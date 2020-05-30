@@ -190,6 +190,7 @@ class Shear:
                 (c / H0)) * integrate.quad(self.WL_window_integrand, a=z,
                                            b=n_z_normalized.get_knots()[-1],
                                            args=(z, n_z_normalized))[0])
+
         return W_val
 
     def loglike(self):

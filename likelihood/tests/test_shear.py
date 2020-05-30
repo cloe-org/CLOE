@@ -63,9 +63,9 @@ class cosmoinitTestCase(TestCase):
         # (GCH): required by Anurag
         self.cosmology.cosmo_dic['c'] = self.c = 3.0e5
         self.rfn = interpolate.InterpolatedUnivariateSpline(
-            np.linspace(0.0, 2.6, 20), np.linspace(0.0, 2.6, 20), ext=2)
+            np.linspace(0.0, 4.6, 20), np.linspace(0.0, 4.6, 20), ext=2)
         self.flatnz = interpolate.InterpolatedUnivariateSpline(
-            np.linspace(0.0, 2.6, 20), np.ones(20), ext=2)
+            np.linspace(0.0, 4.6, 20), np.ones(20), ext=2)
         self.cosmology.cosmo_dic['r_z_func'] = self.rfn
         self.integrand_check = -1.0
         self.wbincheck = 9.143694637057992e-09
@@ -87,22 +87,22 @@ class cosmoinitTestCase(TestCase):
     def test_GC_window(self):
         npt.assert_almost_equal(self.shear.GC_window(0.2, 0.001, 1),
                                 self.W_i_Gcheck,
-                                verbose)
+                                err_msg='GC_window failed')
 
     def test_phot_galbias(self):
         npt.assert_almost_equal(self.shear.phot_galbias(0.1, 0.3),
                                 self.phot_galbias_check,
-                                err_msg='Error in photometric galaxy bias')
+                                err_msg='Photometric galaxy bias failed')
 
     def test_w_integrand(self):
         int_comp = self.shear.WL_window_integrand(0.1, 0.2, self.flatnz)
         npt.assert_almost_equal(int_comp, self.integrand_check,
-                                err_msg='WL kernel integrand check failed.')
+                                err_msg='Integrand of WL kernel failed')
 
     def test_WL_window(self):
         int_comp = self.shear.WL_window(0.1, 1)
         npt.assert_almost_equal(int_comp, self.wbincheck,
-                                verbose)
+                                err_msg='WL_window failed')
 
     def test_rzfunc_exception(self):
         npt.assert_raises(Exception, shear.Shear,

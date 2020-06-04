@@ -207,6 +207,7 @@ class Galdist:
         float
             Observed n(z) with photometric redshift uncertainties accounted.
         """
+        self.int_step = int_step
         z_list = np.arange(self.survey_min, self.survey_max, int_step)
         n_nums_list = []
         for zind in range(len(z_list)):

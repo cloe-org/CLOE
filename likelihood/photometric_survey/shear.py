@@ -188,9 +188,8 @@ class Shear:
         W_val = (1.5 * (H0 / c) * O_m * (1.0 + z) * (
             self.theory['r_z_func'](z) /
                 (c / H0)) * integrate.quad(self.WL_window_integrand,
-                                           a=np.amax([z, n_z_normalized.
-                                                     get_knots()[0]]),
-                                           b=n_z_normalized.get_knots()[-1],
+                                           a=z, b=galdist.survey_max -
+                                           galdist.int_step,
                                            args=(z, n_z_normalized))[0])
         return W_val
 

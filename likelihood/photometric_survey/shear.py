@@ -38,6 +38,8 @@ class Shear:
 
     # SJ: k-indep bias for now
     # def bias(self, k, z):
+    # Use theory approach for bias for now
+    # def phot_galbias(self, bin_i):
     def phot_galbias(self, bin_z_min, bin_z_max):
         """
         Returns the photometric galaxy bias.
@@ -50,6 +52,9 @@ class Shear:
         #    Scale at which to evaluate the bias
         # z: float
         #    Redshift at which to evaluate distribution.
+        # SJ: use theory approach for bias for now
+        # bin_i: float
+        #        Bin index
         bin_z_max: float
                    Upper limit of bin
         bin_z_min: float
@@ -77,24 +82,19 @@ class Shear:
         # b = np.sqrt(1 + z)
         return b
 
-    def GC_window(self, bin_i, bin_j, bin_z_min, bin_z_max, k, z):
+    def GC_window(self, k, z, bin_i):
         """
         Implements GC window
 
         Parameters
         ----------
-        bin_i: list, float
-           Redshift bounds of bin i (lower, higher)
-        bin_j: list, float
-           Redshift bounds of bin j (lower, higher)
-        bin_z_max: float
-                   Upper limit of bin
-        bin_z_min: float
-                   Lower limit of bin
         k: float
            Scale at which to evaluate the bias
         z: float
            Redshift at which to evaluate distribution.
+        bin_i: int
+           index of desired tomographic bin. Tomographic bin
+           indices start from 1.
 
         Returns
         -------
@@ -109,7 +109,7 @@ class Shear:
 
         # (GCH): create instance from Galdist class
         try:
-            galdist = Galdist(bin_i, bin_j)
+            galdist = Galdist(bin_i)
         except ShearError:
             print('Error in initializing the class Galdist')
         # (GCH): call n_z_normalized from Galdist
@@ -117,13 +117,14 @@ class Shear:
         # SJ: k-indep bias, let us follow the IST:F approach for now
         # W_i_G = self.phot_galbias(k, z) * n_z_normalized(z) * \
         #     self.theory['H'](z)
-        W_i_G = self.phot_galbias(bin_z_min, bin_z_max) * n_z_normalized(z) * \
-            self.theory['H'](z)
+        W_i_G = self.phot_galbias(n_z_normalized.get_knots()[0],
+                                  n_z_normalized.get_knots()[-1]) * \
+            n_z_normalized(z) * self.theory['H'](z)
         return W_i_G
 
-    def w_gamma_integrand(self, zprime, z, nz):
+    def WL_window_integrand(self, zprime, z, nz):
         """
-        Calculates integrand of interal in WL lensing kernel.
+        Calculates the WL kernel integrand.
 
         .. math::
         \int_{z}^{z_{\rm max}}
@@ -137,8 +138,8 @@ class Shear:
         z: float
             Redshift at which kernel is being evaluated.
         nz: function
-            Galaxy distribution function for the tomographic bin for which the
-            kernel is currently being evaluated.
+            Galaxy distribution function for the tomographic bin for
+            which the kernel is currently being evaluated.
         Returns
         -------
         Integrand value
@@ -148,7 +149,7 @@ class Shear:
                                     self.theory['r_z_func'](zprime)))
         return wint
 
-    def w_kernel_gamma(self, z, tomo_bin, z_max):
+    def WL_window(self, z, bin_i):
         """
         Calculates the W^{\gamma} lensing kernel for a given tomographic bin.
 
@@ -163,12 +164,9 @@ class Shear:
         ----------
         z: float
             Redshift at which kernel is being evaluated.
-        tomo_bin: function
-            Galaxy distribution function for the tomographic bin for
-            which the kernel is currently being evaluated.
-        z_max: float
-            Maximum redshift of survey, up to which lensing kernel will be
-            evaluated.
+        bin_i: int
+           index of desired tomographic bin. Tomographic bin
+           indices start from 1.
         Returns
         -------
         Value of lensing kernel for specified bin at specified redshift.
@@ -177,11 +175,22 @@ class Shear:
         c = self.theory['c']
         O_m = ((self.theory['omch2'] / (H0 / 100.0)**2.0) +
                (self.theory['ombh2'] / (H0 / 100.0)**2.0))
+
+        # create instance from Galdist class
+        try:
+            galdist = Galdist(bin_i)
+        except ShearError:
+            print('Error in initializing the class Galdist')
+        # call n_z_normalized from Galdist
+        n_z_normalized = galdist.n_i
+
         # (ACD): Note that impact of MG is currently neglected (\Sigma=1).
         W_val = (1.5 * (H0 / c) * O_m * (1.0 + z) * (
             self.theory['r_z_func'](z) /
-                (c / H0)) * integrate.quad(self.w_gamma_integrand, a=z,
-                                           b=z_max, args=(z, tomo_bin))[0])
+                (c / H0)) * integrate.quad(self.WL_window_integrand,
+                                           a=z, b=galdist.survey_max -
+                                           galdist.int_step,
+                                           args=(z, n_z_normalized))[0])
         return W_val
 
     def loglike(self):

@@ -14,52 +14,44 @@ class Galdist:
     Class for cosmic shear observables.
     """
 
-    def __init__(self, bin_i, bin_j, n_type='istf', n_file=None, bcols=None,
+    def __init__(self, bin_i, n_type='istf', n_file=None,
                  survey_lims=[0.001, 4.0], **kwargs):
         """
         Parameters
         ----------
-        bin_i: list, float
-           Redshift bounds of bin i (lower, higher)
-        bin_j: list, float
-           Redshift bounds of bin j (lower, higher)
+        bin_i: int
+           index of desired tomographic bin. Tomographic bin
+           indices should start from 1.
         n_type: str
            Parameter to specify which n(z) to use:
-           'istf' - Use Euclid IST:Forecasting n(z)
+           'istf' - Use Euclid IST:Forecasting n(z).
            'custom' - Input custom n(z). In this case, n_file must also
            be specified.
         n_file: str
            Location of custom n(z) file.
-        bcols: list, int
-           Column indices for desired bins in custom n(z) file. (i, j).
-           Note: index 0 is for the redshift column. Tomographic bin
-           indices should start from 1.
         survey_lims: list, float
            Redshift range of entire survey (lower, higher)
            Euclid default (0.001, 4.0).
         """
         self.survey_min, self.survey_max = survey_lims
+        if bin_i is None:
+            raise Exception('You must specify the index for the desired '
+                            'tomographic bin.')
+        elif bin_i == 0:
+            raise ValueError('Tomographic bin indices start from 1.')
         if n_type == 'istf':
-            self.n_i = self.p_up(bin_i[0], bin_i[1])
-            self.n_j = self.p_up(bin_j[0], bin_j[1])
+            istf_bin_list = [0.001, 0.418, 0.560, 0.678, 0.789, 0.900,
+                             1.019, 1.155, 1.324, 1.576, 2.50]
+            self.n_i = self.p_up(istf_bin_list[bin_i - 1],
+                                 istf_bin_list[bin_i])
         elif n_type == 'custom':
             if n_file is None:
                 raise Exception('When choosing a custom n(z), you must'
                                 'specify the file location using n_file.')
-            elif bcols is None:
-                raise Exception('When choosing a custom n(z) file, you must '
-                                'specify the columns in the file which contain'
-                                ' the desired bins.')
-            elif bcols == 0:
-                raise ValueError('The first column in the n(z) file must'
-                                 ' correspond to the sampled redshifts. So, '
-                                 'bcols > 0.')
             else:
                 ntab = np.loadtxt(n_file)
                 self.n_i = interpolate.InterpolatedUnivariateSpline(
-                    ntab[:, 0], ntab[:, bcols[0]], ext=2)
-                self.n_j = interpolate.InterpolatedUnivariateSpline(
-                    ntab[:, 0], ntab[:, bcols[1]], ext=2)
+                    ntab[:, 0], ntab[:, bin_i], ext=2)
         else:
             raise Exception('n_type must be istf or custom.')
 
@@ -215,6 +207,7 @@ class Galdist:
         float
             Observed n(z) with photometric redshift uncertainties accounted.
         """
+        self.int_step = int_step
         z_list = np.arange(self.survey_min, self.survey_max, int_step)
         n_nums_list = []
         for zind in range(len(z_list)):

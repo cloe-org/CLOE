@@ -80,14 +80,14 @@ class cosmoinitTestCase(TestCase):
 
     def test_cosmo_asign(self):
         self.cosmology.cosmo_dic['H0'] = self.H0check
-        npt.assert_almost_equal(self.cosmology.cosmo_dic['H0'],
-                                self.H0check,
-                                err_msg='Cosmology dictionary assignment '
-                                        'failed')
-        npt.assert_almost_equal(self.cosmology.cosmo_dic['H'](0.2),
-                                self.Hcheck,
-                                err_msg='Cosmology dictionary assignment '
-                                        'failed')
+        npt.assert_allclose(self.cosmology.cosmo_dic['H0'],
+                            self.H0check,
+                            err_msg='Cosmology dictionary assignment '
+                                    'failed')
+        npt.assert_allclose(self.cosmology.cosmo_dic['H'](0.2),
+                            self.Hcheck,
+                            err_msg='Cosmology dictionary assignment '
+                                    'failed')
 
     def test_cosmo_growth_factor(self):
         D = self.cosmology.growth_factor(0.0, 0.002)
@@ -96,9 +96,9 @@ class cosmoinitTestCase(TestCase):
 
     def test_cosmo_growth_rate(self):
         f = self.cosmology.growth_rate(self.z_win, 0.002)
-        npt.assert_almost_equal(f[0], self.fcheck,
-                                decimal=4,
-                                err_msg='Error in f_z_k calculation ')
+        npt.assert_allclose(f[0], self.fcheck,
+                            rtol=1e-3,
+                            err_msg='Error in f_z_k calculation ')
 
     def test_update_cosmo_dic(self):
         self.cosmology.update_cosmo_dic(self.z_win, 0.002)
@@ -114,11 +114,11 @@ class cosmoinitTestCase(TestCase):
     def test_cosmo_comov_dist_interp(self):
         self.cosmology.cosmo_dic['z_win'] = self.z_win
         self.cosmology.interp_comoving_dist()
-        npt.assert_almost_equal(self.cosmology.cosmo_dic['comov_dist'][1],
-                                self.cosmology.cosmo_dic['r_z_func']
-                                (self.z_win[1]),
-                                err_msg='Interpolation of comoving distance '
-                                        'failed.')
+        npt.assert_allclose(self.cosmology.cosmo_dic['comov_dist'][1],
+                            self.cosmology.cosmo_dic['r_z_func']
+                            (self.z_win[1]),
+                            err_msg='Interpolation of comoving distance '
+                                    'failed.')
 
     def test_zwin_exception(self):
         self.cosmology.cosmo_dic['z_win'] = None

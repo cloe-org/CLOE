@@ -71,14 +71,14 @@ class cosmoinitTestCase(TestCase):
         self.flatnz = interpolate.InterpolatedUnivariateSpline(
             np.linspace(0.0, 2.6, 20), np.ones(20), ext=2)
         self.integrand_check = -0.9460376506043413
-        self.wbincheck = 2.269427130923892e-05
+        self.wbincheck = 7.210305e-06
         self.H0 = 67.0
         self.c = const.c.to('km/s').value
         self.omch2 = 0.12
         self.ombh2 = 0.022
         # (GCH): import Shear
         self.shear = shear.Shear(self.cosmology.cosmo_dic)
-        self.W_i_Gcheck = 0.001700557
+        self.W_i_Gcheck = 0.002724124626761272
         self.phot_galbias_check = 1.09544512
 
     def tearDown(self):
@@ -88,26 +88,23 @@ class cosmoinitTestCase(TestCase):
         self.wbincheck = None
 
     def test_GC_window(self):
-        npt.assert_almost_equal(self.shear.GC_window([0.001, 0.418],
-                                                     [0.001, 0.418],
-                                                     0.0, 0.3, 0.2, 0.001),
-                                self.W_i_Gcheck,
-                                err_msg='Error in GW_window')
+        npt.assert_allclose(self.shear.GC_window(0.2, 0.001, 1),
+                            self.W_i_Gcheck, err_msg='GC_window failed')
 
     def test_phot_galbias(self):
-        npt.assert_almost_equal(self.shear.phot_galbias(0.1, 0.3),
-                                self.phot_galbias_check,
-                                err_msg='Error in photometric galaxy bias')
+        npt.assert_allclose(self.shear.phot_galbias(0.1, 0.3),
+                            self.phot_galbias_check,
+                            err_msg='Photometric galaxy bias failed')
 
     def test_w_integrand(self):
-        int_comp = self.shear.w_gamma_integrand(0.1, 0.2, self.flatnz)
-        npt.assert_almost_equal(int_comp, self.integrand_check,
-                                err_msg='WL kernel integrand check failed.')
+        int_comp = self.shear.WL_window_integrand(0.1, 0.2, self.flatnz)
+        npt.assert_allclose(int_comp, self.integrand_check,
+                            err_msg='Integrand of WL kernel failed')
 
-    def test_w_bin(self):
-        int_comp = self.shear.w_kernel_gamma(0.1, self.flatnz, 2.5)
-        npt.assert_almost_equal(int_comp, self.wbincheck,
-                                err_msg='WL kernel check failed.')
+    def test_WL_window(self):
+        int_comp = self.shear.WL_window(0.1, 1)
+        npt.assert_allclose(int_comp, self.wbincheck,
+                            err_msg='WL_window failed')
 
     def test_rzfunc_exception(self):
         npt.assert_raises(Exception, self.shear,

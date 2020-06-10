@@ -17,7 +17,6 @@ from scipy import interpolate
 from ..cosmo.cosmology import Cosmology
 from likelihood.cobaya_interface import EuclidLikelihood
 from ..photometric_survey import shear
-from scipy.interpolate import UnivariateSpline
 from astropy import constants as const
 
 
@@ -56,11 +55,10 @@ class cosmoinitTestCase(TestCase):
         self.cosmology.cosmo_dic['omch2'] = model.provider.get_param('omch2')
         self.cosmology.cosmo_dic['ombh2'] = model.provider.get_param('ombh2')
         self.cosmology.cosmo_dic['mnu'] = model.provider.get_param('mnu')
-        self.cosmology.cosmo_dic['comov_dist'] = UnivariateSpline(
-            self.z_win,
-            model.provider.get_comoving_radial_distance(self.z_win))
-        self.cosmology.cosmo_dic['H'] = UnivariateSpline(
-            self.z_win, model.provider.get_Hubble(self.z_win))
+        self.cosmology.cosmo_dic['comov_dist'] = \
+            model.provider.get_comoving_radial_distance(self.z_win)
+        self.cosmology.cosmo_dic['H'] = \
+            model.provider.get_Hubble(self.z_win)
         self.cosmology.cosmo_dic['Pk_interpolator'] = \
             model.provider.get_Pk_interpolator(nonlinear=False)
         self.cosmology.cosmo_dic['Pk_delta'] = \
@@ -70,15 +68,22 @@ class cosmoinitTestCase(TestCase):
             model.provider.get_fsigma8(self.z_win)
         self.flatnz = interpolate.InterpolatedUnivariateSpline(
             np.linspace(0.0, 2.6, 20), np.ones(20), ext=2)
-        self.integrand_check = -0.9460376506043413
-        self.wbincheck = 7.210305e-06
+        self.cosmology.cosmo_dic['z_win'] = self.z_win
+        self.rfn = interpolate.InterpolatedUnivariateSpline(
+            np.linspace(0.0, 4.6, 20), np.linspace(0.0, 4.6, 20), ext=2)
+        self.flatnz = interpolate.InterpolatedUnivariateSpline(
+            np.linspace(0.0, 4.6, 20), np.ones(20), ext=2)
+        self.cosmology.cosmo_dic['r_z_func'] = self.rfn
+        self.cosmology.interp_H()
+        self.integrand_check = -1.0
+        self.wbincheck = 1.715463e-09
         self.H0 = 67.0
         self.c = const.c.to('km/s').value
         self.omch2 = 0.12
         self.ombh2 = 0.022
         # (GCH): import Shear
         self.shear = shear.Shear(self.cosmology.cosmo_dic)
-        self.W_i_Gcheck = 0.002724124626761272
+        self.W_i_Gcheck = 0.00017746617639121816
         self.phot_galbias_check = 1.09544512
 
     def tearDown(self):
@@ -89,7 +94,8 @@ class cosmoinitTestCase(TestCase):
 
     def test_GC_window(self):
         npt.assert_allclose(self.shear.GC_window(0.2, 0.001, 1),
-                            self.W_i_Gcheck, err_msg='GC_window failed')
+                            self.W_i_Gcheck, rtol=1e-05,
+                            err_msg='GC_window failed')
 
     def test_phot_galbias(self):
         npt.assert_allclose(self.shear.phot_galbias(0.1, 0.3),
@@ -98,12 +104,12 @@ class cosmoinitTestCase(TestCase):
 
     def test_w_integrand(self):
         int_comp = self.shear.WL_window_integrand(0.1, 0.2, self.flatnz)
-        npt.assert_allclose(int_comp, self.integrand_check,
+        npt.assert_allclose(int_comp, self.integrand_check, rtol=1e-05,
                             err_msg='Integrand of WL kernel failed')
 
     def test_WL_window(self):
         int_comp = self.shear.WL_window(0.1, 1)
-        npt.assert_allclose(int_comp, self.wbincheck,
+        npt.assert_allclose(int_comp, self.wbincheck, rtol=1e-05,
                             err_msg='WL_window failed')
 
     def test_rzfunc_exception(self):

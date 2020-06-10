@@ -31,7 +31,7 @@ class Shear:
            cosmological dictionary from cosmo
         """
         self.theory = cosmo_dic
-        if self.theory['comov_dist'] is None:
+        if self.theory['r_z_func'] is None:
             raise Exception('No interpolated function for comoving distance '
                             'exists in cosmo_dic.')
 
@@ -118,7 +118,7 @@ class Shear:
         #     self.theory['H'](z)
         W_i_G = self.phot_galbias(n_z_normalized.get_knots()[0],
                                   n_z_normalized.get_knots()[-1]) * \
-            n_z_normalized(z) * self.theory['H'](z)
+            n_z_normalized(z) * self.theory['H_z_func'](z)
         return W_i_G
 
     def WL_window_integrand(self, zprime, z, nz):
@@ -143,9 +143,8 @@ class Shear:
         -------
         Integrand value
         """
-
-        wint = nz(zprime) * (1.0 - (self.theory['comov_dist'](z) /
-                                    self.theory['comov_dist'](zprime)))
+        wint = nz(zprime) * (1.0 - (self.theory['r_z_func'](z) /
+                                    self.theory['r_z_func'](zprime)))
         return wint
 
     def WL_window(self, z, bin_i):
@@ -185,7 +184,7 @@ class Shear:
 
         # (ACD): Note that impact of MG is currently neglected (\Sigma=1).
         W_val = (1.5 * (H0 / c) * O_m * (1.0 + z) * (
-            self.theory['comov_dist'](z) /
+            self.theory['r_z_func'](z) /
                 (c / H0)) * integrate.quad(self.WL_window_integrand,
                                            a=z, b=galdist.survey_max -
                                            galdist.int_step,

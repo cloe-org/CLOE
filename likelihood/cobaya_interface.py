@@ -1,7 +1,6 @@
 # General import
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.interpolate import UnivariateSpline
 
 # Cobaya import of general Likelihood class
 from cobaya.likelihood import Likelihood
@@ -114,11 +113,9 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['omch2'] = self.provider.get_param('omch2')
             self.cosmo.cosmo_dic['ombh2'] = self.provider.get_param('ombh2')
             self.cosmo.cosmo_dic['mnu'] = self.provider.get_param('mnu')
-            self.cosmo.cosmo_dic['comov_dist'] = UnivariateSpline(
-                self.z_win,
-                self.provider.get_comoving_radial_distance(self.z_win))
-            self.cosmo.cosmo_dic['H'] = UnivariateSpline(
-                self.z_win, self.provider.get_Hubble(self.z_win))
+            self.cosmo.cosmo_dic['comov_dist'] = \
+                self.provider.get_comoving_radial_distance(self.z_win)
+            self.cosmo.cosmo_dic['H'] = self.provider.get_Hubble(self.z_win)
             self.cosmo.cosmo_dic['Pk_interpolator'] = \
                 self.provider.get_Pk_interpolator(nonlinear=False)
             self.cosmo.cosmo_dic['zk'] = self.zk
@@ -186,5 +183,9 @@ class EuclidLikelihood(Likelihood):
             must return -0.5*chi2
         """
         self.passing_requirements()
+        # (GCH): update cosmo_dic to include H and comov_dist
+        # interpolators
+        self.cosmo.interp_comoving_dist()
+        self.cosmo.interp_H()
         loglike = self.log_likelihood(self.cosmo.cosmo_dic, **params_values)
         return loglike

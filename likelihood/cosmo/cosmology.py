@@ -7,6 +7,7 @@ Class to store cosmological parameters and functions.
 import numpy as np
 from scipy import interpolate
 from astropy import constants as const
+from scipy import interpolate
 
 
 class CosmologyError(Exception):
@@ -55,6 +56,8 @@ class Cosmology:
             Speed-of-light in units of km s^{-1}
         r_z_func: function
             Interpolated function for comoving distance
+        H_z_func: function
+            Interpolated function for Hubble parameter
         z_win: array-like
             Array of redshifts ar which H and comov_dist are evaluated at
 
@@ -75,7 +78,9 @@ class Cosmology:
                           'b_gal': None,
                           'sigma_8': None,
                           'c': const.c.to('km/s').value,
-                          'z_win': None}
+                          'z_win': None,
+                          'r_z_func': None,
+                          'H_z_func': None}
 
     def growth_factor(self, zs, ks):
         """
@@ -140,28 +145,6 @@ class Cosmology:
             print('Computation error in f(z, k)')
             print('ATTENTION: Check k is a value, not a list')
 
-    def update_cosmo_dic(self, zs, ks):
-        """
-        Update the dictionary with other cosmological quantities
-
-        Parameters
-        ----------
-        zs: array
-            list of redshift for the power spectrum
-        ks: array
-            list of modes for the power spectrum
-
-        Returns
-        -------
-        None
-
-        """
-        # (GCH): this function is superfluous
-        # just in case we want to have always
-        # an updated dictionary with D_z and f
-        self.cosmo_dic['D_z_k'] = self.growth_factor(zs, ks)
-        self.cosmo_dic['f_z_k'] = self.growth_rate(zs, ks)
-
     def interp_comoving_dist(self):
         """
         Adds an interpolator for comoving distance to the dictionary so that
@@ -181,3 +164,45 @@ class Cosmology:
                             'supplied to cosmo_dic.')
         self.cosmo_dic['r_z_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['comov_dist'], ext=2)
+
+    def interp_H(self):
+        """
+        Adds an interpolator for the Hubble parameter to the dictionary so that
+        it can be evaluated at redshifts not explictly supplied to cobaya.
+
+        Parameters
+        ----------
+        zs: array
+            list of redshift comoving distance is evaluated at.
+        Returns
+        -------
+        None
+
+        """
+        if self.cosmo_dic['z_win'] is None:
+            raise Exception('Boltzmann code redshift binning has not been '
+                            'supplied to cosmo_dic.')
+        self.cosmo_dic['H_z_func'] = interpolate.InterpolatedUnivariateSpline(
+            x=self.cosmo_dic['z_win'], y=self.cosmo_dic['comov_dist'], ext=2)
+
+    def update_cosmo_dic(self, zs, ks):
+        """
+        Update the dictionary with other cosmological quantities
+
+        Parameters
+        ----------
+        zs: array
+            list of redshift for the power spectrum
+        ks: array
+            list of modes for the power spectrum
+
+        Returns
+        -------
+        None
+
+        """
+        # (GCH): this function is superfluous
+        # just in case we want to have always
+        # an updated dictionary with D_z, f, H(z), r(z)
+        self.cosmo_dic['D_z_k'] = self.growth_factor(zs, ks)
+        self.cosmo_dic['f_z_k'] = self.growth_rate(zs, ks)

@@ -37,11 +37,10 @@ class EuclidLikelihood(Likelihood):
     params = {"like_selection": None}
 
     def initialize(self):
-        r""" get_requirements
+        r""" initialize
 
-        New 'theory needs'. Asks for the theory
-        requirements to the theory code via
-        Cobaya.
+        Set up values for initial variables
+        and create instance of Cosmology class
 
         """
 
@@ -76,13 +75,9 @@ class EuclidLikelihood(Likelihood):
         requirements to the theory code via
         Cobaya.
 
-
         Returns
         ----------
-        loglikes: float
-
-
-        return dictionary specifying quantities i
+        dictionary specifying quantities i
         calculated by a theory code are needed
 
         """
@@ -141,9 +136,13 @@ class EuclidLikelihood(Likelihood):
         dictionary: dictionary
             cosmology dictionary from Cosmology class
 
+        **data_params: tuple
+            List of (sampled) parameters obtained from
+            the theory code or asked by the likelihood
+
         Returns
         ----------
-        loglikes: float
+        loglike: float
             must return -0.5*chi2
         """
         loglike = 0.0
@@ -170,7 +169,9 @@ class EuclidLikelihood(Likelihood):
     def logp(self, **params_values):
         r""" logp
 
-        External likelihood module called by COBAYA
+        Executes passing_requirements,
+        updates cosmology dictionary,
+        calls log_likelihood
 
         Parameters
         ----------
@@ -179,8 +180,8 @@ class EuclidLikelihood(Likelihood):
               the theory code or asked by the likelihood
         Returns
         ----------
-        loglikes: float
-            must return -0.5*chi2
+        loglike: float
+            value of the function log_likelihood
         """
         self.passing_requirements()
         # (GCH): update cosmo_dic to include H and comov_dist

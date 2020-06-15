@@ -9,10 +9,10 @@ dependencies:
   - pip>=19.0
   - scipy>=1.3
   - jupyter>=1.0
-  - camb>=1.0
+  - camb
   - astropy>=4.0
   - pip:
-    - cobaya==2.0.3
+    - cobaya
     - pytest
     - pytest-cov
     - pytest-pep8

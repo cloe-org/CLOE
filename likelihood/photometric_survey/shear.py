@@ -30,7 +30,6 @@ class Shear:
         cosmo_dic: dictionary
            cosmological dictionary from cosmo
         """
-
         self.theory = cosmo_dic
         if self.theory['r_z_func'] is None:
             raise Exception('No interpolated function for comoving distance '
@@ -119,7 +118,7 @@ class Shear:
         #     self.theory['H'](z)
         W_i_G = self.phot_galbias(n_z_normalized.get_knots()[0],
                                   n_z_normalized.get_knots()[-1]) * \
-            n_z_normalized(z) * self.theory['H'](z)
+            n_z_normalized(z) * self.theory['H_z_func'](z)
         return W_i_G
 
     def WL_window_integrand(self, zprime, z, nz):
@@ -144,7 +143,6 @@ class Shear:
         -------
         Integrand value
         """
-
         wint = nz(zprime) * (1.0 - (self.theory['r_z_func'](z) /
                                     self.theory['r_z_func'](zprime)))
         return wint

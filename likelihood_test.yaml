@@ -1,0 +1,25 @@
+likelihood: 
+  euclid: "import_module('likelihood.cobaya_interface').EuclidLikelihood"
+params:
+  ombh2: 0.022
+  omch2: 0.12
+  H0: 68
+  tau: 0.07
+  mnu: 0.06
+  nnu: 3.046
+  ns:  
+    prior: 
+      min: 0.8
+      max: 1.2
+  As: 2.1e-9
+  like_selection: 1
+theory:
+  camb:
+    stop_at_error: True
+    extra_args:
+      num_massive_neutrinos: 1
+sampler: 
+  evaluate:
+packages_path: /data2/cobaya_modules/
+output: chains/my_euclid_experiment
+force: True

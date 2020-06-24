@@ -123,5 +123,5 @@ class cosmoinitTestCase(TestCase):
 
     def test_cl_integrand(self):
         cl_int = self.shear.Cl_generic_integrand(1.0, 1.0, 1.0, 100.0)
-        npt.assert_allclose(cl_int, self.cl_integrand_check, rtol=1e-05,
+        npt.assert_allclose(cl_int, self.cl_integrand_check, rtol=1e-03,
                             err_msg='Cl integrand failed')

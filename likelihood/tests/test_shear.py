@@ -85,12 +85,14 @@ class cosmoinitTestCase(TestCase):
         self.shear = shear.Shear(self.cosmology.cosmo_dic)
         self.W_i_Gcheck = 0.00017746617639121816
         self.phot_galbias_check = 1.09544512
+        self.cl_integrand_check = 2.26806934e-09
 
     def tearDown(self):
         self.W_i_Gcheck = None
         self.phot_galbias_check = None
         self.integrand_check = None
         self.wbincheck = None
+        self.cl_integrand_check = None
 
     def test_GC_window(self):
         npt.assert_allclose(self.shear.GC_window(0.2, 0.001, 1),
@@ -118,3 +120,8 @@ class cosmoinitTestCase(TestCase):
                            'c': self.c,
                            'omch2': self.omch2,
                            'ombh2': self.ombh2})
+
+    def test_cl_integrand(self):
+        cl_int = self.shear.Cl_generic_integrand(1.0, 1.0, 1.0, 100.0)
+        npt.assert_allclose(cl_int, self.cl_integrand_check, rtol=1e-05,
+                            err_msg='Cl integrand failed')

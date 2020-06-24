@@ -191,6 +191,36 @@ class Shear:
                                            args=(z, n_z_normalized))[0])
         return W_val
 
+    def Cl_generic_integrand(self, z, W_i_z, W_j_z, ell):
+        """
+        Calculates the C_\ell integrand for any two probes and bins for which
+        the bins are supplied.
+
+        .. math::
+        \frac{W_{i}^{A}(z)W_{j}^{B}(z)}{H(z)r^2(z)}P_{\delta\delta}(k=
+        \ell + 0.5/r(z), z).
+
+        Parameters
+        ----------
+        z: float
+            Redshift at which integrand is being evaluated.
+        W_i_z: float
+           Value of kernel for bin i, at redshift z.
+        W_j_z: float
+           Value of kernel for bin j, at redshift z.
+        ell: float
+           \ell-mode at which the current C_\ell is being evaluated at.
+        Returns
+        -------
+        Value of C_\ell integrand at redshift z.
+        """
+        kern_mult = ((W_i_z * W_j_z) /
+                     (self.theory['H_z_func'](z) *
+                      (self.theory['r_z_func'](z)) ** 2.0))
+        k = (ell +0.5) / self.theory['r_z_func'](z)
+        power = self.theory['Pk_interpolator'](z, k)[0, 0]
+        return kern_mult * power
+
     def loglike(self):
         """
         Returns loglike for Shear observable

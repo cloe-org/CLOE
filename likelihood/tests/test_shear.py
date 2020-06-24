@@ -85,7 +85,7 @@ class cosmoinitTestCase(TestCase):
         self.shear = shear.Shear(self.cosmology.cosmo_dic)
         self.W_i_Gcheck = 0.00017746617639121816
         self.phot_galbias_check = 1.09544512
-        self.cl_integrand_check = 2.26806934e-09
+        self.cl_integrand_check = 0.002065
 
     def tearDown(self):
         self.W_i_Gcheck = None

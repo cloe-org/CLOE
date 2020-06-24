@@ -217,7 +217,7 @@ class Shear:
         kern_mult = ((W_i_z * W_j_z) /
                      (self.theory['H_z_func'](z) *
                       (self.theory['r_z_func'](z)) ** 2.0))
-        k = (ell +0.5) / self.theory['r_z_func'](z)
+        k = (ell + 0.5) / self.theory['r_z_func'](z)
         power = self.theory['Pk_interpolator'](z, k)[0, 0]
         return kern_mult * power
 

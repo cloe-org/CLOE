@@ -49,7 +49,7 @@ class Spec:
         beta = self.theory['fsigma8'] / self.theory['sigma_8'] / \
             self.theory['b_gal']
         Pk_gal = (self.theory['b_gal']**2.0) * \
-            self.theory['Pk_delta'].P(self.theory['zk'], 0.02)
+            self.theory['Pk_interpolator'].P(self.theory['zk'], 0.02)
         self.P0k = (1.0 + 2.0 / 3.0 * beta + 1.0 / 5.0 * beta**2.0) * Pk_gal
         self.P2k = (4.0 / 3.0 * beta + 4.0 / 7.0 * beta**2.0) * Pk_gal
         self.P4k = (8.0 / 35.0 * beta**2.0) * Pk_gal
@@ -67,4 +67,4 @@ class Spec:
         # SJ: This will be the log-likelihood;
         # for now just return P(z,k) for fixed z and k.
         self.multipole_spectra()
-        return self.theory['Pk_delta'].P(0.5, 0.02)
+        return self.theory['Pk_interpolator'].P(0.5, 0.02)

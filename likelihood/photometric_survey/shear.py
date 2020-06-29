@@ -218,7 +218,7 @@ class Shear:
                      (self.theory['H_z_func'](z) *
                       (self.theory['r_z_func'](z)) ** 2.0))
         k = (ell + 0.5) / self.theory['r_z_func'](z)
-        power = self.theory['Pk_interpolator'](z, k)[0, 0]
+        power = self.theory['Pk_interpolator'].P(z, k)
         return kern_mult * power
 
     def loglike(self):

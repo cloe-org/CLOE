@@ -75,7 +75,7 @@ class Cosmology:
                           'mnu': 0.06,
                           'tau': 0.07,
                           'nnu': 3.046,
-                          'ns': 0.964,
+                          'ns': 0.9674,
                           'As': 2.1e-9,
                           'comov_dist': None,
                           'angular_dist': None,
@@ -213,7 +213,7 @@ class Cosmology:
             raise Exception('Boltzmann code redshift binning has not been '
                             'supplied to cosmo_dic.')
         self.cosmo_dic['H_z_func'] = interpolate.InterpolatedUnivariateSpline(
-            x=self.cosmo_dic['z_win'], y=self.cosmo_dic['comov_dist'], ext=2)
+            x=self.cosmo_dic['z_win'], y=self.cosmo_dic['H'], ext=2)
 
     def update_cosmo_dic(self, zs, ks):
         """

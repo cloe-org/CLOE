@@ -194,7 +194,7 @@ class EuclidLikelihood(Likelihood):
                   could not be pass to cosmo module')
         self.cosmo.interp_H()
         self.cosmo.interp_comoving_dist()
-        self.interp_angular_dist()
+        self.cosmo.interp_angular_dist()
 
     def log_likelihood(self, dictionary, dictionary_fiducial, **data_params):
         r""" log_likelihood

@@ -23,10 +23,10 @@ class Spec:
         self.fiducial = fiducial_dic
 
     def scaling_factor_perp(self, z):
-        return theory['d_z_func'](z) / fiducial['d_z_func'](z)
+        return self.theory['d_z_func'](z) / self.fiducial['d_z_func'](z)
 
     def scaling_factor_parall(self, z):
-        return theory['H_z_func'](z) / fiducial['H_z_func'](z)
+        return self.theory['H_z_func'](z) / self.fiducial['H_z_func'](z)
 
     def get_k(self, k_prime, mu_prime, z):
         return k_prime * (self.scaling_factor_parall(z)**(-2) * mu_prime**2 +

@@ -99,6 +99,8 @@ class EuclidLikelihood(Likelihood):
                                                            "delta_tot"]])},
                                          "comoving_radial_distance":
                                          {"z": self.z_win},
+                                         "angular_diameter_distance":
+                                         {"z": self.z_win},
                                          "Hubble": {"z": self.z_win,
                                                     "units": "km/s/Mpc"},
                                          "fsigma8": {"z": self.z_win,
@@ -109,6 +111,9 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology.cosmo_dic['z_win'] = self.z_win
         self.fiducial_cosmology.cosmo_dic['comov_dist'] = \
             model_fiducial.provider.get_comoving_radial_distance(
+            self.z_win),
+        self.fiducial_cosmology.cosmo_dic['angular_dist'] = \
+            model_fiducial.provider.get_angular_diameter_distance(
             self.z_win),
         self.fiducial_cosmology.cosmo_dic['H'] = \
             model_fiducial.provider.get_Hubble(
@@ -124,6 +129,7 @@ class EuclidLikelihood(Likelihood):
             self.z_win)
         self.fiducial_cosmology.interp_H()
         self.fiducial_cosmology.interp_comoving_dist()
+        self.fiducial_cosmology.interp_angular_dist()
 
     def get_requirements(self):
         r""" get_requirements
@@ -146,6 +152,7 @@ class EuclidLikelihood(Likelihood):
                  "vars_pairs": ([["delta_tot",
                                   "delta_tot"]])},
                 "comoving_radial_distance": {"z": self.z_win},
+                "angular_diameter_distance": {"z": self.z_win},
                 "Hubble": {"z": self.z_win, "units": "km/s/Mpc"},
                 "fsigma8": {"z": self.z_win, "units": None}}
 
@@ -168,6 +175,8 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['mnu'] = self.provider.get_param('mnu')
             self.cosmo.cosmo_dic['comov_dist'] = \
                 self.provider.get_comoving_radial_distance(self.z_win)
+            self.cosmo.cosmo_dic['angular_dist'] = \
+                self.provider.get_angular_diameter_distance(self.z_win)
             self.cosmo.cosmo_dic['H'] = self.provider.get_Hubble(self.z_win)
             self.cosmo.cosmo_dic['Pk_interpolator'] = \
                 self.provider.get_Pk_interpolator(nonlinear=False)

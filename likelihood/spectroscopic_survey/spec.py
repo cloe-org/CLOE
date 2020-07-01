@@ -13,7 +13,7 @@ class Spec:
     Class for GC spectroscopy observable
     """
 
-    def __init__(self, cosmo_dic):
+    def __init__(self, cosmo_dic, fiducial_dic):
         """
         Parameters
         ----------

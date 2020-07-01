@@ -124,6 +124,7 @@ class EuclidLikelihood(Likelihood):
             self.z_win)
         self.fiducial_cosmology.interp_H()
         self.fiducial_cosmology.interp_comoving_dist()
+
     def get_requirements(self):
         r""" get_requirements
 

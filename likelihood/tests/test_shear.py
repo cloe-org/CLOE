@@ -18,74 +18,42 @@ from ..cosmo.cosmology import Cosmology
 from likelihood.cobaya_interface import EuclidLikelihood
 from ..photometric_survey import shear
 from astropy import constants as const
+from likelihood.tests.test_wrapper import CobayaModel
 
 
 class cosmoinitTestCase(TestCase):
 
     def setUp(self):
-        # SJ: For now, example sampling in redshift (z)
-        z_min = 0.0
-        z_max = 2.5
-        z_samp = 10
-        self.z_win = np.linspace(z_min, z_max, z_samp)
-        info = {
-            'params': {
-                'ombh2': 0.022,
-                'omch2': 0.12,
-                'H0': 68.0,
-                'tau': 0.07,
-                'mnu': 0.06,
-                'nnu': 3.046,
-                'ns': 0.9674,
-                'As': 2.1e-9,
-                'like_selection': 12},
-            'theory': {
-                'camb': {
-                    'stop_at_error': True,
-                    'extra_args': {
-                        'num_massive_neutrinos': 1}}},
-            'likelihood': {
-                'euclid': EuclidLikelihood},
-        }
-        model = get_model(info)
-        model.logposterior({})
+        # (GCH): define cosmology values in Cosmology dict
+        cosmo = Cosmology()
+        cosmo.cosmo_dic['ombh2'] = 0.022
+        cosmo.cosmo_dic['omch2'] = 0.12
+        cosmo.cosmo_dic['H0'] = 68.0
+        cosmo.cosmo_dic['tau'] = 0.07
+        cosmo.cosmo_dic['mnu'] = 0.06
+        cosmo.cosmo_dic['nnu'] = 3.046
+        cosmo.cosmo_dic['ns'] = 0.9674
+        cosmo.cosmo_dic['As'] = 2.1e-9
 
-        self.cosmology = Cosmology()
-        self.cosmology.cosmo_dic['H0'] = model.provider.get_param('H0')
-        self.cosmology.cosmo_dic['omch2'] = model.provider.get_param('omch2')
-        self.cosmology.cosmo_dic['ombh2'] = model.provider.get_param('ombh2')
-        self.cosmology.cosmo_dic['mnu'] = model.provider.get_param('mnu')
-        self.cosmology.cosmo_dic['comov_dist'] = \
-            model.provider.get_comoving_radial_distance(self.z_win)
-        self.cosmology.cosmo_dic['H'] = \
-            model.provider.get_Hubble(self.z_win)
-        self.cosmology.cosmo_dic['Pk_interpolator'] = \
-            model.provider.get_Pk_interpolator(nonlinear=False)
-        self.cosmology.cosmo_dic['Pk_delta'] = \
-            model.provider.get_Pk_interpolator(
-            ("delta_tot", "delta_tot"), nonlinear=False)
-        self.cosmology.cosmo_dic['fsigma8'] = \
-            model.provider.get_fsigma8(self.z_win)
-        self.flatnz = interpolate.InterpolatedUnivariateSpline(
-            np.linspace(0.0, 2.6, 20), np.ones(20), ext=2)
-        self.cosmology.cosmo_dic['z_win'] = self.z_win
+        # (GCH): create wrapper model
+        self.model_test = CobayaModel(cosmo)
+        self.model_test.update_cosmo()
         self.rfn = interpolate.InterpolatedUnivariateSpline(
             np.linspace(0.0, 4.6, 20), np.linspace(0.0, 4.6, 20), ext=2)
-        self.flatnz = interpolate.InterpolatedUnivariateSpline(
-            np.linspace(0.0, 4.6, 20), np.ones(20), ext=2)
-        self.cosmology.cosmo_dic['r_z_func'] = self.rfn
-        self.cosmology.interp_H()
+
+        self.model_test.cosmology.cosmo_dic['r_z_func'] = self.rfn
         self.integrand_check = -1.0
         self.wbincheck = 1.715463e-09
         self.H0 = 67.0
         self.c = const.c.to('km/s').value
         self.omch2 = 0.12
         self.ombh2 = 0.022
-        # (GCH): import Shear
-        self.shear = shear.Shear(self.cosmology.cosmo_dic)
-        self.W_i_Gcheck = 0.00017746617639121816
+        self.shear = shear.Shear(self.model_test.cosmology.cosmo_dic)
+        self.W_i_Gcheck = 0.0027291100226392064
         self.phot_galbias_check = 1.09544512
-        self.cl_integrand_check = 0.319898
+        self.cl_integrand_check = 8.954023
+        self.flatnz = interpolate.InterpolatedUnivariateSpline(
+            np.linspace(0.0, 4.6, 20), np.ones(20), ext=2)
 
     def tearDown(self):
         self.W_i_Gcheck = None

@@ -52,6 +52,9 @@ Open and play with ```likelihood_test.ipynb```
     * test: unit tests to check likelihood code
         *   ```test_estimates.py```: class with unit tests for common class estimate.py
         *   ```test_cosmo.py```: class with unit tests for cosmology class cosmology.py
+        *   ```test_shear.py```: class with unit tests for shear class shear.py
+        *   ```test_spec.py```: class with unit tests for spec class spec.py
+        *   ```test_wrapper.py```: class with a general call to COBAYA `get_model` wrapper
      * cosmo: cosmology module which takes cosmological parameters and theory needs from Cobaya
         *   ```cosmology.py```: class with cosmological functions
                                       

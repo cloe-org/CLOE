@@ -40,6 +40,8 @@ class Cosmology:
             Sum of massive neutrino species masses (eV)
         comov_dist: array-like
             Value of comoving distances at redshifts z_win
+        angular_dist: array-like
+            Value of angular diameter distances at redshifts z_win
         H: array-like
             Hubble function evaluated at redshifts z_win
         Pk_interpolator: function
@@ -56,6 +58,8 @@ class Cosmology:
             Speed-of-light in units of km s^{-1}
         r_z_func: function
             Interpolated function for comoving distance
+        d_z_func: function
+            Interpolated function for angular diameter distance
         H_z_func: function
             Interpolated function for Hubble parameter
         z_win: array-like
@@ -69,7 +73,12 @@ class Cosmology:
                           'omch2': 0.122,
                           'ombh2': 0.022,
                           'mnu': 0.06,
+                          'tau': 0.07,
+                          'nnu': 3.046,
+                          'ns': 0.9674,
+                          'As': 2.1e-9,
                           'comov_dist': None,
+                          'angular_dist': None,
                           'H': None,
                           'Pk_interpolator': None,
                           'Pk_delta': None,
@@ -80,6 +89,7 @@ class Cosmology:
                           'c': const.c.to('km/s').value,
                           'z_win': None,
                           'r_z_func': None,
+                          'd_z_func': None,
                           'H_z_func': None}
 
     def growth_factor(self, zs, ks):
@@ -165,6 +175,26 @@ class Cosmology:
         self.cosmo_dic['r_z_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['comov_dist'], ext=2)
 
+    def interp_angular_dist(self):
+        """
+        Adds an interpolator for angular distance to the dictionary so that
+        it can be evaluated at redshifts not explictly supplied to cobaya.
+
+        Parameters
+        ----------
+        zs: array
+            list of redshift comoving distance is evaluated at.
+        Returns
+        -------
+        None
+
+        """
+        if self.cosmo_dic['z_win'] is None:
+            raise Exception('Boltzmann code redshift binning has not been '
+                            'supplied to cosmo_dic.')
+        self.cosmo_dic['d_z_func'] = interpolate.InterpolatedUnivariateSpline(
+            x=self.cosmo_dic['z_win'], y=self.cosmo_dic['angular_dist'], ext=2)
+
     def interp_H(self):
         """
         Adds an interpolator for the Hubble parameter to the dictionary so that
@@ -183,7 +213,7 @@ class Cosmology:
             raise Exception('Boltzmann code redshift binning has not been '
                             'supplied to cosmo_dic.')
         self.cosmo_dic['H_z_func'] = interpolate.InterpolatedUnivariateSpline(
-            x=self.cosmo_dic['z_win'], y=self.cosmo_dic['comov_dist'], ext=2)
+            x=self.cosmo_dic['z_win'], y=self.cosmo_dic['H'], ext=2)
 
     def update_cosmo_dic(self, zs, ks):
         """

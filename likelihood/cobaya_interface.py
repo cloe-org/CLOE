@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 
 # Cobaya import of general Likelihood class
 from cobaya.likelihood import Likelihood
+# Import cobaya model wrapper for fiducial model (TEMPORARY)
+from cobaya.model import get_model
 
 # Import likelihoods classes
 from likelihood.photometric_survey.shear import Shear
@@ -65,8 +67,70 @@ class EuclidLikelihood(Likelihood):
         # SJ: temporary (needs to be obtained from Cobaya)
         self.sigma_8 = 1.0
 
-        # (GCH): initialize Cosmology class
+        # (GCH): initialize Cosmology class for sampling
         self.cosmo = Cosmology()
+
+        # (GCH): initialize the fiducial model
+        # ATTENTION: This will work if CAMB is installed globally
+        self.fiducial_cosmology = Cosmology()
+        self.info_fiducial = {'params': {
+            'ombh2': self.fiducial_cosmology.cosmo_dic['ombh2'],
+            'omch2': self.fiducial_cosmology.cosmo_dic['omch2'],
+            'H0': self.fiducial_cosmology.cosmo_dic['H0'],
+            'tau': self.fiducial_cosmology.cosmo_dic['tau'],
+            'mnu': self.fiducial_cosmology.cosmo_dic['mnu'],
+            'nnu': self.fiducial_cosmology.cosmo_dic['nnu'],
+            'ns': self.fiducial_cosmology.cosmo_dic['ns'],
+            'As': self.fiducial_cosmology.cosmo_dic['As'],
+        },
+            'theory': {'camb':
+                       {'stop_at_error': True,
+                        'extra_args': {'num_massive_neutrinos': 1}}},
+            # Likelihood: we load the likelihood as an external function
+            'likelihood': {'one': None}}
+
+        # (GCH): use get_model wrapper for fiducial
+        model_fiducial = get_model(self.info_fiducial)
+        model_fiducial.add_requirements({"Pk_interpolator":
+                                         {"z": self.z_win,
+                                          "k_max": self.k_max,
+                                          "nonlinear": False,
+                                          "vars_pairs": ([["delta_tot",
+                                                           "delta_tot"]])},
+                                         "comoving_radial_distance":
+                                         {"z": self.z_win},
+                                         "angular_diameter_distance":
+                                         {"z": self.z_win},
+                                         "Hubble": {"z": self.z_win,
+                                                    "units": "km/s/Mpc"},
+                                         "fsigma8": {"z": self.z_win,
+                                                     "units": None}})
+        # (GCH): evaluation of posterior, required by Cobaya
+        model_fiducial.logposterior({})
+
+        # (GCH): update fiducial cosmology dictionary
+        self.fiducial_cosmology.cosmo_dic['z_win'] = self.z_win
+        self.fiducial_cosmology.cosmo_dic['comov_dist'] = \
+            model_fiducial.provider.get_comoving_radial_distance(
+            self.z_win),
+        self.fiducial_cosmology.cosmo_dic['angular_dist'] = \
+            model_fiducial.provider.get_angular_diameter_distance(
+            self.z_win),
+        self.fiducial_cosmology.cosmo_dic['H'] = \
+            model_fiducial.provider.get_Hubble(
+            self.z_win),
+        self.fiducial_cosmology.cosmo_dic['Pk_interpolator'] = \
+            model_fiducial.provider.get_Pk_interpolator(
+            nonlinear=False),
+        self.fiducial_cosmology.cosmo_dic['Pk_delta'] = \
+            model_fiducial.provider.get_Pk_interpolator(
+            ("delta_tot", "delta_tot"), nonlinear=False)
+        self.fiducial_cosmology.cosmo_dic['fsigma8'] = \
+            model_fiducial.provider.get_fsigma8(
+            self.z_win)
+        self.fiducial_cosmology.interp_H()
+        self.fiducial_cosmology.interp_comoving_dist()
+        self.fiducial_cosmology.interp_angular_dist()
 
     def get_requirements(self):
         r""" get_requirements
@@ -82,12 +146,14 @@ class EuclidLikelihood(Likelihood):
 
         """
 
-        return {"Pk_interpolator": {"z": self.z_win,
-                                    "k_max": self.k_max,
-                                    "nonlinear": False,
-                                    "vars_pairs": ([["delta_tot",
-                                                     "delta_tot"]])},
+        return {"Pk_interpolator":
+                {"z": self.z_win,
+                 "k_max": self.k_max,
+                 "nonlinear": False,
+                 "vars_pairs": ([["delta_tot",
+                                  "delta_tot"]])},
                 "comoving_radial_distance": {"z": self.z_win},
+                "angular_diameter_distance": {"z": self.z_win},
                 "Hubble": {"z": self.z_win, "units": "km/s/Mpc"},
                 "fsigma8": {"z": self.z_win, "units": None}}
 
@@ -110,6 +176,8 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['mnu'] = self.provider.get_param('mnu')
             self.cosmo.cosmo_dic['comov_dist'] = \
                 self.provider.get_comoving_radial_distance(self.z_win)
+            self.cosmo.cosmo_dic['angular_dist'] = \
+                self.provider.get_angular_diameter_distance(self.z_win)
             self.cosmo.cosmo_dic['H'] = self.provider.get_Hubble(self.z_win)
             self.cosmo.cosmo_dic['Pk_interpolator'] = \
                 self.provider.get_Pk_interpolator(nonlinear=False)
@@ -125,8 +193,11 @@ class EuclidLikelihood(Likelihood):
         except CobayaInterfaceError:
             print('Cobaya theory requirements \
                   could not be pass to cosmo module')
+        self.cosmo.interp_H()
+        self.cosmo.interp_comoving_dist()
+        self.cosmo.interp_angular_dist()
 
-    def log_likelihood(self, dictionary, **data_params):
+    def log_likelihood(self, dictionary, dictionary_fiducial, **data_params):
         r""" log_likelihood
 
         Calculates the log-likelihood given the selection
@@ -135,6 +206,12 @@ class EuclidLikelihood(Likelihood):
         ----------
         dictionary: dictionary
             cosmology dictionary from Cosmology class
+            which gets updated at each step of the
+            sampling method
+
+        dictionary_fiducial: dictionary
+            cosmology dictionary from Cosmology class
+            which includes the fiducial cosmology
 
         **data_params: tuple
             List of (sampled) parameters obtained from
@@ -151,11 +228,11 @@ class EuclidLikelihood(Likelihood):
             shear_ins = Shear(dictionary)
             loglike = shear_ins.loglike()
         elif like_selection == 2:
-            spec_ins = Spec(dictionary)
+            spec_ins = Spec(dictionary, dictionary_fiducial)
             loglike = spec_ins.loglike()
         elif like_selection == 12:
             shear_ins = Shear(dictionary)
-            spec_ins = Spec(dictionary)
+            spec_ins = Spec(dictionary, dictionary_fiducial)
             loglike_shear = shear_ins.loglike()
             loglike_spec = spec_ins.loglike()
             loglike = loglike_shear + loglike_spec
@@ -188,5 +265,8 @@ class EuclidLikelihood(Likelihood):
         # interpolators
         self.cosmo.interp_comoving_dist()
         self.cosmo.interp_H()
-        loglike = self.log_likelihood(self.cosmo.cosmo_dic, **params_values)
+        loglike = self.log_likelihood(
+            self.cosmo.cosmo_dic,
+            self.fiducial_cosmology.cosmo_dic,
+            **params_values)
         return loglike

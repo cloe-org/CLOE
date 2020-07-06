@@ -13,13 +13,31 @@ class Spec:
     Class for GC spectroscopy observable
     """
 
-    def __init__(self, cosmo_dic):
+    def __init__(self, cosmo_dic, fiducial_dic):
         """
         Parameters
         ----------
         None
         """
         self.theory = cosmo_dic
+        self.fiducial = fiducial_dic
+
+    def scaling_factor_perp(self, z):
+        return self.theory['d_z_func'](z) / self.fiducial['d_z_func'](z)
+
+    def scaling_factor_parall(self, z):
+        return self.fiducial['H_z_func'](z) / self.theory['H_z_func'](z)
+
+    def get_k(self, k_prime, mu_prime, z):
+        return k_prime * (self.scaling_factor_parall(z)**(-2) * mu_prime**2 +
+                          self.scaling_factor_perp(z)**(-2) *
+                          (1 - (mu_prime)**2))**(1. / 2)
+
+    def get_mu(self, mu_prime, z):
+        return mu_prime * self.scaling_factor_parall(z)**(-1) * (
+            self.scaling_factor_parall(z)**(-2) * mu_prime**2 +
+            self.scaling_factor_perp(z)**(-2) *
+            (1 - (mu_prime)**2))**(-1. / 2)
 
     def multipole_spectra(self):
         r"""

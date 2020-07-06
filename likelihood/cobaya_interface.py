@@ -206,6 +206,12 @@ class EuclidLikelihood(Likelihood):
         ----------
         dictionary: dictionary
             cosmology dictionary from Cosmology class
+            which gets updated at each step of the 
+            sampling method
+            
+        dictionary_fiducial: dictionary
+            cosmology dictionary from Cosmology class
+            which includes the fiducial cosmology
 
         **data_params: tuple
             List of (sampled) parameters obtained from

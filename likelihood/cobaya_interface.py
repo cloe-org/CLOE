@@ -105,6 +105,7 @@ class EuclidLikelihood(Likelihood):
                                                     "units": "km/s/Mpc"},
                                          "fsigma8": {"z": self.z_win,
                                                      "units": None}})
+        # (GCH): evaluation of posterior, required by Cobaya
         model_fiducial.logposterior({})
 
         # (GCH): update fiducial cosmology dictionary

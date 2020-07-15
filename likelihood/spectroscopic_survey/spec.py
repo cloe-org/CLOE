@@ -52,11 +52,11 @@ class Spec:
         Parameters
         ----------
         mu: float
-           Cosine of the angle between the wavevector and LOS.
+           Cosine of the angle between the wavenumber and LOS.
         z: float
            Redshift at which to evaluate power spectrum.
         k: float
-           Scale (wavevector) at which to evaluate power spectrum.
+           Scale (wavenumber) at which to evaluate power spectrum.
 
         Returns
         -------
@@ -88,11 +88,11 @@ class Spec:
         Parameters
         ----------
         mu: float
-           Cosine of the angle between the wavevector and LOS (AP-distorted).
+           Cosine of the angle between the wavenumber and LOS (AP-distorted).
         z: float
            Redshift at which to evaluate the galaxy power spectrum.
         k: float
-           Scale (wavevector) at which to evaluate the galaxy power
+           Scale (wavenumber) at which to evaluate the galaxy power
            spectrum (AP-distorted).
         m: float
            Order of the Legendre expansion.
@@ -129,7 +129,7 @@ class Spec:
         z: float
            Redshift at which to evaluate the galaxy power spectrum.
         k: float
-           Scale (wavevector) at which to evaluate the galaxy power spectrum.
+           Scale (wavenumber) at which to evaluate the galaxy power spectrum.
         m: float
            Order of the Legendre expansion.
 

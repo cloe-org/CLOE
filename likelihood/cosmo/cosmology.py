@@ -73,7 +73,7 @@ class Cosmology:
         # (GCH): initialize cosmo dictionary
         # (ACD): Added speed of light to dictionary.!!!Important:it's in units
         # of km/s to be dimensionally consistent with H0.!!!!
-        # SJ: temporary modifications to zk, b_gal, and sigma_8
+        # SJ: temporary modification to b_gal
         self.cosmo_dic = {'H0': 67.5,
                           'omch2': 0.122,
                           'ombh2': 0.022,
@@ -88,12 +88,10 @@ class Cosmology:
                           'Pk_interpolator': None,
                           'Pk_delta': None,
                           'fsigma8': None,
-                          'zk': 1.0,
-                          # 'zk': None,
+                          'zk': None,
                           'b_gal': 1.0,
                           # 'b_gal': None,
-                          'sigma_8': 1.0,
-                          # 'sigma_8': None,
+                          'sigma_8': None,
                           'c': const.c.to('km/s').value,
                           'z_win': None,
                           'r_z_func': None,

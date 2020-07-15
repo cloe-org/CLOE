@@ -42,19 +42,34 @@ class Spec:
             self.scaling_factor_perp(z)**(-2) *
             (1 - (mu_prime)**2))**(-1. / 2)
 
-    # SJ: Only linear galaxy spectrum for now as a placeholder.
+    # SJ: Linear galaxy spectrum for now as a placeholder.
     # SJ: To be extended (i.e new function) by IST:NL.
     def pkgal_linear(self, mu, z, k):
         r"""
-        Computation of P_gg appearing in Eqn 37 of IST:L document
-        (found below). Here, we express it using  linear theory (Eqn 25).
+        Computation of P_gg appearing in the IST:L document
+        (found below). Here, we express it using  linear theory.
 
+        Parameters
+        ----------
+        mu: float
+           Cosine of the angle between the wavevector and LOS.
+        z: float
+           Redshift at which to evaluate power spectrum.
+        k: float
+           Scale (wavevector) at which to evaluate power spectrum.
+
+        Returns
+        -------
+        pkgal: float
+           Linear galaxy power spectrum (including RSDs)
+
+        Notes:
+        ------
         https://www.overleaf.com/read/pvfkzvvkymbj
 
         .. math::
             P_{\rm gg}\left(k(k',\mu_k'),\mu_k(\mu_k');z\right) = \
             \left(b(z) + f(z)({\mu_k}')^2\right)^2 P_{\rm mm}(k';z)
-
         """
 
         growth = self.theory['fsigma8_z_func'](z) / \
@@ -66,11 +81,29 @@ class Spec:
 
     def multipole_spectra_integrand(self, mu, z, k, m):
         r"""
-        Computation of integrand of Eqn 37 of
-        Euclid IST:L documentation (corresponding
-        to multipole power spectra), found below.
+        Computation of multipole power spectrum integrand
+        appearing in the Euclid IST:L document, found below.
         Note we consider ell = m in the code.
 
+        Parameters
+        ----------
+        mu: float
+           Cosine of the angle between the wavevector and LOS (AP-distorted).
+        z: float
+           Redshift at which to evaluate the galaxy power spectrum.
+        k: float
+           Scale (wavevector) at which to evaluate the galaxy power
+           spectrum (AP-distorted).
+        m: float
+           Order of the Legendre expansion.
+
+        Returns
+        -------
+        integrand: float
+           Integrand of multipole power spectrum
+
+        Notes:
+        ------
         https://www.overleaf.com/read/pvfkzvvkymbj
 
         .. math::
@@ -87,10 +120,26 @@ class Spec:
 
     def multipole_spectra(self, z, k, m):
         r"""
-        Computation of Eqn 37 of Euclid IST:L documentation
-        (corresponding to multipole power spectra), found
-        below. Note we consider ell = m in the code.
+        Computation of multipole power spectra appearing in
+        the Euclid IST:L document, found below.
+        Note we consider ell = m in the code.
 
+        Parameters
+        ----------
+        z: float
+           Redshift at which to evaluate the galaxy power spectrum.
+        k: float
+           Scale (wavevector) at which to evaluate the galaxy power spectrum.
+        m: float
+           Order of the Legendre expansion.
+
+        Returns
+        -------
+        integral: float
+           Multipole power spectrum
+
+        Notes:
+        ------
         https://www.overleaf.com/read/pvfkzvvkymbj
 
         .. math::
@@ -109,12 +158,21 @@ class Spec:
 
         return integral
 
-    def multipole_spectra_noap(self):
+    def multipole_spectra_noap(self, z, k):
         r"""
         Computation of Eqns 28 - 30 of Euclid IST:L documentation
         (corresponding to multipole power spectra pre geometric distortions),
         found below.
 
+        Parameters
+        ----------
+        z: float
+           Redshift at which to evaluate the galaxy power spectrum.
+        k: float
+           Scale (wavenumber) at which to evaluate the galaxy power spectrum.
+
+        Notes:
+        ------
         https://www.overleaf.com/read/pvfkzvvkymbj
 
         Eqns 28 - 30 shown in latex format below.
@@ -128,22 +186,15 @@ class Spec:
 
         # SJ: Set up power spectrum [note weirdly Cobaya has it as P(z,k)
         # SJ: instead of the more common P(k,z)]
-        # SJ: For now, fix redshift (and scale),
-        # fix galaxy bias = 1, and fix sigma8(z) = 1
-        # Cobaya does not seem to allow for either growth
-        # rate alone or sigma8 alone
-        # to be called yet (only their combination).
-        # compute Eqns 28-30
-        beta = self.theory['fsigma8'] / self.theory['sigma_8'] / \
-            self.theory['b_gal']
-        # beta = 1.0
-        Pk_gal = (self.theory['b_gal']**2.0) * \
-            self.theory['Pk_interpolator'].P(self.theory['zk'], 0.02)
-        # Pk_gal = 1.0
-        self.P0k = (1.0 + 2.0 / 3.0 * beta + 1.0 / 5.0 * beta**2.0) * Pk_gal
-        self.P2k = (4.0 / 3.0 * beta + 4.0 / 7.0 * beta**2.0) * Pk_gal
-        self.P4k = (8.0 / 35.0 * beta**2.0) * Pk_gal
+        beta = self.theory['fsigma8_z_func'](z) / \
+            self.theory['sigma8_z_func'](z) / self.theory['b_gal']
+        Pk_gal = self.theory['b_gal']**2.0 * \
+            self.theory['Pk_interpolator'].P(z, k)
+        P0k = (1.0 + 2.0 / 3.0 * beta + 1.0 / 5.0 * beta**2.0) * Pk_gal
+        P2k = (4.0 / 3.0 * beta + 4.0 / 7.0 * beta**2.0) * Pk_gal
+        P4k = (8.0 / 35.0 * beta**2.0) * Pk_gal
 
+        return P0k, P2k, P4k
         # (GCH): maybe save as attributes P0k, P2k, P4k?
 
     def loglike(self):
@@ -156,5 +207,4 @@ class Spec:
         """
         # SJ: This will be the log-likelihood;
         # for now just return P(z,k) for fixed z and k.
-        self.multipole_spectra_noap()
         return self.theory['Pk_interpolator'].P(0.5, 0.02)

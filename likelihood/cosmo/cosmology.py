@@ -48,18 +48,22 @@ class Cosmology:
             Interpolator function for power spectrum from Boltzmann code
         Pk_delta: function
             Interpolator function for delta from Boltzmann code
-        fsigma8: float
-            fsigma8 function evaluated at z=0.5
+        fsigma8: array
+            fsigma8 function evaluated at z
+        sigma_8: array
+            sigma8 functione valuated at z
         b_gal: float
             Galaxy bias
-        sigma_8: float
-            Present-day value of sigma8
         c: float
             Speed-of-light in units of km s^{-1}
         r_z_func: function
             Interpolated function for comoving distance
         d_z_func: function
             Interpolated function for angular diameter distance
+        sigma8_z_func: function
+            Interpolated function for angular sigma8
+        fsigma8_z_func: function
+            Interpolated function for fsigma8
         H_z_func: function
             Interpolated function for Hubble parameter
         z_win: array-like
@@ -94,7 +98,9 @@ class Cosmology:
                           'z_win': None,
                           'r_z_func': None,
                           'd_z_func': None,
-                          'H_z_func': None}
+                          'H_z_func': None,
+                          'sigma8_z_func': None,
+                          'fsigma8_z_func': None}
 
     def growth_factor(self, zs, ks):
         """
@@ -218,6 +224,48 @@ class Cosmology:
                             'supplied to cosmo_dic.')
         self.cosmo_dic['H_z_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['H'], ext=2)
+
+    def interp_sigma8(self):
+        """
+        Adds an interpolator for sigma8 to the dictionary so that
+        it can be evaluated at redshifts not explictly supplied to cobaya.
+
+        Parameters
+        ----------
+        zs: array
+            list of redshift comoving distance is evaluated at.
+        Returns
+        -------
+        None
+
+        """
+        if self.cosmo_dic['z_win'] is None:
+            raise Exception('Boltzmann code redshift binning has not been '
+                            'supplied to cosmo_dic.')
+        self.cosmo_dic['sigma8_z_func'] = \
+            interpolate.InterpolatedUnivariateSpline(
+                x=self.cosmo_dic['z_win'], y=self.cosmo_dic['sigma_8'], ext=2)
+
+    def interp_fsigma8(self):
+        """
+        Adds an interpolator for sigma8 to the dictionary so that
+        it can be evaluated at redshifts not explictly supplied to cobaya.
+
+        Parameters
+        ----------
+        zs: array
+            list of redshift comoving distance is evaluated at.
+        Returns
+        -------
+        None
+
+        """
+        if self.cosmo_dic['z_win'] is None:
+            raise Exception('Boltzmann code redshift binning has not been '
+                            'supplied to cosmo_dic.')
+        self.cosmo_dic['fsigma8_z_func'] = \
+            interpolate.InterpolatedUnivariateSpline(
+                x=self.cosmo_dic['z_win'], y=self.cosmo_dic['fsigma8'], ext=2)
 
     def update_cosmo_dic(self, zs, ks):
         """

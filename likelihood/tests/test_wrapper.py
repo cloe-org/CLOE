@@ -68,6 +68,12 @@ class CobayaModel:
             ("delta_tot", "delta_tot"), nonlinear=False)
         self.cosmology.cosmo_dic['fsigma8'] = \
             self.model.provider.get_fsigma8(self.z_win)
+        R, z, sigma_R = \
+            self.model.provider.get_sigma_R()
+        self.cosmology.cosmo_dic['sigma_8'] = \
+            sigma_R[:, 0]
         self.cosmology.interp_H()
         self.cosmology.interp_comoving_dist()
         self.cosmology.interp_angular_dist()
+        self.cosmology.interp_sigma8()
+        self.cosmology.interp_fsigma8()

@@ -23,7 +23,6 @@ class Spec:
         None
         """
         self.theory = cosmo_dic
-        self.cosmo_dic = cosmo_dic
         self.fiducial = fiducial_dic
 
     def scaling_factor_perp(self, z):
@@ -58,7 +57,8 @@ class Spec:
 
         """
 
-        growth = self.theory['fsigma8'][0] / self.theory['sigma_8']
+        growth = self.theory['fsigma8_z_func'](z) / \
+            self.theory['sigma8_z_func'](z)
         pkgal = self.theory['Pk_interpolator'].P(z, k) * \
             (self.theory['b_gal'] + growth * mu**2.0)**2.0
 

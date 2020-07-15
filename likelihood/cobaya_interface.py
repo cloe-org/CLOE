@@ -64,9 +64,6 @@ class EuclidLikelihood(Likelihood):
         # SJ: temporary (should be varied in MCMC)
         self.b_gal = 1.0
 
-        # SJ: temporary (needs to be obtained from Cobaya)
-        self.sigma_8 = 1.0
-
         # (GCH): initialize Cosmology class for sampling
         self.cosmo = Cosmology()
 
@@ -104,7 +101,12 @@ class EuclidLikelihood(Likelihood):
                                          "Hubble": {"z": self.z_win,
                                                     "units": "km/s/Mpc"},
                                          "fsigma8": {"z": self.z_win,
-                                                     "units": None}})
+                                                     "units": None},
+                                         "sigma_R": {"z": self.z_win,
+                                                     "vars_pairs":
+                                                     [["delta_tot",
+                                                       "delta_tot"]],
+                                                     "R": [8]}})
         # (GCH): evaluation of posterior, required by Cobaya
         model_fiducial.logposterior({})
 
@@ -128,9 +130,15 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology.cosmo_dic['fsigma8'] = \
             model_fiducial.provider.get_fsigma8(
             self.z_win)
+        R_fiducial, z_fiducial, sigma_R_fiducial = \
+            model_fiducial.provider.get_sigma_R()
+        self.fiducial_cosmology.cosmo_dic['sigma_8'] = \
+            sigma_R_fiducial[:, 0]
         self.fiducial_cosmology.interp_H()
         self.fiducial_cosmology.interp_comoving_dist()
         self.fiducial_cosmology.interp_angular_dist()
+        self.fiducial_cosmology.interp_sigma8()
+        self.fiducial_cosmology.interp_fsigma8()
 
     def get_requirements(self):
         r""" get_requirements
@@ -155,6 +163,10 @@ class EuclidLikelihood(Likelihood):
                 "comoving_radial_distance": {"z": self.z_win},
                 "angular_diameter_distance": {"z": self.z_win},
                 "Hubble": {"z": self.z_win, "units": "km/s/Mpc"},
+                "sigma_R": {"z": self.z_win,
+                            "vars_pairs": [["delta_tot",
+                                            "delta_tot"]],
+                            "R": [8]},
                 "fsigma8": {"z": self.z_win, "units": None}}
 
     def passing_requirements(self):
@@ -183,19 +195,17 @@ class EuclidLikelihood(Likelihood):
                 self.provider.get_Pk_interpolator(nonlinear=False)
             self.cosmo.cosmo_dic['zk'] = self.zk
             self.cosmo.cosmo_dic['b_gal'] = self.b_gal
-            self.cosmo.cosmo_dic['sigma_8'] = self.sigma_8
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 self.provider.get_Pk_interpolator(
                 ("delta_tot", "delta_tot"), nonlinear=False)
             self.cosmo.cosmo_dic['fsigma8'] = self.provider.get_fsigma8(
                 self.cosmo.cosmo_dic['zk'])
             self.cosmo.cosmo_dic['z_win'] = self.z_win
+            R, z, sigma_R = self.provider.get_sigma_R()
+            self.cosmo.cosmo_dic['sigma_8'] = sigma_R[:, 0]
         except CobayaInterfaceError:
             print('Cobaya theory requirements \
                   could not be pass to cosmo module')
-        self.cosmo.interp_H()
-        self.cosmo.interp_comoving_dist()
-        self.cosmo.interp_angular_dist()
 
     def log_likelihood(self, dictionary, dictionary_fiducial, **data_params):
         r""" log_likelihood
@@ -261,10 +271,12 @@ class EuclidLikelihood(Likelihood):
             value of the function log_likelihood
         """
         self.passing_requirements()
-        # (GCH): update cosmo_dic to include H and comov_dist
-        # interpolators
-        self.cosmo.interp_comoving_dist()
+        # (GCH): update cosmo_dic to interpolators
         self.cosmo.interp_H()
+        self.cosmo.interp_comoving_dist()
+        self.cosmo.interp_angular_dist()
+        self.cosmo.interp_sigma8()
+        self.cosmo.interp_fsigma8()
         loglike = self.log_likelihood(
             self.cosmo.cosmo_dic,
             self.fiducial_cosmology.cosmo_dic,

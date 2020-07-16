@@ -48,6 +48,8 @@ class cosmoinitTestCase(TestCase):
                          self.model_fiducial.cosmology.cosmo_dic)
 
         # (GCH): Checks
+        self.check_multipole_spectra_noap = [5925.282996,
+                                             4398.545209, 389.479174]
         self.check_multipole_spectra_m0 = 5926.011892
         self.check_multipole_spectra_m1 = 0.0
         self.check_multipole_spectra_m2 = 4443.432965
@@ -66,35 +68,41 @@ class cosmoinitTestCase(TestCase):
         self.check_get_k = None
         self.check_get_mu = None
 
+    def test_multipole_spectra_noap(self):
+        npt.assert_allclose(self.spec.multipole_spectra_noap(1.0, 0.1),
+                            self.check_multipole_spectra_noap,
+                            rtol=1e-06,
+                            err_msg='Multipole spectra (no AP) failed')
+
     def test_multipole_spectra_m0(self):
         npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, 0),
                             self.check_multipole_spectra_m0,
                             rtol=1e-06,
-                            err_msg='Multipole spectra m = 0 failed')
+                            err_msg='Multipole spectrum m = 0 failed')
 
     def test_multipole_spectra_m1(self):
         npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, 1),
                             self.check_multipole_spectra_m1,
                             atol=1e-06,
-                            err_msg='Multipole spectra m = 1 failed')
+                            err_msg='Multipole spectrum m = 1 failed')
 
     def test_multipole_spectra_m2(self):
         npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, 2),
                             self.check_multipole_spectra_m2,
                             rtol=1e-06,
-                            err_msg='Multipole spectra m = 2 failed')
+                            err_msg='Multipole spectrum m = 2 failed')
 
     def test_multipole_spectra_m3(self):
         npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, 3),
                             self.check_multipole_spectra_m3,
                             atol=1e-06,
-                            err_msg='Multipole spectra m = 3 failed')
+                            err_msg='Multipole spectrum m = 3 failed')
 
     def test_multipole_spectra_m4(self):
         npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, 4),
                             self.check_multipole_spectra_m4,
                             rtol=1e-06,
-                            err_msg='Multipole spectra m = 4 failed')
+                            err_msg='Multipole spectrum m = 4 failed')
 
     def test_multipole_spectra_integrand(self):
         npt.assert_allclose(self.spec.multipole_spectra_integrand(0.7, 1.0,
@@ -107,7 +115,7 @@ class cosmoinitTestCase(TestCase):
         npt.assert_allclose(self.spec.pkgal_linear(0.7, 1.0, 0.1),
                             self.check_pkgal_linear,
                             rtol=1e-06,
-                            err_msg='Pkgal linear failed')
+                            err_msg='Linear galaxy spectrum failed')
 
     def test_scaling_factor_perp(self):
         npt.assert_allclose(self.spec.scaling_factor_perp(0.01),

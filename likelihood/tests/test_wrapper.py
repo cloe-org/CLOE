@@ -18,7 +18,7 @@ class CobayaModel:
         self.model = None
         z_min = 0.0
         z_max = 2.5
-        z_samp = 10
+        z_samp = 100
         self.z_win = np.linspace(z_min, z_max, z_samp)
 
     def define_info(self, cosmo_inst):
@@ -68,6 +68,9 @@ class CobayaModel:
             ("delta_tot", "delta_tot"), nonlinear=False)
         self.cosmology.cosmo_dic['fsigma8'] = \
             self.model.provider.get_fsigma8(self.z_win)
-        self.cosmology.interp_H()
-        self.cosmology.interp_comoving_dist()
-        self.cosmology.interp_angular_dist()
+        R, z, sigma_R = \
+            self.model.provider.get_sigma_R()
+        self.cosmology.cosmo_dic['sigma_8'] = \
+            sigma_R[:, 0]
+        self.cosmology.update_cosmo_dic(self.cosmology.cosmo_dic['z_win'],
+                                        0.05)

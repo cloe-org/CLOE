@@ -48,18 +48,22 @@ class Cosmology:
             Interpolator function for power spectrum from Boltzmann code
         Pk_delta: function
             Interpolator function for delta from Boltzmann code
-        fsigma8: float
-            fsigma8 function evaluated at z=0.5
+        fsigma8: array
+            fsigma8 function evaluated at z
+        sigma_8: array
+            sigma8 functione valuated at z
         b_gal: float
             Galaxy bias
-        sigma_8: float
-            Present-day value of sigma8
         c: float
             Speed-of-light in units of km s^{-1}
         r_z_func: function
             Interpolated function for comoving distance
         d_z_func: function
             Interpolated function for angular diameter distance
+        sigma8_z_func: function
+            Interpolated function for angular sigma8
+        fsigma8_z_func: function
+            Interpolated function for fsigma8
         H_z_func: function
             Interpolated function for Hubble parameter
         z_win: array-like
@@ -69,6 +73,7 @@ class Cosmology:
         # (GCH): initialize cosmo dictionary
         # (ACD): Added speed of light to dictionary.!!!Important:it's in units
         # of km/s to be dimensionally consistent with H0.!!!!
+        # SJ: temporary modification to b_gal
         self.cosmo_dic = {'H0': 67.5,
                           'omch2': 0.122,
                           'ombh2': 0.022,
@@ -83,14 +88,16 @@ class Cosmology:
                           'Pk_interpolator': None,
                           'Pk_delta': None,
                           'fsigma8': None,
-                          'zk': None,
-                          'b_gal': None,
+                          'b_gal': 1.0,
+                          # 'b_gal': None,
                           'sigma_8': None,
                           'c': const.c.to('km/s').value,
                           'z_win': None,
                           'r_z_func': None,
                           'd_z_func': None,
-                          'H_z_func': None}
+                          'H_z_func': None,
+                          'sigma8_z_func': None,
+                          'fsigma8_z_func': None}
 
     def growth_factor(self, zs, ks):
         """
@@ -138,7 +145,7 @@ class Cosmology:
 
         Returns
         -------
-        growth rate
+        interpolator growth rate
 
         """
         # GCH: Careful! This should be updated in the future!
@@ -149,8 +156,9 @@ class Cosmology:
         D_z_k = self.growth_factor(zs, ks)
         # This will work when k is fixed, not an array
         try:
-            f_z_k = -(1 + zs) * np.gradient(D_z_k) / D_z_k
-            return f_z_k
+            f_z_k = -(1 + zs) * np.gradient(D_z_k, zs[1] - zs[0]) / D_z_k
+            return interpolate.InterpolatedUnivariateSpline(
+                x=zs, y=f_z_k, ext=2)
         except CosmologyError:
             print('Computation error in f(z, k)')
             print('ATTENTION: Check k is a value, not a list')
@@ -160,13 +168,9 @@ class Cosmology:
         Adds an interpolator for comoving distance to the dictionary so that
         it can be evaluated at redshifts not explictly supplied to cobaya.
 
-        Parameters
-        ----------
-        zs: array
-            list of redshift comoving distance is evaluated at.
         Returns
         -------
-        None
+        Interpolator comoving distance as a function of redshift
 
         """
         if self.cosmo_dic['z_win'] is None:
@@ -180,13 +184,9 @@ class Cosmology:
         Adds an interpolator for angular distance to the dictionary so that
         it can be evaluated at redshifts not explictly supplied to cobaya.
 
-        Parameters
-        ----------
-        zs: array
-            list of redshift comoving distance is evaluated at.
         Returns
         -------
-        None
+        Interpolator angular diameter distance  as a function of redshift
 
         """
         if self.cosmo_dic['z_win'] is None:
@@ -200,13 +200,9 @@ class Cosmology:
         Adds an interpolator for the Hubble parameter to the dictionary so that
         it can be evaluated at redshifts not explictly supplied to cobaya.
 
-        Parameters
-        ----------
-        zs: array
-            list of redshift comoving distance is evaluated at.
         Returns
         -------
-        None
+        Interpolator H as a function of redshift
 
         """
         if self.cosmo_dic['z_win'] is None:
@@ -214,6 +210,40 @@ class Cosmology:
                             'supplied to cosmo_dic.')
         self.cosmo_dic['H_z_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['H'], ext=2)
+
+    def interp_sigma8(self):
+        """
+        Adds an interpolator for sigma8 to the dictionary so that
+        it can be evaluated at redshifts not explictly supplied to cobaya.
+
+        Returns
+        -------
+        Interpolator sigma8 as a function of redshift
+
+        """
+        if self.cosmo_dic['z_win'] is None:
+            raise Exception('Boltzmann code redshift binning has not been '
+                            'supplied to cosmo_dic.')
+        self.cosmo_dic['sigma8_z_func'] = \
+            interpolate.InterpolatedUnivariateSpline(
+                x=self.cosmo_dic['z_win'], y=self.cosmo_dic['sigma_8'], ext=2)
+
+    def interp_fsigma8(self):
+        """
+        Adds an interpolator for fsigma8 to the dictionary so that
+        it can be evaluated at redshifts not explictly supplied to cobaya.
+
+        Returns
+        -------
+        Interpolator fsigma8 as a function of redshift
+
+        """
+        if self.cosmo_dic['z_win'] is None:
+            raise Exception('Boltzmann code redshift binning has not been '
+                            'supplied to cosmo_dic.')
+        self.cosmo_dic['fsigma8_z_func'] = \
+            interpolate.InterpolatedUnivariateSpline(
+                x=self.cosmo_dic['z_win'], y=self.cosmo_dic['fsigma8'], ext=2)
 
     def update_cosmo_dic(self, zs, ks):
         """
@@ -234,5 +264,10 @@ class Cosmology:
         # (GCH): this function is superfluous
         # just in case we want to have always
         # an updated dictionary with D_z, f, H(z), r(z)
+        self.interp_H()
+        self.interp_comoving_dist()
+        self.interp_fsigma8()
+        self.interp_sigma8()
+        self.interp_angular_dist()
         self.cosmo_dic['D_z_k'] = self.growth_factor(zs, ks)
         self.cosmo_dic['f_z_k'] = self.growth_rate(zs, ks)

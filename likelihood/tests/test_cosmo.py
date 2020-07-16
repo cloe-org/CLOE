@@ -35,12 +35,11 @@ class cosmoinitTestCase(TestCase):
         # (GCH): create wrapper model
         self.model_test = CobayaModel(cosmo)
         self.model_test.update_cosmo()
-        print(self.model_test.cosmology.cosmo_dic)
         # (GCH): Check values
         self.H0check = 68.0
         self.Dcheck = 1.0
-        self.fcheck = 0.135876
-        self.Hcheck = 75.249702
+        self.fcheck = 0.518508
+        self.Hcheck = 75.251876
 
     def tearDown(self):
         self.H0check = None
@@ -70,7 +69,7 @@ class cosmoinitTestCase(TestCase):
     def test_cosmo_growth_rate(self):
         f = self.model_test.cosmology.growth_rate(
             self.model_test.cosmology.cosmo_dic['z_win'], 0.002)
-        npt.assert_allclose(f[0], self.fcheck,
+        npt.assert_allclose(f(0), self.fcheck,
                             rtol=1e-3,
                             err_msg='Error in f_z_k calculation ')
 

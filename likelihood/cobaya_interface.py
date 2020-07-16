@@ -54,7 +54,7 @@ class EuclidLikelihood(Likelihood):
 
         # SJ: For now, example sampling in redshift (z)
         self.z_min = 0.0
-        self.z_max = 2.5
+        self.z_max = 4.0
         self.z_samp = 100
         self.z_win = np.linspace(self.z_min, self.z_max, self.z_samp)
 

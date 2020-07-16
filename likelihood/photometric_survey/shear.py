@@ -244,7 +244,7 @@ class Shear:
         Value of C_\ell.
         """
 
-        int_zs = self.theory['z_win']
+        int_zs = np.linspace(0.001, self.theory['z_win'][-1], 0.1)
 
         c_int_arr = []
         for rshft in int_zs:
@@ -280,7 +280,7 @@ class Shear:
         Value of C_\ell.
         """
 
-        int_zs = self.theory['z_win']
+        int_zs = np.linspace(0.001, self.theory['z_win'][-1], 0.1)
 
         c_int_arr = []
         for rshft in int_zs:
@@ -316,7 +316,7 @@ class Shear:
         Value of C_\ell.
         """
 
-        int_zs = self.theory['z_win']
+        int_zs = np.linspace(0.001, self.theory['z_win'][-1], 0.1)
 
         c_int_arr = []
         for rshft in int_zs:

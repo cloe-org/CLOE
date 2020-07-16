@@ -252,7 +252,7 @@ class Shear:
             kern_j = self.WL_window(rshft, bin_j)
             c_int_arr.append(self.Cl_generic_integrand(rshft, kern_i, kern_j,
                                                        ell))
-        c_final = self.theory['c'] * integrate.trapz(int_zs, c_int_arr)
+        c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final
 
@@ -288,7 +288,7 @@ class Shear:
             kern_j = self.GC_window(0.1, rshft, bin_j)
             c_int_arr.append(self.Cl_generic_integrand(rshft, kern_i, kern_j,
                                                        ell))
-        c_final = self.theory['c'] * integrate.trapz(int_zs, c_int_arr)
+        c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final
 
@@ -324,7 +324,7 @@ class Shear:
             kern_j = self.GC_window(0.1, rshft, bin_j)
             c_int_arr.append(self.Cl_generic_integrand(rshft, kern_i, kern_j,
                                                        ell))
-        c_final = self.theory['c'] * integrate.trapz(int_zs, c_int_arr)
+        c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final
 

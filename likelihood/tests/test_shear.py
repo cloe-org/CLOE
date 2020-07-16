@@ -51,7 +51,7 @@ class cosmoinitTestCase(TestCase):
         self.shear = shear.Shear(self.model_test.cosmology.cosmo_dic)
         self.W_i_Gcheck = 0.0027291100226392064
         self.phot_galbias_check = 1.09544512
-        self.cl_integrand_check = 5.669932
+        self.cl_integrand_check = 8.953918
         self.flatnz = interpolate.InterpolatedUnivariateSpline(
             np.linspace(0.0, 4.6, 20), np.ones(20), ext=2)
 

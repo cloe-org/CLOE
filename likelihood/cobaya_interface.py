@@ -55,11 +55,8 @@ class EuclidLikelihood(Likelihood):
         # SJ: For now, example sampling in redshift (z)
         self.z_min = 0.0
         self.z_max = 2.5
-        self.z_samp = 10
+        self.z_samp = 100
         self.z_win = np.linspace(self.z_min, self.z_max, self.z_samp)
-
-        # (GCH): value to be evaluated fsigma8
-        self.zk = 0.5
 
         # SJ: temporary (should be varied in MCMC)
         self.b_gal = 1.0
@@ -106,7 +103,13 @@ class EuclidLikelihood(Likelihood):
                                                      "vars_pairs":
                                                      [["delta_tot",
                                                        "delta_tot"]],
-                                                     "R": [8]}})
+                                                     "R": [8 / 0.67]}})
+        # (GCH): ATTENTION: in sigma_R, R is in Mpc, but we want it in
+        # Mpc/h. A solution could be to make an interpolation
+        # There is also a problem with the k (at which k sigma_8 is
+        # evaluated?
+        # Still, for the fiducial IST cosmology, fsigma8/sigma8
+        # where R=8/0.67 does not agree. Something else happens
         # (GCH): evaluation of posterior, required by Cobaya
         model_fiducial.logposterior({})
 
@@ -134,11 +137,10 @@ class EuclidLikelihood(Likelihood):
             model_fiducial.provider.get_sigma_R()
         self.fiducial_cosmology.cosmo_dic['sigma_8'] = \
             sigma_R_fiducial[:, 0]
-        self.fiducial_cosmology.interp_H()
-        self.fiducial_cosmology.interp_comoving_dist()
-        self.fiducial_cosmology.interp_angular_dist()
-        self.fiducial_cosmology.interp_sigma8()
-        self.fiducial_cosmology.interp_fsigma8()
+        # (GCH): update dictionary with interpolators
+        self.fiducial_cosmology.update_cosmo_dic(
+            self.fiducial_cosmology.cosmo_dic['z_win'],
+            0.05)
 
     def get_requirements(self):
         r""" get_requirements
@@ -166,8 +168,8 @@ class EuclidLikelihood(Likelihood):
                 "sigma_R": {"z": self.z_win,
                             "vars_pairs": [["delta_tot",
                                             "delta_tot"]],
-                            "R": [8]},
-                "fsigma8": {"z": self.z_win, "units": None}}
+                            "R": [8 / 0.67]},
+                "fsigma8": {"z": self.z_win, "units": "Mpc/h"}}
 
     def passing_requirements(self):
         r""" passing_requirements
@@ -193,16 +195,15 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['H'] = self.provider.get_Hubble(self.z_win)
             self.cosmo.cosmo_dic['Pk_interpolator'] = \
                 self.provider.get_Pk_interpolator(nonlinear=False)
-            self.cosmo.cosmo_dic['zk'] = self.zk
             self.cosmo.cosmo_dic['b_gal'] = self.b_gal
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 self.provider.get_Pk_interpolator(
                 ("delta_tot", "delta_tot"), nonlinear=False)
-            self.cosmo.cosmo_dic['fsigma8'] = self.provider.get_fsigma8(
-                self.cosmo.cosmo_dic['zk'])
             self.cosmo.cosmo_dic['z_win'] = self.z_win
             R, z, sigma_R = self.provider.get_sigma_R()
             self.cosmo.cosmo_dic['sigma_8'] = sigma_R[:, 0]
+            self.cosmo.cosmo_dic['fsigma8'] = self.provider.get_fsigma8(
+                self.cosmo.cosmo_dic['z_win'])
         except CobayaInterfaceError:
             print('Cobaya theory requirements \
                   could not be pass to cosmo module')
@@ -272,11 +273,7 @@ class EuclidLikelihood(Likelihood):
         """
         self.passing_requirements()
         # (GCH): update cosmo_dic to interpolators
-        self.cosmo.interp_H()
-        self.cosmo.interp_comoving_dist()
-        self.cosmo.interp_angular_dist()
-        self.cosmo.interp_sigma8()
-        self.cosmo.interp_fsigma8()
+        self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.05)
         loglike = self.log_likelihood(
             self.cosmo.cosmo_dic,
             self.fiducial_cosmology.cosmo_dic,

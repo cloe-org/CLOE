@@ -71,11 +71,15 @@ class Spec:
             P_{\rm gg}\left(k(k',\mu_k'),\mu_k(\mu_k');z\right) = \
             \left(b(z) + f(z)({\mu_k}')^2\right)^2 P_{\rm mm}(k';z)
         """
+        # (GCH): For the moment, this does not work
+        # Issue with k value and units
 
-        growth = self.theory['fsigma8_z_func'](z) / \
-            self.theory['sigma8_z_func'](z)
+        # growth = self.theory['fsigma8_z_func'](z) / \
+        #    self.theory['sigma8_z_func'](z)
+
+        growth = self.theory['f_z_k']
         pkgal = self.theory['Pk_interpolator'].P(z, k) * \
-            (self.theory['b_gal'] + growth * mu**2.0)**2.0
+            (self.theory['b_gal'] + growth(z) * mu**2.0)**2.0
 
         return pkgal
 

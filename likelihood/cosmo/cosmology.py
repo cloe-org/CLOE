@@ -88,7 +88,6 @@ class Cosmology:
                           'Pk_interpolator': None,
                           'Pk_delta': None,
                           'fsigma8': None,
-                          'zk': None,
                           'b_gal': 1.0,
                           # 'b_gal': None,
                           'sigma_8': None,
@@ -146,7 +145,7 @@ class Cosmology:
 
         Returns
         -------
-        growth rate
+        interpolator growth rate
 
         """
         # GCH: Careful! This should be updated in the future!
@@ -157,9 +156,9 @@ class Cosmology:
         D_z_k = self.growth_factor(zs, ks)
         # This will work when k is fixed, not an array
         try:
-            f_z_k = -(1 + zs) * np.gradient(D_z_k, zs[1]-zs[0]) / D_z_k
+            f_z_k = -(1 + zs) * np.gradient(D_z_k, zs[1] - zs[0]) / D_z_k
             return interpolate.InterpolatedUnivariateSpline(
-            x=zs, y=f_z_k, ext=2)
+                x=zs, y=f_z_k, ext=2)
         except CosmologyError:
             print('Computation error in f(z, k)')
             print('ATTENTION: Check k is a value, not a list')
@@ -169,13 +168,9 @@ class Cosmology:
         Adds an interpolator for comoving distance to the dictionary so that
         it can be evaluated at redshifts not explictly supplied to cobaya.
 
-        Parameters
-        ----------
-        zs: array
-            list of redshift comoving distance is evaluated at.
         Returns
         -------
-        None
+        Interpolator comoving distance as a function of redshift
 
         """
         if self.cosmo_dic['z_win'] is None:
@@ -189,13 +184,9 @@ class Cosmology:
         Adds an interpolator for angular distance to the dictionary so that
         it can be evaluated at redshifts not explictly supplied to cobaya.
 
-        Parameters
-        ----------
-        zs: array
-            list of redshift comoving distance is evaluated at.
         Returns
         -------
-        None
+        Interpolator angular diameter distance  as a function of redshift
 
         """
         if self.cosmo_dic['z_win'] is None:
@@ -209,13 +200,9 @@ class Cosmology:
         Adds an interpolator for the Hubble parameter to the dictionary so that
         it can be evaluated at redshifts not explictly supplied to cobaya.
 
-        Parameters
-        ----------
-        zs: array
-            list of redshift comoving distance is evaluated at.
         Returns
         -------
-        None
+        Interpolator H as a function of redshift
 
         """
         if self.cosmo_dic['z_win'] is None:
@@ -229,13 +216,9 @@ class Cosmology:
         Adds an interpolator for sigma8 to the dictionary so that
         it can be evaluated at redshifts not explictly supplied to cobaya.
 
-        Parameters
-        ----------
-        zs: array
-            list of redshift comoving distance is evaluated at.
         Returns
         -------
-        None
+        Interpolator sigma8 as a function of redshift
 
         """
         if self.cosmo_dic['z_win'] is None:
@@ -247,16 +230,12 @@ class Cosmology:
 
     def interp_fsigma8(self):
         """
-        Adds an interpolator for sigma8 to the dictionary so that
+        Adds an interpolator for fsigma8 to the dictionary so that
         it can be evaluated at redshifts not explictly supplied to cobaya.
 
-        Parameters
-        ----------
-        zs: array
-            list of redshift comoving distance is evaluated at.
         Returns
         -------
-        None
+        Interpolator fsigma8 as a function of redshift
 
         """
         if self.cosmo_dic['z_win'] is None:

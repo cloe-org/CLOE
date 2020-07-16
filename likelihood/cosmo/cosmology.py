@@ -159,8 +159,9 @@ class Cosmology:
         D_z_k = self.growth_factor(zs, ks)
         # This will work when k is fixed, not an array
         try:
-            f_z_k = -(1 + zs) * np.gradient(D_z_k) / D_z_k
-            return f_z_k
+            f_z_k = -(1 + zs) * np.gradient(D_z_k, zs[1]-zs[0]) / D_z_k
+            return interpolate.InterpolatedUnivariateSpline(
+            x=zs, y=f_z_k, ext=2)
         except CosmologyError:
             print('Computation error in f(z, k)')
             print('ATTENTION: Check k is a value, not a list')
@@ -286,5 +287,10 @@ class Cosmology:
         # (GCH): this function is superfluous
         # just in case we want to have always
         # an updated dictionary with D_z, f, H(z), r(z)
+        self.interp_H()
+        self.interp_comoving_dist()
+        self.interp_fsigma8()
+        self.interp_sigma8()
+        self.interp_angular_dist()
         self.cosmo_dic['D_z_k'] = self.growth_factor(zs, ks)
         self.cosmo_dic['f_z_k'] = self.growth_rate(zs, ks)

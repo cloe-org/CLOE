@@ -106,7 +106,7 @@ class EuclidLikelihood(Likelihood):
                                                      "R": [8 / 0.67]}})
         # (GCH): ATTENTION: in sigma_R, R is in Mpc, but we want it in
         # Mpc/h. A solution could be to make an interpolation
-        # There is also a problem with the k (at which k sigma_8 is
+        # There is also a problem with the k (at which k fsigma_8 is
         # evaluated?
         # Still, for the fiducial IST cosmology, fsigma8/sigma8
         # where R=8/0.67 does not agree. Something else happens
@@ -169,7 +169,7 @@ class EuclidLikelihood(Likelihood):
                             "vars_pairs": [["delta_tot",
                                             "delta_tot"]],
                             "R": [8 / 0.67]},
-                "fsigma8": {"z": self.z_win, "units": "Mpc/h"}}
+                "fsigma8": {"z": self.z_win, "units": None}}
 
     def passing_requirements(self):
         r""" passing_requirements

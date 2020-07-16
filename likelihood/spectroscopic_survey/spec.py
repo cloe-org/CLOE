@@ -26,17 +26,102 @@ class Spec:
         self.fiducial = fiducial_dic
 
     def scaling_factor_perp(self, z):
+        r"""
+        Computation of the perpendicular scaling factor
+
+        .. math::
+             q_{\perp} &= \frac{D_{\rm M}(z)}{D'_{\rm M}(z)}
+
+        Parameters
+        ----------
+        z: float
+           Redshift at which to evaluate the galaxy power spectrum.
+
+        Returns
+        -------
+        scaling_factor_perp: float
+           Value of the scaling_factor_perp at given redshift
+
+        """
+
         return self.theory['d_z_func'](z) / self.fiducial['d_z_func'](z)
 
     def scaling_factor_parall(self, z):
+        r"""
+        Computation of the parallel scaling factor
+
+        .. math::
+            q_{\parallel} &= \frac{H'(z)}{H(z)}
+
+        Parameters
+        ----------
+        z: float
+           Redshift at which to evaluate the galaxy power spectrum.
+
+        Returns
+        -------
+        scaling_factor_perp: float
+           Value of the scaling_factor_perp at given redshift
+
+        """
         return self.fiducial['H_z_func'](z) / self.theory['H_z_func'](z)
 
     def get_k(self, k_prime, mu_prime, z):
+        r"""
+        Computation of the wavenumber k
+
+        .. math::
+            k(k',\mu_k', ) &= k' \left[q_{\parallel}^{-2} \,
+            \ (\mu_k')^2 + \
+            \ q_{\perp}^{-2} \left( 1 - (\mu_k')^2 \right)\right]^{1/2}
+
+        Parameters
+        ----------
+        z: float
+           Redshift at which to evaluate the galaxy power spectrum.
+        k_prime: float
+           Fiducial Scale (wavenumber) at which to evaluate the galaxy power
+        mu_prime: float
+           Fiducial Cosine of the angle between the wavenumber and
+           LOS (AP-distorted).
+
+        Returns
+        -------
+        get_k: float
+           Value of the scalar wavenumber  at given redshift
+           cosine of the angle and fiducial wavenumber
+
+        """
         return k_prime * (self.scaling_factor_parall(z)**(-2) * mu_prime**2 +
                           self.scaling_factor_perp(z)**(-2) *
                           (1 - (mu_prime)**2))**(1. / 2)
 
     def get_mu(self, mu_prime, z):
+        r"""
+        Computation of the cosine of the angle
+
+        .. math::
+            \mu_k(\mu_k') &= \mu_k' \, q_{\parallel}^{-1}
+            \left[ q_{\parallel}^{-2}\,
+            (\mu_k')^2 + q_{\perp}^{-2}
+            \left( 1 - (\mu_k')^2 \right) \right]^{-1/2}
+
+        Parameters
+        ----------
+        z: float
+           Redshift at which to evaluate the galaxy power spectrum.
+        mu_prime: float
+           Fiducial Cosine of the angle between the wavenumber
+           and LOS (AP-distorted).
+
+        Returns
+        -------
+        get_mu: float
+           Value of the cosine of the angle at given redshift
+           and fiducial wavenumber
+
+        """
+
         return mu_prime * self.scaling_factor_parall(z)**(-1) * (
             self.scaling_factor_parall(z)**(-2) * mu_prime**2 +
             self.scaling_factor_perp(z)**(-2) *

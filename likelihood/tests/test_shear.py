@@ -52,9 +52,9 @@ class cosmoinitTestCase(TestCase):
         self.W_i_Gcheck = 0.0027291100226392064
         self.phot_galbias_check = 1.09544512
         self.cl_integrand_check = 8.953918
-        self.cl_WL_check = 1.0e-20
-        self.cl_GC_check = 1.0e-20
-        self.cl_cross_check = 1.0e-20
+        self.cl_WL_check = 7.933128e-10
+        self.cl_GC_check = 4.246989e+12
+        self.cl_cross_check = 27.401784
         self.flatnz = interpolate.InterpolatedUnivariateSpline(
             np.linspace(0.0, 4.6, 20), np.ones(20), ext=2)
 

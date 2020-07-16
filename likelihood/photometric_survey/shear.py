@@ -221,6 +221,113 @@ class Shear:
         power = self.theory['Pk_interpolator'].P(z, k)
         return kern_mult * power
 
+    def Cl_WL(self, ell, bin_i, bin_j):
+        """
+        Calculates C_\ell for weak lensing, for the supplied bins.
+
+        .. math::
+        c \int {\rm d}z \frac{W_{i}^{WL}(z)W_{j}^{WL}(z)}{H(z)r^2(z)}
+        P_{\delta\delta}(k=\ell + 0.5/r(z), z).
+
+        Parameters
+        ----------
+        ell: float
+            \ell-mode at which C_\ell is evaluated.
+        bin_i: int
+           index of first tomographic bin. Tomographic bin
+           indices start from 1.
+        bin_j: int
+           index of second tomographic bin. Tomographic bin
+           indices start from 1.
+        Returns
+        -------
+        Value of C_\ell.
+        """
+
+        int_zs = np.arange(0.001, 4.0, 0.1)
+
+        c_int_arr = []
+        for rshft in int_zs:
+            kern_i = self.WL_window(rshft, bin_i)
+            kern_j = self.WL_window(rshft, bin_j)
+            c_int_arr.append(self.Cl_generic_integrand(rshft, kern_i, kern_j,
+                                                       ell))
+        c_final = self.theory['c'] * integrate.trapz(int_zs, c_int_arr)
+
+        return c_final
+
+    def Cl_GC_phot(self, ell, bin_i, bin_j):
+        """
+        Calculates C_\ell for photometric galaxy clustering, for the
+        supplied bins.
+
+        .. math::
+        c \int {\rm d}z \frac{W_{i}^{GC}(z)W_{j}^{GC}(z)}{H(z)r^2(z)}
+        P_{\delta\delta}(k=\ell + 0.5/r(z), z).
+
+        Parameters
+        ----------
+        ell: float
+            \ell-mode at which C_\ell is evaluated.
+        bin_i: int
+           index of first tomographic bin. Tomographic bin
+           indices start from 1.
+        bin_j: int
+           index of second tomographic bin. Tomographic bin
+           indices start from 1.
+        Returns
+        -------
+        Value of C_\ell.
+        """
+
+        int_zs = np.arange(0.001, 4.0, 0.1)
+
+        c_int_arr = []
+        for rshft in int_zs:
+            kern_i = self.GC_window(0.1, rshft, bin_i)
+            kern_j = self.GC_window(0.1, rshft, bin_j)
+            c_int_arr.append(self.Cl_generic_integrand(rshft, kern_i, kern_j,
+                                                       ell))
+        c_final = self.theory['c'] * integrate.trapz(int_zs, c_int_arr)
+
+        return c_final
+
+    def Cl_cross(self, ell, bin_i, bin_j):
+        """
+        Calculates C_\ell for cross-correlation between weak lensing and
+        galaxy clustering, for the supplied bins.
+
+        .. math::
+        c \int {\rm d}z \frac{W_{i}^{WL}(z)W_{j}^{GC}(z)}{H(z)r^2(z)}
+        P_{\delta\delta}(k=\ell + 0.5/r(z), z).
+
+        Parameters
+        ----------
+        ell: float
+            \ell-mode at which C_\ell is evaluated.
+        bin_i: int
+           index of first tomographic bin. Tomographic bin
+           indices start from 1.
+        bin_j: int
+           index of second tomographic bin. Tomographic bin
+           indices start from 1.
+        Returns
+        -------
+        Value of C_\ell.
+        """
+
+        int_zs = np.arange(0.001, 4.0, 0.1)
+
+        c_int_arr = []
+        for rshft in int_zs:
+            kern_i = self.WL_window(rshft, bin_i)
+            kern_j = self.GC_window(0.1, rshft, bin_j)
+            c_int_arr.append(self.Cl_generic_integrand(rshft, kern_i, kern_j,
+                                                       ell))
+        c_final = self.theory['c'] * integrate.trapz(int_zs, c_int_arr)
+
+        return c_final
+
     def loglike(self):
         """
         Returns loglike for Shear observable

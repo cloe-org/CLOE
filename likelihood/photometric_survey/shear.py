@@ -200,7 +200,7 @@ class Shear:
 
         .. math::
         \frac{W_{i}^{A}(z)W_{j}^{B}(z)}{H(z)r^2(z)}P_{\delta\delta}(k=
-        \ell + 0.5/r(z), z).
+        (\ell + 0.5)/r(z), z).
 
         Parameters
         ----------
@@ -228,7 +228,7 @@ class Shear:
 
         .. math::
         c \int {\rm d}z \frac{W_{i}^{WL}(z)W_{j}^{WL}(z)}{H(z)r^2(z)}
-        P_{\delta\delta}(k=\ell + 0.5/r(z), z).
+        P_{\delta\delta}(k=(\ell + 0.5)/r(z), z).
 
         Parameters
         ----------
@@ -266,8 +266,8 @@ class Shear:
         supplied bins.
 
         .. math::
-        c \int {\rm d}z \frac{W_{i}^{GC}(z)W_{j}^{GC}(z)}{H(z)r^2(z)}
-        P_{\delta\delta}(k=\ell + 0.5/r(z), z).
+        c \int {\rm d}z \frac{W_{i}^{GC}(k, z)W_{j}^{GC}(k, z)}{H(z)r^2(z)}
+        P_{\delta\delta}(k=(\ell + 0.5)/r(z), z).
 
         Parameters
         ----------
@@ -308,8 +308,8 @@ class Shear:
         galaxy clustering, for the supplied bins.
 
         .. math::
-        c \int {\rm d}z \frac{W_{i}^{WL}(z)W_{j}^{GC}(z)}{H(z)r^2(z)}
-        P_{\delta\delta}(k=\ell + 0.5/r(z), z).
+        c \int {\rm d}z \frac{W_{i}^{WL}(z)W_{j}^{GC}(k, z)}{H(z)r^2(z)}
+        P_{\delta\delta}(k=(\ell + 0.5)/r(z), z).
 
         Parameters
         ----------

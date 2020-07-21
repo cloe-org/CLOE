@@ -34,6 +34,8 @@ class Shear:
         if self.theory['r_z_func'] is None:
             raise Exception('No interpolated function for comoving distance '
                             'exists in cosmo_dic.')
+        self.cl_int_min = 0.001
+        self.cl_int_max = self.theory['z_win'][-1]
 
     # SJ: k-indep bias for now
     # def bias(self, k, z):
@@ -191,7 +193,7 @@ class Shear:
                                            args=(z, n_z_normalized))[0])
         return W_val
 
-    def Cl_generic_integrand(self, z, W_i_z, W_j_z, ell):
+    def Cl_generic_integrand(self, z, W_i_z, W_j_z, k):
         """
         Calculates the C_\ell integrand for any two probes and bins for which
         the bins are supplied.
@@ -208,8 +210,8 @@ class Shear:
            Value of kernel for bin i, at redshift z.
         W_j_z: float
            Value of kernel for bin j, at redshift z.
-        ell: float
-           \ell-mode at which the current C_\ell is being evaluated at.
+        k: float
+           Scale at which the current C_\ell is being evaluated at.
         Returns
         -------
         Value of C_\ell integrand at redshift z.
@@ -217,11 +219,10 @@ class Shear:
         kern_mult = ((W_i_z * W_j_z) /
                      (self.theory['H_z_func'](z) *
                       (self.theory['r_z_func'](z)) ** 2.0))
-        k = (ell + 0.5) / self.theory['r_z_func'](z)
         power = self.theory['Pk_interpolator'].P(z, k)
         return kern_mult * power
 
-    def Cl_WL(self, ell, bin_i, bin_j):
+    def Cl_WL(self, ell, bin_i, bin_j, int_step=0.1):
         """
         Calculates C_\ell for weak lensing, for the supplied bins.
 
@@ -234,29 +235,32 @@ class Shear:
         ell: float
             \ell-mode at which C_\ell is evaluated.
         bin_i: int
-           index of first tomographic bin. Tomographic bin
+           Index of first tomographic bin. Tomographic bin
            indices start from 1.
         bin_j: int
-           index of second tomographic bin. Tomographic bin
+           Index of second tomographic bin. Tomographic bin
            indices start from 1.
+        int_step: float
+            Size of step for numerical integral over redshift.
         Returns
         -------
         Value of C_\ell.
         """
 
-        int_zs = np.arange(0.001, self.theory['z_win'][-1], 0.1)
+        int_zs = np.arange(self.cl_int_min, self.cl_int_max, int_step)
 
         c_int_arr = []
         for rshft in int_zs:
+            current_k = (ell + 0.5) / self.theory['r_z_func'](rshft)
             kern_i = self.WL_window(rshft, bin_i)
             kern_j = self.WL_window(rshft, bin_j)
             c_int_arr.append(self.Cl_generic_integrand(rshft, kern_i, kern_j,
-                                                       ell))
+                                                       current_k))
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final
 
-    def Cl_GC_phot(self, ell, bin_i, bin_j):
+    def Cl_GC_phot(self, ell, bin_i, bin_j, int_step=0.1):
         """
         Calculates C_\ell for photometric galaxy clustering, for the
         supplied bins.
@@ -270,29 +274,35 @@ class Shear:
         ell: float
             \ell-mode at which C_\ell is evaluated.
         bin_i: int
-           index of first tomographic bin. Tomographic bin
+           Index of first tomographic bin. Tomographic bin
            indices start from 1.
         bin_j: int
-           index of second tomographic bin. Tomographic bin
+           Index of second tomographic bin. Tomographic bin
            indices start from 1.
+        int_step: float
+            Size of step for numerical integral over redshift.
         Returns
         -------
         Value of C_\ell.
         """
 
-        int_zs = np.arange(0.001, self.theory['z_win'][-1], 0.1)
+        int_zs = np.arange(self.cl_int_min, self.cl_int_max, int_step)
 
         c_int_arr = []
         for rshft in int_zs:
-            kern_i = self.GC_window(0.1, rshft, bin_i)
-            kern_j = self.GC_window(0.1, rshft, bin_j)
+            # (ACD): Although k is specified here for the GC window function,
+            # note that the implementation currently uses a scale-independent
+            # bias.
+            current_k = (ell + 0.5) / self.theory['r_z_func'](rshft)
+            kern_i = self.GC_window(current_k, rshft, bin_i)
+            kern_j = self.GC_window(current_k, rshft, bin_j)
             c_int_arr.append(self.Cl_generic_integrand(rshft, kern_i, kern_j,
-                                                       ell))
+                                                       current_k))
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final
 
-    def Cl_cross(self, ell, bin_i, bin_j):
+    def Cl_cross(self, ell, bin_i, bin_j, int_step=0.1):
         """
         Calculates C_\ell for cross-correlation between weak lensing and
         galaxy clustering, for the supplied bins.
@@ -306,24 +316,30 @@ class Shear:
         ell: float
             \ell-mode at which C_\ell is evaluated.
         bin_i: int
-           index of first tomographic bin. Tomographic bin
+           Index of first tomographic bin. Tomographic bin
            indices start from 1.
         bin_j: int
-           index of second tomographic bin. Tomographic bin
+           Index of second tomographic bin. Tomographic bin
            indices start from 1.
+        int_step: float
+            Size of step for numerical integral over redshift.
         Returns
         -------
         Value of C_\ell.
         """
 
-        int_zs = np.arange(0.001, self.theory['z_win'][-1], 0.1)
+        int_zs = np.arange(self.cl_int_min, self.cl_int_max, int_step)
 
         c_int_arr = []
         for rshft in int_zs:
+            # (ACD): Although k is specified here for the GC window function,
+            # note that the implementation currently uses a scale-independent
+            # bias.
+            current_k = (ell + 0.5) / self.theory['r_z_func'](rshft)
             kern_i = self.WL_window(rshft, bin_i)
-            kern_j = self.GC_window(0.1, rshft, bin_j)
+            kern_j = self.GC_window(current_k, rshft, bin_j)
             c_int_arr.append(self.Cl_generic_integrand(rshft, kern_i, kern_j,
-                                                       ell))
+                                                       current_k))
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final

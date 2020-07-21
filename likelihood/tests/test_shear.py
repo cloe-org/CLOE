@@ -52,6 +52,9 @@ class cosmoinitTestCase(TestCase):
         self.W_i_Gcheck = 0.0027291100226392064
         self.phot_galbias_check = 1.09544512
         self.cl_integrand_check = 8.953918
+        self.cl_WL_check = 7.933128e-10
+        self.cl_GC_check = 4.246989e+12
+        self.cl_cross_check = 27.401784
         self.flatnz = interpolate.InterpolatedUnivariateSpline(
             np.linspace(0.0, 4.6, 20), np.ones(20), ext=2)
 
@@ -93,3 +96,18 @@ class cosmoinitTestCase(TestCase):
         cl_int = self.shear.Cl_generic_integrand(1.0, 1.0, 1.0, 100.0)
         npt.assert_allclose(cl_int, self.cl_integrand_check, rtol=1e-03,
                             err_msg='Cl integrand failed')
+
+    def test_cl_WL(self):
+        cl_int = self.shear.Cl_WL(10.0, 1, 1)
+        npt.assert_allclose(cl_int, self.cl_WL_check, rtol=1e-05,
+                            err_msg='Cl WL test failed')
+
+    def test_cl_GC(self):
+        cl_int = self.shear.Cl_GC_phot(10.0, 1, 1)
+        npt.assert_allclose(cl_int, self.cl_GC_check, rtol=1e-05,
+                            err_msg='Cl GC photometric test failed')
+
+    def test_cl_cross(self):
+        cl_int = self.shear.Cl_cross(10.0, 1, 1)
+        npt.assert_allclose(cl_int, self.cl_cross_check, rtol=1e-05,
+                            err_msg='Cl photometric cross test failed')

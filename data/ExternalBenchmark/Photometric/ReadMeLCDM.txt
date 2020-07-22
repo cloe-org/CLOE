@@ -38,6 +38,21 @@ Third and fourth columns are for the nonlinear and linear power spectrum
 
 Photo - z convolved redshift distribution for 10 equipopulated bins over the range (0.01, 2.5)
 Bins limits are given in the 1st and 2nd column of the file PhotoZedEP10RB00.dat
+ni(z) is non normalized
+
+----------------------------------------------------------------
+
+- WiG.dat - 
+
+1.	z
+2.	W1(z)
+3.	W2(z)
+....
+11.	W10(z)
+
+Photometric galaxy clustering kernel function W_{i}^{G}(z) in Mpc^{-1} (including fiducial bias)
+We follow the defintion in the IST:L document on overleaf
+ni(z) is now normalized
 
 ----------------------------------------------------------------
 
@@ -49,7 +64,9 @@ Bins limits are given in the 1st and 2nd column of the file PhotoZedEP10RB00.dat
 ....
 11.	W10(z)
 
-Lensing weight function W_{i}^{\gamma}(z)
+Shear only kernel function W_{i}^{\gamma}(z) in Mpc^{-1}
+We follow the defintion in the IST:L document on overleaf
+ni(z) is now normalized
 
 ----------------------------------------------------------------
 

@@ -188,7 +188,6 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['H0'] = self.provider.get_param("H0")
             self.cosmo.cosmo_dic['omch2'] = self.provider.get_param('omch2')
             self.cosmo.cosmo_dic['ombh2'] = self.provider.get_param('ombh2')
-            self.cosmo.cosmo_dic['omnuh2'] = self.provider.get_param('ombh2')
             self.cosmo.cosmo_dic['mnu'] = self.provider.get_param('mnu')
             self.cosmo.cosmo_dic['comov_dist'] = \
                 self.provider.get_comoving_radial_distance(self.z_win)

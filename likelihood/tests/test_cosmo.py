@@ -38,7 +38,7 @@ class cosmoinitTestCase(TestCase):
         # (GCH): Check values
         self.H0check = 68.0
         self.Dcheck = 1.0
-        self.fcheck = 0.518508
+        self.fcheck = 0.517013
         self.Hcheck = 75.251876
 
     def tearDown(self):

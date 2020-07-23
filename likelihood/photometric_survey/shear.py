@@ -120,7 +120,8 @@ class Shear:
         #     self.theory['H'](z)
         W_i_G = self.phot_galbias(n_z_normalized.get_knots()[0],
                                   n_z_normalized.get_knots()[-1]) * \
-            n_z_normalized(z) * self.theory['H_z_func'](z)
+            n_z_normalized(z) * self.theory['H_z_func'](z) \
+            / self.theory['c']
         return W_i_G
 
     def WL_window_integrand(self, zprime, z, nz):

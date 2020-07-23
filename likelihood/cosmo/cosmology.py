@@ -36,6 +36,8 @@ class Cosmology:
             Present-day Omega_CDM * (H0/100)**2
         ombh2: float
             Present-day Omega_baryon * (H0/100)**2
+        omnuh2: float
+            Present-day Omega_neutrinos * (H0/100)**2
         mnu: float
             Sum of massive neutrino species masses (eV)
         comov_dist: array-like
@@ -77,6 +79,7 @@ class Cosmology:
         self.cosmo_dic = {'H0': 67.5,
                           'omch2': 0.122,
                           'ombh2': 0.022,
+                          'omnuh2': 0.000645,
                           'mnu': 0.06,
                           'tau': 0.07,
                           'nnu': 3.046,

@@ -174,7 +174,8 @@ class Shear:
         H0 = self.theory['H0']
         c = self.theory['c']
         O_m = ((self.theory['omch2'] / (H0 / 100.0)**2.0) +
-               (self.theory['ombh2'] / (H0 / 100.0)**2.0))
+               (self.theory['ombh2'] / (H0 / 100.0)**2.0) +
+               (self.theory['omnuh2'] / (H0 / 100.0)**2.0))
 
         # create instance from Galdist class
         try:

@@ -48,13 +48,13 @@ class EuclidLikelihood(Likelihood):
 
         # SJ: For now, example sampling in wavenumber (k)
         self.k_min = 0.002
-        self.k_max = 0.2
+        self.k_max = 10.0
         self.k_samp = 100
         self.k_win = np.linspace(self.k_min, self.k_max, self.k_samp)
 
         # SJ: For now, example sampling in redshift (z)
         self.z_min = 0.0
-        self.z_max = 2.5
+        self.z_max = 4.0
         self.z_samp = 100
         self.z_win = np.linspace(self.z_min, self.z_max, self.z_samp)
 
@@ -70,6 +70,7 @@ class EuclidLikelihood(Likelihood):
         self.info_fiducial = {'params': {
             'ombh2': self.fiducial_cosmology.cosmo_dic['ombh2'],
             'omch2': self.fiducial_cosmology.cosmo_dic['omch2'],
+            'omnuh2': self.fiducial_cosmology.cosmo_dic['omnuh2'],
             'H0': self.fiducial_cosmology.cosmo_dic['H0'],
             'tau': self.fiducial_cosmology.cosmo_dic['tau'],
             'mnu': self.fiducial_cosmology.cosmo_dic['mnu'],
@@ -187,6 +188,7 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['H0'] = self.provider.get_param("H0")
             self.cosmo.cosmo_dic['omch2'] = self.provider.get_param('omch2')
             self.cosmo.cosmo_dic['ombh2'] = self.provider.get_param('ombh2')
+            self.cosmo.cosmo_dic['omnuh2'] = self.provider.get_param('ombh2')
             self.cosmo.cosmo_dic['mnu'] = self.provider.get_param('mnu')
             self.cosmo.cosmo_dic['comov_dist'] = \
                 self.provider.get_comoving_radial_distance(self.z_win)

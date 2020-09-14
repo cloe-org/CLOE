@@ -79,7 +79,7 @@ class Cosmology:
         self.cosmo_dic = {'H0': 67.5,
                           'omch2': 0.122,
                           'ombh2': 0.022,
-                          'omnuh2': 0.000645,
+                          'omnuh2': 0.00028,
                           'mnu': 0.06,
                           'tau': 0.07,
                           'nnu': 3.046,

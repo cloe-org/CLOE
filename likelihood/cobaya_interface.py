@@ -189,6 +189,10 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['omch2'] = self.provider.get_param('omch2')
             self.cosmo.cosmo_dic['ombh2'] = self.provider.get_param('ombh2')
             self.cosmo.cosmo_dic['mnu'] = self.provider.get_param('mnu')
+            # GCH: ATTENTION! THIS IS A TEMPORAL SOLUTION
+            # as we cannot retrieve num_massive_neutrinos
+            self.cosmo.cosmo_dic['omnuh2'] = \
+                self.cosmo.cosmo_dic['mnu'] / 94.07 * (1. / 3)**0.75
             self.cosmo.cosmo_dic['comov_dist'] = \
                 self.provider.get_comoving_radial_distance(self.z_win)
             self.cosmo.cosmo_dic['angular_dist'] = \

@@ -2,9 +2,26 @@
 import numpy as np
 import likelihood.cosmo
 from scipy import integrate
+from scipy import interpolate
 
 # Import auxilary classes
 from ..general_specs.estimates import Galdist
+
+# JUST FOR NOW: test with bias
+bias_dic = np.load(
+    "/data2/EUCLID/likelihood-implementation/" +
+    "data/ExternalBenchmark/matteo_bias.npy",
+    allow_pickle=True).item()
+
+z_extended = np.linspace(2.6, 4, 100)
+
+
+bias_interpolator = interpolate.InterpolatedUnivariateSpline(
+    x=np.concatenate([bias_dic['z'], z_extended]),
+    y=np.concatenate([bias_dic['bias'],
+                      bias_dic['bias'][-1] * np.ones(len(z_extended))]),
+    ext=2)
+
 
 # General error class
 
@@ -118,8 +135,11 @@ class Shear:
         # SJ: k-indep bias, let us follow the IST:F approach for now
         # W_i_G = self.phot_galbias(k, z) * n_z_normalized(z) * \
         #     self.theory['H'](z)
-        W_i_G = self.phot_galbias(n_z_normalized.get_knots()[0],
-                                  n_z_normalized.get_knots()[-1]) * \
+        # W_i_G = self.phot_galbias(n_z_normalized.get_knots()[0],
+        #                          n_z_normalized.get_knots()[-1]) * \
+        #    n_z_normalized(z) * self.theory['H_z_func'](z) \
+        #    / self.theory['c']
+        W_i_G = bias_interpolator(z) * \
             n_z_normalized(z) * self.theory['H_z_func'](z) \
             / self.theory['c']
         return W_i_G

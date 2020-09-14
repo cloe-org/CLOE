@@ -43,18 +43,18 @@ class cosmoinitTestCase(TestCase):
 
         self.model_test.cosmology.cosmo_dic['r_z_func'] = self.rfn
         self.integrand_check = -1.0
-        self.wbincheck = 1.723255e-09
+        self.wbincheck = 1.718846e-09
         self.H0 = 67.0
         self.c = const.c.to('km/s').value
         self.omch2 = 0.12
         self.ombh2 = 0.022
         self.shear = shear.Shear(self.model_test.cosmology.cosmo_dic)
-        self.W_i_Gcheck = 9.103347e-09
+        self.W_i_Gcheck = 5.827991e-09
         self.phot_galbias_check = 1.09544512
-        self.cl_integrand_check = 0.000705
-        self.cl_WL_check = 6.299893e-14
-        self.cl_GC_check = 0.003719
-        self.cl_cross_check = 7.22578e-09
+        self.cl_integrand_check = 0.000718
+        self.cl_WL_check = 6.384874e-14
+        self.cl_GC_check = 0.001582
+        self.cl_cross_check = 4.706276e-09
         self.flatnz = interpolate.InterpolatedUnivariateSpline(
             np.linspace(0.0, 4.6, 20), np.ones(20), ext=2)
 

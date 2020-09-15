@@ -25,4 +25,4 @@ __about__ = ('{} \n\n Author: {} \n Email: {} \n Year: {} \n {} \n\n'
              ''.format(__name__, __author__, __email__, __year__,
                        __description__))
 __setup_requires__ = ['pytest-runner', ]
-__tests_require__ = ['pytest', 'pytest-cov', 'pytest-pycodestyle']
+__tests_require__ = ['pytest<6.0', 'pytest-cov', 'pytest-pycodestyle']

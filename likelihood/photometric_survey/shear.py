@@ -3,14 +3,18 @@ import numpy as np
 import likelihood.cosmo
 from scipy import integrate
 from scipy import interpolate
+import os.path
 
 # Import auxilary classes
 from ..general_specs.estimates import Galdist
 
 # JUST FOR NOW: test with bias
+my_path = os.path.abspath(os.path.dirname(__file__))
+path = os.path.join(my_path, 
+    "../../data/ExternalBenchmark/matteo_bias.npy")
+
 bias_dic = np.load(
-    "/data2/EUCLID/likelihood-implementation/" +
-    "data/ExternalBenchmark/matteo_bias.npy",
+    path,
     allow_pickle=True).item()
 
 z_extended = np.linspace(2.6, 4, 100)

@@ -9,6 +9,26 @@ import numpy as np
 from ..cosmo.cosmology import Cosmology
 from scipy.special import legendre
 from scipy import integrate
+from scipy import interpolate
+import os.path
+
+# ATTENTION! JUST FOR NOW: test with
+my_path = os.path.abspath(os.path.dirname(__file__))
+path = os.path.join(my_path,
+                    "../../data/ExternalBenchmark/matteo_bias.npy")
+
+bias_dic = np.load(
+    path,
+    allow_pickle=True).item()
+
+z_extended = np.linspace(2.6, 4, 100)
+
+
+bias_interpolator = interpolate.InterpolatedUnivariateSpline(
+    x=np.concatenate([bias_dic['z'], z_extended]),
+    y=np.concatenate([bias_dic['bias'],
+                      bias_dic['bias'][-1] * np.ones(len(z_extended))]),
+    ext=2)
 
 
 class Spec:
@@ -159,12 +179,12 @@ class Spec:
         # (GCH): For the moment, this does not work
         # Issue with k value and units
 
-        # growth = self.theory['fsigma8_z_func'](z) / \
-        #    self.theory['sigma8_z_func'](z)
+        growth = self.theory['fsigma8_z_func'](z) / \
+            self.theory['sigma8_z_func'](z)
 
-        growth = self.theory['f_z_k']
+        #growth = self.theory['f_z_k']
         pkgal = self.theory['Pk_interpolator'].P(z, k) * \
-            (self.theory['b_gal'] + growth(z) * mu**2.0)**2.0
+            (bias_interpolator(z) + growth * mu**2.0)**2.0
 
         return pkgal
 
@@ -276,8 +296,8 @@ class Spec:
         # SJ: Set up power spectrum [note weirdly Cobaya has it as P(z,k)
         # SJ: instead of the more common P(k,z)]
         beta = self.theory['fsigma8_z_func'](z) / \
-            self.theory['sigma8_z_func'](z) / self.theory['b_gal']
-        Pk_gal = self.theory['b_gal']**2.0 * \
+            self.theory['sigma8_z_func'](z) / bias_interpolator(z)
+        Pk_gal = bias_interpolator(z)**2.0 * \
             self.theory['Pk_interpolator'].P(z, k)
         P0k = (1.0 + 2.0 / 3.0 * beta + 1.0 / 5.0 * beta**2.0) * Pk_gal
         P2k = (4.0 / 3.0 * beta + 4.0 / 7.0 * beta**2.0) * Pk_gal

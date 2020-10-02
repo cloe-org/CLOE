@@ -12,7 +12,10 @@ from scipy import integrate
 from scipy import interpolate
 import os.path
 
-# ATTENTION! JUST FOR NOW: test with
+# ATTENTION! JUST FOR NOW: test with Matteo's bias
+# This bias needs to be coded according to the bias
+# specified in IST:F for the spec part
+
 my_path = os.path.abspath(os.path.dirname(__file__))
 path = os.path.join(my_path,
                     "../../data/ExternalBenchmark/matteo_bias.npy")

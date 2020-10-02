@@ -48,16 +48,16 @@ class cosmoinitTestCase(TestCase):
                          self.model_fiducial.cosmology.cosmo_dic)
 
         # (GCH): Checks
-        self.check_multipole_spectra_noap = [6871.811535,
-                                             6389.758767,
-                                             701.41997]
-        self.check_multipole_spectra_m0 = 6830.251578
+        self.check_multipole_spectra_noap = [11738.489315,
+                                             8298.601669,
+                                             701.419969]
+        self.check_multipole_spectra_m0 = 11740.10683
         self.check_multipole_spectra_m1 = 0.0
-        self.check_multipole_spectra_m2 = 6346.321834
+        self.check_multipole_spectra_m2 = 8387.248558
         self.check_multipole_spectra_m3 = 0.0
-        self.check_multipole_spectra_m4 = 728.169641
+        self.check_multipole_spectra_m4 = 758.244657
         self.check_multipole_spectra_integrand = 1881.365751
-        self.check_pkgal_linear = 8026.80922
+        self.check_pkgal_linear = 13399.631841
         self.check_scaling_factor_perp = 0.993
         self.check_scaling_factor_parall = 0.992782
         self.check_get_k = 0.001007

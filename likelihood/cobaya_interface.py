@@ -48,6 +48,11 @@ class EuclidLikelihood(Likelihood):
 
         # SJ: For now, example sampling in wavenumber (k)
         self.k_min = 0.002
+        # ATTENTION: The k_min is not passed to cobaya to build
+        # the matter power spectrum interpolator !!
+        # The k_min is internally chosen by cobaya.
+        # This needs to be changed
+
         self.k_max = 10.0
         self.k_samp = 100
         self.k_win = np.linspace(self.k_min, self.k_max, self.k_samp)
@@ -111,6 +116,7 @@ class EuclidLikelihood(Likelihood):
         # evaluated?
         # Still, for the fiducial IST cosmology, fsigma8/sigma8
         # where R=8/0.67 does not agree. Something else happens
+
         # (GCH): evaluation of posterior, required by Cobaya
         model_fiducial.logposterior({})
 

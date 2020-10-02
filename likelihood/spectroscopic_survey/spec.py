@@ -185,7 +185,10 @@ class Spec:
         growth = self.theory['fsigma8_z_func'](z) / \
             self.theory['sigma8_z_func'](z)
 
-        #growth = self.theory['f_z_k']
+        # ATTENTION: we need to decide which definition
+        # of f we would like to use!!
+
+        # growth = self.theory['f_z_k']
         pkgal = self.theory['Pk_interpolator'].P(z, k) * \
             (bias_interpolator(z) + growth * mu**2.0)**2.0
 

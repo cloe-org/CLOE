@@ -56,7 +56,7 @@ class cosmoinitTestCase(TestCase):
         self.check_multipole_spectra_m2 = 8387.248558
         self.check_multipole_spectra_m3 = 0.0
         self.check_multipole_spectra_m4 = 758.244657
-        self.check_multipole_spectra_integrand = 1881.365751
+        self.check_multipole_spectra_integrand = 3142.60911
         self.check_pkgal_linear = 13399.631841
         self.check_scaling_factor_perp = 0.993
         self.check_scaling_factor_parall = 0.992782

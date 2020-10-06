@@ -20,7 +20,7 @@ class Reader:
         data_subdirectory: str
             Location of subdirectory within which desired files are stored.
         """
-        root_dir = Path(__file__).resolve().parents[1]
+        root_dir = Path(__file__).resolve().parents[2]
         self.dat_dir_main = str(root_dir) + '/data' + data_subdirectory
         self.data_dict = {'GC-Spec': None, 'GC-Phot': None, 'WL': None}
         self.nz_dict = {1: None, 2: None, 3: None, 4: None, 5: None, 6: None,

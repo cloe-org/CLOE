@@ -17,7 +17,7 @@ __year__ = '2019'
 __url__ = ('https://gitlab.euclid-sgs.uk/pf-ist-likelihood/'
            'likelihood-implementation')
 __description__ = 'Cosmology Toolbox for Euclid'
-__requires__ = ['numpy', 'scipy', 'camb']
+__requires__ = ['numpy', 'scipy', 'camb', 'astropy']
 
 # Default package properties
 __license__ = 'MIT'

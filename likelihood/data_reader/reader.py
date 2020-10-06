@@ -17,11 +17,11 @@ class Reader:
         """
         Parameters
         ----------
-        data_subdirectory: float
+        data_subdirectory: str
             Location of subdirectory within which desired files are stored.
         """
         root_dir = Path(__file__).resolve().parents[1]
-        self.dat_dir_main = root_dir + '/data' + data_subdirectory
+        self.dat_dir_main = str(root_dir) + '/data' + data_subdirectory
         self.data_dict = {'GC-Spec': None, 'GC-Phot': None, 'WL': None}
         self.nz_dict = {1: None, 2: None, 3: None, 4: None, 5: None, 6: None,
                         7: None, 8: None, 9: None, 10: None}
@@ -49,7 +49,7 @@ class Reader:
         zstr = ["", "2", "4", "65"]
 
         for z_label in zstr:
-            fits_file = fits.open(full_path%z_label)
+            fits_file = fits.open(full_path % z_label)
             average = fits_file[1].data
             kk = average["SCALE_1DIM"]
             pk0 = average["AVERAGE0"]

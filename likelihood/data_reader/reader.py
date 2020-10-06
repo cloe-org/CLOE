@@ -41,8 +41,9 @@ class Reader:
         -------
         None
         """
-        file_dest = '/Spectroscopic/data/cov_power_galaxies_dk0p004_z1.%s.fits'
-        full_path = self.dat_dir_main + file_dest
+        file_dest = '/Spectroscopic/data/Sefusatti_multipoles_pk/'
+        file_names = 'cov_power_galaxies_dk0p004_z1.%s.fits'
+        full_path = self.dat_dir_main + file_dest + file_names
 
         GC_spec_dict = {}
         zstr = ["", "2", "4", "65"]

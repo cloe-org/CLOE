@@ -25,17 +25,17 @@ class Reader:
         no_bins_GC_Phot: int
             Number of redshift bins for photometric GC probe.
         """
-        root_dir = Path(__file__).resolve().parents[1]
+        root_dir = Path(__file__).resolve().parents[2]
         self.dat_dir_main = str(root_dir) + '/data' + data_subdirectory
         self.data_dict = {'GC-Spec': None, 'GC-Phot': None, 'WL': None,
                           'XC-Phot': None}
         self.nz_dict_WL = {}
         self.nz_dict_GC_Phot = {}
 
-        for bin_WL in range(1, no_bins_WL+1):
+        for bin_WL in range(1, no_bins_WL + 1):
             self.nz_dict_WL[bin_WL] = None
 
-        for bin_GC_Phot in range(1, no_bins_GC_Phot+1):
+        for bin_GC_Phot in range(1, no_bins_GC_Phot + 1):
             self.nz_dict_GC_Phot[bin_GC_Phot] = None
         return
 
@@ -88,13 +88,13 @@ class Reader:
             cov_l_j = np.reshape(cov_l_j, newshape=(3 * nk, 3 * nk))
 
             GC_spec_dict['z={:s}'.format(z_label)] = {'k_pk': kk,
-                                                        'pk0': pk0,
-                                                        'pk2': pk2,
-                                                        'pk4': pk4,
-                                                        'cov': cov,
-                                                        'cov_k_i': cov_k_i,
-                                                        'cov_k_j': cov_k_j,
-                                                        'cov_l_i': cov_l_i,
-                                                        'cov_l_j': cov_l_j}
+                                                      'pk0': pk0,
+                                                      'pk2': pk2,
+                                                      'pk4': pk4,
+                                                      'cov': cov,
+                                                      'cov_k_i': cov_k_i,
+                                                      'cov_k_j': cov_k_j,
+                                                      'cov_l_i': cov_l_i,
+                                                      'cov_l_j': cov_l_j}
         self.data_dict['GC-Spec'] = GC_spec_dict
         return

@@ -15,7 +15,7 @@ class datareaderTestCase(TestCase):
 
     def setUp(self):
         self.data_tester = reader.Reader()
-        self.main_key_check = ['GC-Spec', 'GC-Phot', 'WL']
+        self.main_key_check = ['GC-Spec', 'GC-Phot', 'WL', 'XC-Phot']
         self.nz_key_check = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         self.cov_check = 178.4167636283394
 
@@ -29,11 +29,21 @@ class datareaderTestCase(TestCase):
         npt.assert_equal(true_dict, self.main_key_check,
                          err_msg='Error in data reading dict initialisation.')
 
-    def test_nz_dict_init(self):
-        true_nz_dict = list(self.data_tester.nz_dict.keys())
+    def test_nz_WL_dict_init(self):
+        true_nz_dict = list(self.data_tester.nz_dict_WL.keys())
         npt.assert_equal(true_nz_dict, self.nz_key_check,
-                         err_msg='Error in data reading nz '
+                         err_msg='Error in data reading nz WL '
                                  'dict initialisation.')
+
+    def test_nz_GC_Phot_dict_init(self):
+        true_nz_dict = list(self.data_tester.nz_dict_GC_Phot.keys())
+        npt.assert_equal(true_nz_dict, self.nz_key_check,
+                         err_msg='Error in data reading nz GC Phot '
+                                 'dict initialisation.')
+
+    def test_gc_fname_exception(self):
+        npt.assert_raises(Exception, self.data_tester.read_GC_spec,
+                          file_names='cov_power_galaxies_dk0p004.fits')
 
     def test_bench_gc_cov_check(self):
         self.data_tester.read_GC_spec()

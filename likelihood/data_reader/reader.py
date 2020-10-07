@@ -13,21 +13,36 @@ class Reader:
     """
     Class to read external data files.
     """
-    def __init__(self, data_subdirectory='/ExternalBenchmark'):
+    def __init__(self, data_subdirectory='/ExternalBenchmark', no_bins_WL=10,
+                 no_bins_GC_Phot=10):
         """
         Parameters
         ----------
         data_subdirectory: str
             Location of subdirectory within which desired files are stored.
+        no_bins_WL: int
+            Number of redshift bins for photometric WL probe.
+        no_bins_GC_Phot: int
+            Number of redshift bins for photometric GC probe.
         """
-        root_dir = Path(__file__).resolve().parents[2]
+        root_dir = Path(__file__).resolve().parents[1]
         self.dat_dir_main = str(root_dir) + '/data' + data_subdirectory
-        self.data_dict = {'GC-Spec': None, 'GC-Phot': None, 'WL': None}
-        self.nz_dict = {1: None, 2: None, 3: None, 4: None, 5: None, 6: None,
-                        7: None, 8: None, 9: None, 10: None}
+        self.data_dict = {'GC-Spec': None, 'GC-Phot': None, 'WL': None,
+                          'XC-Phot': None}
+        self.nz_dict_WL = {}
+        self.nz_dict_GC_Phot = {}
+
+        for bin_WL in range(1, no_bins_WL+1):
+            self.nz_dict_WL[bin_WL] = None
+
+        for bin_GC_Phot in range(1, no_bins_GC_Phot+1):
+            self.nz_dict_GC_Phot[bin_GC_Phot] = None
         return
 
-    def read_GC_spec(self):
+    def read_GC_spec(self,
+                     file_dest='/Spectroscopic/data/Sefusatti_multipoles_pk/',
+                     file_names='cov_power_galaxies_dk0p004_z%s.fits',
+                     zstr=["1.", "1.2", "1.4", "1.65"]):
         """
         Function to read OU-LE3 spectroscopic galaxy clustering files, based
         on location provided to class. Adds contents to the data dictionary
@@ -35,18 +50,21 @@ class Reader:
 
         Parameters
         ----------
-        None
-
-        Returns
-        -------
-        None
+        file_dest: str
+            Sub-folder of self.data_subdirectory within which to find
+            spectroscopic data.
+        file_names: str
+            General structure of file names. Note: must contain 'z%s' to
+            enable iteration over redshifts.
+        zstr: list
+            List of strings denoting spectroscopic redshift bins.
         """
-        file_dest = '/Spectroscopic/data/Sefusatti_multipoles_pk/'
-        file_names = 'cov_power_galaxies_dk0p004_z1.%s.fits'
-        full_path = self.dat_dir_main + file_dest + file_names
+        if 'z%s' not in file_names:
+            raise Exception('GC Spec file names should contain z%s string to '
+                            'enable iteration over bins.')
 
+        full_path = self.dat_dir_main + file_dest + file_names
         GC_spec_dict = {}
-        zstr = ["", "2", "4", "65"]
 
         for z_label in zstr:
             fits_file = fits.open(full_path % z_label)
@@ -69,7 +87,7 @@ class Reader:
             cov_l_i = np.reshape(cov_l_i, newshape=(3 * nk, 3 * nk))
             cov_l_j = np.reshape(cov_l_j, newshape=(3 * nk, 3 * nk))
 
-            GC_spec_dict['z=1.{:s}'.format(z_label)] = {'k_pk': kk,
+            GC_spec_dict['z={:s}'.format(z_label)] = {'k_pk': kk,
                                                         'pk0': pk0,
                                                         'pk2': pk2,
                                                         'pk4': pk4,

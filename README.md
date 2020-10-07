@@ -25,7 +25,7 @@ To build the package in a dedicated Conda environment with development tools run
 
 ```bash
 conda env create -f environment.yml
-conda activate cosmobox
+conda activate likelihood
 python setup.py install
 ```
 

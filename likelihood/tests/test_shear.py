@@ -43,18 +43,18 @@ class cosmoinitTestCase(TestCase):
 
         self.model_test.cosmology.cosmo_dic['r_z_func'] = self.rfn
         self.integrand_check = -1.0
-        self.wbincheck = 1.715463e-09
+        self.wbincheck = 1.718846e-09
         self.H0 = 67.0
         self.c = const.c.to('km/s').value
         self.omch2 = 0.12
         self.ombh2 = 0.022
         self.shear = shear.Shear(self.model_test.cosmology.cosmo_dic)
-        self.W_i_Gcheck = 0.0027291100226392064
+        self.W_i_Gcheck = 5.827991e-09
         self.phot_galbias_check = 1.09544512
-        self.cl_integrand_check = 8.953918
-        self.cl_WL_check = 7.933128e-10
-        self.cl_GC_check = 4.246989e+12
-        self.cl_cross_check = 27.401784
+        self.cl_integrand_check = 0.000718
+        self.cl_WL_check = 6.384874e-14
+        self.cl_GC_check = 0.001582
+        self.cl_cross_check = 4.706276e-09
         self.flatnz = interpolate.InterpolatedUnivariateSpline(
             np.linspace(0.0, 4.6, 20), np.ones(20), ext=2)
 
@@ -104,10 +104,10 @@ class cosmoinitTestCase(TestCase):
 
     def test_cl_GC(self):
         cl_int = self.shear.Cl_GC_phot(10.0, 1, 1)
-        npt.assert_allclose(cl_int, self.cl_GC_check, rtol=1e-05,
+        npt.assert_allclose(cl_int, self.cl_GC_check, rtol=1e-02,
                             err_msg='Cl GC photometric test failed')
 
     def test_cl_cross(self):
         cl_int = self.shear.Cl_cross(10.0, 1, 1)
-        npt.assert_allclose(cl_int, self.cl_cross_check, rtol=1e-05,
+        npt.assert_allclose(cl_int, self.cl_cross_check, rtol=1e-02,
                             err_msg='Cl photometric cross test failed')

@@ -17,7 +17,7 @@ class CobayaModel:
         self.info = {}
         self.model = None
         z_min = 0.0
-        z_max = 2.5
+        z_max = 4.0
         z_samp = 100
         self.z_win = np.linspace(z_min, z_max, z_samp)
 
@@ -25,6 +25,7 @@ class CobayaModel:
         self.info = {'params': {
             'ombh2': cosmo_inst.cosmo_dic['ombh2'],
             'omch2': cosmo_inst.cosmo_dic['omch2'],
+            'omnuh2': cosmo_inst.cosmo_dic['omnuh2'],
             'H0': cosmo_inst.cosmo_dic['H0'],
             'tau': cosmo_inst.cosmo_dic['tau'],
             'mnu': cosmo_inst.cosmo_dic['mnu'],
@@ -48,6 +49,8 @@ class CobayaModel:
         self.cosmology.cosmo_dic['H0'] = self.model.provider.get_param('H0')
         self.cosmology.cosmo_dic['omch2'] = self.model.provider.get_param(
             'omch2')
+        self.cosmology.cosmo_dic['omnuh2'] = self.model.provider.get_param(
+            'omnuh2')
         self.cosmology.cosmo_dic['ombh2'] = self.model.provider.get_param(
             'ombh2')
         self.cosmology.cosmo_dic['mnu'] = self.model.provider.get_param('mnu')

@@ -1,23 +1,9 @@
 #General imports
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy import integrate
 from scipy import interpolate 
 import sys
 
-
-
-plt.rc('xtick',labelsize=16)
-plt.rc('ytick',labelsize=16)
-plt.rc('font',size=15)
-#plt.rc('figure', autolayout=True)
-plt.rc('axes', titlesize=16)
-plt.rc('axes', labelsize=17)
-plt.rc('lines', linewidth=2)
-plt.rc('lines', markersize=6)
-plt.rc('legend', fontsize=20)
-plt.rc('mathtext', fontset='stix')
-plt.rc('font', family='STIXGeneral')
 #Import cobaya -need to be installed
 import cobaya
 #Import external loglike from the Likelihood Package within cobaya interface module
@@ -110,86 +96,25 @@ cosmology = Cosmology()
 cosmology.cosmo_dic.update(theory_dic)
 cosmology.update_cosmo_dic(z_win, 0.005)
 
-
-C_GC_bench = np.genfromtxt("./data/ExternalBenchmark/Photometric/CijGG-LCDM-Lin-noIA.dat")
-C_LL_bench = np.genfromtxt("./data/ExternalBenchmark/Photometric/CijLL-LCDM-Lin-noIA.dat")
-
 from likelihood.photometric_survey.shear import Shear
 shear = Shear(cosmology.cosmo_dic)
 
-
-len_ell_max = int(sys.argv[1])
-C_GC_bench = C_GC_bench[:len_ell_max]
-C_GC_bench_ells = C_GC_bench[:,0]
-ell_min = C_GC_bench_ells[0]
-ell_max = C_GC_bench_ells[-1]
+len_ell_max = 100
+ell_min = 10
+ell_max = 1000
+C_ells_list = np.linspace(ell_min, ell_max, len_ell_max)
 
 print("Computing gal-gal C_ells")
 print("len_ell_max: ", len_ell_max, "  ell_min: ", ell_min, "  ell_max:", ell_max) 
- 
-
-# Save C_GC_11
-C_GC_11 = np.zeros(len_ell_max)
-
-for y, l in enumerate(C_GC_bench_ells):
-    print(l)
-    C_GC_11[y]=shear.Cl_GC_phot(l, 1, 1, int_step=0.1)
-
-ISTL_C_GC_11 = np.column_stack((C_GC_bench_ells, C_GC_11))
-np.savetxt('./data/ISTL_C_GC_11.txt', ISTL_C_GC_11)
-
-
-len_ell_max = int(sys.argv[1])
-C_LL_bench = C_LL_bench[:len_ell_max]
-C_LL_bench_ells = C_LL_bench[:, 0]
-ell_min = C_LL_bench_ells[0]
-ell_max = C_LL_bench_ells[-1]
+# Compute C_GC_11
+C_GC_11 = np.array([shear.Cl_GC_phot(ell, 1, 1, int_step=0.1) for ell in C_ells_list])
 
 print("Computing shear-shear C_ells")
 print("len_ell_max: ", len_ell_max, "  ell_min: ", ell_min, "  ell_max:", ell_max) 
+# Compute C_LL_11
+C_LL_11 = np.array([shear.Cl_WL(ell, 1, 1, int_step=0.1) for ell in C_ells_list])
 
-
-C_LL_11 = np.zeros(len_ell_max)
-for y, l in enumerate(C_LL_bench_ells):
-    print(l)
-    C_LL_11[y]=shear.Cl_WL(l, 1, 1, int_step=0.1)
-
-
-ISTL_C_LL_11 = np.column_stack((C_LL_bench_ells, C_LL_11))
-np.savetxt('./data/ISTL_C_LL_11.txt', ISTL_C_LL_11)
-
-plt.figure(figsize=(10,6));
-plt.loglog(C_GC_bench[:,0], C_GC_bench[:, 1], 'g--', label=r"Benchmark $(i,j=1,1)$")
-plt.loglog(C_GC_bench_ells, C_GC_11, 'o', label="GCph Shear $(i,j=1,1)$")
-plt.xlabel(r"$\ell$", fontsize=20);
-plt.ylabel(r"$C_\ell^{GCphot}$", fontsize=20);
-plt.legend()
-plt.savefig("./data/plot_comparison_C_GC.png")
-plt.close()
-
-plt.figure(figsize=(10,6))
-plt.plot(C_GC_bench[:, 0],  100*(C_GC_11-C_GC_bench[:, 1])/C_GC_bench[:, 1], 'k-')
-plt.xlabel(r"$\ell$", fontsize=20);
-plt.ylabel(r"$\Delta C_\ell^{GCphoto}/C_\ell^{GCphoto} (\%)$", fontsize=20);
-plt.savefig("./data/plot_delta_C_GC.png")
-plt.close()
-
-
-plt.figure(figsize=(10,6));
-plt.loglog(C_LL_bench[:,0], C_LL_bench[:, 1], 'g--', label=r"Benchmark $(i,j=1,1)$")
-plt.loglog(C_LL_bench_ells, C_LL_11, 'o', label="WL Shear $(i,j=1,1)$")
-plt.xlabel(r"$\ell$", fontsize=20);
-plt.ylabel(r"$C_\ell^{WL}$", fontsize=20);
-plt.legend()
-plt.savefig("./data/plot_comparison_C_WL.png")
-plt.close()
-
-plt.figure(figsize=(10,6));
-plt.plot(C_LL_bench[:, 0],  100*(C_LL_11-C_LL_bench[:, 1])/C_LL_bench[:, 1], 'k-', label=r"Benchmark $(i,j=1,1)$")
-plt.xlabel(r"$\ell$", fontsize=20);
-plt.ylabel(r"$\Delta C_\ell^{WL}/C_\ell^{WL} (\%)$", fontsize=20);
-plt.savefig("./data/plot_delta_C_LL.png")
-plt.close()
+print("calculation finished")
 
 
 

@@ -7,12 +7,14 @@ Contains class to read external data
 import numpy as np
 from astropy.io import fits
 from pathlib import Path
+from scipy import interpolate
 
 
 class Reader:
     """
     Class to read external data files.
     """
+
     def __init__(self, data_subdirectory='/ExternalBenchmark', no_bins_WL=10,
                  no_bins_GC_Phot=10):
         """
@@ -29,15 +31,81 @@ class Reader:
         self.dat_dir_main = str(root_dir) + '/data' + data_subdirectory
         self.data_dict = {'GC-Spec': None, 'GC-Phot': None, 'WL': None,
                           'XC-Phot': None}
+
+        # (GCH): Added dictionaries for n(z)
+        # Both raw data and interpolated data
         self.nz_dict_WL = {}
         self.nz_dict_GC_Phot = {}
+        self.nz_dict_WL_raw = {}
+        self.nz_dict_GC_Phot_raw = {}
 
-        for bin_WL in range(1, no_bins_WL + 1):
-            self.nz_dict_WL[bin_WL] = None
+        # for bin_WL in range(1, no_bins_WL + 1):
+        #    self.nz_dict_WL[bin_WL] = None
 
-        for bin_GC_Phot in range(1, no_bins_GC_Phot + 1):
-            self.nz_dict_GC_Phot[bin_GC_Phot] = None
+        # for bin_GC_Phot in range(1, no_bins_GC_Phot + 1):
+        #    self.nz_dict_GC_Phot[bin_GC_Phot] = None
         return
+
+    def reader_raw_nz(self, file_dest, file_name):
+        """
+        General routine to read n(z) files
+
+        Parameters
+        ----------
+        file_dest: str
+            Sub-folder of self.data_subdirectory within which to find
+            the n(z) data.
+        file_names: str
+            Names of the n(z) files
+
+        Return
+        ------
+        nz_dict: dict
+            dictionary containing raw n(z) data
+        """
+        try:
+            # (GCH): open file and read the content
+            f = open(self.dat_dir_main + file_dest + file_name, "r")
+            content = f.read()
+            # (GCH): get the arbitrary header and save in a dict
+            nz = np.genfromtxt(content.splitlines(), names=True)
+            nz_dict = {x: nz[x] for x in nz.dtype.names}
+            return nz_dict
+        except BaseException:
+            raise Exception(
+                'n(z) files not found. Please, check out the files')
+
+    def save_nz(self,
+                file_dest='/Photometric/',
+                file_names=['niTab-EP10-RB00.dat', 'niTab-EP10-RB00.dat']):
+        """
+        Function to save n(z) dictionaries as attributes of the class
+        It saves the interpolators of the raw data
+
+        Parameters
+        ----------
+        file_dest: str
+            Sub-folder of self.data_subdirectory within which to find
+            the n(z) data.
+        file_names: str
+            Names of the n(z) files
+        """
+        # (GCH): GC n(z) data
+        self.nz_dict_GC_Phot_raw.update(
+            self.reader_raw_nz(
+                file_dest, file_names[0]))
+        self.nz_dict_GC_Phot.update({x: interpolate.InterpolatedUnivariateSpline(
+                                      self.nz_dict_GC_Phot_raw['z'],
+                                      self.nz_dict_GC_Phot_raw[x], ext=2)
+                                     for x in list(self.nz_dict_GC_Phot_raw.keys())[1:]})
+        # (GCH): WL n(z) data
+        self.nz_dict_WL_raw.update(
+            self.reader_raw_nz(
+                file_dest, file_names[1]))
+        self.nz_dict_WL.update({x: interpolate.InterpolatedUnivariateSpline(
+                                      self.nz_dict_GC_Phot_raw['z'],
+                                      self.nz_dict_GC_Phot_raw[x], ext=2)
+                                for x in list(self.nz_dict_GC_Phot_raw.keys())[1:]})
 
     def read_GC_spec(self,
                      file_dest='/Spectroscopic/data/Sefusatti_multipoles_pk/',

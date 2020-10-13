@@ -15,17 +15,12 @@ class Reader:
     Class to read external data files.
     """
 
-    def __init__(self, data_subdirectory='/ExternalBenchmark', no_bins_WL=10,
-                 no_bins_GC_Phot=10):
+    def __init__(self, data_subdirectory='/ExternalBenchmark'):
         """
         Parameters
         ----------
         data_subdirectory: str
             Location of subdirectory within which desired files are stored.
-        no_bins_WL: int
-            Number of redshift bins for photometric WL probe.
-        no_bins_GC_Phot: int
-            Number of redshift bins for photometric GC probe.
         """
         root_dir = Path(__file__).resolve().parents[2]
         self.dat_dir_main = str(root_dir) + '/data' + data_subdirectory
@@ -39,11 +34,6 @@ class Reader:
         self.nz_dict_WL_raw = {}
         self.nz_dict_GC_Phot_raw = {}
 
-        # for bin_WL in range(1, no_bins_WL + 1):
-        #    self.nz_dict_WL[bin_WL] = None
-
-        # for bin_GC_Phot in range(1, no_bins_GC_Phot + 1):
-        #    self.nz_dict_GC_Phot[bin_GC_Phot] = None
         return
 
     def reader_raw_nz(self, file_dest, file_name):
@@ -110,10 +100,10 @@ class Reader:
             self.reader_raw_nz(
                 file_dest, file_name_WL))
         self.nz_dict_WL.update({x: interpolate.InterpolatedUnivariateSpline(
-                                self.nz_dict_GC_Phot_raw['z'],
-                                self.nz_dict_GC_Phot_raw[x], ext=2)
+                                self.nz_dict_WL_raw['z'],
+                                self.nz_dict_WL_raw[x], ext=2)
                                 for x in
-                                list(self.nz_dict_GC_Phot_raw.keys())[1:]})
+                                list(self.nz_dict_WL_raw.keys())[1:]})
 
     def read_GC_spec(self,
                      file_dest='/Spectroscopic/data/Sefusatti_multipoles_pk/',

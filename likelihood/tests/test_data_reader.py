@@ -28,6 +28,8 @@ class datareaderTestCase(TestCase):
         self.main_key_check = None
         self.nz_key_check = None
         self.cov_check = None
+        self.nz_dict_GC_Phot_check = None
+        self.nz_dict_WL_check = None
 
     def test_data_dict_init(self):
         true_dict = list(self.data_tester.data_dict.keys())

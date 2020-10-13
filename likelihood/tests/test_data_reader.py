@@ -21,8 +21,8 @@ class datareaderTestCase(TestCase):
         self.cov_check = 178.4167636283394
         # (GCH): added tests for n(z) data
         self.data_tester.compute_nz()
-        self.nz_dict_GC_Phot_check = np.array([8.53624743e-23])
-        self.nz_dict_WL_Phot_check = np.array([8.53624743e-23])
+        self.nz_dict_GC_Phot_check = np.array([0.15197732])
+        self.nz_dict_WL_check = np.array([0.15197732])
 
     def tearDown(self):
         self.main_key_check = None
@@ -47,15 +47,15 @@ class datareaderTestCase(TestCase):
                                  'dict initialisation.')
 
     def test_nz_GC_Phot_dict_interpolator(self):
-        npt.assert_allclose(self.data_tester.nz_dict_GC_Phot['n1'](0),
+        npt.assert_allclose(self.data_tester.nz_dict_GC_Phot['n1'](0.399987),
                             self.nz_dict_GC_Phot_check,
                             atol=1e-06,
                             err_msg='Error in the interpolation of '
                             'raw n(z) GC data')
 
-    def test_nz_WL_Phot_dict_interpolator(self):
-        npt.assert_allclose(self.data_tester.nz_dict_WL['n1'](0),
-                            self.nz_dict_WL_Phot_check,
+    def test_nz_WL_dict_interpolator(self):
+        npt.assert_allclose(self.data_tester.nz_dict_WL['n1'](0.399987),
+                            self.nz_dict_WL_check,
                             atol=1e-06,
                             err_msg='Error in the interpolation of '
                             'raw n(z) WL data')

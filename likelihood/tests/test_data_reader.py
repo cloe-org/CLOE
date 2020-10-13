@@ -16,13 +16,20 @@ class datareaderTestCase(TestCase):
     def setUp(self):
         self.data_tester = reader.Reader()
         self.main_key_check = ['GC-Spec', 'GC-Phot', 'WL', 'XC-Phot']
-        self.nz_key_check = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        self.nz_key_check = ['n1', 'n2', 'n3', 'n4', 'n5',
+                             'n6', 'n7', 'n8', 'n9', 'n10']
         self.cov_check = 178.4167636283394
+        # (GCH): added tests for n(z) data
+        self.data_tester.compute_nz()
+        self.nz_dict_GC_Phot_check = np.array([0.15197732])
+        self.nz_dict_WL_check = np.array([0.15197732])
 
     def tearDown(self):
         self.main_key_check = None
         self.nz_key_check = None
         self.cov_check = None
+        self.nz_dict_GC_Phot_check = None
+        self.nz_dict_WL_check = None
 
     def test_data_dict_init(self):
         true_dict = list(self.data_tester.data_dict.keys())
@@ -40,6 +47,20 @@ class datareaderTestCase(TestCase):
         npt.assert_equal(true_nz_dict, self.nz_key_check,
                          err_msg='Error in data reading nz GC Phot '
                                  'dict initialisation.')
+
+    def test_nz_GC_Phot_dict_interpolator(self):
+        npt.assert_allclose(self.data_tester.nz_dict_GC_Phot['n1'](0.399987),
+                            self.nz_dict_GC_Phot_check,
+                            atol=1e-06,
+                            err_msg='Error in the interpolation of '
+                            'raw n(z) GC data')
+
+    def test_nz_WL_dict_interpolator(self):
+        npt.assert_allclose(self.data_tester.nz_dict_WL['n1'](0.399987),
+                            self.nz_dict_WL_check,
+                            atol=1e-06,
+                            err_msg='Error in the interpolation of '
+                            'raw n(z) WL data')
 
     def test_gc_fname_exception(self):
         npt.assert_raises(Exception, self.data_tester.read_GC_spec,

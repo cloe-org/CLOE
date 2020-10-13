@@ -55,8 +55,8 @@ class Reader:
         file_dest: str
             Sub-folder of self.data_subdirectory within which to find
             the n(z) data.
-        file_names: str
-            Names of the n(z) files
+        file_name: str
+            Name of the n(z) files
 
         Return
         ------
@@ -75,9 +75,10 @@ class Reader:
             raise Exception(
                 'n(z) files not found. Please, check out the files')
 
-    def save_nz(self,
-                file_dest='/Photometric/',
-                file_names=['niTab-EP10-RB00.dat', 'niTab-EP10-RB00.dat']):
+    def compute_nz(self,
+                   file_dest='/Photometric/',
+                   file_name_GC='niTab-EP10-RB00.dat',
+                   file_name_WL='niTab-EP10-RB00.dat'):
         """
         Function to save n(z) dictionaries as attributes of the class
         It saves the interpolators of the raw data
@@ -87,25 +88,32 @@ class Reader:
         file_dest: str
             Sub-folder of self.data_subdirectory within which to find
             the n(z) data.
-        file_names: str
-            Names of the n(z) files
+        file_name_GC: str
+            Name of the n(z) files for GC
+        file_name_WL: str
+            Name of the n(z) files for WL
         """
         # (GCH): GC n(z) data
         self.nz_dict_GC_Phot_raw.update(
             self.reader_raw_nz(
-                file_dest, file_names[0]))
-        self.nz_dict_GC_Phot.update({x: interpolate.InterpolatedUnivariateSpline(
-                                      self.nz_dict_GC_Phot_raw['z'],
-                                      self.nz_dict_GC_Phot_raw[x], ext=2)
-                                     for x in list(self.nz_dict_GC_Phot_raw.keys())[1:]})
+                file_dest, file_name_GC))
+        self.nz_dict_GC_Phot.update(
+            {
+                x: interpolate.InterpolatedUnivariateSpline(
+                    self.nz_dict_GC_Phot_raw['z'],
+                    self.nz_dict_GC_Phot_raw[x],
+                    ext=2) for x in list(
+                    self.nz_dict_GC_Phot_raw.keys())[
+                    1:]})
         # (GCH): WL n(z) data
         self.nz_dict_WL_raw.update(
             self.reader_raw_nz(
-                file_dest, file_names[1]))
+                file_dest, file_name_WL))
         self.nz_dict_WL.update({x: interpolate.InterpolatedUnivariateSpline(
-                                      self.nz_dict_GC_Phot_raw['z'],
-                                      self.nz_dict_GC_Phot_raw[x], ext=2)
-                                for x in list(self.nz_dict_GC_Phot_raw.keys())[1:]})
+                                self.nz_dict_GC_Phot_raw['z'],
+                                self.nz_dict_GC_Phot_raw[x], ext=2)
+                                for x in
+                                list(self.nz_dict_GC_Phot_raw.keys())[1:]})
 
     def read_GC_spec(self,
                      file_dest='/Spectroscopic/data/Sefusatti_multipoles_pk/',

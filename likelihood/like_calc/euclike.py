@@ -31,13 +31,12 @@ class Euclike:
         Parameters
         ----------
         dictionary: dictionary
-            cosmology dictionary from Cosmology class
-            which gets updated at each step of the
-            sampling method
+            cosmology dictionary from the Cosmology class
+            which is updated at each sampling step
 
         dictionary_fiducial: dictionary
-            cosmology dictionary from Cosmology class
-            which includes the fiducial cosmology
+            cosmology dictionary from the Cosmology class
+            at the fiducial cosmology
         """
         self.theory = dictionary
         self.fiducial = dictionary_fiducial
@@ -127,8 +126,8 @@ class Euclike:
         Parameters
         ----------
         data_params: tuple
-            List of (sampled) parameters obtained from
-            the theory code or asked by the likelihood
+            List of (sampled) parameters needed by the likelihood.
+            This includes nuisance parameters and settings keys.
 
         Returns
         ----------

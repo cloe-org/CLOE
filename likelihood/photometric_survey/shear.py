@@ -369,12 +369,3 @@ class Shear:
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final
-
-    def loglike(self):
-        """
-        Returns loglike for Shear observable
-        """
-
-        # likelihood value is currently only a place holder!
-        loglike = 0.0
-        return loglike

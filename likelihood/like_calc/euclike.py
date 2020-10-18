@@ -9,7 +9,6 @@ from ..cosmo.cosmology import Cosmology
 from likelihood.photometric_survey.shear import Shear
 from likelihood.spectroscopic_survey.spec import Spec
 from ..data_reader import reader
-import sys
 
 
 class EuclikeError(Exception):

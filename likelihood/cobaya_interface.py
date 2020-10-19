@@ -10,7 +10,6 @@ from cobaya.model import get_model
 # Import likelihoods classes
 from likelihood.cosmo.cosmology import Cosmology
 from likelihood.like_calc.euclike import Euclike
-import sys
 
 # Error classes
 

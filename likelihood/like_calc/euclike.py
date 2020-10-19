@@ -51,7 +51,7 @@ class Euclike:
 
         Returns
         -------
-        theoryvec: float list
+        theoryvec: float array
             returns the theory array with same indexing/format as the data
         """
 
@@ -62,9 +62,11 @@ class Euclike:
         for z_ins in self.zkeys:
             for m_ins in [0, 2, 4]:
                 for k_ins in self.data_ins.data_dict['GC-Spec'][z_ins]['k_pk']:
-                    theoryvec.append(spec_ins.multipole_spectra(
-                        float(z_ins), k_ins * dictionary['H0'] / 100.0, m_ins))
-        #                 float(z_ins), k_ins, m_ins))
+                    theoryvec = np.append(
+                                    theoryvec, spec_ins.multipole_spectra(
+                                        float(z_ins), k_ins *
+                                        dictionary['H0'] / 100.0, m_ins))
+        #                                 float(z_ins), k_ins, m_ins))
 
         return theoryvec
 
@@ -74,15 +76,15 @@ class Euclike:
 
         Returns
         -------
-        datavec: float list
+        datavec: float array
             returns the data as a single array across z, mu, k
         """
 
         datavec = []
         for z_ins in self.zkeys:
             for m_ins in [0, 2, 4]:
-                datavec.extend(self.data_ins.data_dict['GC-Spec'][z_ins][
-                    'pk' + str(m_ins)])
+                datavec = np.append(datavec, self.data_ins.data_dict[
+                              'GC-Spec'][z_ins]['pk' + str(m_ins)])
 
         return datavec
 
@@ -151,16 +153,14 @@ class Euclike:
             observable = shear_ins.Cl_WL(ell_ins, bin_i_ins, bin_j_ins)
             self.loglike = 0.0
         elif like_selection == 2:
-            thvec = self.create_spec_theory(dictionary, dictionary_fiducial)
-            thvec = [i * thfac for i in thvec]
-            dmt_zip = zip(self.specdatafinal, thvec)
-            dmt = [list1_i - list2_i for (list1_i, list2_i) in dmt_zip]
+            self.thvec = self.create_spec_theory(
+                             dictionary, dictionary_fiducial)
+            dmt = self.specdatafinal - self.thvec * thfac
             self.loglike = dmt @ self.speccovinvfinal @ np.transpose(dmt)
         elif like_selection == 12:
-            thvec = self.create_spec_theory(dictionary, dictionary_fiducial)
-            thvec = [i * thfac for i in thvec]
-            dmt_zip = zip(self.specdatafinal, thvec)
-            dmt = [list1_i - list2_i for (list1_i, list2_i) in dmt_zip]
+            self.thvec = self.create_spec_theory(
+                             dictionary, dictionary_fiducial)
+            dmt = self.specdatafinal - self.thvec * thfac
             self.loglike_spec = dmt @ self.speccovinvfinal @ np.transpose(dmt)
             self.loglike_shear = 0.0
             # (SJ): only addition below if no cross-covariance

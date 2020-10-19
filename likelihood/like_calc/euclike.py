@@ -57,11 +57,14 @@ class Euclike:
 
         spec_ins = Spec(dictionary, dictionary_fiducial)
         theoryvec = []
+        # (SJ): k_ins seemingly in h/Mpc units, tentative transformation here.
+        # (SJ): Commented line below is pre-transformation, kept for now
         for z_ins in self.zkeys:
             for m_ins in [0, 2, 4]:
                 for k_ins in self.data_ins.data_dict['GC-Spec'][z_ins]['k_pk']:
                     theoryvec.append(spec_ins.multipole_spectra(
-                        float(z_ins), k_ins, m_ins))
+                        float(z_ins), k_ins * dictionary['H0'] / 100.0, m_ins))
+        #                 float(z_ins), k_ins, m_ins))
 
         return theoryvec
 
@@ -133,6 +136,11 @@ class Euclike:
             loglike = -2 ln(likelihood) for the Euclid observables
         """
 
+        # (SJ): We can either multiply data+cov or theory with (2pi/h)^3 factor
+        # (SJ): Prefer theory as is, but more efficient to multiply it
+        # datfac = (2.0 * np.pi / (dictionary['H0'] / 100.0))**3.0
+        # covfac = datfac**2
+        thfac = 1.0 / (2.0 * np.pi / (dictionary['H0'] / 100.0))**3.0
         like_selection = data_params['params']['like_selection']
         if like_selection == 1:
             # (SJ): for now, shear lines below just for fun
@@ -143,13 +151,15 @@ class Euclike:
             observable = shear_ins.Cl_WL(ell_ins, bin_i_ins, bin_j_ins)
             self.loglike = 0.0
         elif like_selection == 2:
-            dmt_zip = zip(self.specdatafinal, self.create_spec_theory(
-                          dictionary, dictionary_fiducial))
+            thvec = self.create_spec_theory(dictionary, dictionary_fiducial)
+            thvec = [i * thfac for i in thvec]
+            dmt_zip = zip(self.specdatafinal, thvec)
             dmt = [list1_i - list2_i for (list1_i, list2_i) in dmt_zip]
             self.loglike = dmt @ self.speccovinvfinal @ np.transpose(dmt)
         elif like_selection == 12:
-            dmt_zip = zip(self.specdatafinal, self.create_spec_theory(
-                          dictionary, dictionary_fiducial))
+            thvec = self.create_spec_theory(dictionary, dictionary_fiducial)
+            thvec = [i * thfac for i in thvec]
+            dmt_zip = zip(self.specdatafinal, thvec)
             dmt = [list1_i - list2_i for (list1_i, list2_i) in dmt_zip]
             self.loglike_spec = dmt @ self.speccovinvfinal @ np.transpose(dmt)
             self.loglike_shear = 0.0

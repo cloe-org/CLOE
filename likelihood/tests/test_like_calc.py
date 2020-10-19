@@ -53,7 +53,9 @@ class likecalcTestCase(TestCase):
         self.like_tt = euclike.Euclike()
 
         # (SJ): For now use loglike below, to be updated
-        self.check_loglike = 4.607437e+11
+        # (SJ): First one without, second one with h and (2pi/h)^3 corrections
+        # self.check_loglike = 4.607437e+11
+        self.check_loglike = 30568.400834
 
     def tearDown(self):
         self.check_loglike = None

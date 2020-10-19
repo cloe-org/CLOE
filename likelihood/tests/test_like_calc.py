@@ -55,7 +55,6 @@ class likecalcTestCase(TestCase):
 
         # (SJ): For now use loglike below, to be updated
         self.check_loglike = 4.607437e+11
-        # self.check_loglike = 15.0
 
     def tearDown(self):
         self.check_loglike = None

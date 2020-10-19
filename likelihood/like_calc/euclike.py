@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Euclike
 
-Contains class to compute Euclid likelihood
+Contains class to compute the Euclid likelihood
 """
 
 import numpy as np
@@ -45,6 +45,7 @@ class Euclike:
         self.zkeys = self.data_ins.data_dict['GC-Spec'].keys()
         self.specdatafinal = self.create_spec_data()
         self.speccovfinal = self.create_spec_cov()
+        self.speccovinvfinal = np.linalg.inv(self.speccovfinal)
 
     def create_spec_theory(self):
         """
@@ -148,13 +149,11 @@ class Euclike:
         elif like_selection == 2:
             dmt_zip = zip(self.create_spec_data(), self.create_spec_theory())
             dmt = [list1_i - list2_i for (list1_i, list2_i) in dmt_zip]
-            covinv = np.linalg.inv(self.speccovfinal)
-            self.loglike = dmt @ covinv @ np.transpose(dmt)
+            self.loglike = dmt @ self.speccovinvfinal @ np.transpose(dmt)
         elif like_selection == 12:
             dmt_zip = zip(self.specdatafinal, self.create_spec_theory())
             dmt = [list1_i - list2_i for (list1_i, list2_i) in dmt_zip]
-            covinv = np.linalg.inv(self.speccovfinal)
-            self.loglike_spec = dmt @ covinv @ np.transpose(dmt)
+            self.loglike_spec = dmt @ self.speccovinvfinal @ np.transpose(dmt)
             self.loglike_shear = 0.0
             # (SJ): only addition below if no cross-covariance
             self.loglike = self.loglike_shear + self.loglike_spec

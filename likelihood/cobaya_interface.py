@@ -10,6 +10,7 @@ from cobaya.model import get_model
 # Import likelihoods classes
 from likelihood.cosmo.cosmology import Cosmology
 from likelihood.like_calc.euclike import Euclike
+import sys
 
 # Error classes
 
@@ -148,8 +149,7 @@ class EuclidLikelihood(Likelihood):
             self.fiducial_cosmology.cosmo_dic['z_win'],
             0.05)
 
-        self.likefinal = Euclike(self.cosmo.cosmo_dic,
-                                 self.fiducial_cosmology.cosmo_dic)
+        self.likefinal = Euclike()
 
     def get_requirements(self):
         r""" get_requirements
@@ -241,5 +241,7 @@ class EuclidLikelihood(Likelihood):
         self.passing_requirements()
         # (GCH): update cosmo_dic to interpolators
         self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.05)
-        loglike = self.likefinal.loglike(**params_values)
+        loglike = self.likefinal.loglike(self.cosmo.cosmo_dic,
+                                         self.fiducial_cosmology.cosmo_dic,
+                                         **params_values)
         return loglike

@@ -50,8 +50,7 @@ class likecalcTestCase(TestCase):
         self.model_fiducial.update_cosmo()
         self.model_test = CobayaModel(cosmo)
         self.model_test.update_cosmo()
-        self.like_tt = euclike.Euclike(self.model_test.cosmology.cosmo_dic,
-                                       self.model_fiducial.cosmology.cosmo_dic)
+        self.like_tt = euclike.Euclike()
 
         # (SJ): For now use loglike below, to be updated
         self.check_loglike = 4.607437e+11
@@ -60,7 +59,7 @@ class likecalcTestCase(TestCase):
         self.check_loglike = None
 
     def test_loglike(self):
-        npt.assert_allclose(self.like_tt.loglike(self.info),
-                            self.check_loglike,
-                            rtol=1e-06,
-                            err_msg='Loglike failed')
+        npt.assert_allclose(self.like_tt.loglike(
+            self.model_test.cosmology.cosmo_dic,
+            self.model_fiducial.cosmology.cosmo_dic, self.info),
+                self.check_loglike, rtol=1e-06, err_msg='Loglike failed')

@@ -23,7 +23,7 @@ class Euclike:
     Class to compute the Euclid likelihood from the theory, data, covariance.
     """
 
-    def __init__(self, dictionary, dictionary_fiducial):
+    def __init__(self):
         """
         Constructor of the class Euclike. The data and covariance are
         read and arranged into their final format only once here.
@@ -38,8 +38,6 @@ class Euclike:
             cosmology dictionary from the Cosmology class
             at the fiducial cosmology
         """
-        self.theory = dictionary
-        self.fiducial = dictionary_fiducial
         self.data_ins = reader.Reader()
         self.data_ins.read_GC_spec()
         self.zkeys = self.data_ins.data_dict['GC-Spec'].keys()
@@ -47,25 +45,25 @@ class Euclike:
         self.speccovfinal = self.create_spec_cov()
         self.speccovinvfinal = np.linalg.inv(self.speccovfinal)
 
-    def create_spec_theory(self):
+    def create_spec_theory(self, dictionary, dictionary_fiducial):
         """
         Obtains the theory for the likelihood
 
         Returns
         -------
-        theoryvec: float array
+        theoryvec: float list
             returns the theory array with same indexing/format as the data
         """
 
-        spec_ins = Spec(self.theory, self.fiducial)
-        self.theoryvec = []
+        spec_ins = Spec(dictionary, dictionary_fiducial)
+        theoryvec = []
         for z_ins in self.zkeys:
             for m_ins in [0, 2, 4]:
                 for k_ins in self.data_ins.data_dict['GC-Spec'][z_ins]['k_pk']:
-                    self.theoryvec.append(
-                        spec_ins.multipole_spectra(float(z_ins), k_ins, m_ins))
+                    theoryvec.append(spec_ins.multipole_spectra(
+                        float(z_ins), k_ins, m_ins))
 
-        return self.theoryvec
+        return theoryvec
 
     def create_spec_data(self):
         """
@@ -73,18 +71,17 @@ class Euclike:
 
         Returns
         -------
-        datavec: float array
+        datavec: float list
             returns the data as a single array across z, mu, k
         """
 
-        self.datavec = []
+        datavec = []
         for z_ins in self.zkeys:
             for m_ins in [0, 2, 4]:
-                self.datavec.extend(
-                    self.data_ins.data_dict['GC-Spec'][z_ins][
-                        'pk' + str(m_ins)])
+                datavec.extend(self.data_ins.data_dict['GC-Spec'][z_ins][
+                    'pk' + str(m_ins)])
 
-        return self.datavec
+        return datavec
 
     def create_spec_cov(self):
         """
@@ -107,20 +104,20 @@ class Euclike:
         # (SJ): Put all covariances into a single/larger covariance.
         # (SJ): As no cross-covariances, this takes on a block-form
         # (SJ): along the diagonal.
-        self.covfull = np.zeros([sum(self.covnumk), sum(self.covnumk)])
+        covfull = np.zeros([sum(self.covnumk), sum(self.covnumk)])
         kc = 0
         c1 = 0
         c2 = 0
         for z_ins in self.zkeys:
             c1 = c1 + self.covnumk[kc]
             c2 = c2 + self.covnumk[kc + 1]
-            self.covfull[c1:c2, c1:c2] = self.data_ins.data_dict['GC-Spec'][
-                                             z_ins]['cov']
+            covfull[c1:c2, c1:c2] = self.data_ins.data_dict['GC-Spec'][
+                                        z_ins]['cov']
             kc = kc + 1
 
-        return self.covfull
+        return covfull
 
-    def loglike(self, data_params):
+    def loglike(self, dictionary, dictionary_fiducial, data_params):
         """
         Calculates the log-likelihood for a given model
 
@@ -136,22 +133,23 @@ class Euclike:
             loglike = -2 ln(likelihood) for the Euclid observables
         """
 
-        self.data_params = data_params
-        like_selection = self.data_params['params']['like_selection']
+        like_selection = data_params['params']['like_selection']
         if like_selection == 1:
-            shear_ins = Shear(self.theory)
             # (SJ): for now, shear lines below just for fun
+            shear_ins = Shear(dictionary)
             ell_ins = 100
             bin_i_ins = 1
             bin_j_ins = 1
             observable = shear_ins.Cl_WL(ell_ins, bin_i_ins, bin_j_ins)
             self.loglike = 0.0
         elif like_selection == 2:
-            dmt_zip = zip(self.create_spec_data(), self.create_spec_theory())
+            dmt_zip = zip(self.specdatafinal, self.create_spec_theory(
+                          dictionary, dictionary_fiducial))
             dmt = [list1_i - list2_i for (list1_i, list2_i) in dmt_zip]
             self.loglike = dmt @ self.speccovinvfinal @ np.transpose(dmt)
         elif like_selection == 12:
-            dmt_zip = zip(self.specdatafinal, self.create_spec_theory())
+            dmt_zip = zip(self.specdatafinal, self.create_spec_theory(
+                          dictionary, dictionary_fiducial))
             dmt = [list1_i - list2_i for (list1_i, list2_i) in dmt_zip]
             self.loglike_spec = dmt @ self.speccovinvfinal @ np.transpose(dmt)
             self.loglike_shear = 0.0
@@ -159,6 +157,6 @@ class Euclike:
             self.loglike = self.loglike_shear + self.loglike_spec
         else:
             raise CobayaInterfaceError(
-                r"Choose like selection 'shear' or 'spec' or 'both'")
+                r"Choose like selection '1' or '2' or '12'")
 
         return self.loglike

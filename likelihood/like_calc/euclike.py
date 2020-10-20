@@ -150,7 +150,9 @@ class Euclike:
         # (SJ): Prefer theory as is, but more efficient to multiply it
         # datfac = (2.0 * np.pi / (dictionary['H0'] / 100.0))**3.0
         # covfac = datfac**2
-        thfac = 1.0 / (2.0 * np.pi / (dictionary['H0'] / 100.0))**3.0
+        # (SJ): Not using thfac with 1/(2pi)^3 as will be removed from OU data
+        # thfac = 1.0 / (2.0 * np.pi / (dictionary['H0'] / 100.0))**3.0
+        thfac = (dictionary['H0'] / 100.0)**3.0
         like_selection = data_params['params']['like_selection']
         if like_selection == 1:
             # (SJ): for now, shear lines below just for fun

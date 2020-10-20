@@ -54,8 +54,10 @@ class likecalcTestCase(TestCase):
 
         # (SJ): For now use loglike below, to be updated
         # (SJ): First one without, second one with h and (2pi/h)^3 corrections
+        # (SJ): third one with only 1/h^3 correction, pre-update to data
         # self.check_loglike = 4.607437e+11
-        self.check_loglike = 30568.400834
+        # self.check_loglike = 30568.400834
+        self.check_loglike = 1.963907e+11
 
     def tearDown(self):
         self.check_loglike = None

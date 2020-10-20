@@ -37,7 +37,17 @@ class Euclike:
 
     def create_spec_theory(self, dictionary, dictionary_fiducial):
         """
-        Obtains the theory for the likelihood
+        Obtains the theory for the likelihood.
+
+        Parameters
+        -------
+        dictionary: dictionary
+            cosmology dictionary from the Cosmology class
+            which is updated at each sampling step
+
+        dictionary_fiducial: dictionary
+            cosmology dictionary from the Cosmology class
+            at the fiducial cosmology
 
         Returns
         -------

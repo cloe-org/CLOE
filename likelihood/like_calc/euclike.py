@@ -164,12 +164,13 @@ class Euclike:
             self.thvec = self.create_spec_theory(
                              dictionary, dictionary_fiducial)
             dmt = self.specdatafinal - self.thvec * thfac
-            self.loglike = dmt @ self.speccovinvfinal @ np.transpose(dmt)
+            self.loglike = np.dot(np.dot(dmt, self.speccovinvfinal), dmt.T)
         elif like_selection == 12:
             self.thvec = self.create_spec_theory(
                              dictionary, dictionary_fiducial)
             dmt = self.specdatafinal - self.thvec * thfac
-            self.loglike_spec = dmt @ self.speccovinvfinal @ np.transpose(dmt)
+            self.loglike_spec = np.dot(np.dot(
+                                    dmt, self.speccovinvfinal), dmt.T)
             self.loglike_shear = 0.0
             # (SJ): only addition below if no cross-covariance
             self.loglike = self.loglike_shear + self.loglike_spec

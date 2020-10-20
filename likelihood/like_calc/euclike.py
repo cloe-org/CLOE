@@ -27,16 +27,6 @@ class Euclike:
         """
         Constructor of the class Euclike. The data and covariance are
         read and arranged into their final format only once here.
-
-        Parameters
-        ----------
-        dictionary: dictionary
-            cosmology dictionary from the Cosmology class
-            which is updated at each sampling step
-
-        dictionary_fiducial: dictionary
-            cosmology dictionary from the Cosmology class
-            at the fiducial cosmology
         """
         self.data_ins = reader.Reader()
         self.data_ins.read_GC_spec()
@@ -131,6 +121,14 @@ class Euclike:
         data_params: tuple
             List of (sampled) parameters needed by the likelihood.
             This includes nuisance parameters and settings keys.
+
+        dictionary: dictionary
+            cosmology dictionary from the Cosmology class
+            which is updated at each sampling step
+
+        dictionary_fiducial: dictionary
+            cosmology dictionary from the Cosmology class
+            at the fiducial cosmology
 
         Returns
         ----------

@@ -8,9 +8,8 @@ from cobaya.likelihood import Likelihood
 from cobaya.model import get_model
 
 # Import likelihoods classes
-from likelihood.photometric_survey.shear import Shear
-from likelihood.spectroscopic_survey.spec import Spec
 from likelihood.cosmo.cosmology import Cosmology
+from likelihood.like_calc.euclike import Euclike
 
 # Error classes
 
@@ -149,6 +148,8 @@ class EuclidLikelihood(Likelihood):
             self.fiducial_cosmology.cosmo_dic['z_win'],
             0.05)
 
+        self.likefinal = Euclike()
+
     def get_requirements(self):
         r""" get_requirements
 
@@ -219,52 +220,6 @@ class EuclidLikelihood(Likelihood):
             print('Cobaya theory requirements \
                   could not be pass to cosmo module')
 
-    def log_likelihood(self, dictionary, dictionary_fiducial, **data_params):
-        r""" log_likelihood
-
-        Calculates the log-likelihood given the selection
-
-        Parameters
-        ----------
-        dictionary: dictionary
-            cosmology dictionary from Cosmology class
-            which gets updated at each step of the
-            sampling method
-
-        dictionary_fiducial: dictionary
-            cosmology dictionary from Cosmology class
-            which includes the fiducial cosmology
-
-        **data_params: tuple
-            List of (sampled) parameters obtained from
-            the theory code or asked by the likelihood
-
-        Returns
-        ----------
-        loglike: float
-            must return -0.5*chi2
-        """
-        loglike = 0.0
-        like_selection = data_params['like_selection']
-        if like_selection == 1:
-            shear_ins = Shear(dictionary)
-            loglike = shear_ins.loglike()
-        elif like_selection == 2:
-            spec_ins = Spec(dictionary, dictionary_fiducial)
-            loglike = spec_ins.loglike()
-        elif like_selection == 12:
-            shear_ins = Shear(dictionary)
-            spec_ins = Spec(dictionary, dictionary_fiducial)
-            loglike_shear = shear_ins.loglike()
-            loglike_spec = spec_ins.loglike()
-            loglike = loglike_shear + loglike_spec
-        else:
-            raise CobayaInterfaceError(
-                r"Choose like selection 'shear' or 'spec' or 'both'")
-        # (GCH): For the moment, it returns -15 (-0.5 * chi2)
-        loglike = -0.5 * 30
-        return loglike
-
     def logp(self, **params_values):
         r""" logp
 
@@ -285,8 +240,7 @@ class EuclidLikelihood(Likelihood):
         self.passing_requirements()
         # (GCH): update cosmo_dic to interpolators
         self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.05)
-        loglike = self.log_likelihood(
-            self.cosmo.cosmo_dic,
-            self.fiducial_cosmology.cosmo_dic,
-            **params_values)
+        loglike = self.likefinal.loglike(self.cosmo.cosmo_dic,
+                                         self.fiducial_cosmology.cosmo_dic,
+                                         **params_values)
         return loglike

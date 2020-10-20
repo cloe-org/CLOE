@@ -68,7 +68,7 @@ class datareaderTestCase(TestCase):
 
     def test_bench_gc_cov_check(self):
         self.data_tester.read_GC_spec()
-        test_cov = self.data_tester.data_dict['GC-Spec']['z=1.2']['cov'][1, 1]
+        test_cov = self.data_tester.data_dict['GC-Spec']['1.2']['cov'][1, 1]
         npt.assert_allclose(test_cov, self.cov_check,
                             rtol=1e-3,
                             err_msg='Error in loading external spectroscopic'

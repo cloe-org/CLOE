@@ -153,14 +153,14 @@ class Reader:
             cov_l_i = np.reshape(cov_l_i, newshape=(3 * nk, 3 * nk))
             cov_l_j = np.reshape(cov_l_j, newshape=(3 * nk, 3 * nk))
 
-            GC_spec_dict['z={:s}'.format(z_label)] = {'k_pk': kk,
-                                                      'pk0': pk0,
-                                                      'pk2': pk2,
-                                                      'pk4': pk4,
-                                                      'cov': cov,
-                                                      'cov_k_i': cov_k_i,
-                                                      'cov_k_j': cov_k_j,
-                                                      'cov_l_i': cov_l_i,
-                                                      'cov_l_j': cov_l_j}
+            GC_spec_dict['{:s}'.format(z_label)] = {'k_pk': kk,
+                                                    'pk0': pk0,
+                                                    'pk2': pk2,
+                                                    'pk4': pk4,
+                                                    'cov': cov,
+                                                    'cov_k_i': cov_k_i,
+                                                    'cov_k_j': cov_k_j,
+                                                    'cov_l_i': cov_l_i,
+                                                    'cov_l_j': cov_l_j}
         self.data_dict['GC-Spec'] = GC_spec_dict
         return

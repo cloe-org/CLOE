@@ -311,15 +311,3 @@ class Spec:
 
         return P0k, P2k, P4k
         # (GCH): maybe save as attributes P0k, P2k, P4k?
-
-    def loglike(self):
-        """
-        Returns
-        -------
-        loglike: float
-                loglike for GC spectroscopy observable
-                ln(likelihood) = -1/2 chi**2
-        """
-        # SJ: This will be the log-likelihood;
-        # for now just return P(z,k) for fixed z and k.
-        return self.theory['Pk_interpolator'].P(0.5, 0.02)

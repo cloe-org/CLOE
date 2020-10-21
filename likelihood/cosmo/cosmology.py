@@ -306,17 +306,11 @@ class Cosmology:
         if redshift < bin_edge_list[-1]:
             for i in range(len(bin_edge_list) - 1):
                 if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
-                    bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[i]
-                                                              + bin_edge_list[i
-                                                                              +
-                                                                              1
-                                                              ])
-                                                             / 2.0)
-                else:
-                    continue
+                    bi_val = self.generic_istf_bin_bias_calc(
+                        (bin_edge_list[i] + bin_edge_list[i + 1]) / 2.0)
         elif redshift >=  bin_edge_list[-1]:
             bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[-1] +
-                                                      bin_edge_list[-2])/ 2.0)
+                                                      bin_edge_list[-2]) / 2.0)
         elif redshift < bin_edge_list[0]:
             bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[0] +
                                                       bin_edge_list[1]) / 2.0)
@@ -343,17 +337,11 @@ class Cosmology:
         if redshift < bin_edge_list[-1]:
             for i in range(len(bin_edge_list) - 1):
                 if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
-                    bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[i]
-                                                              + bin_edge_list[i
-                                                                              +
-                                                                              1
-                                                              ])
-                                                             / 2.0)
-                else:
-                    continue
+                    bi_val = self.generic_istf_bin_bias_calc(
+                        (bin_edge_list[i] + bin_edge_list[i + 1]) / 2.0)
         elif redshift >=  bin_edge_list[-1]:
             bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[-1] +
-                                                      bin_edge_list[-2])/ 2.0)
+                                                      bin_edge_list[-2]) / 2.0)
         elif redshift < bin_edge_list[0]:
             bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[0] +
                                                       bin_edge_list[1]) / 2.0)
@@ -455,25 +443,27 @@ class Cosmology:
             pgg_spec.append(self.Pgg_spec_def(zs_interp[index],
                                               ks_interp[index]))
             pgdelta_phot.append(self.Pgd_phot_def(zs_interp[index],
-                                              ks_interp[index]))
+                                                  ks_interp[index]))
             pgdelta_spec.append(self.Pgd_spec_def(zs_interp[index],
-                                              ks_interp[index]))
+                                                  ks_interp[index]))
         self.cosmo_dic['Pgg_phot'] = interpolate.interp2d(x=zs_interp,
-                                                         y=ks_interp,
-                                                         z=pgg_phot,
-                                                         bounds_error=True)
+                                                          y=ks_interp,
+                                                          z=pgg_phot,
+                                                          bounds_error=True)
         self.cosmo_dic['Pgdelta_phot'] = interpolate.interp2d(x=zs_interp,
-                                                         y=ks_interp,
-                                                         z=pgdelta_phot,
-                                                         bounds_error=True)
+                                                              y=ks_interp,
+                                                              z=pgdelta_phot,
+                                                              bounds_error=True
+                                                              )
         self.cosmo_dic['Pgg_spec'] = interpolate.interp2d(x=zs_interp,
-                                                         y=ks_interp,
-                                                         z=pgg_spec,
-                                                         bounds_error=True)
+                                                          y=ks_interp,
+                                                          z=pgg_spec,
+                                                          bounds_error=True)
         self.cosmo_dic['Pgdelta_spec'] = interpolate.interp2d(x=zs_interp,
-                                                         y=ks_interp,
-                                                         z=pgdelta_spec,
-                                                         bounds_error=True)
+                                                              y=ks_interp,
+                                                              z=pgdelta_spec,
+                                                              bounds_error=True
+                                                              )
         return
 
     def update_cosmo_dic(self, zs, ks):

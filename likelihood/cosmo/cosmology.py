@@ -303,7 +303,7 @@ class Cosmology:
         -------
         Value of galaxy bias at input redshift.
         """
-        if redshift < bin_edge_list[-1]:
+        if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
             for i in range(len(bin_edge_list) - 1):
                 if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
                     bi_val = self.generic_istf_bin_bias_calc(
@@ -334,7 +334,7 @@ class Cosmology:
         -------
         Value of galaxy bias at input redshift.
         """
-        if redshift < bin_edge_list[-1]:
+        if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
             for i in range(len(bin_edge_list) - 1):
                 if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
                     bi_val = self.generic_istf_bin_bias_calc(

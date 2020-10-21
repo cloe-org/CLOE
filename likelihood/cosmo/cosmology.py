@@ -70,7 +70,17 @@ class Cosmology:
             Interpolated function for Hubble parameter
         z_win: array-like
             Array of redshifts ar which H and comov_dist are evaluated at
-
+        k_win: array-like
+            Array of k values which will be used to evaluate gaalxy power
+            spectra
+        Pgg_phot: function
+            Galaxy-galaxy power spectrum for GC-phot.
+        Pgdelta_phot: function
+            Galaxy-matter power spectrum for GC-phot.
+        Pgg_spec: function
+            Galaxy-galaxy power spectrum for GC-spec.
+        Pgdelta_spec: function
+            Galaxy-matter power spectrum for GC-spec.
         """
         # (GCH): initialize cosmo dictionary
         # (ACD): Added speed of light to dictionary.!!!Important:it's in units
@@ -90,12 +100,17 @@ class Cosmology:
                           'H': None,
                           'Pk_interpolator': None,
                           'Pk_delta': None,
+                          'Pgg_phot': None,
+                          'Pgdelta_phot': None,
+                          'Pgg_spec': None,
+                          'Pgdelta_spec': None,
                           'fsigma8': None,
                           'b_gal': 1.0,
                           # 'b_gal': None,
                           'sigma_8': None,
                           'c': const.c.to('km/s').value,
                           'z_win': None,
+                          'k_win': None,
                           'r_z_func': None,
                           'd_z_func': None,
                           'H_z_func': None,
@@ -248,6 +263,213 @@ class Cosmology:
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['fsigma8'], ext=2)
 
+    def generic_istf_bin_bias_calc(self, bin_mean_redshift):
+        """
+        Calculates galaxy bias according to default recipe, for a given
+        redshift bin.
+
+        .. math::
+                   b_{x,i} = \sqrt{1+\bar{z}_{x,i}}\\
+
+        Parameters
+        ----------
+        bin_mean_redshift: float
+            Mean redshift of particular redshift bin.
+
+        Returns
+        -------
+        Value of bias in redshift bin with mean given by bin_mean_redshift.
+        """
+        bias = np.sqrt(1.0 + bin_mean_redshift)
+        return bias
+
+    def istf_phot_galbias(self, redshift, bin_edge_list=[0.001, 0.418, 0.560,
+                                                         0.678, 0.789, 0.900,
+                                                         1.019, 1.155, 1.324,
+                                                         1.576, 2.50]):
+        """
+        Calculates galaxy bias for the photometric GC probe, at given redshift,
+        according to default recipe.
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to calculate bias.
+        bin_edge_list: list
+            List of tomographic redshift bin edges for photometic GC probe.
+            Default is Euclid IST: Forecasting choices.
+
+        Returns
+        -------
+        Value of galaxy bias at input redshift.
+        """
+        if redshift < bin_edge_list[-1]:
+            for i in range(len(bin_edge_list)):
+                if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
+                    bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[i]
+                                                              + bin_edge_list[i
+                                                                              +
+                                                                              1
+                                                              ])
+                                                             / 2.0)
+                else:
+                    continue
+        else:
+            bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[-1] +
+                                                      bin_edge_list[-2])/ 2.0)
+        return bi_val
+
+    def istf_spec_galbias(self, redshift, bin_edge_list=[0.90, 1.10, 1.30,
+                                                         1.50, 1.80]):
+        """
+        Calculates galaxy bias for the spectroscopic GC probe, at given
+        redshift, according to default recipe.
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to calculate bias.
+        bin_edge_list: list
+            List of tomographic redshift bin edges for spectroscopic GC probe.
+            Default is Euclid IST: Forecasting choices.
+
+        Returns
+        -------
+        Value of galaxy bias at input redshift.
+        """
+        if redshift < bin_edge_list[-1]:
+            for i in range(len(bin_edge_list)):
+                if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
+                    bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[i]
+                                                              + bin_edge_list[i
+                                                                              +
+                                                                              1
+                                                              ])
+                                                             / 2.0)
+                else:
+                    continue
+        else:
+            bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[-1] +
+                                                      bin_edge_list[-2])/ 2.0)
+        return bi_val
+
+    def Pgg_phot_def(self, redshift, k_scale):
+        """
+        Calculates the galaxy-galaxy power spectrum for the photometric probe.
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum.
+        k_scale: float
+            k-mode at which to evaluate the  power spectrum.
+
+        Returns
+        -------
+        Value of G-G power spectrum at given k and redshift.
+        """
+        pval = ((self.istf_phot_galbias(redshift) ** 2.0) *
+                self.cosmo_dic['Pk_interpolator'].P(redshift, k_scale))
+        return pval
+
+    def Pgg_spec_def(self, redshift, k_scale):
+        """
+        Calculates the galaxy-galaxy power spectrum for the spectroscopic
+        probe.
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum.
+        k_scale: float
+            k-mode at which to evaluate the  power spectrum.
+
+        Returns
+        -------
+        Value of G-G power spectrum at given k and redshift.
+        """
+        pval = ((self.istf_spec_galbias(redshift) ** 2.0) *
+                self.cosmo_dic['Pk_interpolator'].P(redshift, k_scale))
+        return pval
+
+    def Pgd_phot_def(self, redshift, k_scale):
+        """
+        Calculates the galaxy-matter power spectrum for the photometric probe.
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum.
+        k_scale: float
+            k-mode at which to evaluate the  power spectrum.
+
+        Returns
+        -------
+        Value of G-delta power spectrum at given k and redshift.
+        """
+        pval = (self.istf_phot_galbias(redshift) *
+                self.cosmo_dic['Pk_interpolator'].P(redshift, k_scale))
+        return pval
+
+    def Pgd_spec_def(self, redshift, k_scale):
+        """
+        Calculates the galaxy-matter power spectrum for the spectroscopic
+        probe.
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum.
+        k_scale: float
+            k-mode at which to evaluate the  power spectrum.
+
+        Returns
+        -------
+        Value of G-delta power spectrum at given k and redshift.
+        """
+        pval = (self.istf_spec_galbias(redshift) *
+                self.cosmo_dic['Pk_interpolator'].P(redshift, k_scale))
+        return pval
+
+    def interp_galaxy_spectra(self):
+
+        ks_base = self.cosmo_dic['k_win']
+        zs_base = self.cosmo_dic['z_win']
+
+        zs_interp = np.tile(zs_base, len(ks_base))
+        ks_interp = np.repeat(ks_base, len(zs_base))
+
+        pgg_phot = []
+        pgg_spec = []
+        pgdelta_phot = []
+        pgdelta_spec = []
+        for index in range(len(ks_interp)):
+            pgg_phot.append(self.Pgg_phot_def(zs_interp[index],
+                                              ks_interp[index]))
+            pgg_spec.append(self.Pgg_spec_def(zs_interp[index],
+                                              ks_interp[index]))
+            pgdelta_phot.append(self.Pgd_phot_def(zs_interp[index],
+                                              ks_interp[index]))
+            pgdelta_spec.append(self.Pgd_spec_def(zs_interp[index],
+                                              ks_interp[index]))
+        self.cosmo_dic['Pgg_phot'] = interpolate.intep2d(x=zs_interp,
+                                                         y=ks_interp,
+                                                         z=pgg_phot,
+                                                         bounds_error=True)
+        self.cosmo_dic['Pgdelta_phot'] = interpolate.intep2d(x=zs_interp,
+                                                         y=ks_interp,
+                                                         z=pgdelta_phot,
+                                                         bounds_error=True)
+        self.cosmo_dic['Pgg_spec'] = interpolate.intep2d(x=zs_interp,
+                                                         y=ks_interp,
+                                                         z=pgg_spec,
+                                                         bounds_error=True)
+        self.cosmo_dic['Pgdelta_spec'] = interpolate.intep2d(x=zs_interp,
+                                                         y=ks_interp,
+                                                         z=pgdelta_spec,
+                                                         bounds_error=True)
+        return
+
     def update_cosmo_dic(self, zs, ks):
         """
         Update the dictionary with other cosmological quantities
@@ -272,5 +494,6 @@ class Cosmology:
         self.interp_fsigma8()
         self.interp_sigma8()
         self.interp_angular_dist()
+        self.interp_galaxy_spectra()
         self.cosmo_dic['D_z_k'] = self.growth_factor(zs, ks)
         self.cosmo_dic['f_z_k'] = self.growth_rate(zs, ks)

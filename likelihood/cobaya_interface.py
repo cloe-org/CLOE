@@ -121,6 +121,7 @@ class EuclidLikelihood(Likelihood):
 
         # (GCH): update fiducial cosmology dictionary
         self.fiducial_cosmology.cosmo_dic['z_win'] = self.z_win
+        self.fiducial_cosmology.cosmo_dic['k_win'] = self.k_win
         self.fiducial_cosmology.cosmo_dic['comov_dist'] = \
             model_fiducial.provider.get_comoving_radial_distance(
             self.z_win),
@@ -212,6 +213,7 @@ class EuclidLikelihood(Likelihood):
                 self.provider.get_Pk_interpolator(
                 ("delta_tot", "delta_tot"), nonlinear=False)
             self.cosmo.cosmo_dic['z_win'] = self.z_win
+            self.cosmo.cosmo_dic['k_win'] = self.k_win
             R, z, sigma_R = self.provider.get_sigma_R()
             self.cosmo.cosmo_dic['sigma_8'] = sigma_R[:, 0]
             self.cosmo.cosmo_dic['fsigma8'] = self.provider.get_fsigma8(

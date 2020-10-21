@@ -314,9 +314,12 @@ class Cosmology:
                                                              / 2.0)
                 else:
                     continue
-        else:
+        elif redshift >=  bin_edge_list[-1]:
             bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[-1] +
                                                       bin_edge_list[-2])/ 2.0)
+        elif redshift < bin_edge_list[0]:
+            bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[0] +
+                                                      bin_edge_list[1]) / 2.0)
         return bi_val
 
     def istf_spec_galbias(self, redshift, bin_edge_list=[0.90, 1.10, 1.30,
@@ -348,9 +351,12 @@ class Cosmology:
                                                              / 2.0)
                 else:
                     continue
-        else:
+        elif redshift >=  bin_edge_list[-1]:
             bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[-1] +
                                                       bin_edge_list[-2])/ 2.0)
+        elif redshift < bin_edge_list[0]:
+            bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[0] +
+                                                      bin_edge_list[1]) / 2.0)
         return bi_val
 
     def Pgg_phot_def(self, redshift, k_scale):
@@ -452,19 +458,19 @@ class Cosmology:
                                               ks_interp[index]))
             pgdelta_spec.append(self.Pgd_spec_def(zs_interp[index],
                                               ks_interp[index]))
-        self.cosmo_dic['Pgg_phot'] = interpolate.intep2d(x=zs_interp,
+        self.cosmo_dic['Pgg_phot'] = interpolate.interp2d(x=zs_interp,
                                                          y=ks_interp,
                                                          z=pgg_phot,
                                                          bounds_error=True)
-        self.cosmo_dic['Pgdelta_phot'] = interpolate.intep2d(x=zs_interp,
+        self.cosmo_dic['Pgdelta_phot'] = interpolate.interp2d(x=zs_interp,
                                                          y=ks_interp,
                                                          z=pgdelta_phot,
                                                          bounds_error=True)
-        self.cosmo_dic['Pgg_spec'] = interpolate.intep2d(x=zs_interp,
+        self.cosmo_dic['Pgg_spec'] = interpolate.interp2d(x=zs_interp,
                                                          y=ks_interp,
                                                          z=pgg_spec,
                                                          bounds_error=True)
-        self.cosmo_dic['Pgdelta_spec'] = interpolate.intep2d(x=zs_interp,
+        self.cosmo_dic['Pgdelta_spec'] = interpolate.interp2d(x=zs_interp,
                                                          y=ks_interp,
                                                          z=pgdelta_spec,
                                                          bounds_error=True)

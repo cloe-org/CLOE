@@ -363,7 +363,7 @@ class Cosmology:
         Value of G-G power spectrum at given k and redshift.
         """
         pval = ((self.istf_phot_galbias(redshift) ** 2.0) *
-                self.cosmo_dic['Pk_interpolator'].P(redshift, k_scale))
+                self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
         return pval
 
     def Pgg_spec_def(self, redshift, k_scale):
@@ -383,7 +383,7 @@ class Cosmology:
         Value of G-G power spectrum at given k and redshift.
         """
         pval = ((self.istf_spec_galbias(redshift) ** 2.0) *
-                self.cosmo_dic['Pk_interpolator'].P(redshift, k_scale))
+                self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
         return pval
 
     def Pgd_phot_def(self, redshift, k_scale):
@@ -402,7 +402,7 @@ class Cosmology:
         Value of G-delta power spectrum at given k and redshift.
         """
         pval = (self.istf_phot_galbias(redshift) *
-                self.cosmo_dic['Pk_interpolator'].P(redshift, k_scale))
+                self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
         return pval
 
     def Pgd_spec_def(self, redshift, k_scale):
@@ -422,7 +422,7 @@ class Cosmology:
         Value of G-delta power spectrum at given k and redshift.
         """
         pval = (self.istf_spec_galbias(redshift) *
-                self.cosmo_dic['Pk_interpolator'].P(redshift, k_scale))
+                self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
         return pval
 
     def interp_galaxy_spectra(self):

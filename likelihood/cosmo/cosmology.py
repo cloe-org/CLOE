@@ -308,7 +308,7 @@ class Cosmology:
                 if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
                     bi_val = self.generic_istf_bin_bias_calc(
                         (bin_edge_list[i] + bin_edge_list[i + 1]) / 2.0)
-        elif redshift >=  bin_edge_list[-1]:
+        elif redshift >= bin_edge_list[-1]:
             bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[-1] +
                                                       bin_edge_list[-2]) / 2.0)
         elif redshift < bin_edge_list[0]:
@@ -339,7 +339,7 @@ class Cosmology:
                 if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
                     bi_val = self.generic_istf_bin_bias_calc(
                         (bin_edge_list[i] + bin_edge_list[i + 1]) / 2.0)
-        elif redshift >=  bin_edge_list[-1]:
+        elif redshift >= bin_edge_list[-1]:
             bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[-1] +
                                                       bin_edge_list[-2]) / 2.0)
         elif redshift < bin_edge_list[0]:

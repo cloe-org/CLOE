@@ -123,7 +123,37 @@ class cosmoinitTestCase(TestCase):
                             err_msg='Error in default bias calculation')
 
     def test_phot_bias(self):
+        val = self.model_test.cosmology.istf_phot_galbias(0.43)
+        npt.assert_allclose(val, self.bias_fn_check,
+                            rtol=1e-3,
+                            err_msg='Error in GC-phot bias calculation')
+
+    def test_spec_bias(self):
         val = self.model_test.cosmology.istf_spec_galbias(1.0)
         npt.assert_allclose(val, self.bias_gc_spec_check,
                             rtol=1e-3,
                             err_msg='Error in GC-spec bias calculation')
+
+    def test_Pgg_phot(self):
+        test_p = self.model_test.cosmology.Pgg_phot_def(1.0, 0.002)
+        npt.assert_allclose(test_p, self.Pgg_phot_test,
+                            rtol=1e-3,
+                            err_msg='Error in GC-phot Pgg calculation')
+
+    def test_Pg_delta_phot(self):
+        test_p = self.model_test.cosmology.Pgd_phot_def(1.0, 0.002)
+        npt.assert_allclose(test_p, self.Pgd_phot_test,
+                            rtol=1e-3,
+                            err_msg='Error in GC-phot Pgdelta calculation')
+
+    def test_Pgg_spec(self):
+        test_p = self.model_test.cosmology.Pgg_spec_def(1.0, 0.002)
+        npt.assert_allclose(test_p, self.Pgg_spec_test,
+                            rtol=1e-3,
+                            err_msg='Error in GC-spec Pgg calculation')
+
+    def test_Pg_delta_spec(self):
+        test_p = self.model_test.cosmology.Pgd_spec_def(1.0, 0.002)
+        npt.assert_allclose(test_p, self.Pgd_spec_test,
+                            rtol=1e-3,
+                            err_msg='Error in GC-spec Pgdelta calculation')

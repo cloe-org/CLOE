@@ -42,10 +42,10 @@ class cosmoinitTestCase(TestCase):
         self.Hcheck = 75.234214
         self.bias_gc_phot_check = 1.220245876862528
         self.bias_gc_spec_check = 1.46
-        self.Pgg_phot_test = 23564.315132
-        self.Pgd_phot_test = 16833.800971
-        self.Pgg_spec_test = 25633.934236
-        self.Pgd_spec_test = 17557.489202
+        self.Pgg_phot_test = 57627.032026
+        self.Pgd_phot_test = 41167.417014
+        self.Pgg_spec_test = 62688.329403
+        self.Pgd_spec_test = 42937.21192
 
     def tearDown(self):
         self.H0check = None

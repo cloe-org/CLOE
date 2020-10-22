@@ -418,12 +418,21 @@ class Cosmology:
         return pval
 
     def interp_galaxy_spectra(self):
+        """
+        Creates interpolators for the photometric and spectroscopic galaxy
+        clustering power spectra, and adds them to cosmo_dic.
+        """
 
         ks_base = self.cosmo_dic['k_win']
         zs_base = self.cosmo_dic['z_win']
 
         zs_interp = np.tile(zs_base, len(ks_base))
         ks_interp = np.repeat(ks_base, len(zs_base))
+
+        z_reshape = np.array(zs_interp).reshape((len(zs_interp), 1))
+        k_reshape = np.array(ks_interp).reshape((len(ks_interp), 1))
+
+        zk_arr = np.concatenate((z_reshape, k_reshape), axis=1)
 
         pgg_phot = []
         pgg_spec = []
@@ -438,24 +447,14 @@ class Cosmology:
                                                   ks_interp[index]))
             pgdelta_spec.append(self.Pgd_spec_def(zs_interp[index],
                                                   ks_interp[index]))
-        self.cosmo_dic['Pgg_phot'] = interpolate.interp2d(x=zs_interp,
-                                                          y=ks_interp,
-                                                          z=pgg_phot,
-                                                          bounds_error=True)
-        self.cosmo_dic['Pgdelta_phot'] = interpolate.interp2d(x=zs_interp,
-                                                              y=ks_interp,
-                                                              z=pgdelta_phot,
-                                                              bounds_error=True
-                                                              )
-        self.cosmo_dic['Pgg_spec'] = interpolate.interp2d(x=zs_interp,
-                                                          y=ks_interp,
-                                                          z=pgg_spec,
-                                                          bounds_error=True)
-        self.cosmo_dic['Pgdelta_spec'] = interpolate.interp2d(x=zs_interp,
-                                                              y=ks_interp,
-                                                              z=pgdelta_spec,
-                                                              bounds_error=True
-                                                              )
+        self.cosmo_dic['Pgg_phot'] = interpolate.LinearNDInterpolator(zk_arr,
+                                                                      pgg_phot)
+        self.cosmo_dic['Pgdelta_phot'] = interpolate.LinearNDInterpolator(
+            zk_arr, pgdelta_phot)
+        self.cosmo_dic['Pgg_spec'] = interpolate.LinearNDInterpolator(zk_arr,
+                                                                      pgg_spec)
+        self.cosmo_dic['Pgdelta_spec'] = interpolate.LinearNDInterpolator(
+            zk_arr, pgdelta_spec)
         return
 
     def update_cosmo_dic(self, zs, ks):
@@ -468,11 +467,6 @@ class Cosmology:
             list of redshift for the power spectrum
         ks: array
             list of modes for the power spectrum
-
-        Returns
-        -------
-        None
-
         """
         # (GCH): this function is superfluous
         # just in case we want to have always

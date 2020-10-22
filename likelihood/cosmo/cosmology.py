@@ -71,16 +71,16 @@ class Cosmology:
         z_win: array-like
             Array of redshifts ar which H and comov_dist are evaluated at
         k_win: array-like
-            Array of k values which will be used to evaluate gaalxy power
+            Array of k values which will be used to evaluate galaxy power
             spectra
         Pgg_phot: function
-            Galaxy-galaxy power spectrum for GC-phot.
+            Galaxy-galaxy power spectrum for GC-phot
         Pgdelta_phot: function
-            Galaxy-matter power spectrum for GC-phot.
+            Galaxy-matter power spectrum for GC-phot
         Pgg_spec: function
-            Galaxy-galaxy power spectrum for GC-spec.
+            Galaxy-galaxy power spectrum for GC-spec
         Pgdelta_spec: function
-            Galaxy-matter power spectrum for GC-spec.
+            Galaxy-matter power spectrum for GC-spec
         """
         # (GCH): initialize cosmo dictionary
         # (ACD): Added speed of light to dictionary.!!!Important:it's in units
@@ -263,26 +263,6 @@ class Cosmology:
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['fsigma8'], ext=2)
 
-    def generic_istf_bin_bias_calc(self, bin_mean_redshift):
-        """
-        Calculates galaxy bias according to default recipe, for a given
-        redshift bin.
-
-        .. math::
-                   b_{x,i} = \sqrt{1+\bar{z}_{x,i}}\\
-
-        Parameters
-        ----------
-        bin_mean_redshift: float
-            Mean redshift of particular redshift bin.
-
-        Returns
-        -------
-        Value of bias in redshift bin with mean given by bin_mean_redshift.
-        """
-        bias = np.sqrt(1.0 + bin_mean_redshift)
-        return bias
-
     def istf_phot_galbias(self, redshift, bin_edge_list=[0.001, 0.418, 0.560,
                                                          0.678, 0.789, 0.900,
                                                          1.019, 1.155, 1.324,
@@ -290,6 +270,13 @@ class Cosmology:
         """
         Calculates galaxy bias for the photometric GC probe, at given redshift,
         according to default recipe.
+
+        Note: for redshifts above the final bin (z > 2.5), we use the bias
+        from the final bin. Similarly, for redshifts below the first bin
+        (z < 0.001), we use the bias of the first bin.
+
+        .. math::
+                   b_{x,i} = \sqrt{1+\bar{z}_{x,i}}\\
 
         Parameters
         ----------
@@ -306,45 +293,50 @@ class Cosmology:
         if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
             for i in range(len(bin_edge_list) - 1):
                 if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
-                    bi_val = self.generic_istf_bin_bias_calc(
-                        (bin_edge_list[i] + bin_edge_list[i + 1]) / 2.0)
+                    mean_z = (bin_edge_list[i] + bin_edge_list[i + 1]) / 2.0
+                    bi_val = np.sqrt(1.0 + mean_z)
         elif redshift >= bin_edge_list[-1]:
-            bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[-1] +
-                                                      bin_edge_list[-2]) / 2.0)
+            mean_z = (bin_edge_list[-1] + bin_edge_list[-2]) / 2.0
+            bi_val = np.sqrt(1.0 + mean_z)
         elif redshift < bin_edge_list[0]:
-            bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[0] +
-                                                      bin_edge_list[1]) / 2.0)
+            mean_z = (bin_edge_list[0] + bin_edge_list[1]) / 2.0
+            bi_val = np.sqrt(1.0 + mean_z)
         return bi_val
 
     def istf_spec_galbias(self, redshift, bin_edge_list=[0.90, 1.10, 1.30,
                                                          1.50, 1.80]):
         """
         Calculates galaxy bias for the spectroscopic GC probe, at given
-        redshift, according to default recipe.
+        redshift, according to default recipe. Biases for each bin are
+        calculated by fitting to numerical simulations, as defined in
+        Table 3 of arXiv:1910.09273.
+
+        Note: for redshifts above the final bin (z > 1.80), we use the bias
+        from the final bin. Similarly, for redshifts below the first bin
+        (z < 0.90), we use the bias of the first bin.
 
         Parameters
         ----------
         redshift: float
             Redshift at which to calculate bias.
         bin_edge_list: list
-            List of tomographic redshift bin edges for spectroscopic GC probe.
+            List of redshift bin edges for spectroscopic GC probe.
             Default is Euclid IST: Forecasting choices.
 
         Returns
         -------
         Value of galaxy bias at input redshift.
         """
+        istf_bias_list = [1.46, 1.61, 1.75, 1.90]
+
         if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
             for i in range(len(bin_edge_list) - 1):
                 if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
-                    bi_val = self.generic_istf_bin_bias_calc(
-                        (bin_edge_list[i] + bin_edge_list[i + 1]) / 2.0)
+                    bi_val = istf_bias_list[i]
         elif redshift >= bin_edge_list[-1]:
-            bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[-1] +
-                                                      bin_edge_list[-2]) / 2.0)
+            bi_val = istf_bias_list[-1]
         elif redshift < bin_edge_list[0]:
-            bi_val = self.generic_istf_bin_bias_calc((bin_edge_list[0] +
-                                                      bin_edge_list[1]) / 2.0)
+            bi_val = istf_bias_list[0]
         return bi_val
 
     def Pgg_phot_def(self, redshift, k_scale):
@@ -376,7 +368,7 @@ class Cosmology:
         redshift: float
             Redshift at which to evaluate the power spectrum.
         k_scale: float
-            k-mode at which to evaluate the  power spectrum.
+            k-mode at which to evaluate the power spectrum.
 
         Returns
         -------
@@ -395,7 +387,7 @@ class Cosmology:
         redshift: float
             Redshift at which to evaluate the power spectrum.
         k_scale: float
-            k-mode at which to evaluate the  power spectrum.
+            k-mode at which to evaluate the power spectrum.
 
         Returns
         -------
@@ -415,7 +407,7 @@ class Cosmology:
         redshift: float
             Redshift at which to evaluate the power spectrum.
         k_scale: float
-            k-mode at which to evaluate the  power spectrum.
+            k-mode at which to evaluate the power spectrum.
 
         Returns
         -------

@@ -54,7 +54,8 @@ class EuclidLikelihood(Likelihood):
 
         self.k_max = 10.0
         self.k_samp = 100
-        self.k_win = np.linspace(self.k_min, self.k_max, self.k_samp)
+        self.k_win = np.logspace(np.log10(self.k_min), np.log10(self.k_max),
+                                 self.k_samp)
 
         # SJ: For now, example sampling in redshift (z)
         self.z_min = 0.0

@@ -23,7 +23,8 @@ class CobayaModel:
         self.k_min = 0.002
         self.k_max = 10.0
         self.k_samp = 100
-        self.k_win = np.linspace(self.k_min, self.k_max, self.k_samp)
+        self.k_win = np.logspace(np.log10(self.k_min), np.log10(self.k_max),
+                                 self.k_samp)
 
     def define_info(self, cosmo_inst):
         self.info = {'params': {

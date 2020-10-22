@@ -44,8 +44,8 @@ class cosmoinitTestCase(TestCase):
         self.bias_gc_spec_check = 1.46
         self.Pgg_phot_test = 23564.315132
         self.Pgd_phot_test = 16833.800971
-        self.Pgg_spec_test = 24051.355072
-        self.Pgd_spec_test = 17006.876268
+        self.Pgg_spec_test = 25633.934236
+        self.Pgd_spec_test = 17557.489202
 
     def tearDown(self):
         self.H0check = None

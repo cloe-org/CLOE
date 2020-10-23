@@ -20,6 +20,14 @@ class CobayaModel:
         z_max = 4.0
         z_samp = 100
         self.z_win = np.linspace(z_min, z_max, z_samp)
+        # ACD: Note that this k_min does not currently interface with cobaya
+        # Once the Cobaya interface is adjusted to use a set k_min, the same
+        # value should be used here.
+        self.k_min = 0.002
+        self.k_max = 10.0
+        self.k_samp = 100
+        self.k_win = np.logspace(np.log10(self.k_min), np.log10(self.k_max),
+                                 self.k_samp)
 
     def define_info(self, cosmo_inst):
         self.info = {'params': {
@@ -55,6 +63,7 @@ class CobayaModel:
             'ombh2')
         self.cosmology.cosmo_dic['mnu'] = self.model.provider.get_param('mnu')
         self.cosmology.cosmo_dic['z_win'] = self.z_win
+        self.cosmology.cosmo_dic['k_win'] = self.k_win
         self.cosmology.cosmo_dic['comov_dist'] = \
             self.model.provider.get_comoving_radial_distance(
             self.cosmology.cosmo_dic['z_win'])

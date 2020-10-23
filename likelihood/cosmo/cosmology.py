@@ -24,10 +24,6 @@ class Cosmology:
 
     def __init__(self):
         """
-        Parameters
-        ----------
-        None
-
         Cosmology dictionary parameters
         -------------------------------
         H0: float
@@ -420,7 +416,7 @@ class Cosmology:
     def interp_galaxy_spectra(self):
         """
         Creates interpolators for the photometric and spectroscopic galaxy
-        clustering power spectra, and adds them to cosmo_dic.
+        clustering and galaxy-matter power spectra, and adds them to cosmo_dic.
         """
 
         ks_base = self.cosmo_dic['k_win']

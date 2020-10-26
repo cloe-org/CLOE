@@ -149,7 +149,7 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology.update_cosmo_dic(
             self.fiducial_cosmology.cosmo_dic['z_win'],
             0.05)
-
+        # Initialize Euclike module
         self.likefinal = Euclike()
 
     def get_requirements(self):
@@ -246,4 +246,5 @@ class EuclidLikelihood(Likelihood):
         loglike = self.likefinal.loglike(self.cosmo.cosmo_dic,
                                          self.fiducial_cosmology.cosmo_dic,
                                          **params_values)
+
         return loglike

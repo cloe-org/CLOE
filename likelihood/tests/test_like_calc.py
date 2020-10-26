@@ -27,29 +27,14 @@ class likecalcTestCase(TestCase):
         cosmo.cosmo_dic['ns'] = 0.9674
         cosmo.cosmo_dic['As'] = 2.1e-9
 
-        self.info = {'params': {
-            'ombh2': cosmo.cosmo_dic['ombh2'],
-            'omch2': cosmo.cosmo_dic['omch2'],
-            'omnuh2': cosmo.cosmo_dic['omnuh2'],
-            'H0': cosmo.cosmo_dic['H0'],
-            'tau': cosmo.cosmo_dic['tau'],
-            'mnu': cosmo.cosmo_dic['mnu'],
-            'nnu': cosmo.cosmo_dic['nnu'],
-            'ns': cosmo.cosmo_dic['ns'],
-            'As': cosmo.cosmo_dic['As'],
-            'like_selection': 12},
-            'theory': {'camb':
-                       {'stop_at_error': True,
-                        'extra_args': {'num_massive_neutrinos': 1}}},
-            # Likelihood: we load the likelihood as an external function
-            'likelihood': {'euclid': EuclidLikelihood}}
-
         # fiducial params
         cosmo_fiducial = Cosmology()
         self.model_fiducial = CobayaModel(cosmo_fiducial)
         self.model_fiducial.update_cosmo()
+        # sampled params
         self.model_test = CobayaModel(cosmo)
         self.model_test.update_cosmo()
+        # init Euclike
         self.like_tt = euclike.Euclike()
 
         # (SJ): For now use loglike below, to be updated
@@ -65,5 +50,6 @@ class likecalcTestCase(TestCase):
     def test_loglike(self):
         npt.assert_allclose(self.like_tt.loglike(
             self.model_test.cosmology.cosmo_dic,
-            self.model_fiducial.cosmology.cosmo_dic, self.info),
+            self.model_fiducial.cosmology.cosmo_dic,
+            **self.model_test.model.provider.params),
                 self.check_loglike, rtol=1e-06, err_msg='Loglike failed')

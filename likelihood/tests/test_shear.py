@@ -91,11 +91,6 @@ class cosmoinitTestCase(TestCase):
                            'omch2': self.omch2,
                            'ombh2': self.ombh2})
 
-    def test_cl_integrand(self):
-        cl_int = self.shear.Cl_generic_integrand(1.0, 1.0, 1.0, 100.0)
-        npt.assert_allclose(cl_int, self.cl_integrand_check, rtol=1e-03,
-                            err_msg='Cl integrand failed')
-
     def test_cl_WL(self):
         cl_int = self.shear.Cl_WL(10.0, 1, 1)
         npt.assert_allclose(cl_int, self.cl_WL_check, rtol=1e-05,

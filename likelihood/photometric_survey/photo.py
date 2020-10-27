@@ -72,8 +72,8 @@ class Photo:
 
         n_z_normalized = self.nz_dic_GC[''.join(['n', str(bin_i)])]
 
-        W_i_G = (n_z_normalized(z) * self.theory['H_z_func'](z)
-                 / self.theory['c'])
+        W_i_G = (n_z_normalized(z) * self.theory['H_z_func'](z) /
+                 self.theory['c'])
         return W_i_G
 
     def WL_window_integrand(self, zprime, z, nz):

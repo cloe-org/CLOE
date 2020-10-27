@@ -8,6 +8,7 @@ import numpy as np
 from astropy.io import fits
 from pathlib import Path
 from scipy import interpolate
+from scipy import integrate
 
 
 class Reader:
@@ -91,19 +92,20 @@ class Reader:
             {
                 x: interpolate.InterpolatedUnivariateSpline(
                     self.nz_dict_GC_Phot_raw['z'],
-                    self.nz_dict_GC_Phot_raw[x],
-                    ext=2) for x in list(
-                    self.nz_dict_GC_Phot_raw.keys())[
-                    1:]})
+                    self.nz_dict_GC_Phot_raw[x] / integrate.trapz(
+                        self.nz_dict_GC_Phot_raw[x],
+                        self.nz_dict_GC_Phot_raw['z']), ext=2) for x in list(
+                self.nz_dict_GC_Phot_raw.keys())[1:]})
         # (GCH): WL n(z) data
         self.nz_dict_WL_raw.update(
             self.reader_raw_nz(
                 file_dest, file_name_WL))
         self.nz_dict_WL.update({x: interpolate.InterpolatedUnivariateSpline(
                                 self.nz_dict_WL_raw['z'],
-                                self.nz_dict_WL_raw[x], ext=2)
-                                for x in
-                                list(self.nz_dict_WL_raw.keys())[1:]})
+                                self.nz_dict_WL_raw[x] / integrate.trapz(
+                                    self.nz_dict_WL_raw[x],
+                                    self.nz_dict_WL_raw['z']), ext=2) for x in
+            list(self.nz_dict_WL_raw.keys())[1:]})
 
     def read_GC_spec(self,
                      file_dest='/Spectroscopic/data/Sefusatti_multipoles_pk/',

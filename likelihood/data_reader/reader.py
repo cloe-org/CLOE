@@ -105,7 +105,7 @@ class Reader:
                                 self.nz_dict_WL_raw[x] / integrate.trapz(
                                     self.nz_dict_WL_raw[x],
                                     self.nz_dict_WL_raw['z']), ext=2) for x in
-                                    list(self.nz_dict_WL_raw.keys())[1:]})
+                                list(self.nz_dict_WL_raw.keys())[1:]})
 
     def read_GC_spec(self,
                      file_dest='/Spectroscopic/data/Sefusatti_multipoles_pk/',

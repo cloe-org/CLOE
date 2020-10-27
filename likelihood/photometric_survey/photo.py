@@ -5,9 +5,6 @@ from scipy import integrate
 from scipy import interpolate
 import os.path
 
-# Import auxilary classes
-from ..general_specs.estimates import Galdist
-
 # General error class
 
 

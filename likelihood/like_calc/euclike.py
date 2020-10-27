@@ -6,7 +6,7 @@ Contains class to compute the Euclid likelihood
 
 import numpy as np
 from ..cosmo.cosmology import Cosmology
-from likelihood.photometric_survey.shear import Shear
+from likelihood.photometric_survey.photo import Photo
 from likelihood.spectroscopic_survey.spec import Spec
 from ..data_reader import reader
 
@@ -155,7 +155,7 @@ class Euclike:
         like_selection = data_params['like_selection']
         if like_selection == 1:
             # (SJ): for now, shear lines below just for fun
-            shear_ins = Shear(dictionary)
+            shear_ins = Photo(dictionary)
             ell_ins = 100
             bin_i_ins = 1
             bin_j_ins = 1

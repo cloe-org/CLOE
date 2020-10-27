@@ -1,6 +1,6 @@
 """UNIT TESTS FOR SHEAR
 
-This module contains unit tests for the Shear sub-module of the
+This module contains unit tests for the Photo sub-module of the
 photometric survey module.
 =======
 
@@ -16,7 +16,8 @@ from scipy import integrate
 from scipy import interpolate
 from ..cosmo.cosmology import Cosmology
 from likelihood.cobaya_interface import EuclidLikelihood
-from ..photometric_survey import shear
+from ..photometric_survey import photo
+from ..data_reader import reader
 from astropy import constants as const
 from likelihood.tests.test_wrapper import CobayaModel
 
@@ -35,6 +36,10 @@ class cosmoinitTestCase(TestCase):
         cosmo.cosmo_dic['ns'] = 0.9674
         cosmo.cosmo_dic['As'] = 2.1e-9
 
+        test_reading = reader.Reader()
+        test_reading.compute_nz()
+        nz_dic_WL = test_reading.nz_dict_WL
+        nz_dic_GC = test_reading.nz_dict_GC_Phot
         # (GCH): create wrapper model
         self.model_test = CobayaModel(cosmo)
         self.model_test.update_cosmo()
@@ -48,9 +53,9 @@ class cosmoinitTestCase(TestCase):
         self.c = const.c.to('km/s').value
         self.omch2 = 0.12
         self.ombh2 = 0.022
-        self.shear = shear.Shear(self.model_test.cosmology.cosmo_dic)
+        self.shear = photo.Photo(self.model_test.cosmology.cosmo_dic,
+                                 nz_dic_WL, nz_dic_GC)
         self.W_i_Gcheck = 5.827991e-09
-        self.phot_galbias_check = 1.09544512
         self.cl_integrand_check = 0.000718
         self.cl_WL_check = 6.384874e-14
         self.cl_GC_check = 0.001582
@@ -60,7 +65,6 @@ class cosmoinitTestCase(TestCase):
 
     def tearDown(self):
         self.W_i_Gcheck = None
-        self.phot_galbias_check = None
         self.integrand_check = None
         self.wbincheck = None
         self.cl_integrand_check = None
@@ -69,11 +73,6 @@ class cosmoinitTestCase(TestCase):
         npt.assert_allclose(self.shear.GC_window(0.2, 0.001, 1),
                             self.W_i_Gcheck, rtol=1e-05,
                             err_msg='GC_window failed')
-
-    def test_phot_galbias(self):
-        npt.assert_allclose(self.shear.phot_galbias(0.1, 0.3),
-                            self.phot_galbias_check,
-                            err_msg='Photometric galaxy bias failed')
 
     def test_w_integrand(self):
         int_comp = self.shear.WL_window_integrand(0.1, 0.2, self.flatnz)

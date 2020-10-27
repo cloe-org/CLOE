@@ -48,16 +48,16 @@ class cosmoinitTestCase(TestCase):
 
         self.model_test.cosmology.cosmo_dic['r_z_func'] = self.rfn
         self.integrand_check = -1.0
-        self.wbincheck = 1.718846e-09
+        self.wbincheck = 1.718003e-09
         self.H0 = 67.0
         self.c = const.c.to('km/s').value
         self.omch2 = 0.12
         self.ombh2 = 0.022
         self.shear = photo.Photo(self.model_test.cosmology.cosmo_dic,
                                  nz_dic_WL, nz_dic_GC)
-        self.W_i_Gcheck = 5.827991e-09
+        self.W_i_Gcheck = 5.319691e-09
         self.cl_integrand_check = 0.000718
-        self.cl_WL_check = 6.384874e-14
+        self.cl_WL_check = 6.377865e-14
         self.cl_GC_check = 0.001582
         self.cl_cross_check = 4.706276e-09
         self.flatnz = interpolate.InterpolatedUnivariateSpline(

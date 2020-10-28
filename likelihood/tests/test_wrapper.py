@@ -39,13 +39,14 @@ class CobayaModel:
             'mnu': cosmo_inst.cosmo_dic['mnu'],
             'nnu': cosmo_inst.cosmo_dic['nnu'],
             'ns': cosmo_inst.cosmo_dic['ns'],
-            'As': cosmo_inst.cosmo_dic['As'],
-            'like_selection': 12},
+            'As': cosmo_inst.cosmo_dic['As']},
             'theory': {'camb':
                        {'stop_at_error': True,
                         'extra_args': {'num_massive_neutrinos': 1}}},
             # Likelihood: we load the likelihood as an external function
             'likelihood': {'euclid': EuclidLikelihood}}
+        self.info['params'].update(
+            cosmo_inst.cosmo_dic['nuisance_parameters'])
 
     def get_cobaya_model(self):
         self.define_info(self.cosmology)

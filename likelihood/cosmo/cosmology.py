@@ -77,6 +77,9 @@ class Cosmology:
             Galaxy-galaxy power spectrum for GC-spec
         Pgdelta_spec: function
             Galaxy-matter power spectrum for GC-spec
+        bias_parameters: dictionary
+            Contains all niusance bias parameters
+            which are sampled over
         """
         # (GCH): initialize cosmo dictionary
         # (ACD): Added speed of light to dictionary.!!!Important:it's in units
@@ -102,7 +105,6 @@ class Cosmology:
                           'Pgdelta_spec': None,
                           'fsigma8': None,
                           'b_gal': 1.0,
-                          # 'b_gal': None,
                           'sigma_8': None,
                           'c': const.c.to('km/s').value,
                           'z_win': None,
@@ -111,7 +113,23 @@ class Cosmology:
                           'd_z_func': None,
                           'H_z_func': None,
                           'sigma8_z_func': None,
-                          'fsigma8_z_func': None}
+                          'fsigma8_z_func': None,
+                          'nuisance_parameters': {
+                             'like_selection': 12,
+                             'b1_photo': 1.0997727037892875,
+                             'b2_photo': 1.220245876862528,
+                             'b3_photo': 1.2723993083933989,
+                             'b4_photo': 1.316624471897739,
+                             'b5_photo': 1.35812370570578,
+                             'b6_photo': 1.3998214171814918,
+                             'b7_photo': 1.4446452851824907,
+                             'b8_photo': 1.4964959071110084,
+                             'b9_photo': 1.5652475842498528,
+                             'b10_photo': 1.7429859437184225,
+                             'b1_spec': 1.46,
+                             'b2_spec': 1.61,
+                             'b3_spec': 1.75,
+                             'b4_spec': 1.90}}
 
     def growth_factor(self, zs, ks):
         """
@@ -286,17 +304,25 @@ class Cosmology:
         -------
         Value of galaxy bias at input redshift.
         """
+        istf_bias_list = [self.cosmo_dic['nuisance_parameters']['b1_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b2_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b3_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b4_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b5_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b6_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b7_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b8_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b9_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b10_photo']]
+
         if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
             for i in range(len(bin_edge_list) - 1):
                 if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
-                    mean_z = (bin_edge_list[i] + bin_edge_list[i + 1]) / 2.0
-                    bi_val = np.sqrt(1.0 + mean_z)
+                    bi_val = istf_bias_list[i]
         elif redshift >= bin_edge_list[-1]:
-            mean_z = (bin_edge_list[-1] + bin_edge_list[-2]) / 2.0
-            bi_val = np.sqrt(1.0 + mean_z)
+            bi_val = istf_bias_list[-1]
         elif redshift < bin_edge_list[0]:
-            mean_z = (bin_edge_list[0] + bin_edge_list[1]) / 2.0
-            bi_val = np.sqrt(1.0 + mean_z)
+            bi_val = istf_bias_list[0]
         return bi_val
 
     def istf_spec_galbias(self, redshift, bin_edge_list=[0.90, 1.10, 1.30,
@@ -323,7 +349,11 @@ class Cosmology:
         -------
         Value of galaxy bias at input redshift.
         """
-        istf_bias_list = [1.46, 1.61, 1.75, 1.90]
+
+        istf_bias_list = [self.cosmo_dic['nuisance_parameters']['b1_spec'],
+                          self.cosmo_dic['nuisance_parameters']['b2_spec'],
+                          self.cosmo_dic['nuisance_parameters']['b3_spec'],
+                          self.cosmo_dic['nuisance_parameters']['b4_spec']]
 
         if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
             for i in range(len(bin_edge_list) - 1):

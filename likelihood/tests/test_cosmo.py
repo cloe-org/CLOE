@@ -65,6 +65,14 @@ class cosmoinitTestCase(TestCase):
                          err_msg='Cosmology dictionary not initialised '
                                  'correctly.')
 
+    def test_cosmo_nuisance_init(self):
+        emptflag = bool(
+            self.model_test.cosmology.cosmo_dic['nuisance_parameters'])
+        npt.assert_equal(emptflag, True,
+                         err_msg='nuisance parameters '
+                         'not initialized within '
+                         'cosmology dictionary')
+
     def test_cosmo_asign(self):
         npt.assert_allclose(self.model_test.cosmology.cosmo_dic['H0'],
                             self.H0check,

@@ -8,7 +8,7 @@ import os.path
 # General error class
 
 
-class ShearError(Exception):
+class PhotoError(Exception):
     r"""
     Class to define Exception Error
     """
@@ -31,7 +31,7 @@ class Photo:
         nz_dic_WL: dictionary
             Dictionary containing n(z)s for WL probe.
         nz_dic_GC: dictionary
-            Dictionary contain
+            Dictionary containing n(z)s for GC-phot probe.
         """
         self.theory = cosmo_dic
         self.nz_dic_WL = nz_dic_WL
@@ -39,17 +39,15 @@ class Photo:
         if self.theory['r_z_func'] is None:
             raise Exception('No interpolated function for comoving distance '
                             'exists in cosmo_dic.')
-        self.cl_int_min = 0.001
-        self.cl_int_max = self.theory['z_win'][-1]
+        self.cl_int_z_min = 0.001
+        self.cl_int_z_max = self.theory['z_win'][-1]
 
-    def GC_window(self, k, z, bin_i):
+    def GC_window(self, z, bin_i):
         """
         Implements GC window
 
         Parameters
         ----------
-        k: float
-           Scale at which to evaluate the bias
         z: float
            Redshift at which to evaluate distribution.
         bin_i: int
@@ -64,7 +62,7 @@ class Photo:
         Notes
         -----
         .. math::
-            W_i^G(k, z) &=b(k, z)n_i(z)/\bar{n_i}H(z)\\
+            W_i^G(z) &= /\bar{n_i}H(z)/c\\
         """
 
         n_z_normalized = self.nz_dic_GC[''.join(['n', str(bin_i)])]
@@ -133,7 +131,7 @@ class Photo:
         W_val = (1.5 * (H0 / c) * O_m * (1.0 + z) * (
             self.theory['r_z_func'](z) /
                 (c / H0)) * integrate.quad(self.WL_window_integrand,
-                                           a=z, b=4.0,
+                                           a=z, b=self.cl_int_z_max,
                                            args=(z, n_z_normalized))[0])
         return W_val
 
@@ -143,8 +141,10 @@ class Photo:
         the bins are supplied.
 
         .. math::
-        \frac{W_{i}^{A}(z)W_{j}^{B}(z)}{H(z)r^2(z)}P_{\delta\delta}(k=
+        \frac{W_{i}^{A}(z)W_{j}^{B}(z)}{H(z)r^2(z)}P_{AB}(k=
         (\ell + 0.5)/r(z), z).
+
+        A, B in {G, L}.
 
         Parameters
         ----------
@@ -194,7 +194,7 @@ class Photo:
         Value of C_\ell.
         """
 
-        int_zs = np.arange(self.cl_int_min, self.cl_int_max, int_step)
+        int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
         c_int_arr = []
         for rshft in int_zs:
@@ -217,7 +217,7 @@ class Photo:
 
         .. math::
         c \int {\rm d}z \frac{W_{i}^{GC}(k, z)W_{j}^{GC}(k, z)}{H(z)r^2(z)}
-        P_{\delta\delta}(k=(\ell + 0.5)/r(z), z).
+        P_{GG}(k=(\ell + 0.5)/r(z), z).
 
         Parameters
         ----------
@@ -236,7 +236,7 @@ class Photo:
         Value of C_\ell.
         """
 
-        int_zs = np.arange(self.cl_int_min, self.cl_int_max, int_step)
+        int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
         c_int_arr = []
         for rshft in int_zs:
@@ -244,8 +244,8 @@ class Photo:
             # note that the implementation currently uses a scale-independent
             # bias.
             current_k = (ell + 0.5) / self.theory['r_z_func'](rshft)
-            kern_i = self.GC_window(current_k, rshft, bin_i)
-            kern_j = self.GC_window(current_k, rshft, bin_j)
+            kern_i = self.GC_window(rshft, bin_i)
+            kern_j = self.GC_window(rshft, bin_j)
             c_int_arr.append(self.Cl_generic_integrand(rshft, kern_i, kern_j,
                                                        current_k, self.theory[
                                                            'Pgg_phot']))
@@ -260,7 +260,7 @@ class Photo:
 
         .. math::
         c \int {\rm d}z \frac{W_{i}^{WL}(z)W_{j}^{GC}(k, z)}{H(z)r^2(z)}
-        P_{\delta\delta}(k=(\ell + 0.5)/r(z), z).
+        P_{G\delta}(k=(\ell + 0.5)/r(z), z).
 
         Parameters
         ----------
@@ -279,7 +279,7 @@ class Photo:
         Value of C_\ell.
         """
 
-        int_zs = np.arange(self.cl_int_min, self.cl_int_max, int_step)
+        int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
         c_int_arr = []
         for rshft in int_zs:

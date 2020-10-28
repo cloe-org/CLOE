@@ -1,4 +1,4 @@
-"""UNIT TESTS FOR SHEAR
+"""UNIT TESTS FOR PHOTO
 
 This module contains unit tests for the Photo sub-module of the
 photometric survey module.
@@ -53,8 +53,8 @@ class cosmoinitTestCase(TestCase):
         self.c = const.c.to('km/s').value
         self.omch2 = 0.12
         self.ombh2 = 0.022
-        self.shear = photo.Photo(self.model_test.cosmology.cosmo_dic,
-                                 nz_dic_WL, nz_dic_GC)
+        self.phot = photo.Photo(self.model_test.cosmology.cosmo_dic,
+                                nz_dic_WL, nz_dic_GC)
         self.W_i_Gcheck = 5.319691e-09
         self.cl_integrand_check = 0.000718
         self.cl_WL_check = 6.377865e-14
@@ -70,38 +70,38 @@ class cosmoinitTestCase(TestCase):
         self.cl_integrand_check = None
 
     def test_GC_window(self):
-        npt.assert_allclose(self.shear.GC_window(0.2, 0.001, 1),
+        npt.assert_allclose(self.phot.GC_window(0.001, 1),
                             self.W_i_Gcheck, rtol=1e-05,
                             err_msg='GC_window failed')
 
     def test_w_integrand(self):
-        int_comp = self.shear.WL_window_integrand(0.1, 0.2, self.flatnz)
+        int_comp = self.phot.WL_window_integrand(0.1, 0.2, self.flatnz)
         npt.assert_allclose(int_comp, self.integrand_check, rtol=1e-05,
                             err_msg='Integrand of WL kernel failed')
 
     def test_WL_window(self):
-        int_comp = self.shear.WL_window(0.1, 1)
+        int_comp = self.phot.WL_window(0.1, 1)
         npt.assert_allclose(int_comp, self.wbincheck, rtol=1e-05,
                             err_msg='WL_window failed')
 
     def test_rzfunc_exception(self):
-        npt.assert_raises(Exception, self.shear,
+        npt.assert_raises(Exception, self.phot,
                           {'H0': self.H0,
                            'c': self.c,
                            'omch2': self.omch2,
                            'ombh2': self.ombh2})
 
     def test_cl_WL(self):
-        cl_int = self.shear.Cl_WL(10.0, 1, 1)
+        cl_int = self.phot.Cl_WL(10.0, 1, 1)
         npt.assert_allclose(cl_int, self.cl_WL_check, rtol=1e-05,
                             err_msg='Cl WL test failed')
 
     def test_cl_GC(self):
-        cl_int = self.shear.Cl_GC_phot(10.0, 1, 1)
+        cl_int = self.phot.Cl_GC_phot(10.0, 1, 1)
         npt.assert_allclose(cl_int, self.cl_GC_check, rtol=1e-02,
                             err_msg='Cl GC photometric test failed')
 
     def test_cl_cross(self):
-        cl_int = self.shear.Cl_cross(10.0, 1, 1)
+        cl_int = self.phot.Cl_cross(10.0, 1, 1)
         npt.assert_allclose(cl_int, self.cl_cross_check, rtol=1e-02,
                             err_msg='Cl photometric cross test failed')

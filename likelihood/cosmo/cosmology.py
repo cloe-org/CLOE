@@ -445,12 +445,12 @@ class Cosmology:
                                                   ks_interp[index]))
         self.cosmo_dic['Pgg_phot'] = interpolate.LinearNDInterpolator(zk_arr,
                                                                       pgg_phot,
-                                                                      0.0)
+                                                                      )
         self.cosmo_dic['Pgdelta_phot'] = interpolate.LinearNDInterpolator(
             zk_arr, pgdelta_phot, 0.0)
         self.cosmo_dic['Pgg_spec'] = interpolate.LinearNDInterpolator(zk_arr,
                                                                       pgg_spec,
-                                                                      0.0)
+                                                                      )
         self.cosmo_dic['Pgdelta_spec'] = interpolate.LinearNDInterpolator(
             zk_arr, pgdelta_spec, 0.0)
         return

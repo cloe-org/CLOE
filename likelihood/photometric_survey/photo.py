@@ -288,7 +288,7 @@ class Photo:
             # bias.
             current_k = (ell + 0.5) / self.theory['r_z_func'](rshft)
             kern_i = self.WL_window(rshft, bin_i)
-            kern_j = self.GC_window(current_k, rshft, bin_j)
+            kern_j = self.GC_window(rshft, bin_j)
             c_int_arr.append(self.Cl_generic_integrand(rshft, kern_i, kern_j,
                                                        current_k, self.theory[
                                                            'Pgdelta_phot']))

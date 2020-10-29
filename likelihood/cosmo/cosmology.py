@@ -193,6 +193,12 @@ class Cosmology:
         # (in process)
         # This quantity depends on z and k
         # I assume 1+z=1/a where a: scale factor
+        # AP: I added these two lines because with the new galaxy spectra
+        #     interpolators we have to specify k_win as an array, and no longer
+        #     as a scalar. But as specified above, the code crashes if k_win is
+        #     an array
+        if (isinstance(ks, np.ndarray)):
+            ks = ks[0]
         D_z_k = self.growth_factor(zs, ks)
         # This will work when k is fixed, not an array
         try:
@@ -389,10 +395,10 @@ class Cosmology:
                 self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
         return pval
 
-    def Pgg_spec_def(self, redshift, k_scale):
+    def Pgg_spec_def(self, redshift, k_scale, rsd_mu):
         """
-        Calculates the galaxy-galaxy power spectrum for the spectroscopic
-        probe.
+        Calculates the redshift-space galaxy-galaxy power spectrum for the
+        spectroscopic probe.
 
         Parameters
         ----------
@@ -400,13 +406,20 @@ class Cosmology:
             Redshift at which to evaluate the power spectrum.
         k_scale: float
             k-mode at which to evaluate the power spectrum.
+        rsd_mu: float
+            cosinus of the angle between the pair separation and the l.o.s.
 
         Returns
         -------
-        Value of G-G power spectrum at given k and redshift.
+        Value of redshift-space G-G power spectrum at given k, redshift
+        and mu
         """
-        pval = ((self.istf_spec_galbias(redshift) ** 2.0) *
-                self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
+        bias = self.istf_spec_galbias(redshift)
+        fs8 = self.cosmo_dic['fsigma8_z_func'](redshift)
+        s8 = self.cosmo_dic['sigma8_z_func'](redshift)
+        growth = fs8 / s8
+        power = self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
+        pval = (bias + growth * rsd_mu ** 2.0) ** 2.0 * power
         return pval
 
     def Pgd_phot_def(self, redshift, k_scale):
@@ -466,24 +479,21 @@ class Cosmology:
         zk_arr = np.concatenate((z_reshape, k_reshape), axis=1)
 
         pgg_phot = []
-        pgg_spec = []
         pgdelta_phot = []
         pgdelta_spec = []
         for index in range(len(ks_interp)):
             pgg_phot.append(self.Pgg_phot_def(zs_interp[index],
                                               ks_interp[index]))
-            pgg_spec.append(self.Pgg_spec_def(zs_interp[index],
-                                              ks_interp[index]))
             pgdelta_phot.append(self.Pgd_phot_def(zs_interp[index],
                                                   ks_interp[index]))
             pgdelta_spec.append(self.Pgd_spec_def(zs_interp[index],
                                                   ks_interp[index]))
+
         self.cosmo_dic['Pgg_phot'] = interpolate.LinearNDInterpolator(zk_arr,
                                                                       pgg_phot)
         self.cosmo_dic['Pgdelta_phot'] = interpolate.LinearNDInterpolator(
             zk_arr, pgdelta_phot)
-        self.cosmo_dic['Pgg_spec'] = interpolate.LinearNDInterpolator(zk_arr,
-                                                                      pgg_spec)
+        self.cosmo_dic['Pgg_spec'] = self.Pgg_spec_def
         self.cosmo_dic['Pgdelta_spec'] = interpolate.LinearNDInterpolator(
             zk_arr, pgdelta_spec)
         return

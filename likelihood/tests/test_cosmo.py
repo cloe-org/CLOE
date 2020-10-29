@@ -44,7 +44,7 @@ class cosmoinitTestCase(TestCase):
         self.bias_gc_spec_check = 1.46
         self.Pgg_phot_test = 57627.032026
         self.Pgd_phot_test = 41167.417014
-        self.Pgg_spec_test = 62688.329403
+        self.Pgg_spec_test = 83066.735675
         self.Pgd_spec_test = 42937.21192
 
     def tearDown(self):
@@ -133,7 +133,7 @@ class cosmoinitTestCase(TestCase):
                             err_msg='Error in GC-phot Pgdelta calculation')
 
     def test_Pgg_spec(self):
-        test_p = self.model_test.cosmology.Pgg_spec_def(1.0, 0.01)
+        test_p = self.model_test.cosmology.Pgg_spec_def(1.0, 0.01, 0.5)
         npt.assert_allclose(test_p, self.Pgg_spec_test,
                             rtol=1e-3,
                             err_msg='Error in GC-spec Pgg calculation')
@@ -158,7 +158,9 @@ class cosmoinitTestCase(TestCase):
                             err_msg='Error in GC-phot Pgdelta interpolation')
 
     def test_Pgg_spec_interp(self):
-        test_p = self.model_test.cosmology.cosmo_dic['Pgg_spec'](1.0, 0.01)
+        test_p = self.model_test.cosmology.cosmo_dic['Pgg_spec'](1.0,
+                                                                 0.01,
+                                                                 0.5)
         npt.assert_allclose(test_p, self.Pgg_spec_test,
                             rtol=1e-3,
                             err_msg='Error in GC-spec Pgg interpolation')

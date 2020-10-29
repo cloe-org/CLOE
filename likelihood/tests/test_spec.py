@@ -48,16 +48,12 @@ class cosmoinitTestCase(TestCase):
                          self.model_fiducial.cosmology.cosmo_dic)
 
         # (GCH): Checks
-        self.check_multipole_spectra_noap = [11738.489315,
-                                             8298.601669,
-                                             701.419969]
-        self.check_multipole_spectra_m0 = 11740.10683
+        self.check_multipole_spectra_m0 = 12398.426604
         self.check_multipole_spectra_m1 = 0.0
-        self.check_multipole_spectra_m2 = 8387.248558
+        self.check_multipole_spectra_m2 = 8615.859821
         self.check_multipole_spectra_m3 = 0.0
-        self.check_multipole_spectra_m4 = 758.244657
-        self.check_multipole_spectra_integrand = 3142.60911
-        self.check_pkgal_linear = 13399.631841
+        self.check_multipole_spectra_m4 = 759.762468
+        self.check_multipole_spectra_integrand = 3309.479301
         self.check_scaling_factor_perp = 0.993
         self.check_scaling_factor_parall = 0.992782
         self.check_get_k = 0.001007
@@ -68,12 +64,6 @@ class cosmoinitTestCase(TestCase):
         self.check_scaling_factor_parall = None
         self.check_get_k = None
         self.check_get_mu = None
-
-    def test_multipole_spectra_noap(self):
-        npt.assert_allclose(self.spec.multipole_spectra_noap(1.0, 0.1),
-                            self.check_multipole_spectra_noap,
-                            rtol=1e-06,
-                            err_msg='Multipole spectra (no AP) failed')
 
     def test_multipole_spectra_m0(self):
         npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, 0),
@@ -111,12 +101,6 @@ class cosmoinitTestCase(TestCase):
                             self.check_multipole_spectra_integrand,
                             rtol=1e-06,
                             err_msg='Multipole spectra integrand failed')
-
-    def test_pkgal_linear(self):
-        npt.assert_allclose(self.spec.pkgal_linear(0.7, 1.0, 0.1),
-                            self.check_pkgal_linear,
-                            rtol=1e-06,
-                            err_msg='Linear galaxy spectrum failed')
 
     def test_scaling_factor_perp(self):
         npt.assert_allclose(self.spec.scaling_factor_perp(0.01),

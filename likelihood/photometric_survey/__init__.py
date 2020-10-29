@@ -6,6 +6,6 @@ In this module we include functions needed for photometric observables
 
 """
 
-__all__ = ['shear']  # list submodules
+__all__ = ['photo']  # list submodules
 
 from . import *

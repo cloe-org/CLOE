@@ -5,113 +5,49 @@ from scipy import integrate
 from scipy import interpolate
 import os.path
 
-# Import auxilary classes
-from ..general_specs.estimates import Galdist
-
-# JUST FOR NOW: test with bias
-my_path = os.path.abspath(os.path.dirname(__file__))
-path = os.path.join(my_path,
-                    "../../data/ExternalBenchmark/matteo_bias.npy")
-
-bias_dic = np.load(
-    path,
-    allow_pickle=True).item()
-
-z_extended = np.linspace(2.6, 4, 100)
-
-
-bias_interpolator = interpolate.InterpolatedUnivariateSpline(
-    x=np.concatenate([bias_dic['z'], z_extended]),
-    y=np.concatenate([bias_dic['bias'],
-                      bias_dic['bias'][-1] * np.ones(len(z_extended))]),
-    ext=2)
-
-
 # General error class
 
 
-class ShearError(Exception):
+class PhotoError(Exception):
     r"""
     Class to define Exception Error
     """
     pass
 
 
-class Shear:
+class Photo:
     """
-    Class for Shear observable
+    Class for photometric observables
     """
 
-    def __init__(self, cosmo_dic):
+    def __init__(self, cosmo_dic, nz_dic_WL, nz_dic_GC):
         """
-        Constructor of the class Shear
+        Constructor of the class Photo
 
         Parameters
         ----------
         cosmo_dic: dictionary
            cosmological dictionary from cosmo
+        nz_dic_WL: dictionary
+            Dictionary containing n(z)s for WL probe.
+        nz_dic_GC: dictionary
+            Dictionary containing n(z)s for GC-phot probe.
         """
         self.theory = cosmo_dic
+        self.nz_dic_WL = nz_dic_WL
+        self.nz_dic_GC = nz_dic_GC
         if self.theory['r_z_func'] is None:
             raise Exception('No interpolated function for comoving distance '
                             'exists in cosmo_dic.')
-        self.cl_int_min = 0.001
-        self.cl_int_max = self.theory['z_win'][-1]
+        self.cl_int_z_min = 0.001
+        self.cl_int_z_max = self.theory['z_win'][-1]
 
-    # SJ: k-indep bias for now
-    # def bias(self, k, z):
-    # Use theory approach for bias for now
-    # def phot_galbias(self, bin_i):
-    def phot_galbias(self, bin_z_min, bin_z_max):
-        """
-        Returns the photometric galaxy bias.
-        For now use Eqn 133 in arXiv:1910.09273
-
-        Parameters
-        ----------
-        # SJ: k-indep bias for now
-        # k: float
-        #    Scale at which to evaluate the bias
-        # z: float
-        #    Redshift at which to evaluate distribution.
-        # SJ: use theory approach for bias for now
-        # bin_i: float
-        #        Bin index
-        bin_z_max: float
-                   Upper limit of bin
-        bin_z_min: float
-                   Lower limit of bin
-
-        Returns
-        -------
-        b: float
-           galaxy bias
-
-        Notes
-        -----
-        .. math::
-            b(z) &= \sqrt{1+\bar{z}}\\
-        """
-
-        # SJ: We could eventually have a bias parameter for each
-        # SJ: tomographic bin (also see yaml file)
-        # phot_galbias = [params_values.get(p, None) for p in \
-        #     ['phot_b1', 'phot_b2', 'phot_b3', 'phot_b4', 'phot_b5', \
-        #     'phot_b6', 'phot_b7', 'phot_b8', 'phot_b9', 'phot_b10']]
-
-        b = np.sqrt(1.0 + (bin_z_min + bin_z_max) / 2.0)
-        # SJ: Yet another option, not used
-        # b = np.sqrt(1 + z)
-        return b
-
-    def GC_window(self, k, z, bin_i):
+    def GC_window(self, z, bin_i):
         """
         Implements GC window
 
         Parameters
         ----------
-        k: float
-           Scale at which to evaluate the bias
         z: float
            Redshift at which to evaluate distribution.
         bin_i: int
@@ -126,26 +62,13 @@ class Shear:
         Notes
         -----
         .. math::
-            W_i^G(k, z) &=b(k, z)n_i(z)/\bar{n_i}H(z)\\
+            W_i^G(z) &= n_i(z)/\bar{n_i}H(z)/c\\
         """
 
-        # (GCH): create instance from Galdist class
-        try:
-            galdist = Galdist(bin_i)
-        except ShearError:
-            print('Error in initializing the class Galdist')
-        # (GCH): call n_z_normalized from Galdist
-        n_z_normalized = galdist.n_i
-        # SJ: k-indep bias, let us follow the IST:F approach for now
-        # W_i_G = self.phot_galbias(k, z) * n_z_normalized(z) * \
-        #     self.theory['H'](z)
-        # W_i_G = self.phot_galbias(n_z_normalized.get_knots()[0],
-        #                          n_z_normalized.get_knots()[-1]) * \
-        #    n_z_normalized(z) * self.theory['H_z_func'](z) \
-        #    / self.theory['c']
-        W_i_G = bias_interpolator(z) * \
-            n_z_normalized(z) * self.theory['H_z_func'](z) \
-            / self.theory['c']
+        n_z_normalized = self.nz_dic_GC[''.join(['n', str(bin_i)])]
+
+        W_i_G = (n_z_normalized(z) * self.theory['H_z_func'](z) /
+                 self.theory['c'])
         return W_i_G
 
     def WL_window_integrand(self, zprime, z, nz):
@@ -202,31 +125,26 @@ class Shear:
                (self.theory['ombh2'] / (H0 / 100.0)**2.0) +
                (self.theory['omnuh2'] / (H0 / 100.0)**2.0))
 
-        # create instance from Galdist class
-        try:
-            galdist = Galdist(bin_i)
-        except ShearError:
-            print('Error in initializing the class Galdist')
-        # call n_z_normalized from Galdist
-        n_z_normalized = galdist.n_i
+        n_z_normalized = self.nz_dic_WL[''.join(['n', str(bin_i)])]
 
         # (ACD): Note that impact of MG is currently neglected (\Sigma=1).
         W_val = (1.5 * (H0 / c) * O_m * (1.0 + z) * (
             self.theory['r_z_func'](z) /
                 (c / H0)) * integrate.quad(self.WL_window_integrand,
-                                           a=z, b=galdist.survey_max -
-                                           galdist.int_step,
+                                           a=z, b=self.cl_int_z_max,
                                            args=(z, n_z_normalized))[0])
         return W_val
 
-    def Cl_generic_integrand(self, z, W_i_z, W_j_z, k):
+    def Cl_generic_integrand(self, z, W_i_z, W_j_z, k, P_int):
         """
         Calculates the C_\ell integrand for any two probes and bins for which
         the bins are supplied.
 
         .. math::
-        \frac{W_{i}^{A}(z)W_{j}^{B}(z)}{H(z)r^2(z)}P_{\delta\delta}(k=
+        \frac{W_{i}^{A}(z)W_{j}^{B}(z)}{H(z)r^2(z)}P_{AB}(k=
         (\ell + 0.5)/r(z), z).
+
+        A, B in {G, L}.
 
         Parameters
         ----------
@@ -238,6 +156,9 @@ class Shear:
            Value of kernel for bin j, at redshift z.
         k: float
            Scale at which the current C_\ell is being evaluated at.
+        P_int: obj
+            Choice of power spectrum interpolator. Either matter power spectrum
+            GG power spectrum, or G-delta power spectrum.
         Returns
         -------
         Value of C_\ell integrand at redshift z.
@@ -245,7 +166,7 @@ class Shear:
         kern_mult = ((W_i_z * W_j_z) /
                      (self.theory['H_z_func'](z) *
                       (self.theory['r_z_func'](z)) ** 2.0))
-        power = self.theory['Pk_interpolator'].P(z, k)
+        power = P_int(z, k)
         return kern_mult * power
 
     def Cl_WL(self, ell, bin_i, bin_j, int_step=0.1):
@@ -273,7 +194,7 @@ class Shear:
         Value of C_\ell.
         """
 
-        int_zs = np.arange(self.cl_int_min, self.cl_int_max, int_step)
+        int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
         c_int_arr = []
         for rshft in int_zs:
@@ -281,7 +202,10 @@ class Shear:
             kern_i = self.WL_window(rshft, bin_i)
             kern_j = self.WL_window(rshft, bin_j)
             c_int_arr.append(self.Cl_generic_integrand(rshft, kern_i, kern_j,
-                                                       current_k))
+                                                       current_k,
+                                                       self.theory[
+                                                           'Pk_interpolator'].P
+                                                       ))
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final
@@ -293,7 +217,7 @@ class Shear:
 
         .. math::
         c \int {\rm d}z \frac{W_{i}^{GC}(k, z)W_{j}^{GC}(k, z)}{H(z)r^2(z)}
-        P_{\delta\delta}(k=(\ell + 0.5)/r(z), z).
+        P_{GG}(k=(\ell + 0.5)/r(z), z).
 
         Parameters
         ----------
@@ -312,7 +236,7 @@ class Shear:
         Value of C_\ell.
         """
 
-        int_zs = np.arange(self.cl_int_min, self.cl_int_max, int_step)
+        int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
         c_int_arr = []
         for rshft in int_zs:
@@ -320,10 +244,11 @@ class Shear:
             # note that the implementation currently uses a scale-independent
             # bias.
             current_k = (ell + 0.5) / self.theory['r_z_func'](rshft)
-            kern_i = self.GC_window(current_k, rshft, bin_i)
-            kern_j = self.GC_window(current_k, rshft, bin_j)
+            kern_i = self.GC_window(rshft, bin_i)
+            kern_j = self.GC_window(rshft, bin_j)
             c_int_arr.append(self.Cl_generic_integrand(rshft, kern_i, kern_j,
-                                                       current_k))
+                                                       current_k, self.theory[
+                                                           'Pgg_phot']))
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final
@@ -335,7 +260,7 @@ class Shear:
 
         .. math::
         c \int {\rm d}z \frac{W_{i}^{WL}(z)W_{j}^{GC}(k, z)}{H(z)r^2(z)}
-        P_{\delta\delta}(k=(\ell + 0.5)/r(z), z).
+        P_{G\delta}(k=(\ell + 0.5)/r(z), z).
 
         Parameters
         ----------
@@ -354,7 +279,7 @@ class Shear:
         Value of C_\ell.
         """
 
-        int_zs = np.arange(self.cl_int_min, self.cl_int_max, int_step)
+        int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
         c_int_arr = []
         for rshft in int_zs:
@@ -363,9 +288,10 @@ class Shear:
             # bias.
             current_k = (ell + 0.5) / self.theory['r_z_func'](rshft)
             kern_i = self.WL_window(rshft, bin_i)
-            kern_j = self.GC_window(current_k, rshft, bin_j)
+            kern_j = self.GC_window(rshft, bin_j)
             c_int_arr.append(self.Cl_generic_integrand(rshft, kern_i, kern_j,
-                                                       current_k))
+                                                       current_k, self.theory[
+                                                           'Pgdelta_phot']))
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final

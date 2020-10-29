@@ -46,7 +46,7 @@ class EuclidLikelihood(Likelihood):
         """
 
         # SJ: For now, example sampling in wavenumber (k)
-        self.k_min = 0.002
+        self.k_min = 0.001
         # ATTENTION: The k_min is not passed to cobaya to build
         # the matter power spectrum interpolator !!
         # The k_min is internally chosen by cobaya.

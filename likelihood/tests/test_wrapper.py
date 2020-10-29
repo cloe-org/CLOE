@@ -23,7 +23,7 @@ class CobayaModel:
         # ACD: Note that this k_min does not currently interface with cobaya
         # Once the Cobaya interface is adjusted to use a set k_min, the same
         # value should be used here.
-        self.k_min = 0.002
+        self.k_min = 0.001
         self.k_max = 10.0
         self.k_samp = 100
         self.k_win = np.logspace(np.log10(self.k_min), np.log10(self.k_max),

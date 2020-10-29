@@ -6,7 +6,7 @@ Contains class to compute the Euclid likelihood
 
 import numpy as np
 from ..cosmo.cosmology import Cosmology
-from likelihood.photometric_survey.shear import Shear
+from likelihood.photometric_survey.photo import Photo
 from likelihood.spectroscopic_survey.spec import Spec
 from ..data_reader import reader
 
@@ -154,12 +154,12 @@ class Euclike:
         thfac = (dictionary['H0'] / 100.0)**3.0
         like_selection = data_params['like_selection']
         if like_selection == 1:
-            # (SJ): for now, shear lines below just for fun
-            shear_ins = Shear(dictionary)
+            # (SJ): for now, photo lines below just for fun
+            phot_ins = Photo(dictionary)
             ell_ins = 100
             bin_i_ins = 1
             bin_j_ins = 1
-            observable = shear_ins.Cl_WL(ell_ins, bin_i_ins, bin_j_ins)
+            observable = phot_ins.Cl_WL(ell_ins, bin_i_ins, bin_j_ins)
             self.loglike = 0.0
         elif like_selection == 2:
             self.thvec = self.create_spec_theory(
@@ -172,9 +172,9 @@ class Euclike:
             dmt = self.specdatafinal - self.thvec * thfac
             self.loglike_spec = np.dot(np.dot(
                                     dmt, self.speccovinvfinal), dmt.T)
-            self.loglike_shear = 0.0
+            self.loglike_photo = 0.0
             # (SJ): only addition below if no cross-covariance
-            self.loglike = self.loglike_shear + self.loglike_spec
+            self.loglike = self.loglike_photo + self.loglike_spec
         else:
             raise CobayaInterfaceError(
                 r"Choose like selection '1' or '2' or '12'")

@@ -453,6 +453,12 @@ class Cosmology:
                                                                       0.0)
         self.cosmo_dic['Pgdelta_spec'] = interpolate.LinearNDInterpolator(
             zk_arr, pgdelta_spec, 0.0)
+        # ACD: Note, for now these interpolation routines have been set to
+        # return 0 outside of the intepolated range. This has been done to
+        # ensure the unit tests do not produce NaNs. This issue is
+        # currently under investigation. Once this is resolved, these
+        # routines should be modified to return an error when values
+        # outside the interpolated range are requested.
         return
 
     def update_cosmo_dic(self, zs, ks):

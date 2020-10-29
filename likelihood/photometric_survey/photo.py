@@ -62,7 +62,7 @@ class Photo:
         Notes
         -----
         .. math::
-            W_i^G(z) &= /\bar{n_i}H(z)/c\\
+            W_i^G(z) &= n_i(z)/\bar{n_i}H(z)/c\\
         """
 
         n_z_normalized = self.nz_dic_GC[''.join(['n', str(bin_i)])]

@@ -33,8 +33,15 @@ class Reader:
         self.nz_dict_GC_Phot = {}
         self.nz_dict_WL_raw = {}
         self.nz_dict_GC_Phot_raw = {}
+        
+        # (GCH): Added empty dict to fill in
+        # fiducial cosmology data from Spec OU-level3 files
+        self.data_spec_fiducial_cosmo = {}
 
         return
+    
+    def reader_fiducial_cosmology()
+    
 
     def reader_raw_nz(self, file_dest, file_name):
         """
@@ -131,6 +138,7 @@ class Reader:
 
         full_path = self.dat_dir_main + file_dest + file_names
         GC_spec_dict = {}
+        GC_spec_dict_fiducial_cosmo = {}
 
         for z_label in zstr:
             fits_file = fits.open(full_path % z_label)
@@ -163,4 +171,6 @@ class Reader:
                                                     'cov_l_i': cov_l_i,
                                                     'cov_l_j': cov_l_j}
         self.data_dict['GC-Spec'] = GC_spec_dict
+        self.data_spec_fiducial_cosmo = 
+        
         return

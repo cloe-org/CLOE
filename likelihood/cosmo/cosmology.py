@@ -193,12 +193,6 @@ class Cosmology:
         # (in process)
         # This quantity depends on z and k
         # I assume 1+z=1/a where a: scale factor
-        # AP: I added these two lines because with the new galaxy spectra
-        #     interpolators we have to specify k_win as an array, and no longer
-        #     as a scalar. But as specified above, the code crashes if k_win is
-        #     an array
-        if (isinstance(ks, np.ndarray)):
-            ks = ks[0]
         D_z_k = self.growth_factor(zs, ks)
         # This will work when k is fixed, not an array
         try:

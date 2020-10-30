@@ -45,7 +45,7 @@ class cosmoinitTestCase(TestCase):
         self.Pgg_phot_test = 57627.032026
         self.Pgd_phot_test = 41167.417014
         self.Pgg_spec_test = 83066.735675
-        self.Pgd_spec_test = 42937.21192
+        self.Pgd_spec_test = 60049.302163
 
     def tearDown(self):
         self.H0check = None
@@ -139,7 +139,7 @@ class cosmoinitTestCase(TestCase):
                             err_msg='Error in GC-spec Pgg calculation')
 
     def test_Pg_delta_spec(self):
-        test_p = self.model_test.cosmology.Pgd_spec_def(1.0, 0.01)
+        test_p = self.model_test.cosmology.Pgd_spec_def(1.0, 0.01, 0.5)
         npt.assert_allclose(test_p, self.Pgd_spec_test,
                             rtol=1e-3,
                             err_msg='Error in GC-spec Pgdelta calculation')
@@ -163,11 +163,12 @@ class cosmoinitTestCase(TestCase):
                                                                  0.5)
         npt.assert_allclose(test_p, self.Pgg_spec_test,
                             rtol=1e-3,
-                            err_msg='Error in GC-spec Pgg interpolation')
+                            err_msg='Error in GC-spec Pgg (cosmo-dic)')
 
     def test_Pg_delta_spec_interp(self):
         test_p = self.model_test.cosmology.cosmo_dic['Pgdelta_spec'](1.0,
-                                                                     0.01)
+                                                                     0.01,
+                                                                     0.5)
         npt.assert_allclose(test_p, self.Pgd_spec_test,
                             rtol=1e-3,
-                            err_msg='Error in GC-spec Pgdelta interpolation')
+                            err_msg='Error in GC-spec Pgdelta (cosmo-dic)')

@@ -435,10 +435,10 @@ class Cosmology:
                 self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
         return pval
 
-    def Pgd_spec_def(self, redshift, k_scale):
+    def Pgd_spec_def(self, redshift, k_scale, rsd_mu):
         """
-        Calculates the galaxy-matter power spectrum for the spectroscopic
-        probe.
+        Calculates the redshift-space galaxy-matter power spectrum for the
+        spectroscopic probe.
 
         Parameters
         ----------
@@ -446,21 +446,34 @@ class Cosmology:
             Redshift at which to evaluate the power spectrum.
         k_scale: float
             k-mode at which to evaluate the power spectrum.
+        rsd_mu: float
+            cosinus of the angle between the pair separation and the l.o.s.
 
         Returns
         -------
         Value of G-delta power spectrum at given k and redshift.
         """
-        pval = (self.istf_spec_galbias(redshift) *
-                self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
+        bias = self.istf_spec_galbias(redshift)
+        fs8 = self.cosmo_dic['fsigma8_z_func'](redshift)
+        s8 = self.cosmo_dic['sigma8_z_func'](redshift)
+        growth = fs8 / s8
+        power = self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
+        pval = (np.sqrt(bias) + growth * rsd_mu ** 2.0) ** 2.0 * power
         return pval
 
-    def interp_galaxy_spectra(self):
+    def interp_phot_galaxy_spectra(self):
         """
-        Creates interpolators for the photometric and spectroscopic galaxy
+        Creates interpolators for the photometric galaxy
         clustering and galaxy-matter power spectra, and adds them to cosmo_dic.
         """
-
+        # AP: Removed the interpolation of the spectroscopic galaxy power
+        # spectra and renamed this method to reflect that the interpolation
+        # is carrioed out only on the photometric spectra. This is because,
+        # in order to interface the spec module with Pgg_spec we need it
+        # in redshift-space , i.e. Pgg_spec(z, k, rsd_mu), and a 3-d
+        # interpolation drastically increases the evaluation time.
+        # Pgg_spec and Pgd_spec are added to the cosmo dic in the method
+        # update_cosmo_dic
         ks_base = self.cosmo_dic['k_win']
         zs_base = self.cosmo_dic['z_win']
 
@@ -474,13 +487,10 @@ class Cosmology:
 
         pgg_phot = []
         pgdelta_phot = []
-        pgdelta_spec = []
         for index in range(len(ks_interp)):
             pgg_phot.append(self.Pgg_phot_def(zs_interp[index],
                                               ks_interp[index]))
             pgdelta_phot.append(self.Pgd_phot_def(zs_interp[index],
-                                                  ks_interp[index]))
-            pgdelta_spec.append(self.Pgd_spec_def(zs_interp[index],
                                                   ks_interp[index]))
 
         self.cosmo_dic['Pgg_phot'] = interpolate.LinearNDInterpolator(zk_arr,
@@ -511,6 +521,8 @@ class Cosmology:
         self.interp_fsigma8()
         self.interp_sigma8()
         self.interp_angular_dist()
-        self.interp_galaxy_spectra()
+        self.interp_phot_galaxy_spectra()
+        self.cosmo_dic['Pgg_spec'] = self.Pgg_spec_def
+        self.cosmo_dic['Pgdelta_spec'] = self.Pgd_spec_def
         self.cosmo_dic['D_z_k'] = self.growth_factor(zs, ks)
         self.cosmo_dic['f_z_k'] = self.growth_rate(zs, ks)

@@ -56,12 +56,12 @@ class Spec:
         ----------
         z: float
            Redshift at which to evaluate the galaxy power spectrum.
-	
+
         Returns
         -------
         scaling_factor_perp: float
            Value of the scaling_factor_perp at given redshift
-	
+
         Notes
         -----
         .. math::
@@ -83,7 +83,7 @@ class Spec:
         -------
         scaling_factor_perp: float
            Value of the scaling_factor_perp at given redshift
-	
+
         Notes
         -----
         .. math::
@@ -110,13 +110,13 @@ class Spec:
         get_k: float
            Value of the scalar wavenumber  at given redshift
            cosine of the angle and fiducial wavenumber
-	
+
         Notes
         -----
         .. math::
             k(k',\mu_k', ) &= k' \left[q_{\parallel}^{-2} \,
-            \ (\mu_k')^2 + \
-            \ q_{\perp}^{-2} \left( 1 - (\mu_k')^2 \right)\right]^{1/2}\\
+            (\mu_k')^2 + \
+            q_{\perp}^{-2} \left( 1 - (\mu_k')^2 \right)\right]^{1/2}\\
         """
         return k_prime * (self.scaling_factor_parall(z)**(-2) * mu_prime**2 +
                           self.scaling_factor_perp(z)**(-2) *
@@ -139,7 +139,7 @@ class Spec:
         get_mu: float
            Value of the cosine of the angle at given redshift
            and fiducial wavenumber
-	
+
         Notes
         -----
         .. math::
@@ -159,7 +159,7 @@ class Spec:
     def pkgal_linear(self, mu, z, k):
         r"""
         Computation of P_gg using  linear theory
-            
+
         Parameters
         ----------
         mu: float
@@ -168,17 +168,18 @@ class Spec:
             Redshift at which to evaluate power spectrum.
         k: float
             Scale (wavenumber) at which to evaluate power spectrum.
-        
-            
+
+
         Returns
         -------
         pkgal: float
         Linear galaxy power spectrum (including RSDs)
-            
+
         Notes
         -----
         .. math::
-            P_{\rm gg}\left(k(k',\mu_k'),\mu_k(\mu_k');z\right) = \left(b(z) + f(z)({\mu_k}')^2\right)^2 P_{\rm mm}(k';z)\\
+            P_{\rm gg}\left(k(k',\mu_k'),\mu_k(\mu_k');z\right) =\
+            \left(b(z) + f(z)({\mu_k}')^2\right)^2 P_{\rm mm}(k';z)\\
         """
         # (GCH): For the moment, this does not work
         # Issue with k value and units
@@ -200,7 +201,7 @@ class Spec:
         Computation of multipole power spectrum integrand
         Note we consider ell = m in the code
 
-            
+
         Parameters
         ----------
         mu: float
@@ -211,13 +212,13 @@ class Spec:
             Scale (wavenumber) at which to evaluate power spectrum.
         m: float
             Order of the Legendre expansion.
-            
-            
+
+
         Returns
         -------
         integrand: float
         Integrand of multipole power spectrum
-            
+
         Notes
         -----
         .. math::
@@ -234,8 +235,8 @@ class Spec:
         r"""
         Computation of multipole power spectra
         Note we consider ell = m in the code.
-            
-            
+
+
         Parameters
         ----------
         z: float
@@ -244,13 +245,13 @@ class Spec:
         Scale (wavenumber) at which to evaluate power spectrum.
         m: float
         Order of the Legendre expansion.
-            
-            
+
+
         Returns
         -------
         integral: float
         Multipole power spectrum
-            
+
         Notes
         -----
         .. math::
@@ -259,7 +260,7 @@ class Spec:
             P_{\rm gg}\left(k(k',\mu_k'),\mu_k(\mu_k') \
             \PNT{;z}\right)\,{\rm d}\mu_k'\\
         """
-        
+
         prefactor = 1.0 / self.scaling_factor_parall(z) / \
             (self.scaling_factor_perp(z))**2.0 * (2.0 * m + 1.0) / 2.0
 
@@ -271,27 +272,27 @@ class Spec:
     def multipole_spectra_noap(self, z, k):
         r"""
         Computation of multipole power spectra pre geometric distortions.
-            
-            
+
+
         Parameters
         ----------
         z: float
         Redshift at which to evaluate power spectrum.
         k: float
         Scale (wavenumber) at which to evaluate power spectrum.
-            
-            
+
+
         Returns
         -------
         integral: float
         Multipole power spectrum
-            
+
         Notes
         -----
         .. math::
-            P_0(k) &=\left(1+\frac{2}{3}\beta+\frac{1}{5}\beta^2\right)\,P(k)\
-            P_2(k) &=\left(\frac{4}{3}\beta+\frac{4}{7}\beta^2\right)\,P(k)\
-            P_4(k) &=\frac{8}{35}\beta^2\,P(k)\\
+            P_0(k) &=\left(1+\frac{2}{3}\beta+\frac{1}{5}\beta^2\right)P(k)\,
+            P_2(k) &=\left(\frac{4}{3}\beta+\frac{4}{7}\beta^2\right)P(k)\,
+            P_4(k) &=\frac{8}{35}\beta^2\P(k)\\
         """
 
         # SJ: Set up power spectrum [note weirdly Cobaya has it as P(z,k)

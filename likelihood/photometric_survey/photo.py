@@ -87,13 +87,13 @@ class Photo:
         Returns
         -------
         Integrand value
-        
 
         Notes
         -----
         .. math::
-            \int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm L}(z^{\prime}) \left [ 1 - \frac{\tilde{r}(z)}{\tilde{r}(z^{\prime}} \right ]}
-	"""
+            \int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm L}(z^{\prime})
+            \left [ 1 - \frac{\tilde{r}(z)}{\tilde{r}(z^{\prime}} \right ]}
+        """
         wint = nz(zprime) * (1.0 - (self.theory['r_z_func'](z) /
                                     self.theory['r_z_func'](zprime)))
         return wint
@@ -112,13 +112,15 @@ class Photo:
         Returns
         -------
         Value of lensing kernel for specified bin at specified redshift.
-        
-	
+
         Notes
         -----
         .. math::
-	    W_{i}^{\gamma}(z) = \frac{3 H_0}{2 c}\Omega_{{\rm m},0} (1 + z) \Sigma(z,k) \tilde{r}(z)\int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm WL}(z^{\prime}) \left [ 1 -\frac{\tilde{r}(z)}{\tilde{r}(z^{\prime}} \right ]}
-	"""
+            W_{i}^{\gamma}(z) = \frac{3 H_0}{2 c}\Omega_{{\rm m},0} (1 + z)\
+            Sigma(z,k) \tilde{r}(z)\int_{z}^{z_{\rm max}}{{\rm d}z^{\prime}\
+            n_{i}^{\rm WL}(z^{\prime})\
+            left [ 1 -\frac{\tilde{r}(z)}{\tilde{r}(z^{\prime}} \right ]}\\
+        """
         H0 = self.theory['H0']
         c = self.theory['c']
         O_m = ((self.theory['omch2'] / (H0 / 100.0)**2.0) +
@@ -137,7 +139,8 @@ class Photo:
 
     def Cl_generic_integrand(self, z, W_i_z, W_j_z, k, P_int):
         r"""
-        Calculates the angular power spectrum integrand for any two probes and bins for which
+        Calculates the angular power spectrum integrand
+        for any two probes and bins for which
         the bins are supplied.
 
         Parameters
@@ -156,13 +159,13 @@ class Photo:
         Returns
         -------
         Value of angular power spectrum integrand at redshift z.
-        
+
         Notes
         -----
         .. math::
-            \frac{W_{i}^{\rm A}(z)W_{j}^{\rm B}(z)}{H(z)r^2(z)}P_{\rm AB}(k=({\rm\ell} + 0.5)/r(z), z)
-	    \\
-	    \text{A, B in {G, L}}
+            \frac{W_{i}^{\rm A}(z)W_{j}^{\rm B}(z)}{H(z)r^2(z)}\
+            P_{\rm AB}(k=({\rm\ell} + 0.5)/r(z), z)\\
+            \text{A, B in {G, L}}
         """
         kern_mult = ((W_i_z * W_j_z) /
                      (self.theory['H_z_func'](z) *
@@ -172,7 +175,8 @@ class Photo:
 
     def Cl_WL(self, ell, bin_i, bin_j, int_step=0.1):
         r"""
-        Calculates angular power spectrum for weak lensing, for the supplied bins.
+        Calculates angular power spectrum for weak lensing,
+        for the supplied bins.
 
         Parameters
         ----------
@@ -194,7 +198,8 @@ class Photo:
         Notes
         -----
         .. math::
-            c \int {\rm d}z \frac{W_{i}^{\rm WL}(z)W_{j}^{\rm WL}(z)}{H(z)r^2(z)}P_{\delta\delta}(k=({\rm\ell} + 0.5)/r(z), z)
+            c \int {\rm d}z \frac{W_{i}^{\rm WL}(z)W_{j}^{\rm WL}(z)}\
+            {H(z)r^2(z)}P_{\delta\delta}(k=({\rm\ell} + 0.5)/r(z), z)\\
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
@@ -215,8 +220,8 @@ class Photo:
 
     def Cl_GC_phot(self, ell, bin_i, bin_j, int_step=0.1):
         r"""
-        Calculates angular power spectrum for photometric galaxy clustering, for the
-        supplied bins.
+        Calculates angular power spectrum for photometric galaxy clustering,
+        for the supplied bins.
 
         Parameters
         ----------
@@ -233,12 +238,13 @@ class Photo:
         Returns
         -------
         Value of angular power spectrum for photometric galaxy clustering.
-        
-	
+
+
         Notes
         -----
         .. math::
-            c \int {\rm d}z \frac{W_{i}^{\rm GC}(k, z)W_{j}^{\rm GC}(k, z)}{H(z)r^2(z)}P_{\rm GG}(k=(\ell + 0.5)/r(z), z)
+            c \int {\rm d}z \frac{W_{i}^{\rm GC}(k, z)W_{j}^{\rm GC}(k, z)}\
+            {H(z)r^2(z)}P_{\rm GG}(k=(\ell + 0.5)/r(z), z)\\
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
@@ -260,8 +266,8 @@ class Photo:
 
     def Cl_cross(self, ell, bin_i, bin_j, int_step=0.1):
         r"""
-        Calculates angular power spectrum for cross-correlation between weak lensing and
-        galaxy clustering, for the supplied bins.
+        Calculates angular power spectrum for cross-correlation
+        between weak lensing and galaxy clustering, for the supplied bins.
 
         Parameters
         ----------
@@ -283,7 +289,8 @@ class Photo:
         Notes
         -----
         .. math::
-            c \int {\rm d}z \frac{W_{i}^{\rm WL}(z)W_{j}^{\rm GC}(k, z)}{H(z)r^2(z)}P_{\rm G\delta}(k=({\rm \ell} + 0.5)/r(z), z)
+            c \int {\rm d}z \frac{W_{i}^{\rm WL}(z)W_{j}^{\rm GC}(k, z)}\
+            {H(z)r^2(z)}P_{\rm G\delta}(k=({\rm \ell} + 0.5)/r(z), z)\\
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)

@@ -35,7 +35,7 @@ bias_interpolator = interpolate.InterpolatedUnivariateSpline(
 
 
 class Spec:
-    """
+    r"""
     Class for GC spectroscopy observable
     """
 
@@ -52,19 +52,20 @@ class Spec:
         r"""
         Computation of the perpendicular scaling factor
 
-        .. math::
-             q_{\perp} &= \frac{D_{\rm M}(z)}{D'_{\rm M}(z)}
-
         Parameters
         ----------
         z: float
            Redshift at which to evaluate the galaxy power spectrum.
-
+	
         Returns
         -------
         scaling_factor_perp: float
            Value of the scaling_factor_perp at given redshift
-
+	
+        Notes
+        -----
+        .. math::
+            q_{\perp} &= \frac{D_{\rm M}(z)}{D'_{\rm M}(z)}\\
         """
 
         return self.theory['d_z_func'](z) / self.fiducial['d_z_func'](z)
@@ -73,9 +74,6 @@ class Spec:
         r"""
         Computation of the parallel scaling factor
 
-        .. math::
-            q_{\parallel} &= \frac{H'(z)}{H(z)}
-
         Parameters
         ----------
         z: float
@@ -85,18 +83,17 @@ class Spec:
         -------
         scaling_factor_perp: float
            Value of the scaling_factor_perp at given redshift
-
+	
+        Notes
+        -----
+        .. math::
+            q_{\parallel} &= \frac{H'(z)}{H(z)}\\
         """
         return self.fiducial['H_z_func'](z) / self.theory['H_z_func'](z)
 
     def get_k(self, k_prime, mu_prime, z):
         r"""
         Computation of the wavenumber k
-
-        .. math::
-            k(k',\mu_k', ) &= k' \left[q_{\parallel}^{-2} \,
-            \ (\mu_k')^2 + \
-            \ q_{\perp}^{-2} \left( 1 - (\mu_k')^2 \right)\right]^{1/2}
 
         Parameters
         ----------
@@ -113,7 +110,13 @@ class Spec:
         get_k: float
            Value of the scalar wavenumber  at given redshift
            cosine of the angle and fiducial wavenumber
-
+	
+        Notes
+        -----
+        .. math::
+            k(k',\mu_k', ) &= k' \left[q_{\parallel}^{-2} \,
+            \ (\mu_k')^2 + \
+            \ q_{\perp}^{-2} \left( 1 - (\mu_k')^2 \right)\right]^{1/2}\\
         """
         return k_prime * (self.scaling_factor_parall(z)**(-2) * mu_prime**2 +
                           self.scaling_factor_perp(z)**(-2) *
@@ -122,12 +125,6 @@ class Spec:
     def get_mu(self, mu_prime, z):
         r"""
         Computation of the cosine of the angle
-
-        .. math::
-            \mu_k(\mu_k') &= \mu_k' \, q_{\parallel}^{-1}
-            \left[ q_{\parallel}^{-2}\,
-            (\mu_k')^2 + q_{\perp}^{-2}
-            \left( 1 - (\mu_k')^2 \right) \right]^{-1/2}
 
         Parameters
         ----------
@@ -142,7 +139,14 @@ class Spec:
         get_mu: float
            Value of the cosine of the angle at given redshift
            and fiducial wavenumber
-
+	
+        Notes
+        -----
+        .. math::
+            \mu_k(\mu_k') &= \mu_k' \, q_{\parallel}^{-1}
+            \left[ q_{\parallel}^{-2}\,
+            (\mu_k')^2 + q_{\perp}^{-2}
+            \left( 1 - (\mu_k')^2 \right) \right]^{-1/2}\\
         """
 
         return mu_prime * self.scaling_factor_parall(z)**(-1) * (
@@ -154,30 +158,27 @@ class Spec:
     # SJ: To be extended (i.e new function) by IST:NL.
     def pkgal_linear(self, mu, z, k):
         r"""
-        Computation of P_gg appearing in the IST:L document
-        (found below). Here, we express it using  linear theory.
-
+        Computation of P_gg using  linear theory
+            
         Parameters
         ----------
         mu: float
-           Cosine of the angle between the wavenumber and LOS.
+            Cosine of the angle between the wavenumber and LOS.
         z: float
-           Redshift at which to evaluate power spectrum.
+            Redshift at which to evaluate power spectrum.
         k: float
-           Scale (wavenumber) at which to evaluate power spectrum.
-
+            Scale (wavenumber) at which to evaluate power spectrum.
+        
+            
         Returns
         -------
         pkgal: float
-           Linear galaxy power spectrum (including RSDs)
-
-        Notes:
-        ------
-        https://www.overleaf.com/read/pvfkzvvkymbj
-
+        Linear galaxy power spectrum (including RSDs)
+            
+        Notes
+        -----
         .. math::
-            P_{\rm gg}\left(k(k',\mu_k'),\mu_k(\mu_k');z\right) = \
-            \left(b(z) + f(z)({\mu_k}')^2\right)^2 P_{\rm mm}(k';z)
+            P_{\rm gg}\left(k(k',\mu_k'),\mu_k(\mu_k');z\right) = \left(b(z) + f(z)({\mu_k}')^2\right)^2 P_{\rm mm}(k';z)\\
         """
         # (GCH): For the moment, this does not work
         # Issue with k value and units
@@ -197,34 +198,30 @@ class Spec:
     def multipole_spectra_integrand(self, mu, z, k, m):
         r"""
         Computation of multipole power spectrum integrand
-        appearing in the Euclid IST:L document, found below.
-        Note we consider ell = m in the code.
+        Note we consider ell = m in the code
 
+            
         Parameters
         ----------
         mu: float
-           Cosine of the angle between the wavenumber and LOS (AP-distorted).
+            Cosine of the angle between the wavenumber and LOS.
         z: float
-           Redshift at which to evaluate the galaxy power spectrum.
+            Redshift at which to evaluate power spectrum.
         k: float
-           Scale (wavenumber) at which to evaluate the galaxy power
-           spectrum (AP-distorted).
+            Scale (wavenumber) at which to evaluate power spectrum.
         m: float
-           Order of the Legendre expansion.
-
+            Order of the Legendre expansion.
+            
+            
         Returns
         -------
         integrand: float
-           Integrand of multipole power spectrum
-
-        Notes:
-        ------
-        https://www.overleaf.com/read/pvfkzvvkymbj
-
+        Integrand of multipole power spectrum
+            
+        Notes
+        -----
         .. math::
-            L_\ell(\mu_k') \
-            P_{\rm gg}\left(k(k',\mu_k'),\mu_k(\mu_k');z\right)
-
+            L_\ell(\mu_k')P_{\rm gg}\left(k(k',\mu_k'),\mu_k(\mu_k');z\right)\\
         """
 
         legendrepol = legendre(m)(mu)
@@ -235,36 +232,34 @@ class Spec:
 
     def multipole_spectra(self, z, k, m):
         r"""
-        Computation of multipole power spectra appearing in
-        the Euclid IST:L document, found below.
+        Computation of multipole power spectra
         Note we consider ell = m in the code.
-
+            
+            
         Parameters
         ----------
         z: float
-           Redshift at which to evaluate the galaxy power spectrum.
+        Redshift at which to evaluate power spectrum.
         k: float
-           Scale (wavenumber) at which to evaluate the galaxy power spectrum.
+        Scale (wavenumber) at which to evaluate power spectrum.
         m: float
-           Order of the Legendre expansion.
-
+        Order of the Legendre expansion.
+            
+            
         Returns
         -------
         integral: float
-           Multipole power spectrum
-
-        Notes:
-        ------
-        https://www.overleaf.com/read/pvfkzvvkymbj
-
+        Multipole power spectrum
+            
+        Notes
+        -----
         .. math::
             P_{{\rm obs},\ell}(k';z)=\frac{1}{q_\perp^2 q_\parallel} \
             \frac{2\ell+1}{2}\int^1_{-1} L_\ell(\mu_k') \
             P_{\rm gg}\left(k(k',\mu_k'),\mu_k(\mu_k') \
-            \PNT{;z}\right)\,{\rm d}\mu_k'
-
+            \PNT{;z}\right)\,{\rm d}\mu_k'\\
         """
-
+        
         prefactor = 1.0 / self.scaling_factor_parall(z) / \
             (self.scaling_factor_perp(z))**2.0 * (2.0 * m + 1.0) / 2.0
 
@@ -275,28 +270,28 @@ class Spec:
 
     def multipole_spectra_noap(self, z, k):
         r"""
-        Computation of Eqns 28 - 30 of Euclid IST:L documentation
-        (corresponding to multipole power spectra pre geometric distortions),
-        found below.
-
+        Computation of multipole power spectra pre geometric distortions.
+            
+            
         Parameters
         ----------
         z: float
-           Redshift at which to evaluate the galaxy power spectrum.
+        Redshift at which to evaluate power spectrum.
         k: float
-           Scale (wavenumber) at which to evaluate the galaxy power spectrum.
-
-        Notes:
-        ------
-        https://www.overleaf.com/read/pvfkzvvkymbj
-
-        Eqns 28 - 30 shown in latex format below.
-
+        Scale (wavenumber) at which to evaluate power spectrum.
+            
+            
+        Returns
+        -------
+        integral: float
+        Multipole power spectrum
+            
+        Notes
+        -----
         .. math::
-            P_0(k) &=\left(1+\frac{2}{3}\beta+\frac{1}{5}\beta^2\right)\,P(k)\\
-            P_2(k) &=\left(\frac{4}{3}\beta+\frac{4}{7}\beta^2\right)\,P(k)\\
-            P_4(k) &=\frac{8}{35}\beta^2\,P(k)
-
+            P_0(k) &=\left(1+\frac{2}{3}\beta+\frac{1}{5}\beta^2\right)\,P(k)\
+            P_2(k) &=\left(\frac{4}{3}\beta+\frac{4}{7}\beta^2\right)\,P(k)\
+            P_4(k) &=\frac{8}{35}\beta^2\,P(k)\\
         """
 
         # SJ: Set up power spectrum [note weirdly Cobaya has it as P(z,k)

@@ -114,7 +114,7 @@ class Cosmology:
                           'fsigma8_z_func': None}
 
     def growth_factor(self, zs, ks):
-        """
+        r"""
         Calculates growth factor according to
 
         .. math::
@@ -144,7 +144,7 @@ class Cosmology:
             print('Computation error in D(z, k)')
 
     def growth_rate(self, zs, ks):
-        """
+        r"""
         Calculates growth rate according to
 
         .. math::
@@ -263,7 +263,7 @@ class Cosmology:
                                                          0.678, 0.789, 0.900,
                                                          1.019, 1.155, 1.324,
                                                          1.576, 2.50]):
-        """
+        r"""
         Calculates galaxy bias for the photometric GC probe, at given redshift,
         according to default recipe.
 

@@ -167,6 +167,9 @@ class Photo:
                      (self.theory['H_z_func'](z) *
                       (self.theory['r_z_func'](z)) ** 2.0))
         power = P_int(z, k)
+        if np.isnan(power) is True:
+            raise Exception('Requested k, z values are outside of power'
+                            ' spectrum interpolation range.')
         return kern_mult * power
 
     def Cl_WL(self, ell, bin_i, bin_j, int_step=0.1):

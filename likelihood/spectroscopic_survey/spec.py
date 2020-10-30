@@ -133,7 +133,7 @@ class Spec:
             self.scaling_factor_perp(z)**(-2) *
             (1 - (mu_prime)**2))**(-1. / 2)
 
-    def multipole_spectra_integrand(self, rsd_mu, z, k, m):
+    def multipole_spectra_integrand(self, mu_rsd, z, k, m):
         r"""
         Computation of multipole power spectrum integrand
         Note we consider ell = m in the code
@@ -141,7 +141,7 @@ class Spec:
 
         Parameters
         ----------
-        rsd_mu: float
+        mu_rsd: float
            Cosine of the angle between the wavenumber and LOS (AP-distorted).
         z: float
             Redshift at which to evaluate power spectrum.
@@ -161,10 +161,12 @@ class Spec:
         .. math::
             L_\ell(\mu_k')P_{\rm gg}\left(k(k',\mu_k'),\mu_k(\mu_k');z\right)\\
         """
-
-        legendrepol = legendre(m)(rsd_mu)
-        integrand = (self.theory['Pgg_spec'](z, self.get_k(k, rsd_mu, z),
-                                             self.get_mu(rsd_mu, z)) *
+        if self.theory['Pgg_spec'] is None:
+            raise Exception('Pgg_spec is not defined inside the cosmo dic. '
+                            'Run update_cosmo_dic() method first.')
+        legendrepol = legendre(m)(mu_rsd)
+        integrand = (self.theory['Pgg_spec'](z, self.get_k(k, mu_rsd, z),
+                                             self.get_mu(mu_rsd, z)) *
                      legendrepol)
 
         return integrand

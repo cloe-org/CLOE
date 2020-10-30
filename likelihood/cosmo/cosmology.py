@@ -389,7 +389,7 @@ class Cosmology:
                 self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
         return pval
 
-    def Pgg_spec_def(self, redshift, k_scale, rsd_mu):
+    def Pgg_spec_def(self, redshift, k_scale, mu_rsd):
         """
         Calculates the redshift-space galaxy-galaxy power spectrum for the
         spectroscopic probe.
@@ -400,7 +400,7 @@ class Cosmology:
             Redshift at which to evaluate the power spectrum.
         k_scale: float
             k-mode at which to evaluate the power spectrum.
-        rsd_mu: float
+        mu_rsd: float
             cosinus of the angle between the pair separation and the l.o.s.
 
         Returns
@@ -413,7 +413,7 @@ class Cosmology:
         s8 = self.cosmo_dic['sigma8_z_func'](redshift)
         growth = fs8 / s8
         power = self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
-        pval = (bias + growth * rsd_mu ** 2.0) ** 2.0 * power
+        pval = (bias + growth * mu_rsd ** 2.0) ** 2.0 * power
         return pval
 
     def Pgd_phot_def(self, redshift, k_scale):
@@ -435,7 +435,7 @@ class Cosmology:
                 self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
         return pval
 
-    def Pgd_spec_def(self, redshift, k_scale, rsd_mu):
+    def Pgd_spec_def(self, redshift, k_scale, mu_rsd):
         """
         Calculates the redshift-space galaxy-matter power spectrum for the
         spectroscopic probe.
@@ -446,7 +446,7 @@ class Cosmology:
             Redshift at which to evaluate the power spectrum.
         k_scale: float
             k-mode at which to evaluate the power spectrum.
-        rsd_mu: float
+        mu_rsd: float
             cosinus of the angle between the pair separation and the l.o.s.
 
         Returns
@@ -458,7 +458,8 @@ class Cosmology:
         s8 = self.cosmo_dic['sigma8_z_func'](redshift)
         growth = fs8 / s8
         power = self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
-        pval = (np.sqrt(bias) + growth * rsd_mu ** 2.0) ** 2.0 * power
+        pval = ((bias + growth * mu_rsd ** 2.0) *
+                (1.0 + growth * mu_rsd ** 2.0)) * power
         return pval
 
     def interp_phot_galaxy_spectra(self):

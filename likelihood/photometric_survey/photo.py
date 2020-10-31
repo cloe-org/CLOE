@@ -43,7 +43,7 @@ class Photo:
         self.cl_int_z_max = self.theory['z_win'][-1]
 
     def GC_window(self, z, bin_i):
-        """
+        r"""
         Implements GC window
 
         Parameters
@@ -72,13 +72,8 @@ class Photo:
         return W_i_G
 
     def WL_window_integrand(self, zprime, z, nz):
-        """
+        r"""
         Calculates the WL kernel integrand.
-
-        .. math::
-        \int_{z}^{z_{\rm max}}
-        {{\rm d}z^{\prime} n_{i}^{\rm WL}(z^{\prime}) \left [ 1 -
-        \frac{\tilde{r}(z)}{\tilde{r}(z^{\prime}} \right ]}
 
         Parameters
         ----------
@@ -92,21 +87,20 @@ class Photo:
         Returns
         -------
         Integrand value
+
+        Notes
+        -----
+        .. math::
+            \int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm L}(z^{\prime})
+            \left [ 1 - \frac{\tilde{r}(z)}{\tilde{r}(z^{\prime}} \right ]}
         """
         wint = nz(zprime) * (1.0 - (self.theory['r_z_func'](z) /
                                     self.theory['r_z_func'](zprime)))
         return wint
 
     def WL_window(self, z, bin_i):
-        """
-        Calculates the W^{\gamma} lensing kernel for a given tomographic bin.
-
-        .. math::
-        W_{i}^{\gamma}(z) = \frac{3 H_0}{2 c}
-        \Omega_{{\rm m},0} (1 + z) \Sigma(z,k) \tilde{r}(z)
-        \int_{z}^{z_{\rm max}}
-        {{\rm d}z^{\prime} n_{i}^{\rm WL}(z^{\prime}) \left [ 1 -
-        \frac{\tilde{r}(z)}{\tilde{r}(z^{\prime}} \right ]}
+        r"""
+        Calculates the weak lensing shear kernel for a given tomographic bin.
 
         Parameters
         ----------
@@ -118,6 +112,14 @@ class Photo:
         Returns
         -------
         Value of lensing kernel for specified bin at specified redshift.
+
+        Notes
+        -----
+        .. math::
+            W_{i}^{\gamma}(z) = \frac{3 H_0}{2 c}\Omega_{{\rm m},0} (1 + z)\
+            Sigma(z,k) \tilde{r}(z)\int_{z}^{z_{\rm max}}{{\rm d}z^{\prime}\
+            n_{i}^{\rm WL}(z^{\prime})\
+            left [ 1 -\frac{\tilde{r}(z)}{\tilde{r}(z^{\prime}} \right ]}\\
         """
         H0 = self.theory['H0']
         c = self.theory['c']
@@ -136,15 +138,10 @@ class Photo:
         return W_val
 
     def Cl_generic_integrand(self, z, W_i_z, W_j_z, k, P_int):
-        """
-        Calculates the C_\ell integrand for any two probes and bins for which
+        r"""
+        Calculates the angular power spectrum integrand
+        for any two probes and bins for which
         the bins are supplied.
-
-        .. math::
-        \frac{W_{i}^{A}(z)W_{j}^{B}(z)}{H(z)r^2(z)}P_{AB}(k=
-        (\ell + 0.5)/r(z), z).
-
-        A, B in {G, L}.
 
         Parameters
         ----------
@@ -161,7 +158,14 @@ class Photo:
             GG power spectrum, or G-delta power spectrum.
         Returns
         -------
-        Value of C_\ell integrand at redshift z.
+        Value of angular power spectrum integrand at redshift z.
+
+        Notes
+        -----
+        .. math::
+            \frac{W_{i}^{\rm A}(z)W_{j}^{\rm B}(z)}{H(z)r^2(z)}\
+            P_{\rm AB}(k=({\rm\ell} + 0.5)/r(z), z)\\
+            \text{A, B in {G, L}}
         """
         kern_mult = ((W_i_z * W_j_z) /
                      (self.theory['H_z_func'](z) *
@@ -170,12 +174,9 @@ class Photo:
         return kern_mult * power
 
     def Cl_WL(self, ell, bin_i, bin_j, int_step=0.1):
-        """
-        Calculates C_\ell for weak lensing, for the supplied bins.
-
-        .. math::
-        c \int {\rm d}z \frac{W_{i}^{WL}(z)W_{j}^{WL}(z)}{H(z)r^2(z)}
-        P_{\delta\delta}(k=(\ell + 0.5)/r(z), z).
+        r"""
+        Calculates angular power spectrum for weak lensing,
+        for the supplied bins.
 
         Parameters
         ----------
@@ -191,7 +192,14 @@ class Photo:
             Size of step for numerical integral over redshift.
         Returns
         -------
-        Value of C_\ell.
+        Value of angular power spectrum.
+
+
+        Notes
+        -----
+        .. math::
+            c \int {\rm d}z \frac{W_{i}^{\rm WL}(z)W_{j}^{\rm WL}(z)}\
+            {H(z)r^2(z)}P_{\delta\delta}(k=({\rm\ell} + 0.5)/r(z), z)\\
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
@@ -211,13 +219,9 @@ class Photo:
         return c_final
 
     def Cl_GC_phot(self, ell, bin_i, bin_j, int_step=0.1):
-        """
-        Calculates C_\ell for photometric galaxy clustering, for the
-        supplied bins.
-
-        .. math::
-        c \int {\rm d}z \frac{W_{i}^{GC}(k, z)W_{j}^{GC}(k, z)}{H(z)r^2(z)}
-        P_{GG}(k=(\ell + 0.5)/r(z), z).
+        r"""
+        Calculates angular power spectrum for photometric galaxy clustering,
+        for the supplied bins.
 
         Parameters
         ----------
@@ -233,7 +237,14 @@ class Photo:
             Size of step for numerical integral over redshift.
         Returns
         -------
-        Value of C_\ell.
+        Value of angular power spectrum for photometric galaxy clustering.
+
+
+        Notes
+        -----
+        .. math::
+            c \int {\rm d}z \frac{W_{i}^{\rm GC}(k, z)W_{j}^{\rm GC}(k, z)}\
+            {H(z)r^2(z)}P_{\rm GG}(k=(\ell + 0.5)/r(z), z)\\
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
@@ -254,13 +265,9 @@ class Photo:
         return c_final
 
     def Cl_cross(self, ell, bin_i, bin_j, int_step=0.1):
-        """
-        Calculates C_\ell for cross-correlation between weak lensing and
-        galaxy clustering, for the supplied bins.
-
-        .. math::
-        c \int {\rm d}z \frac{W_{i}^{WL}(z)W_{j}^{GC}(k, z)}{H(z)r^2(z)}
-        P_{G\delta}(k=(\ell + 0.5)/r(z), z).
+        r"""
+        Calculates angular power spectrum for cross-correlation
+        between weak lensing and galaxy clustering, for the supplied bins.
 
         Parameters
         ----------
@@ -276,7 +283,14 @@ class Photo:
             Size of step for numerical integral over redshift.
         Returns
         -------
-        Value of C_\ell.
+        Value of cross correlation angular power spectrum.
+
+
+        Notes
+        -----
+        .. math::
+            c \int {\rm d}z \frac{W_{i}^{\rm WL}(z)W_{j}^{\rm GC}(k, z)}\
+            {H(z)r^2(z)}P_{\rm G\delta}(k=({\rm \ell} + 0.5)/r(z), z)\\
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)

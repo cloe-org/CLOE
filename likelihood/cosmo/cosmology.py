@@ -77,9 +77,21 @@ class Cosmology:
             Galaxy-galaxy power spectrum for GC-spec
         Pgdelta_spec: function
             Galaxy-matter power spectrum for GC-spec
-        bias_parameters: dictionary
-            Contains all niusance bias parameters
-            which are sampled over
+        nuisance_parameters: dictionary
+            Contains all nuisance bias parameters
+            which are sampled over.
+            At the moment, we have implemented
+            10 constant bias for photo-z
+            recipe and 4 for spec recipe. The
+            initialized values of the fiducial
+            cosmology dictionary corresponds to
+            (1) Photo-z: values corrsponding to
+
+            .. math::
+                b_{x,i} = \sqrt{1+\bar{z}_{x,i}}\\
+
+            (2) Spec: bias values
+            of arXiv:1910.0923
         """
         # (GCH): initialize cosmo dictionary
         # (ACD): Added speed of light to dictionary.!!!Important:it's in units
@@ -282,15 +294,12 @@ class Cosmology:
                                                          1.019, 1.155, 1.324,
                                                          1.576, 2.50]):
         r"""
-        Calculates galaxy bias for the photometric GC probe, at given redshift,
-        according to default recipe.
+        Updates galaxy bias for the photometric GC probes at a given
+        redshift z
 
         Note: for redshifts above the final bin (z > 2.5), we use the bias
         from the final bin. Similarly, for redshifts below the first bin
         (z < 0.001), we use the bias of the first bin.
-
-        .. math::
-                   b_{x,i} = \sqrt{1+\bar{z}_{x,i}}\\
 
         Parameters
         ----------
@@ -328,10 +337,8 @@ class Cosmology:
     def istf_spec_galbias(self, redshift, bin_edge_list=[0.90, 1.10, 1.30,
                                                          1.50, 1.80]):
         """
-        Calculates galaxy bias for the spectroscopic GC probe, at given
-        redshift, according to default recipe. Biases for each bin are
-        calculated by fitting to numerical simulations, as defined in
-        Table 3 of arXiv:1910.09273.
+        Updates galaxy bias for the spectroscopic GC probe, at given
+        redshift, according to default recipe.
 
         Note: for redshifts above the final bin (z > 1.80), we use the bias
         from the final bin. Similarly, for redshifts below the first bin

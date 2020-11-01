@@ -31,6 +31,8 @@ class Euclike:
         self.data_ins = reader.Reader()
         self.data_ins.read_GC_spec()
         self.zkeys = self.data_ins.data_dict['GC-Spec'].keys()
+        self.data_spec_fiducial_cosmo = \
+            self.data_ins.data_spec_fiducial_cosmo
         self.specdatafinal = self.create_spec_data()
         self.speccovfinal = self.create_spec_cov()
         self.speccovinvfinal = np.linalg.inv(self.speccovfinal)

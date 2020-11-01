@@ -50,8 +50,6 @@ class Cosmology:
             fsigma8 function evaluated at z
         sigma_8: array
             sigma8 functione valuated at z
-        b_gal: float
-            Galaxy bias
         c: float
             Speed-of-light in units of km s^{-1}
         r_z_func: function
@@ -96,7 +94,6 @@ class Cosmology:
         # (GCH): initialize cosmo dictionary
         # (ACD): Added speed of light to dictionary.!!!Important:it's in units
         # of km/s to be dimensionally consistent with H0.!!!!
-        # SJ: temporary modification to b_gal
         self.cosmo_dic = {'H0': 67.5,
                           'omch2': 0.122,
                           'ombh2': 0.022,
@@ -116,7 +113,6 @@ class Cosmology:
                           'Pgg_spec': None,
                           'Pgdelta_spec': None,
                           'fsigma8': None,
-                          'b_gal': 1.0,
                           'sigma_8': None,
                           'c': const.c.to('km/s').value,
                           'z_win': None,

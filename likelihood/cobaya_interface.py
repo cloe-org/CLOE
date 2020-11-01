@@ -78,8 +78,8 @@ class EuclidLikelihood(Likelihood):
         self.z_samp = 100
         self.z_win = np.linspace(self.z_min, self.z_max, self.z_samp)
 
-        # SJ: temporary (should be varied in MCMC)
-        self.b_gal = 1.0
+        # Initialize Euclike module
+        self.likefinal = Euclike()
 
         # (GCH): initialize Cosmology class for sampling
         self.cosmo = Cosmology()
@@ -87,6 +87,9 @@ class EuclidLikelihood(Likelihood):
         # (GCH): initialize the fiducial model
         # ATTENTION: This will work if CAMB is installed globally
         self.fiducial_cosmology = Cosmology()
+        # (GCH): update fiducial cosmo dic with fiducial info from reader
+        self.fiducial_cosmology.cosmo_dic.update(
+            self.likefinal.data_spec_fiducial_cosmo)
         self.info_fiducial = {'params': {
             'ombh2': self.fiducial_cosmology.cosmo_dic['ombh2'],
             'omch2': self.fiducial_cosmology.cosmo_dic['omch2'],
@@ -167,8 +170,6 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology.update_cosmo_dic(
             self.fiducial_cosmology.cosmo_dic['z_win'],
             0.05)
-        # Initialize Euclike module
-        self.likefinal = Euclike()
 
     def get_requirements(self):
         r""" get_requirements
@@ -227,7 +228,6 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['H'] = self.provider.get_Hubble(self.z_win)
             self.cosmo.cosmo_dic['Pk_interpolator'] = \
                 self.provider.get_Pk_interpolator(nonlinear=False)
-            self.cosmo.cosmo_dic['b_gal'] = self.b_gal
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 self.provider.get_Pk_interpolator(
                 ("delta_tot", "delta_tot"), nonlinear=False)

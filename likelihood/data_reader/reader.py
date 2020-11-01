@@ -11,6 +11,13 @@ from scipy import interpolate
 from scipy import integrate
 
 
+class ReaderError(Exception):
+    r"""
+
+    """
+    pass
+
+
 class Reader:
     """
     Class to read external data files.
@@ -34,6 +41,10 @@ class Reader:
         self.nz_dict_GC_Phot = {}
         self.nz_dict_WL_raw = {}
         self.nz_dict_GC_Phot_raw = {}
+
+        # (GCH): Added empty dict to fill in
+        # fiducial cosmology data from Spec OU-level3 files
+        self.data_spec_fiducial_cosmo = {}
 
         return
 
@@ -165,4 +176,20 @@ class Reader:
                                                     'cov_l_i': cov_l_i,
                                                     'cov_l_j': cov_l_j}
         self.data_dict['GC-Spec'] = GC_spec_dict
+        try:
+            self.data_spec_fiducial_cosmo = {
+                'H0': fits_file[1].header['HUBBLE'] *
+                100,
+                'omch2': (
+                    fits_file[1].header['OMEGA_M'] -
+                    fits_file[1].header['OMEGA_B']) *
+                fits_file[1].header['HUBBLE'],
+                'ombh2': fits_file[1].header['OMEGA_B'] *
+                fits_file[1].header['HUBBLE'],
+                'ns': fits_file[1].header['INDEX_N'],
+                'sigma_8': fits_file[1].header['SIGMA_8']}
+        # GCH: What do we do with neutrinos and sigma_8 ?i
+        except ReaderError:
+            print('There was an error when reading the fiducial '
+                  'data from OU-level3 files')
         return

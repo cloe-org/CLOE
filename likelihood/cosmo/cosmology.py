@@ -477,21 +477,13 @@ class Cosmology:
             pgdelta_spec.append(self.Pgd_spec_def(zs_interp[index],
                                                   ks_interp[index]))
         self.cosmo_dic['Pgg_phot'] = interpolate.LinearNDInterpolator(zk_arr,
-                                                                      pgg_phot,
-                                                                      0.0)
+                                                                      pgg_phot)
         self.cosmo_dic['Pgdelta_phot'] = interpolate.LinearNDInterpolator(
-            zk_arr, pgdelta_phot, 0.0)
+            zk_arr, pgdelta_phot)
         self.cosmo_dic['Pgg_spec'] = interpolate.LinearNDInterpolator(zk_arr,
-                                                                      pgg_spec,
-                                                                      0.0)
+                                                                      pgg_spec)
         self.cosmo_dic['Pgdelta_spec'] = interpolate.LinearNDInterpolator(
-            zk_arr, pgdelta_spec, 0.0)
-        # ACD: Note, for now these interpolation routines have been set to
-        # return 0 outside of the intepolated range. This has been done to
-        # ensure the unit tests do not produce NaNs. This issue is
-        # currently under investigation. Once this is resolved, these
-        # routines should be modified to return an error when values
-        # outside the interpolated range are requested.
+            zk_arr, pgdelta_spec)
         return
 
     def update_cosmo_dic(self, zs, ks):

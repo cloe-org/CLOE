@@ -61,6 +61,7 @@ class cosmoinitTestCase(TestCase):
 
     def tearDown(self):
         self.integrand_check = None
+        self.wbincheck = None
         self.W_i_Gcheck = None
         self.cl_integrand_check = None
         self.cl_WL_check = None

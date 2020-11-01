@@ -62,7 +62,10 @@ z_min = 0.0
 z_max = 4.0
 z_samp = 100
 z_win = np.linspace(z_min, z_max, z_samp)
-k_max = 0.2
+k_min = 0.002
+k_max = 10.0
+k_samp = 100
+k_win = np.logspace(np.log10(k_min), np.log10(k_max), k_samp)
 
 
 
@@ -71,18 +74,19 @@ k_max = 0.2
 
 # This dictionary collects info from cobaya
 theory_dic = {'H0': model.provider.get_param('H0'),
-                  'omch2': model.provider.get_param('omch2'),
-                  'ombh2': model.provider.get_param('ombh2'),
-                  'mnu': model.provider.get_param('mnu'),
-                  'omnuh2': model.provider.get_param('mnu') / 94.07 * (1./3)**0.75, 
-                  'comov_dist': model.provider.get_comoving_radial_distance(z_win),
-                  'angular_dist': model.provider.get_angular_diameter_distance(z_win),
-                  'H': model.provider.get_Hubble(z_win),
-                  'Pk_interpolator': model.provider.get_Pk_interpolator(nonlinear=False),
-                  'Pk_delta': None,
-                  'fsigma8': None,
-                  'z_win': z_win
-                  }
+              'omch2': model.provider.get_param('omch2'),
+              'ombh2': model.provider.get_param('ombh2'),
+              'mnu': model.provider.get_param('mnu'),
+              'omnuh2': model.provider.get_param('mnu') / 94.07 * (1./3)**0.75,
+              'comov_dist': model.provider.get_comoving_radial_distance(z_win),
+              'angular_dist': model.provider.get_angular_diameter_distance(z_win),
+              'H': model.provider.get_Hubble(z_win),
+              'Pk_interpolator': model.provider.get_Pk_interpolator(nonlinear=False),
+              'Pk_delta': None,
+              'fsigma8': None,
+              'z_win': z_win,
+              'k_win': k_win
+              }
 theory_dic['Pk_delta'] = model.provider.get_Pk_interpolator(("delta_tot", "delta_tot"), nonlinear=False)
 theory_dic['fsigma8'] = model.provider.get_fsigma8(z_win)
 # Remember: h is hard-coded
@@ -96,8 +100,15 @@ cosmology = Cosmology()
 cosmology.cosmo_dic.update(theory_dic)
 cosmology.update_cosmo_dic(z_win, 0.005)
 
-from likelihood.photometric_survey.shear import Shear
-shear = Shear(cosmology.cosmo_dic)
+from likelihood.photometric_survey.photo import Photo
+from likelihood.data_reader.reader import Reader
+
+test_reading = Reader()
+test_reading.compute_nz()
+nz_dic_WL = test_reading.nz_dict_WL
+nz_dic_GC = test_reading.nz_dict_GC_Phot
+
+photo = Photo(cosmology.cosmo_dic, nz_dic_WL, nz_dic_GC)
 
 len_ell_max = 100
 ell_min = 10
@@ -107,12 +118,12 @@ C_ells_list = np.linspace(ell_min, ell_max, len_ell_max)
 print("Computing gal-gal C_ells")
 print("len_ell_max: ", len_ell_max, "  ell_min: ", ell_min, "  ell_max:", ell_max) 
 # Compute C_GC_11
-C_GC_11 = np.array([shear.Cl_GC_phot(ell, 1, 1, int_step=0.1) for ell in C_ells_list])
+C_GC_11 = np.array([photo.Cl_GC_phot(ell, 1, 1, int_step=0.1) for ell in C_ells_list])
 
 print("Computing shear-shear C_ells")
 print("len_ell_max: ", len_ell_max, "  ell_min: ", ell_min, "  ell_max:", ell_max) 
 # Compute C_LL_11
-C_LL_11 = np.array([shear.Cl_WL(ell, 1, 1, int_step=0.1) for ell in C_ells_list])
+C_LL_11 = np.array([photo.Cl_WL(ell, 1, 1, int_step=0.1) for ell in C_ells_list])
 
 print("calculation finished")
 

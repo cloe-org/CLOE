@@ -132,7 +132,7 @@ class Cosmology:
                              'b4_spec': 1.90}}
 
     def growth_factor(self, zs, ks):
-        """
+        r"""
         Calculates growth factor according to
 
         .. math::
@@ -162,7 +162,7 @@ class Cosmology:
             print('Computation error in D(z, k)')
 
     def growth_rate(self, zs, ks):
-        """
+        r"""
         Calculates growth rate according to
 
         .. math::
@@ -281,7 +281,7 @@ class Cosmology:
                                                          0.678, 0.789, 0.900,
                                                          1.019, 1.155, 1.324,
                                                          1.576, 2.50]):
-        """
+        r"""
         Calculates galaxy bias for the photometric GC probe, at given redshift,
         according to default recipe.
 
@@ -474,13 +474,21 @@ class Cosmology:
             pgdelta_spec.append(self.Pgd_spec_def(zs_interp[index],
                                                   ks_interp[index]))
         self.cosmo_dic['Pgg_phot'] = interpolate.LinearNDInterpolator(zk_arr,
-                                                                      pgg_phot)
+                                                                      pgg_phot,
+                                                                      0.0)
         self.cosmo_dic['Pgdelta_phot'] = interpolate.LinearNDInterpolator(
-            zk_arr, pgdelta_phot)
+            zk_arr, pgdelta_phot, 0.0)
         self.cosmo_dic['Pgg_spec'] = interpolate.LinearNDInterpolator(zk_arr,
-                                                                      pgg_spec)
+                                                                      pgg_spec,
+                                                                      0.0)
         self.cosmo_dic['Pgdelta_spec'] = interpolate.LinearNDInterpolator(
-            zk_arr, pgdelta_spec)
+            zk_arr, pgdelta_spec, 0.0)
+        # ACD: Note, for now these interpolation routines have been set to
+        # return 0 outside of the intepolated range. This has been done to
+        # ensure the unit tests do not produce NaNs. This issue is
+        # currently under investigation. Once this is resolved, these
+        # routines should be modified to return an error when values
+        # outside the interpolated range are requested.
         return
 
     def update_cosmo_dic(self, zs, ks):

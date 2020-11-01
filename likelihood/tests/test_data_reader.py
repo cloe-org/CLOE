@@ -21,8 +21,8 @@ class datareaderTestCase(TestCase):
         self.cov_check = 178.4167636283394
         # (GCH): added tests for n(z) data
         self.data_tester.compute_nz()
-        self.nz_dict_GC_Phot_check = np.array([0.15197732])
-        self.nz_dict_WL_check = np.array([0.15197732])
+        self.nz_dict_GC_Phot_check = 3.190402
+        self.nz_dict_WL_check = 3.190402
 
     def tearDown(self):
         self.main_key_check = None

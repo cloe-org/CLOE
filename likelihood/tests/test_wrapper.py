@@ -50,7 +50,6 @@ class CobayaModel:
 
     def get_cobaya_model(self):
         self.define_info(self.cosmology)
-        print(self.info)
         self.model = get_model(self.info)
         self.model.logposterior({})
 

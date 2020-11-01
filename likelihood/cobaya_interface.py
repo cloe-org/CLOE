@@ -78,9 +78,6 @@ class EuclidLikelihood(Likelihood):
         self.z_samp = 100
         self.z_win = np.linspace(self.z_min, self.z_max, self.z_samp)
 
-        # SJ: temporary (should be varied in MCMC)
-        self.b_gal = 1.0
-
         # (GCH): initialize Cosmology class for sampling
         self.cosmo = Cosmology()
 
@@ -227,7 +224,6 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['H'] = self.provider.get_Hubble(self.z_win)
             self.cosmo.cosmo_dic['Pk_interpolator'] = \
                 self.provider.get_Pk_interpolator(nonlinear=False)
-            self.cosmo.cosmo_dic['b_gal'] = self.b_gal
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 self.provider.get_Pk_interpolator(
                 ("delta_tot", "delta_tot"), nonlinear=False)

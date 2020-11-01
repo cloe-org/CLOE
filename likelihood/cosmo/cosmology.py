@@ -339,7 +339,7 @@ class Cosmology:
         Note: for redshifts above the final bin (z > 1.80), we use the bias
         from the final bin. Similarly, for redshifts below the first bin
         (z < 0.90), we use the bias of the first bin.
-        
+
         Attention: this will change in the future
 
         Parameters

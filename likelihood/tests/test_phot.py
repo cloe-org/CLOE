@@ -43,12 +43,8 @@ class cosmoinitTestCase(TestCase):
         # (GCH): create wrapper model
         self.model_test = CobayaModel(cosmo)
         self.model_test.update_cosmo()
-        self.rfn = interpolate.InterpolatedUnivariateSpline(
-            np.linspace(0.0, 4.6, 20), np.linspace(0.0, 4.6, 20), ext=2)
-
-        self.model_test.cosmology.cosmo_dic['r_z_func'] = self.rfn
-        self.integrand_check = -1.0
-        self.wbincheck = 1.718003e-09
+        self.integrand_check = -0.950651
+        self.wbincheck = 7.200027e-06
         self.H0 = 67.0
         self.c = const.c.to('km/s').value
         self.omch2 = 0.12
@@ -57,17 +53,21 @@ class cosmoinitTestCase(TestCase):
                                 nz_dic_WL, nz_dic_GC)
         self.W_i_Gcheck = 5.319691e-09
         self.cl_integrand_check = 0.000718
-        self.cl_WL_check = 6.377865e-14
-        self.cl_GC_check = 6.321068e-22
-        self.cl_cross_check = 2.90653e-29
+        self.cl_WL_check = 8.517887e-09
+        self.cl_GC_check = 2.95197263e-05
+        self.cl_cross_check = 3.14508861e-07
         self.flatnz = interpolate.InterpolatedUnivariateSpline(
             np.linspace(0.0, 4.6, 20), np.ones(20), ext=2)
 
     def tearDown(self):
-        self.W_i_Gcheck = None
         self.integrand_check = None
         self.wbincheck = None
+        self.W_i_Gcheck = None
         self.cl_integrand_check = None
+        self.cl_WL_check = None
+        self.cl_GC_check = None
+        self.cl_cross_check = None
+        self.flatnz = None
 
     def test_GC_window(self):
         npt.assert_allclose(self.phot.GC_window(0.001, 1),
@@ -90,6 +90,11 @@ class cosmoinitTestCase(TestCase):
                            'c': self.c,
                            'omch2': self.omch2,
                            'ombh2': self.ombh2})
+
+    def test_power_exception(self):
+        npt.assert_raises(Exception, self.phot.Cl_generic_integrand,
+                          10.0, 1.0, 2.0, 12.0,
+                          self.model_test.cosmology.cosmo_dic['Pgg_phot'])
 
     def test_cl_WL(self):
         cl_int = self.phot.Cl_WL(10.0, 1, 1)

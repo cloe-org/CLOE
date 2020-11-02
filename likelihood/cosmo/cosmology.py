@@ -498,9 +498,6 @@ class Cosmology:
                                                                       pgg_phot)
         self.cosmo_dic['Pgdelta_phot'] = interpolate.LinearNDInterpolator(
             zk_arr, pgdelta_phot)
-        self.cosmo_dic['Pgg_spec'] = self.Pgg_spec_def
-        self.cosmo_dic['Pgdelta_spec'] = interpolate.LinearNDInterpolator(
-            zk_arr, pgdelta_spec)
         return
 
     def update_cosmo_dic(self, zs, ks):

@@ -50,8 +50,6 @@ class Cosmology:
             fsigma8 function evaluated at z
         sigma_8: array
             sigma8 functione valuated at z
-        b_gal: float
-            Galaxy bias
         c: float
             Speed-of-light in units of km s^{-1}
         r_z_func: function
@@ -77,11 +75,25 @@ class Cosmology:
             Galaxy-galaxy power spectrum for GC-spec
         Pgdelta_spec: function
             Galaxy-matter power spectrum for GC-spec
+        nuisance_parameters: dictionary
+            Contains all nuisance bias parameters
+            which are sampled over.
+            At the moment, we have implemented
+            10 constant bias for photo-z
+            recipe and 4 for spec recipe. The
+            initialized values of the fiducial
+            cosmology dictionary corresponds to
+            (1) Photo-z: values corrsponding to
+
+            .. math::
+                b_{x,i} = \sqrt{1+\bar{z}_{x,i}}\\
+
+            (2) Spec: bias values
+            of arXiv:1910.0923
         """
         # (GCH): initialize cosmo dictionary
         # (ACD): Added speed of light to dictionary.!!!Important:it's in units
         # of km/s to be dimensionally consistent with H0.!!!!
-        # SJ: temporary modification to b_gal
         self.cosmo_dic = {'H0': 67.5,
                           'omch2': 0.122,
                           'ombh2': 0.022,
@@ -101,8 +113,6 @@ class Cosmology:
                           'Pgg_spec': None,
                           'Pgdelta_spec': None,
                           'fsigma8': None,
-                          'b_gal': 1.0,
-                          # 'b_gal': None,
                           'sigma_8': None,
                           'c': const.c.to('km/s').value,
                           'z_win': None,
@@ -111,7 +121,23 @@ class Cosmology:
                           'd_z_func': None,
                           'H_z_func': None,
                           'sigma8_z_func': None,
-                          'fsigma8_z_func': None}
+                          'fsigma8_z_func': None,
+                          'nuisance_parameters': {
+                             'like_selection': 12,
+                             'b1_photo': 1.0997727037892875,
+                             'b2_photo': 1.220245876862528,
+                             'b3_photo': 1.2723993083933989,
+                             'b4_photo': 1.316624471897739,
+                             'b5_photo': 1.35812370570578,
+                             'b6_photo': 1.3998214171814918,
+                             'b7_photo': 1.4446452851824907,
+                             'b8_photo': 1.4964959071110084,
+                             'b9_photo': 1.5652475842498528,
+                             'b10_photo': 1.7429859437184225,
+                             'b1_spec': 1.46,
+                             'b2_spec': 1.61,
+                             'b3_spec': 1.75,
+                             'b4_spec': 1.90}}
 
     def growth_factor(self, zs, ks):
         r"""
@@ -264,15 +290,12 @@ class Cosmology:
                                                          1.019, 1.155, 1.324,
                                                          1.576, 2.50]):
         r"""
-        Calculates galaxy bias for the photometric GC probe, at given redshift,
-        according to default recipe.
+        Updates galaxy bias for the photometric GC probes at a given
+        redshift z
 
         Note: for redshifts above the final bin (z > 2.5), we use the bias
         from the final bin. Similarly, for redshifts below the first bin
         (z < 0.001), we use the bias of the first bin.
-
-        .. math::
-                   b_{x,i} = \sqrt{1+\bar{z}_{x,i}}\\
 
         Parameters
         ----------
@@ -286,30 +309,38 @@ class Cosmology:
         -------
         Value of galaxy bias at input redshift.
         """
+        istf_bias_list = [self.cosmo_dic['nuisance_parameters']['b1_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b2_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b3_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b4_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b5_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b6_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b7_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b8_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b9_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b10_photo']]
+
         if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
             for i in range(len(bin_edge_list) - 1):
                 if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
-                    mean_z = (bin_edge_list[i] + bin_edge_list[i + 1]) / 2.0
-                    bi_val = np.sqrt(1.0 + mean_z)
+                    bi_val = istf_bias_list[i]
         elif redshift >= bin_edge_list[-1]:
-            mean_z = (bin_edge_list[-1] + bin_edge_list[-2]) / 2.0
-            bi_val = np.sqrt(1.0 + mean_z)
+            bi_val = istf_bias_list[-1]
         elif redshift < bin_edge_list[0]:
-            mean_z = (bin_edge_list[0] + bin_edge_list[1]) / 2.0
-            bi_val = np.sqrt(1.0 + mean_z)
+            bi_val = istf_bias_list[0]
         return bi_val
 
     def istf_spec_galbias(self, redshift, bin_edge_list=[0.90, 1.10, 1.30,
                                                          1.50, 1.80]):
         """
-        Calculates galaxy bias for the spectroscopic GC probe, at given
-        redshift, according to default recipe. Biases for each bin are
-        calculated by fitting to numerical simulations, as defined in
-        Table 3 of arXiv:1910.09273.
+        Updates galaxy bias for the spectroscopic GC probe, at given
+        redshift, according to default recipe.
 
         Note: for redshifts above the final bin (z > 1.80), we use the bias
         from the final bin. Similarly, for redshifts below the first bin
         (z < 0.90), we use the bias of the first bin.
+
+        Attention: this will change in the future
 
         Parameters
         ----------
@@ -323,7 +354,11 @@ class Cosmology:
         -------
         Value of galaxy bias at input redshift.
         """
-        istf_bias_list = [1.46, 1.61, 1.75, 1.90]
+
+        istf_bias_list = [self.cosmo_dic['nuisance_parameters']['b1_spec'],
+                          self.cosmo_dic['nuisance_parameters']['b2_spec'],
+                          self.cosmo_dic['nuisance_parameters']['b3_spec'],
+                          self.cosmo_dic['nuisance_parameters']['b4_spec']]
 
         if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
             for i in range(len(bin_edge_list) - 1):

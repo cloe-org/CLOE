@@ -122,7 +122,7 @@ class Euclike:
 
         return covfull
 
-    def loglike(self, dictionary, dictionary_fiducial, **data_params):
+    def loglike(self, dictionary, dictionary_fiducial):
         """
         Calculates the log-likelihood for a given model
 
@@ -152,7 +152,7 @@ class Euclike:
         # (SJ): Not using thfac with 1/(2pi)^3 as will be removed from OU data
         # thfac = 1.0 / (2.0 * np.pi / (dictionary['H0'] / 100.0))**3.0
         thfac = (dictionary['H0'] / 100.0)**3.0
-        like_selection = data_params['like_selection']
+        like_selection = dictionary['nuisance_parameters']['like_selection']
         if like_selection == 1:
             # (SJ): for now, photo lines below just for fun
             phot_ins = Photo(dictionary)

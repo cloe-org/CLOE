@@ -42,7 +42,11 @@ class likecalcTestCase(TestCase):
         # (SJ): third one with only 1/h^3 correction, pre-update to data
         # self.check_loglike = 4.607437e+11
         # self.check_loglike = 30568.400834
-        self.check_loglike = 1.963907e+11
+        # (AP): The following is with the original bias interpolator
+        #       of the spec class
+        # self.check_loglike = 1.963907e+11
+        # (AP): The following is with the IST:F predictions
+        self.check_loglike = 2.459737e+11
 
     def tearDown(self):
         self.check_loglike = None

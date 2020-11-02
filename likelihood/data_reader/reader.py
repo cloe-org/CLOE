@@ -180,12 +180,11 @@ class Reader:
             self.data_spec_fiducial_cosmo = {
                 'H0': fits_file[1].header['HUBBLE'] *
                 100,
-                'omch2': (
-                    fits_file[1].header['OMEGA_M'] -
-                    fits_file[1].header['OMEGA_B']) *
-                fits_file[1].header['HUBBLE'],
+                'omch2': (fits_file[1].header['OMEGA_M'] -
+                          fits_file[1].header['OMEGA_B']) *
+                fits_file[1].header['HUBBLE']**2,
                 'ombh2': fits_file[1].header['OMEGA_B'] *
-                fits_file[1].header['HUBBLE'],
+                fits_file[1].header['HUBBLE']**2,
                 'ns': fits_file[1].header['INDEX_N'],
                 'sigma_8': fits_file[1].header['SIGMA_8']}
         # GCH: What do we do with neutrinos and sigma_8 ?i

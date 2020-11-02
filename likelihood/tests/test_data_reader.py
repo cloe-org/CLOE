@@ -18,7 +18,7 @@ class datareaderTestCase(TestCase):
         self.main_key_check = ['GC-Spec', 'GC-Phot', 'WL', 'XC-Phot']
         self.nz_key_check = ['n1', 'n2', 'n3', 'n4', 'n5',
                              'n6', 'n7', 'n8', 'n9', 'n10']
-        self.fiducial_key_check = ['H0', 'omch2', 'ombh2', 'ns', 'sigma_8']
+        self.fiducial_key_check = ['H0', 'omch2', 'ombh2', 'ns', 'sigma_8_0']
         self.cov_check = 178.4167636283394
         # (GCH): added tests for n(z) data
         self.data_tester.compute_nz()

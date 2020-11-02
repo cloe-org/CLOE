@@ -50,6 +50,8 @@ class Cosmology:
             fsigma8 function evaluated at z
         sigma_8: array
             sigma8 functione valuated at z
+        sigma_8_0: double
+            sigma8 evaluated at z = 0
         c: float
             Speed-of-light in units of km s^{-1}
         r_z_func: function
@@ -114,6 +116,7 @@ class Cosmology:
                           'Pgdelta_spec': None,
                           'fsigma8': None,
                           'sigma_8': None,
+                          'sigma_8_0': None,
                           'c': const.c.to('km/s').value,
                           'z_win': None,
                           'k_win': None,
@@ -516,3 +519,5 @@ class Cosmology:
         self.interp_galaxy_spectra()
         self.cosmo_dic['D_z_k'] = self.growth_factor(zs, ks)
         self.cosmo_dic['f_z_k'] = self.growth_rate(zs, ks)
+        self.cosmo_dic['sigma_8_0'] = \
+            self.cosmo_dic['sigma8_z_func'](0)

@@ -186,8 +186,12 @@ class Reader:
                 'ombh2': fits_file[1].header['OMEGA_B'] *
                 fits_file[1].header['HUBBLE']**2,
                 'ns': fits_file[1].header['INDEX_N'],
-                'sigma_8_0': fits_file[1].header['SIGMA_8']}
-        # GCH: What do we do with neutrinos and sigma_8 ?i
+                'sigma_8_0': fits_file[1].header['SIGMA_8'],
+                'w': fits_file[1].header['W_STATE'],
+                'omkh2': fits_file[1].header['OMEGA_K'] *
+                fits_file[1].header['HUBBLE']**2}
+        # GCH: remember, for the moment we ignore Omega_R and
+        # neutrinos
         except ReaderError:
             print('There was an error when reading the fiducial '
                   'data from OU-level3 files')

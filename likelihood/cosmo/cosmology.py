@@ -32,6 +32,11 @@ class Cosmology:
             Present-day Omega_CDM * (H0/100)**2
         ombh2: float
             Present-day Omega_baryon * (H0/100)**2
+        omkh2: float
+            Present-day curvature energy density
+            Omega_k * (H0/100)**2
+        w: float
+           Dark energy equation of state
         omnuh2: float
             Present-day Omega_neutrinos * (H0/100)**2
         mnu: float
@@ -100,6 +105,8 @@ class Cosmology:
                           'omch2': 0.122,
                           'ombh2': 0.022,
                           'omnuh2': 0.00028,
+                          'omkh2': 0.0,
+                          'w': -1.0,
                           'mnu': 0.06,
                           'tau': 0.07,
                           'nnu': 3.046,

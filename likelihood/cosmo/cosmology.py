@@ -35,6 +35,13 @@ class Cosmology:
         omkh2: float
             Present-day curvature energy density
             Omega_k * (H0/100)**2
+        As: float
+            amplitude of the primordial power spectrum
+        ns: float
+            spectral tilt of the primordial
+            power spectrum
+        sigma_8_0: double
+            sigma8 evaluated at z = 0
         w: float
            Dark energy equation of state
         omnuh2: float
@@ -55,8 +62,6 @@ class Cosmology:
             fsigma8 function evaluated at z
         sigma_8: array
             sigma8 functione valuated at z
-        sigma_8_0: double
-            sigma8 evaluated at z = 0
         c: float
             Speed-of-light in units of km s^{-1}
         r_z_func: function
@@ -112,6 +117,7 @@ class Cosmology:
                           'nnu': 3.046,
                           'ns': 0.9674,
                           'As': 2.1e-9,
+                          'sigma_8_0': 0.816,
                           'comov_dist': None,
                           'angular_dist': None,
                           'H': None,
@@ -123,7 +129,6 @@ class Cosmology:
                           'Pgdelta_spec': None,
                           'fsigma8': None,
                           'sigma_8': None,
-                          'sigma_8_0': None,
                           'c': const.c.to('km/s').value,
                           'z_win': None,
                           'k_win': None,

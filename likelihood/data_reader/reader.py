@@ -189,7 +189,8 @@ class Reader:
                 'sigma_8_0': fits_file[1].header['SIGMA_8'],
                 'w': fits_file[1].header['W_STATE'],
                 'omkh2': fits_file[1].header['OMEGA_K'] *
-                fits_file[1].header['HUBBLE']**2}
+                fits_file[1].header['HUBBLE']**2,
+                'omnuh2': 0}
         # GCH: remember, for the moment we ignore Omega_R and
         # neutrinos
         except ReaderError:

@@ -50,6 +50,8 @@ class cosmoinitTestCase(TestCase):
         self.Pdeltai_test = -257.666214
         self.Pgi_phot_test = -360.686685
         self.Pgi_spec_test = -376.192673
+        self.MG_mu_test = 1.0
+        self.MG_sigma_test = 1.0
 
     def tearDown(self):
         self.H0check = None
@@ -204,3 +206,23 @@ class cosmoinitTestCase(TestCase):
         npt.assert_allclose(test_p, self.Pgi_spec_test,
                             rtol=1e-3,
                             err_msg='Error in GC-spec Pgi calculation')
+
+    def test_MG_mu_def(self):
+        test_mu = self.model_test.cosmology.MG_mu_def(1.0, 0.01)
+        npt.assert_equal(test_mu, self.MG_mu_test,
+                         err_msg='Error in MG mu calculation')
+
+    def test_MG_sigma_def(self):
+        test_sigma = self.model_test.cosmology.MG_sigma_def(1.0, 0.01)
+        npt.assert_equal(test_sigma, self.MG_sigma_test,
+                         err_msg='Error in MG sigma calculation')
+
+    def test_MG_mu(self):
+        test_mu = self.model_test.cosmology.cosmo_dic['MG_mu'](1.0, 0.01)
+        npt.assert_equal(test_mu, self.MG_mu_test,
+                         err_msg='Error in MG mu calculation')
+
+    def test_MG_sigma(self):
+        test_sigma = self.model_test.cosmology.cosmo_dic['MG_sigma'](1.0, 0.01)
+        npt.assert_equal(test_sigma, self.MG_sigma_test,
+                         err_msg='Error in MG sigma calculation')

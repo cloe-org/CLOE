@@ -18,6 +18,8 @@ class datareaderTestCase(TestCase):
         self.main_key_check = ['GC-Spec', 'GC-Phot', 'WL', 'XC-Phot']
         self.nz_key_check = ['n1', 'n2', 'n3', 'n4', 'n5',
                              'n6', 'n7', 'n8', 'n9', 'n10']
+        self.fiducial_key_check = ['H0', 'omch2', 'ombh2', 'ns',
+                                   'sigma_8_0', 'w', 'omkh2', 'omnuh2']
         self.cov_check = 178.4167636283394
         # (GCH): added tests for n(z) data
         self.data_tester.compute_nz()
@@ -30,6 +32,7 @@ class datareaderTestCase(TestCase):
         self.cov_check = None
         self.nz_dict_GC_Phot_check = None
         self.nz_dict_WL_check = None
+        self.fiducial_key_check = None
 
     def test_data_dict_init(self):
         true_dict = list(self.data_tester.data_dict.keys())
@@ -73,3 +76,9 @@ class datareaderTestCase(TestCase):
                             rtol=1e-3,
                             err_msg='Error in loading external spectroscopic'
                                     ' test data.')
+
+    def test_fiducial_reading_check(self):
+        self.data_tester.read_GC_spec()
+        npt.assert_equal(list(
+                        self.data_tester.data_spec_fiducial_cosmo.keys()),
+                        self.fiducial_key_check)

@@ -32,6 +32,18 @@ class Cosmology:
             Present-day Omega_CDM * (H0/100)**2
         ombh2: float
             Present-day Omega_baryon * (H0/100)**2
+        omkh2: float
+            Present-day curvature energy density
+            Omega_k * (H0/100)**2
+        As: float
+            amplitude of the primordial power spectrum
+        ns: float
+            spectral tilt of the primordial
+            power spectrum
+        sigma_8_0: double
+            sigma8 evaluated at z = 0
+        w: float
+           Dark energy equation of state
         omnuh2: float
             Present-day Omega_neutrinos * (H0/100)**2
         mnu: float
@@ -98,11 +110,14 @@ class Cosmology:
                           'omch2': 0.122,
                           'ombh2': 0.022,
                           'omnuh2': 0.00028,
+                          'omkh2': 0.0,
+                          'w': -1.0,
                           'mnu': 0.06,
                           'tau': 0.07,
                           'nnu': 3.046,
                           'ns': 0.9674,
                           'As': 2.1e-9,
+                          'sigma_8_0': 0.816,
                           'comov_dist': None,
                           'angular_dist': None,
                           'H': None,
@@ -524,3 +539,5 @@ class Cosmology:
         self.cosmo_dic['Pgdelta_spec'] = self.Pgd_spec_def
         self.cosmo_dic['D_z_k'] = self.growth_factor(zs, ks)
         self.cosmo_dic['f_z_k'] = self.growth_rate(zs, ks)
+        self.cosmo_dic['sigma_8_0'] = \
+            self.cosmo_dic['sigma8_z_func'](0)

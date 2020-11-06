@@ -208,12 +208,14 @@ class cosmoinitTestCase(TestCase):
                             err_msg='Error in GC-spec Pgi calculation')
 
     def test_MG_mu_def(self):
-        test_mu = self.model_test.cosmology.MG_mu_def(1.0, 0.01)
+        test_mu = self.model_test.cosmology.MG_mu_def(1.0, 0.01,
+                                                      self.MG_mu_test)
         npt.assert_equal(test_mu, self.MG_mu_test,
                          err_msg='Error in MG mu calculation')
 
     def test_MG_sigma_def(self):
-        test_sigma = self.model_test.cosmology.MG_sigma_def(1.0, 0.01)
+        test_sigma = self.model_test.cosmology.MG_sigma_def(1.0, 0.01,
+                                                            self.MG_sigma_test)
         npt.assert_equal(test_sigma, self.MG_sigma_test,
                          err_msg='Error in MG sigma calculation')
 

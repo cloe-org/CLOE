@@ -684,7 +684,7 @@ class Cosmology:
                                                                       pgi_spec)
         return
 
-    def MG_mu_def(self, redshift, k_scale, MG_mu=1.0):
+    def MG_mu_def(self, redshift, k_scale, MG_mu):
         """
         Returns the mu function according to mu-sigma Modified Gravity
         parametrization.
@@ -705,7 +705,7 @@ class Cosmology:
 
         return MG_mu
 
-    def MG_sigma_def(self, redshift, k_scale, MG_sigma=1.0):
+    def MG_sigma_def(self, redshift, k_scale, MG_sigma):
         """
         Returns the sigma function according to mu-sigma Modified Gravity
         parametrization.

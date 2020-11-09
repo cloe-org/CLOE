@@ -7,7 +7,6 @@ Class to store cosmological parameters and functions.
 import numpy as np
 from scipy import interpolate
 from astropy import constants as const
-from scipy import interpolate
 
 
 class CosmologyError(Exception):
@@ -87,12 +86,21 @@ class Cosmology:
             Galaxy-galaxy power spectrum for GC-spec
         Pgdelta_spec: function
             Galaxy-matter power spectrum for GC-spec
+        Pii: function
+            Intrinsic alignment (intrinsic-intrinsic) power spectrum
+        Pdeltai: function
+            Density-intrinsic cross-spectrum
+        Pgi_phot: function
+            Photometric galaxy-intrinsic cross-spectrum
+        Pgi_spec: function
+            Spectroscopic galaxy-intrinsic cross-spectrum
         nuisance_parameters: dictionary
             Contains all nuisance bias parameters
-            which are sampled over.
+            and IA parameters which are sampled over.
             At the moment, we have implemented
             10 constant bias for photo-z
-            recipe and 4 for spec recipe. The
+            recipe and 4 for spec recipe,
+            and 3 IA parameters. The
             initialized values of the fiducial
             cosmology dictionary corresponds to
             (1) Photo-z: values corrsponding to
@@ -102,6 +110,7 @@ class Cosmology:
 
             (2) Spec: bias values
             of arXiv:1910.0923
+            (3) IA values in arXiv:1910.0923
         """
         # (GCH): initialize cosmo dictionary
         # (ACD): Added speed of light to dictionary.!!!Important:it's in units
@@ -127,6 +136,10 @@ class Cosmology:
                           'Pgdelta_phot': None,
                           'Pgg_spec': None,
                           'Pgdelta_spec': None,
+                          'Pii': None,
+                          'Pdeltai': None,
+                          'Pgi_phot': None,
+                          'Pgi_spec': None,
                           'fsigma8': None,
                           'sigma_8': None,
                           'c': const.c.to('km/s').value,
@@ -152,7 +165,10 @@ class Cosmology:
                              'b1_spec': 1.46,
                              'b2_spec': 1.61,
                              'b3_spec': 1.75,
-                             'b4_spec': 1.90}}
+                             'b4_spec': 1.90,
+                             'aia': 1.72,
+                             'nia': -0.41,
+                             'bia': 2.17}}
 
     def growth_factor(self, zs, ks):
         r"""
@@ -386,8 +402,12 @@ class Cosmology:
         return bi_val
 
     def Pgg_phot_def(self, redshift, k_scale):
-        """
+        r"""
         Calculates the galaxy-galaxy power spectrum for the photometric probe.
+
+        .. math::
+            P_{\rm gg}^{\rm photo}(z, k) &=\
+            [b_g^{\rm photo}(z)]^2 P_{\rm \delta\delta}(z, k)\\
 
         Parameters
         ----------
@@ -432,8 +452,12 @@ class Cosmology:
         return pval
 
     def Pgd_phot_def(self, redshift, k_scale):
-        """
+        r"""
         Calculates the galaxy-matter power spectrum for the photometric probe.
+
+        .. math::
+            P_{\rm g\delta}^{\rm photo}(z, k) &=\
+            [b_g^{\rm photo}(z)] P_{\rm \delta\delta}(z, k)\\
 
         Parameters
         ----------
@@ -451,7 +475,7 @@ class Cosmology:
         return pval
 
     def Pgd_spec_def(self, redshift, k_scale, mu_rsd):
-        """
+        r"""
         Calculates the redshift-space galaxy-matter power spectrum for the
         spectroscopic probe.
 
@@ -475,6 +499,128 @@ class Cosmology:
         power = self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
         pval = ((bias + growth * mu_rsd ** 2.0) *
                 (1.0 + growth * mu_rsd ** 2.0)) * power
+        return pval
+
+    def fia(self, redshift, k_scale=0.001):
+        r"""
+        Computes the intrinsic alignment function.
+
+        .. math::
+            f_{\rm IA}(z) &= -\mathcal{A_{\rm IA}}\mathcal{C_{\rm IA}}\
+            \frac{\Omega_{m,0}}{D(z)}(1 + z)^{\eta_{\rm IA}}\
+            [\langle L \rangle(z) /L_{\star}(z)]^{\beta_{\rm IA}}\\
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum.
+
+        Returns
+        -------
+        Value of intrinsic alignment function at given redshift.
+        """
+        c1 = 0.0134
+        aia = self.cosmo_dic['nuisance_parameters']['aia']
+        nia = self.cosmo_dic['nuisance_parameters']['nia']
+        bia = self.cosmo_dic['nuisance_parameters']['bia']
+        omegam = (self.cosmo_dic['ombh2'] + self.cosmo_dic['omch2'] +
+                  self.cosmo_dic['omnuh2']) / (self.cosmo_dic['H0'] / 100)**2
+        # SJ: temporary lum for now, to be read in from IST:forecast file
+        lum = 1.0
+        fia = (-aia * c1 * omegam / self.growth_factor(redshift, k_scale) *
+               (1 + redshift)**nia * lum**bia)
+        return fia
+
+    def Pii_def(self, redshift, k_scale):
+        r"""
+        Computes the intrinsic alignment (intrinsic-intrinsic) power spectrum.
+
+        .. math::
+            P_{\rm II}(z, k) = [f_{\rm IA}(z)]^2P_{\rm \delta\delta}(z, k)
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum.
+        k_scale: float
+            k-mode at which to evaluate the power spectrum.
+
+        Returns
+        -------
+        Value of intrinsic alignment power spectrum at given k and redshift.
+        """
+        pval = self.fia(redshift)**2.0 * \
+            self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
+        return pval
+
+    def Pdeltai_def(self, redshift, k_scale):
+        r"""
+        Computes the density-intrinsic power spectrum.
+
+        .. math::
+            P_{\rm \delta I}(z, k) = [f_{\rm IA}(z)]P_{\rm \delta\delta}(z, k)
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum.
+        k_scale: float
+            k-mode at which to evaluate the power spectrum.
+
+        Returns
+        -------
+        Value of density-intrinsic power spectrum at given k and redshift.
+        """
+        pval = self.fia(redshift) * \
+            self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
+        return pval
+
+    def Pgi_phot_def(self, redshift, k_scale):
+        r"""
+        Computes the photometric galaxy-intrinsic power spectrum.
+
+        .. math::
+            P_{\rm gI}^{\rm photo}(z, k) &=\
+            [f_{\rm IA}(z)]b_g^{\rm photo}(z)P_{\rm \delta\delta}(z, k)\\
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum.
+        k_scale: float
+            k-mode at which to evaluate the power spectrum.
+
+        Returns
+        -------
+        Value of photometric galaxy-intrinsic power spectrum at given
+        k and redshift.
+        """
+        pval = self.fia(redshift) * self.istf_phot_galbias(redshift) * \
+            self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
+        return pval
+
+    def Pgi_spec_def(self, redshift, k_scale):
+        r"""
+        Computes the spectroscopic galaxy-intrinsic power spectrum.
+
+        .. math::
+            P_{\rm gI}^{\rm spec}(z, k) &=\
+            [f_{\rm IA}(z)]b_g^{\rm spec}(z)P_{\rm \delta\delta}(z, k)\\
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum.
+        k_scale: float
+            k-mode at which to evaluate the power spectrum.
+
+        Returns
+        -------
+        Value of spectroscopic galaxy-intrinsic power spectrum at given
+        k and redshift.
+        """
+        pval = self.fia(redshift) * self.istf_spec_galbias(redshift) * \
+            self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
         return pval
 
     def interp_phot_galaxy_spectra(self):
@@ -503,16 +649,33 @@ class Cosmology:
 
         pgg_phot = []
         pgdelta_phot = []
+        pii = []
+        pdeltai = []
+        pgi_phot = []
+        pgi_spec = []
         for index in range(len(ks_interp)):
             pgg_phot.append(self.Pgg_phot_def(zs_interp[index],
                                               ks_interp[index]))
             pgdelta_phot.append(self.Pgd_phot_def(zs_interp[index],
                                                   ks_interp[index]))
-
+            pii.append(self.Pii_def(zs_interp[index], ks_interp[index]))
+            pdeltai.append(self.Pdeltai_def(zs_interp[index],
+                                            ks_interp[index]))
+            pgi_phot.append(self.Pgi_phot_def(zs_interp[index],
+                                              ks_interp[index]))
+            pgi_spec.append(self.Pgi_spec_def(zs_interp[index],
+                                              ks_interp[index]))
         self.cosmo_dic['Pgg_phot'] = interpolate.LinearNDInterpolator(zk_arr,
                                                                       pgg_phot)
         self.cosmo_dic['Pgdelta_phot'] = interpolate.LinearNDInterpolator(
             zk_arr, pgdelta_phot)
+        self.cosmo_dic['Pii'] = interpolate.LinearNDInterpolator(zk_arr, pii)
+        self.cosmo_dic['Pdeltai'] = interpolate.LinearNDInterpolator(zk_arr,
+                                                                     pdeltai)
+        self.cosmo_dic['Pgi_phot'] = interpolate.LinearNDInterpolator(zk_arr,
+                                                                      pgi_phot)
+        self.cosmo_dic['Pgi_spec'] = interpolate.LinearNDInterpolator(zk_arr,
+                                                                      pgi_spec)
         return
 
     def update_cosmo_dic(self, zs, ks):
@@ -537,6 +700,10 @@ class Cosmology:
         self.interp_phot_galaxy_spectra()
         self.cosmo_dic['Pgg_spec'] = self.Pgg_spec_def
         self.cosmo_dic['Pgdelta_spec'] = self.Pgd_spec_def
+        self.cosmo_dic['Pii'] = self.Pii_def
+        self.cosmo_dic['Pdeltai'] = self.Pdeltai_def
+        self.cosmo_dic['Pgi_phot'] = self.Pgi_phot_def
+        self.cosmo_dic['Pgi_spec'] = self.Pgi_spec_def
         self.cosmo_dic['D_z_k'] = self.growth_factor(zs, ks)
         self.cosmo_dic['f_z_k'] = self.growth_rate(zs, ks)
         self.cosmo_dic['sigma_8_0'] = \

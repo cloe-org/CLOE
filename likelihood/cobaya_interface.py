@@ -50,7 +50,10 @@ class EuclidLikelihood(Likelihood):
               'b1_spec': None,
               'b2_spec': None,
               'b3_spec': None,
-              'b4_spec': None}
+              'b4_spec': None,
+              'aia': None,
+              'nia': None,
+              'bia': None}
 
     def initialize(self):
         r""" initialize

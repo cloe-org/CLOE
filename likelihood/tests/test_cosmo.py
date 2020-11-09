@@ -46,6 +46,10 @@ class cosmoinitTestCase(TestCase):
         self.Pgd_phot_test = 41167.417014
         self.Pgg_spec_test = 83066.735675
         self.Pgd_spec_test = 60330.848988
+        self.Pii_test = 2.257532
+        self.Pdeltai_test = -257.666214
+        self.Pgi_phot_test = -360.686685
+        self.Pgi_spec_test = -376.192673
 
     def tearDown(self):
         self.H0check = None
@@ -58,6 +62,10 @@ class cosmoinitTestCase(TestCase):
         self.Pgd_phot_test = None
         self.Pgg_spec_test = None
         self.Pgd_spec_test = None
+        self.Pii_test = None
+        self.Pdeltai_test = None
+        self.Pgi_phot_test = None
+        self.Pgi_spec_test = None
 
     def test_cosmo_init(self):
         emptflag = bool(self.model_test.cosmology.cosmo_dic)
@@ -172,3 +180,27 @@ class cosmoinitTestCase(TestCase):
         npt.assert_allclose(test_p, self.Pgd_spec_test,
                             rtol=1e-3,
                             err_msg='Error in GC-spec Pgdelta (cosmo-dic)')
+
+    def test_Pii(self):
+        test_p = self.model_test.cosmology.Pii_def(1.0, 0.01)
+        npt.assert_allclose(test_p, self.Pii_test,
+                            rtol=1e-3,
+                            err_msg='Error in Pii calculation')
+
+    def test_Pdeltai(self):
+        test_p = self.model_test.cosmology.Pdeltai_def(1.0, 0.01)
+        npt.assert_allclose(test_p, self.Pdeltai_test,
+                            rtol=1e-3,
+                            err_msg='Error in Pdeltai calculation')
+
+    def test_Pgi_phot(self):
+        test_p = self.model_test.cosmology.Pgi_phot_def(1.0, 0.01)
+        npt.assert_allclose(test_p, self.Pgi_phot_test,
+                            rtol=1e-3,
+                            err_msg='Error in GC-phot Pgi calculation')
+
+    def test_Pgi_spec(self):
+        test_p = self.model_test.cosmology.Pgi_spec_def(1.0, 0.01)
+        npt.assert_allclose(test_p, self.Pgi_spec_test,
+                            rtol=1e-3,
+                            err_msg='Error in GC-spec Pgi calculation')

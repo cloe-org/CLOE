@@ -94,6 +94,10 @@ class Cosmology:
             Photometric galaxy-intrinsic cross-spectrum
         Pgi_spec: function
             Spectroscopic galaxy-intrinsic cross-spectrum
+        MG_mu: function
+            mu function from Modified Gravity parametrization
+        MG_msigma: function
+            sigma function from Modified Gravity parametrization
         nuisance_parameters: dictionary
             Contains all nuisance bias parameters
             and IA parameters which are sampled over.
@@ -150,6 +154,8 @@ class Cosmology:
                           'H_z_func': None,
                           'sigma8_z_func': None,
                           'fsigma8_z_func': None,
+                          'MG_mu': None,
+                          'MG_sigma': None,
                           'nuisance_parameters': {
                              'like_selection': 12,
                              'b1_photo': 1.0997727037892875,
@@ -678,7 +684,49 @@ class Cosmology:
                                                                       pgi_spec)
         return
 
-    def update_cosmo_dic(self, zs, ks):
+    def MG_mu_def(self, redshift, k_scale, MG_mu):
+        """
+        Returns the mu function according to mu-sigma Modified Gravity
+        parametrization.
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate mu.
+        k_scale: float
+            k-mode at which to evaluate mu.
+        MG_mu: float
+            Value of constant (for v1.0) MG mu function.
+
+        Returns
+        -------
+        Value of MG mu function at given k and redshift.
+        """
+
+        return MG_mu
+
+    def MG_sigma_def(self, redshift, k_scale, MG_sigma):
+        """
+        Returns the sigma function according to mu-sigma Modified Gravity
+        parametrization.
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate mu.
+        k_scale: float
+            k-mode at which to evaluate mu.
+        MG_sigma: float
+            Value of constant (for v1.0) MG sigma function
+
+        Returns
+        -------
+        Value of MG sigma function at given k and redshift.
+        """
+
+        return MG_sigma
+
+    def update_cosmo_dic(self, zs, ks, MG_mu=1.0, MG_sigma=1.0):
         """
         Update the dictionary with other cosmological quantities
 
@@ -708,3 +756,6 @@ class Cosmology:
         self.cosmo_dic['f_z_k'] = self.growth_rate(zs, ks)
         self.cosmo_dic['sigma_8_0'] = \
             self.cosmo_dic['sigma8_z_func'](0)
+        self.cosmo_dic['MG_mu'] = lambda x, y: self.MG_mu_def(x, y, MG_mu)
+        self.cosmo_dic['MG_sigma'] = lambda x, y: self.MG_sigma_def(x, y,
+                                                                    MG_sigma)

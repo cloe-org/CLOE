@@ -20,7 +20,14 @@ class datareaderTestCase(TestCase):
                              'n6', 'n7', 'n8', 'n9', 'n10']
         self.fiducial_key_check = ['H0', 'omch2', 'ombh2', 'ns',
                                    'sigma_8_0', 'w', 'omkh2', 'omnuh2']
-        self.cov_check = 10977788.704318
+        self.cov_check_GC_spec = 178.4167636283394
+        self.cov_check_WL = 1.236327e-17
+        self.cov_check_GC_phot = 1.515497e-11
+        self.cov_check_XC = 1.842760e-18
+        self.cl_phot_WL_check = 1.445805e-08
+        self.cl_phot_GC_check = 9.657300e-20
+        self.cl_phot_XC_check = 1.140359e-06
+
         # (GCH): added tests for n(z) data
         self.data_tester.compute_nz()
         self.nz_dict_GC_Phot_check = 3.190402
@@ -29,7 +36,13 @@ class datareaderTestCase(TestCase):
     def tearDown(self):
         self.main_key_check = None
         self.nz_key_check = None
-        self.cov_check = None
+        self.cov_check_GC_spec = None
+        self.cov_check_WL = None
+        self.cov_check_GC_phot = None
+        self.cov_check_XC = None
+        self.cl_phot_WL_check = None
+        self.cl_phot_GC_check = None
+        self.cl_phot_XC_check = None
         self.nz_dict_GC_Phot_check = None
         self.nz_dict_WL_check = None
         self.fiducial_key_check = None
@@ -72,10 +85,32 @@ class datareaderTestCase(TestCase):
     def test_bench_gc_cov_check(self):
         self.data_tester.read_GC_spec()
         test_cov = self.data_tester.data_dict['GC-Spec']['1.2']['cov'][1, 1]
-        npt.assert_allclose(test_cov, self.cov_check,
+        npt.assert_allclose(test_cov, self.cov_check_GC_spec,
                             rtol=1e-3,
                             err_msg='Error in loading external spectroscopic'
                                     ' test data.')
+
+    def test_bench_phot_cov_check(self):
+        self.data_tester.read_phot()
+        test_cov_WL = self.data_tester.data_dict['WL']['cov'][1,1]
+        test_cov_GC = self.data_tester.data_dict['GC-Phot']['cov'][1,1]
+        test_cov_XC = self.data_tester.data_dict['XC-Phot']['cov'][1,1]
+        npt.assert_allclose([test_cov_WL, test_cov_GC, test_cov_XC],
+                            [self.cov_check_WL, self.cov_check_GC_phot,
+                             self.cov_check_XC], rtol=1e-3,
+                            err_msg='Error in loading external photometric'
+                                    ' test covariance data.')
+
+    def test_bench_phot_cls_check(self):
+        self.data_tester.read_phot()
+        test_Cl_WL = self.data_tester.data_dict['WL']['E1-E1'][1]
+        test_Cl_GC = self.data_tester.data_dict['GC-Phot']['P1-P1'][1]
+        test_Cl_XC = self.data_tester.data_dict['XC-Phot']['P1-E1'][1]
+        npt.assert_allclose([test_Cl_WL, test_Cl_GC, test_Cl_XC],
+                            [self.cl_phot_WL_check, self.cl_phot_GC_check,
+                             self.cl_phot_XC_check], rtol=1e-3,
+                            err_msg='Error in loading external photometric'
+                                    ' test power spectra data.')
 
     def test_fiducial_reading_check(self):
         self.data_tester.read_GC_spec()

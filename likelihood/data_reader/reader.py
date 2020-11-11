@@ -238,19 +238,55 @@ class Reader:
         for i in range(2, len(GC_file)):
             cur_ind = GC_file[i].header['EXTNAME']
             cur_comb = GC_file[i].header['BIN_COMB']
-            cur_lab = cur_ind[0] + cur_comb[0:2] + cur_ind[2] + cur_comb[2]
+            if len(cur_comb) > 3:
+                if cur_comb[:2] == '10':
+                    left_digit = '10'
+                else:
+                    left_digit = cur_comb[0]
+                if cur_comb[-2:] == '10':
+                    right_digit = '10'
+                else:
+                    right_digit = cur_comb[-1]
+            else:
+                left_digit = cur_comb[0]
+                right_digit = cur_comb[-1]
+            cur_lab = cur_ind[0] + left_digit + '-' + cur_ind[2] + right_digit
             GC_phot_dict[cur_lab] = GC_file[i].data
 
         for j in range(2, len(WL_file)):
             cur_ind = WL_file[j].header['EXTNAME']
             cur_comb = WL_file[j].header['BIN_COMB']
-            cur_lab = cur_ind[0] + cur_comb[0:2] + cur_ind[2] + cur_comb[2]
+            if len(cur_comb) > 3:
+                if cur_comb[:2] == '10':
+                    left_digit = '10'
+                else:
+                    left_digit = cur_comb[0]
+                if cur_comb[-2:] == '10':
+                    right_digit = '10'
+                else:
+                    right_digit = cur_comb[-1]
+            else:
+                left_digit = cur_comb[0]
+                right_digit = cur_comb[-1]
+            cur_lab = cur_ind[0] + left_digit + '-' + cur_ind[2] + right_digit
             WL_dict[cur_lab] = WL_file[j].data
 
         for k in range(2, len(XC_file)):
             cur_ind = XC_file[k].header['EXTNAME']
             cur_comb = XC_file[k].header['BIN_COMB']
-            cur_lab = cur_ind[0] + cur_comb[0:2] + cur_ind[2] + cur_comb[2]
+            if len(cur_comb) > 3:
+                if cur_comb[:2] == '10':
+                    left_digit = '10'
+                else:
+                    left_digit = cur_comb[0]
+                if cur_comb[-2:] == '10':
+                    right_digit = '10'
+                else:
+                    right_digit = cur_comb[-1]
+            else:
+                left_digit = cur_comb[0]
+                right_digit = cur_comb[-1]
+            cur_lab = cur_ind[0] + left_digit + '-' + cur_ind[2] + right_digit
             XC_phot_dict[cur_lab] = XC_file[k].data
 
         GC_cov = np.loadtxt(full_path + 'CovMat-PosPos-{:s}-20Bins.dat'.format(

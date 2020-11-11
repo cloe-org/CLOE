@@ -24,9 +24,9 @@ class datareaderTestCase(TestCase):
         self.cov_check_WL = 1.236327e-17
         self.cov_check_GC_phot = 1.515497e-11
         self.cov_check_XC = 1.842760e-18
-        self.cl_phot_WL_check = 1.445805e-08
-        self.cl_phot_GC_check = 9.657300e-20
-        self.cl_phot_XC_check = 1.140359e-06
+        self.cl_phot_WL_check = 7.324317e-09
+        self.cl_phot_GC_check = 2.898418e-05
+        self.cl_phot_XC_check = 2.689051e-07
 
         # (GCH): added tests for n(z) data
         self.data_tester.compute_nz()

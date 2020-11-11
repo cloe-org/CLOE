@@ -260,7 +260,7 @@ class Reader:
                                 cov_model_str))
         XC_cov = np.loadtxt(full_path + 'CovMat-3x2pt-{:s}-20Bins.dat'.format(
             cov_model_str))[WL_cov.shape[0]:-GC_cov.shape[0],
-                 WL_cov.shape[1]:-GC_cov.shape[1]]
+                            WL_cov.shape[1]:-GC_cov.shape[1]]
 
         GC_phot_dict['cov'] = GC_cov
         WL_dict['cov'] = WL_cov

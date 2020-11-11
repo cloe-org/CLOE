@@ -20,7 +20,7 @@ class datareaderTestCase(TestCase):
                              'n6', 'n7', 'n8', 'n9', 'n10']
         self.fiducial_key_check = ['H0', 'omch2', 'ombh2', 'ns',
                                    'sigma_8_0', 'w', 'omkh2', 'omnuh2']
-        self.cov_check_GC_spec = 178.4167636283394
+        self.cov_check_GC_spec = 10977788.704318
         self.cov_check_WL = 1.236327e-17
         self.cov_check_GC_phot = 1.515497e-11
         self.cov_check_XC = 1.842760e-18
@@ -92,9 +92,9 @@ class datareaderTestCase(TestCase):
 
     def test_bench_phot_cov_check(self):
         self.data_tester.read_phot()
-        test_cov_WL = self.data_tester.data_dict['WL']['cov'][1,1]
-        test_cov_GC = self.data_tester.data_dict['GC-Phot']['cov'][1,1]
-        test_cov_XC = self.data_tester.data_dict['XC-Phot']['cov'][1,1]
+        test_cov_WL = self.data_tester.data_dict['WL']['cov'][1, 1]
+        test_cov_GC = self.data_tester.data_dict['GC-Phot']['cov'][1, 1]
+        test_cov_XC = self.data_tester.data_dict['XC-Phot']['cov'][1, 1]
         npt.assert_allclose([test_cov_WL, test_cov_GC, test_cov_XC],
                             [self.cov_check_WL, self.cov_check_GC_phot,
                              self.cov_check_XC], rtol=1e-3,

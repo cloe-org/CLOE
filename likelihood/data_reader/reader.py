@@ -55,7 +55,7 @@ class Reader:
         Parameters
         ----------
         file_dest: str
-            Sub-folder of self.data_subdirectory within which to find
+            Sub-folder of Reader.data_subdirectory within which to find
             the n(z) data.
         file_name: str
             Name of the n(z) files
@@ -82,13 +82,13 @@ class Reader:
                    file_name_GC='niTab-EP10-RB00.dat',
                    file_name_WL='niTab-EP10-RB00.dat'):
         """
-        Function to save n(z) dictionaries as attributes of the class
-        It saves the interpolators of the raw data
+        Function to save n(z) dictionaries as attributes of the Reader class
+        It saves the interpolators of the raw data.
 
         Parameters
         ----------
         file_dest: str
-            Sub-folder of self.data_subdirectory within which to find
+            Sub-folder of Reader.data_subdirectory within which to find
             the n(z) data.
         file_name_GC: str
             Name of the n(z) files for GC
@@ -124,8 +124,8 @@ class Reader:
                      zstr=["1.", "1.2", "1.4", "1.65"]):
         """
         Function to read OU-LE3 spectroscopic galaxy clustering files, based
-        on location provided to class. Adds contents to the data dictionary
-        (self.data_dict).
+        on location provided to Reader class. Adds contents to the data
+        dictionary (Reader.data_dict).
 
         Parameters
         ----------
@@ -202,8 +202,8 @@ class Reader:
                   cov_model_str='Gauss'):
         """
         Function to read OU-LE3 photometric galaxy clustering and weak lensing
-        files, based on location provided to class. Adds contents to the data
-        dictionary (self.data_dict).
+        files, based on location provided to Reader class. Adds contents to
+        the data dictionary (Reader.data_dict).
 
         Parameters
         ----------
@@ -294,13 +294,15 @@ class Reader:
         WL_cov = np.loadtxt(full_path +
                             'CovMat-ShearShear-{:s}-20Bins.dat'.format(
                                 cov_model_str))
-        XC_cov = np.loadtxt(full_path + 'CovMat-3x2pt-{:s}-20Bins.dat'.format(
-            cov_model_str))[WL_cov.shape[0]:-GC_cov.shape[0],
-                            WL_cov.shape[1]:-GC_cov.shape[1]]
+        tx2_cov = np.loadtxt(full_path + 'CovMat-3x2pt-{:s}-20Bins.dat'.format(
+            cov_model_str))
+        XC_cov = tx2_cov[WL_cov.shape[0]:-GC_cov.shape[0],
+                         WL_cov.shape[1]:-GC_cov.shape[1]]
 
         GC_phot_dict['cov'] = GC_cov
         WL_dict['cov'] = WL_cov
-        XC_phot_dict['cov'] = XC_cov
+        XC_phot_dict['cov'] = tx2_cov
+        XC_phot_dict['cov_XC_only'] = XC_cov
 
         self.data_dict['GC-Phot'] = GC_phot_dict
         self.data_dict['WL'] = WL_dict

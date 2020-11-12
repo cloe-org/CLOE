@@ -21,12 +21,12 @@ class datareaderTestCase(TestCase):
         self.fiducial_key_check = ['H0', 'omch2', 'ombh2', 'ns',
                                    'sigma_8_0', 'w', 'omkh2', 'omnuh2']
         self.cov_check_GC_spec = 10977788.704318
-        self.cov_check_WL = 1.236327e-17
-        self.cov_check_GC_phot = 1.515497e-11
-        self.cov_check_XC = 1.842760e-18
-        self.cl_phot_WL_check = 7.324317e-09
-        self.cl_phot_GC_check = 2.898418e-05
-        self.cl_phot_XC_check = 2.689051e-07
+        self.cov_check_WL = 2.825061e-09
+        self.cov_check_GC_phot = 1.554181e-05
+        self.cov_check_XC = 4.259661e-04
+        self.cl_phot_WL_check = 7.427352e-05
+        self.cl_phot_GC_check = 2.181704e-03
+        self.cl_phot_XC_check = 2.566456e-04
 
         # (GCH): added tests for n(z) data
         self.data_tester.compute_nz()
@@ -92,9 +92,29 @@ class datareaderTestCase(TestCase):
 
     def test_bench_phot_cov_check(self):
         self.data_tester.read_phot()
-        test_cov_WL = self.data_tester.data_dict['WL']['cov'][1, 1]
-        test_cov_GC = self.data_tester.data_dict['GC-Phot']['cov'][1, 1]
-        test_cov_XC = self.data_tester.data_dict['XC-Phot']['cov'][1, 1]
+        shape_WL = self.data_tester.data_dict['WL']['cov'].shape
+        shape_GC = self.data_tester.data_dict['GC-Phot']['cov'].shape
+        shape_XC = self.data_tester.data_dict['XC-Phot']['cov'].shape
+
+        test_cov_WL = 0.0
+        test_cov_GC = 0.0
+        test_cov_XC = 0.0
+
+        for i in range(shape_WL[0]):
+            for j in range(shape_WL[1]):
+                test_cov_WL += (i * j * self.data_tester.data_dict['WL'][
+                                'cov'][i, j])
+
+        for i in range(shape_GC[0]):
+            for j in range(shape_GC[1]):
+                test_cov_GC += (i * j * self.data_tester.data_dict['GC-Phot'][
+                                'cov'][i, j])
+
+        for i in range(shape_XC[0]):
+            for j in range(shape_XC[1]):
+                test_cov_XC += (i * j * self.data_tester.data_dict['XC-Phot'][
+                                'cov'][i, j])
+
         npt.assert_allclose([test_cov_WL, test_cov_GC, test_cov_XC],
                             [self.cov_check_WL, self.cov_check_GC_phot,
                              self.cov_check_XC], rtol=1e-3,
@@ -103,9 +123,20 @@ class datareaderTestCase(TestCase):
 
     def test_bench_phot_cls_check(self):
         self.data_tester.read_phot()
-        test_Cl_WL = self.data_tester.data_dict['WL']['E1-E1'][1]
-        test_Cl_GC = self.data_tester.data_dict['GC-Phot']['P1-P1'][1]
-        test_Cl_XC = self.data_tester.data_dict['XC-Phot']['P1-E1'][1]
+        test_Cl_WL = 0.0
+        test_Cl_GC = 0.0
+        test_Cl_XC = 0.0
+
+        WL_arr = self.data_tester.data_dict['WL']
+        GC_arr = self.data_tester.data_dict['GC-Phot']
+        XC_arr = self.data_tester.data_dict['XC-Phot']
+
+        for i in range(1, 11):
+            for j in range(i, 11):
+                test_Cl_WL += (i * j * WL_arr['E{:d}-E{:d}'.format(i, j)][1])
+                test_Cl_GC += (i * j * GC_arr['P{:d}-P{:d}'.format(i, j)][1])
+                test_Cl_XC += (i * j * XC_arr['P{:d}-E{:d}'.format(i, j)][1])
+
         npt.assert_allclose([test_Cl_WL, test_Cl_GC, test_Cl_XC],
                             [self.cl_phot_WL_check, self.cl_phot_GC_check,
                              self.cl_phot_XC_check], rtol=1e-3,

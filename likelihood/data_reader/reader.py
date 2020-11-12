@@ -55,7 +55,7 @@ class Reader:
         Parameters
         ----------
         file_dest: str
-            Sub-folder of self.data_subdirectory within which to find
+            Sub-folder of Reader.data_subdirectory within which to find
             the n(z) data.
         file_name: str
             Name of the n(z) files
@@ -82,13 +82,13 @@ class Reader:
                    file_name_GC='niTab-EP10-RB00.dat',
                    file_name_WL='niTab-EP10-RB00.dat'):
         """
-        Function to save n(z) dictionaries as attributes of the class
-        It saves the interpolators of the raw data
+        Function to save n(z) dictionaries as attributes of the Reader class
+        It saves the interpolators of the raw data.
 
         Parameters
         ----------
         file_dest: str
-            Sub-folder of self.data_subdirectory within which to find
+            Sub-folder of Reader.data_subdirectory within which to find
             the n(z) data.
         file_name_GC: str
             Name of the n(z) files for GC
@@ -124,8 +124,8 @@ class Reader:
                      zstr=["1.", "1.2", "1.4", "1.65"]):
         """
         Function to read OU-LE3 spectroscopic galaxy clustering files, based
-        on location provided to class. Adds contents to the data dictionary
-        (self.data_dict).
+        on location provided to Reader class. Adds contents to the data
+        dictionary (Reader.data_dict).
 
         Parameters
         ----------
@@ -196,4 +196,115 @@ class Reader:
         except ReaderError:
             print('There was an error when reading the fiducial '
                   'data from OU-level3 files')
+        return
+
+    def read_phot(self, file_dest='/Photometric/data/', IA_model_str='eNLA',
+                  cov_model_str='Gauss'):
+        """
+        Function to read OU-LE3 photometric galaxy clustering and weak lensing
+        files, based on location provided to Reader class. Adds contents to
+        the data dictionary (Reader.data_dict).
+
+        Parameters
+        ----------
+        file_dest: str
+            Sub-folder of self.data_subdirectory within which to find
+            photometric data.
+        IA_model_str: str
+            String used to denote particular intrinsic alignment model used.
+        cov_model_str: str
+            String used to denote type of covariance matrices constructed.
+            E.g. 'Gauss' for Gaussian, 'GaussSSC' for Gaussian + Super Sampled
+            Covariance.
+        """
+
+        GC_phot_dict = {}
+        WL_dict = {}
+        XC_phot_dict = {}
+
+        full_path = self.dat_dir_main + file_dest
+
+        GC_file = fits.open(full_path + 'Cls_{:s}_PosPos.fits'.format(
+            IA_model_str))
+        WL_file = fits.open(full_path + 'Cls_{:s}_ShearShear.fits'.format(
+            IA_model_str))
+        XC_file = fits.open(full_path + 'Cls_{:s}_PosShear.fits'.format(
+            IA_model_str))
+
+        GC_phot_dict['ells'] = GC_file[1].data
+        WL_dict['ells'] = WL_file[1].data
+        XC_phot_dict['ells'] = XC_file[1].data
+
+        for i in range(2, len(GC_file)):
+            cur_ind = GC_file[i].header['EXTNAME']
+            cur_comb = GC_file[i].header['BIN_COMB']
+            if len(cur_comb) > 3:
+                if cur_comb[:2] == '10':
+                    left_digit = '10'
+                else:
+                    left_digit = cur_comb[0]
+                if cur_comb[-2:] == '10':
+                    right_digit = '10'
+                else:
+                    right_digit = cur_comb[-1]
+            else:
+                left_digit = cur_comb[0]
+                right_digit = cur_comb[-1]
+            cur_lab = cur_ind[0] + left_digit + '-' + cur_ind[2] + right_digit
+            GC_phot_dict[cur_lab] = GC_file[i].data
+
+        for j in range(2, len(WL_file)):
+            cur_ind = WL_file[j].header['EXTNAME']
+            cur_comb = WL_file[j].header['BIN_COMB']
+            if len(cur_comb) > 3:
+                if cur_comb[:2] == '10':
+                    left_digit = '10'
+                else:
+                    left_digit = cur_comb[0]
+                if cur_comb[-2:] == '10':
+                    right_digit = '10'
+                else:
+                    right_digit = cur_comb[-1]
+            else:
+                left_digit = cur_comb[0]
+                right_digit = cur_comb[-1]
+            cur_lab = cur_ind[0] + left_digit + '-' + cur_ind[2] + right_digit
+            WL_dict[cur_lab] = WL_file[j].data
+
+        for k in range(2, len(XC_file)):
+            cur_ind = XC_file[k].header['EXTNAME']
+            cur_comb = XC_file[k].header['BIN_COMB']
+            if len(cur_comb) > 3:
+                if cur_comb[:2] == '10':
+                    left_digit = '10'
+                else:
+                    left_digit = cur_comb[0]
+                if cur_comb[-2:] == '10':
+                    right_digit = '10'
+                else:
+                    right_digit = cur_comb[-1]
+            else:
+                left_digit = cur_comb[0]
+                right_digit = cur_comb[-1]
+            cur_lab = cur_ind[0] + left_digit + '-' + cur_ind[2] + right_digit
+            XC_phot_dict[cur_lab] = XC_file[k].data
+
+        GC_cov = np.loadtxt(full_path + 'CovMat-PosPos-{:s}-20Bins.dat'.format(
+            cov_model_str))
+        WL_cov = np.loadtxt(full_path +
+                            'CovMat-ShearShear-{:s}-20Bins.dat'.format(
+                                cov_model_str))
+        tx2_cov = np.loadtxt(full_path + 'CovMat-3x2pt-{:s}-20Bins.dat'.format(
+            cov_model_str))
+        XC_cov = tx2_cov[WL_cov.shape[0]:-GC_cov.shape[0],
+                         WL_cov.shape[1]:-GC_cov.shape[1]]
+
+        GC_phot_dict['cov'] = GC_cov
+        WL_dict['cov'] = WL_cov
+        XC_phot_dict['cov'] = tx2_cov
+        XC_phot_dict['cov_XC_only'] = XC_cov
+
+        self.data_dict['GC-Phot'] = GC_phot_dict
+        self.data_dict['WL'] = WL_dict
+        self.data_dict['XC-Phot'] = XC_phot_dict
         return

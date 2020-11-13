@@ -157,7 +157,8 @@ class Cosmology:
                           'MG_mu': None,
                           'MG_sigma': None,
                           'nuisance_parameters': {
-                             'like_selection': 12,
+                             'like_selection': 2,
+                             'full_photo': True,
                              'b1_photo': 1.0997727037892875,
                              'b2_photo': 1.220245876862528,
                              'b3_photo': 1.2723993083933989,

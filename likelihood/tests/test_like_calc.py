@@ -48,7 +48,8 @@ class likecalcTestCase(TestCase):
         # (AP): The following is with the IST:F predictions
         # self.check_loglike = 2.459737e+11
         # (AP): The following is with the correct amplitude of GCSpec ((2pi)^3)
-        self.check_loglike = 4569.446812
+        # self.check_loglike = 104432329248.83969
+        self.check_loglike = 4551.713397
 
     def tearDown(self):
         self.check_loglike = None

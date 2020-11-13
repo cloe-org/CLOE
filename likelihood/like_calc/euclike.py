@@ -9,6 +9,7 @@ from ..cosmo.cosmology import Cosmology
 from likelihood.photometric_survey.photo import Photo
 from likelihood.spectroscopic_survey.spec import Spec
 from ..data_reader import reader
+import time
 
 
 class EuclikeError(Exception):
@@ -29,17 +30,46 @@ class Euclike:
         read and arranged into their final format only once here.
         """
         self.data_ins = reader.Reader()
+        self.data_ins.compute_nz()
+        # Read spec
         self.data_ins.read_GC_spec()
         self.zkeys = self.data_ins.data_dict['GC-Spec'].keys()
         self.data_spec_fiducial_cosmo = \
             self.data_ins.data_spec_fiducial_cosmo
+        # Transforming data
         self.specdatafinal = self.create_spec_data()
         self.speccovfinal = self.create_spec_cov()
         self.speccovinvfinal = np.linalg.inv(self.speccovfinal)
+        # Read photo
+        self.data_ins.read_phot()
+        self.photoinvcovfinal_GC = np.linalg.inv(
+            self.data_ins.data_dict['GC-Phot']['cov'])
+        self.photoinvcovfinal_WL = np.linalg.inv(
+            self.data_ins.data_dict['WL']['cov'])
+        self.photoinvcovfinal_XC = np.linalg.inv(
+            self.data_ins.data_dict['XC-Phot']['cov_XC_only'])
+        # GCH: order of this matrix is WL, XC, GC
+        self.photoinvcovfinal_all = np.linalg.inv(
+            self.data_ins.data_dict['XC-Phot']['cov'])
+        # Tranforming data
+        self.photodatafinal = self.create_photo_data()
+        # Calculate permutations i,j bins for photo
+        x_diagonal = np.triu(np.ones((10, 10)))
+        self.indices_diagonal = []
+        for i in range(0, len(x_diagonal)):
+            for j in range(0, len(x_diagonal)):
+                if x_diagonal[i, j] == 1:
+                    self.indices_diagonal.append([i + 1, j + 1])
+        x = np.ones((10, 10))
+        self.indices_all = []
+        for i in range(0, len(x)):
+            for j in range(0, len(x)):
+                if x[i, j] == 1:
+                    self.indices_all.append([i + 1, j + 1])
 
     def create_spec_theory(self, dictionary, dictionary_fiducial):
         """
-        Obtains the theory for the likelihood.
+        Obtains the Spec theory for the likelihood.
 
         Parameters
         -------
@@ -74,7 +104,7 @@ class Euclike:
 
     def create_spec_data(self):
         """
-        Arranges the data vector for the likelihood into its final format
+        Arranges the spec data vector for the likelihood into its final format
 
         Returns
         -------
@@ -89,6 +119,96 @@ class Euclike:
                               'GC-Spec'][z_ins]['pk' + str(m_ins)])
 
         return datavec
+
+    def create_photo_data(self):
+        """
+        Arranges the photo data vector for the likelihood into its final format
+
+        Returns
+        -------
+        datavec_dict: dictionary
+            returns a dictionary of arrays with the transformed photo data
+        """
+
+        datavec_dict = {'GC-Phot': [], 'WL': [], 'XC-Phot': [], 'all': []}
+        for index in list(self.data_ins.data_dict['WL'].keys()):
+            if index in self.data_ins.data_dict['WL'].keys():
+                if 'B' in index:
+                    del(self.data_ins.data_dict['WL'][index])
+        for index in list(self.data_ins.data_dict['XC-Phot'].keys()):
+            if index in self.data_ins.data_dict['XC-Phot'].keys():
+                if 'B' in index:
+                    del(self.data_ins.data_dict['XC-Phot'][index])
+        # GCH: transform GC-Phot
+        datavec_dict['GC-Phot'] = np.array([v for key, v in list(
+            self.data_ins.data_dict['GC-Phot'].items())[1:-1]]).reshape((1100))
+        datavec_dict['WL'] = np.array([v for key, v in list(
+            self.data_ins.data_dict['WL'].items())[1:-1]]).reshape((1100))
+        datavec_dict['XC-Phot'] = np.array([v for key, v in list(
+            self.data_ins.data_dict['XC-Phot'].items())[1:-2]]).reshape((2000))
+        datavec_dict['all'] = np.concatenate((datavec_dict['WL'],
+                                              datavec_dict['XC-Phot'],
+                                              datavec_dict['GC-Phot']), axis=0)
+
+        return datavec_dict
+
+    def create_photo_theory(self, phot_ins, full_photo):
+        """
+        Obtains the photo theory for the likelihood.
+
+        Parameters
+        -------
+        dictionary: dictionary
+            cosmology dictionary from the Cosmology class
+            which is updated at each sampling step
+
+        Returns
+        -------
+        theoryvec_dict: dictionary
+            returns a dictionary of arrays with the transformed photo theory
+            vector
+        """
+        theoryvec_dict = {'GC-Phot': None, 'WL': None, 'XC-Phot': None,
+                          'all': None}
+        # GCH: compute theory for GC-Phot
+        theoryvec_dict['GC-Phot'] = np.array([phot_ins.Cl_GC_phot(ell,
+                                                                  element[0],
+                                                                  element[1])
+                                              for
+                                              element in
+                                              self.indices_diagonal
+                                              for ell in
+                                              self.data_ins.data_dict[
+                                              'GC-Phot']
+                                              ['ells']])
+        # GCH: getting theory WL
+        theoryvec_dict['WL'] = np.array([phot_ins.Cl_WL(ell,
+                                                        element[0],
+                                                        element[1]) for
+                                         element in
+                                         self.indices_diagonal
+                                         for ell in
+                                         self.data_ins.data_dict['WL']
+                                         ['ells']])
+        # GCH: getting theory XC-Phot
+        if full_photo:
+            theoryvec_dict['XC-Phot'] = np.array([phot_ins.Cl_cross(ell,
+                                                                    element[0],
+                                                                    element[1])
+                                                  for
+                                                  element in
+                                                  self.indices_all
+                                                  for ell in
+                                                  self.data_ins.data_dict[
+                                                  'XC-Phot']
+                                                  ['ells']])
+            theoryvec_dict['all'] = np.concatenate(
+                (theoryvec_dict['WL'],
+                 theoryvec_dict['XC-Phot'],
+                 theoryvec_dict['GC-Phot']),
+                axis=0)
+
+        return theoryvec_dict
 
     def create_spec_cov(self):
         """
@@ -124,6 +244,50 @@ class Euclike:
 
         return covfull
 
+    def loglike_photo(self, dictionary, full_photo):
+        """
+        Calculates loglike photometric based on
+        the flag 'full_photo'. If True, calculates
+        all probes. If false, only calculates GCxWL
+
+        Returns
+        -------
+        loglike_photo: float
+            returns a single covariance from sub-covariances (split in z)
+        """
+
+        # (GCH): photo-class instance
+        phot_ins = Photo(
+                dictionary,
+                self.data_ins.nz_dict_WL,
+                self.data_ins.nz_dict_GC_Phot)
+        # (GCH): theory vec cal
+        theoryvec_dict = self.create_photo_theory(phot_ins, full_photo)
+        loglike_photo = 0
+        if not full_photo:
+            # (GCH): construct dmt
+            dmt_GC = self.photodatafinal['GC-Phot'] - \
+                    theoryvec_dict['GC-Phot']
+            dmt_WL = self.photodatafinal['WL'] - \
+                theoryvec_dict['WL']
+            # (GCH): cal loglike
+            loglike_GC = np.dot(np.dot(dmt_GC, self.photoinvcovfinal_GC),
+                                dmt_GC.T)
+            loglike_WL = np.dot(np.dot(dmt_WL, self.photoinvcovfinal_WL),
+                                dmt_WL.T)
+            # (GCH): save loglike
+            loglike_photo = loglike_GC + loglike_WL
+        # If True, calls massive cov mat
+        if full_photo:
+            # (GCH): construct dmt
+            dmt_all = self.photodatafinal['all'] - \
+                    theoryvec_dict['all']
+
+            # (GCH): cal loglike
+            loglike_photo = np.dot(np.dot(dmt_all, self.photoinvcovfinal_all),
+                                   dmt_all.T)
+        return loglike_photo
+
     def loglike(self, dictionary, dictionary_fiducial):
         """
         Calculates the log-likelihood for a given model
@@ -155,14 +319,9 @@ class Euclike:
         # thfac = 1.0 / (2.0 * np.pi / (dictionary['H0'] / 100.0))**3.0
         thfac = (dictionary['H0'] / 100.0)**3.0
         like_selection = dictionary['nuisance_parameters']['like_selection']
+        full_photo = dictionary['nuisance_parameters']['full_photo']
         if like_selection == 1:
-            # (SJ): for now, photo lines below just for fun
-            phot_ins = Photo(dictionary)
-            ell_ins = 100
-            bin_i_ins = 1
-            bin_j_ins = 1
-            observable = phot_ins.Cl_WL(ell_ins, bin_i_ins, bin_j_ins)
-            self.loglike = 0.0
+            self.loglike = self.loglike_photo(dictionary, full_photo)
         elif like_selection == 2:
             self.thvec = self.create_spec_theory(
                              dictionary, dictionary_fiducial)
@@ -174,8 +333,7 @@ class Euclike:
             dmt = self.specdatafinal - self.thvec * thfac
             self.loglike_spec = np.dot(np.dot(
                                     dmt, self.speccovinvfinal), dmt.T)
-            self.loglike_photo = 0.0
-            # (SJ): only addition below if no cross-covariance
+            self.loglike_photo = self.loglike_photo(dictionary, full_photo)
             self.loglike = self.loglike_photo + self.loglike_spec
         else:
             raise CobayaInterfaceError(

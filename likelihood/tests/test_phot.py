@@ -80,7 +80,7 @@ class cosmoinitTestCase(TestCase):
                             err_msg='Integrand of WL kernel failed')
 
     def test_WL_window(self):
-        int_comp = self.phot.WL_window(0.1, 1)
+        int_comp = self.phot.WL_window(0.1, 1, 0.1)
         npt.assert_allclose(int_comp, self.wbincheck, rtol=1e-05,
                             err_msg='WL_window failed')
 

@@ -98,7 +98,7 @@ class Photo:
                                     self.theory['r_z_func'](zprime)))
         return wint
 
-    def WL_window(self, z, bin_i):
+    def WL_window(self, z, bin_i, k=0.0001):
         r"""
         Calculates the weak lensing shear kernel for a given tomographic bin.
 
@@ -109,15 +109,18 @@ class Photo:
         bin_i: int
            index of desired tomographic bin. Tomographic bin
            indices start from 1.
+        k: float
+            k-mode at which to evaluate the MG sigma function
         Returns
         -------
-        Value of lensing kernel for specified bin at specified redshift.
+        Value of lensing kernel for specified bin at specified redshift and
+        scale.
 
         Notes
         -----
         .. math::
-            W_{i}^{\gamma}(z) = \frac{3 H_0}{2 c}\Omega_{{\rm m},0} (1 + z)\
-            Sigma(z,k) \tilde{r}(z)\int_{z}^{z_{\rm max}}{{\rm d}z^{\prime}\
+            W_{i}^{\gamma}(z, k) = \frac{3 H_0}{2 c}\Omega_{{\rm m},0} (1 + z)\
+            \Sigma(z, k) \tilde{r}(z)\int_{z}^{z_{\rm max}}{{\rm d}z^{\prime}\
             n_{i}^{\rm WL}(z^{\prime})\
             left [ 1 -\frac{\tilde{r}(z)}{\tilde{r}(z^{\prime}} \right ]}\\
         """
@@ -129,12 +132,12 @@ class Photo:
 
         n_z_normalized = self.nz_dic_WL[''.join(['n', str(bin_i)])]
 
-        # (ACD): Note that impact of MG is currently neglected (\Sigma=1).
-        W_val = (1.5 * (H0 / c) * O_m * (1.0 + z) * (
-            self.theory['r_z_func'](z) /
-                (c / H0)) * integrate.quad(self.WL_window_integrand,
-                                           a=z, b=self.cl_int_z_max,
-                                           args=(z, n_z_normalized))[0])
+        W_val = ((1.5 * (H0 / c) * O_m * (1.0 + z) *
+                  self.theory['MG_sigma'](z, k) * (
+                  self.theory['r_z_func'](z) /
+                  (c / H0)) * integrate.quad(self.WL_window_integrand,
+                                             a=z, b=self.cl_int_z_max,
+                                             args=(z, n_z_normalized))[0]))
         return W_val
 
     def Cl_generic_integrand(self, z, W_i_z, W_j_z, k, P_int):
@@ -210,8 +213,8 @@ class Photo:
         c_int_arr = []
         for rshft in int_zs:
             current_k = (ell + 0.5) / self.theory['r_z_func'](rshft)
-            kern_i = self.WL_window(rshft, bin_i)
-            kern_j = self.WL_window(rshft, bin_j)
+            kern_i = self.WL_window(rshft, bin_i, current_k)
+            kern_j = self.WL_window(rshft, bin_j, current_k)
             c_int_arr.append(self.Cl_generic_integrand(rshft, kern_i, kern_j,
                                                        current_k,
                                                        self.theory[
@@ -304,7 +307,7 @@ class Photo:
             # note that the implementation currently uses a scale-independent
             # bias.
             current_k = (ell + 0.5) / self.theory['r_z_func'](rshft)
-            kern_i = self.WL_window(rshft, bin_i)
+            kern_i = self.WL_window(rshft, bin_i, current_k)
             kern_j = self.GC_window(rshft, bin_j)
             c_int_arr.append(self.Cl_generic_integrand(rshft, kern_i, kern_j,
                                                        current_k, self.theory[

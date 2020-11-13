@@ -645,43 +645,38 @@ class Cosmology:
         ks_base = self.cosmo_dic['k_win']
         zs_base = self.cosmo_dic['z_win']
 
-        zs_interp = np.tile(zs_base, len(ks_base))
-        ks_interp = np.repeat(ks_base, len(zs_base))
+        pgg_phot = np.array([self.Pgg_phot_def(zz, ks_base) for zz in zs_base])
+        pgdelta_phot = np.array([self.Pgd_phot_def(zz, ks_base)
+                                for zz in zs_base])
+        pii = np.array([self.Pii_def(zz, ks_base) for zz in zs_base])
+        pdeltai = np.array([self.Pdeltai_def(zz, ks_base) for zz in zs_base])
+        pgi_phot = np.array([self.Pgi_phot_def(zz, ks_base) for zz in zs_base])
+        pgi_spec = np.array([self.Pgi_spec_def(zz, ks_base) for zz in zs_base])
 
-        z_reshape = np.array(zs_interp).reshape((len(zs_interp), 1))
-        k_reshape = np.array(ks_interp).reshape((len(ks_interp), 1))
-
-        zk_arr = np.concatenate((z_reshape, k_reshape), axis=1)
-
-        pgg_phot = []
-        pgdelta_phot = []
-        pii = []
-        pdeltai = []
-        pgi_phot = []
-        pgi_spec = []
-        for index in range(len(ks_interp)):
-            pgg_phot.append(self.Pgg_phot_def(zs_interp[index],
-                                              ks_interp[index]))
-            pgdelta_phot.append(self.Pgd_phot_def(zs_interp[index],
-                                                  ks_interp[index]))
-            pii.append(self.Pii_def(zs_interp[index], ks_interp[index]))
-            pdeltai.append(self.Pdeltai_def(zs_interp[index],
-                                            ks_interp[index]))
-            pgi_phot.append(self.Pgi_phot_def(zs_interp[index],
-                                              ks_interp[index]))
-            pgi_spec.append(self.Pgi_spec_def(zs_interp[index],
-                                              ks_interp[index]))
-        self.cosmo_dic['Pgg_phot'] = interpolate.LinearNDInterpolator(zk_arr,
-                                                                      pgg_phot)
-        self.cosmo_dic['Pgdelta_phot'] = interpolate.LinearNDInterpolator(
-            zk_arr, pgdelta_phot)
-        self.cosmo_dic['Pii'] = interpolate.LinearNDInterpolator(zk_arr, pii)
-        self.cosmo_dic['Pdeltai'] = interpolate.LinearNDInterpolator(zk_arr,
-                                                                     pdeltai)
-        self.cosmo_dic['Pgi_phot'] = interpolate.LinearNDInterpolator(zk_arr,
-                                                                      pgi_phot)
-        self.cosmo_dic['Pgi_spec'] = interpolate.LinearNDInterpolator(zk_arr,
-                                                                      pgi_spec)
+        self.cosmo_dic['Pgg_phot'] = (
+                  lambda z, k:
+                  interpolate.interp2d(zs_base, ks_base,
+                                       pgg_phot.T)(z, k).flatten())
+        self.cosmo_dic['Pgdelta_phot'] = (
+                  lambda z, k:
+                  interpolate.interp2d(zs_base, ks_base,
+                                       pgdelta_phot.T)(z, k).flatten())
+        self.cosmo_dic['Pii'] = (
+                  lambda z, k:
+                  interpolate.interp2d(zs_base, ks_base,
+                                       pii.T)(z, k).flatten())
+        self.cosmo_dic['Pdeltai'] = (
+                  lambda z, k:
+                  interpolate.interp2d(zs_base, ks_base,
+                                       pdeltai.T)(z, k).flatten())
+        self.cosmo_dic['Pgi_phot'] = (
+                  lambda z, k:
+                  interpolate.interp2d(zs_base, ks_base,
+                                       pgi_phot.T)(z, k).flatten())
+        self.cosmo_dic['Pgi_spec'] = (
+                  lambda z, k:
+                  interpolate.interp2d(zs_base, ks_base,
+                                       pgi_spec.T)(z, k).flatten())
         return
 
     def MG_mu_def(self, redshift, k_scale, MG_mu):

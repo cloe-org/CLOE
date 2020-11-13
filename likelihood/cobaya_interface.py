@@ -37,6 +37,7 @@ class EuclidLikelihood(Likelihood):
     # Define them here!
     # For the moment, only 14 different bias terms
     params = {"like_selection": None,
+              'full_photo': None,
               'b1_photo': None,
               'b2_photo': None,
               'b3_photo': None,
@@ -70,7 +71,7 @@ class EuclidLikelihood(Likelihood):
         # The k_min is internally chosen by cobaya.
         # This needs to be changed
 
-        self.k_max = 10.0
+        self.k_max = 1500.0
         self.k_samp = 100
         self.k_win = np.logspace(np.log10(self.k_min), np.log10(self.k_max),
                                  self.k_samp)

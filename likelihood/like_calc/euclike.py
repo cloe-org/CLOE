@@ -9,7 +9,6 @@ from ..cosmo.cosmology import Cosmology
 from likelihood.photometric_survey.photo import Photo
 from likelihood.spectroscopic_survey.spec import Spec
 from ..data_reader import reader
-import time
 
 
 class EuclikeError(Exception):
@@ -66,59 +65,6 @@ class Euclike:
             for j in range(0, len(x)):
                 if x[i, j] == 1:
                     self.indices_all.append([i + 1, j + 1])
-
-    def create_spec_theory(self, dictionary, dictionary_fiducial):
-        """
-        Obtains the Spec theory for the likelihood.
-
-        Parameters
-        -------
-        dictionary: dictionary
-            cosmology dictionary from the Cosmology class
-            which is updated at each sampling step
-
-        dictionary_fiducial: dictionary
-            cosmology dictionary from the Cosmology class
-            at the fiducial cosmology
-
-        Returns
-        -------
-        theoryvec: float array
-            returns the theory array with same indexing/format as the data
-        """
-
-        spec_ins = Spec(dictionary, dictionary_fiducial)
-        theoryvec = []
-        # (SJ): k_ins seemingly in h/Mpc units, tentative transformation here.
-        # (SJ): Commented line below is pre-transformation, kept for now
-        for z_ins in self.zkeys:
-            for m_ins in [0, 2, 4]:
-                for k_ins in self.data_ins.data_dict['GC-Spec'][z_ins]['k_pk']:
-                    theoryvec = np.append(
-                                    theoryvec, spec_ins.multipole_spectra(
-                                        float(z_ins), k_ins *
-                                        dictionary['H0'] / 100.0, m_ins))
-        #                                 float(z_ins), k_ins, m_ins))
-
-        return theoryvec
-
-    def create_spec_data(self):
-        """
-        Arranges the spec data vector for the likelihood into its final format
-
-        Returns
-        -------
-        datavec: float array
-            returns the data as a single array across z, mu, k
-        """
-
-        datavec = []
-        for z_ins in self.zkeys:
-            for m_ins in [0, 2, 4]:
-                datavec = np.append(datavec, self.data_ins.data_dict[
-                              'GC-Spec'][z_ins]['pk' + str(m_ins)])
-
-        return datavec
 
     def create_photo_data(self):
         """
@@ -209,6 +155,59 @@ class Euclike:
                 axis=0)
 
         return theoryvec_dict
+
+    def create_spec_theory(self, dictionary, dictionary_fiducial):
+        """
+        Obtains the theory for the likelihood.
+
+        Parameters
+        -------
+        dictionary: dictionary
+            cosmology dictionary from the Cosmology class
+            which is updated at each sampling step
+
+        dictionary_fiducial: dictionary
+            cosmology dictionary from the Cosmology class
+            at the fiducial cosmology
+
+        Returns
+        -------
+        theoryvec: float array
+            returns the theory array with same indexing/format as the data
+        """
+
+        spec_ins = Spec(dictionary, dictionary_fiducial)
+        theoryvec = []
+        # (SJ): k_ins seemingly in h/Mpc units, tentative transformation here.
+        # (SJ): Commented line below is pre-transformation, kept for now
+        for z_ins in self.zkeys:
+            for m_ins in [0, 2, 4]:
+                for k_ins in self.data_ins.data_dict['GC-Spec'][z_ins]['k_pk']:
+                    theoryvec = np.append(
+                                    theoryvec, spec_ins.multipole_spectra(
+                                        float(z_ins), k_ins *
+                                        dictionary['H0'] / 100.0, m_ins))
+        #                                 float(z_ins), k_ins, m_ins))
+
+        return theoryvec
+
+    def create_spec_data(self):
+        """
+        Arranges the data vector for the likelihood into its final format
+
+        Returns
+        -------
+        datavec: float array
+            returns the data as a single array across z, mu, k
+        """
+
+        datavec = []
+        for z_ins in self.zkeys:
+            for m_ins in [0, 2, 4]:
+                datavec = np.append(datavec, self.data_ins.data_dict[
+                              'GC-Spec'][z_ins]['pk' + str(m_ins)])
+
+        return datavec
 
     def create_spec_cov(self):
         """
@@ -317,23 +316,27 @@ class Euclike:
         # covfac = datfac**2
         # (SJ): Not using thfac with 1/(2pi)^3 as will be removed from OU data
         # thfac = 1.0 / (2.0 * np.pi / (dictionary['H0'] / 100.0))**3.0
-        thfac = (dictionary['H0'] / 100.0)**3.0
         like_selection = dictionary['nuisance_parameters']['like_selection']
         full_photo = dictionary['nuisance_parameters']['full_photo']
         if like_selection == 1:
             self.loglike = self.loglike_photo(dictionary, full_photo)
         elif like_selection == 2:
+            thfac = 1.0 / (2.0 * np.pi / (dictionary['H0'] / 100.0))**3.0
+            thfac = (dictionary['H0'] / 100.0)**3.0
             self.thvec = self.create_spec_theory(
                              dictionary, dictionary_fiducial)
             dmt = self.specdatafinal - self.thvec * thfac
             self.loglike = np.dot(np.dot(dmt, self.speccovinvfinal), dmt.T)
         elif like_selection == 12:
+            thfac = 1.0 / (2.0 * np.pi / (dictionary['H0'] / 100.0))**3.0
+            thfac = (dictionary['H0'] / 100.0)**3.0
             self.thvec = self.create_spec_theory(
                              dictionary, dictionary_fiducial)
             dmt = self.specdatafinal - self.thvec * thfac
             self.loglike_spec = np.dot(np.dot(
                                     dmt, self.speccovinvfinal), dmt.T)
             self.loglike_photo = self.loglike_photo(dictionary, full_photo)
+            # (SJ): only addition below if no cross-covariance
             self.loglike = self.loglike_photo + self.loglike_spec
         else:
             raise CobayaInterfaceError(

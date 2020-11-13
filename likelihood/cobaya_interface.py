@@ -71,7 +71,7 @@ class EuclidLikelihood(Likelihood):
         # The k_min is internally chosen by cobaya.
         # This needs to be changed
 
-        self.k_max = 1500.0
+        self.k_max = 10.0
         self.k_samp = 100
         self.k_win = np.logspace(np.log10(self.k_min), np.log10(self.k_max),
                                  self.k_samp)

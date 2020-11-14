@@ -200,10 +200,10 @@ class Photo:
             P_{\rm AB}(k=({\rm\ell} + 0.5)/r(z), z)\\
             \text{A, B in {G, L}}
         """
-        kern_mult_power = ((PandW_i_j_z_k) /
+        kern_mult_power = (PandW_i_j_z_k /
                            (self.theory['H_z_func'](z) *
                             (self.theory['r_z_func'](z)) ** 2.0))
-        # power = np.atleast_1d(P_int(z, k))[0]
+
         if np.isnan(PandW_i_j_z_k) is True:
             raise Exception('Requested k, z values are outside of power'
                             ' spectrum interpolation range.')

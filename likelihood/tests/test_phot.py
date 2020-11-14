@@ -52,6 +52,7 @@ class cosmoinitTestCase(TestCase):
         self.phot = photo.Photo(self.model_test.cosmology.cosmo_dic,
                                 nz_dic_WL, nz_dic_GC)
         self.W_i_Gcheck = 5.319691e-09
+        self.W_IA_check = 0.000106330045837
         self.cl_integrand_check = 0.000718
         self.cl_WL_check = 8.517887e-09
         self.cl_GC_check = 2.95197263e-05
@@ -63,6 +64,7 @@ class cosmoinitTestCase(TestCase):
         self.integrand_check = None
         self.wbincheck = None
         self.W_i_Gcheck = None
+        self.W_IA_check = None
         self.cl_integrand_check = None
         self.cl_WL_check = None
         self.cl_GC_check = None
@@ -73,6 +75,11 @@ class cosmoinitTestCase(TestCase):
         npt.assert_allclose(self.phot.GC_window(0.001, 1),
                             self.W_i_Gcheck, rtol=1e-05,
                             err_msg='GC_window failed')
+
+    def test_IA_window(self):
+        npt.assert_allclose(self.phot.IA_window(0.1, 1),
+                            self.W_IA_check, rtol=1e-05,
+                            err_msg='IA_window failed')
 
     def test_w_integrand(self):
         int_comp = self.phot.WL_window_integrand(0.1, 0.2, self.flatnz)

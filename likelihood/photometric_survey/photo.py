@@ -140,6 +140,36 @@ class Photo:
                                              args=(z, n_z_normalized))[0]))
         return W_val
 
+    def IA_window(self, z, bin_i):
+        r"""
+        Calculates the intrinsic alignment (IA) weight function for a
+        given tomographic bin.
+
+        Parameters
+        ----------
+        z: float
+            Redshift at which weight is evaluated.
+        bin_i: int
+           index of desired tomographic bin. Tomographic bin
+           indices start from 1.
+        Returns
+        -------
+        Value of lensing kernel for specified bin at specified redshift.
+
+        Notes
+        -----
+        .. math::
+            W_{i}^{\rm IA}(z) = \frac{n_i^{\rm L}(z)}{\tilde{n}_i^{\rm L}}\
+            \frac{H(z)}{c}\\
+        """
+
+        n_z_normalized = self.nz_dic_WL[''.join(['n', str(bin_i)])]
+
+        W_IA = (n_z_normalized(z) * self.theory['H_z_func'](z) /
+                self.theory['c'])
+
+        return W_IA
+
     def Cl_generic_integrand(self, z, W_i_z, W_j_z, k, P_int):
         r"""
         Calculates the angular power spectrum integrand

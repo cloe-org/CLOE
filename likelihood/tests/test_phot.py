@@ -35,6 +35,10 @@ class cosmoinitTestCase(TestCase):
         cosmo.cosmo_dic['nnu'] = 3.046
         cosmo.cosmo_dic['ns'] = 0.9674
         cosmo.cosmo_dic['As'] = 2.1e-9
+        # (SJ): by setting below to zero, obtain previous non-IA results
+        # cosmo.cosmo_dic['nuisance_parameters']['aia'] = 0
+        # cosmo.cosmo_dic['nuisance_parameters']['bia'] = 0
+        # cosmo.cosmo_dic['nuisance_parameters']['nia'] = 0
 
         test_reading = reader.Reader()
         test_reading.compute_nz()
@@ -54,9 +58,12 @@ class cosmoinitTestCase(TestCase):
         self.W_i_Gcheck = 5.319691e-09
         self.W_IA_check = 0.000106330045837
         self.cl_integrand_check = 0.000718
-        self.cl_WL_check = 8.517887e-09
+        self.cl_WL_check = 5.680761e-09
         self.cl_GC_check = 2.95197263e-05
-        self.cl_cross_check = 3.14508861e-07
+        self.cl_cross_check = 1.151977e-07
+        # (SJ): when no IA, replace with below
+        # self.cl_WL_check = 8.517887e-09
+        # self.cl_cross_check = 3.14508861e-07
         self.flatnz = interpolate.InterpolatedUnivariateSpline(
             np.linspace(0.0, 4.6, 20), np.ones(20), ext=2)
 
@@ -99,9 +106,11 @@ class cosmoinitTestCase(TestCase):
                            'ombh2': self.ombh2})
 
     def test_power_exception(self):
+        pow = self.model_test.cosmology.cosmo_dic['Pgg_phot'](10.0, 12.0)
+        wab = 1.0 * 2.0
+        pandw = wab * np.atleast_1d(pow)[0]
         npt.assert_raises(Exception, self.phot.Cl_generic_integrand,
-                          10.0, 1.0, 2.0, 12.0,
-                          self.model_test.cosmology.cosmo_dic['Pgg_phot'])
+                          10.0, pandw)
 
     def test_cl_WL(self):
         cl_int = self.phot.Cl_WL(10.0, 1, 1)

@@ -170,7 +170,7 @@ class Photo:
 
         return W_IA
 
-    def Cl_generic_integrand(self, z, W_i_z, W_j_z, k, P_int):
+    def Cl_generic_integrand(self, z, PandW_i_j_z_k):
         r"""
         Calculates the angular power spectrum integrand
         for any two probes and bins for which
@@ -200,14 +200,14 @@ class Photo:
             P_{\rm AB}(k=({\rm\ell} + 0.5)/r(z), z)\\
             \text{A, B in {G, L}}
         """
-        kern_mult = ((W_i_z * W_j_z) /
-                     (self.theory['H_z_func'](z) *
-                      (self.theory['r_z_func'](z)) ** 2.0))
-        power = np.atleast_1d(P_int(z, k))[0]
-        if np.isnan(power) is True:
+        kern_mult_power = ((PandW_i_j_z_k) /
+                           (self.theory['H_z_func'](z) *
+                            (self.theory['r_z_func'](z)) ** 2.0))
+        # power = np.atleast_1d(P_int(z, k))[0]
+        if np.isnan(PandW_i_j_z_k) is True:
             raise Exception('Requested k, z values are outside of power'
                             ' spectrum interpolation range.')
-        return kern_mult * power
+        return kern_mult_power
 
     def Cl_WL(self, ell, bin_i, bin_j, int_step=0.1):
         r"""
@@ -241,15 +241,23 @@ class Photo:
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
         c_int_arr = np.empty(len(int_zs))
-        for ii, rshft in enumerate(int_zs):
-            current_k = (ell + 0.5) / self.theory['r_z_func'](rshft)
-            kern_i = self.WL_window(rshft, bin_i, current_k)
-            kern_j = self.WL_window(rshft, bin_j, current_k)
-            c_int_arr[ii] = (self.Cl_generic_integrand(rshft, kern_i, kern_j,
-                                                       current_k,
-                                                       self.theory[
-                                                           'Pk_interpolator'].P
-                                                       ))
+        P_dd = self.theory['Pk_interpolator'].P
+        P_ii = self.theory['Pii']
+        P_di = self.theory['Pdeltai']
+        for ii, rshift in enumerate(int_zs):
+            current_k = (ell + 0.5) / self.theory['r_z_func'](rshift)
+            pow_dd = np.atleast_1d(P_dd(rshift, current_k))[0]
+            pow_ii = np.atleast_1d(P_ii(rshift, current_k))[0]
+            pow_di = np.atleast_1d(P_di(rshift, current_k))[0]
+            kern_i = self.WL_window(rshift, bin_i, current_k)
+            kern_j = self.WL_window(rshift, bin_j, current_k)
+            kernia_i = self.IA_window(rshift, bin_i)
+            kernia_j = self.IA_window(rshift, bin_j)
+            pandw_dd = kern_i * kern_j * pow_dd
+            pandw_ii = kernia_i * kernia_j * pow_ii
+            pandw_di = (kern_i * kernia_j + kernia_i * kern_j) * pow_di
+            pandwijk = pandw_dd + pandw_ii + pandw_di
+            c_int_arr[ii] = self.Cl_generic_integrand(rshift, pandwijk)
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final
@@ -286,16 +294,17 @@ class Photo:
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
         c_int_arr = np.empty(len(int_zs))
-        for ii, rshft in enumerate(int_zs):
+        P_int = self.theory['Pgg_phot']
+        for ii, rshift in enumerate(int_zs):
             # (ACD): Although k is specified here for the GC window function,
             # note that the implementation currently uses a scale-independent
             # bias.
-            current_k = (ell + 0.5) / self.theory['r_z_func'](rshft)
-            kern_i = self.GC_window(rshft, bin_i)
-            kern_j = self.GC_window(rshft, bin_j)
-            c_int_arr[ii] = (self.Cl_generic_integrand(rshft, kern_i, kern_j,
-                                                       current_k, self.theory[
-                                                           'Pgg_phot']))
+            current_k = (ell + 0.5) / self.theory['r_z_func'](rshift)
+            power = np.atleast_1d(P_int(rshift, current_k))[0]
+            kern_i = self.GC_window(rshift, bin_i)
+            kern_j = self.GC_window(rshift, bin_j)
+            pandwijk = kern_i * kern_j * power
+            c_int_arr[ii] = self.Cl_generic_integrand(rshift, pandwijk)
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final
@@ -332,16 +341,22 @@ class Photo:
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
         c_int_arr = np.empty(len(int_zs))
-        for ii, rshft in enumerate(int_zs):
+        P_gd = self.theory['Pgdelta_phot']
+        P_gi = self.theory['Pgi_phot']
+        for ii, rshift in enumerate(int_zs):
             # (ACD): Although k is specified here for the GC window function,
             # note that the implementation currently uses a scale-independent
             # bias.
-            current_k = (ell + 0.5) / self.theory['r_z_func'](rshft)
-            kern_i = self.WL_window(rshft, bin_i, current_k)
-            kern_j = self.GC_window(rshft, bin_j)
-            c_int_arr[ii] = (self.Cl_generic_integrand(rshft, kern_i, kern_j,
-                                                       current_k, self.theory[
-                                                           'Pgdelta_phot']))
+            current_k = (ell + 0.5) / self.theory['r_z_func'](rshift)
+            pow_gd = np.atleast_1d(P_gd(rshift, current_k))[0]
+            pow_gi = np.atleast_1d(P_gi(rshift, current_k))[0]
+            kern_i = self.WL_window(rshift, bin_i, current_k)
+            kernia_i = self.IA_window(rshift, bin_i)
+            kern_j = self.GC_window(rshift, bin_j)
+            pandw_gd = kern_i * kern_j * pow_gd
+            pandw_gi = kernia_i * kern_j * pow_gi
+            pandwijk = pandw_gd + pandw_gi
+            c_int_arr[ii] = self.Cl_generic_integrand(rshift, pandwijk)
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final

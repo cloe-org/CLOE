@@ -212,7 +212,7 @@ class Photo:
     def Cl_WL(self, ell, bin_i, bin_j, int_step=0.1):
         r"""
         Calculates angular power spectrum for weak lensing,
-        for the supplied bins.
+        for the supplied bins. Includes intrinsic alignments.
 
         Parameters
         ----------
@@ -234,8 +234,13 @@ class Photo:
         Notes
         -----
         .. math::
-            c \int {\rm d}z \frac{W_{i}^{\rm WL}(z)W_{j}^{\rm WL}(z)}\
-            {H(z)r^2(z)}P_{\delta\delta}(k=({\rm\ell} + 0.5)/r(z), z)\\
+            c \int \frac{dz}{H(z)r^2(z)} \left[W_{i}^{\gamma}(z)\
+            W_{j}^{\gamma}(z) P_{\delta\delta}\left(\frac{{\rm\ell} + 1/2}\
+            {r(z)}, z\right) + \left(W_{i}^{\rm{IA}}(z)W_{j}^{\gamma}(z) + \
+            W_{i}^{\gamma}(z)W_{j}^{\rm{IA}}(z)\right) P_{\delta\rm{I}}\
+            \left(\frac{{\rm\ell} + 1/2}{r(z)}, z\right) + W_{i}^{\rm{IA}}(z)\
+            W_{j}^{\rm{IA}}(z) P_{\rm{II}}\left(\frac{{\rm\ell} + 1/2}\
+            {r(z)}, z\right)\right]\\
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
@@ -287,8 +292,9 @@ class Photo:
         Notes
         -----
         .. math::
-            c \int {\rm d}z \frac{W_{i}^{\rm GC}(k, z)W_{j}^{\rm GC}(k, z)}\
-            {H(z)r^2(z)}P_{\rm GG}(k=(\ell + 0.5)/r(z), z)\\
+            c \int {\rm d}z \frac{W_{i}^{\rm G}(z)W_{j}^{\rm G}(z)}\
+            {H(z)r^2(z)}P^{\rm{photo}}_{\rm gg}\
+            \left(\frac{{\rm\ell} + 1/2}{r(z)}, z\right)\\
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
@@ -313,6 +319,7 @@ class Photo:
         r"""
         Calculates angular power spectrum for cross-correlation
         between weak lensing and galaxy clustering, for the supplied bins.
+        Includes intrinsic alignments.
 
         Parameters
         ----------
@@ -334,8 +341,11 @@ class Photo:
         Notes
         -----
         .. math::
-            c \int {\rm d}z \frac{W_{i}^{\rm WL}(z)W_{j}^{\rm GC}(k, z)}\
-            {H(z)r^2(z)}P_{\rm G\delta}(k=({\rm \ell} + 0.5)/r(z), z)\\
+            c \int \frac{dz}{H(z)r^2(z)}\left[W_{i}^{\rm{G}}(z)\
+            W_{j}^{\gamma}(z)P^{\rm{photo}}_{\rm g\delta}\
+            \left(\frac{{\rm\ell} + 1/2}{r(z)}, z\right) + \
+            W_{i}^{\rm{IA}}(z)W_{j}^{\rm{G}}(z)P^{\rm{photo}}_{\rm g\rm{I}}\
+            \left(\frac{{\rm\ell} + 1/2}{r(z)}, z\right)\right]\\
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)

@@ -341,8 +341,8 @@ class Photo:
         Notes
         -----
         .. math::
-            c \int \frac{dz}{H(z)r^2(z)}\left[W_{i}^{\rm{G}}(z)\
-            W_{j}^{\gamma}(z)P^{\rm{photo}}_{\rm g\delta}\
+            c \int \frac{dz}{H(z)r^2(z)}\left[W_{i}^{\gamma}(z)\
+            W_{j}^{\rm{G}}(z)P^{\rm{photo}}_{\rm g\delta}\
             \left(\frac{{\rm\ell} + 1/2}{r(z)}, z\right) + \
             W_{i}^{\rm{IA}}(z)W_{j}^{\rm{G}}(z)P^{\rm{photo}}_{\rm g\rm{I}}\
             \left(\frac{{\rm\ell} + 1/2}{r(z)}, z\right)\right]\\

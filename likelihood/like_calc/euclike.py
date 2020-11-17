@@ -38,7 +38,7 @@ class Euclike:
         # Transforming data
         self.specdatafinal = self.create_spec_data()
         self.speccovfinal = self.create_spec_cov()
-        self.speccovinvfinal = np.linalg.inv(self.speccovfinal)
+        self.specinvcovfinal = np.linalg.inv(self.speccovfinal)
         # Read photo
         self.data_ins.read_phot()
         self.photoinvcovfinal_GC = np.linalg.inv(
@@ -63,8 +63,7 @@ class Euclike:
         self.indices_all = []
         for i in range(0, len(x)):
             for j in range(0, len(x)):
-                if x[i, j] == 1:
-                    self.indices_all.append([i + 1, j + 1])
+                self.indices_all.append([i + 1, j + 1])
 
     def create_photo_data(self):
         """
@@ -78,20 +77,22 @@ class Euclike:
 
         datavec_dict = {'GC-Phot': [], 'WL': [], 'XC-Phot': [], 'all': []}
         for index in list(self.data_ins.data_dict['WL'].keys()):
-            if index in self.data_ins.data_dict['WL'].keys():
-                if 'B' in index:
-                    del(self.data_ins.data_dict['WL'][index])
+            if 'B' in index:
+                del(self.data_ins.data_dict['WL'][index])
         for index in list(self.data_ins.data_dict['XC-Phot'].keys()):
-            if index in self.data_ins.data_dict['XC-Phot'].keys():
-                if 'B' in index:
-                    del(self.data_ins.data_dict['XC-Phot'][index])
+            if 'B' in index:
+                del(self.data_ins.data_dict['XC-Phot'][index])
         # GCH: transform GC-Phot
+        # We ignore the first value (ells) and last (cov matrix)
         datavec_dict['GC-Phot'] = np.array([v for key, v in list(
-            self.data_ins.data_dict['GC-Phot'].items())[1:-1]]).reshape((1100))
+            self.data_ins.data_dict['GC-Phot'].items())[1:-1]]).reshape((
+                len(self.photoinvcovfinal_GC)))
         datavec_dict['WL'] = np.array([v for key, v in list(
-            self.data_ins.data_dict['WL'].items())[1:-1]]).reshape((1100))
+            self.data_ins.data_dict['WL'].items())[1:-1]]).reshape((
+                len(self.photoinvcovfinal_WL)))
         datavec_dict['XC-Phot'] = np.array([v for key, v in list(
-            self.data_ins.data_dict['XC-Phot'].items())[1:-2]]).reshape((2000))
+            self.data_ins.data_dict['XC-Phot'].items())[1:-2]]).reshape((
+                len(self.photoinvcovfinal_XC)))
         datavec_dict['all'] = np.concatenate((datavec_dict['WL'],
                                               datavec_dict['XC-Phot'],
                                               datavec_dict['GC-Phot']), axis=0)
@@ -248,11 +249,12 @@ class Euclike:
         Calculates loglike photometric based on
         the flag 'full_photo'. If True, calculates
         all probes. If false, only calculates GCxWL
+        assuming they are independent.
 
         Returns
         -------
         loglike_photo: float
-            returns a single covariance from sub-covariances (split in z)
+            returns photo-z chi2
         """
 
         # (GCH): photo-class instance
@@ -285,6 +287,8 @@ class Euclike:
             # (GCH): cal loglike
             loglike_photo = np.dot(np.dot(dmt_all, self.photoinvcovfinal_all),
                                    dmt_all.T)
+        else:
+            print('ATTENTION: full_photo has to be either True/False')
         return loglike_photo
 
     def loglike(self, dictionary, dictionary_fiducial):
@@ -321,20 +325,18 @@ class Euclike:
         if like_selection == 1:
             self.loglike = self.loglike_photo(dictionary, full_photo)
         elif like_selection == 2:
-            thfac = 1.0 / (2.0 * np.pi / (dictionary['H0'] / 100.0))**3.0
             thfac = (dictionary['H0'] / 100.0)**3.0
             self.thvec = self.create_spec_theory(
                              dictionary, dictionary_fiducial)
             dmt = self.specdatafinal - self.thvec * thfac
-            self.loglike = np.dot(np.dot(dmt, self.speccovinvfinal), dmt.T)
+            self.loglike = np.dot(np.dot(dmt, self.specinvcovfinal), dmt.T)
         elif like_selection == 12:
-            thfac = 1.0 / (2.0 * np.pi / (dictionary['H0'] / 100.0))**3.0
             thfac = (dictionary['H0'] / 100.0)**3.0
             self.thvec = self.create_spec_theory(
                              dictionary, dictionary_fiducial)
             dmt = self.specdatafinal - self.thvec * thfac
             self.loglike_spec = np.dot(np.dot(
-                                    dmt, self.speccovinvfinal), dmt.T)
+                                    dmt, self.specinvcovfinal), dmt.T)
             self.loglike_photo = self.loglike_photo(dictionary, full_photo)
             # (SJ): only addition below if no cross-covariance
             self.loglike = self.loglike_photo + self.loglike_spec

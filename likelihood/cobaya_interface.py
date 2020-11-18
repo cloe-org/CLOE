@@ -37,6 +37,7 @@ class EuclidLikelihood(Likelihood):
     # Define them here!
     # For the moment, only 14 different bias terms
     params = {"like_selection": None,
+              'full_photo': None,
               'b1_photo': None,
               'b2_photo': None,
               'b3_photo': None,

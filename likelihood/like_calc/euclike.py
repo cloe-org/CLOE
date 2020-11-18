@@ -248,7 +248,7 @@ class Euclike:
         """
         Calculates loglike photometric based on
         the flag 'full_photo'. If True, calculates
-        all probes. If false, only calculates GCxWL
+        all probes. If false, only calculates GC+WL
         assuming they are independent.
 
         Returns

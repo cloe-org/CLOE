@@ -119,10 +119,10 @@ class Photo:
         Notes
         -----
         .. math::
-            W_{i}^{\gamma}(z, k) = \frac{3 H_0}{2 c}\Omega_{{\rm m},0} (1 + z)\
-            \Sigma(z, k) \tilde{r}(z)\int_{z}^{z_{\rm max}}{{\rm d}z^{\prime}\
-            n_{i}^{\rm WL}(z^{\prime})\
-            left [ 1 -\frac{\tilde{r}(z)}{\tilde{r}(z^{\prime}} \right ]}\\
+            W_{i}^{\gamma}(z, k) = \frac{3}{2}\left ( \frac{H_0}{c}\right )^2
+            \Omega_{{\rm m},0} (1 + z) \Sigma(z, k) \tilde{r}(z)
+            \int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm WL}(z^{\prime})
+            \left [ 1 -\frac{\tilde{r}(z)}{\tilde{r}(z^{\prime}} \right ]}\\
         """
         H0 = self.theory['H0']
         c = self.theory['c']

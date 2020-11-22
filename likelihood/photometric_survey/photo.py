@@ -84,9 +84,11 @@ class Photo:
         nz: function
             Galaxy distribution function for the tomographic bin for
             which the kernel is currently being evaluated.
+
         Returns
         -------
-        Integrand value
+        wint: float
+           WL kernel integrand
 
         Notes
         -----
@@ -111,10 +113,12 @@ class Photo:
            indices start from 1.
         k: float
             k-mode at which to evaluate the MG sigma function
+
         Returns
         -------
-        Value of lensing kernel for specified bin at specified redshift and
-        scale.
+        W_val: float
+           Value of lensing kernel for specified bin at specified redshift
+           and scale.
 
         Notes
         -----
@@ -152,9 +156,11 @@ class Photo:
         bin_i: int
            index of desired tomographic bin. Tomographic bin
            indices start from 1.
+
         Returns
         -------
-        Value of lensing kernel for specified bin at specified redshift.
+        W_IA: float
+           Value of lensing kernel for specified bin at specified redshift.
 
         Notes
         -----
@@ -173,25 +179,22 @@ class Photo:
     def Cl_generic_integrand(self, z, PandW_i_j_z_k):
         r"""
         Calculates the angular power spectrum integrand
-        for any two probes and bins for which
+        for any two probes and tomographic bins for which
         the bins are supplied.
 
         Parameters
         ----------
         z: float
             Redshift at which integrand is being evaluated.
-        W_i_z: float
-           Value of kernel for bin i, at redshift z.
-        W_j_z: float
-           Value of kernel for bin j, at redshift z.
-        k: float
-           Scale at which the current C_\ell is being evaluated at.
-        P_int: obj
-            Choice of power spectrum interpolator. Either matter power spectrum
-            GG power spectrum, or G-delta power spectrum.
+        PandW_i_j_z_k: float
+           Value of the product of kernel for bin i, kernel for bin j,
+           and the power spectrum at redshift z and scale k. The power
+           spectrum is either that of delta-delta, GG, or G-delta.
+
         Returns
         -------
-        Value of angular power spectrum integrand at redshift z.
+        kern_mult_power: float
+           Value of angular power spectrum integrand at redshift z.
 
         Notes
         -----
@@ -204,7 +207,7 @@ class Photo:
                            (self.theory['H_z_func'](z) *
                             (self.theory['r_z_func'](z)) ** 2.0))
 
-        if np.isnan(PandW_i_j_z_k) is True:
+        if np.isnan(PandW_i_j_z_k):
             raise Exception('Requested k, z values are outside of power'
                             ' spectrum interpolation range.')
         return kern_mult_power
@@ -226,10 +229,11 @@ class Photo:
            indices start from 1.
         int_step: float
             Size of step for numerical integral over redshift.
+
         Returns
         -------
-        Value of angular power spectrum.
-
+        c_final: float
+           Value of angular shear power spectrum.
 
         Notes
         -----
@@ -284,10 +288,11 @@ class Photo:
            indices start from 1.
         int_step: float
             Size of step for numerical integral over redshift.
+
         Returns
         -------
-        Value of angular power spectrum for photometric galaxy clustering.
-
+        c_final: float
+           Value of angular power spectrum for photometric galaxy clustering.
 
         Notes
         -----
@@ -333,10 +338,11 @@ class Photo:
            indices start from 1.
         int_step: float
             Size of step for numerical integral over redshift.
+
         Returns
         -------
-        Value of cross correlation angular power spectrum.
-
+        c_final: float
+           Value of cross correlation angular power spectrum.
 
         Notes
         -----

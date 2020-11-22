@@ -297,8 +297,8 @@ class Photo:
         Notes
         -----
         .. math::
-            c \int {\rm d}z \frac{W_{i}^{\rm G}(z)W_{j}^{\rm G}(z)}\
-            {H(z)r^2(z)}P^{\rm{photo}}_{\rm gg}\
+            c \int {\rm d}z {{W_{i}^{\rm G}(z)W_{j}^{\rm G}(z)} \over\
+            {H(z)r^2(z)}}P^{\rm{photo}}_{\rm gg}\
             \left(\frac{{\rm\ell} + 1/2}{r(z)}, z\right)\\
         """
 

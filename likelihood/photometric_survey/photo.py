@@ -84,9 +84,11 @@ class Photo:
         nz: function
             Galaxy distribution function for the tomographic bin for
             which the kernel is currently being evaluated.
+
         Returns
         -------
-        Integrand value
+        wint: float
+           WL kernel integrand
 
         Notes
         -----
@@ -111,10 +113,12 @@ class Photo:
            indices start from 1.
         k: float
             k-mode at which to evaluate the MG sigma function
+
         Returns
         -------
-        Value of lensing kernel for specified bin at specified redshift and
-        scale.
+        W_val: float
+           Value of lensing kernel for specified bin at specified redshift
+           and scale.
 
         Notes
         -----
@@ -152,9 +156,11 @@ class Photo:
         bin_i: int
            index of desired tomographic bin. Tomographic bin
            indices start from 1.
+
         Returns
         -------
-        Value of lensing kernel for specified bin at specified redshift.
+        W_IA: float
+           Value of lensing kernel for specified bin at specified redshift.
 
         Notes
         -----
@@ -170,28 +176,26 @@ class Photo:
 
         return W_IA
 
-    def Cl_generic_integrand(self, z, W_i_z, W_j_z, k, P_int):
+    def Cl_generic_integrand(self, z, PandW_i_j_z_k):
         r"""
         Calculates the angular power spectrum integrand
-        for any two probes and bins for which
+        for any two probes and tomographic bins for which
         the bins are supplied.
 
         Parameters
         ----------
         z: float
             Redshift at which integrand is being evaluated.
-        W_i_z: float
-           Value of kernel for bin i, at redshift z.
-        W_j_z: float
-           Value of kernel for bin j, at redshift z.
-        k: float
-           Scale at which the current C_\ell is being evaluated at.
-        P_int: obj
-            Choice of power spectrum interpolator. Either matter power spectrum
-            GG power spectrum, or G-delta power spectrum.
+        PandW_i_j_z_k: float
+           Value of the product of kernel for bin i, kernel for bin j,
+           and the power spectrum at redshift z and scale k. The power
+           spectrum is either that of delta-delta, GG, or G-delta.
+
         Returns
         -------
-        Value of angular power spectrum integrand at redshift z.
+        kern_mult_power: float
+           Value of the angular power spectrum integrand at redshift
+           z and multipole l.
 
         Notes
         -----
@@ -200,19 +204,19 @@ class Photo:
             P_{\rm AB}(k=({\rm\ell} + 0.5)/r(z), z)\\
             \text{A, B in {G, L}}
         """
-        kern_mult = ((W_i_z * W_j_z) /
-                     (self.theory['H_z_func'](z) *
-                      (self.theory['r_z_func'](z)) ** 2.0))
-        power = np.atleast_1d(P_int(z, k))[0]
-        if np.isnan(power) is True:
+        kern_mult_power = (PandW_i_j_z_k /
+                           (self.theory['H_z_func'](z) *
+                            (self.theory['r_z_func'](z)) ** 2.0))
+
+        if np.isnan(PandW_i_j_z_k):
             raise Exception('Requested k, z values are outside of power'
                             ' spectrum interpolation range.')
-        return kern_mult * power
+        return kern_mult_power
 
     def Cl_WL(self, ell, bin_i, bin_j, int_step=0.1):
         r"""
         Calculates angular power spectrum for weak lensing,
-        for the supplied bins.
+        for the supplied bins. Includes intrinsic alignments.
 
         Parameters
         ----------
@@ -226,30 +230,44 @@ class Photo:
            indices start from 1.
         int_step: float
             Size of step for numerical integral over redshift.
+
         Returns
         -------
-        Value of angular power spectrum.
-
+        c_final: float
+           Value of angular shear power spectrum.
 
         Notes
         -----
         .. math::
-            c \int {\rm d}z \frac{W_{i}^{\rm WL}(z)W_{j}^{\rm WL}(z)}\
-            {H(z)r^2(z)}P_{\delta\delta}(k=({\rm\ell} + 0.5)/r(z), z)\\
+            c \int \frac{dz}{H(z)r^2(z)} [W_{i}^{\gamma}(z)\
+            W_{j}^{\gamma}(z)P_{\delta\delta}\left(\frac{{\rm\ell}+1/2}{r(z)},\
+            z\right) + \\ \left(W_{i}^{\rm{IA}}(z)W_{j}^{\gamma}(z) + \
+            W_{i}^{\gamma}(z)W_{j}^{\rm{IA}}(z)\right) P_{\delta\rm{I}}\
+            \left(\frac{{\rm\ell}+1/2}{r(z)}, z\right) + \\ W_{i}^{\rm{IA}}(z)\
+            W_{j}^{\rm{IA}}(z) P_{\rm{II}}\left(\frac{{\rm\ell}+1/2}{r(z)},\
+            z\right)]\\
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
         c_int_arr = np.empty(len(int_zs))
-        for ii, rshft in enumerate(int_zs):
-            current_k = (ell + 0.5) / self.theory['r_z_func'](rshft)
-            kern_i = self.WL_window(rshft, bin_i, current_k)
-            kern_j = self.WL_window(rshft, bin_j, current_k)
-            c_int_arr[ii] = (self.Cl_generic_integrand(rshft, kern_i, kern_j,
-                                                       current_k,
-                                                       self.theory[
-                                                           'Pk_interpolator'].P
-                                                       ))
+        P_dd = self.theory['Pk_interpolator'].P
+        P_ii = self.theory['Pii']
+        P_di = self.theory['Pdeltai']
+        for ii, rshift in enumerate(int_zs):
+            current_k = (ell + 0.5) / self.theory['r_z_func'](rshift)
+            pow_dd = np.atleast_1d(P_dd(rshift, current_k))[0]
+            pow_ii = np.atleast_1d(P_ii(rshift, current_k))[0]
+            pow_di = np.atleast_1d(P_di(rshift, current_k))[0]
+            kern_i = self.WL_window(rshift, bin_i, current_k)
+            kern_j = self.WL_window(rshift, bin_j, current_k)
+            kernia_i = self.IA_window(rshift, bin_i)
+            kernia_j = self.IA_window(rshift, bin_j)
+            pandw_dd = kern_i * kern_j * pow_dd
+            pandw_ii = kernia_i * kernia_j * pow_ii
+            pandw_di = (kern_i * kernia_j + kernia_i * kern_j) * pow_di
+            pandwijk = pandw_dd + pandw_ii + pandw_di
+            c_int_arr[ii] = self.Cl_generic_integrand(rshift, pandwijk)
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final
@@ -271,31 +289,34 @@ class Photo:
            indices start from 1.
         int_step: float
             Size of step for numerical integral over redshift.
+
         Returns
         -------
-        Value of angular power spectrum for photometric galaxy clustering.
-
+        c_final: float
+           Value of angular power spectrum for photometric galaxy clustering.
 
         Notes
         -----
         .. math::
-            c \int {\rm d}z \frac{W_{i}^{\rm GC}(k, z)W_{j}^{\rm GC}(k, z)}\
-            {H(z)r^2(z)}P_{\rm GG}(k=(\ell + 0.5)/r(z), z)\\
+            c \int {\rm d}z {{W_{i}^{\rm G}(z)W_{j}^{\rm G}(z)} \over\
+            {H(z)r^2(z)}}P^{\rm{photo}}_{\rm gg}\
+            \left(\frac{{\rm\ell} + 1/2}{r(z)}, z\right)\\
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
         c_int_arr = np.empty(len(int_zs))
-        for ii, rshft in enumerate(int_zs):
+        P_int = self.theory['Pgg_phot']
+        for ii, rshift in enumerate(int_zs):
             # (ACD): Although k is specified here for the GC window function,
             # note that the implementation currently uses a scale-independent
             # bias.
-            current_k = (ell + 0.5) / self.theory['r_z_func'](rshft)
-            kern_i = self.GC_window(rshft, bin_i)
-            kern_j = self.GC_window(rshft, bin_j)
-            c_int_arr[ii] = (self.Cl_generic_integrand(rshft, kern_i, kern_j,
-                                                       current_k, self.theory[
-                                                           'Pgg_phot']))
+            current_k = (ell + 0.5) / self.theory['r_z_func'](rshift)
+            power = np.atleast_1d(P_int(rshift, current_k))[0]
+            kern_i = self.GC_window(rshift, bin_i)
+            kern_j = self.GC_window(rshift, bin_j)
+            pandwijk = kern_i * kern_j * power
+            c_int_arr[ii] = self.Cl_generic_integrand(rshift, pandwijk)
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final
@@ -304,6 +325,7 @@ class Photo:
         r"""
         Calculates angular power spectrum for cross-correlation
         between weak lensing and galaxy clustering, for the supplied bins.
+        Includes intrinsic alignments.
 
         Parameters
         ----------
@@ -317,31 +339,41 @@ class Photo:
            indices start from 1.
         int_step: float
             Size of step for numerical integral over redshift.
+
         Returns
         -------
-        Value of cross correlation angular power spectrum.
-
+        c_final: float
+           Value of cross correlation angular power spectrum.
 
         Notes
         -----
         .. math::
-            c \int {\rm d}z \frac{W_{i}^{\rm WL}(z)W_{j}^{\rm GC}(k, z)}\
-            {H(z)r^2(z)}P_{\rm G\delta}(k=({\rm \ell} + 0.5)/r(z), z)\\
+            c \int \frac{dz}{H(z)r^2(z)}[W_{i}^{\gamma}(z)\
+            W_{j}^{\rm{G}}(z)P^{\rm{photo}}_{\rm g\delta}\
+            \left(\frac{{\rm\ell} + 1/2}{r(z)}, z\right)\\
+            +\,W_{i}^{\rm{IA}}(z)W_{j}^{\rm{G}}(z)P^{\rm{photo}}_{\rm g\rm{I}}\
+            \left(\frac{{\rm\ell} + 1/2}{r(z)}, z\right)]\\
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
         c_int_arr = np.empty(len(int_zs))
-        for ii, rshft in enumerate(int_zs):
+        P_gd = self.theory['Pgdelta_phot']
+        P_gi = self.theory['Pgi_phot']
+        for ii, rshift in enumerate(int_zs):
             # (ACD): Although k is specified here for the GC window function,
             # note that the implementation currently uses a scale-independent
             # bias.
-            current_k = (ell + 0.5) / self.theory['r_z_func'](rshft)
-            kern_i = self.WL_window(rshft, bin_i, current_k)
-            kern_j = self.GC_window(rshft, bin_j)
-            c_int_arr[ii] = (self.Cl_generic_integrand(rshft, kern_i, kern_j,
-                                                       current_k, self.theory[
-                                                           'Pgdelta_phot']))
+            current_k = (ell + 0.5) / self.theory['r_z_func'](rshift)
+            pow_gd = np.atleast_1d(P_gd(rshift, current_k))[0]
+            pow_gi = np.atleast_1d(P_gi(rshift, current_k))[0]
+            kern_i = self.WL_window(rshift, bin_i, current_k)
+            kernia_i = self.IA_window(rshift, bin_i)
+            kern_j = self.GC_window(rshift, bin_j)
+            pandw_gd = kern_i * kern_j * pow_gd
+            pandw_gi = kernia_i * kern_j * pow_gi
+            pandwijk = pandw_gd + pandw_gi
+            c_int_arr[ii] = self.Cl_generic_integrand(rshift, pandwijk)
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final

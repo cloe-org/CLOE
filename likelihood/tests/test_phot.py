@@ -105,6 +105,7 @@ class cosmoinitTestCase(TestCase):
                            'omch2': self.omch2,
                            'ombh2': self.ombh2})
 
+    # (SJ): wab here refers to the product of the two window functions.
     def test_power_exception(self):
         pow = self.model_test.cosmology.cosmo_dic['Pgg_phot'](10.0, 12.0)
         wab = 1.0 * 2.0

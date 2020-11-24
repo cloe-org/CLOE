@@ -194,7 +194,8 @@ class Photo:
         Returns
         -------
         kern_mult_power: float
-           Value of angular power spectrum integrand at redshift z.
+           Value of the angular power spectrum integrand at redshift
+           z and multipole l.
 
         Notes
         -----
@@ -238,13 +239,13 @@ class Photo:
         Notes
         -----
         .. math::
-            c \int \frac{dz}{H(z)r^2(z)} \left[W_{i}^{\gamma}(z)\
-            W_{j}^{\gamma}(z) P_{\delta\delta}\left(\frac{{\rm\ell} + 1/2}\
-            {r(z)}, z\right) + \left(W_{i}^{\rm{IA}}(z)W_{j}^{\gamma}(z) + \
+            c \int \frac{dz}{H(z)r^2(z)} [W_{i}^{\gamma}(z)\
+            W_{j}^{\gamma}(z)P_{\delta\delta}\left(\frac{{\rm\ell}+1/2}{r(z)},\
+            z\right) + \\ \left(W_{i}^{\rm{IA}}(z)W_{j}^{\gamma}(z) + \
             W_{i}^{\gamma}(z)W_{j}^{\rm{IA}}(z)\right) P_{\delta\rm{I}}\
-            \left(\frac{{\rm\ell} + 1/2}{r(z)}, z\right) + W_{i}^{\rm{IA}}(z)\
-            W_{j}^{\rm{IA}}(z) P_{\rm{II}}\left(\frac{{\rm\ell} + 1/2}\
-            {r(z)}, z\right)\right]\\
+            \left(\frac{{\rm\ell}+1/2}{r(z)}, z\right) + \\ W_{i}^{\rm{IA}}(z)\
+            W_{j}^{\rm{IA}}(z) P_{\rm{II}}\left(\frac{{\rm\ell}+1/2}{r(z)},\
+            z\right)]\\
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
@@ -347,11 +348,11 @@ class Photo:
         Notes
         -----
         .. math::
-            c \int \frac{dz}{H(z)r^2(z)}\left[W_{i}^{\gamma}(z)\
+            c \int \frac{dz}{H(z)r^2(z)}[W_{i}^{\gamma}(z)\
             W_{j}^{\rm{G}}(z)P^{\rm{photo}}_{\rm g\delta}\
-            \left(\frac{{\rm\ell} + 1/2}{r(z)}, z\right) + \
-            W_{i}^{\rm{IA}}(z)W_{j}^{\rm{G}}(z)P^{\rm{photo}}_{\rm g\rm{I}}\
-            \left(\frac{{\rm\ell} + 1/2}{r(z)}, z\right)\right]\\
+            \left(\frac{{\rm\ell} + 1/2}{r(z)}, z\right)\\
+            +\,W_{i}^{\rm{IA}}(z)W_{j}^{\rm{G}}(z)P^{\rm{photo}}_{\rm g\rm{I}}\
+            \left(\frac{{\rm\ell} + 1/2}{r(z)}, z\right)]\\
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)

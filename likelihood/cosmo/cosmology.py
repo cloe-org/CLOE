@@ -96,7 +96,7 @@ class Cosmology:
             Spectroscopic galaxy-intrinsic cross-spectrum
         MG_mu: function
             mu function from Modified Gravity parametrization
-        MG_msigma: function
+        MG_sigma: function
             sigma function from Modified Gravity parametrization
         nuisance_parameters: dictionary
             Contains all nuisance bias parameters

@@ -789,3 +789,5 @@ class Cosmology:
         self.cosmo_dic['NL_flag'] = NL_flag
         if (NL_flag == 'linear'):
             self.cosmo_dic['NL_boost'] = self.NL_boost_def
+        else:
+            raise Exception("Non-linear flag can only be 'linear'.")

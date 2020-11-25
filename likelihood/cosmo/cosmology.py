@@ -98,6 +98,10 @@ class Cosmology:
             mu function from Modified Gravity parametrization
         MG_sigma: function
             sigma function from Modified Gravity parametrization
+        NL_flag: string
+            Recipe for non-linear dark matter evolution
+        NL_boost: function
+            Non-linear boost factor
         nuisance_parameters: dictionary
             Contains all nuisance bias parameters
             and IA parameters which are sampled over.
@@ -156,6 +160,8 @@ class Cosmology:
                           'fsigma8_z_func': None,
                           'MG_mu': None,
                           'MG_sigma': None,
+                          'NL_flag': None,
+                          'NL_boost': None,
                           'nuisance_parameters': {
                              'like_selection': 2,
                              'full_photo': True,
@@ -722,7 +728,26 @@ class Cosmology:
 
         return MG_sigma
 
-    def update_cosmo_dic(self, zs, ks, MG_mu=1.0, MG_sigma=1.0):
+    def NL_boost_def(self, redshift, k_scale):
+        """
+        Returns the non-linear boost factor.
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the boost factor.
+        k_scale: float
+            k-mode at which to evaluate the boost factor.
+
+        Returns
+        -------
+        Value of non-linear boost factor at given scale and redshift.
+        """
+
+        return 1.
+
+    def update_cosmo_dic(self, zs, ks, MG_mu=1.0, MG_sigma=1.0,
+                         NL_flag='linear'):
         """
         Update the dictionary with other cosmological quantities
 
@@ -732,6 +757,12 @@ class Cosmology:
             list of redshift for the power spectrum
         ks: array
             list of modes for the power spectrum
+        MG_mu: float
+            constant value of modified gravity mu function
+        MG_sigma: float
+            constant value of modified gravity sigma function
+        NL_flag: string
+            flag for non-linear boost factor
         """
         # (GCH): this function is superfluous
         # just in case we want to have always
@@ -755,3 +786,6 @@ class Cosmology:
         self.cosmo_dic['MG_mu'] = lambda x, y: self.MG_mu_def(x, y, MG_mu)
         self.cosmo_dic['MG_sigma'] = lambda x, y: self.MG_sigma_def(x, y,
                                                                     MG_sigma)
+        self.cosmo_dic['NL_flag'] = NL_flag
+        if (NL_flag == 'linear'):
+            self.cosmo_dic['NL_boost'] = self.NL_boost_def

@@ -41,34 +41,24 @@ class plotterTestCase(TestCase):
     def test_plotter_init(self):
         npt.assert_raises(Exception, Plotter)
 
-    def test_plot_WL_excep(self):
-        npt.assert_raises(Exception, self.plot_inst.plot_Cl_WL, 1.0, 1, 1,
-                          self.ax1)
-        npt.assert_raises(Exception, self.plot_inst.plot_Cl_WL, 10.0, 1, 1)
+    def test_plot_phot_excep(self):
+        npt.assert_raises(Exception, self.plot_inst.plot_Cl_phot,
+                          np.array([1.0]), 1, 1, self.ax1)
+        npt.assert_raises(Exception, self.plot_inst.plot_Cl_phot,
+                          np.array([10.0]), 1, 1)
 
-    def test_ext_WL_binexcep(self):
-        npt.assert_raises(Exception, self.plot_inst.plot_external_Cl_Wl, 11, 1,
-                          self.ax1)
-        npt.assert_raises(Exception, self.plot_inst.plot_external_Cl_Wl, 10, 1)
-
-    def test_plot_GC_phot_excep(self):
-        npt.assert_raises(Exception, self.plot_inst.plot_Cl_GC_phot, 1.0, 1, 1,
-                          self.ax1)
-        npt.assert_raises(Exception, self.plot_inst.plot_Cl_GC_phot, 10.0, 1,
+    def test_ext_phot_excep(self):
+        npt.assert_raises(Exception, self.plot_inst.plot_external_Cl_phot, 11,
+                          1, self.ax1)
+        npt.assert_raises(Exception, self.plot_inst.plot_external_Cl_phot, 10,
                           1)
-
-    def test_ext_GC_phot_binexcep(self):
-        npt.assert_raises(Exception, self.plot_inst.plot_external_Cl_GC_phot,
-                          11, 1, self.ax1)
-        npt.assert_raises(Exception, self.plot_inst.plot_external_Cl_GC_phot,
-                          10, 1)
 
     def test_plot_XC_phot_excep(self):
         npt.assert_raises(Exception, self.plot_inst.plot_Cl_XC, 1.0, 1, 1,
                           self.ax1)
         npt.assert_raises(Exception, self.plot_inst.plot_Cl_XC, 10.0, 1, 1)
 
-    def test_ext_XC_phot_binexcep(self):
+    def test_ext_XC_phot_excep(self):
         npt.assert_raises(Exception, self.plot_inst.plot_external_Cl_XC,
                           11, 1, self.ax1)
         npt.assert_raises(Exception, self.plot_inst.plot_external_Cl_XC,
@@ -76,12 +66,18 @@ class plotterTestCase(TestCase):
 
     def test_plot_GC_spec_multipole_excep(self):
         npt.assert_raises(Exception, self.plot_inst.plot_GC_spec_multipole,
-                          0.1, 0.1, 5, self.ax1)
+                          0.1, np.array([0.1]), 5, self.ax1)
         npt.assert_raises(Exception, self.plot_inst.plot_GC_spec_multipole,
-                          0.1, 0.1, 2)
+                          0.1, np.array([0.1]), 2)
+        npt.assert_raises(Exception, self.plot_inst.plot_GC_spec_multipole,
+                          0.1, np.array([10.0]), 2, self.ax1)
+        npt.assert_raises(Exception, self.plot_inst.plot_GC_spec_multipole,
+                          3.0, np.array([0.1]), 2, self.ax1)
 
     def test_ext_GC_spec_multipole_excep(self):
         npt.assert_raises(Exception, self.plot_inst.plot_GC_spec_multipole,
-                          0.1, 5, self.ax1)
+                          "1.2", 5, self.ax1)
         npt.assert_raises(Exception, self.plot_inst.plot_GC_spec_multipole,
-                          0.1, 2)
+                          "1.2", 2)
+        npt.assert_raises(Exception, self.plot_inst.plot_GC_spec_multipole,
+                          "3.0", 2, self.ax1)

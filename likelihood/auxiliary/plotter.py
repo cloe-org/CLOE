@@ -12,7 +12,7 @@ from likelihood.data_reader.reader import Reader
 
 
 class PlotError(Exception):
-    r"""
+    """
     Class to define Exception Error
     """
     pass
@@ -20,7 +20,7 @@ class PlotError(Exception):
 
 class Plotter:
     """
-    Class to plot observables (power spectra and multipoles).
+    Class to plot observables (angular power spectra and multipoles).
     """
 
     def __init__(self, cosmo_dic):
@@ -49,17 +49,18 @@ class Plotter:
                               self.read_data.nz_dict_GC_Phot)
         self.spec_ins = Spec(cosmo_dic, fid_dict)
 
-    def plot_Cl_WL(self, ells, bin_i, bin_j, pl_ax, pl_label=None,
-                   pl_colour='b', pl_linestyle='-'):
+    def plot_Cl_phot(self, ells, bin_i, bin_j, pl_ax, probe='WL',
+                     pl_label=None, pl_colour='b', pl_linestyle='-',
+                     no_bins=10):
         """
-        Function to plot WL Cls computed with the cosmobox code
+        Function to plot given photometric Cls computed with the cosmobox code
         for a given set of ells, and bin combination.
 
         Parameters
         ----------
         ells: array
             Ell-modes at which to evaluate power spectra. Note: minimum allowed
-            ell is 10.
+            ell is 10, and maximum is 5000.
         bin_i: int
             Index of first redshift bin. Note: bin indices start
             from 1.
@@ -68,17 +69,32 @@ class Plotter:
             from 1.
         pl_ax: matplotlib axis object
             Axis object within which to carry out plotting.
+        probe: str
+            Which photometric probe to plot power spectra for. Must be either
+            'WL' for weak lensing or 'GC-Phot' for photometric galaxy
+            clustering. Set to 'WL' by default.
+            Note: Plotter.plot_Cl_XC must be used for the cross-correlation.
         pl_label: str
             Label for plot to appear in legend. If none is given, this will
             be set to "Bin {:d} - Bin {:d}".format(bin_i, bin_j).
         pl_colour: str
             Matplotlib colour choice for current plot. Default is 'b' for blue.
         pl_linestyle: str
-            Matplotlib linestyle choice for current plot. Deafault is '-'.
+            Matplotlib linestyle choice for current plot. Default is '-'.
+        no_bins: int
+            Number of redshift bins for chosen probe.
         """
-        if ells[0] < 10.0:
-            raise Exception('Minimum allowed ell-mode to plot is 10.0.')
-        cl_arr = np.array([self.phot_ins.Cl_WL(cur_ell, bin_i, bin_j) for
+        if probe not in ['WL', 'GC-Phot']:
+            raise Exception('Must choose valid type of probe: WL, or GC-Phot.')
+        if bin_i > no_bins or bin_j > no_bins:
+            raise Exception('Requested bin index greater than number of bins.')
+        if np.min(ells) < 10.0 or np.max(ells) > 5000.0:
+            raise Exception('ell-modes must be between 10 and 5000.')
+        if probe == 'WL':
+            c_func = self.phot_ins.Cl_WL
+        elif probe == 'GC-Phot':
+            c_func = self.phot_ins.Cl_GC_phot
+        cl_arr = np.array([c_func(cur_ell, bin_i, bin_j) for
                            cur_ell in ells])
         if pl_label is None:
             pl_label = "Bin {:d} - Bin {:d}".format(bin_i, bin_j)
@@ -86,147 +102,65 @@ class Plotter:
                    linestyle=pl_linestyle)
         return pl_ax
 
-    def plot_external_Cl_Wl(self, bin_1, bin_2, pl_ax, pl_label=None,
-                            pl_colour='b', pl_linestyle='-', no_bins=10):
+    def plot_external_Cl_phot(self, bin_m, bin_n, pl_ax, probe='WL',
+                              pl_label=None, pl_colour='b', pl_linestyle='-',
+                              no_bins=10):
         """
-        Plots external OU-LE3 WL power spectra, for given redshift bin
-        combination, and errors on those.
+        Plots external OU-LE3 angular power spectra for a stated individual
+        probe, for given redshift bin combination, and errors on those.
 
         Parameters
         ----------
-        bin_1: int
+        bin_m: int
             Index of first redshift bin. Note: bin indices start
             from 1.
-        bin_2: int
+        bin_n: int
             Index of second redshift bin. Note: bin indices start
             from 1.
         pl_ax: matplotlib axis object
             Axis object within which to carry out plotting.
+        probe: str
+            Which photometric probe to plot power spectra for. Must be either
+            'WL' for weak lensing or 'GC-Phot' for photometric galaxy
+            clustering. Set to 'WL' by default.
+            Note: Plotter.plot_external_Cl_XC must be used for the
+            cross-correlation.
         pl_label: str
             Label for plot to appear in legend. If none is given, this will
             be set to "OU-LE3 Bin {:d} - Bin {:d}".format(bin_i, bin_j).
         pl_colour: str
             Matplotlib colour choice for current plot. Default is 'b' for blue.
         pl_linestyle: str
-            Matplotlib linestyle choice for current plot. Deafault is '-'.
+            Matplotlib linestyle choice for current plot. Default is '-'.
         no_bins: int
             Number of redshift bins for WL probe.
         """
-        if bin_1 > no_bins or bin_2 > no_bins:
-            raise Exception('Reqeusted bin index greater than number of bins.')
-        if bin_1 <= bin_2:
-            bin_i = bin_1
-            bin_j = bin_2
+        if probe not in ['WL', 'GC-Phot']:
+            raise Exception('Must choose valid type of probe: WL, or GC-Phot.')
+        if bin_m > no_bins or bin_n > no_bins:
+            raise Exception('Requested bin index greater than number of bins.')
+        if bin_m <= bin_n:
+            bin_i = bin_m
+            bin_j = bin_n
         else:
-            bin_i = bin_2
-            bin_j = bin_1
-        ells = self.read_data.data_dict['WL']['ells']
-        ext_cs = self.read_data.data_dict['WL']['E{:d}-E{:d}'.format(bin_i,
-                                                                     bin_j)]
+            bin_i = bin_n
+            bin_j = bin_m
+        if probe == 'WL':
+            p_let = 'E'
+        else:
+            p_let = 'P'
+        power_label = '{:s}{:d}-{:s}{:d}'.format(p_let, bin_i, p_let, bin_j)
+        ells = self.read_data.data_dict[probe]['ells']
+        ext_cs = self.read_data.data_dict[probe][power_label]
         if pl_label is None:
             pl_label = "OU-LE3 Bin {:d} - Bin {:d}".format(bin_i, bin_j)
         pl_ax.plot(ells, ext_cs, label=pl_label, color=pl_colour,
                    linestyle=pl_linestyle)
-        cov_diags = np.sqrt(np.diagonal(self.read_data.data_dict['WL']['cov']))
-        counter = 0
-        for i in range(1, no_bins + 1):
-            for j in range(i, no_bins + 1):
-                if i == bin_i and j == bin_j:
-                    cur_index = counter
-                counter += 1
-        err_arr = []
-        for mult in range(len(ells)):
-            cur_err = cov_diags[(counter * mult) + cur_index]
-            err_arr.append(cur_err)
-        err_arr = np.array(err_arr)
-        pl_ax.plot(ells, ext_cs + err_arr, color=pl_colour,
-                   linestyle=pl_linestyle)
-        pl_ax.plot(ells, ext_cs - err_arr, color=pl_colour,
-                   linestyle=pl_linestyle)
-        pl_ax.fill_between(ells, ext_cs - err_arr, ext_cs + err_arr,
-                           color=pl_colour, alpha=0.2)
-        return pl_ax
-
-    def plot_Cl_GC_phot(self, ells, bin_i, bin_j, pl_ax, pl_label=None,
-                        pl_colour='b', pl_linestyle='-'):
-        """
-        Function to plot GC-phot Cls computed with the cosmobox code
-        for a given set of ells, and bin combination.
-
-        Parameters
-        ----------
-        ells: array
-            Ell-modes at which to evaluate power spectra. Note: minimum allowed
-            ell is 10.
-        bin_i: int
-            Index of first redshift bin. Note: bin indices start
-            from 1.
-        bin_j: int
-            Index of second redshift bin. Note: bin indices start
-            from 1.
-        pl_ax: matplotlib axis object
-            Axis object within which to carry out plotting.
-        pl_label: str
-            Label for plot to appear in legend. If none is given, this will
-            be set to "Bin {:d} - Bin {:d}".format(bin_i, bin_j).
-        pl_colour: str
-            Matplotlib colour choice for current plot. Default is 'b' for blue.
-        pl_linestyle: str
-            Matplotlib linestyle choice for current plot. Deafault is '-'.
-        """
-        if ells[0] < 10.0:
-            raise Exception('Minimum allowed ell-mode to plot is 10.0.')
-        cl_arr = np.array([self.phot_ins.Cl_GC_phot(cur_ell, bin_i, bin_j) for
-                           cur_ell in ells])
-        if pl_label is None:
-            pl_label = "Bin {:d} - Bin {:d}".format(bin_i, bin_j)
-        pl_ax.plot(ells, cl_arr, label=pl_label, color=pl_colour,
-                   linestyle=pl_linestyle)
-        return pl_ax
-
-    def plot_external_Cl_GC_phot(self, bin_1, bin_2, pl_ax, pl_label=None,
-                                 pl_colour='b', pl_linestyle='-', no_bins=10):
-        """
-        Plots external OU-LE3 GC-phot power spectra, for given redshift bin
-        combination, and errors on those.
-
-        Parameters
-        ----------
-        bin_1: int
-            Index of first redshift bin. Note: bin indices start
-            from 1.
-        bin_2: int
-            Index of second redshift bin. Note: bin indices start
-            from 1.
-        pl_ax: matplotlib axis object
-            Axis object within which to carry out plotting.
-        pl_label: str
-            Label for plot to appear in legend. If none is given, this will
-            be set to "OU-LE3 Bin {:d} - Bin {:d}".format(bin_i, bin_j).
-        pl_colour: str
-            Matplotlib colour choice for current plot. Default is 'b' for blue.
-        pl_linestyle: str
-            Matplotlib linestyle choice for current plot. Deafault is '-'.
-        no_bins: int
-            Number of redshift bins for GC-phot probe.
-        """
-        if bin_1 > no_bins or bin_2 > no_bins:
-            raise Exception('Reqeusted bin index greater than number of bins.')
-        if bin_1 <= bin_2:
-            bin_i = bin_1
-            bin_j = bin_2
-        else:
-            bin_i = bin_2
-            bin_j = bin_1
-        ells = self.read_data.data_dict['GC-Phot']['ells']
-        ext_cs = self.read_data.data_dict['GC-Phot'][
-            'P{:d}-P{:d}'.format(bin_i, bin_j)]
-        if pl_label is None:
-            pl_label = "OU-LE3 Bin {:d} - Bin {:d}".format(bin_i, bin_j)
-        pl_ax.plot(ells, ext_cs, label=pl_label, color=pl_colour,
-                   linestyle=pl_linestyle)
-        cov_diags = np.sqrt(np.diagonal(self.read_data.data_dict[
-                                        'GC-Phot']['cov']))
+        # ACD: NOTE - As covariance format is not set in stone, if the format
+        # changes, the following code will need to be reviewed to correct the
+        # error bar calculation.
+        cov_diags = np.sqrt(np.diagonal(self.read_data.data_dict[probe][
+                                        'cov']))
         counter = 0
         for i in range(1, no_bins + 1):
             for j in range(i, no_bins + 1):
@@ -247,16 +181,17 @@ class Plotter:
         return pl_ax
 
     def plot_Cl_XC(self, ells, bin_WL, bin_GC, pl_ax, pl_label=None,
-                   pl_colour='b', pl_linestyle='-'):
+                   pl_colour='b', pl_linestyle='-', no_bins_WL=10,
+                   no_bins_GC=10):
         """
-        Function to plot WL Cls computed with the cosmobox code
+        Function to plot XC Cls computed with the cosmobox code
         for a given set of ells, and bin combination.
 
         Parameters
         ----------
         ells: array
             Ell-modes at which to evaluate power spectra. Note: minimum allowed
-            ell is 10.
+            ell is 10, and maximum is 5000.
         bin_WL: int
             Index of WL redshift bin. Note: bin indices start
             from 1.
@@ -271,10 +206,16 @@ class Plotter:
         pl_colour: str
             Matplotlib colour choice for current plot. Default is 'b' for blue.
         pl_linestyle: str
-            Matplotlib linestyle choice for current plot. Deafault is '-'.
+            Matplotlib linestyle choice for current plot. Default is '-'.
+        no_bins_WL: int
+            Number of redshift bins for WL probe.
+        no_bins_GC: int
+            Number of redshift bins for GC-phot probe.
         """
-        if ells[0] < 10.0:
-            raise Exception('Minimum allowed ell-mode to plot is 10.0.')
+        if bin_WL > no_bins_WL or bin_GC > no_bins_GC:
+            raise Exception('Requested bin index greater than number of bins.')
+        if np.min(ells) < 10.0 or np.max(ells) > 5000.0:
+            raise Exception('ell-modes must be between 10 and 5000.')
         cl_arr = np.array([self.phot_ins.Cl_cross(cur_ell, bin_WL, bin_GC) for
                            cur_ell in ells])
         if pl_label is None:
@@ -307,22 +248,25 @@ class Plotter:
         pl_colour: str
             Matplotlib colour choice for current plot. Default is 'b' for blue.
         pl_linestyle: str
-            Matplotlib linestyle choice for current plot. Deafault is '-'.
+            Matplotlib linestyle choice for current plot. Default is '-'.
         no_bins_WL: int
             Number of redshift bins for WL probe.
         no_bins_GC: int
             Number of redshift bins for GC-phot probe.
         """
         if bin_WL > no_bins_WL or bin_GC > no_bins_GC:
-            raise Exception('Reqeusted bin index greater than number of bins.')
+            raise Exception('Requested bin index greater than number of bins.')
         ells = self.read_data.data_dict['XC-Phot']['ells']
         ext_cs = self.read_data.data_dict['XC-Phot'][
-            'P{:d}-E{:d}'.format(bin_WL, bin_GC)]
+            'P{:d}-E{:d}'.format(bin_GC, bin_WL)]
         if pl_label is None:
             pl_label = "OU-LE3 WL Bin {:d} - GC-Phot Bin {:d}".format(bin_WL,
                                                                       bin_GC)
         pl_ax.plot(ells, ext_cs, label=pl_label, color=pl_colour,
                    linestyle=pl_linestyle)
+        # ACD: NOTE - As covariance format is not set in stone, if the format
+        # changes, the following code will need to be reviewed to correct the
+        # error bar calculation.
         cov_diags = np.sqrt(np.diagonal(self.read_data.data_dict['XC-Phot'][
                                         'cov_XC_only']))
         counter = no_bins_WL * no_bins_GC
@@ -370,8 +314,15 @@ class Plotter:
         pl_colour: str
             Matplotlib colour choice for current plot. Default is 'b' for blue.
         pl_linestyle: str
-            Matplotlib linestyle choice for current plot. Deafault is '-'.
+            Matplotlib linestyle choice for current plot. Default is '-'.
         """
+        # ACD: NOTE - These limits for k are set based on what is currently the
+        # expected range for OU-LE3 data. Should this change, this range should
+        # also be adjusted accordingly.
+        if np.min(ks) < 0.001 or np.max(ks) > 0.5:
+            raise Exception('ks must be between 0.001 and 0.5')
+        if redshift > 2.5:
+            raise Exception('Euclid maximum redshift is 2.5.')
         if multipole_order not in [0, 2, 4]:
             raise Exception('Multipole order must be 0, 2, or 4.')
         pk_arr = np.array([self.spec_ins.multipole_spectra(redshift, k_val,
@@ -387,12 +338,13 @@ class Plotter:
                               pl_label=None, pl_colour='b', pl_linestyle='-'):
         """
         Plots GC-spec multipole spectra from OU-LE3 files, for a
-        given redshift, and multipole order.
+        given redshift, and multipole order, with errors.
 
         Parameters
         ----------
         redshift: str
-            Redshift at which to evaluate spectrum.
+            Redshift at which to evaluate spectrum. Note: Here, this must be
+            specified as string.
         multipole_order: int
             Multipole order of spectrum to be evaluated. Note: Must be 0, 2, or
             4.
@@ -404,10 +356,15 @@ class Plotter:
         pl_colour: str
             Matplotlib colour choice for current plot. Default is 'b' for blue.
         pl_linestyle: str
-            Matplotlib linestyle choice for current plot. Deafault is '-'.
+            Matplotlib linestyle choice for current plot. Default is '-'.
         """
+        if float(redshift) > 2.5:
+            raise Exception('Euclid maximum redshift is 2.5.')
         if multipole_order not in [0, 2, 4]:
             raise Exception('Multipole order must be 0, 2, or 4.')
+        # ACD: NOTE - The format for the GC-Spec Covariance matrix is also not
+        # completely fixed yet. If the format changes, this section of code
+        # should be reviewed to ensure it correctly extracts the error bars.
         cov = self.read_data.data_dict['GC-Spec'][redshift]['cov']
         samp_ks = self.read_data.data_dict['GC-Spec'][redshift]['k_pk']
         errs = np.sqrt(np.diagonal(cov))

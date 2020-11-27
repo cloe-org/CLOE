@@ -52,6 +52,7 @@ class cosmoinitTestCase(TestCase):
         self.Pgi_spec_test = -376.192673
         self.MG_mu_test = 1.0
         self.MG_sigma_test = 1.0
+        self.NL_boost_test = 1.0
 
     def tearDown(self):
         self.H0check = None
@@ -228,3 +229,8 @@ class cosmoinitTestCase(TestCase):
         test_sigma = self.model_test.cosmology.cosmo_dic['MG_sigma'](1.0, 0.01)
         npt.assert_equal(test_sigma, self.MG_sigma_test,
                          err_msg='Error in MG sigma calculation')
+
+    def test_NL_boost(self):
+        test_boost = self.model_test.cosmology.cosmo_dic['NL_boost'](1.0, 0.01)
+        npt.assert_equal(test_boost, self.NL_boost_test,
+                         err_msg='Error in NL boost calculation')

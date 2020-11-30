@@ -88,6 +88,9 @@ class Plotter:
             raise Exception('Must choose valid type of probe: WL, or GC-Phot.')
         if bin_i > no_bins or bin_j > no_bins:
             raise Exception('Requested bin index greater than number of bins.')
+        # ACD: NOTE - As the range of ell-modes from OU-LE3 is not set in
+        # stone, if this changes, the following exception handling will need to
+        # be reviewed.
         if np.min(ells) < 10.0 or np.max(ells) > 5000.0:
             raise Exception('ell-modes must be between 10 and 5000.')
         if probe == 'WL':
@@ -214,6 +217,9 @@ class Plotter:
         """
         if bin_WL > no_bins_WL or bin_GC > no_bins_GC:
             raise Exception('Requested bin index greater than number of bins.')
+        # ACD: NOTE - As the range of ell-modes from OU-LE3 is not set in
+        # stone, if this changes, the following exception handling will need to
+        # be reviewed.
         if np.min(ells) < 10.0 or np.max(ells) > 5000.0:
             raise Exception('ell-modes must be between 10 and 5000.')
         cl_arr = np.array([self.phot_ins.Cl_cross(cur_ell, bin_WL, bin_GC) for
@@ -267,20 +273,13 @@ class Plotter:
         # ACD: NOTE - As covariance format is not set in stone, if the format
         # changes, the following code will need to be reviewed to correct the
         # error bar calculation.
-        cov_diags = np.sqrt(np.diagonal(self.read_data.data_dict['XC-Phot'][
-                                        'cov_XC_only']))
-        counter = no_bins_WL * no_bins_GC
-        cur_index = 0
-        for i in range(1, no_bins_WL + 1):
-            for j in range(1, no_bins_GC + 1):
-                if i == bin_WL and j == bin_GC:
-                    break
-                cur_index += 1
-            if i == bin_WL and j == bin_GC:
-                break
+        cov_full = self.read_data.data_dict['XC-Phot']['cov']
         err_arr = []
         for mult in range(len(ells)):
-            cur_err = cov_diags[(counter * mult) + cur_index]
+            k = int(no_bins_WL * bin_WL + bin_GC + no_bins_WL *
+                 (2.0 * no_bins_GC + 1.0) * (mult + 1.0) - (3.0/2.0) *
+                 no_bins_WL * (no_bins_GC + 1.0))
+            cur_err = np.sqrt(cov_full[k, k])
             err_arr.append(cur_err)
         err_arr = np.array(err_arr)
         pl_ax.plot(ells, ext_cs + err_arr, color=pl_colour,
@@ -321,8 +320,8 @@ class Plotter:
         # also be adjusted accordingly.
         if np.min(ks) < 0.001 or np.max(ks) > 0.5:
             raise Exception('ks must be between 0.001 and 0.5')
-        if redshift > 2.5:
-            raise Exception('Euclid maximum redshift is 2.5.')
+        if redshift > 1.8:
+            raise Exception('Euclid maximum redshift for GC-spec is 1.8.')
         if multipole_order not in [0, 2, 4]:
             raise Exception('Multipole order must be 0, 2, or 4.')
         pk_arr = np.array([self.spec_ins.multipole_spectra(redshift, k_val,
@@ -358,8 +357,8 @@ class Plotter:
         pl_linestyle: str
             Matplotlib linestyle choice for current plot. Default is '-'.
         """
-        if float(redshift) > 2.5:
-            raise Exception('Euclid maximum redshift is 2.5.')
+        if float(redshift) > 1.8:
+            raise Exception('Euclid maximum redshift for GC-spec is 1.8.')
         if multipole_order not in [0, 2, 4]:
             raise Exception('Multipole order must be 0, 2, or 4.')
         # ACD: NOTE - The format for the GC-Spec Covariance matrix is also not

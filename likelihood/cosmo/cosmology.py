@@ -60,7 +60,7 @@ class Cosmology:
         fsigma8: array
             fsigma8 function evaluated at z
         sigma_8: array
-            sigma8 functione valuated at z
+            sigma8 function evaluated at z
         c: float
             Speed-of-light in units of km s^{-1}
         r_z_func: function
@@ -68,7 +68,7 @@ class Cosmology:
         d_z_func: function
             Interpolated function for angular diameter distance
         sigma8_z_func: function
-            Interpolated function for angular sigma8
+            Interpolated function for sigma8
         fsigma8_z_func: function
             Interpolated function for fsigma8
         H_z_func: function
@@ -728,24 +728,6 @@ class Cosmology:
 
         return MG_sigma
 
-    def NL_boost_def(self, redshift, k_scale):
-        """
-        Returns the non-linear boost factor.
-
-        Parameters
-        ----------
-        redshift: float
-            Redshift at which to evaluate the boost factor.
-        k_scale: float
-            k-mode at which to evaluate the boost factor.
-
-        Returns
-        -------
-        Value of non-linear boost factor at given scale and redshift.
-        """
-
-        return 1.
-
     def update_cosmo_dic(self, zs, ks, MG_mu=1.0, MG_sigma=1.0,
                          NL_flag='linear'):
         """
@@ -788,6 +770,6 @@ class Cosmology:
                                                                     MG_sigma)
         self.cosmo_dic['NL_flag'] = NL_flag
         if (NL_flag == 'linear'):
-            self.cosmo_dic['NL_boost'] = self.NL_boost_def
+            self.cosmo_dic['NL_boost'] = lambda x, y: 1.
         else:
-            raise Exception("Non-linear flag can only be 'linear'.")
+            raise Exception("Non-linear flag not implemented.")

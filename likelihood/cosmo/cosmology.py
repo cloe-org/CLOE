@@ -728,8 +728,7 @@ class Cosmology:
 
         return MG_sigma
 
-    def update_cosmo_dic(self, zs, ks, MG_mu=1.0, MG_sigma=1.0,
-                         NL_flag='linear'):
+    def update_cosmo_dic(self, zs, ks, MG_mu=1.0, MG_sigma=1.0):
         """
         Update the dictionary with other cosmological quantities
 
@@ -768,8 +767,5 @@ class Cosmology:
         self.cosmo_dic['MG_mu'] = lambda x, y: self.MG_mu_def(x, y, MG_mu)
         self.cosmo_dic['MG_sigma'] = lambda x, y: self.MG_sigma_def(x, y,
                                                                     MG_sigma)
-        self.cosmo_dic['NL_flag'] = NL_flag
-        if (NL_flag == 'linear'):
-            self.cosmo_dic['NL_boost'] = lambda x, y: 1.
-        else:
-            raise Exception("Non-linear flag not implemented.")
+        self.cosmo_dic['NL_flag'] = 'linear'
+        self.cosmo_dic['NL_boost'] = lambda x, y: 1.

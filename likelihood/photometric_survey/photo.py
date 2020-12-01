@@ -44,7 +44,10 @@ class Photo:
 
     def GC_window(self, z, bin_i):
         r"""
-        Implements GC window
+        Implements GC-photo window function.
+
+        .. math::
+            W_i^G(z) &= \frac{n_i(z)}{\bar{n_i}}\frac{H(z)}{c}\\
 
         Parameters
         ----------
@@ -58,11 +61,6 @@ class Photo:
         -------
         W_i_G: float
            GCph window function
-
-        Notes
-        -----
-        .. math::
-            W_i^G(z) &= n_i(z)/\bar{n_i}H(z)/c\\
         """
 
         n_z_normalized = self.nz_dic_GC[''.join(['n', str(bin_i)])]
@@ -73,7 +71,11 @@ class Photo:
 
     def WL_window_integrand(self, zprime, z, nz):
         r"""
-        Calculates the WL kernel integrand.
+        Calculates the WL kernel integrand as
+
+        .. math::
+            \int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm L}(z^{\prime})
+            \left [ 1 - \frac{\tilde{r}(z)}{\tilde{r}(z^{\prime})} \right ]}
 
         Parameters
         ----------
@@ -89,12 +91,6 @@ class Photo:
         -------
         wint: float
            WL kernel integrand
-
-        Notes
-        -----
-        .. math::
-            \int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm L}(z^{\prime})
-            \left [ 1 - \frac{\tilde{r}(z)}{\tilde{r}(z^{\prime}} \right ]}
         """
         wint = nz(zprime) * (1.0 - (self.theory['r_z_func'](z) /
                                     self.theory['r_z_func'](zprime)))
@@ -103,6 +99,12 @@ class Photo:
     def WL_window(self, z, bin_i, k=0.0001):
         r"""
         Calculates the weak lensing shear kernel for a given tomographic bin.
+
+        .. math::
+            W_{i}^{\gamma}(z, k) = \frac{3}{2}\left ( \frac{H_0}{c}\right )^2
+            \Omega_{{\rm m},0} (1 + z) \Sigma(z, k) r(z)
+            \int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm L}(z^{\prime})
+            \left [ 1 -\frac{\tilde{r}(z)}{\tilde{r}(z^{\prime})} \right ]}\\
 
         Parameters
         ----------
@@ -119,14 +121,6 @@ class Photo:
         W_val: float
            Value of lensing kernel for specified bin at specified redshift
            and scale.
-
-        Notes
-        -----
-        .. math::
-            W_{i}^{\gamma}(z, k) = \frac{3}{2}\left ( \frac{H_0}{c}\right )^2
-            \Omega_{{\rm m},0} (1 + z) \Sigma(z, k) \tilde{r}(z)
-            \int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm WL}(z^{\prime})
-            \left [ 1 -\frac{\tilde{r}(z)}{\tilde{r}(z^{\prime}} \right ]}\\
         """
         H0 = self.theory['H0']
         c = self.theory['c']
@@ -147,7 +141,11 @@ class Photo:
     def IA_window(self, z, bin_i):
         r"""
         Calculates the intrinsic alignment (IA) weight function for a
-        given tomographic bin.
+        given tomographic bin
+
+        .. math::
+            W_{i}^{\rm IA}(z) = \frac{n_i^{\rm L}(z)}{\bar{n}_i^{\rm L}}\
+            \frac{H(z)}{c}\\
 
         Parameters
         ----------
@@ -161,12 +159,6 @@ class Photo:
         -------
         W_IA: float
            Value of lensing kernel for specified bin at specified redshift.
-
-        Notes
-        -----
-        .. math::
-            W_{i}^{\rm IA}(z) = \frac{n_i^{\rm L}(z)}{\tilde{n}_i^{\rm L}}\
-            \frac{H(z)}{c}\\
         """
 
         n_z_normalized = self.nz_dic_WL[''.join(['n', str(bin_i)])]
@@ -182,6 +174,11 @@ class Photo:
         for any two probes and tomographic bins for which
         the bins are supplied.
 
+        .. math::
+            \frac{W_{i}^{\rm A}(z)W_{j}^{\rm B}(z)}{H(z)r^2(z)}\
+            P_{\rm AB}\left(k_{\ell}=\frac{{\rm\ell} + 1/2}{r(z)}, z\right)\\
+            \text{A, B in {G, L}}
+
         Parameters
         ----------
         z: float
@@ -196,13 +193,6 @@ class Photo:
         kern_mult_power: float
            Value of the angular power spectrum integrand at redshift
            z and multipole l.
-
-        Notes
-        -----
-        .. math::
-            \frac{W_{i}^{\rm A}(z)W_{j}^{\rm B}(z)}{H(z)r^2(z)}\
-            P_{\rm AB}(k=({\rm\ell} + 0.5)/r(z), z)\\
-            \text{A, B in {G, L}}
         """
         kern_mult_power = (PandW_i_j_z_k /
                            (self.theory['H_z_func'](z) *
@@ -217,6 +207,18 @@ class Photo:
         r"""
         Calculates angular power spectrum for weak lensing,
         for the supplied bins. Includes intrinsic alignments.
+
+        .. math::
+            C_{ij}^{\rm LL}(\ell)= c \int \frac{dz}{H(z)r^2(z)}\
+            \left\lbrace W_{i}^{\rm \gamma}\left[ k_{\ell}(z), z \right]\
+            W_{j}^{\rm \gamma}\left[ k_{\ell}(z), z \right ]\
+            P_{\rm \delta \delta}\left[ k_{\ell}(z), z \right] +\\
+            \left[ W_{i}^{\rm IA}(z)W_{j}^{\rm \gamma}\
+            \left[ k_{\ell}(z), z \right ]+W_{i}^{\rm \gamma}\
+            \left[ k_{\ell}(z), z \right]W_{j}^{\rm IA}(z)\right]\
+            P_{\rm \delta I}\left[ k_{\ell}(z), z \right]+\\
+            W_{i}^{\rm IA}(z)W_{j}^{\rm IA}(z)\
+            P_{\rm II}\left[k_{\ell}(z), z\right] \right\rbrace \\
 
         Parameters
         ----------
@@ -235,17 +237,6 @@ class Photo:
         -------
         c_final: float
            Value of angular shear power spectrum.
-
-        Notes
-        -----
-        .. math::
-            c \int \frac{dz}{H(z)r^2(z)} [W_{i}^{\gamma}(z)\
-            W_{j}^{\gamma}(z)P_{\delta\delta}\left(\frac{{\rm\ell}+1/2}{r(z)},\
-            z\right) + \\ \left(W_{i}^{\rm{IA}}(z)W_{j}^{\gamma}(z) + \
-            W_{i}^{\gamma}(z)W_{j}^{\rm{IA}}(z)\right) P_{\delta\rm{I}}\
-            \left(\frac{{\rm\ell}+1/2}{r(z)}, z\right) + \\ W_{i}^{\rm{IA}}(z)\
-            W_{j}^{\rm{IA}}(z) P_{\rm{II}}\left(\frac{{\rm\ell}+1/2}{r(z)},\
-            z\right)]\\
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
@@ -277,10 +268,16 @@ class Photo:
         Calculates angular power spectrum for photometric galaxy clustering,
         for the supplied bins.
 
+        .. math::
+            C_{ij}^{\rm GG}(\ell) = c \int {\rm d}z
+            \frac{W_{i}^{\rm G}(z)W_{j}^{\rm G}(z)}{H(z)r^2(z)}\
+            P^{\rm{photo}}_{\rm gg}\
+            \left[ k_{\ell}(z), z \right]\\
+
         Parameters
         ----------
         ell: float
-            \ell-mode at which C_\ell is evaluated.
+            \ell-mode at which C_{\ell} is evaluated.
         bin_i: int
            Index of first tomographic bin. Tomographic bin
            indices start from 1.
@@ -294,13 +291,6 @@ class Photo:
         -------
         c_final: float
            Value of angular power spectrum for photometric galaxy clustering.
-
-        Notes
-        -----
-        .. math::
-            c \int {\rm d}z {{W_{i}^{\rm G}(z)W_{j}^{\rm G}(z)} \over\
-            {H(z)r^2(z)}}P^{\rm{photo}}_{\rm gg}\
-            \left(\frac{{\rm\ell} + 1/2}{r(z)}, z\right)\\
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
@@ -327,6 +317,14 @@ class Photo:
         between weak lensing and galaxy clustering, for the supplied bins.
         Includes intrinsic alignments.
 
+        .. math::
+            C_{ij}^{\rm LG}(\ell) = c \int \frac{dz}{H(z)r^2(z)}\
+            \left\lbrace W_{i}^{\gamma}\left[ k_{\ell}(z), z \right ]\
+            W_{j}^{\rm{G}}(z)P^{\rm{photo}}_{\rm g\delta}\
+            \left[ k_{\ell}(z), z \right]\\
+            +\,W_{i}^{\rm{IA}}(z)W_{j}^{\rm{G}}(z)P^{\rm{photo}}_{\rm g\rm{I}}\
+            \left[ k_{\ell}(z), z \right] \right\rbrace \\
+
         Parameters
         ----------
         ell: float
@@ -344,15 +342,6 @@ class Photo:
         -------
         c_final: float
            Value of cross correlation angular power spectrum.
-
-        Notes
-        -----
-        .. math::
-            c \int \frac{dz}{H(z)r^2(z)}[W_{i}^{\gamma}(z)\
-            W_{j}^{\rm{G}}(z)P^{\rm{photo}}_{\rm g\delta}\
-            \left(\frac{{\rm\ell} + 1/2}{r(z)}, z\right)\\
-            +\,W_{i}^{\rm{IA}}(z)W_{j}^{\rm{G}}(z)P^{\rm{photo}}_{\rm g\rm{I}}\
-            \left(\frac{{\rm\ell} + 1/2}{r(z)}, z\right)]\\
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)

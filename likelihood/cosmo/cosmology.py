@@ -182,7 +182,8 @@ class Cosmology:
         Calculates growth factor according to
 
         .. math::
-                   D(z, k) &=\sqrt{P(z, k)/P(z=0, k)}\\
+            D(z, k) &=\sqrt{P_{\rm \delta\delta}(z, k)\
+            /P_{\rm \delta\delta}(z=0, k)}\\
 
         Parameters
         ----------
@@ -193,7 +194,8 @@ class Cosmology:
 
         Returns
         -------
-        growth factor
+        D_z_k: array
+            Growth factor
 
         """
         # GCH: Careful! This should be updated in the future!
@@ -212,7 +214,7 @@ class Cosmology:
         Calculates growth rate according to
 
         .. math::
-                   f(z, k) &=-(1+z)/D dD(z, k)/dz\\
+            f(z, k) &=-\frac{(1+z)}{D(z,k)}\frac{dD(z, k)}{dz}\\
 
         Parameters
         ----------
@@ -223,7 +225,8 @@ class Cosmology:
 
         Returns
         -------
-        interpolator growth rate
+        f_z_k: object
+            Interpolator growth rate
 
         """
         # GCH: Careful! This should be updated in the future!
@@ -248,7 +251,8 @@ class Cosmology:
 
         Returns
         -------
-        Interpolator comoving distance as a function of redshift
+        interpolator: object
+            Interpolator comoving distance as a function of redshift
 
         """
         if self.cosmo_dic['z_win'] is None:
@@ -264,7 +268,8 @@ class Cosmology:
 
         Returns
         -------
-        Interpolator angular diameter distance  as a function of redshift
+        interpolator: object
+            Interpolator angular diameter distance  as a function of redshift
 
         """
         if self.cosmo_dic['z_win'] is None:
@@ -280,7 +285,8 @@ class Cosmology:
 
         Returns
         -------
-        Interpolator H as a function of redshift
+        interpolator: object
+            Interpolator H as a function of redshift
 
         """
         if self.cosmo_dic['z_win'] is None:
@@ -296,7 +302,8 @@ class Cosmology:
 
         Returns
         -------
-        Interpolator sigma8 as a function of redshift
+        interpolator: object
+            Interpolator sigma8 as a function of redshift
 
         """
         if self.cosmo_dic['z_win'] is None:
@@ -313,7 +320,8 @@ class Cosmology:
 
         Returns
         -------
-        Interpolator fsigma8 as a function of redshift
+        interpolator: object
+            Interpolator fsigma8 as a function of redshift:
 
         """
         if self.cosmo_dic['z_win'] is None:
@@ -345,7 +353,8 @@ class Cosmology:
 
         Returns
         -------
-        Value of galaxy bias at input redshift.
+        bi_val: float
+            Value of photometric galaxy bias at input redshift
         """
         istf_bias_list = [self.cosmo_dic['nuisance_parameters']['b1_photo'],
                           self.cosmo_dic['nuisance_parameters']['b2_photo'],
@@ -390,7 +399,8 @@ class Cosmology:
 
         Returns
         -------
-        Value of galaxy bias at input redshift.
+        bi_val: float
+            Value of spectroscopic galaxy bias at input redshift
         """
 
         istf_bias_list = [self.cosmo_dic['nuisance_parameters']['b1_spec'],
@@ -414,7 +424,7 @@ class Cosmology:
 
         .. math::
             P_{\rm gg}^{\rm photo}(z, k) &=\
-            [b_g^{\rm photo}(z)]^2 P_{\rm \delta\delta}(z, k)\\
+            [b_{\rm g}^{\rm photo}(z)]^2 P_{\rm \delta\delta}(z, k)\\
 
         Parameters
         ----------
@@ -425,16 +435,22 @@ class Cosmology:
 
         Returns
         -------
-        Value of G-G power spectrum at given k and redshift.
+        pval: float
+            Value of galaxy-galaxy power spectrum at given k and z for GC-photo
         """
         pval = ((self.istf_phot_galbias(redshift) ** 2.0) *
                 self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
         return pval
 
     def Pgg_spec_def(self, redshift, k_scale, mu_rsd):
-        """
+        r"""
         Calculates the redshift-space galaxy-galaxy power spectrum for the
         spectroscopic probe.
+
+        .. math::
+            P_{\rm gg}^{\rm spec}(z, k) &=\
+            [b_{\rm g}^{\rm spec}(z) + f(z, k)\mu_{k}^2]^2\
+            P_{\rm \delta\delta}(z, k)\\
 
         Parameters
         ----------
@@ -447,8 +463,8 @@ class Cosmology:
 
         Returns
         -------
-        Value of redshift-space G-G power spectrum at given k, redshift
-        and mu
+        pval: float
+            Value of galaxy-galaxy power spectrum at given k, z, mu for GC-spec
         """
         bias = self.istf_spec_galbias(redshift)
         fs8 = self.cosmo_dic['fsigma8_z_func'](redshift)
@@ -475,7 +491,9 @@ class Cosmology:
 
         Returns
         -------
-        Value of G-delta power spectrum at given k and redshift.
+        pval: float
+            Value of galaxy-matter power spectrum
+            at given k and z for GC-photo
         """
         pval = (self.istf_phot_galbias(redshift) *
                 self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
@@ -485,6 +503,11 @@ class Cosmology:
         r"""
         Calculates the redshift-space galaxy-matter power spectrum for the
         spectroscopic probe.
+
+        .. math::
+            P_{\rm g \delta}^{\rm spec}(z, k) &=\
+            [b_{\rm g}^{\rm spec}(z) + f(z, k)\mu_{k}^2][1 + f(z, k)\mu_{k}^2]\
+            P_{\rm \delta\delta}(z, k)\\
 
         Parameters
         ----------
@@ -497,7 +520,9 @@ class Cosmology:
 
         Returns
         -------
-        Value of G-delta power spectrum at given k and redshift.
+        pval: float
+            Value of galaxy-matter power spectrum
+            at given k, z and mu for GC-spec
         """
         bias = self.istf_spec_galbias(redshift)
         fs8 = self.cosmo_dic['fsigma8_z_func'](redshift)
@@ -524,7 +549,8 @@ class Cosmology:
 
         Returns
         -------
-        Value of intrinsic alignment function at given redshift.
+        fia: float
+            Value of intrinsic alignment function at given z
         """
         c1 = 0.0134
         aia = self.cosmo_dic['nuisance_parameters']['aia']
@@ -554,7 +580,9 @@ class Cosmology:
 
         Returns
         -------
-        Value of intrinsic alignment power spectrum at given k and redshift.
+        pval: float
+            Value of intrinsic alignment power spectrum
+            at given k and z
         """
         pval = self.fia(redshift)**2.0 * \
             self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
@@ -576,7 +604,8 @@ class Cosmology:
 
         Returns
         -------
-        Value of density-intrinsic power spectrum at given k and redshift.
+        pval: float
+            Value of density-intrinsic power spectrum at given k and z
         """
         pval = self.fia(redshift) * \
             self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
@@ -599,8 +628,9 @@ class Cosmology:
 
         Returns
         -------
-        Value of photometric galaxy-intrinsic power spectrum at given
-        k and redshift.
+        pval: float
+            Value of photometric galaxy-intrinsic power spectrum
+            at given k and z
         """
         pval = self.fia(redshift) * self.istf_phot_galbias(redshift) * \
             self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
@@ -623,8 +653,9 @@ class Cosmology:
 
         Returns
         -------
-        Value of spectroscopic galaxy-intrinsic power spectrum at given
-        k and redshift.
+        pval: float
+            Value of spectroscopic galaxy-intrinsic power spectrum
+            at given k and z
         """
         pval = self.fia(redshift) * self.istf_spec_galbias(redshift) * \
             self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
@@ -681,9 +712,12 @@ class Cosmology:
         return
 
     def MG_mu_def(self, redshift, k_scale, MG_mu):
-        """
+        r"""
         Returns the mu function according to mu-sigma Modified Gravity
         parametrization.
+
+        .. math::
+            \mu(z, k)
 
         Parameters
         ----------
@@ -696,15 +730,19 @@ class Cosmology:
 
         Returns
         -------
-        Value of MG mu function at given k and redshift.
+        MG_mu: float
+            Value of MG mu function at given k and redshift.
         """
 
         return MG_mu
 
     def MG_sigma_def(self, redshift, k_scale, MG_sigma):
-        """
+        r"""
         Returns the sigma function according to mu-sigma Modified Gravity
         parametrization.
+
+        .. math::
+            \Sigma(z, k)
 
         Parameters
         ----------
@@ -717,7 +755,8 @@ class Cosmology:
 
         Returns
         -------
-        Value of MG sigma function at given k and redshift.
+        MG_sigma: float
+            Value of MG sigma function at given k and redshift.
         """
 
         return MG_sigma

@@ -60,7 +60,7 @@ class Cosmology:
         fsigma8: array
             fsigma8 function evaluated at z
         sigma_8: array
-            sigma8 functione valuated at z
+            sigma8 function evaluated at z
         c: float
             Speed-of-light in units of km s^{-1}
         r_z_func: function
@@ -68,7 +68,7 @@ class Cosmology:
         d_z_func: function
             Interpolated function for angular diameter distance
         sigma8_z_func: function
-            Interpolated function for angular sigma8
+            Interpolated function for sigma8
         fsigma8_z_func: function
             Interpolated function for fsigma8
         H_z_func: function
@@ -98,6 +98,10 @@ class Cosmology:
             mu function from Modified Gravity parametrization
         MG_sigma: function
             sigma function from Modified Gravity parametrization
+        NL_flag: string
+            Recipe for non-linear dark matter evolution
+        NL_boost: function
+            Non-linear boost factor
         nuisance_parameters: dictionary
             Contains all nuisance bias parameters
             and IA parameters which are sampled over.
@@ -156,6 +160,8 @@ class Cosmology:
                           'fsigma8_z_func': None,
                           'MG_mu': None,
                           'MG_sigma': None,
+                          'NL_flag': None,
+                          'NL_boost': None,
                           'nuisance_parameters': {
                              'like_selection': 2,
                              'full_photo': True,
@@ -732,6 +738,12 @@ class Cosmology:
             list of redshift for the power spectrum
         ks: array
             list of modes for the power spectrum
+        MG_mu: float
+            constant value of modified gravity mu function
+        MG_sigma: float
+            constant value of modified gravity sigma function
+        NL_flag: string
+            flag for non-linear boost factor
         """
         # (GCH): this function is superfluous
         # just in case we want to have always
@@ -755,3 +767,5 @@ class Cosmology:
         self.cosmo_dic['MG_mu'] = lambda x, y: self.MG_mu_def(x, y, MG_mu)
         self.cosmo_dic['MG_sigma'] = lambda x, y: self.MG_sigma_def(x, y,
                                                                     MG_sigma)
+        self.cosmo_dic['NL_flag'] = 'linear'
+        self.cosmo_dic['NL_boost'] = lambda x, y: 1.

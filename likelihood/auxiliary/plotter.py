@@ -277,8 +277,8 @@ class Plotter:
         err_arr = []
         for mult in range(len(ells)):
             k = int(no_bins_WL * bin_WL + bin_GC + no_bins_WL *
-                 (2.0 * no_bins_GC + 1.0) * (mult + 1.0) - (3.0/2.0) *
-                 no_bins_WL * (no_bins_GC + 1.0))
+                    (2.0 * no_bins_GC + 1.0) * (mult + 1.0) - (3.0 / 2.0) *
+                    no_bins_WL * (no_bins_GC + 1.0))
             cur_err = np.sqrt(cov_full[k, k])
             err_arr.append(cur_err)
         err_arr = np.array(err_arr)

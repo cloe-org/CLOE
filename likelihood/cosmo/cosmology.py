@@ -71,6 +71,8 @@ class Cosmology:
             Interpolated function for angular sigma8
         fsigma8_z_func: function
             Interpolated function for fsigma8
+        f_z: function
+            Interpolated growth rate function
         H_z_func: function
             Interpolated function for Hubble parameter
         z_win: array-like
@@ -146,6 +148,7 @@ class Cosmology:
                           'Pgi_spec': None,
                           'fsigma8': None,
                           'sigma_8': None,
+                          'f_z': None,
                           'c': const.c.to('km/s').value,
                           'z_win': None,
                           'k_win': None,
@@ -207,6 +210,8 @@ class Cosmology:
         except CosmologyError:
             print('Computation error in D(z, k)')
 
+    # ATTENTION !!!
+    # THIS FUNCTION IS DEPRECATED
     def growth_rate(self, zs, ks):
         r"""
         Calculates growth rate according to
@@ -240,6 +245,26 @@ class Cosmology:
         except CosmologyError:
             print('Computation error in f(z, k)')
             print('ATTENTION: Check k is a value, not a list')
+
+    def growth_rate_cobaya(self):
+        r"""
+        Calculates growth rate according to
+
+        .. math::
+                   f(z, k) &=f\sigma_8 / sigma_8\\
+
+        Returns
+        -------
+        interpolator growth rate
+
+        """
+        fs8 = self.cosmo_dic['fsigma8_z_func'](self.cosmo_dic['z_win'])
+        s8 = self.cosmo_dic['sigma8_z_func'](self.cosmo_dic['z_win'])
+        growth = fs8 / s8
+        self.cosmo_dic['f_z'] = \
+            interpolate.InterpolatedUnivariateSpline(
+                x=self.cosmo_dic['z_win'],
+                y=growth, ext=2)
 
     def interp_comoving_dist(self):
         """
@@ -451,9 +476,7 @@ class Cosmology:
         and mu
         """
         bias = self.istf_spec_galbias(redshift)
-        fs8 = self.cosmo_dic['fsigma8_z_func'](redshift)
-        s8 = self.cosmo_dic['sigma8_z_func'](redshift)
-        growth = fs8 / s8
+        growth = self.cosmo_dic['f_z'](redshift)
         power = self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
         pval = (bias + growth * mu_rsd ** 2.0) ** 2.0 * power
         return pval
@@ -500,9 +523,7 @@ class Cosmology:
         Value of G-delta power spectrum at given k and redshift.
         """
         bias = self.istf_spec_galbias(redshift)
-        fs8 = self.cosmo_dic['fsigma8_z_func'](redshift)
-        s8 = self.cosmo_dic['sigma8_z_func'](redshift)
-        growth = fs8 / s8
+        growth = self.cosmo_dic['f_z'](redshift)
         power = self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
         pval = ((bias + growth * mu_rsd ** 2.0) *
                 (1.0 + growth * mu_rsd ** 2.0)) * power
@@ -648,7 +669,7 @@ class Cosmology:
 
         pgg_phot = np.array([self.Pgg_phot_def(zz, ks_base) for zz in zs_base])
         pgdelta_phot = np.array([self.Pgd_phot_def(zz, ks_base)
-                                for zz in zs_base])
+                                 for zz in zs_base])
         pii = np.array([self.Pii_def(zz, ks_base) for zz in zs_base])
         pdeltai = np.array([self.Pdeltai_def(zz, ks_base) for zz in zs_base])
         pgi_phot = np.array([self.Pgi_phot_def(zz, ks_base) for zz in zs_base])
@@ -740,6 +761,7 @@ class Cosmology:
         self.interp_comoving_dist()
         self.interp_fsigma8()
         self.interp_sigma8()
+        self.growth_rate_cobaya()
         self.interp_angular_dist()
         self.interp_phot_galaxy_spectra()
         self.cosmo_dic['Pgg_spec'] = self.Pgg_spec_def
@@ -749,7 +771,6 @@ class Cosmology:
         self.cosmo_dic['Pgi_phot'] = self.Pgi_phot_def
         self.cosmo_dic['Pgi_spec'] = self.Pgi_spec_def
         self.cosmo_dic['D_z_k'] = self.growth_factor(zs, ks)
-        self.cosmo_dic['f_z_k'] = self.growth_rate(zs, ks)
         self.cosmo_dic['sigma_8_0'] = \
             self.cosmo_dic['sigma8_z_func'](0)
         self.cosmo_dic['MG_mu'] = lambda x, y: self.MG_mu_def(x, y, MG_mu)

@@ -198,7 +198,7 @@ class Reader:
                   'data from OU-level3 files')
         return
 
-    def read_phot(self, file_dest='/Photometric/data/', IA_model_str='eNLA',
+    def read_phot(self, file_dest='/Photometric/data/', IA_model_str='zNLA',
                   cov_model_str='Gauss'):
         """
         Function to read OU-LE3 photometric galaxy clustering and weak lensing

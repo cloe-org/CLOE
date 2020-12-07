@@ -44,7 +44,7 @@ class Photo:
 
     def GC_window(self, z, bin_i):
         r"""
-        Implements GC-photo window function.
+        Implements the galaxy clustering photometric window function.
 
         .. math::
             W_i^G(z) &= \frac{n_i(z)}{\bar{n_i}}\frac{H(z)}{c}\\
@@ -60,7 +60,7 @@ class Photo:
         Returns
         -------
         W_i_G: float
-           GCph window function
+           Window function for galaxy clustering photometric
         """
 
         n_z_normalized = self.nz_dic_GC[''.join(['n', str(bin_i)])]
@@ -71,7 +71,7 @@ class Photo:
 
     def WL_window_integrand(self, zprime, z, nz):
         r"""
-        Calculates the WL kernel integrand as
+        Calculates the Weak-lensing (WL) kernel integrand as
 
         .. math::
             \int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm L}(z^{\prime})
@@ -90,7 +90,7 @@ class Photo:
         Returns
         -------
         wint: float
-           WL kernel integrand
+           Weak-lensing kernel integrand
         """
         wint = nz(zprime) * (1.0 - (self.theory['r_z_func'](z) /
                                     self.theory['r_z_func'](zprime)))
@@ -114,12 +114,13 @@ class Photo:
            index of desired tomographic bin. Tomographic bin
            indices start from 1.
         k: float
-            k-mode at which to evaluate the MG sigma function
+            k-mode at which to evaluate the Modified Gravity
+            :math:`\Sigma(z,k)` function
 
         Returns
         -------
         W_val: float
-           Value of lensing kernel for specified bin at specified redshift
+           Value of shear kernel for specified bin at specified redshift
            and scale.
         """
         H0 = self.theory['H0']
@@ -158,7 +159,7 @@ class Photo:
         Returns
         -------
         W_IA: float
-           Value of lensing kernel for specified bin at specified redshift.
+           Value of IA kernel for specified bin at specified redshift.
         """
 
         n_z_normalized = self.nz_dic_WL[''.join(['n', str(bin_i)])]
@@ -174,7 +175,7 @@ class Photo:
         for any two probes and tomographic bins for which
         the bins are supplied. The power
         spectrum is either that of
-        :math:`\delta`-:math:`\delta`, GG, or G-:math:`\delta`,
+        :math:`\delta \delta`, gg, or :math:`{\rm g}\delta`,
         with {A, B} in {G, L}
 
         .. math::
@@ -192,8 +193,8 @@ class Photo:
         Returns
         -------
         kern_mult_power: float
-           Value of the angular power spectrum integrand at redshift
-           z and multipole l.
+           Value of the angular power spectrum integrand at
+           a given redshift and multipole :math:`\ell`.
         """
         kern_mult_power = (PandW_i_j_z_k /
                            (self.theory['H_z_func'](z) *
@@ -237,7 +238,7 @@ class Photo:
         Returns
         -------
         c_final: float
-           Value of angular shear power spectrum.
+           Value of the angular shear power spectrum.
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
@@ -291,7 +292,8 @@ class Photo:
         Returns
         -------
         c_final: float
-           Value of angular power spectrum for photometric galaxy clustering.
+           Value of angular power spectrum for
+           galaxy clustering photometric.
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
@@ -342,7 +344,8 @@ class Photo:
         Returns
         -------
         c_final: float
-           Value of cross correlation angular power spectrum.
+           Value of cross-correlation between weak lensing and
+           galaxy clustering photometric angular power spectrum.
         """
 
         int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)

@@ -15,7 +15,7 @@ import os.path
 
 class Spec:
     r"""
-    Class for GC spectroscopy observable
+    Class for Galaxy clustering spectroscopic observable
     """
 
     def __init__(self, cosmo_dic, fiducial_dic):
@@ -47,7 +47,7 @@ class Spec:
         Returns
         -------
         scaling_factor_perp: float
-           Value of the scaling_factor_perp at given redshift
+           Value of the perpendicular scaling factor at given redshift
         """
 
         return self.theory['d_z_func'](z) / self.fiducial['d_z_func'](z)
@@ -67,7 +67,7 @@ class Spec:
         Returns
         -------
         scaling_factor_parall: float
-           Value of the scaling_factor_parall at given redshift
+           Value of the the parallel scaling factor at a given redshift
         """
         return self.fiducial['H_z_func'](z) / self.theory['H_z_func'](z)
 
@@ -85,9 +85,9 @@ class Spec:
         z: float
            Redshift at which to evaluate the galaxy power spectrum.
         k_prime: float
-           Fiducial Scale (wavenumber) at which to evaluate the galaxy power
+           Fiducial scale (wavenumber) at which to evaluate the galaxy power
         mu_prime: float
-           Fiducial Cosine of the angle between the wavenumber and
+           Fiducial cosine of the angle between the wavenumber and
            line of sight (AP-distorted).
 
         Returns
@@ -115,7 +115,7 @@ class Spec:
         z: float
            Redshift at which to evaluate the galaxy power spectrum.
         mu_prime: float
-           Fiducial Cosine of the angle between the wavenumber
+           Fiducial cosine of the angle between the wavenumber
            and line of sight (AP-distorted).
 
         Returns
@@ -133,10 +133,11 @@ class Spec:
     def multipole_spectra_integrand(self, mu_rsd, z, k, m):
         r"""
         Computation of multipole power spectrum integrand.
-        Note: we consider :math:`\ell` = m in the code
+        Note: we consider :math:`\ell = m` in the code
 
         .. math::
-            L_\ell(\mu_k')P_{\rm gg}\left(k(k',\mu_k'),\mu_k(\mu_k');z\right)\\
+            L_\ell(\mu_k')P_{\rm gg}^{\rm spec}\
+            \left[k(k',\mu_k'),\mu_k(\mu_k');z\right]\\
 
 
         Parameters
@@ -170,13 +171,13 @@ class Spec:
     def multipole_spectra(self, z, k, m):
         r"""
         Computation of multipole power spectra.
-        Note: we consider :math:`\ell` = m in the code.
+        Note: we consider :math:`\ell = m` in the code.
 
         .. math::
-            P_{{\rm obs},\ell}(k';z)=\frac{1}{q_\perp^2 q_\parallel} \
+            P_{{\rm obs},\ell}(k';z)=\frac{1}{[q_\perp(z)]^2 q_\parallel(z)} \
             \frac{2\ell+1}{2}\int^1_{-1} L_\ell(\mu_k') \
-            P_{\rm gg}\left(k(k',\mu_k'),\mu_k(\mu_k') \
-            {;z}\right)\,{\rm d}\mu_k'\\
+            P_{\rm gg}^{\rm spec}\left[k(k',\mu_k'),\mu_k(\mu_k') \
+            {;z}\right]\,{\rm d}\mu_k'\\
 
 
         Parameters

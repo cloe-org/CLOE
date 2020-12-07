@@ -179,7 +179,7 @@ class Cosmology:
 
     def growth_factor(self, zs, ks):
         r"""
-        Calculates growth factor according to
+        Computes growth factor according to
 
         .. math::
             D(z, k) &=\sqrt{P_{\rm \delta\delta}(z, k)\
@@ -194,8 +194,8 @@ class Cosmology:
 
         Returns
         -------
-        D_z_k: array
-            Growth factor
+        D_z_k: numpy.ndarray
+            Growth factor as function of redshift and k
 
         """
         # GCH: Careful! This should be updated in the future!
@@ -211,7 +211,8 @@ class Cosmology:
 
     def growth_rate(self, zs, ks):
         r"""
-        Calculates growth rate according to
+        Adds an interpolator for the growth rate (this function is actually
+        deprecated since we use the growth rate directly from  Cobaya)
 
         .. math::
             f(z, k) &=-\frac{(1+z)}{D(z,k)}\frac{dD(z, k)}{dz}\\
@@ -226,7 +227,7 @@ class Cosmology:
         Returns
         -------
         f_z_k: object
-            Interpolator growth rate
+            Interpolator growth rate as function od redshift and k
 
         """
         # GCH: Careful! This should be updated in the future!
@@ -252,7 +253,7 @@ class Cosmology:
         Returns
         -------
         interpolator: object
-            Interpolator comoving distance as a function of redshift
+            Interpolates comoving distance as a function of redshift
 
         """
         if self.cosmo_dic['z_win'] is None:
@@ -269,7 +270,7 @@ class Cosmology:
         Returns
         -------
         interpolator: object
-            Interpolator angular diameter distance  as a function of redshift
+            Interpolates angular diameter distance  as a function of redshift
 
         """
         if self.cosmo_dic['z_win'] is None:
@@ -286,7 +287,7 @@ class Cosmology:
         Returns
         -------
         interpolator: object
-            Interpolator H as a function of redshift
+            Interpolates H as a function of redshift
 
         """
         if self.cosmo_dic['z_win'] is None:
@@ -297,13 +298,14 @@ class Cosmology:
 
     def interp_sigma8(self):
         """
-        Adds an interpolator for sigma8 to the dictionary so that
-        it can be evaluated at redshifts not explictly supplied to cobaya.
+        Adds an interpolator for :math:`\sigma_8` to the dictionary
+        so that it can be evaluated at redshifts
+        not explictly supplied to Cobaya
 
         Returns
         -------
         interpolator: object
-            Interpolator sigma8 as a function of redshift
+            Interpolates :math:`\sigma_8` as a function of redshift
 
         """
         if self.cosmo_dic['z_win'] is None:
@@ -315,13 +317,14 @@ class Cosmology:
 
     def interp_fsigma8(self):
         """
-        Adds an interpolator for fsigma8 to the dictionary so that
-        it can be evaluated at redshifts not explictly supplied to cobaya.
+        Adds an interpolator for :math:`f\sigma_8` to the dictionary
+        so that it can be evaluated at redshifts
+        not explictly supplied to Cobaya
 
         Returns
         -------
         interpolator: object
-            Interpolator fsigma8 as a function of redshift:
+            Interpolates :math:`f\sigma_8` as a function of redshift:
 
         """
         if self.cosmo_dic['z_win'] is None:
@@ -420,7 +423,7 @@ class Cosmology:
 
     def Pgg_phot_def(self, redshift, k_scale):
         r"""
-        Calculates the galaxy-galaxy power spectrum for the photometric probe.
+        Computes the galaxy-galaxy power spectrum for the photometric probe.
 
         .. math::
             P_{\rm gg}^{\rm photo}(z, k) &=\
@@ -444,7 +447,7 @@ class Cosmology:
 
     def Pgg_spec_def(self, redshift, k_scale, mu_rsd):
         r"""
-        Calculates the redshift-space galaxy-galaxy power spectrum for the
+        Computes the redshift-space galaxy-galaxy power spectrum for the
         spectroscopic probe.
 
         .. math::
@@ -476,7 +479,7 @@ class Cosmology:
 
     def Pgd_phot_def(self, redshift, k_scale):
         r"""
-        Calculates the galaxy-matter power spectrum for the photometric probe.
+        Computes the galaxy-matter power spectrum for the photometric probe.
 
         .. math::
             P_{\rm g\delta}^{\rm photo}(z, k) &=\
@@ -501,7 +504,7 @@ class Cosmology:
 
     def Pgd_spec_def(self, redshift, k_scale, mu_rsd):
         r"""
-        Calculates the redshift-space galaxy-matter power spectrum for the
+        Computes the redshift-space galaxy-matter power spectrum for the
         spectroscopic probe.
 
         .. math::
@@ -713,11 +716,13 @@ class Cosmology:
 
     def MG_mu_def(self, redshift, k_scale, MG_mu):
         r"""
-        Returns the mu function according to mu-sigma Modified Gravity
-        parametrization.
+        Returns the function :math:`\mu(z, k)` according to the
+        Modified Gravity parametrization
 
         .. math::
-            \mu(z, k)
+            \Psi(z,k) &= -4\pi G\
+            \frac{\bar\rho_{\rm m}(z)\delta_{\rm m}(z, k)}{k^2(1+z)^2}\
+            \mu(z,k)\\
 
         Parameters
         ----------
@@ -738,11 +743,13 @@ class Cosmology:
 
     def MG_sigma_def(self, redshift, k_scale, MG_sigma):
         r"""
-        Returns the sigma function according to mu-sigma Modified Gravity
-        parametrization.
+        Returns the function :math:`\Sigma(z, k)` according to the
+        Modified Gravity parametrization
 
         .. math::
-            \Sigma(z, k)
+            \Phi(z,k)+\Psi(z,k) &= -8\pi G\
+            \frac{\bar\rho_{\rm m}(z)\delta_{\rm m}(z,k)}{k^2(1+z)^2}\
+            \Sigma(a,k)\\
 
         Parameters
         ----------

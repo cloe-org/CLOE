@@ -172,12 +172,14 @@ class Photo:
         r"""
         Calculates the angular power spectrum integrand
         for any two probes and tomographic bins for which
-        the bins are supplied.
+        the bins are supplied. The power
+        spectrum is either that of
+        :math:`\delta`-:math:`\delta`, GG, or G-:math:`\delta`,
+        with {A, B} in {G, L}
 
         .. math::
             \frac{W_{i}^{\rm A}(z)W_{j}^{\rm B}(z)}{H(z)r^2(z)}\
             P_{\rm AB}\left(k_{\ell}=\frac{{\rm\ell} + 1/2}{r(z)}, z\right)\\
-            \text{A, B in {G, L}}
 
         Parameters
         ----------
@@ -185,8 +187,7 @@ class Photo:
             Redshift at which integrand is being evaluated.
         PandW_i_j_z_k: float
            Value of the product of kernel for bin i, kernel for bin j,
-           and the power spectrum at redshift z and scale k. The power
-           spectrum is either that of delta-delta, GG, or G-delta.
+           and the power spectrum at redshift z and scale k.
 
         Returns
         -------
@@ -223,7 +224,7 @@ class Photo:
         Parameters
         ----------
         ell: float
-            \ell-mode at which C_\ell is evaluated.
+            :math:`\ell`-mode at which :math:`C_{\ell}` is evaluated.
         bin_i: int
            Index of first tomographic bin. Tomographic bin
            indices start from 1.
@@ -277,7 +278,7 @@ class Photo:
         Parameters
         ----------
         ell: float
-            \ell-mode at which C_{\ell} is evaluated.
+            :math:`\ell`-mode at which :math:`C_{\ell}` is evaluated.
         bin_i: int
            Index of first tomographic bin. Tomographic bin
            indices start from 1.
@@ -328,7 +329,7 @@ class Photo:
         Parameters
         ----------
         ell: float
-            \ell-mode at which C_\ell is evaluated.
+            :math:`\ell`-mode at which :math:`C_{\ell}` is evaluated.
         bin_i: int
            Index of first tomographic bin. Tomographic bin
            indices start from 1.

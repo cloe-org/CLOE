@@ -25,9 +25,12 @@ class CobayaModel:
         # value should be used here.
         self.k_min = 0.001
         self.k_max = 10.0
-        self.k_samp = 100
-        self.k_win = np.logspace(np.log10(self.k_min), np.log10(self.k_max),
-                                 self.k_samp)
+        self.k_min_GC_phot_interp = 0.001
+        self.k_max_GC_phot_interp = 100.0
+        self.k_samp_GC = 100
+        self.k_win = np.logspace(np.log10(self.k_min_GC_phot_interp),
+                                 np.log10(self.k_max_GC_phot_interp),
+                                 self.k_samp_GC)
 
     def define_info(self, cosmo_inst):
         self.info = {'params': {

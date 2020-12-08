@@ -21,9 +21,9 @@ class datareaderTestCase(TestCase):
         self.fiducial_key_check = ['H0', 'omch2', 'ombh2', 'ns',
                                    'sigma_8_0', 'w', 'omkh2', 'omnuh2']
         self.cov_check_GC_spec = 10977788.704318
-        self.cov_check_WL = 2.825061e-09
+        self.cov_check_WL = 2.478089e-09
         self.cov_check_GC_phot = 1.554181e-05
-        self.cov_check_XC = 4.259661e-04
+        self.cov_check_XC = 4.194857e-04
         self.cl_phot_WL_check = 7.280999e-05
         self.cl_phot_GC_check = 2.181704e-03
         self.cl_phot_XC_check = 2.482407e-04

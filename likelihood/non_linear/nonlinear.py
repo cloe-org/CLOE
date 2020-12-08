@@ -24,8 +24,16 @@ class Nonlinear:
         Parameters
         ----------
         theory: cosmo dictionary imported from Cosmology class
+
+        Initialization of non-linear code happens here
         """
         self.theory = cosmo_dic
+
+    def update_nonlinear_dic(self):
+        """
+        Call all routines updating the cosmo dictionary
+        """
+        self.calculate_boost()
 
     def calculate_boost(self):
         """

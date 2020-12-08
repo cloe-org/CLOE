@@ -5,6 +5,7 @@ Class to store cosmological parameters and functions.
 """
 
 import numpy as np
+from ..non_linear.nonlinear import Nonlinear
 from scipy import interpolate
 from astropy import constants as const
 
@@ -98,8 +99,6 @@ class Cosmology:
             mu function from Modified Gravity parametrization
         MG_sigma: function
             sigma function from Modified Gravity parametrization
-        NL_flag: string
-            Recipe for non-linear dark matter evolution
         NL_boost: function
             Non-linear boost factor
         nuisance_parameters: dictionary
@@ -160,11 +159,11 @@ class Cosmology:
                           'fsigma8_z_func': None,
                           'MG_mu': None,
                           'MG_sigma': None,
-                          'NL_flag': None,
                           'NL_boost': None,
                           'nuisance_parameters': {
                              'like_selection': 2,
                              'full_photo': True,
+                             'NL_flag': 1,
                              'b1_photo': 1.0997727037892875,
                              'b2_photo': 1.220245876862528,
                              'b3_photo': 1.2723993083933989,
@@ -182,6 +181,8 @@ class Cosmology:
                              'aia': 1.72,
                              'nia': -0.41,
                              'bia': 2.17}}
+
+        self.nonlinear = Nonlinear(self.cosmo_dic)
 
     def growth_factor(self, zs, ks):
         r"""
@@ -842,5 +843,5 @@ class Cosmology:
         self.cosmo_dic['MG_mu'] = lambda x, y: self.MG_mu_def(x, y, MG_mu)
         self.cosmo_dic['MG_sigma'] = lambda x, y: self.MG_sigma_def(x, y,
                                                                     MG_sigma)
-        self.cosmo_dic['NL_flag'] = 'linear'
-        self.cosmo_dic['NL_boost'] = lambda x, y: 1.
+        self.nonlinear.update_nonlinear_dic()
+        self.cosmo_dic = self.nonlinear.theory

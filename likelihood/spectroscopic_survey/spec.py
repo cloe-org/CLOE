@@ -88,7 +88,7 @@ class Spec:
            Fiducial scale (wavenumber) at which to evaluate the galaxy power
         mu_prime: float
            Fiducial cosine of the angle between the wavenumber and
-           line of sight (AP-distorted).
+           line of sight (Alcock–Paczynski distorted).
 
         Returns
         -------
@@ -116,7 +116,7 @@ class Spec:
            Redshift at which to evaluate the galaxy power spectrum.
         mu_prime: float
            Fiducial cosine of the angle between the wavenumber
-           and line of sight (AP-distorted).
+           and line of sight (Alcock–Paczynski distorted).
 
         Returns
         -------
@@ -144,7 +144,7 @@ class Spec:
         ----------
         mu_rsd: float
            Cosine of the angle between the wavenumber and
-           line of sight (AP-distorted).
+           line of sight (Alcock–Paczynski distorted).
         z: float
             Redshift at which to evaluate power spectrum.
         k: float

@@ -299,9 +299,9 @@ class Cosmology:
 
     def interp_sigma8(self):
         """
-        Adds an interpolator for the parameter :math:`\sigma_8`
-        to the dictionary so that it can be evaluated at redshifts
-        not explictly supplied to Cobaya
+        Adds an interpolator for the matter fluctuation
+        parameter :math:`\sigma_8` to the dictionary so that it
+        can be evaluated at redshifts not explictly supplied to Cobaya
 
         Returns
         -------

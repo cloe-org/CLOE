@@ -680,6 +680,7 @@ class Cosmology:
         """
         Creates interpolators for the photometric galaxy
         clustering and galaxy-matter power spectra, and adds them to cosmo_dic.
+        Note: the interpolators for v1.0 span the range :math:`k=[0.001,100.0]`
         """
         # AP: Removed the interpolation of the spectroscopic galaxy power
         # spectra and renamed this method to reflect that the interpolation

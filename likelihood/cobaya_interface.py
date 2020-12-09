@@ -65,16 +65,19 @@ class EuclidLikelihood(Likelihood):
         """
 
         # SJ: For now, example sampling in wavenumber (k)
-        self.k_min = 0.001
+        self.k_min_Boltzmannn = 0.001
         # ATTENTION: The k_min is not passed to cobaya to build
         # the matter power spectrum interpolator !!
         # The k_min is internally chosen by cobaya.
         # This needs to be changed
 
-        self.k_max = 10.0
-        self.k_samp = 100
-        self.k_win = np.logspace(np.log10(self.k_min), np.log10(self.k_max),
-                                 self.k_samp)
+        self.k_max_Boltzmannn = 10.0
+        self.k_min_GC_phot_interp = 0.001
+        self.k_max_GC_phot_interp = 100.0
+        self.k_samp_GC = 100
+        self.k_win = np.logspace(np.log10(self.k_min_GC_phot_interp),
+                                 np.log10(self.k_max_GC_phot_interp),
+                                 self.k_samp_GC)
 
         # SJ: For now, example sampling in redshift (z)
         self.z_min = 0.0
@@ -118,7 +121,7 @@ class EuclidLikelihood(Likelihood):
         model_fiducial = get_model(self.info_fiducial)
         model_fiducial.add_requirements({"Pk_interpolator":
                                          {"z": self.z_win,
-                                          "k_max": self.k_max,
+                                          "k_max": self.k_max_Boltzmannn,
                                           "nonlinear": False,
                                           "vars_pairs": ([["delta_tot",
                                                            "delta_tot"]])},
@@ -191,7 +194,7 @@ class EuclidLikelihood(Likelihood):
 
         return {"Pk_interpolator":
                 {"z": self.z_win,
-                 "k_max": self.k_max,
+                 "k_max": self.k_max_Boltzmannn,
                  "nonlinear": False,
                  "vars_pairs": ([["delta_tot",
                                   "delta_tot"]])},

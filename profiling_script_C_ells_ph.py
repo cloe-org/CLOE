@@ -62,10 +62,14 @@ z_min = 0.0
 z_max = 4.0
 z_samp = 100
 z_win = np.linspace(z_min, z_max, z_samp)
-k_min = 0.002
-k_max = 10.0
-k_samp = 100
-k_win = np.logspace(np.log10(k_min), np.log10(k_max), k_samp)
+k_min_Boltzmannn = 0.002
+k_max_Boltzmannn = 10.0
+k_min_GC_phot_interp = 0.001
+k_max_GC_phot_interp = 100.0
+k_samp_GC = 100
+k_win = np.logspace(np.log10(k_min_GC_phot_interp),
+                    np.log10(k_max_GC_phot_interp),
+                    k_samp_GC)
 
 
 

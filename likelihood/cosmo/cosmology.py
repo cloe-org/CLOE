@@ -257,7 +257,7 @@ class Cosmology:
         Calculates growth rate according to
 
         .. math::
-                   f(z, k) &=f\sigma_8 / sigma_8\\
+                   f(z) &=f\sigma_8(z) / sigma_8(z)\\
 
         Returns
         -------

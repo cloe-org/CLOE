@@ -843,5 +843,4 @@ class Cosmology:
         self.cosmo_dic['MG_mu'] = lambda x, y: self.MG_mu_def(x, y, MG_mu)
         self.cosmo_dic['MG_sigma'] = lambda x, y: self.MG_sigma_def(x, y,
                                                                     MG_sigma)
-        self.nonlinear.update_nonlinear_dic()
-        self.cosmo_dic = self.nonlinear.theory
+        self.cosmo_dic = self.nonlinear.update_dic(self.cosmo_dic)

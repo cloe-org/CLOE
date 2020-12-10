@@ -176,7 +176,7 @@ class Reader:
             kk = average["SCALE_1DIM"] * k_fac
             pk0 = average["AVERAGE0"] * p_fac
             pk2 = average["AVERAGE2"] * p_fac
-            pk4 = average["AVERAGE4"]* p_fac
+            pk4 = average["AVERAGE4"] * p_fac
 
             cov = fits_file[2].data["COVARIANCE"] * cov_fac
             cov_k_i = fits_file[2].data["SCALE_1DIM-I"] * k_fac

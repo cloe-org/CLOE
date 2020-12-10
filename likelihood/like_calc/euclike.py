@@ -186,9 +186,7 @@ class Euclike:
                 for k_ins in self.data_ins.data_dict['GC-Spec'][z_ins]['k_pk']:
                     theoryvec = np.append(
                                     theoryvec, spec_ins.multipole_spectra(
-                                        float(z_ins), k_ins *
-                                        dictionary['H0'] / 100.0, m_ins))
-        #                                 float(z_ins), k_ins, m_ins))
+                                        float(z_ins), k_ins, m_ins))
 
         return theoryvec
 

@@ -144,18 +144,43 @@ class Reader:
 
         full_path = self.dat_dir_main + file_dest + file_names
         GC_spec_dict = {}
+        fid_cosmo_file = fits.open(full_path % zstr[0])
+        try:
+            self.data_spec_fiducial_cosmo = {
+                'H0': fid_cosmo_file[1].header['HUBBLE'] *
+                100,
+                'omch2': (fid_cosmo_file[1].header['OMEGA_M'] -
+                          fid_cosmo_file[1].header['OMEGA_B']) *
+                fid_cosmo_file[1].header['HUBBLE']**2,
+                'ombh2': fid_cosmo_file[1].header['OMEGA_B'] *
+                fid_cosmo_file[1].header['HUBBLE']**2,
+                'ns': fid_cosmo_file[1].header['INDEX_N'],
+                'sigma_8_0': fid_cosmo_file[1].header['SIGMA_8'],
+                'w': fid_cosmo_file[1].header['W_STATE'],
+                'omkh2': fid_cosmo_file[1].header['OMEGA_K'] *
+                fid_cosmo_file[1].header['HUBBLE']**2,
+                'omnuh2': 0}
+        # GCH: remember, for the moment we ignore Omega_R and
+        # neutrinos
+        except ReaderError:
+            print('There was an error when reading the fiducial '
+                  'data from OU-level3 files')
+
+        k_fac = (self.data_spec_fiducial_cosmo['H0'] / 100.0)
+        p_fac = 1.0 / ((self.data_spec_fiducial_cosmo['H0'] / 100.0) ** 3.0)
+        cov_fac = p_fac ** 2.0
 
         for z_label in zstr:
             fits_file = fits.open(full_path % z_label)
             average = fits_file[1].data
-            kk = average["SCALE_1DIM"]
-            pk0 = average["AVERAGE0"]
-            pk2 = average["AVERAGE2"]
-            pk4 = average["AVERAGE4"]
+            kk = average["SCALE_1DIM"] * k_fac
+            pk0 = average["AVERAGE0"] * p_fac
+            pk2 = average["AVERAGE2"] * p_fac
+            pk4 = average["AVERAGE4"]* p_fac
 
-            cov = fits_file[2].data["COVARIANCE"]
-            cov_k_i = fits_file[2].data["SCALE_1DIM-I"]
-            cov_k_j = fits_file[2].data["SCALE_1DIM-J"]
+            cov = fits_file[2].data["COVARIANCE"] * cov_fac
+            cov_k_i = fits_file[2].data["SCALE_1DIM-I"] * k_fac
+            cov_k_j = fits_file[2].data["SCALE_1DIM-J"] * k_fac
             cov_l_i = fits_file[2].data["MULTIPOLE-I"]
             cov_l_j = fits_file[2].data["MULTIPOLE-J"]
 
@@ -176,26 +201,6 @@ class Reader:
                                                     'cov_l_i': cov_l_i,
                                                     'cov_l_j': cov_l_j}
         self.data_dict['GC-Spec'] = GC_spec_dict
-        try:
-            self.data_spec_fiducial_cosmo = {
-                'H0': fits_file[1].header['HUBBLE'] *
-                100,
-                'omch2': (fits_file[1].header['OMEGA_M'] -
-                          fits_file[1].header['OMEGA_B']) *
-                fits_file[1].header['HUBBLE']**2,
-                'ombh2': fits_file[1].header['OMEGA_B'] *
-                fits_file[1].header['HUBBLE']**2,
-                'ns': fits_file[1].header['INDEX_N'],
-                'sigma_8_0': fits_file[1].header['SIGMA_8'],
-                'w': fits_file[1].header['W_STATE'],
-                'omkh2': fits_file[1].header['OMEGA_K'] *
-                fits_file[1].header['HUBBLE']**2,
-                'omnuh2': 0}
-        # GCH: remember, for the moment we ignore Omega_R and
-        # neutrinos
-        except ReaderError:
-            print('There was an error when reading the fiducial '
-                  'data from OU-level3 files')
         return
 
     def read_phot(self, file_dest='/Photometric/data/', IA_model_str='zNLA',

@@ -50,7 +50,8 @@ class Reader:
 
     def reader_raw_nz(self, file_dest, file_name):
         """
-        General routine to read n(z) files
+        General routine to read the galaxy density
+        distribution n(z) files
 
         Parameters
         ----------

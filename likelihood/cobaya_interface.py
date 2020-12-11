@@ -207,7 +207,7 @@ class EuclidLikelihood(Likelihood):
                             "R": [8 / 0.67]},
                 "fsigma8": {"z": self.z_win, "units": None}}
 
-    def passing_requirements(self, **params_dic):
+    def passing_requirements(self, model, **params_dic):
         r""" passing_requirements
 
         Gets cosmological quantities from the theory code
@@ -247,9 +247,33 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['nuisance_parameters'].update(
                 **params_dic)
 
-        except CobayaInterfaceError:
-            print('Cobaya theory requirements \
-                  could not be pass to cosmo module')
+        except (TypeError, AttributeError):
+            self.cosmo.cosmo_dic['H0'] = model.provider.get_param("H0")
+            self.cosmo.cosmo_dic['omch2'] = model.provider.get_param('omch2')
+            self.cosmo.cosmo_dic['ombh2'] = model.provider.get_param('ombh2')
+            self.cosmo.cosmo_dic['mnu'] = model.provider.get_param('mnu')
+            # GCH: ATTENTION! THIS IS A TEMPORAL SOLUTION
+            # as we cannot retrieve num_massive_neutrinos
+            self.cosmo.cosmo_dic['omnuh2'] = \
+                self.cosmo.cosmo_dic['mnu'] / 94.07 * (1. / 3)**0.75
+            self.cosmo.cosmo_dic['comov_dist'] = \
+                model.provider.get_comoving_radial_distance(self.z_win)
+            self.cosmo.cosmo_dic['angular_dist'] = \
+                model.provider.get_angular_diameter_distance(self.z_win)
+            self.cosmo.cosmo_dic['H'] = model.provider.get_Hubble(self.z_win)
+            self.cosmo.cosmo_dic['Pk_interpolator'] = \
+                model.provider.get_Pk_interpolator(nonlinear=False)
+            self.cosmo.cosmo_dic['Pk_delta'] = \
+                model.provider.get_Pk_interpolator(
+                ("delta_tot", "delta_tot"), nonlinear=False)
+            self.cosmo.cosmo_dic['z_win'] = self.z_win
+            self.cosmo.cosmo_dic['k_win'] = self.k_win
+            R, z, sigma_R = model.provider.get_sigma_R()
+            self.cosmo.cosmo_dic['sigma_8'] = sigma_R[:, 0]
+            self.cosmo.cosmo_dic['fsigma8'] = model.provider.get_fsigma8(
+                self.cosmo.cosmo_dic['z_win'])
+            self.cosmo.cosmo_dic['nuisance_parameters'].update(
+                **params_dic)
 
     def logp(self, **params_values):
         r""" logp
@@ -268,7 +292,8 @@ class EuclidLikelihood(Likelihood):
         loglike: float
             value of the function log_likelihood
         """
-        self.passing_requirements(**params_values)
+        model = None
+        self.passing_requirements(model, **params_values)
         # (GCH): update cosmo_dic to interpolators
         self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.05)
         loglike = self.likefinal.loglike(self.cosmo.cosmo_dic,

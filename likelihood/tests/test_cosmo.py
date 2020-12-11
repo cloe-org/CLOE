@@ -111,12 +111,8 @@ class cosmoinitTestCase(TestCase):
             self.model_test.cosmology.cosmo_dic['z_win'], 0.002)
         if 'D_z_k' in self.model_test.cosmology.cosmo_dic:
             emptflag_D = True
-        if 'f_z_k' in self.model_test.cosmology.cosmo_dic:
-            emptflag_f = True
         npt.assert_equal(emptflag_D, True,
                          err_msg='D_z_k not calculated ')
-        npt.assert_equal(emptflag_f, True,
-                         err_msg='f_z_k not calculated ')
 
     def test_phot_bias(self):
         val = self.model_test.cosmology.istf_phot_galbias(0.43)

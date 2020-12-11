@@ -270,10 +270,10 @@ class Euclike:
             dmt_WL = self.photodatafinal['WL'] - \
                 theoryvec_dict['WL']
             # (GCH): cal loglike
-            loglike_GC = np.dot(np.dot(dmt_GC, self.photoinvcovfinal_GC),
-                                dmt_GC.T)
-            loglike_WL = np.dot(np.dot(dmt_WL, self.photoinvcovfinal_WL),
-                                dmt_WL.T)
+            loglike_GC = -0.5 * \
+                np.dot(np.dot(dmt_GC, self.photoinvcovfinal_GC), dmt_GC.T)
+            loglike_WL = -0.5 * \
+                np.dot(np.dot(dmt_WL, self.photoinvcovfinal_WL), dmt_WL.T)
             # (GCH): save loglike
             loglike_photo = loglike_GC + loglike_WL
         # If True, calls massive cov mat
@@ -283,8 +283,9 @@ class Euclike:
                     theoryvec_dict['all']
 
             # (GCH): cal loglike
-            loglike_photo = np.dot(np.dot(dmt_all, self.photoinvcovfinal_all),
-                                   dmt_all.T)
+            loglike_photo = -0.5 * np.dot(
+                np.dot(dmt_all, self.photoinvcovfinal_all),
+                dmt_all.T)
         else:
             print('ATTENTION: full_photo has to be either True/False')
         return loglike_photo
@@ -320,12 +321,13 @@ class Euclike:
             self.thvec = self.create_spec_theory(
                              dictionary, dictionary_fiducial)
             dmt = self.specdatafinal - self.thvec
-            self.loglike = np.dot(np.dot(dmt, self.specinvcovfinal), dmt.T)
+            self.loglike = -0.5 * np.dot(
+                np.dot(dmt, self.specinvcovfinal), dmt.T)
         elif like_selection == 12:
             self.thvec = self.create_spec_theory(
                              dictionary, dictionary_fiducial)
             dmt = self.specdatafinal - self.thvec
-            self.loglike_spec = np.dot(np.dot(
+            self.loglike_spec = -0.5 * np.dot(np.dot(
                                     dmt, self.specinvcovfinal), dmt.T)
             self.loglike_photo = self.loglike_photo(dictionary, full_photo)
             # (SJ): only addition below if no cross-covariance

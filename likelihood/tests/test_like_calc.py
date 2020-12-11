@@ -48,7 +48,14 @@ class likecalcTestCase(TestCase):
         # (AP): The following is with the IST:F predictions
         # self.check_loglike = 2.459737e+11
         # (AP): The following is with the correct amplitude of GCSpec ((2pi)^3)
-        self.check_loglike = -2284.723389
+        # self.check_loglike = -2284.723389
+        # (ACD): The following is the incorrect amplitude when assuming
+        # fiducial cosmology from code rather than for file for unit
+        # conversion:
+        # self.check_loglike = 4569.446812
+        # (ACD): The correct check value, using the h scaling for the h from
+        # supplied external file is:
+        self.check_loglike = -572.134866
 
     def tearDown(self):
         self.check_loglike = None

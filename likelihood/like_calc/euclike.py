@@ -186,9 +186,7 @@ class Euclike:
                 for k_ins in self.data_ins.data_dict['GC-Spec'][z_ins]['k_pk']:
                     theoryvec = np.append(
                                     theoryvec, spec_ins.multipole_spectra(
-                                        float(z_ins), k_ins *
-                                        dictionary['H0'] / 100.0, m_ins))
-        #                                 float(z_ins), k_ins, m_ins))
+                                        float(z_ins), k_ins, m_ins))
 
         return theoryvec
 
@@ -315,28 +313,20 @@ class Euclike:
         loglike: float
             loglike = -2 ln(likelihood) for the Euclid observables
         """
-        # (SJ): We can either multiply data+cov or theory with (2pi/h)^3 factor
-        # (SJ): Prefer theory as is, but more efficient to multiply it
-        # datfac = (2.0 * np.pi / (dictionary['H0'] / 100.0))**3.0
-        # covfac = datfac**2
-        # (SJ): Not using thfac with 1/(2pi)^3 as will be removed from OU data
-        # thfac = 1.0 / (2.0 * np.pi / (dictionary['H0'] / 100.0))**3.0
         like_selection = dictionary['nuisance_parameters']['like_selection']
         full_photo = dictionary['nuisance_parameters']['full_photo']
         if like_selection == 1:
             self.loglike = self.loglike_photo(dictionary, full_photo)
         elif like_selection == 2:
-            thfac = (dictionary['H0'] / 100.0)**3.0
             self.thvec = self.create_spec_theory(
                              dictionary, dictionary_fiducial)
-            dmt = self.specdatafinal - self.thvec * thfac
+            dmt = self.specdatafinal - self.thvec
             self.loglike = -0.5 * np.dot(
                 np.dot(dmt, self.specinvcovfinal), dmt.T)
         elif like_selection == 12:
-            thfac = (dictionary['H0'] / 100.0)**3.0
             self.thvec = self.create_spec_theory(
                              dictionary, dictionary_fiducial)
-            dmt = self.specdatafinal - self.thvec * thfac
+            dmt = self.specdatafinal - self.thvec
             self.loglike_spec = -0.5 * np.dot(np.dot(
                                     dmt, self.specinvcovfinal), dmt.T)
             self.loglike_photo = self.loglike_photo(dictionary, full_photo)

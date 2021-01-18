@@ -73,6 +73,7 @@ class Reader:
             # (GCH): get the arbitrary header and save in a dict
             nz = np.genfromtxt(content.splitlines(), names=True)
             nz_dict = {x: nz[x] for x in nz.dtype.names}
+            f.close()
             return nz_dict
         except BaseException:
             raise Exception(
@@ -167,6 +168,8 @@ class Reader:
             print('There was an error when reading the fiducial '
                   'data from OU-level3 files')
 
+        fid_cosmo_file.close()
+
         k_fac = (self.data_spec_fiducial_cosmo['H0'] / 100.0)
         p_fac = 1.0 / ((self.data_spec_fiducial_cosmo['H0'] / 100.0) ** 3.0)
         cov_fac = p_fac ** 2.0
@@ -201,6 +204,9 @@ class Reader:
                                                     'cov_k_j': cov_k_j,
                                                     'cov_l_i': cov_l_i,
                                                     'cov_l_j': cov_l_j}
+
+            fits_file.close()
+
         self.data_dict['GC-Spec'] = GC_spec_dict
         return
 
@@ -313,4 +319,8 @@ class Reader:
         self.data_dict['GC-Phot'] = GC_phot_dict
         self.data_dict['WL'] = WL_dict
         self.data_dict['XC-Phot'] = XC_phot_dict
+
+        GC_file.close()
+        WL_file.close()
+        XC_file.close()
         return

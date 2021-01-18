@@ -65,8 +65,8 @@ class Photo:
 
         n_z_normalized = self.nz_dic_GC[''.join(['n', str(bin_i)])]
 
-        W_i_G = (n_z_normalized(z) * self.theory['H_z_func'](z) /
-                 self.theory['c'])
+        W_i_G = (n_z_normalized(z) * self.theory['H_z_func_Mpc'](z))
+
         return W_i_G
 
     def WL_window_integrand(self, zprime, z, nz):
@@ -123,20 +123,18 @@ class Photo:
            Value of shear kernel for specified bin at specified redshift
            and scale.
         """
-        H0 = self.theory['H0']
-        c = self.theory['c']
-        O_m = ((self.theory['omch2'] / (H0 / 100.0)**2.0) +
-               (self.theory['ombh2'] / (H0 / 100.0)**2.0) +
-               (self.theory['omnuh2'] / (H0 / 100.0)**2.0))
+        H0_Mpc = self.theory['H0_Mpc']
+        O_m = (self.theory['Omc'] + self.theory['Omb'] +
+               self.theory['Omnu'])
 
         n_z_normalized = self.nz_dic_WL[''.join(['n', str(bin_i)])]
 
-        W_val = ((1.5 * (H0 / c) * O_m * (1.0 + z) *
+        W_val = ((1.5 * H0_Mpc * O_m * (1.0 + z) *
                   self.theory['MG_sigma'](z, k) * (
                   self.theory['r_z_func'](z) /
-                  (c / H0)) * integrate.quad(self.WL_window_integrand,
-                                             a=z, b=self.cl_int_z_max,
-                                             args=(z, n_z_normalized))[0]))
+                  (1 / H0_Mpc)) * integrate.quad(self.WL_window_integrand,
+                                                 a=z, b=self.cl_int_z_max,
+                                                 args=(z, n_z_normalized))[0]))
         return W_val
 
     def IA_window(self, z, bin_i):
@@ -164,8 +162,7 @@ class Photo:
 
         n_z_normalized = self.nz_dic_WL[''.join(['n', str(bin_i)])]
 
-        W_IA = (n_z_normalized(z) * self.theory['H_z_func'](z) /
-                self.theory['c'])
+        W_IA = (n_z_normalized(z) * self.theory['H_z_func_Mpc'](z))
 
         return W_IA
 

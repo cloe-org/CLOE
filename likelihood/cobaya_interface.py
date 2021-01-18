@@ -1,6 +1,7 @@
 # General import
 import numpy as np
 import matplotlib.pyplot as plt
+from astropy import constants as const
 
 # Cobaya import of general Likelihood class
 from cobaya.likelihood import Likelihood
@@ -103,6 +104,13 @@ class EuclidLikelihood(Likelihood):
             'omch2': self.fiducial_cosmology.cosmo_dic['omch2'],
             'omnuh2': self.fiducial_cosmology.cosmo_dic['omnuh2'],
             'H0': self.fiducial_cosmology.cosmo_dic['H0'],
+            'H0_Mpc': self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value,
+            'Omb': (self.fiducial_cosmology.cosmo_dic['ombh2'] /
+                    (self.cosmo.cosmo_dic['H0'] / 100)**2.),
+            'Omc': (self.fiducial_cosmology.cosmo_dic['omch2'] /
+                    (self.cosmo.cosmo_dic['H0'] / 100)**2.),
+            'Omnu': (self.fiducial_cosmology.cosmo_dic['omnuh2'] /
+                     (self.cosmo.cosmo_dic['H0'] / 100)**2.),
             'tau': self.fiducial_cosmology.cosmo_dic['tau'],
             'mnu': self.fiducial_cosmology.cosmo_dic['mnu'],
             'nnu': self.fiducial_cosmology.cosmo_dic['nnu'],
@@ -161,6 +169,9 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology.cosmo_dic['H'] = \
             model_fiducial.provider.get_Hubble(
             self.z_win),
+        self.fiducial_cosmology.cosmo_dic['H_Mpc'] = \
+            model_fiducial.provider.get_Hubble(
+            self.z_win, units='1/Mpc'),
         self.fiducial_cosmology.cosmo_dic['Pk_interpolator'] = \
             model_fiducial.provider.get_Pk_interpolator(
             nonlinear=False),
@@ -222,18 +233,31 @@ class EuclidLikelihood(Likelihood):
 
         try:
             self.cosmo.cosmo_dic['H0'] = self.provider.get_param("H0")
+            self.cosmo.cosmo_dic['H0_Mpc'] = \
+                self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
             self.cosmo.cosmo_dic['omch2'] = self.provider.get_param('omch2')
             self.cosmo.cosmo_dic['ombh2'] = self.provider.get_param('ombh2')
+            self.cosmo.cosmo_dic['Omc'] = \
+                (self.cosmo.cosmo_dic['omch2'] /
+                    (self.cosmo.cosmo_dic['H0'] / 100)**2.)
+            self.cosmo.cosmo_dic['Omb'] = \
+                (self.cosmo.cosmo_dic['ombh2'] /
+                    (self.cosmo.cosmo_dic['H0'] / 100)**2.)
             self.cosmo.cosmo_dic['mnu'] = self.provider.get_param('mnu')
             # GCH: ATTENTION! THIS IS A TEMPORAL SOLUTION
             # as we cannot retrieve num_massive_neutrinos
             self.cosmo.cosmo_dic['omnuh2'] = \
                 self.cosmo.cosmo_dic['mnu'] / 94.07 * (1. / 3)**0.75
+            self.cosmo.cosmo_dic['Omnu'] = \
+                (self.cosmo.cosmo_dic['omnuh2'] /
+                    (self.cosmo.cosmo_dic['H0'] / 100)**2.)
             self.cosmo.cosmo_dic['comov_dist'] = \
                 self.provider.get_comoving_radial_distance(self.z_win)
             self.cosmo.cosmo_dic['angular_dist'] = \
                 self.provider.get_angular_diameter_distance(self.z_win)
             self.cosmo.cosmo_dic['H'] = self.provider.get_Hubble(self.z_win)
+            self.cosmo.cosmo_dic['H_Mpc'] = \
+                self.provider.get_Hubble(self.z_win, units='1/Mpc')
             self.cosmo.cosmo_dic['Pk_interpolator'] = \
                 self.provider.get_Pk_interpolator(nonlinear=False)
             self.cosmo.cosmo_dic['Pk_delta'] = \
@@ -250,18 +274,31 @@ class EuclidLikelihood(Likelihood):
 
         except (TypeError, AttributeError):
             self.cosmo.cosmo_dic['H0'] = model.provider.get_param("H0")
+            self.cosmo.cosmo_dic['H0_Mpc'] = \
+                self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
             self.cosmo.cosmo_dic['omch2'] = model.provider.get_param('omch2')
             self.cosmo.cosmo_dic['ombh2'] = model.provider.get_param('ombh2')
+            self.cosmo.cosmo_dic['Omc'] = \
+                (self.cosmo.cosmo_dic['omch2'] /
+                    (self.cosmo.cosmo_dic['H0'] / 100)**2.)
+            self.cosmo.cosmo_dic['Omb'] = \
+                (self.cosmo.cosmo_dic['ombh2'] /
+                    (self.cosmo.cosmo_dic['H0'] / 100)**2.)
             self.cosmo.cosmo_dic['mnu'] = model.provider.get_param('mnu')
             # GCH: ATTENTION! THIS IS A TEMPORAL SOLUTION
             # as we cannot retrieve num_massive_neutrinos
             self.cosmo.cosmo_dic['omnuh2'] = \
                 self.cosmo.cosmo_dic['mnu'] / 94.07 * (1. / 3)**0.75
+            self.cosmo.cosmo_dic['Omnu'] = \
+                (self.cosmo.cosmo_dic['omnuh2'] /
+                    (self.cosmo.cosmo_dic['H0'] / 100)**2.)
             self.cosmo.cosmo_dic['comov_dist'] = \
                 model.provider.get_comoving_radial_distance(self.z_win)
             self.cosmo.cosmo_dic['angular_dist'] = \
                 model.provider.get_angular_diameter_distance(self.z_win)
             self.cosmo.cosmo_dic['H'] = model.provider.get_Hubble(self.z_win)
+            self.cosmo.cosmo_dic['H_Mpc'] = \
+                model.provider.get_Hubble(self.z_win, units='1/Mpc')
             self.cosmo.cosmo_dic['Pk_interpolator'] = \
                 model.provider.get_Pk_interpolator(nonlinear=False)
             self.cosmo.cosmo_dic['Pk_delta'] = \

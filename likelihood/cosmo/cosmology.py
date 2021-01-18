@@ -28,6 +28,8 @@ class Cosmology:
         -------------------------------
         H0: float
             Present-day Hubble constant (km s^{-1} Mpc^{-1})
+        H0_Mpc: float
+            resent-day Hubble constant (Mpc^{-1})
         omch2: float
             Present-day Omega_CDM * (H0/100)**2
         ombh2: float
@@ -35,6 +37,13 @@ class Cosmology:
         omkh2: float
             Present-day curvature energy density
             Omega_k * (H0/100)**2
+        Omc: float
+            Present-day Omega_CDM
+        Omb: float
+            Present-day Omega_baryon
+        Omk: float
+            Present-day curvature energy density
+            Omega_k
         As: float
             amplitude of the primordial power spectrum
         ns: float
@@ -46,6 +55,8 @@ class Cosmology:
            Dark energy equation of state
         omnuh2: float
             Present-day Omega_neutrinos * (H0/100)**2
+        Omnu: float
+            Present-day Omega_neutrinos
         mnu: float
             Sum of massive neutrino species masses (eV)
         comov_dist: array-like
@@ -54,6 +65,8 @@ class Cosmology:
             Value of angular diameter distances at redshifts z_win
         H: array-like
             Hubble function evaluated at redshifts z_win
+        H_Mpc: array-like
+            Hubble function evaluated at redshifts z_win in units of Mpc^{-1}
         Pk_interpolator: function
             Interpolator function for power spectrum from Boltzmann code
         Pk_delta: function
@@ -76,6 +89,8 @@ class Cosmology:
             Interpolated growth rate function
         H_z_func: function
             Interpolated function for Hubble parameter
+        H_z_func_Mpc: function
+            Interpolated function for Hubble parameter in Mpc^{-1}
         z_win: array-like
             Array of redshifts ar which H and comov_dist are evaluated at
         k_win: array-like
@@ -125,10 +140,15 @@ class Cosmology:
         # (ACD): Added speed of light to dictionary.!!!Important:it's in units
         # of km/s to be dimensionally consistent with H0.!!!!
         self.cosmo_dic = {'H0': 67.5,
+                          'H0_Mpc': 67.5 / const.c.to('km/s').value,
                           'omch2': 0.122,
                           'ombh2': 0.022,
                           'omnuh2': 0.00028,
                           'omkh2': 0.0,
+                          'Omc': 0.122 / (67.5 / 100)**2.,
+                          'Omb': 0.022 / (67.5 / 100)**2.,
+                          'Omnu': 0.00028 / (67.5 / 100)**2.,
+                          'Omk': 0.0,
                           'w': -1.0,
                           'mnu': 0.06,
                           'tau': 0.07,
@@ -139,6 +159,7 @@ class Cosmology:
                           'comov_dist': None,
                           'angular_dist': None,
                           'H': None,
+                          'H_Mpc': None,
                           'Pk_interpolator': None,
                           'Pk_delta': None,
                           'Pgg_phot': None,
@@ -158,6 +179,7 @@ class Cosmology:
                           'r_z_func': None,
                           'd_z_func': None,
                           'H_z_func': None,
+                          'H_z_func_Mpc': None,
                           'sigma8_z_func': None,
                           'fsigma8_z_func': None,
                           'MG_mu': None,
@@ -328,6 +350,26 @@ class Cosmology:
                             'supplied to cosmo_dic.')
         self.cosmo_dic['H_z_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['H'], ext=2)
+
+    def interp_H_Mpc(self):
+        """
+        Adds an interpolator for the Hubble parameter in Mpc to the
+        dictionary so that it can be evaluated at redshifts not
+        explictly supplied to Cobaya.
+
+        Returns
+        -------
+        interpolator: object
+            Interpolates the Hubble parameter
+            H(z) as a function of redshift
+
+        """
+        if self.cosmo_dic['z_win'] is None:
+            raise Exception('Boltzmann code redshift binning has not been '
+                            'supplied to cosmo_dic.')
+        self.cosmo_dic['H_z_func_Mpc'] = \
+            interpolate.InterpolatedUnivariateSpline(
+                x=self.cosmo_dic['z_win'], y=self.cosmo_dic['H_Mpc'], ext=2)
 
     def interp_sigma8(self):
         """
@@ -846,6 +888,7 @@ class Cosmology:
         # just in case we want to have always
         # an updated dictionary with D_z, f, H(z), r(z)
         self.interp_H()
+        self.interp_H_Mpc()
         self.interp_comoving_dist()
         self.interp_fsigma8()
         self.interp_sigma8()

@@ -259,7 +259,6 @@ class EuclidLikelihood(Likelihood):
 
         except (TypeError, AttributeError):
             self.cosmo.cosmo_dic['H0'] = model.provider.get_param("H0")
-                self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
             self.cosmo.cosmo_dic['omch2'] = model.provider.get_param('omch2')
             self.cosmo.cosmo_dic['ombh2'] = model.provider.get_param('ombh2')
             self.cosmo.cosmo_dic['mnu'] = model.provider.get_param('mnu')

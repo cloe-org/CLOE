@@ -887,17 +887,18 @@ class Cosmology:
 
         """
 
-        self.cosmo_dic['H0_Mpc'] = self.cosmo_dic['H0'] / const.c.to('km/s').value
+        self.cosmo_dic['H0_Mpc'] = \
+            self.cosmo_dic['H0'] / const.c.to('km/s').value
         self.cosmo_dic['Omega_c'] = \
-            (self.cosmo_dic['omch2'] / (self.cosmo_dic['H0'] / 100)**2.) 
+            (self.cosmo_dic['omch2'] / (self.cosmo_dic['H0'] / 100)**2.)
         self.cosmo_dic['Omega_b'] = \
             (self.cosmo_dic['ombh2'] / (self.cosmo_dic['H0'] / 100)**2.)
         self.cosmo_dic['Omega_nu'] = \
             (self.cosmo_dic['omnuh2'] / (self.cosmo_dic['H0'] / 100)**2.)
         self.cosmo_dic['Omega_k'] = \
             (self.cosmo_dic['omkh2'] / (self.cosmo_dic['H0'] / 100)**2.)
-        self.cosmo_dic['Omega_m'] = (self.cosmo_dic['Omega_c'] + 
-                self.cosmo_dic['Omega_b'] + self.cosmo_dic['Omega_nu'])
+        self.cosmo_dic['Omega_m'] = self.cosmo_dic['Omega_c'] +\
+            self.cosmo_dic['Omega_b'] + self.cosmo_dic['Omega_nu']
 
     def update_cosmo_dic(self, zs, ks, MG_mu=1.0, MG_sigma=1.0):
         """

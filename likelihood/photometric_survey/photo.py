@@ -124,8 +124,7 @@ class Photo:
            and scale.
         """
         H0_Mpc = self.theory['H0_Mpc']
-        O_m = (self.theory['Omc'] + self.theory['Omb'] +
-               self.theory['Omnu'])
+        O_m = self.theory['Omega_m']
 
         n_z_normalized = self.nz_dic_WL[''.join(['n', str(bin_i)])]
 

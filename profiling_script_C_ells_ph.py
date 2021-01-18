@@ -3,6 +3,7 @@ import numpy as np
 from scipy import integrate
 from scipy import interpolate 
 import sys
+from astropy import constants as const
 
 #Import cobaya -need to be installed
 import cobaya

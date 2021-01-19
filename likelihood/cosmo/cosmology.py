@@ -57,6 +57,9 @@ class Cosmology:
             Present-day Omega_neutrinos * (H0/100)**2
         Omnu: float
             Present-day Omega_neutrinos
+        Omm: float
+            Present-day total matter energy density
+            Assumes sum of baryons, CDM and neutrinos
         mnu: float
             Sum of massive neutrino species masses (eV)
         comov_dist: array-like
@@ -140,15 +143,10 @@ class Cosmology:
         # (ACD): Added speed of light to dictionary.!!!Important:it's in units
         # of km/s to be dimensionally consistent with H0.!!!!
         self.cosmo_dic = {'H0': 67.5,
-                          'H0_Mpc': 67.5 / const.c.to('km/s').value,
                           'omch2': 0.122,
                           'ombh2': 0.022,
                           'omnuh2': 0.00028,
                           'omkh2': 0.0,
-                          'Omc': 0.122 / (67.5 / 100)**2.,
-                          'Omb': 0.022 / (67.5 / 100)**2.,
-                          'Omnu': 0.00028 / (67.5 / 100)**2.,
-                          'Omk': 0.0,
                           'w': -1.0,
                           'mnu': 0.06,
                           'tau': 0.07,
@@ -206,6 +204,15 @@ class Cosmology:
                              'aia': 1.72,
                              'nia': -0.41,
                              'bia': 2.17}}
+
+        #MM: adding some derived parameters
+        self.cosmo_dic.update({'H0_Mpc': self.cosmo_dic['H0'] / const.c.to('km/s').value,
+                               'Omc': self.cosmo_dic['omch2'] / (self.cosmo_dic['H0'] / 100)**2.,
+                               'Omb': self.cosmo_dic['ombh2'] / (self.cosmo_dic['H0'] / 100)**2.,
+                               'Omnu': self.cosmo_dic['omnuh2'] / (self.cosmo_dic['H0'] / 100)**2.,
+                               'Omk': self.cosmo_dic['omkh2'] / (self.cosmo_dic['H0'] / 100)**2.})
+
+        self.cosmo_dic['Omm'] = self.cosmo_dic['Omc'] + self.cosmo_dic['Omb'] + self.cosmo_dic['Omnu'] 
 
         self.nonlinear = Nonlinear(self.cosmo_dic)
 
@@ -640,8 +647,7 @@ class Cosmology:
         aia = self.cosmo_dic['nuisance_parameters']['aia']
         nia = self.cosmo_dic['nuisance_parameters']['nia']
         bia = self.cosmo_dic['nuisance_parameters']['bia']
-        omegam = (self.cosmo_dic['ombh2'] + self.cosmo_dic['omch2'] +
-                  self.cosmo_dic['omnuh2']) / (self.cosmo_dic['H0'] / 100)**2
+        omegam = self.cosmo_dic['Omm']
         # SJ: temporary lum for now, to be read in from IST:forecast file
         lum = 1.0
         fia = (-aia * c1 * omegam / self.growth_factor(redshift, k_scale) *

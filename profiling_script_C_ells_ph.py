@@ -3,6 +3,7 @@ import numpy as np
 from scipy import integrate
 from scipy import interpolate 
 import sys
+from astropy import constants as const
 
 #Import cobaya -need to be installed
 import cobaya
@@ -96,6 +97,8 @@ theory_dic = {'H0': model.provider.get_param('H0'),
               'z_win': z_win,
               'k_win': k_win
               }
+
+theory_dic['Omm'] = theory_dic['Omb'] + theory_dic['Omc'] + theory_dic['Omnu']
 theory_dic['Pk_delta'] = model.provider.get_Pk_interpolator(("delta_tot", "delta_tot"), nonlinear=False)
 theory_dic['fsigma8'] = model.provider.get_fsigma8(z_win)
 # Remember: h is hard-coded

@@ -111,6 +111,10 @@ class EuclidLikelihood(Likelihood):
                     (self.cosmo.cosmo_dic['H0'] / 100)**2.),
             'Omnu': (self.fiducial_cosmology.cosmo_dic['omnuh2'] /
                      (self.cosmo.cosmo_dic['H0'] / 100)**2.),
+            'Omm': ((self.fiducial_cosmology.cosmo_dic['ombh2'] +
+                    self.fiducial_cosmology.cosmo_dic['omch2'] +
+                    self.fiducial_cosmology.cosmo_dic['omnuh2']) /
+                    (self.cosmo.cosmo_dic['H0'] / 100)**2.)
             'tau': self.fiducial_cosmology.cosmo_dic['tau'],
             'mnu': self.fiducial_cosmology.cosmo_dic['mnu'],
             'nnu': self.fiducial_cosmology.cosmo_dic['nnu'],
@@ -251,6 +255,9 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Omnu'] = \
                 (self.cosmo.cosmo_dic['omnuh2'] /
                     (self.cosmo.cosmo_dic['H0'] / 100)**2.)
+            #MM: why there is no omkh2 here?
+            self.cosmo.cosmo_dic['Omm'] = \
+                self.cosmo.cosmo_dic['Omb'] + self.cosmo.cosmo_dic['Omc'] + self.cosmo.cosmo_dic['Omnu']
             self.cosmo.cosmo_dic['comov_dist'] = \
                 self.provider.get_comoving_radial_distance(self.z_win)
             self.cosmo.cosmo_dic['angular_dist'] = \
@@ -292,6 +299,8 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Omnu'] = \
                 (self.cosmo.cosmo_dic['omnuh2'] /
                     (self.cosmo.cosmo_dic['H0'] / 100)**2.)
+            self.cosmo.cosmo_dic['Omm'] = \
+                self.cosmo.cosmo_dic['Omb'] + self.cosmo.cosmo_dic['Omc'] + self.cosmo.cosmo_dic['Omnu']
             self.cosmo.cosmo_dic['comov_dist'] = \
                 model.provider.get_comoving_radial_distance(self.z_win)
             self.cosmo.cosmo_dic['angular_dist'] = \

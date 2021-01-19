@@ -12,6 +12,7 @@ from unittest import TestCase
 import numpy as np
 import numpy.testing as npt
 from scipy import integrate
+from astropy import constants as const
 from ..cosmo.cosmology import Cosmology
 from likelihood.cobaya_interface import EuclidLikelihood
 from likelihood.tests.test_wrapper import CobayaModel
@@ -31,6 +32,20 @@ class cosmoinitTestCase(TestCase):
         cosmo.cosmo_dic['nnu'] = 3.046
         cosmo.cosmo_dic['ns'] = 0.9674
         cosmo.cosmo_dic['As'] = 2.1e-9
+        cosmo.cosmo_dic['H0_Mpc'] = \
+            cosmo.cosmo_dic['H0'] / const.c.to('km/s').value,
+        cosmo.cosmo_dic['Omc'] = \
+            cosmo.cosmo_dic['omch2'] / (cosmo.cosmo_dic['H0'] / 100)**2.
+        cosmo.cosmo_dic['Omb'] = \
+            cosmo.cosmo_dic['ombh2'] / (cosmo.cosmo_dic['H0'] / 100)**2.
+        cosmo.cosmo_dic['Omnu'] = \
+            cosmo.cosmo_dic['omnuh2'] / (cosmo.cosmo_dic['H0'] / 100)**2.
+        cosmo.cosmo_dic['Omk'] = \
+            cosmo.cosmo_dic['omkh2'] / (cosmo.cosmo_dic['H0'] / 100)**2.
+
+        cosmo.cosmo_dic['Omm'] = (cosmo.cosmo_dic['Omc'] +
+                                  cosmo.cosmo_dic['Omb'] +
+                                  cosmo.cosmo_dic['Omnu'])
 
         # (GCH): create wrapper model
         self.model_test = CobayaModel(cosmo)

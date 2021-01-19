@@ -114,7 +114,7 @@ class EuclidLikelihood(Likelihood):
             'Omm': ((self.fiducial_cosmology.cosmo_dic['ombh2'] +
                     self.fiducial_cosmology.cosmo_dic['omch2'] +
                     self.fiducial_cosmology.cosmo_dic['omnuh2']) /
-                    (self.cosmo.cosmo_dic['H0'] / 100)**2.)
+                    (self.cosmo.cosmo_dic['H0'] / 100)**2.),
             'tau': self.fiducial_cosmology.cosmo_dic['tau'],
             'mnu': self.fiducial_cosmology.cosmo_dic['mnu'],
             'nnu': self.fiducial_cosmology.cosmo_dic['nnu'],

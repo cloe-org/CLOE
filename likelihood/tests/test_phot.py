@@ -47,8 +47,8 @@ class cosmoinitTestCase(TestCase):
         cosmo.cosmo_dic['Omnu'] = \
             cosmo.cosmo_dic['omnuh2'] / (cosmo.cosmo_dic['H0'] / 100)**2.
         cosmo.cosmo_dic['Omm'] = (cosmo.cosmo_dic['Omnu'] +
-                                   cosmo.cosmo_dic['Omc'] +
-                                   cosmo.cosmo_dic['Omb'])
+                                  cosmo.cosmo_dic['Omc'] +
+                                  cosmo.cosmo_dic['Omb'])
 
         # (SJ): by setting below to zero, obtain previous non-IA results
         # cosmo.cosmo_dic['nuisance_parameters']['aia'] = 0

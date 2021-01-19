@@ -205,14 +205,21 @@ class Cosmology:
                              'nia': -0.41,
                              'bia': 2.17}}
 
-        #MM: adding some derived parameters
-        self.cosmo_dic.update({'H0_Mpc': self.cosmo_dic['H0'] / const.c.to('km/s').value,
-                               'Omc': self.cosmo_dic['omch2'] / (self.cosmo_dic['H0'] / 100)**2.,
-                               'Omb': self.cosmo_dic['ombh2'] / (self.cosmo_dic['H0'] / 100)**2.,
-                               'Omnu': self.cosmo_dic['omnuh2'] / (self.cosmo_dic['H0'] / 100)**2.,
-                               'Omk': self.cosmo_dic['omkh2'] / (self.cosmo_dic['H0'] / 100)**2.})
+        # MM: adding some derived parameters
+        self.cosmo_dic.update({'H0_Mpc': (self.cosmo_dic['H0'] /
+                                          const.c.to('km/s').value),
+                               'Omc': (self.cosmo_dic['omch2'] /
+                                       (self.cosmo_dic['H0'] / 100)**2.),
+                               'Omb': (self.cosmo_dic['ombh2'] /
+                                       (self.cosmo_dic['H0'] / 100)**2.),
+                               'Omnu': (self.cosmo_dic['omnuh2'] /
+                                        (self.cosmo_dic['H0'] / 100)**2.),
+                               'Omk': (self.cosmo_dic['omkh2'] /
+                                       (self.cosmo_dic['H0'] / 100)**2.}))
 
-        self.cosmo_dic['Omm'] = self.cosmo_dic['Omc'] + self.cosmo_dic['Omb'] + self.cosmo_dic['Omnu'] 
+        self.cosmo_dic['Omm'] = (self.cosmo_dic['Omc'] +
+                                 self.cosmo_dic['Omb'] +
+                                 self.cosmo_dic['Omnu'])
 
         self.nonlinear = Nonlinear(self.cosmo_dic)
 

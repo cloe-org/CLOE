@@ -30,11 +30,16 @@ class cosmoinitTestCase(TestCase):
         cosmo.cosmo_dic['ombh2'] = 0.022
         cosmo.cosmo_dic['omch2'] = 0.12
         cosmo.cosmo_dic['H0'] = 68.0
+        cosmo.cosmo_dic['H0_Mpc'] = 68.0 / const.c.to('km/s').value
+        cosmo.cosmo_dic['Omb'] = 0.022 / (cosmo.cosmo_dic['H0'] / 100)**2.
+        cosmo.cosmo_dic['Omc'] = 0.12 / (cosmo.cosmo_dic['H0'] / 100)**2.
         cosmo.cosmo_dic['tau'] = 0.07
         cosmo.cosmo_dic['mnu'] = 0.06
         cosmo.cosmo_dic['nnu'] = 3.046
         cosmo.cosmo_dic['omnuh2'] = \
             cosmo.cosmo_dic['mnu'] / 94.07 * (1. / 3)**0.75
+        cosmo.cosmo_dic['Omnu'] = \
+            cosmo.cosmo_dic['omnuh2'] / (cosmo.cosmo_dic['H0'] / 100)**2.
         cosmo.cosmo_dic['ns'] = 0.9674
         cosmo.cosmo_dic['As'] = 2.1e-9
         # (SJ): by setting below to zero, obtain previous non-IA results

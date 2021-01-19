@@ -140,10 +140,15 @@ class Cosmology:
         # (ACD): Added speed of light to dictionary.!!!Important:it's in units
         # of km/s to be dimensionally consistent with H0.!!!!
         self.cosmo_dic = {'H0': 67.5,
+                          'H0_Mpc': 67.5 / const.c.to('km/s').value,
                           'omch2': 0.122,
                           'ombh2': 0.022,
                           'omnuh2': 0.00028,
                           'omkh2': 0.0,
+                          'Omc': 0.122 / (67.5 / 100)**2.,
+                          'Omb': 0.022 / (67.5 / 100)**2.,
+                          'Omnu': 0.00028 / (67.5 / 100)**2.,
+                          'Omk': 0.0,
                           'w': -1.0,
                           'mnu': 0.06,
                           'tau': 0.07,
@@ -862,44 +867,6 @@ class Cosmology:
 
         return MG_sigma
 
-    def precompute_pars(self):
-        """
-        Adds other parameters to the cosmo dictionary.
-
-        Returns
-        -------
-        H0_Mpc: float
-            Hubble constant in 1/Mpc
-        Omega_c: float
-            Present-day CDM energy density
-        Omega_b: float
-            Present-day baryon energy density
-        Omega_k: float
-            Present-day curvature energy density
-        Omega_nu:float
-            Present-day neutrino energy density
-        Omega_m:float
-            Present-day total matter energy density.
-            Assumes
-            .. math::
-            \Omega_{\rm m}^0 &= \
-            \Omega_{\rm c}^0 + \Omega_{\rm m}^0 + \Omega_\nu^0\\
-
-        """
-
-        self.cosmo_dic['H0_Mpc'] = \
-            self.cosmo_dic['H0'] / const.c.to('km/s').value
-        self.cosmo_dic['Omega_c'] = \
-            (self.cosmo_dic['omch2'] / (self.cosmo_dic['H0'] / 100)**2.)
-        self.cosmo_dic['Omega_b'] = \
-            (self.cosmo_dic['ombh2'] / (self.cosmo_dic['H0'] / 100)**2.)
-        self.cosmo_dic['Omega_nu'] = \
-            (self.cosmo_dic['omnuh2'] / (self.cosmo_dic['H0'] / 100)**2.)
-        self.cosmo_dic['Omega_k'] = \
-            (self.cosmo_dic['omkh2'] / (self.cosmo_dic['H0'] / 100)**2.)
-        self.cosmo_dic['Omega_m'] = self.cosmo_dic['Omega_c'] +\
-            self.cosmo_dic['Omega_b'] + self.cosmo_dic['Omega_nu']
-
     def update_cosmo_dic(self, zs, ks, MG_mu=1.0, MG_sigma=1.0):
         """
         Update the dictionary with other cosmological quantities
@@ -920,7 +887,6 @@ class Cosmology:
         # (GCH): this function is superfluous
         # just in case we want to have always
         # an updated dictionary with D_z, f, H(z), r(z)
-        self.precompute_params()
         self.interp_H()
         self.interp_H_Mpc()
         self.interp_comoving_dist()

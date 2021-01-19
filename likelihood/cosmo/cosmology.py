@@ -215,7 +215,7 @@ class Cosmology:
                                'Omnu': (self.cosmo_dic['omnuh2'] /
                                         (self.cosmo_dic['H0'] / 100)**2.),
                                'Omk': (self.cosmo_dic['omkh2'] /
-                                       (self.cosmo_dic['H0'] / 100)**2.}))
+                                       (self.cosmo_dic['H0'] / 100)**2.)})
 
         self.cosmo_dic['Omm'] = (self.cosmo_dic['Omc'] +
                                  self.cosmo_dic['Omb'] +

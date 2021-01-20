@@ -58,10 +58,12 @@ class cosmoinitTestCase(TestCase):
         self.W_i_Gcheck = 5.319691e-09
         self.W_IA_check = 0.000106330045837
         self.cl_integrand_check = 0.000718
-        self.cl_WL_check = 5.680761e-09
-        self.cl_GC_check = 2.95197263e-05
-        self.cl_cross_check = 1.151977e-07
-        # (SJ): when no IA, replace with below
+        self.cl_WL_check = 6.786397e-09
+        # (SJ): Below is the original int_step = 0.1, need rtol = 5e-03
+        # self.cl_WL_check = 5.680761e-09
+        self.cl_GC_check = 2.970077e-05
+        self.cl_cross_check = 1.137797e-07
+        # (SJ): when no IA, replace with below (int_step = 0.1)
         # self.cl_WL_check = 8.517887e-09
         # self.cl_cross_check = 3.14508861e-07
         self.flatnz = interpolate.InterpolatedUnivariateSpline(
@@ -120,10 +122,10 @@ class cosmoinitTestCase(TestCase):
 
     def test_cl_GC(self):
         cl_int = self.phot.Cl_GC_phot(10.0, 1, 1)
-        npt.assert_allclose(cl_int, self.cl_GC_check, rtol=1e-02,
+        npt.assert_allclose(cl_int, self.cl_GC_check, rtol=1e-05,
                             err_msg='Cl GC photometric test failed')
 
     def test_cl_cross(self):
         cl_int = self.phot.Cl_cross(10.0, 1, 1)
-        npt.assert_allclose(cl_int, self.cl_cross_check, rtol=1e-02,
+        npt.assert_allclose(cl_int, self.cl_cross_check, rtol=1e-05,
                             err_msg='Cl photometric cross test failed')

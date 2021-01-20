@@ -106,15 +106,15 @@ class EuclidLikelihood(Likelihood):
             'H0': self.fiducial_cosmology.cosmo_dic['H0'],
             'H0_Mpc': self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value,
             'Omb': (self.fiducial_cosmology.cosmo_dic['ombh2'] /
-                    (self.cosmo.cosmo_dic['H0'] / 100)**2.),
+                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.),
             'Omc': (self.fiducial_cosmology.cosmo_dic['omch2'] /
-                    (self.cosmo.cosmo_dic['H0'] / 100)**2.),
+                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.),
             'Omnu': (self.fiducial_cosmology.cosmo_dic['omnuh2'] /
-                     (self.cosmo.cosmo_dic['H0'] / 100)**2.),
+                     (self.cosmo.cosmo_dic['H0'] / 100.)**2.),
             'Omm': ((self.fiducial_cosmology.cosmo_dic['ombh2'] +
                     self.fiducial_cosmology.cosmo_dic['omch2'] +
                     self.fiducial_cosmology.cosmo_dic['omnuh2']) /
-                    (self.cosmo.cosmo_dic['H0'] / 100)**2.),
+                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.),
             'tau': self.fiducial_cosmology.cosmo_dic['tau'],
             'mnu': self.fiducial_cosmology.cosmo_dic['mnu'],
             'nnu': self.fiducial_cosmology.cosmo_dic['nnu'],
@@ -243,10 +243,10 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['ombh2'] = self.provider.get_param('ombh2')
             self.cosmo.cosmo_dic['Omc'] = \
                 (self.cosmo.cosmo_dic['omch2'] /
-                    (self.cosmo.cosmo_dic['H0'] / 100)**2.)
+                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.)
             self.cosmo.cosmo_dic['Omb'] = \
                 (self.cosmo.cosmo_dic['ombh2'] /
-                    (self.cosmo.cosmo_dic['H0'] / 100)**2.)
+                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.)
             self.cosmo.cosmo_dic['mnu'] = self.provider.get_param('mnu')
             # GCH: ATTENTION! THIS IS A TEMPORAL SOLUTION
             # as we cannot retrieve num_massive_neutrinos
@@ -254,7 +254,7 @@ class EuclidLikelihood(Likelihood):
                 self.cosmo.cosmo_dic['mnu'] / 94.07 * (1. / 3)**0.75
             self.cosmo.cosmo_dic['Omnu'] = \
                 (self.cosmo.cosmo_dic['omnuh2'] /
-                    (self.cosmo.cosmo_dic['H0'] / 100)**2.)
+                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.)
             # MM: why there is no omkh2 here?
             self.cosmo.cosmo_dic['Omm'] = \
                 (self.cosmo.cosmo_dic['Omb'] + self.cosmo.cosmo_dic['Omc'] +
@@ -288,10 +288,10 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['ombh2'] = model.provider.get_param('ombh2')
             self.cosmo.cosmo_dic['Omc'] = \
                 (self.cosmo.cosmo_dic['omch2'] /
-                    (self.cosmo.cosmo_dic['H0'] / 100)**2.)
+                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.)
             self.cosmo.cosmo_dic['Omb'] = \
                 (self.cosmo.cosmo_dic['ombh2'] /
-                    (self.cosmo.cosmo_dic['H0'] / 100)**2.)
+                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.)
             self.cosmo.cosmo_dic['mnu'] = model.provider.get_param('mnu')
             # GCH: ATTENTION! THIS IS A TEMPORAL SOLUTION
             # as we cannot retrieve num_massive_neutrinos
@@ -299,7 +299,7 @@ class EuclidLikelihood(Likelihood):
                 self.cosmo.cosmo_dic['mnu'] / 94.07 * (1. / 3)**0.75
             self.cosmo.cosmo_dic['Omnu'] = \
                 (self.cosmo.cosmo_dic['omnuh2'] /
-                    (self.cosmo.cosmo_dic['H0'] / 100)**2.)
+                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.)
             self.cosmo.cosmo_dic['Omm'] = \
                 (self.cosmo.cosmo_dic['Omb'] + self.cosmo.cosmo_dic['Omc'] +
                  self.cosmo.cosmo_dic['Omnu'])

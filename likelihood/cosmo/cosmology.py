@@ -29,18 +29,22 @@ class Cosmology:
         H0: float
             Present-day Hubble constant (km s^{-1} Mpc^{-1})
         H0_Mpc: float
-            resent-day Hubble constant (Mpc^{-1})
+            Present-day Hubble constant (Mpc^{-1})
         omch2: float
-            Present-day Omega_CDM * (H0/100)**2
+            Present-day CDM energy density
+            Omega_CDM * (H0/100)**2
         ombh2: float
-            Present-day Omega_baryon * (H0/100)**2
+            Present-day baryon energy density
+            Omega_baryon * (H0/100)**2
         omkh2: float
             Present-day curvature energy density
             Omega_k * (H0/100)**2
         Omc: float
-            Present-day Omega_CDM
+            Present-day CDM energy density
+            Omega_CDM
         Omb: float
-            Present-day Omega_baryon
+            Present-day baryon energy density
+            Omega_baryon
         Omk: float
             Present-day curvature energy density
             Omega_k
@@ -54,11 +58,14 @@ class Cosmology:
         w: float
            Dark energy equation of state
         omnuh2: float
-            Present-day Omega_neutrinos * (H0/100)**2
+            Present-day massive neutrinos energy density
+            Omega_neutrinos * (H0/100)**2
         Omnu: float
-            Present-day Omega_neutrinos
+            Present-day massive neutrinos energy density
+            Omega_neutrinos
         Omm: float
             Present-day total matter energy density
+            Omega_m
             Assumes sum of baryons, CDM and neutrinos
         mnu: float
             Sum of massive neutrino species masses (eV)
@@ -206,16 +213,16 @@ class Cosmology:
                              'bia': 2.17}}
 
         # MM: adding some derived parameters
-        self.cosmo_dic.update({'H0_Mpc': (self.cosmo_dic['H0'] /
-                                          const.c.to('km/s').value),
-                               'Omc': (self.cosmo_dic['omch2'] /
-                                       (self.cosmo_dic['H0'] / 100)**2.),
-                               'Omb': (self.cosmo_dic['ombh2'] /
-                                       (self.cosmo_dic['H0'] / 100)**2.),
-                               'Omnu': (self.cosmo_dic['omnuh2'] /
-                                        (self.cosmo_dic['H0'] / 100)**2.),
-                               'Omk': (self.cosmo_dic['omkh2'] /
-                                       (self.cosmo_dic['H0'] / 100)**2.)})
+        self.cosmo_dic['H0_Mpc'] = (self.cosmo_dic['H0'] /
+                                    const.c.to('km/s').value)
+        self.cosmo_dic['Omc'] = (self.cosmo_dic['omch2'] /
+                                 (self.cosmo_dic['H0'] / 100.)**2.)
+        self.cosmo_dic['Omb'] = (self.cosmo_dic['ombh2'] /
+                                 (self.cosmo_dic['H0'] / 100.)**2.)
+        self.cosmo_dic['Omnu'] = (self.cosmo_dic['omnuh2'] /
+                                  (self.cosmo_dic['H0'] / 100.)**2.)
+        self.cosmo_dic['Omk'] = (self.cosmo_dic['omkh2'] /
+                                 (self.cosmo_dic['H0'] / 100.)**2.)
 
         self.cosmo_dic['Omm'] = (self.cosmo_dic['Omc'] +
                                  self.cosmo_dic['Omb'] +

@@ -41,6 +41,40 @@ class Photo:
                             'exists in cosmo_dic.')
         self.cl_int_z_min = 0.001
         self.cl_int_z_max = self.theory['z_win'][-1]
+        # (SJ): The size of z_winterp sufficient for now, could be tuned later
+        z_wlogmin = -2
+        z_wmin1 = 0
+        z_wmin2 = 1e-4
+        z_wmin3 = 1e-3
+        z_wmax = 4.0
+        z_wsamp = 140
+        z_winterp = np.logspace(z_wlogmin, np.log10(z_wmax), z_wsamp)
+        z_winterp[0] = z_wmin1
+        z_winterp[1] = z_wmin2
+        z_winterp[2] = z_wmin3
+        # (SJ): Number of bins should be generalized, hard-coded for now
+        # (SJ): z_wtomo is the number of tomographic bins + 1
+
+        z_wtomo_wl = len(self.nz_dic_WL)
+        z_wtomo_gc = len(self.nz_dic_GC)
+        z_wtom_wl = z_wtomo_wl + 1
+        z_wtom_gc = z_wtomo_gc + 1
+        self.interpwin = np.zeros(shape=(z_wsamp, z_wtom_wl))
+        self.interpwingal = np.zeros(shape=(z_wsamp, z_wtom_gc))
+        self.interpwinia = np.zeros(shape=(z_wsamp, z_wtom_wl))
+        self.interpwin[:, 0] = z_winterp
+        self.interpwingal[:, 0] = z_winterp
+        self.interpwinia[:, 0] = z_winterp
+        for tomi in range(1, z_wtom_wl):
+            self.interpwin[:, tomi] = np.array([self.WL_window(z, tomi) for
+                                                z in z_winterp])
+            self.interpwingal[:, tomi] = np.array([self.GC_window(z, tomi) for
+                                                   z in z_winterp])
+            self.interpwinia[:, tomi] = np.array([self.IA_window(z, tomi) for
+                                                  z in z_winterp])
+        for tomi in range(1, z_wtom_gc):
+            self.interpwingal[:, tomi] = np.array([self.GC_window(z, tomi) for
+                                                   z in z_winterp])
 
     def GC_window(self, z, bin_i):
         r"""
@@ -201,7 +235,7 @@ class Photo:
                             ' spectrum interpolation range.')
         return kern_mult_power
 
-    def Cl_WL(self, ell, bin_i, bin_j, int_step=0.1):
+    def Cl_WL(self, ell, bin_i, bin_j, int_step=0.05):
         r"""
         Calculates angular power spectrum for weak lensing,
         for the supplied bins. Includes intrinsic alignments.
@@ -248,10 +282,14 @@ class Photo:
             pow_dd = np.atleast_1d(P_dd(rshift, current_k))[0]
             pow_ii = np.atleast_1d(P_ii(rshift, current_k))[0]
             pow_di = np.atleast_1d(P_di(rshift, current_k))[0]
-            kern_i = self.WL_window(rshift, bin_i, current_k)
-            kern_j = self.WL_window(rshift, bin_j, current_k)
-            kernia_i = self.IA_window(rshift, bin_i)
-            kernia_j = self.IA_window(rshift, bin_j)
+            kern_i = np.interp(rshift, self.interpwin[:, 0],
+                               self.interpwin[:, bin_i])
+            kern_j = np.interp(rshift, self.interpwin[:, 0],
+                               self.interpwin[:, bin_j])
+            kernia_i = np.interp(rshift, self.interpwinia[:, 0],
+                                 self.interpwinia[:, bin_i])
+            kernia_j = np.interp(rshift, self.interpwinia[:, 0],
+                                 self.interpwinia[:, bin_j])
             pandw_dd = kern_i * kern_j * pow_dd
             pandw_ii = kernia_i * kernia_j * pow_ii
             pandw_di = (kern_i * kernia_j + kernia_i * kern_j) * pow_di
@@ -261,7 +299,7 @@ class Photo:
 
         return c_final
 
-    def Cl_GC_phot(self, ell, bin_i, bin_j, int_step=0.1):
+    def Cl_GC_phot(self, ell, bin_i, bin_j, int_step=0.05):
         r"""
         Calculates angular power spectrum for photometric galaxy clustering,
         for the supplied bins.
@@ -302,15 +340,17 @@ class Photo:
             # bias.
             current_k = (ell + 0.5) / self.theory['r_z_func'](rshift)
             power = np.atleast_1d(P_int(rshift, current_k))[0]
-            kern_i = self.GC_window(rshift, bin_i)
-            kern_j = self.GC_window(rshift, bin_j)
+            kern_i = np.interp(rshift, self.interpwingal[:, 0],
+                               self.interpwingal[:, bin_i])
+            kern_j = np.interp(rshift, self.interpwingal[:, 0],
+                               self.interpwingal[:, bin_j])
             pandwijk = kern_i * kern_j * power
             c_int_arr[ii] = self.Cl_generic_integrand(rshift, pandwijk)
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final
 
-    def Cl_cross(self, ell, bin_i, bin_j, int_step=0.1):
+    def Cl_cross(self, ell, bin_i, bin_j, int_step=0.02):
         r"""
         Calculates angular power spectrum for cross-correlation
         between weak lensing and galaxy clustering, for the supplied bins.
@@ -356,9 +396,12 @@ class Photo:
             current_k = (ell + 0.5) / self.theory['r_z_func'](rshift)
             pow_gd = np.atleast_1d(P_gd(rshift, current_k))[0]
             pow_gi = np.atleast_1d(P_gi(rshift, current_k))[0]
-            kern_i = self.WL_window(rshift, bin_i, current_k)
-            kernia_i = self.IA_window(rshift, bin_i)
-            kern_j = self.GC_window(rshift, bin_j)
+            kern_i = np.interp(rshift, self.interpwin[:, 0],
+                               self.interpwin[:, bin_i])
+            kernia_i = np.interp(rshift, self.interpwinia[:, 0],
+                                 self.interpwinia[:, bin_i])
+            kern_j = np.interp(rshift, self.interpwingal[:, 0],
+                               self.interpwingal[:, bin_j])
             pandw_gd = kern_i * kern_j * pow_gd
             pandw_gi = kernia_i * kern_j * pow_gi
             pandwijk = pandw_gd + pandw_gi

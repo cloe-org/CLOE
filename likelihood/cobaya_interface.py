@@ -66,7 +66,7 @@ class EuclidLikelihood(Likelihood):
 
         """
 
-        # SJ: For now, example sampling in wavenumber (k)
+        # (SJ): For now, example sampling in wavenumber (k)
         self.k_min_Boltzmannn = 0.001
         # ATTENTION: The k_min is not passed to cobaya to build
         # the matter power spectrum interpolator !!
@@ -81,11 +81,23 @@ class EuclidLikelihood(Likelihood):
                                  np.log10(self.k_max_GC_phot_interp),
                                  self.k_samp_GC)
 
-        # SJ: For now, example sampling in redshift (z)
+        # (SJ): For now, example sampling in redshift (z)
         self.z_min = 0.0
         self.z_max = 4.0
         self.z_samp = 100
         self.z_win = np.linspace(self.z_min, self.z_max, self.z_samp)
+        # (SJ): log sampling below
+        # self.z_min1 = 0.0
+        # self.z_min2 = 1e-4
+        # self.z_min3 = 1e-3
+        # self.z_minlog = -2
+        # self.z_max = 4.0
+        # self.z_samp = 140
+        # self.z_win = np.logspace(self.z_minlog, np.log10(self.z_max),
+        #                          self.z_samp)
+        # self.z_win[0] = self.z_min1
+        # self.z_win[1] = self.z_min2
+        # self.z_win[2] = self.z_min3
 
         # Initialize Euclike module
         self.likefinal = Euclike()

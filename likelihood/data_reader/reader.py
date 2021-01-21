@@ -41,6 +41,8 @@ class Reader:
         self.nz_dict_GC_Phot = {}
         self.nz_dict_WL_raw = {}
         self.nz_dict_GC_Phot_raw = {}
+        self.numtomo_gcphot = {}
+        self.numtomo_wl = {}
 
         # (GCH): Added empty dict to fill in
         # fiducial cosmology data from Spec OU-level3 files
@@ -247,6 +249,9 @@ class Reader:
         GC_phot_dict['ells'] = GC_file[1].data
         WL_dict['ells'] = WL_file[1].data
         XC_phot_dict['ells'] = XC_file[1].data
+
+        self.numtomo_wl = len(self.nz_dict_WL)
+        self.numtomo_gcphot = len(self.nz_dict_GC_Phot)
 
         for i in range(2, len(GC_file)):
             cur_ind = GC_file[i].header['EXTNAME']

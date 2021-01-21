@@ -70,10 +70,11 @@ class Reader:
             # (GCH): open file and read the content
             f = open(self.dat_dir_main + file_dest + file_name, "r")
             content = f.read()
+            f.close()
             # (GCH): get the arbitrary header and save in a dict
             nz = np.genfromtxt(content.splitlines(), names=True)
             nz_dict = {x: nz[x] for x in nz.dtype.names}
-            f.close()
+
             return nz_dict
         except BaseException:
             raise Exception(
@@ -162,13 +163,13 @@ class Reader:
                 'omkh2': fid_cosmo_file[1].header['OMEGA_K'] *
                 fid_cosmo_file[1].header['HUBBLE']**2,
                 'omnuh2': 0}
+
+            fid_cosmo_file.close()
         # GCH: remember, for the moment we ignore Omega_R and
         # neutrinos
         except ReaderError:
             print('There was an error when reading the fiducial '
                   'data from OU-level3 files')
-
-        fid_cosmo_file.close()
 
         k_fac = (self.data_spec_fiducial_cosmo['H0'] / 100.0)
         p_fac = 1.0 / ((self.data_spec_fiducial_cosmo['H0'] / 100.0) ** 3.0)

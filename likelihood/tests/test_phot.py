@@ -41,11 +41,11 @@ class cosmoinitTestCase(TestCase):
         cosmo.cosmo_dic['H0_Mpc'] = \
             cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
         cosmo.cosmo_dic['Omb'] = \
-            cosmo.cosmo_dic['ombh2'] / (cosmo.cosmo_dic['H0'] / 100)**2.
+            cosmo.cosmo_dic['ombh2'] / (cosmo.cosmo_dic['H0'] / 100.)**2.
         cosmo.cosmo_dic['Omc'] = \
-            cosmo.cosmo_dic['omch2'] / (cosmo.cosmo_dic['H0'] / 100)**2.
+            cosmo.cosmo_dic['omch2'] / (cosmo.cosmo_dic['H0'] / 100.)**2.
         cosmo.cosmo_dic['Omnu'] = \
-            cosmo.cosmo_dic['omnuh2'] / (cosmo.cosmo_dic['H0'] / 100)**2.
+            cosmo.cosmo_dic['omnuh2'] / (cosmo.cosmo_dic['H0'] / 100.)**2.
         cosmo.cosmo_dic['Omm'] = (cosmo.cosmo_dic['Omnu'] +
                                   cosmo.cosmo_dic['Omc'] +
                                   cosmo.cosmo_dic['Omb'])

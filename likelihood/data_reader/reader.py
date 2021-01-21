@@ -72,9 +72,11 @@ class Reader:
             # (GCH): open file and read the content
             f = open(self.dat_dir_main + file_dest + file_name, "r")
             content = f.read()
+            f.close()
             # (GCH): get the arbitrary header and save in a dict
             nz = np.genfromtxt(content.splitlines(), names=True)
             nz_dict = {x: nz[x] for x in nz.dtype.names}
+
             return nz_dict
         except BaseException:
             raise Exception(
@@ -163,6 +165,8 @@ class Reader:
                 'omkh2': fid_cosmo_file[1].header['OMEGA_K'] *
                 fid_cosmo_file[1].header['HUBBLE']**2,
                 'omnuh2': 0}
+
+            fid_cosmo_file.close()
         # GCH: remember, for the moment we ignore Omega_R and
         # neutrinos
         except ReaderError:
@@ -203,6 +207,9 @@ class Reader:
                                                     'cov_k_j': cov_k_j,
                                                     'cov_l_i': cov_l_i,
                                                     'cov_l_j': cov_l_j}
+
+            fits_file.close()
+
         self.data_dict['GC-Spec'] = GC_spec_dict
         return
 
@@ -318,4 +325,8 @@ class Reader:
         self.data_dict['GC-Phot'] = GC_phot_dict
         self.data_dict['WL'] = WL_dict
         self.data_dict['XC-Phot'] = XC_phot_dict
+
+        GC_file.close()
+        WL_file.close()
+        XC_file.close()
         return

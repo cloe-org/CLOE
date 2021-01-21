@@ -28,13 +28,26 @@ class Cosmology:
         -------------------------------
         H0: float
             Present-day Hubble constant (km s^{-1} Mpc^{-1})
+        H0_Mpc: float
+            Present-day Hubble constant (Mpc^{-1})
         omch2: float
-            Present-day Omega_CDM * (H0/100)**2
+            Present-day CDM energy density
+            Omega_CDM * (H0/100)**2
         ombh2: float
-            Present-day Omega_baryon * (H0/100)**2
+            Present-day baryon energy density
+            Omega_baryon * (H0/100)**2
         omkh2: float
             Present-day curvature energy density
             Omega_k * (H0/100)**2
+        Omc: float
+            Present-day CDM energy density
+            Omega_CDM
+        Omb: float
+            Present-day baryon energy density
+            Omega_baryon
+        Omk: float
+            Present-day curvature energy density
+            Omega_k
         As: float
             amplitude of the primordial power spectrum
         ns: float
@@ -45,7 +58,15 @@ class Cosmology:
         w: float
            Dark energy equation of state
         omnuh2: float
-            Present-day Omega_neutrinos * (H0/100)**2
+            Present-day massive neutrinos energy density
+            Omega_neutrinos * (H0/100)**2
+        Omnu: float
+            Present-day massive neutrinos energy density
+            Omega_neutrinos
+        Omm: float
+            Present-day total matter energy density
+            Omega_m
+            Assumes sum of baryons, CDM and neutrinos
         mnu: float
             Sum of massive neutrino species masses (eV)
         comov_dist: array-like
@@ -54,6 +75,8 @@ class Cosmology:
             Value of angular diameter distances at redshifts z_win
         H: array-like
             Hubble function evaluated at redshifts z_win
+        H_Mpc: array-like
+            Hubble function evaluated at redshifts z_win in units of Mpc^{-1}
         Pk_interpolator: function
             Interpolator function for power spectrum from Boltzmann code
         Pk_delta: function
@@ -76,6 +99,8 @@ class Cosmology:
             Interpolated growth rate function
         H_z_func: function
             Interpolated function for Hubble parameter
+        H_z_func_Mpc: function
+            Interpolated function for Hubble parameter in Mpc^{-1}
         z_win: array-like
             Array of redshifts ar which H and comov_dist are evaluated at
         k_win: array-like
@@ -139,6 +164,7 @@ class Cosmology:
                           'comov_dist': None,
                           'angular_dist': None,
                           'H': None,
+                          'H_Mpc': None,
                           'Pk_interpolator': None,
                           'Pk_delta': None,
                           'Pgg_phot': None,
@@ -158,6 +184,7 @@ class Cosmology:
                           'r_z_func': None,
                           'd_z_func': None,
                           'H_z_func': None,
+                          'H_z_func_Mpc': None,
                           'sigma8_z_func': None,
                           'fsigma8_z_func': None,
                           'MG_mu': None,
@@ -184,6 +211,22 @@ class Cosmology:
                              'aia': 1.72,
                              'nia': -0.41,
                              'bia': 2.17}}
+
+        # MM: adding some derived parameters
+        self.cosmo_dic['H0_Mpc'] = (self.cosmo_dic['H0'] /
+                                    const.c.to('km/s').value)
+        self.cosmo_dic['Omc'] = (self.cosmo_dic['omch2'] /
+                                 (self.cosmo_dic['H0'] / 100.)**2.)
+        self.cosmo_dic['Omb'] = (self.cosmo_dic['ombh2'] /
+                                 (self.cosmo_dic['H0'] / 100.)**2.)
+        self.cosmo_dic['Omnu'] = (self.cosmo_dic['omnuh2'] /
+                                  (self.cosmo_dic['H0'] / 100.)**2.)
+        self.cosmo_dic['Omk'] = (self.cosmo_dic['omkh2'] /
+                                 (self.cosmo_dic['H0'] / 100.)**2.)
+
+        self.cosmo_dic['Omm'] = (self.cosmo_dic['Omc'] +
+                                 self.cosmo_dic['Omb'] +
+                                 self.cosmo_dic['Omnu'])
 
         self.nonlinear = Nonlinear(self.cosmo_dic)
 
@@ -328,6 +371,26 @@ class Cosmology:
                             'supplied to cosmo_dic.')
         self.cosmo_dic['H_z_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['H'], ext=2)
+
+    def interp_H_Mpc(self):
+        """
+        Adds an interpolator for the Hubble parameter in Mpc to the
+        dictionary so that it can be evaluated at redshifts not
+        explictly supplied to Cobaya.
+
+        Returns
+        -------
+        interpolator: object
+            Interpolates the Hubble parameter
+            H(z) as a function of redshift
+
+        """
+        if self.cosmo_dic['z_win'] is None:
+            raise Exception('Boltzmann code redshift binning has not been '
+                            'supplied to cosmo_dic.')
+        self.cosmo_dic['H_z_func_Mpc'] = \
+            interpolate.InterpolatedUnivariateSpline(
+                x=self.cosmo_dic['z_win'], y=self.cosmo_dic['H_Mpc'], ext=2)
 
     def interp_sigma8(self):
         """
@@ -598,8 +661,7 @@ class Cosmology:
         aia = self.cosmo_dic['nuisance_parameters']['aia']
         nia = self.cosmo_dic['nuisance_parameters']['nia']
         bia = self.cosmo_dic['nuisance_parameters']['bia']
-        omegam = (self.cosmo_dic['ombh2'] + self.cosmo_dic['omch2'] +
-                  self.cosmo_dic['omnuh2']) / (self.cosmo_dic['H0'] / 100)**2
+        omegam = self.cosmo_dic['Omm']
         # SJ: temporary lum for now, to be read in from IST:forecast file
         lum = 1.0
         fia = (-aia * c1 * omegam / self.growth_factor(redshift, k_scale) *
@@ -846,6 +908,7 @@ class Cosmology:
         # just in case we want to have always
         # an updated dictionary with D_z, f, H(z), r(z)
         self.interp_H()
+        self.interp_H_Mpc()
         self.interp_comoving_dist()
         self.interp_fsigma8()
         self.interp_sigma8()

@@ -3,6 +3,7 @@ import numpy as np
 from scipy import integrate
 from scipy import interpolate
 import sys
+from astropy import constants as const
 import time
 
 #Import cobaya -need to be installed
@@ -83,19 +84,26 @@ k_win = np.logspace(np.log10(k_min_GC_phot_interp),
 
 # This dictionary collects info from cobaya
 theory_dic = {'H0': model.provider.get_param('H0'),
+              'H0_Mpc': model.provider.get_param('H0') / const.c.to('km/s').value,
               'omch2': model.provider.get_param('omch2'),
               'ombh2': model.provider.get_param('ombh2'),
+              'Omc': model.provider.get_param('omch2') / (model.provider.get_param('H0') / 100.)**2.,
+              'Omb': model.provider.get_param('ombh2') / (model.provider.get_param('H0') / 100.)**2.,
               'mnu': model.provider.get_param('mnu'),
               'omnuh2': model.provider.get_param('mnu') / 94.07 * (1./3)**0.75,
+              'Omnu': (model.provider.get_param('mnu') / 94.07 * (1./3)**0.75) / (model.provider.get_param('H0') / 100.)**2.,
               'comov_dist': model.provider.get_comoving_radial_distance(z_win),
               'angular_dist': model.provider.get_angular_diameter_distance(z_win),
               'H': model.provider.get_Hubble(z_win),
+              'H_Mpc': model.provider.get_Hubble(z_win, units='1/Mpc'),
               'Pk_interpolator': model.provider.get_Pk_interpolator(nonlinear=False),
               'Pk_delta': None,
               'fsigma8': None,
               'z_win': z_win,
               'k_win': k_win
               }
+
+theory_dic['Omm'] = theory_dic['Omb'] + theory_dic['Omc'] + theory_dic['Omnu']
 theory_dic['Pk_delta'] = model.provider.get_Pk_interpolator(("delta_tot", "delta_tot"), nonlinear=False)
 theory_dic['fsigma8'] = model.provider.get_fsigma8(z_win)
 # Remember: h is hard-coded

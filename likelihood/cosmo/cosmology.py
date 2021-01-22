@@ -797,36 +797,24 @@ class Cosmology:
         pgi_phot = np.array([self.Pgi_phot_def(zz, ks_base) for zz in zs_base])
         pgi_spec = np.array([self.Pgi_spec_def(zz, ks_base) for zz in zs_base])
 
-        self.cosmo_dic['Pgg_phot'] = (
-                  lambda z, k:
-                  interpolate.interp2d(zs_base, ks_base,
-                                       pgg_phot.T,
-                                       fill_value=0.0)(z, k).flatten())
-        self.cosmo_dic['Pgdelta_phot'] = (
-                  lambda z, k:
-                  interpolate.interp2d(zs_base, ks_base,
-                                       pgdelta_phot.T,
-                                       fill_value=0.0)(z, k).flatten())
-        self.cosmo_dic['Pii'] = (
-                  lambda z, k:
-                  interpolate.interp2d(zs_base, ks_base,
-                                       pii.T,
-                                       fill_value=0.0)(z, k).flatten())
-        self.cosmo_dic['Pdeltai'] = (
-                  lambda z, k:
-                  interpolate.interp2d(zs_base, ks_base,
-                                       pdeltai.T,
-                                       fill_value=0.0)(z, k).flatten())
-        self.cosmo_dic['Pgi_phot'] = (
-                  lambda z, k:
-                  interpolate.interp2d(zs_base, ks_base,
-                                       pgi_phot.T,
-                                       fill_value=0.0)(z, k).flatten())
-        self.cosmo_dic['Pgi_spec'] = (
-                  lambda z, k:
-                  interpolate.interp2d(zs_base, ks_base,
-                                       pgi_spec.T,
-                                       fill_value=0.0)(z, k).flatten())
+        self.cosmo_dic['Pgg_phot'] = interpolate.interp2d(zs_base, ks_base,
+                                                          pgg_phot.T,
+                                                          fill_value=0.0)
+        self.cosmo_dic['Pgdelta_phot'] = interpolate.interp2d(zs_base, ks_base,
+                                                              pgdelta_phot.T,
+                                                              fill_value=0.0)
+        self.cosmo_dic['Pii'] = interpolate.interp2d(zs_base, ks_base,
+                                                     pii.T,
+                                                     fill_value=0.0)
+        self.cosmo_dic['Pdeltai'] = interpolate.interp2d(zs_base, ks_base,
+                                                         pdeltai.T,
+                                                         fill_value=0.0)
+        self.cosmo_dic['Pgi_phot'] = interpolate.interp2d(zs_base, ks_base,
+                                                          pgi_phot.T,
+                                                          fill_value=0.0)
+        self.cosmo_dic['Pgi_spec'] = interpolate.interp2d(zs_base, ks_base,
+                                                          pgi_spec.T,
+                                                          fill_value=0.0)
         return
 
     def MG_mu_def(self, redshift, k_scale, MG_mu):

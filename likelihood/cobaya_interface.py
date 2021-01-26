@@ -289,8 +289,12 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['sigma_8'] = sigma_R[:, 0]
             self.cosmo.cosmo_dic['fsigma8'] = self.provider.get_fsigma8(
                 self.cosmo.cosmo_dic['z_win'])
+            # Filter nuisance parameters for new dict
+            new_keys = params_dic.keys()-self.cosmo.cosmo_dic.keys()
+            only_nuisance_params = {your_key: params_dic[your_key] 
+                             for your_key in new_keys }
             self.cosmo.cosmo_dic['nuisance_parameters'].update(
-                **params_dic)
+                **only_nuisance_params)
 
         except (TypeError, AttributeError):
             self.cosmo.cosmo_dic['H0'] = model.provider.get_param("H0")
@@ -333,8 +337,11 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['sigma_8'] = sigma_R[:, 0]
             self.cosmo.cosmo_dic['fsigma8'] = model.provider.get_fsigma8(
                 self.cosmo.cosmo_dic['z_win'])
+            new_keys = params_dic.keys()-self.cosmo.cosmo_dic.keys()
+            only_nuisance_params = {your_key: params_dic[your_key] 
+                             for your_key in new_keys }
             self.cosmo.cosmo_dic['nuisance_parameters'].update(
-                **params_dic)
+                **only_nuisance_params)
 
     def logp(self, **params_values):
         r""" logp

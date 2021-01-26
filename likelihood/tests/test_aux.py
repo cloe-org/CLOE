@@ -8,6 +8,7 @@ This module contains unit tests for the auxiliary functions module.
 import numpy as np
 import numpy.testing as npt
 import matplotlib.pyplot as plt
+from astropy import constants as const
 
 from unittest import TestCase
 from ..cosmo.cosmology import Cosmology

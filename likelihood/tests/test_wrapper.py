@@ -74,6 +74,9 @@ class CobayaModel:
         self.cosmology.cosmo_dic['H'] = \
             self.model.provider.get_Hubble(
             self.cosmology.cosmo_dic['z_win'])
+        self.cosmology.cosmo_dic['H_Mpc'] = \
+            self.model.provider.get_Hubble(
+            self.cosmology.cosmo_dic['z_win'], units='1/Mpc')
         self.cosmology.cosmo_dic['angular_dist'] = \
             self.model.provider.get_angular_diameter_distance(
             self.cosmology.cosmo_dic['z_win'])

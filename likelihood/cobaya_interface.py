@@ -1,6 +1,7 @@
 # General import
 import numpy as np
 import matplotlib.pyplot as plt
+from astropy import constants as const
 
 # Cobaya import of general Likelihood class
 from cobaya.likelihood import Likelihood
@@ -65,7 +66,7 @@ class EuclidLikelihood(Likelihood):
 
         """
 
-        # SJ: For now, example sampling in wavenumber (k)
+        # (SJ): For now, example sampling in wavenumber (k)
         self.k_min_Boltzmannn = 0.001
         # ATTENTION: The k_min is not passed to cobaya to build
         # the matter power spectrum interpolator !!
@@ -80,11 +81,23 @@ class EuclidLikelihood(Likelihood):
                                  np.log10(self.k_max_GC_phot_interp),
                                  self.k_samp_GC)
 
-        # SJ: For now, example sampling in redshift (z)
+        # (SJ): For now, example sampling in redshift (z)
         self.z_min = 0.0
         self.z_max = 4.0
         self.z_samp = 100
         self.z_win = np.linspace(self.z_min, self.z_max, self.z_samp)
+        # (SJ): log sampling below
+        # self.z_min1 = 0.0
+        # self.z_min2 = 1e-4
+        # self.z_min3 = 1e-3
+        # self.z_minlog = -2
+        # self.z_max = 4.0
+        # self.z_samp = 140
+        # self.z_win = np.logspace(self.z_minlog, np.log10(self.z_max),
+        #                          self.z_samp)
+        # self.z_win[0] = self.z_min1
+        # self.z_win[1] = self.z_min2
+        # self.z_win[2] = self.z_min3
 
         # Initialize Euclike module
         self.likefinal = Euclike()
@@ -103,6 +116,17 @@ class EuclidLikelihood(Likelihood):
             'omch2': self.fiducial_cosmology.cosmo_dic['omch2'],
             'omnuh2': self.fiducial_cosmology.cosmo_dic['omnuh2'],
             'H0': self.fiducial_cosmology.cosmo_dic['H0'],
+            'H0_Mpc': self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value,
+            'Omb': (self.fiducial_cosmology.cosmo_dic['ombh2'] /
+                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.),
+            'Omc': (self.fiducial_cosmology.cosmo_dic['omch2'] /
+                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.),
+            'Omnu': (self.fiducial_cosmology.cosmo_dic['omnuh2'] /
+                     (self.cosmo.cosmo_dic['H0'] / 100.)**2.),
+            'Omm': ((self.fiducial_cosmology.cosmo_dic['ombh2'] +
+                     self.fiducial_cosmology.cosmo_dic['omch2'] +
+                     self.fiducial_cosmology.cosmo_dic['omnuh2']) /
+                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.),
             'tau': self.fiducial_cosmology.cosmo_dic['tau'],
             'mnu': self.fiducial_cosmology.cosmo_dic['mnu'],
             'nnu': self.fiducial_cosmology.cosmo_dic['nnu'],
@@ -161,6 +185,9 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology.cosmo_dic['H'] = \
             model_fiducial.provider.get_Hubble(
             self.z_win),
+        self.fiducial_cosmology.cosmo_dic['H_Mpc'] = \
+            model_fiducial.provider.get_Hubble(
+            self.z_win, units='1/Mpc'),
         self.fiducial_cosmology.cosmo_dic['Pk_interpolator'] = \
             model_fiducial.provider.get_Pk_interpolator(
             nonlinear=False),
@@ -222,18 +249,35 @@ class EuclidLikelihood(Likelihood):
 
         try:
             self.cosmo.cosmo_dic['H0'] = self.provider.get_param("H0")
+            self.cosmo.cosmo_dic['H0_Mpc'] = \
+                self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
             self.cosmo.cosmo_dic['omch2'] = self.provider.get_param('omch2')
             self.cosmo.cosmo_dic['ombh2'] = self.provider.get_param('ombh2')
+            self.cosmo.cosmo_dic['Omc'] = \
+                (self.cosmo.cosmo_dic['omch2'] /
+                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.)
+            self.cosmo.cosmo_dic['Omb'] = \
+                (self.cosmo.cosmo_dic['ombh2'] /
+                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.)
             self.cosmo.cosmo_dic['mnu'] = self.provider.get_param('mnu')
             # GCH: ATTENTION! THIS IS A TEMPORAL SOLUTION
             # as we cannot retrieve num_massive_neutrinos
             self.cosmo.cosmo_dic['omnuh2'] = \
                 self.cosmo.cosmo_dic['mnu'] / 94.07 * (1. / 3)**0.75
+            self.cosmo.cosmo_dic['Omnu'] = \
+                (self.cosmo.cosmo_dic['omnuh2'] /
+                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.)
+            # MM: why there is no omkh2 here?
+            self.cosmo.cosmo_dic['Omm'] = \
+                (self.cosmo.cosmo_dic['Omb'] + self.cosmo.cosmo_dic['Omc'] +
+                 self.cosmo.cosmo_dic['Omnu'])
             self.cosmo.cosmo_dic['comov_dist'] = \
                 self.provider.get_comoving_radial_distance(self.z_win)
             self.cosmo.cosmo_dic['angular_dist'] = \
                 self.provider.get_angular_diameter_distance(self.z_win)
             self.cosmo.cosmo_dic['H'] = self.provider.get_Hubble(self.z_win)
+            self.cosmo.cosmo_dic['H_Mpc'] = \
+                self.provider.get_Hubble(self.z_win, units='1/Mpc')
             self.cosmo.cosmo_dic['Pk_interpolator'] = \
                 self.provider.get_Pk_interpolator(nonlinear=False)
             self.cosmo.cosmo_dic['Pk_delta'] = \
@@ -245,23 +289,43 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['sigma_8'] = sigma_R[:, 0]
             self.cosmo.cosmo_dic['fsigma8'] = self.provider.get_fsigma8(
                 self.cosmo.cosmo_dic['z_win'])
+            # Filter nuisance parameters for new dict
+            new_keys = params_dic.keys() - self.cosmo.cosmo_dic.keys()
+            only_nuisance_params = {your_key: params_dic[your_key]
+                                    for your_key in new_keys}
             self.cosmo.cosmo_dic['nuisance_parameters'].update(
-                **params_dic)
+                **only_nuisance_params)
 
         except (TypeError, AttributeError):
             self.cosmo.cosmo_dic['H0'] = model.provider.get_param("H0")
+            self.cosmo.cosmo_dic['H0_Mpc'] = \
+                self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
             self.cosmo.cosmo_dic['omch2'] = model.provider.get_param('omch2')
             self.cosmo.cosmo_dic['ombh2'] = model.provider.get_param('ombh2')
+            self.cosmo.cosmo_dic['Omc'] = \
+                (self.cosmo.cosmo_dic['omch2'] /
+                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.)
+            self.cosmo.cosmo_dic['Omb'] = \
+                (self.cosmo.cosmo_dic['ombh2'] /
+                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.)
             self.cosmo.cosmo_dic['mnu'] = model.provider.get_param('mnu')
             # GCH: ATTENTION! THIS IS A TEMPORAL SOLUTION
             # as we cannot retrieve num_massive_neutrinos
             self.cosmo.cosmo_dic['omnuh2'] = \
                 self.cosmo.cosmo_dic['mnu'] / 94.07 * (1. / 3)**0.75
+            self.cosmo.cosmo_dic['Omnu'] = \
+                (self.cosmo.cosmo_dic['omnuh2'] /
+                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.)
+            self.cosmo.cosmo_dic['Omm'] = \
+                (self.cosmo.cosmo_dic['Omb'] + self.cosmo.cosmo_dic['Omc'] +
+                 self.cosmo.cosmo_dic['Omnu'])
             self.cosmo.cosmo_dic['comov_dist'] = \
                 model.provider.get_comoving_radial_distance(self.z_win)
             self.cosmo.cosmo_dic['angular_dist'] = \
                 model.provider.get_angular_diameter_distance(self.z_win)
             self.cosmo.cosmo_dic['H'] = model.provider.get_Hubble(self.z_win)
+            self.cosmo.cosmo_dic['H_Mpc'] = \
+                model.provider.get_Hubble(self.z_win, units='1/Mpc')
             self.cosmo.cosmo_dic['Pk_interpolator'] = \
                 model.provider.get_Pk_interpolator(nonlinear=False)
             self.cosmo.cosmo_dic['Pk_delta'] = \
@@ -273,8 +337,11 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['sigma_8'] = sigma_R[:, 0]
             self.cosmo.cosmo_dic['fsigma8'] = model.provider.get_fsigma8(
                 self.cosmo.cosmo_dic['z_win'])
+            new_keys = params_dic.keys() - self.cosmo.cosmo_dic.keys()
+            only_nuisance_params = {your_key: params_dic[your_key]
+                                    for your_key in new_keys}
             self.cosmo.cosmo_dic['nuisance_parameters'].update(
-                **params_dic)
+                **only_nuisance_params)
 
     def logp(self, **params_values):
         r""" logp

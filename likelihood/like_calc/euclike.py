@@ -52,14 +52,28 @@ class Euclike:
             self.data_ins.data_dict['XC-Phot']['cov'])
         # Tranforming data
         self.photodatafinal = self.create_photo_data()
-        # Calculate permutations i,j bins for photo
-        x_diagonal = np.triu(np.ones((10, 10)))
-        self.indices_diagonal = []
-        for i in range(0, len(x_diagonal)):
-            for j in range(0, len(x_diagonal)):
-                if x_diagonal[i, j] == 1:
-                    self.indices_diagonal.append([i + 1, j + 1])
-        x = np.ones((10, 10))
+        # Calculate permutations i,j bins for WL, GC-Phot, XC.
+        # This refers to the non-redundant bin combinations for
+        # which we have measurements (i.e. 1-1, 1-2, ..., 1-10,
+        # 2-2, 2-3, ..., 2-10, 3-3, 3-4, etc, in the case of ten
+        # tomographic bins for WL and GC-phot. Meanhile, all bin
+        # combinations exist for XC, i.e. for example both 1-2
+        # and 2-1, both 1-3 and 3-1, etc).
+        numtomo_wl = self.data_ins.numtomo_wl
+        numtomo_gcphot = self.data_ins.numtomo_gcphot
+        x_diagonal_wl = np.triu(np.ones((numtomo_wl, numtomo_wl)))
+        self.indices_diagonal_wl = []
+        for i in range(0, len(x_diagonal_wl)):
+            for j in range(0, len(x_diagonal_wl)):
+                if x_diagonal_wl[i, j] == 1:
+                    self.indices_diagonal_wl.append([i + 1, j + 1])
+        x_diagonal_gcphot = np.triu(np.ones((numtomo_gcphot, numtomo_gcphot)))
+        self.indices_diagonal_gcphot = []
+        for i in range(0, len(x_diagonal_gcphot)):
+            for j in range(0, len(x_diagonal_gcphot)):
+                if x_diagonal_gcphot[i, j] == 1:
+                    self.indices_diagonal_gcphot.append([i + 1, j + 1])
+        x = np.ones((numtomo_gcphot, numtomo_wl))
         self.indices_all = []
         for i in range(0, len(x)):
             for j in range(0, len(x)):
@@ -123,7 +137,7 @@ class Euclike:
                                                                   element[1])
                                               for
                                               element in
-                                              self.indices_diagonal
+                                              self.indices_diagonal_gcphot
                                               for ell in
                                               self.data_ins.data_dict[
                                               'GC-Phot']
@@ -133,7 +147,7 @@ class Euclike:
                                                         element[0],
                                                         element[1]) for
                                          element in
-                                         self.indices_diagonal
+                                         self.indices_diagonal_wl
                                          for ell in
                                          self.data_ins.data_dict['WL']
                                          ['ells']])

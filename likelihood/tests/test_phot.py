@@ -33,8 +33,23 @@ class cosmoinitTestCase(TestCase):
         cosmo.cosmo_dic['tau'] = 0.07
         cosmo.cosmo_dic['mnu'] = 0.06
         cosmo.cosmo_dic['nnu'] = 3.046
+        cosmo.cosmo_dic['omnuh2'] = \
+            cosmo.cosmo_dic['mnu'] / 94.07 * (1. / 3)**0.75
         cosmo.cosmo_dic['ns'] = 0.9674
         cosmo.cosmo_dic['As'] = 2.1e-9
+        # MM: precomputed parameters
+        cosmo.cosmo_dic['H0_Mpc'] = \
+            cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
+        cosmo.cosmo_dic['Omb'] = \
+            cosmo.cosmo_dic['ombh2'] / (cosmo.cosmo_dic['H0'] / 100.)**2.
+        cosmo.cosmo_dic['Omc'] = \
+            cosmo.cosmo_dic['omch2'] / (cosmo.cosmo_dic['H0'] / 100.)**2.
+        cosmo.cosmo_dic['Omnu'] = \
+            cosmo.cosmo_dic['omnuh2'] / (cosmo.cosmo_dic['H0'] / 100.)**2.
+        cosmo.cosmo_dic['Omm'] = (cosmo.cosmo_dic['Omnu'] +
+                                  cosmo.cosmo_dic['Omc'] +
+                                  cosmo.cosmo_dic['Omb'])
+
         # (SJ): by setting below to zero, obtain previous non-IA results
         # cosmo.cosmo_dic['nuisance_parameters']['aia'] = 0
         # cosmo.cosmo_dic['nuisance_parameters']['bia'] = 0
@@ -58,10 +73,12 @@ class cosmoinitTestCase(TestCase):
         self.W_i_Gcheck = 5.319691e-09
         self.W_IA_check = 0.000106330045837
         self.cl_integrand_check = 0.000718
-        self.cl_WL_check = 5.680761e-09
-        self.cl_GC_check = 2.95197263e-05
-        self.cl_cross_check = 1.151977e-07
-        # (SJ): when no IA, replace with below
+        self.cl_WL_check = 6.786397e-09
+        # (SJ): Below is the original int_step = 0.1, need rtol = 5e-03
+        # self.cl_WL_check = 5.680761e-09
+        self.cl_GC_check = 2.970077e-05
+        self.cl_cross_check = 1.137797e-07
+        # (SJ): when no IA, replace with below (int_step = 0.1)
         # self.cl_WL_check = 8.517887e-09
         # self.cl_cross_check = 3.14508861e-07
         self.flatnz = interpolate.InterpolatedUnivariateSpline(
@@ -120,10 +137,10 @@ class cosmoinitTestCase(TestCase):
 
     def test_cl_GC(self):
         cl_int = self.phot.Cl_GC_phot(10.0, 1, 1)
-        npt.assert_allclose(cl_int, self.cl_GC_check, rtol=1e-02,
+        npt.assert_allclose(cl_int, self.cl_GC_check, rtol=1e-05,
                             err_msg='Cl GC photometric test failed')
 
     def test_cl_cross(self):
         cl_int = self.phot.Cl_cross(10.0, 1, 1)
-        npt.assert_allclose(cl_int, self.cl_cross_check, rtol=1e-02,
+        npt.assert_allclose(cl_int, self.cl_cross_check, rtol=1e-05,
                             err_msg='Cl photometric cross test failed')

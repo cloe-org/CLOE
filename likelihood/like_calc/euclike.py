@@ -5,10 +5,10 @@ Contains class to compute the Euclid likelihood
 """
 
 import numpy as np
-from ..cosmo.cosmology import Cosmology
+from likelihod.cosmo.cosmology import Cosmology
 from likelihood.photometric_survey.photo import Photo
 from likelihood.spectroscopic_survey.spec import Spec
-from ..data_reader import reader
+from likelihod.data_reader import reader
 
 
 class EuclikeError(Exception):

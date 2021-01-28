@@ -6,7 +6,7 @@ Prototype computation of spectroscopic galaxy clustering likelihood.
 
 # Global
 import numpy as np
-from ..cosmo.cosmology import Cosmology
+from likelihood.cosmo.cosmology import Cosmology
 from scipy.special import legendre
 from scipy import integrate
 from scipy import interpolate

@@ -5,7 +5,7 @@ Class to store cosmological parameters and functions.
 """
 
 import numpy as np
-from ..non_linear.nonlinear import Nonlinear
+from likelihood.non_linear.nonlinear import Nonlinear
 from scipy import interpolate
 from astropy import constants as const
 

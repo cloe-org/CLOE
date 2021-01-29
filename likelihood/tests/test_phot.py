@@ -6,81 +6,143 @@ photometric survey module.
 
 """
 
-# (GCH): Use Cobaya Model wrapper
-
-from cobaya.model import get_model
 from unittest import TestCase
 import numpy as np
 import numpy.testing as npt
-from scipy import integrate
 from scipy import interpolate
-from ..cosmo.cosmology import Cosmology
-from likelihood.cobaya_interface import EuclidLikelihood
-from ..photometric_survey import photo
-from ..data_reader import reader
+from likelihood.photometric_survey import photo
 from astropy import constants as const
-from likelihood.tests.test_wrapper import CobayaModel
 
 
-class cosmoinitTestCase(TestCase):
+class mock_P_obj:
+    def __init__(self, p_interp):
+        self.P = p_interp
+
+
+class photoinitTestCase(TestCase):
 
     def setUp(self):
-        # (GCH): define cosmology values in Cosmology dict
-        cosmo = Cosmology()
-        cosmo.cosmo_dic['ombh2'] = 0.022
-        cosmo.cosmo_dic['omch2'] = 0.12
-        cosmo.cosmo_dic['H0'] = 68.0
-        cosmo.cosmo_dic['tau'] = 0.07
-        cosmo.cosmo_dic['mnu'] = 0.06
-        cosmo.cosmo_dic['nnu'] = 3.046
-        cosmo.cosmo_dic['omnuh2'] = \
-            cosmo.cosmo_dic['mnu'] / 94.07 * (1. / 3)**0.75
-        cosmo.cosmo_dic['ns'] = 0.9674
-        cosmo.cosmo_dic['As'] = 2.1e-9
+        cmov_file = np.loadtxt('./test_inputs/ComDist-LCDM-Lin-zNLA.dat')
+        zs_r = cmov_file[:, 0]
+        rs = cmov_file[:, 1]
+        ang_dists = rs / (1.0 + zs_r)
+
+        rz_interp = interpolate.InterpolatedUnivariateSpline(x=zs_r, y=rs,
+                                                             ext=0)
+        dz_interp = interpolate.InterpolatedUnivariateSpline(x=zs_r,
+                                                             y=ang_dists,
+                                                             ext=0)
+
+        Hz_file = np.loadtxt('./test_inputs/Hz.dat')
+        zs_H = Hz_file[:, 0]
+        Hs = Hz_file[:, 1]
+        Hs_mpc = Hz_file[:, 1] / const.c.to('km/s').value
+
+        Hz_interp = interpolate.InterpolatedUnivariateSpline(x=zs_H, y=Hs,
+                                                             ext=0)
+
+        Hmpc_interp = interpolate.InterpolatedUnivariateSpline(x=zs_H,
+                                                               y=Hs_mpc,
+                                                               ext=0)
+
+        f_sig_8_arr = np.load('./test_inputs/f_sig_8_arr.npy',
+                              allow_pickle=True)
+        sig_8_arr = np.load('./test_inputs/sig_8_arr.npy',
+                            allow_pickle=True)
+
+        sig_8_interp = interpolate.InterpolatedUnivariateSpline(
+                       x=np.linspace(0.0, 5.0, 50),
+                       y=sig_8_arr[::-1], ext=0)
+        f_sig_8_interp = interpolate.InterpolatedUnivariateSpline(
+                         x=np.linspace(0.0, 5.0, 50),
+                         y=f_sig_8_arr[::-1], ext=0)
+
+        MG_interp = lambda z, k: 1
+
+        pdd = np.load('./test_inputs/pdd.npy')
+        pdi = np.load('./test_inputs/pdi.npy')
+        pgd = np.load('./test_inputs/pgd.npy')
+        pgg = np.load('./test_inputs/pgg.npy')
+        pgi_phot = np.load('./test_inputs/pgi_phot.npy')
+        pgi_spec = np.load('./test_inputs/pgi_spec.npy')
+        pii = np.load('./test_inputs/pii.npy')
+
+        zs_base = np.linspace(0.0, 4.0, 100)
+        ks_base = np.logspace(0.001, 100.0, 100)
+
+        mock_cosmo_dic = {'ombh2': 0.022, 'omch2': 0.12, 'H0': 68.0,
+                          'tau': 0.07, 'mnu': 0.06, 'nnu': 3.046, 'ns': 0.9674,
+                          'As': 2.1e-9, 'sigma8_z_func': sig_8_interp,
+                          'fsigma8_z_func': f_sig_8_interp,
+                          'r_z_func': rz_interp, 'd_z_func': dz_interp,
+                          'H_z_func_Mpc': Hmpc_interp,
+                          'H_z_func': Hz_interp,
+                          'z_win': np.linspace(0.0, 4.0, 100),
+                          'k_win': np.linspace(0.001, 10.0, 100),
+                          'MG_sigma': MG_interp, 'c':const.c.to('km/s').value}
+
+        mock_cosmo_dic['omnuh2'] = \
+            mock_cosmo_dic['mnu'] / 94.07 * (1. / 3)**0.75
         # MM: precomputed parameters
-        cosmo.cosmo_dic['H0_Mpc'] = \
-            cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
-        cosmo.cosmo_dic['Omb'] = \
-            cosmo.cosmo_dic['ombh2'] / (cosmo.cosmo_dic['H0'] / 100.)**2.
-        cosmo.cosmo_dic['Omc'] = \
-            cosmo.cosmo_dic['omch2'] / (cosmo.cosmo_dic['H0'] / 100.)**2.
-        cosmo.cosmo_dic['Omnu'] = \
-            cosmo.cosmo_dic['omnuh2'] / (cosmo.cosmo_dic['H0'] / 100.)**2.
-        cosmo.cosmo_dic['Omm'] = (cosmo.cosmo_dic['Omnu'] +
-                                  cosmo.cosmo_dic['Omc'] +
-                                  cosmo.cosmo_dic['Omb'])
+        mock_cosmo_dic['H0_Mpc'] = \
+            mock_cosmo_dic['H0'] / const.c.to('km/s').value
+        mock_cosmo_dic['Omb'] = \
+            mock_cosmo_dic['ombh2'] / (mock_cosmo_dic['H0'] / 100.)**2.
+        mock_cosmo_dic['Omc'] = \
+            mock_cosmo_dic['omch2'] / (mock_cosmo_dic['H0'] / 100.)**2.
+        mock_cosmo_dic['Omnu'] = \
+            mock_cosmo_dic['omnuh2'] / (mock_cosmo_dic['H0'] / 100.)**2.
+        mock_cosmo_dic['Omm'] = (mock_cosmo_dic['Omnu'] +
+                                 mock_cosmo_dic['Omc'] +
+                                 mock_cosmo_dic['Omb'])
 
         # (SJ): by setting below to zero, obtain previous non-IA results
-        # cosmo.cosmo_dic['nuisance_parameters']['aia'] = 0
-        # cosmo.cosmo_dic['nuisance_parameters']['bia'] = 0
-        # cosmo.cosmo_dic['nuisance_parameters']['nia'] = 0
+        # mock_cosmo_dic['nuisance_parameters']['aia'] = 0
+        # mock_cosmo_dic['nuisance_parameters']['bia'] = 0
+        # mock_cosmo_dic['nuisance_parameters']['nia'] = 0
 
-        test_reading = reader.Reader()
-        test_reading.compute_nz()
-        nz_dic_WL = test_reading.nz_dict_WL
-        nz_dic_GC = test_reading.nz_dict_GC_Phot
-        # (GCH): create wrapper model
-        self.model_test = CobayaModel(cosmo)
-        self.model_test.update_cosmo()
-        self.integrand_check = -0.950651
-        self.wbincheck = 7.200027e-06
+        p_matter = mock_P_obj(interpolate.interp2d(zs_base, ks_base, pdd.T,
+                                                   fill_value=0))
+        mock_cosmo_dic['Pk_interpolator'] = p_matter
+        mock_cosmo_dic['Pk_delta'] = p_matter
+        mock_cosmo_dic['Pgg_phot'] = interpolate.interp2d(zs_base, ks_base,
+                                                          pgg.T,
+                                                          fill_value=0.0)
+        mock_cosmo_dic['Pgdelta_phot'] = interpolate.interp2d(zs_base, ks_base,
+                                                              pgd.T,
+                                                              fill_value=0.0)
+        mock_cosmo_dic['Pii'] = interpolate.interp2d(zs_base, ks_base,
+                                                     pii.T,
+                                                     fill_value=0.0)
+        mock_cosmo_dic['Pdeltai'] = interpolate.interp2d(zs_base, ks_base,
+                                                         pdi.T,
+                                                         fill_value=0.0)
+        mock_cosmo_dic['Pgi_phot'] = interpolate.interp2d(zs_base, ks_base,
+                                                          pgi_phot.T,
+                                                          fill_value=0.0)
+        mock_cosmo_dic['Pgi_spec'] = interpolate.interp2d(zs_base, ks_base,
+                                                          pgi_spec.T,
+                                                          fill_value=0.0)
+
+        nz_dic_WL = np.load('./test_inputs/nz_dict_WL.npy',
+                            allow_pickle=True).item()
+        nz_dic_GC = np.load('./test_inputs/nz_dict_GC_phot.npy',
+                            allow_pickle=True).item()
+        self.cosmo_dict = mock_cosmo_dic
+        self.integrand_check = -0.948932
+        self.wbincheck = 7.294055e-06
         self.H0 = 67.0
         self.c = const.c.to('km/s').value
         self.omch2 = 0.12
         self.ombh2 = 0.022
-        self.phot = photo.Photo(self.model_test.cosmology.cosmo_dic,
+        self.phot = photo.Photo(mock_cosmo_dic,
                                 nz_dic_WL, nz_dic_GC)
-        self.W_i_Gcheck = 5.319691e-09
-        self.W_IA_check = 0.000106330045837
+        self.W_i_Gcheck = 5.241556e-09
+        self.W_IA_check = 0.0001049580
         self.cl_integrand_check = 0.000718
-        self.cl_WL_check = 6.786397e-09
-        # (SJ): Below is the original int_step = 0.1, need rtol = 5e-03
-        # self.cl_WL_check = 5.680761e-09
-        self.cl_GC_check = 2.970077e-05
-        self.cl_cross_check = 1.137797e-07
-        # (SJ): when no IA, replace with below (int_step = 0.1)
-        # self.cl_WL_check = 8.517887e-09
-        # self.cl_cross_check = 3.14508861e-07
+        self.cl_WL_check = -5.589712e-13
+        self.cl_GC_check = 3.444883e-12
+        self.cl_cross_check = 2.531334e-11
         self.flatnz = interpolate.InterpolatedUnivariateSpline(
             np.linspace(0.0, 4.6, 20), np.ones(20), ext=2)
 
@@ -124,7 +186,7 @@ class cosmoinitTestCase(TestCase):
 
     # (SJ): wab here refers to the product of the two window functions.
     def test_power_exception(self):
-        pow = self.model_test.cosmology.cosmo_dic['Pgg_phot'](10.0, 12.0)
+        pow = float("NaN")
         wab = 1.0 * 2.0
         pandw = wab * np.atleast_1d(pow)[0]
         npt.assert_raises(Exception, self.phot.Cl_generic_integrand,

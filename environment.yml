@@ -4,15 +4,17 @@ channels:
   - defaults
 dependencies:
   - python=3.6
+  - astropy>=4.0
+  - camb>=1.3
+  - fast-pt>=3.1
+  - jupyter>=1.0
   - matplotlib>=3.1
   - numpy>=1.17
-  - pip>=19.0
   - scipy>=1.3
-  - jupyter>=1.0
-  - camb
-  - astropy>=4.0
+  - pip>=19.0
   - pip:
-    - cobaya
-    - pytest
-    - pytest-cov
+    - baccoemu>=1.1
+    - cobaya>=3.0
+    - pytest>=6.2
+    - pytest-cov>=2.10
     - pytest-pep8

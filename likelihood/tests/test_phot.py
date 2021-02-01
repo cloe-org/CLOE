@@ -12,6 +12,26 @@ import numpy.testing as npt
 from scipy import interpolate
 from likelihood.photometric_survey import photo
 from astropy import constants as const
+from pathlib import Path
+
+
+def mock_MG_func(z, k):
+    """
+    Test MG function that simply returns 1.
+
+    Parameters
+    ----------
+    z: float
+        Redshift.
+    k: float
+        Angular scale.
+
+    Returns
+    -------
+    float
+        Returns 1 for test purposes.
+    """
+    return 1.0
 
 
 class mock_P_obj:
@@ -22,7 +42,9 @@ class mock_P_obj:
 class photoinitTestCase(TestCase):
 
     def setUp(self):
-        cmov_file = np.loadtxt('./test_inputs/ComDist-LCDM-Lin-zNLA.dat')
+        cur_dir = Path(__file__).resolve().parents[0]
+        cmov_file = np.loadtxt(str(cur_dir) +
+                               '/test_inputs/ComDist-LCDM-Lin-zNLA.dat')
         zs_r = cmov_file[:, 0]
         rs = cmov_file[:, 1]
         ang_dists = rs / (1.0 + zs_r)
@@ -57,7 +79,7 @@ class photoinitTestCase(TestCase):
                          x=np.linspace(0.0, 5.0, 50),
                          y=f_sig_8_arr[::-1], ext=0)
 
-        MG_interp = lambda z, k: 1
+        MG_interp = mock_MG_func
 
         pdd = np.load('./test_inputs/pdd.npy')
         pdi = np.load('./test_inputs/pdi.npy')
@@ -79,7 +101,7 @@ class photoinitTestCase(TestCase):
                           'H_z_func': Hz_interp,
                           'z_win': np.linspace(0.0, 4.0, 100),
                           'k_win': np.linspace(0.001, 10.0, 100),
-                          'MG_sigma': MG_interp, 'c':const.c.to('km/s').value}
+                          'MG_sigma': MG_interp, 'c': const.c.to('km/s').value}
 
         mock_cosmo_dic['omnuh2'] = \
             mock_cosmo_dic['mnu'] / 94.07 * (1. / 3)**0.75

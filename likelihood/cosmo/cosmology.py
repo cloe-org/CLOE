@@ -210,7 +210,7 @@ class Cosmology:
                              'b4_spec': 1.90,
                              'aia': 1.72,
                              'nia': -0.41,
-                             'bia': 2.17}}
+                             'bia': 0.0}}
 
         # MM: adding some derived parameters
         self.cosmo_dic['H0_Mpc'] = (self.cosmo_dic['H0'] /

@@ -44,7 +44,7 @@ class photoinitTestCase(TestCase):
     def setUp(self):
         cur_dir = Path(__file__).resolve().parents[0]
         cmov_file = np.loadtxt(str(cur_dir) +
-                               '/test_inputs/ComDist-LCDM-Lin-zNLA.dat')
+                               '/test_input/ComDist-LCDM-Lin-zNLA.dat')
         zs_r = cmov_file[:, 0]
         rs = cmov_file[:, 1]
         ang_dists = rs / (1.0 + zs_r)
@@ -55,7 +55,7 @@ class photoinitTestCase(TestCase):
                                                              y=ang_dists,
                                                              ext=0)
 
-        Hz_file = np.loadtxt(str(cur_dir) + '/test_inputs/Hz.dat')
+        Hz_file = np.loadtxt(str(cur_dir) + '/test_input/Hz.dat')
         zs_H = Hz_file[:, 0]
         Hs = Hz_file[:, 1]
         Hs_mpc = Hz_file[:, 1] / const.c.to('km/s').value
@@ -68,10 +68,10 @@ class photoinitTestCase(TestCase):
                                                                ext=0)
 
         f_sig_8_arr = np.load(str(cur_dir) +
-                              '/test_inputs/f_sig_8_arr.npy',
+                              '/test_input/f_sig_8_arr.npy',
                               allow_pickle=True)
         sig_8_arr = np.load(str(cur_dir) +
-                            '/test_inputs/sig_8_arr.npy',
+                            '/test_input/sig_8_arr.npy',
                             allow_pickle=True)
 
         sig_8_interp = interpolate.InterpolatedUnivariateSpline(
@@ -83,13 +83,13 @@ class photoinitTestCase(TestCase):
 
         MG_interp = mock_MG_func
 
-        pdd = np.load(str(cur_dir) + '/test_inputs/pdd.npy')
-        pdi = np.load(str(cur_dir) + '/test_inputs/pdi.npy')
-        pgd = np.load(str(cur_dir) + '/test_inputs/pgd.npy')
-        pgg = np.load(str(cur_dir) + '/test_inputs/pgg.npy')
-        pgi_phot = np.load(str(cur_dir) + '/test_inputs/pgi_phot.npy')
-        pgi_spec = np.load(str(cur_dir) + '/test_inputs/pgi_spec.npy')
-        pii = np.load(str(cur_dir) + '/test_inputs/pii.npy')
+        pdd = np.load(str(cur_dir) + '/test_input/pdd.npy')
+        pdi = np.load(str(cur_dir) + '/test_input/pdi.npy')
+        pgd = np.load(str(cur_dir) + '/test_input/pgd.npy')
+        pgg = np.load(str(cur_dir) + '/test_input/pgg.npy')
+        pgi_phot = np.load(str(cur_dir) + '/test_input/pgi_phot.npy')
+        pgi_spec = np.load(str(cur_dir) + '/test_input/pgi_spec.npy')
+        pii = np.load(str(cur_dir) + '/test_input/pii.npy')
 
         zs_base = np.linspace(0.0, 4.0, 100)
         ks_base = np.logspace(-3.0, 1.0, 100)
@@ -149,10 +149,10 @@ class photoinitTestCase(TestCase):
                                                           fill_value=0.0)
 
         nz_dic_WL = np.load(str(cur_dir) +
-                            '/test_inputs/nz_dict_WL.npy',
+                            '/test_input/nz_dict_WL.npy',
                             allow_pickle=True).item()
         nz_dic_GC = np.load(str(cur_dir) +
-                            '/test_inputs/nz_dict_GC_phot.npy',
+                            '/test_input/nz_dict_GC_phot.npy',
                             allow_pickle=True).item()
         self.cosmo_dict = mock_cosmo_dic
         self.integrand_check = -0.948932

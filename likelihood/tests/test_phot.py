@@ -92,11 +92,13 @@ class photoinitTestCase(TestCase):
         pii = np.load(str(cur_dir) + '/test_inputs/pii.npy')
 
         zs_base = np.linspace(0.0, 4.0, 100)
-        ks_base = np.logspace(0.001, 100.0, 100)
+        ks_base = np.logspace(-3.0, 1.0, 100)
 
-        mock_cosmo_dic = {'ombh2': 0.022, 'omch2': 0.12, 'H0': 68.0,
-                          'tau': 0.07, 'mnu': 0.06, 'nnu': 3.046, 'ns': 0.9674,
-                          'As': 2.1e-9, 'sigma8_z_func': sig_8_interp,
+        mock_cosmo_dic = {'ombh2': 0.022445, 'omch2': 0.121203, 'H0': 67.0,
+                          'tau': 0.07, 'mnu': 0.06, 'nnu': 3.046,
+                          'omkh2': 0.0, 'omnuh2': 0.0, 'ns': 0.96,
+                          'w': -1.0, 'sigma_8_0': 0.816,
+                          'As': 2.115e-9, 'sigma8_z_func': sig_8_interp,
                           'fsigma8_z_func': f_sig_8_interp,
                           'r_z_func': rz_interp, 'd_z_func': dz_interp,
                           'H_z_func_Mpc': Hmpc_interp,
@@ -105,8 +107,6 @@ class photoinitTestCase(TestCase):
                           'k_win': np.linspace(0.001, 10.0, 100),
                           'MG_sigma': MG_interp, 'c': const.c.to('km/s').value}
 
-        mock_cosmo_dic['omnuh2'] = \
-            mock_cosmo_dic['mnu'] / 94.07 * (1. / 3)**0.75
         # MM: precomputed parameters
         mock_cosmo_dic['H0_Mpc'] = \
             mock_cosmo_dic['H0'] / const.c.to('km/s').value
@@ -156,7 +156,7 @@ class photoinitTestCase(TestCase):
                             allow_pickle=True).item()
         self.cosmo_dict = mock_cosmo_dic
         self.integrand_check = -0.948932
-        self.wbincheck = 7.294055e-06
+        self.wbincheck = 7.364196e-06
         self.H0 = 67.0
         self.c = const.c.to('km/s').value
         self.omch2 = 0.12
@@ -166,9 +166,9 @@ class photoinitTestCase(TestCase):
         self.W_i_Gcheck = 5.241556e-09
         self.W_IA_check = 0.0001049580
         self.cl_integrand_check = 0.000718
-        self.cl_WL_check = -5.589712e-13
-        self.cl_GC_check = 3.444883e-12
-        self.cl_cross_check = 2.531334e-11
+        self.cl_WL_check = 7.100511e-09
+        self.cl_GC_check = 2.890929e-05
+        self.cl_cross_check = 1.133102e-07
         self.flatnz = interpolate.InterpolatedUnivariateSpline(
             np.linspace(0.0, 4.6, 20), np.ones(20), ext=2)
 

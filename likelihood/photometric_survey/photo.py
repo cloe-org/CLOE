@@ -48,10 +48,11 @@ class Photo:
         z_wmin3 = 1e-3
         z_wmax = 4.0
         z_wsamp = 140
-        z_winterp = np.logspace(z_wlogmin, np.log10(z_wmax), z_wsamp)
-        z_winterp[0] = z_wmin1
-        z_winterp[1] = z_wmin2
-        z_winterp[2] = z_wmin3
+        self.z_trapz_sampling = 500
+        self.z_winterp = np.logspace(z_wlogmin, np.log10(z_wmax), z_wsamp)
+        self.z_winterp[0] = z_wmin1
+        self.z_winterp[1] = z_wmin2
+        self.z_winterp[2] = z_wmin3
         # (SJ): Number of bins should be generalized, hard-coded for now
         # (SJ): z_wtomo is the number of tomographic bins + 1
 
@@ -62,19 +63,15 @@ class Photo:
         self.interpwin = np.zeros(shape=(z_wsamp, z_wtom_wl))
         self.interpwingal = np.zeros(shape=(z_wsamp, z_wtom_gc))
         self.interpwinia = np.zeros(shape=(z_wsamp, z_wtom_wl))
-        self.interpwin[:, 0] = z_winterp
-        self.interpwingal[:, 0] = z_winterp
-        self.interpwinia[:, 0] = z_winterp
+        self.interpwin[:, 0] = self.z_winterp
+        self.interpwingal[:, 0] = self.z_winterp
+        self.interpwinia[:, 0] = self.z_winterp
+
         for tomi in range(1, z_wtom_wl):
-            self.interpwin[:, tomi] = np.array([self.WL_window(z, tomi) for
-                                                z in z_winterp])
-            self.interpwingal[:, tomi] = np.array([self.GC_window(z, tomi) for
-                                                   z in z_winterp])
-            self.interpwinia[:, tomi] = np.array([self.IA_window(z, tomi) for
-                                                  z in z_winterp])
+            self.interpwin[:, tomi] = self.WL_window(tomi)
+            self.interpwinia[:, tomi] = self.IA_window(self.z_winterp, tomi)
         for tomi in range(1, z_wtom_gc):
-            self.interpwingal[:, tomi] = np.array([self.GC_window(z, tomi) for
-                                                   z in z_winterp])
+            self.interpwingal[:, tomi] = self.GC_window(self.z_winterp, tomi)
 
     def GC_window(self, z, bin_i):
         r"""
@@ -130,7 +127,56 @@ class Photo:
                                     self.theory['r_z_func'](zprime)))
         return wint
 
-    def WL_window(self, z, bin_i, k=0.0001):
+    def WL_window(self, bin_i, k=0.0001):
+        r"""
+        Calculates the weak lensing shear kernel for a given tomographic bin.
+        Uses broadcasting to compute a 2D-array of integrands and then applies
+        integrate.trapz on the array along one axis.
+
+        .. math::
+            W_{i}^{\gamma}(z, k) = \frac{3}{2}\left ( \frac{H_0}{c}\right )^2
+            \Omega_{{\rm m},0} (1 + z) \Sigma(z, k) r(z)
+            \int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm L}(z^{\prime})
+            \left [ 1 -\frac{\tilde{r}(z)}{\tilde{r}(z^{\prime})} \right ]}\\
+
+        Parameters
+        ----------
+        bin_i: int
+           index of desired tomographic bin. Tomographic bin
+           indices start from 1.
+        k: float
+            k-mode at which to evaluate the Modified Gravity
+            :math:`\Sigma(z,k)` function
+
+        Returns
+        -------
+        W_val: numpy.ndarray
+           1-D Numpy array of shear kernel values for specified bin
+           at specified scale for the redshifts defined in self.z_winterp
+        """
+        zint_mat = np.linspace(self.z_winterp, self.z_winterp[-1],
+                               self.z_trapz_sampling)
+        zint_mat = zint_mat.T
+        diffz = np.diff(zint_mat)
+        H0_Mpc = self.theory['H0_Mpc']
+        O_m = self.theory['Omm']
+
+        n_z_normalized = self.nz_dic_WL[''.join(['n', str(bin_i)])]
+
+        intg_mat = np.array([self.WL_window_integrand(zint_mat[zii],
+                            zint_mat[zii, 0], n_z_normalized)
+                            for zii in range(len(zint_mat))])
+
+        integral_arr = integrate.trapz(intg_mat, dx=diffz, axis=1)
+
+        W_val = (1.5 * H0_Mpc * O_m * (1.0 + self.z_winterp) *
+                 self.theory['MG_sigma'](self.z_winterp, k) *
+                 (self.theory['r_z_func'](self.z_winterp) /
+                 (1 / H0_Mpc)) * integral_arr)
+
+        return W_val
+
+    def WL_window_slow(self, z, bin_i, k=0.0001):
         r"""
         Calculates the weak lensing shear kernel for a given tomographic bin.
 

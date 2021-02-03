@@ -8,8 +8,8 @@ This module contains unit tests for the likelihood calculation module.
 from unittest import TestCase
 import numpy as np
 import numpy.testing as npt
-from ..like_calc import euclike
-from ..cosmo.cosmology import Cosmology
+from likelihood.like_calc.euclike import Euclike
+from likelihood.cosmo.cosmology import Cosmology
 from likelihood.tests.test_wrapper import CobayaModel
 from likelihood.cobaya_interface import EuclidLikelihood
 
@@ -35,7 +35,7 @@ class likecalcTestCase(TestCase):
         self.model_test = CobayaModel(cosmo)
         self.model_test.update_cosmo()
         # init Euclike
-        self.like_tt = euclike.Euclike()
+        self.like_tt = Euclike()
 
         # (SJ): For now use loglike below, to be updated
         # (SJ): First one without, second one with h and (2pi/h)^3 corrections

@@ -14,9 +14,9 @@ import numpy as np
 import numpy.testing as npt
 from scipy import integrate
 from scipy import interpolate
-from ..cosmo.cosmology import Cosmology
+from likelihood.cosmo.cosmology import Cosmology
 from likelihood.cobaya_interface import EuclidLikelihood
-from ..spectroscopic_survey.spec import Spec
+from likelihood.spectroscopic_survey.spec import Spec
 from astropy import constants as const
 from likelihood.tests.test_wrapper import CobayaModel
 

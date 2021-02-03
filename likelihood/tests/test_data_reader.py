@@ -8,13 +8,13 @@ This module contains unit tests for the data_reader module.
 from unittest import TestCase
 import numpy as np
 import numpy.testing as npt
-from ..data_reader import reader
+from likelihood.data_reader.reader import Reader
 
 
 class datareaderTestCase(TestCase):
 
     def setUp(self):
-        self.data_tester = reader.Reader()
+        self.data_tester = Reader()
         self.main_key_check = ['GC-Spec', 'GC-Phot', 'WL', 'XC-Phot']
         self.nz_key_check = ['n1', 'n2', 'n3', 'n4', 'n5',
                              'n6', 'n7', 'n8', 'n9', 'n10']

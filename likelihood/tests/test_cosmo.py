@@ -13,7 +13,7 @@ import numpy as np
 import numpy.testing as npt
 from scipy import integrate
 from astropy import constants as const
-from ..cosmo.cosmology import Cosmology
+from likelihood.cosmo.cosmology import Cosmology
 from likelihood.cobaya_interface import EuclidLikelihood
 from likelihood.tests.test_wrapper import CobayaModel
 from scipy.interpolate import InterpolatedUnivariateSpline

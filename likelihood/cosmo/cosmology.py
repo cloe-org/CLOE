@@ -892,9 +892,9 @@ class Cosmology:
         NL_flag: string
             flag for non-linear boost factor
         """
-        # (GCH): this function is superfluous
-        # just in case we want to have always
-        # an updated dictionary with D_z, f, H(z), r(z)
+        # (GCH): update dictionary with H(z)
+        # r(z), fsigma8, sigma8, f(z), D_A(z),
+        # photo-spectra
         self.interp_H()
         self.interp_H_Mpc()
         self.interp_comoving_dist()
@@ -903,12 +903,13 @@ class Cosmology:
         self.growth_rate_cobaya()
         self.interp_angular_dist()
         self.interp_phot_galaxy_spectra()
+        # (GCH): As mentioned in interp_phot_galaxy_spectra
+        # spec spectra are not interpolated so they are added
+        # here in this method
         self.cosmo_dic['Pgg_spec'] = self.Pgg_spec_def
         self.cosmo_dic['Pgdelta_spec'] = self.Pgd_spec_def
-        self.cosmo_dic['Pii'] = self.Pii_def
-        self.cosmo_dic['Pdeltai'] = self.Pdeltai_def
-        self.cosmo_dic['Pgi_phot'] = self.Pgi_phot_def
-        self.cosmo_dic['Pgi_spec'] = self.Pgi_spec_def
+        # (GCH): for the moment we use our own definition
+        # of the growth factor
         self.cosmo_dic['D_z_k'] = self.growth_factor(zs, ks)
         self.cosmo_dic['sigma_8_0'] = \
             self.cosmo_dic['sigma8_z_func'](0)

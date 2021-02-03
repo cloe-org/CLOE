@@ -892,7 +892,9 @@ class Cosmology:
         NL_flag: string
             flag for non-linear boost factor
         """
-        # (GCH): pdate dictionary with D_z, f, H(z), r(z)
+        # (GCH): update dictionary with H(z)
+        # r(z), fsigma8, sigma8, f(z), D_A(z),
+        # photo-spectra
         self.interp_H()
         self.interp_H_Mpc()
         self.interp_comoving_dist()

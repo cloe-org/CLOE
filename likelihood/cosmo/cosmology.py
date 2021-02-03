@@ -908,7 +908,7 @@ class Cosmology:
         # here in this method
         self.cosmo_dic['Pgg_spec'] = self.Pgg_spec_def
         self.cosmo_dic['Pgdelta_spec'] = self.Pgd_spec_def
-        # (GCH): for the moment we use own definition
+        # (GCH): for the moment we use our own definition
         # growth factor
         self.cosmo_dic['D_z_k'] = self.growth_factor(zs, ks)
         self.cosmo_dic['sigma_8_0'] = \

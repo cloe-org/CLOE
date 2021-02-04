@@ -322,8 +322,8 @@ class Reader:
                                       cov_model_str)))
 
         tot_XC_bins = self.numtomo_wl * self.numtomo_gcphot
-        tot_GC_bins = len(GC_cov) / len(WL_dict['ells'])
-        tot_WL_bins = len(WL_cov) / len(GC_phot_dict['ells'])
+        tot_GC_bins = len(GC_cov) / len(GC_phot_dict['ells'])
+        tot_WL_bins = len(WL_cov) / len(WL_dict['ells'])
         total_bins = tot_WL_bins + tot_XC_bins + tot_GC_bins
         XC_side = tot_XC_bins * len(XC_phot_dict['ells'])
         XC_cov = np.zeros((XC_side, XC_side))

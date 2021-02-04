@@ -23,7 +23,7 @@ class Reader:
     Class to read external data files.
     """
 
-    def __init__(self, data_subdirectory='/ExternalBenchmark'):
+    def __init__(self, data_subdirectory='ExternalBenchmark'):
         """
         Parameters
         ----------
@@ -31,7 +31,8 @@ class Reader:
             Location of subdirectory within which desired files are stored.
         """
         root_dir = Path(__file__).resolve().parents[2]
-        self.dat_dir_main = str(root_dir) + '/data' + data_subdirectory
+        self.dat_dir_main = Path(root_dir, Path('data'),
+                                 Path(data_subdirectory))
         self.data_dict = {'GC-Spec': None, 'GC-Phot': None, 'WL': None,
                           'XC-Phot': None}
 
@@ -70,7 +71,8 @@ class Reader:
         """
         try:
             # (GCH): open file and read the content
-            f = open(self.dat_dir_main + file_dest + file_name, "r")
+            f = open(Path(self.dat_dir_main, Path(file_dest),
+                          Path(file_name)), "r")
             content = f.read()
             f.close()
             # (GCH): get the arbitrary header and save in a dict
@@ -83,7 +85,7 @@ class Reader:
                 'n(z) files not found. Please, check out the files')
 
     def compute_nz(self,
-                   file_dest='/Photometric/',
+                   file_dest='Photometric',
                    file_name_GC='niTab-EP10-RB00.dat',
                    file_name_WL='niTab-EP10-RB00.dat'):
         """
@@ -124,7 +126,7 @@ class Reader:
                                 list(self.nz_dict_WL_raw.keys())[1:]})
 
     def read_GC_spec(self,
-                     file_dest='/Spectroscopic/data/Sefusatti_multipoles_pk/',
+                     file_dest='Spectroscopic/data/Sefusatti_multipoles_pk',
                      file_names='cov_power_galaxies_dk0p004_z%s.fits',
                      zstr=["1.", "1.2", "1.4", "1.65"]):
         """
@@ -146,10 +148,10 @@ class Reader:
         if 'z%s' not in file_names:
             raise Exception('GC Spec file names should contain z%s string to '
                             'enable iteration over bins.')
-
-        full_path = self.dat_dir_main + file_dest + file_names
+        cur_fname = file_names % zstr[0]
+        full_path = Path(self.dat_dir_main, file_dest, cur_fname)
         GC_spec_dict = {}
-        fid_cosmo_file = fits.open(full_path % zstr[0])
+        fid_cosmo_file = fits.open(full_path)
         try:
             self.data_spec_fiducial_cosmo = {
                 'H0': fid_cosmo_file[1].header['HUBBLE'] *
@@ -178,7 +180,9 @@ class Reader:
         cov_fac = p_fac ** 2.0
 
         for z_label in zstr:
-            fits_file = fits.open(full_path % z_label)
+            cur_it_fname = file_names % z_label
+            cur_full_path = Path(self.dat_dir_main, file_dest, cur_it_fname)
+            fits_file = fits.open(cur_full_path)
             average = fits_file[1].data
             kk = average["SCALE_1DIM"] * k_fac
             pk0 = average["AVERAGE0"] * p_fac
@@ -213,7 +217,7 @@ class Reader:
         self.data_dict['GC-Spec'] = GC_spec_dict
         return
 
-    def read_phot(self, file_dest='/Photometric/data/', IA_model_str='zNLA',
+    def read_phot(self, file_dest='Photometric/data', IA_model_str='zNLA',
                   cov_model_str='Gauss'):
         """
         Function to read OU-LE3 photometric galaxy clustering and weak lensing
@@ -237,14 +241,14 @@ class Reader:
         WL_dict = {}
         XC_phot_dict = {}
 
-        full_path = self.dat_dir_main + file_dest
+        full_path = Path(self.dat_dir_main, file_dest)
 
-        GC_file = fits.open(full_path + 'Cls_{:s}_PosPos.fits'.format(
-            IA_model_str))
-        WL_file = fits.open(full_path + 'Cls_{:s}_ShearShear.fits'.format(
-            IA_model_str))
-        XC_file = fits.open(full_path + 'Cls_{:s}_PosShear.fits'.format(
-            IA_model_str))
+        GC_file = fits.open(Path(full_path, 'Cls_{:s}_PosPos.fits'.format(
+            IA_model_str)))
+        WL_file = fits.open(Path(full_path, 'Cls_{:s}_ShearShear.fits'.format(
+            IA_model_str)))
+        XC_file = fits.open(Path(full_path, 'Cls_{:s}_PosShear.fits'.format(
+            IA_model_str)))
 
         GC_phot_dict['ells'] = GC_file[1].data
         WL_dict['ells'] = WL_file[1].data
@@ -307,15 +311,35 @@ class Reader:
             cur_lab = cur_ind[0] + left_digit + '-' + cur_ind[2] + right_digit
             XC_phot_dict[cur_lab] = XC_file[k].data
 
-        GC_cov = np.loadtxt(full_path + 'CovMat-PosPos-{:s}-20Bins.dat'.format(
-            cov_model_str))
-        WL_cov = np.loadtxt(full_path +
-                            'CovMat-ShearShear-{:s}-20Bins.dat'.format(
-                                cov_model_str))
-        tx2_cov = np.loadtxt(full_path + 'CovMat-3x2pt-{:s}-20Bins.dat'.format(
-            cov_model_str))
-        XC_cov = tx2_cov[WL_cov.shape[0]:-GC_cov.shape[0],
-                         WL_cov.shape[1]:-GC_cov.shape[1]]
+        GC_cov = np.loadtxt(Path(full_path,
+                                 'CovMat-PosPos-{:s}-20Bins.dat'.format(
+                                     cov_model_str)))
+        WL_cov = np.loadtxt(Path(full_path,
+                                 'CovMat-ShearShear-{:s}-20Bins.dat'.format(
+                                     cov_model_str)))
+        tx2_cov = np.loadtxt(Path(full_path,
+                                  'CovMat-3x2pt-{:s}-20Bins.dat'.format(
+                                      cov_model_str)))
+
+        tot_XC_bins = self.numtomo_wl * self.numtomo_gcphot
+        tot_GC_bins = len(GC_cov) / len(GC_phot_dict['ells'])
+        tot_WL_bins = len(WL_cov) / len(WL_dict['ells'])
+        total_bins = tot_WL_bins + tot_XC_bins + tot_GC_bins
+        XC_side = tot_XC_bins * len(XC_phot_dict['ells'])
+        XC_cov = np.zeros((XC_side, XC_side))
+
+        for i in range(len(XC_phot_dict['ells'])):
+            cur_i = int(i * tot_XC_bins)
+            next_i = int((i + 1) * tot_XC_bins)
+            XC_i_low = int((i * total_bins) + tot_WL_bins)
+            XC_i_hi = int(XC_i_low + tot_XC_bins)
+            for j in range(len(XC_phot_dict['ells'])):
+                cur_j = int(j * tot_XC_bins)
+                next_j = int((j + 1) * tot_XC_bins)
+                XC_j_low = int((j * total_bins) + tot_WL_bins)
+                XC_j_hi = int(XC_j_low + tot_XC_bins)
+                main_extract = tx2_cov[XC_i_low:XC_i_hi, XC_j_low:XC_j_hi]
+                XC_cov[cur_i:next_i, cur_j:next_j] = main_extract
 
         GC_phot_dict['cov'] = GC_cov
         WL_dict['cov'] = WL_cov

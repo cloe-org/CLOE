@@ -23,6 +23,7 @@ setup(
     version=release_info['__version__'],
     url=release_info['__url__'],
     packages=find_packages(),
+    include_package_data=True,
     install_requires=release_info['__requires__'],
     license=release_info['__license__'],
     description=release_info['__about__'],

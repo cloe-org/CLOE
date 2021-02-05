@@ -28,7 +28,7 @@ class Cosmology:
         ----------
         This is the list of current implemented cosmological
         parameters in the cosmo_dic
-        
+
         H0: float
             Present-day Hubble constant (km s^{-1} Mpc^{-1})
         H0_Mpc: float
@@ -154,7 +154,7 @@ class Cosmology:
         # (GCH): initialize cosmo dictionary
         # (ACD): Added speed of light to dictionary.!!!Important:it's in units
         # of km/s to be dimensionally consistent with H0.!!!!
-        self.cosmo_dic = {# Constants
+        self.cosmo_dic = {  # Constants
                           'H0': 67.0,
                           'omch2': 0.122,
                           'ombh2': 0.022,
@@ -168,7 +168,7 @@ class Cosmology:
                           'ns': 0.96,
                           'As': 2.1e-9,
                           'sigma_8_0': 0.816,
-                          'c': const.c.to('km/s').value, 
+                          'c': const.c.to('km/s').value,
                           'MG_mu': None,
                           'MG_sigma': None,
                           # Arrays
@@ -199,7 +199,7 @@ class Cosmology:
                           'sigma8_z_func': None,
                           'fsigma8_z_func': None,
                           'f_z': None,
-                          # NL_boost  
+                          # NL_boost
                           'NL_boost': None,
                           'nuisance_parameters': {
                              'like_selection': 2,
@@ -370,7 +370,7 @@ class Cosmology:
         Updates 'key' in the cosmo_dic attribute of the class
         by adding an interpolator object
         which interpolates the Hubble parameter
-        H(z) as a function of redshift 
+        H(z) as a function of redshift
         """
         if self.cosmo_dic['z_win'] is None:
             raise Exception('Boltzmann code redshift binning has not been '
@@ -387,7 +387,7 @@ class Cosmology:
         Updates 'key' in the cosmo_dic attribute of the class
         by adding an interpolator object
         which interpolates the Hubble parameter
-        H(z) in Mpc as a function of redshift 
+        H(z) in Mpc as a function of redshift
         """
         if self.cosmo_dic['z_win'] is None:
             raise Exception('Boltzmann code redshift binning has not been '
@@ -421,7 +421,7 @@ class Cosmology:
 
         Updates 'key' in the cosmo_dic attribute of the class
         by adding an interpolator object
-        which interpolates :math:`f\sigma_8` as a 
+        which interpolates :math:`f\sigma_8` as a
         function of redshift
         """
         if self.cosmo_dic['z_win'] is None:
@@ -774,8 +774,8 @@ class Cosmology:
         Note: the interpolators for v1.0 span the range :math:`k=[0.001,100.0]`
 
         Updates 'keys' of the cosmo_dic attribute of the class, adding
-        interpolator objects (interpolates photometric galaxy 
-        clustering and galaxy-matter power spectra as a 
+        interpolator objects (interpolates photometric galaxy
+        clustering and galaxy-matter power spectra as a
         function of redshift and k-mode)
         """
         # AP: Removed the interpolation of the spectroscopic galaxy power

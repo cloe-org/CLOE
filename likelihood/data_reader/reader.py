@@ -163,10 +163,9 @@ class Reader:
                 fid_cosmo_file[1].header['HUBBLE']**2,
                 'ns': fid_cosmo_file[1].header['INDEX_N'],
                 'sigma_8_0': fid_cosmo_file[1].header['SIGMA_8'],
-                'w': fid_cosmo_file[1].header['W_STATE'],
+                'w0': fid_cosmo_file[1].header['W_STATE'],
                 'omkh2': fid_cosmo_file[1].header['OMEGA_K'] *
-                fid_cosmo_file[1].header['HUBBLE']**2,
-                'omnuh2': 0}
+                fid_cosmo_file[1].header['HUBBLE']**2}
 
             fid_cosmo_file.close()
         # GCH: remember, for the moment we ignore Omega_R and

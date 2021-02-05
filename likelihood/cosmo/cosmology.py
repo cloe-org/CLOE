@@ -883,8 +883,9 @@ class Cosmology:
         ----------
         zs: array
             list of redshift for the power spectrum
-        ks: array
-            list of modes for the power spectrum
+        ks: double
+            value of k-scale at which the growth factor
+            is evaluated
         MG_mu: float
             constant value of modified gravity mu function
         MG_sigma: float

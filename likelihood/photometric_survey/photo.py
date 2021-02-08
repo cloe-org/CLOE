@@ -26,11 +26,11 @@ class Photo:
 
         Parameters
         ----------
-        cosmo_dic: dictionary
+        cosmo_dic: dict
            cosmological dictionary from cosmo
-        nz_dic_WL: dictionary
+        nz_dic_WL: dict
             Dictionary containing n(z)s for WL probe.
-        nz_dic_GC: dictionary
+        nz_dic_GC: dict
             Dictionary containing n(z)s for GC-phot probe.
         """
         self.theory = cosmo_dic

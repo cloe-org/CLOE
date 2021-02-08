@@ -18,21 +18,21 @@ class CosmologyError(Exception):
 
 
 class Cosmology:
-    """
+    r"""
     Class for cosmological observables
     """
 
     def __init__(self):
-        """
-        Parameters
-        ----------
+        r"""
         This is the list of current implemented cosmological
         parameters in the cosmo_dic
 
+        Parameters
+        ----------
         H0: float
-            Present-day Hubble constant (km s^{-1} Mpc^{-1})
+            Present-day Hubble constant :math:`(km·s^{-1}·Mpc^{-1})`
         H0_Mpc: float
-            Present-day Hubble constant (Mpc^{-1})
+            Present-day Hubble constant :math:`(Mpc^{-1})`
         omch2: float
             Present-day CDM energy density
             Omega_CDM * (H0/100)**2
@@ -56,9 +56,9 @@ class Cosmology:
         ns: float
             spectral tilt of the primordial
             power spectrum
-        sigma_8_0: double
+        sigma_8_0: float
             sigma8 evaluated at z = 0
-        w0: float
+        w: float
            Dark energy equation of state
         wa: float
            Dark energy equation of state
@@ -74,24 +74,25 @@ class Cosmology:
             Assumes sum of baryons, CDM and neutrinos
         mnu: float
             Sum of massive neutrino species masses (eV)
-        comov_dist: array-like
+        comov_dist: list
             Value of comoving distances at redshifts z_win
-        angular_dist: array-like
+        angular_dist: list
             Value of angular diameter distances at redshifts z_win
-        H: array-like
+        H: list
             Hubble function evaluated at redshifts z_win
-        H_Mpc: array-like
-            Hubble function evaluated at redshifts z_win in units of Mpc^{-1}
+        H_Mpc: list
+            Hubble function evaluated at redshifts z_win in units
+            of :math:`Mpc^{-1}`
         Pk_interpolator: function
             Interpolator function for power spectrum from Boltzmann code
         Pk_delta: function
             Interpolator function for delta from Boltzmann code
-        fsigma8: array
+        fsigma8: list
             fsigma8 function evaluated at z
-        sigma_8: array
+        sigma_8: list
             sigma8 function evaluated at z
         c: float
-            Speed-of-light in units of km s^{-1}
+            Speed-of-light in units of :math:`km·s^{-1}`
         r_z_func: function
             Interpolated function for comoving distance
         d_z_func: function
@@ -105,10 +106,10 @@ class Cosmology:
         H_z_func: function
             Interpolated function for Hubble parameter
         H_z_func_Mpc: function
-            Interpolated function for Hubble parameter in Mpc^{-1}
-        z_win: array-like
+            Interpolated function for Hubble parameter in :math:`Mpc^{-1}`
+        z_win: list
             Array of redshifts ar which H and comov_dist are evaluated at
-        k_win: array-like
+        k_win: list
             Array of k values which will be used to evaluate galaxy power
             spectra
         Pgg_phot: function
@@ -131,9 +132,9 @@ class Cosmology:
             mu function from Modified Gravity parametrization
         MG_sigma: function
             sigma function from Modified Gravity parametrization
-        NL_boost: function
+        NL_boost: int
             Non-linear boost factor
-        nuisance_parameters: dictionary
+        nuisance_parameters: dict
             Contains all nuisance bias parameters
             and IA parameters which are sampled over.
             At the moment, we have implemented
@@ -141,15 +142,14 @@ class Cosmology:
             recipe and 4 for spec recipe,
             and 3 IA parameters. The
             initialized values of the fiducial
-            cosmology dictionary corresponds to
-            (1) Photo-z: values corrsponding to
+            cosmology dictionary corresponds to:
 
-            .. math::
-                b_{x,i} = \sqrt{1+\bar{z}_{x,i}}\\
+                * Photo-z values corrsponding to
+                :math:`b_{(x,i)}=\sqrt{1+\bar{b}_{(x,i)}}`
 
-            (2) Spec: bias values
-            of arXiv:1910.09273
-            (3) IA values in arXiv:1910.09273
+                * Spectroscopic bias values of arXiv:1910.09273
+
+                * IA values in arXiv:1910.09273
         """
         # (GCH): initialize cosmo dictionary
         # (ACD): Added speed of light to dictionary.!!!Important:it's in units
@@ -160,7 +160,7 @@ class Cosmology:
                           'ombh2': 0.022,
                           'omnuh2': 0.000644,
                           'omkh2': 0.0,
-                          'w0': -1.0,
+                          'w': -1.0,
                           'wa': 0.0,
                           'mnu': 0.06,
                           'tau': 0.07,
@@ -171,7 +171,7 @@ class Cosmology:
                           'c': const.c.to('km/s').value,
                           'MG_mu': None,
                           'MG_sigma': None,
-                          # Arrays
+                          # Lists
                           'z_win': None,
                           'k_win': None,
                           'comov_dist': None,
@@ -251,14 +251,13 @@ class Cosmology:
 
         Parameters
         ----------
-        zs: array
-            list of redshift for the power spectrum
-        ks: array
+        zs: list
+        ks: list
             list of modes for the power spectrum
 
         Returns
         -------
-        D_z_k: numpy.ndarray
+        D_z_k: list
             Growth factor as function of redshift and k-mode
 
         """
@@ -285,9 +284,9 @@ class Cosmology:
 
         Parameters
         ----------
-        zs: array
+        zs: list
             list of redshift for the power spectrum
-        ks: array
+        ks: list
             list of modes for the power spectrum
 
         Returns
@@ -881,9 +880,9 @@ class Cosmology:
 
         Parameters
         ----------
-        zs: array
+        zs: list
             list of redshift for the power spectrum
-        ks: double
+        ks: float
             value of k-scale at which the growth factor
             is evaluated
         MG_mu: float

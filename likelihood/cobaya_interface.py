@@ -135,7 +135,8 @@ class EuclidLikelihood(Likelihood):
         },
             'theory': {'camb':
                        {'stop_at_error': True,
-                        'extra_args': {'num_massive_neutrinos': 1}}},
+                        'extra_args': {'num_massive_neutrinos': 1,
+                                       'dark_energy_model': 'ppf'}}},
             # Likelihood: we load the likelihood as an external function
             'likelihood': {'one': None}}
         # Update fiducial cobaya dictionary with the IST-f
@@ -271,6 +272,8 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Omm'] = \
                 (self.cosmo.cosmo_dic['Omb'] + self.cosmo.cosmo_dic['Omc'] +
                  self.cosmo.cosmo_dic['Omnu'])
+            self.cosmo.cosmo_dic['w'] = self.provider.get_param('w')
+            self.cosmo.cosmo_dic['wa'] = self.provider.get_param('wa')
             self.cosmo.cosmo_dic['comov_dist'] = \
                 self.provider.get_comoving_radial_distance(self.z_win)
             self.cosmo.cosmo_dic['angular_dist'] = \
@@ -319,6 +322,8 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Omm'] = \
                 (self.cosmo.cosmo_dic['Omb'] + self.cosmo.cosmo_dic['Omc'] +
                  self.cosmo.cosmo_dic['Omnu'])
+            self.cosmo.cosmo_dic['w'] = model.provider.get_param('w')
+            self.cosmo.cosmo_dic['wa'] = model.provider.get_param('wa')
             self.cosmo.cosmo_dic['comov_dist'] = \
                 model.provider.get_comoving_radial_distance(self.z_win)
             self.cosmo.cosmo_dic['angular_dist'] = \

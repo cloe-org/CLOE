@@ -53,18 +53,19 @@ class cosmoinitTestCase(TestCase):
         # (GCH): Check values
         self.H0check = 68.0
         self.Dcheck = 1.0
-        self.fcheck = 0.516266
-        self.Hcheck = 75.234214
+        self.fcheck = 0.517014
+        self.Hcheck = 75.25182
         self.bias_gc_phot_check = 1.220245876862528
-        self.bias_gc_spec_check = 1.46
-        self.Pgg_phot_test = 57627.032026
-        self.Pgd_phot_test = 41167.417014
-        self.Pgg_spec_test = 83066.735675
-        self.Pgd_spec_test = 60330.848988
-        self.Pii_test = 2.257532
-        self.Pdeltai_test = -257.666214
-        self.Pgi_phot_test = -360.686685
-        self.Pgi_spec_test = -376.192673
+        self.bias_gc_spec_check = 1.46148
+        self.Pgg_phot_test = 56966.342327
+        self.Pgd_phot_test = 40733.180956
+        self.Pgd_phot_test_interpolation = 40695.435595
+        self.Pgg_spec_test = 82364.912687
+        self.Pgd_spec_test = 59772.520009
+        self.Pii_test = 2.247159
+        self.Pdeltai_test = -255.714171
+        self.Pgi_phot_test = -357.954173
+        self.Pgi_spec_test = -373.721248
         self.MG_mu_test = 1.0
         self.MG_sigma_test = 1.0
 
@@ -77,6 +78,7 @@ class cosmoinitTestCase(TestCase):
         self.bias_gc_spec_check = None
         self.Pgg_phot_test = None
         self.Pgd_phot_test = None
+        self.Pgd_phot_test_interpolation = None
         self.Pgg_spec_test = None
         self.Pgd_spec_test = None
         self.Pii_test = None
@@ -174,7 +176,7 @@ class cosmoinitTestCase(TestCase):
     def test_Pg_delta_phot_interp(self):
         test_p = self.model_test.cosmology.cosmo_dic['Pgdelta_phot'](1.0,
                                                                      0.01)
-        npt.assert_allclose(test_p, self.Pgd_phot_test,
+        npt.assert_allclose(test_p, self.Pgd_phot_test_interpolation,
                             rtol=1e-3,
                             err_msg='Error in GC-phot Pgdelta interpolation')
 

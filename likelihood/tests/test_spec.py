@@ -48,15 +48,15 @@ class cosmoinitTestCase(TestCase):
                          self.model_fiducial.cosmology.cosmo_dic)
 
         # (GCH): Checks
-        self.check_multipole_spectra_m0 = 12398.426604
+        self.check_multipole_spectra_m0 = 12245.781206
         self.check_multipole_spectra_m1 = 0.0
-        self.check_multipole_spectra_m2 = 8615.859821
+        self.check_multipole_spectra_m2 = 8560.342111
         self.check_multipole_spectra_m3 = 0.0
-        self.check_multipole_spectra_m4 = 759.762468
-        self.check_multipole_spectra_integrand = 3309.479301
-        self.check_scaling_factor_perp = 0.993
-        self.check_scaling_factor_parall = 0.992782
-        self.check_get_k = 0.001007
+        self.check_multipole_spectra_m4 = 781.13919
+        self.check_multipole_spectra_integrand = 3230.390513
+        self.check_scaling_factor_perp = 0.985397
+        self.check_scaling_factor_parall = 0.985497
+        self.check_get_k = 0.001015
         self.check_get_mu = 1.00
 
     def tearDown(self):

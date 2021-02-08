@@ -42,10 +42,13 @@ class CobayaModel:
             'mnu': cosmo_inst.cosmo_dic['mnu'],
             'nnu': cosmo_inst.cosmo_dic['nnu'],
             'ns': cosmo_inst.cosmo_dic['ns'],
-            'As': cosmo_inst.cosmo_dic['As']},
+            'As': cosmo_inst.cosmo_dic['As'],
+            'w': cosmo_inst.cosmo_dic['w'],
+            'wa': cosmo_inst.cosmo_dic['wa']},
             'theory': {'camb':
                        {'stop_at_error': True,
-                        'extra_args': {'num_massive_neutrinos': 1}}},
+                        'extra_args': {'num_massive_neutrinos': 1,
+                                       'dark_energy_model': 'ppf'}}},
             # Likelihood: we load the likelihood as an external function
             'likelihood': {'euclid': EuclidLikelihood}}
         self.info['params'].update(

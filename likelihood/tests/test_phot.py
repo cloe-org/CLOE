@@ -125,28 +125,41 @@ class photoinitTestCase(TestCase):
         # mock_cosmo_dic['nuisance_parameters']['bia'] = 0
         # mock_cosmo_dic['nuisance_parameters']['nia'] = 0
 
-        p_matter = mock_P_obj(interpolate.interp2d(zs_base, ks_base, pdd.T,
-                                                   fill_value=0))
+        p_matter = mock_P_obj(interpolate.RectBivariateSpline(zs_base,
+                                                              ks_base,
+                                                              pdd))
         mock_cosmo_dic['Pk_interpolator'] = p_matter
         mock_cosmo_dic['Pk_delta'] = p_matter
-        mock_cosmo_dic['Pgg_phot'] = interpolate.interp2d(zs_base, ks_base,
-                                                          pgg.T,
-                                                          fill_value=0.0)
-        mock_cosmo_dic['Pgdelta_phot'] = interpolate.interp2d(zs_base, ks_base,
-                                                              pgd.T,
-                                                              fill_value=0.0)
-        mock_cosmo_dic['Pii'] = interpolate.interp2d(zs_base, ks_base,
-                                                     pii.T,
-                                                     fill_value=0.0)
-        mock_cosmo_dic['Pdeltai'] = interpolate.interp2d(zs_base, ks_base,
-                                                         pdi.T,
-                                                         fill_value=0.0)
-        mock_cosmo_dic['Pgi_phot'] = interpolate.interp2d(zs_base, ks_base,
-                                                          pgi_phot.T,
-                                                          fill_value=0.0)
-        mock_cosmo_dic['Pgi_spec'] = interpolate.interp2d(zs_base, ks_base,
-                                                          pgi_spec.T,
-                                                          fill_value=0.0)
+        mock_cosmo_dic['Pgg_phot'] = \
+            interpolate.RectBivariateSpline(zs_base,
+                                            ks_base,
+                                            pgg,
+                                            kx=1, ky=1)
+        mock_cosmo_dic['Pgdelta_phot'] = \
+            interpolate.RectBivariateSpline(zs_base,
+                                            ks_base,
+                                            pgd,
+                                            kx=1, ky=1)
+        mock_cosmo_dic['Pii'] = \
+            interpolate.RectBivariateSpline(zs_base,
+                                            ks_base,
+                                            pii,
+                                            kx=1, ky=1)
+        mock_cosmo_dic['Pdeltai'] = \
+            interpolate.RectBivariateSpline(zs_base,
+                                            ks_base,
+                                            pdi,
+                                            kx=1, ky=1)
+        mock_cosmo_dic['Pgi_phot'] = \
+            interpolate.RectBivariateSpline(zs_base,
+                                            ks_base,
+                                            pgi_phot,
+                                            kx=1, ky=1)
+        mock_cosmo_dic['Pgi_spec'] = \
+            interpolate.RectBivariateSpline(zs_base,
+                                            ks_base,
+                                            pgi_spec,
+                                            kx=1, ky=1)
 
         nz_dic_WL = np.load(str(cur_dir) +
                             '/test_input/nz_dict_WL.npy',

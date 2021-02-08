@@ -276,7 +276,7 @@ class Photo:
                            (self.theory['H_z_func'](z) *
                             (self.theory['r_z_func'](z)) ** 2.0))
 
-        if np.isnan(PandW_i_j_z_k):
+        if (np.isnan(PandW_i_j_z_k).any()):
             raise Exception('Requested k, z values are outside of power'
                             ' spectrum interpolation range.')
         return kern_mult_power
@@ -323,24 +323,27 @@ class Photo:
         P_dd = self.theory['Pk_interpolator'].P
         P_ii = self.theory['Pii']
         P_di = self.theory['Pdeltai']
-        for ii, rshift in enumerate(int_zs):
-            current_k = (ell + 0.5) / self.theory['r_z_func'](rshift)
-            pow_dd = np.atleast_1d(P_dd(rshift, current_k))[0]
-            pow_ii = np.atleast_1d(P_ii(rshift, current_k))[0]
-            pow_di = np.atleast_1d(P_di(rshift, current_k))[0]
-            kern_i = np.interp(rshift, self.interpwin[:, 0],
-                               self.interpwin[:, bin_i])
-            kern_j = np.interp(rshift, self.interpwin[:, 0],
-                               self.interpwin[:, bin_j])
-            kernia_i = np.interp(rshift, self.interpwinia[:, 0],
-                                 self.interpwinia[:, bin_i])
-            kernia_j = np.interp(rshift, self.interpwinia[:, 0],
-                                 self.interpwinia[:, bin_j])
-            pandw_dd = kern_i * kern_j * pow_dd
-            pandw_ii = kernia_i * kernia_j * pow_ii
-            pandw_di = (kern_i * kernia_j + kernia_i * kern_j) * pow_di
-            pandwijk = pandw_dd + pandw_ii + pandw_di
-            c_int_arr[ii] = self.Cl_generic_integrand(rshift, pandwijk)
+
+        current_k = (ell + 0.5) / self.theory['r_z_func'](int_zs)
+        pow_dd = P_dd(int_zs, current_k, grid=False)
+        pow_ii = P_ii(int_zs, current_k, grid=False)
+        pow_di = P_di(int_zs, current_k, grid=False)
+
+        kern_i = np.interp(int_zs, self.interpwin[:, 0],
+                           self.interpwin[:, bin_i])
+        kern_j = np.interp(int_zs, self.interpwin[:, 0],
+                           self.interpwin[:, bin_j])
+        kernia_i = np.interp(int_zs, self.interpwinia[:, 0],
+                             self.interpwinia[:, bin_i])
+        kernia_j = np.interp(int_zs, self.interpwinia[:, 0],
+                             self.interpwinia[:, bin_j])
+
+        pandw_dd = kern_i * kern_j * pow_dd
+        pandw_ii = kernia_i * kernia_j * pow_ii
+        pandw_di = (kern_i * kernia_j + kernia_i * kern_j) * pow_di
+        pandwijk = pandw_dd + pandw_ii + pandw_di
+
+        c_int_arr = self.Cl_generic_integrand(int_zs, pandwijk)
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final
@@ -380,18 +383,17 @@ class Photo:
 
         c_int_arr = np.empty(len(int_zs))
         P_int = self.theory['Pgg_phot']
-        for ii, rshift in enumerate(int_zs):
-            # (ACD): Although k is specified here for the GC window function,
-            # note that the implementation currently uses a scale-independent
-            # bias.
-            current_k = (ell + 0.5) / self.theory['r_z_func'](rshift)
-            power = np.atleast_1d(P_int(rshift, current_k))[0]
-            kern_i = np.interp(rshift, self.interpwingal[:, 0],
-                               self.interpwingal[:, bin_i])
-            kern_j = np.interp(rshift, self.interpwingal[:, 0],
-                               self.interpwingal[:, bin_j])
-            pandwijk = kern_i * kern_j * power
-            c_int_arr[ii] = self.Cl_generic_integrand(rshift, pandwijk)
+
+        current_k = (ell + 0.5) / self.theory['r_z_func'](int_zs)
+        power = P_int(int_zs, current_k, grid=False)
+
+        kern_i = np.interp(int_zs, self.interpwingal[:, 0],
+                           self.interpwingal[:, bin_i])
+        kern_j = np.interp(int_zs, self.interpwingal[:, 0],
+                           self.interpwingal[:, bin_j])
+        pandwijk = kern_i * kern_j * power
+
+        c_int_arr = self.Cl_generic_integrand(int_zs, pandwijk)
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final
@@ -435,23 +437,22 @@ class Photo:
         c_int_arr = np.empty(len(int_zs))
         P_gd = self.theory['Pgdelta_phot']
         P_gi = self.theory['Pgi_phot']
-        for ii, rshift in enumerate(int_zs):
-            # (ACD): Although k is specified here for the GC window function,
-            # note that the implementation currently uses a scale-independent
-            # bias.
-            current_k = (ell + 0.5) / self.theory['r_z_func'](rshift)
-            pow_gd = np.atleast_1d(P_gd(rshift, current_k))[0]
-            pow_gi = np.atleast_1d(P_gi(rshift, current_k))[0]
-            kern_i = np.interp(rshift, self.interpwin[:, 0],
-                               self.interpwin[:, bin_i])
-            kernia_i = np.interp(rshift, self.interpwinia[:, 0],
-                                 self.interpwinia[:, bin_i])
-            kern_j = np.interp(rshift, self.interpwingal[:, 0],
-                               self.interpwingal[:, bin_j])
-            pandw_gd = kern_i * kern_j * pow_gd
-            pandw_gi = kernia_i * kern_j * pow_gi
-            pandwijk = pandw_gd + pandw_gi
-            c_int_arr[ii] = self.Cl_generic_integrand(rshift, pandwijk)
+
+        current_k = (ell + 0.5) / self.theory['r_z_func'](int_zs)
+        pow_gd = P_gd(int_zs, current_k, grid=False)
+        pow_gi = P_gi(int_zs, current_k, grid=False)
+
+        kern_i = np.interp(int_zs, self.interpwin[:, 0],
+                           self.interpwin[:, bin_i])
+        kernia_i = np.interp(int_zs, self.interpwinia[:, 0],
+                             self.interpwinia[:, bin_i])
+        kern_j = np.interp(int_zs, self.interpwingal[:, 0],
+                           self.interpwingal[:, bin_j])
+        pandw_gd = kern_i * kern_j * pow_gd
+        pandw_gi = kernia_i * kern_j * pow_gi
+        pandwijk = pandw_gd + pandw_gi
+
+        c_int_arr = self.Cl_generic_integrand(int_zs, pandwijk)
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
 
         return c_final

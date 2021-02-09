@@ -14,6 +14,7 @@ from likelihood.spectroscopic_survey.spec import Spec
 from astropy import constants as const
 from pathlib import Path
 
+
 def mock_MG_func(z, k):
     """
     Test MG function that simply returns 1.
@@ -96,7 +97,7 @@ class cosmoinitTestCase(TestCase):
         pgg = np.load(str(cur_dir) + '/test_input/pgg.npy')
         pgi_phot = np.load(str(cur_dir) + '/test_input/pgi_phot.npy')
         pgi_spec = np.load(str(cur_dir) + '/test_input/pgi_spec.npy')
-        pgg_spec =  np.load(str(cur_dir) + '/test_input/pgg_spec.npy')
+        pgg_spec = np.load(str(cur_dir) + '/test_input/pgg_spec.npy')
         pii = np.load(str(cur_dir) + '/test_input/pii.npy')
 
         zs_base = np.linspace(0.0, 4.0, 100)

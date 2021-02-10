@@ -37,6 +37,12 @@ class CobayaModel:
             'ombh2': cosmo_inst.cosmo_dic['ombh2'],
             'omch2': cosmo_inst.cosmo_dic['omch2'],
             'omnuh2': cosmo_inst.cosmo_dic['omnuh2'],
+            'omegam': None,
+            'omegab': None,
+            'omeganu': None,
+            'omegac': None,
+            'omk': cosmo_inst.cosmo_dic['Omk'],
+            'mnu': 0.06,
             'H0': cosmo_inst.cosmo_dic['H0'],
             'tau': cosmo_inst.cosmo_dic['tau'],
             'mnu': cosmo_inst.cosmo_dic['mnu'],
@@ -68,6 +74,14 @@ class CobayaModel:
             'omnuh2')
         self.cosmology.cosmo_dic['ombh2'] = self.model.provider.get_param(
             'ombh2')
+        self.cosmology.cosmo_dic['Omc'] = \
+            self.model.provider.get_param('omegac')
+        self.cosmology.cosmo_dic['Omm'] = \
+            self.model.provider.get_param('omegam')
+        self.cosmology.cosmo_dic['Omk'] = \
+            self.model.provider.get_param('omk')
+        self.cosmology.cosmo_dic['Omnu'] = \
+            self.model.provider.get_param('omeganu')
         self.cosmology.cosmo_dic['mnu'] = self.model.provider.get_param('mnu')
         self.cosmology.cosmo_dic['z_win'] = self.z_win
         self.cosmology.cosmo_dic['k_win'] = self.k_win

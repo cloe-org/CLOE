@@ -117,16 +117,8 @@ class EuclidLikelihood(Likelihood):
             'omnuh2': self.fiducial_cosmology.cosmo_dic['omnuh2'],
             'H0': self.fiducial_cosmology.cosmo_dic['H0'],
             'H0_Mpc': self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value,
-            'Omb': (self.fiducial_cosmology.cosmo_dic['ombh2'] /
-                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.),
-            'Omc': (self.fiducial_cosmology.cosmo_dic['omch2'] /
-                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.),
             'Omnu': (self.fiducial_cosmology.cosmo_dic['omnuh2'] /
                      (self.cosmo.cosmo_dic['H0'] / 100.)**2.),
-            'Omm': ((self.fiducial_cosmology.cosmo_dic['ombh2'] +
-                     self.fiducial_cosmology.cosmo_dic['omch2'] +
-                     self.fiducial_cosmology.cosmo_dic['omnuh2']) /
-                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.),
             'tau': self.fiducial_cosmology.cosmo_dic['tau'],
             'mnu': self.fiducial_cosmology.cosmo_dic['mnu'],
             'nnu': self.fiducial_cosmology.cosmo_dic['nnu'],
@@ -145,7 +137,12 @@ class EuclidLikelihood(Likelihood):
             self.fiducial_cosmology.cosmo_dic['nuisance_parameters'])
         # (GCH): use get_model wrapper for fiducial
         model_fiducial = get_model(self.info_fiducial)
-        model_fiducial.add_requirements({"Pk_interpolator":
+        model_fiducial.add_requirements({"omegam": None,
+                                         "omegab": None,
+                                         "omegac": None,
+                                         "omnuh2": None,
+                                         "omeganu": None,
+                                         "Pk_interpolator":
                                          {"z": self.z_win,
                                           "k_max": self.k_max_Boltzmannn,
                                           "nonlinear": False,
@@ -175,6 +172,12 @@ class EuclidLikelihood(Likelihood):
         model_fiducial.logposterior({})
 
         # (GCH): update fiducial cosmology dictionary
+        self.fiducial_cosmology.cosmo_dic['Omc'] = \
+            model_fiducial.provider.get_param('omegac')
+        self.fiducial_cosmology.cosmo_dic['Omm'] = \
+            model_fiducial.provider.get_param('omegam')
+        self.fiducial_cosmology.cosmo_dic['Omk'] = \
+            model_fiducial.provider.get_param('omegam')
         self.fiducial_cosmology.cosmo_dic['z_win'] = self.z_win
         self.fiducial_cosmology.cosmo_dic['k_win'] = self.k_win
         self.fiducial_cosmology.cosmo_dic['comov_dist'] = \
@@ -221,7 +224,12 @@ class EuclidLikelihood(Likelihood):
 
         """
 
-        return {"Pk_interpolator":
+        return {"omegam": None,
+                "omegab": None,
+                "omegac": None,
+                "omnuh2": None,
+                "omeganu": None,
+                "Pk_interpolator":
                 {"z": self.z_win,
                  "k_max": self.k_max_Boltzmannn,
                  "nonlinear": False,
@@ -254,24 +262,13 @@ class EuclidLikelihood(Likelihood):
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
             self.cosmo.cosmo_dic['omch2'] = self.provider.get_param('omch2')
             self.cosmo.cosmo_dic['ombh2'] = self.provider.get_param('ombh2')
-            self.cosmo.cosmo_dic['Omc'] = \
-                (self.cosmo.cosmo_dic['omch2'] /
-                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.)
-            self.cosmo.cosmo_dic['Omb'] = \
-                (self.cosmo.cosmo_dic['ombh2'] /
-                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.)
+            self.cosmo.cosmo_dic['Omc'] = self.provider.get_param('omegac')
+            self.cosmo.cosmo_dic['Omb'] = self.provider.get_param('omegab')
+            self.cosmo.cosmo_dic['Omm'] = self.provider.get_param('omegam')
+            self.cosmo.cosmo_dic['Omk'] = self.provider.get_param('omk')
             self.cosmo.cosmo_dic['mnu'] = self.provider.get_param('mnu')
-            # GCH: ATTENTION! THIS IS A TEMPORAL SOLUTION
-            # as we cannot retrieve num_massive_neutrinos
-            self.cosmo.cosmo_dic['omnuh2'] = \
-                self.cosmo.cosmo_dic['mnu'] / 94.07 * (1. / 3)**0.75
-            self.cosmo.cosmo_dic['Omnu'] = \
-                (self.cosmo.cosmo_dic['omnuh2'] /
-                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.)
-            # MM: why there is no omkh2 here?
-            self.cosmo.cosmo_dic['Omm'] = \
-                (self.cosmo.cosmo_dic['Omb'] + self.cosmo.cosmo_dic['Omc'] +
-                 self.cosmo.cosmo_dic['Omnu'])
+            self.cosmo.cosmo_dic['omnuh2'] = self.provider.get_param('omnuh2')
+            self.cosmo.cosmo_dic['Omnu'] = self.provider.get_param('omeganu')
             self.cosmo.cosmo_dic['w'] = self.provider.get_param('w')
             self.cosmo.cosmo_dic['wa'] = self.provider.get_param('wa')
             self.cosmo.cosmo_dic['comov_dist'] = \
@@ -305,23 +302,14 @@ class EuclidLikelihood(Likelihood):
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
             self.cosmo.cosmo_dic['omch2'] = model.provider.get_param('omch2')
             self.cosmo.cosmo_dic['ombh2'] = model.provider.get_param('ombh2')
-            self.cosmo.cosmo_dic['Omc'] = \
-                (self.cosmo.cosmo_dic['omch2'] /
-                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.)
-            self.cosmo.cosmo_dic['Omb'] = \
-                (self.cosmo.cosmo_dic['ombh2'] /
-                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.)
+            self.cosmo.cosmo_dic['Omc'] = model.provider.get_param('omegac')
+            self.cosmo.cosmo_dic['Omb'] = model.provider.get_param('omegab')
+            self.cosmo.cosmo_dic['Omm'] = model.provider.get_param('omegam')
+            self.cosmo.cosmo_dic['Omk'] = model.provider.get_param('omk')
             self.cosmo.cosmo_dic['mnu'] = model.provider.get_param('mnu')
-            # GCH: ATTENTION! THIS IS A TEMPORAL SOLUTION
-            # as we cannot retrieve num_massive_neutrinos
-            self.cosmo.cosmo_dic['omnuh2'] = \
-                self.cosmo.cosmo_dic['mnu'] / 94.07 * (1. / 3)**0.75
-            self.cosmo.cosmo_dic['Omnu'] = \
-                (self.cosmo.cosmo_dic['omnuh2'] /
-                    (self.cosmo.cosmo_dic['H0'] / 100.)**2.)
-            self.cosmo.cosmo_dic['Omm'] = \
-                (self.cosmo.cosmo_dic['Omb'] + self.cosmo.cosmo_dic['Omc'] +
-                 self.cosmo.cosmo_dic['Omnu'])
+            self.cosmo.cosmo_dic['mnu'] = model.provider.get_param('mnu')
+            self.cosmo.cosmo_dic['omnuh2'] = model.provider.get_param('omnuh2')
+            self.cosmo.cosmo_dic['Omnu'] = model.provider.get_param('omeganu')
             self.cosmo.cosmo_dic['w'] = model.provider.get_param('w')
             self.cosmo.cosmo_dic['wa'] = model.provider.get_param('wa')
             self.cosmo.cosmo_dic['comov_dist'] = \

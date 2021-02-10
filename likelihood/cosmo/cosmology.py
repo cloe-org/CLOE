@@ -72,6 +72,12 @@ class Cosmology:
             Present-day total matter energy density
             Omega_m
             Assumes sum of baryons, CDM and neutrinos
+        Omc: float
+            Present-day cold dark matter energy density
+            Omega_cdm
+        Omk: float
+            Present-day curvature energy density
+            Omega_k
         mnu: float
             Sum of massive neutrino species masses (eV)
         comov_dist: list
@@ -159,7 +165,11 @@ class Cosmology:
                           'omch2': 0.122,
                           'ombh2': 0.022,
                           'omnuh2': 0.000644,
-                          'omkh2': 0.0,
+                          'Omnu': 0.00143715,
+                          'Omk': 0.0,
+                          'Omm': 0.32,
+                          'Omc': 0.27,
+                          'Omb': 0.05,
                           'w': -1.0,
                           'wa': 0.0,
                           'mnu': 0.06,
@@ -223,22 +233,8 @@ class Cosmology:
                              'nia': -0.41,
                              'bia': 0.0}}
 
-        # MM: adding some derived parameters
         self.cosmo_dic['H0_Mpc'] = (self.cosmo_dic['H0'] /
                                     const.c.to('km/s').value)
-        self.cosmo_dic['Omc'] = (self.cosmo_dic['omch2'] /
-                                 (self.cosmo_dic['H0'] / 100.)**2.)
-        self.cosmo_dic['Omb'] = (self.cosmo_dic['ombh2'] /
-                                 (self.cosmo_dic['H0'] / 100.)**2.)
-        self.cosmo_dic['Omnu'] = (self.cosmo_dic['omnuh2'] /
-                                  (self.cosmo_dic['H0'] / 100.)**2.)
-        self.cosmo_dic['Omk'] = (self.cosmo_dic['omkh2'] /
-                                 (self.cosmo_dic['H0'] / 100.)**2.)
-
-        self.cosmo_dic['Omm'] = (self.cosmo_dic['Omc'] +
-                                 self.cosmo_dic['Omb'] +
-                                 self.cosmo_dic['Omnu'])
-
         self.nonlinear = Nonlinear(self.cosmo_dic)
 
     def growth_factor(self, zs, ks):

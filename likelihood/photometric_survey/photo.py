@@ -82,17 +82,16 @@ class Photo:
 
         Parameters
         ----------
-        z: array
-           List of redshifts at which to evaluate distribution.
+        z: float
+           Redshift at which to evaluate distribution.
         bin_i: int
            index of desired tomographic bin. Tomographic bin
            indices start from 1.
 
         Returns
         -------
-        W_i_G: array
-           Window function for galaxy clustering photometric evaluated
-           at input redshifts
+        W_i_G: float
+           Window function for galaxy clustering photometric
         """
 
         n_z_normalized = self.nz_dic_GC[''.join(['n', str(bin_i)])]
@@ -228,16 +227,16 @@ class Photo:
 
         Parameters
         ----------
-        z: array
-            List of redshifts at which weight is evaluated.
+        z: float
+            Redshift at which weight is evaluated.
         bin_i: int
            index of desired tomographic bin. Tomographic bin
            indices start from 1.
 
         Returns
         -------
-        W_IA: array
-           Value of IA kernel for specified bin at specified redshifts.
+        W_IA: float
+           Value of IA kernel for specified bin at specified redshift.
         """
 
         n_z_normalized = self.nz_dic_WL[''.join(['n', str(bin_i)])]
@@ -261,17 +260,17 @@ class Photo:
 
         Parameters
         ----------
-        z: array
+        z: numpy.ndarray
             List of redshifts at which integrand is being evaluated.
-        PandW_i_j_z_k: array
-           List of values of the product of kernel for bin i, kernel for bin j,
+        PandW_i_j_z_k: numpy.ndarray
+           Values of the product of kernel for bin i, kernel for bin j,
            and the power spectrum at redshift z and scale k.
 
         Returns
         -------
-        kern_mult_power: array
+        kern_mult_power: numpy.ndarray
            Values of the angular power spectrum integrand at
-           the input redshift array and multipole :math:`\ell`.
+           the given redshifts and multipole :math:`\ell`.
         """
         kern_mult_power = (PandW_i_j_z_k /
                            (self.theory['H_z_func'](z) *

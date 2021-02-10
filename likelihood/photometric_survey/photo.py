@@ -317,25 +317,25 @@ class Photo:
            Value of the angular shear power spectrum.
         """
 
-        int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
+        zs_arr = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
-        c_int_arr = np.empty(len(int_zs))
+        c_int_arr = np.empty(len(zs_arr))
         P_dd = self.theory['Pk_interpolator'].P
         P_ii = self.theory['Pii']
         P_di = self.theory['Pdeltai']
 
-        int_ks = (ell + 0.5) / self.theory['r_z_func'](int_zs)
-        pow_dd = P_dd(int_zs, int_ks, grid=False)
-        pow_ii = P_ii(int_zs, int_ks, grid=False)
-        pow_di = P_di(int_zs, int_ks, grid=False)
+        ks_arr = (ell + 0.5) / self.theory['r_z_func'](zs_arr)
+        pow_dd = P_dd(zs_arr, ks_arr, grid=False)
+        pow_ii = P_ii(zs_arr, ks_arr, grid=False)
+        pow_di = P_di(zs_arr, ks_arr, grid=False)
 
-        kern_i = np.interp(int_zs, self.interpwin[:, 0],
+        kern_i = np.interp(zs_arr, self.interpwin[:, 0],
                            self.interpwin[:, bin_i])
-        kern_j = np.interp(int_zs, self.interpwin[:, 0],
+        kern_j = np.interp(zs_arr, self.interpwin[:, 0],
                            self.interpwin[:, bin_j])
-        kernia_i = np.interp(int_zs, self.interpwinia[:, 0],
+        kernia_i = np.interp(zs_arr, self.interpwinia[:, 0],
                              self.interpwinia[:, bin_i])
-        kernia_j = np.interp(int_zs, self.interpwinia[:, 0],
+        kernia_j = np.interp(zs_arr, self.interpwinia[:, 0],
                              self.interpwinia[:, bin_j])
 
         pandw_dd = kern_i * kern_j * pow_dd
@@ -343,8 +343,8 @@ class Photo:
         pandw_di = (kern_i * kernia_j + kernia_i * kern_j) * pow_di
         pandwijk = pandw_dd + pandw_ii + pandw_di
 
-        c_int_arr = self.Cl_generic_integrand(int_zs, pandwijk)
-        c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
+        c_int_arr = self.Cl_generic_integrand(zs_arr, pandwijk)
+        c_final = self.theory['c'] * integrate.trapz(c_int_arr, zs_arr)
 
         return c_final
 
@@ -379,22 +379,22 @@ class Photo:
            galaxy clustering photometric.
         """
 
-        int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
+        zs_arr = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
-        c_int_arr = np.empty(len(int_zs))
-        P_int = self.theory['Pgg_phot']
+        c_int_arr = np.empty(len(zs_arr))
+        P_gg = self.theory['Pgg_phot']
 
-        int_ks = (ell + 0.5) / self.theory['r_z_func'](int_zs)
-        power = P_int(int_zs, int_ks, grid=False)
+        ks_arr = (ell + 0.5) / self.theory['r_z_func'](zs_arr)
+        power = P_gg(zs_arr, ks_arr, grid=False)
 
-        kern_i = np.interp(int_zs, self.interpwingal[:, 0],
+        kern_i = np.interp(zs_arr, self.interpwingal[:, 0],
                            self.interpwingal[:, bin_i])
-        kern_j = np.interp(int_zs, self.interpwingal[:, 0],
+        kern_j = np.interp(zs_arr, self.interpwingal[:, 0],
                            self.interpwingal[:, bin_j])
         pandwijk = kern_i * kern_j * power
 
-        c_int_arr = self.Cl_generic_integrand(int_zs, pandwijk)
-        c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
+        c_int_arr = self.Cl_generic_integrand(zs_arr, pandwijk)
+        c_final = self.theory['c'] * integrate.trapz(c_int_arr, zs_arr)
 
         return c_final
 
@@ -432,27 +432,27 @@ class Photo:
            galaxy clustering photometric angular power spectrum.
         """
 
-        int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
+        zs_arr = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
-        c_int_arr = np.empty(len(int_zs))
+        c_int_arr = np.empty(len(zs_arr))
         P_gd = self.theory['Pgdelta_phot']
         P_gi = self.theory['Pgi_phot']
 
-        int_ks = (ell + 0.5) / self.theory['r_z_func'](int_zs)
-        pow_gd = P_gd(int_zs, int_ks, grid=False)
-        pow_gi = P_gi(int_zs, int_ks, grid=False)
+        ks_arr = (ell + 0.5) / self.theory['r_z_func'](zs_arr)
+        pow_gd = P_gd(zs_arr, ks_arr, grid=False)
+        pow_gi = P_gi(zs_arr, ks_arr, grid=False)
 
-        kern_i = np.interp(int_zs, self.interpwin[:, 0],
+        kern_i = np.interp(zs_arr, self.interpwin[:, 0],
                            self.interpwin[:, bin_i])
-        kernia_i = np.interp(int_zs, self.interpwinia[:, 0],
+        kernia_i = np.interp(zs_arr, self.interpwinia[:, 0],
                              self.interpwinia[:, bin_i])
-        kern_j = np.interp(int_zs, self.interpwingal[:, 0],
+        kern_j = np.interp(zs_arr, self.interpwingal[:, 0],
                            self.interpwingal[:, bin_j])
         pandw_gd = kern_i * kern_j * pow_gd
         pandw_gi = kernia_i * kern_j * pow_gi
         pandwijk = pandw_gd + pandw_gi
 
-        c_int_arr = self.Cl_generic_integrand(int_zs, pandwijk)
-        c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
+        c_int_arr = self.Cl_generic_integrand(zs_arr, pandwijk)
+        c_final = self.theory['c'] * integrate.trapz(c_int_arr, zs_arr)
 
         return c_final

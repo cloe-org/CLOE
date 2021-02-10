@@ -32,7 +32,7 @@ info = {
         'mnu': 0.06, #  sum of the mass of neutrinos in eV
         'nnu': 3.046, #N_eff of relativistic species 
         'As': 2.12605e-9, #Amplitude of the primordial scalar power spectrum
-        'ns': {'prior':{'min':0.8, 'max':1.2}}, # primordial power spectrum tilt (sampled with an uniform prior)
+        'ns': 0.9674,  # primordial power spectrum tilt
         'w': -1, #Dark energy fluid model
         'wa': 0, #Dark energy fluid model
         'omk': 0.0, #curvature density

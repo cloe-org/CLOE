@@ -82,16 +82,17 @@ class Photo:
 
         Parameters
         ----------
-        z: float
-           Redshift at which to evaluate distribution.
+        z: array
+           List of redshifts at which to evaluate distribution.
         bin_i: int
            index of desired tomographic bin. Tomographic bin
            indices start from 1.
 
         Returns
         -------
-        W_i_G: float
-           Window function for galaxy clustering photometric
+        W_i_G: array
+           Window function for galaxy clustering photometric evaluated
+           at input redshifts
         """
 
         n_z_normalized = self.nz_dic_GC[''.join(['n', str(bin_i)])]
@@ -227,16 +228,16 @@ class Photo:
 
         Parameters
         ----------
-        z: float
-            Redshift at which weight is evaluated.
+        z: array
+            List of redshifts at which weight is evaluated.
         bin_i: int
            index of desired tomographic bin. Tomographic bin
            indices start from 1.
 
         Returns
         -------
-        W_IA: float
-           Value of IA kernel for specified bin at specified redshift.
+        W_IA: array
+           Value of IA kernel for specified bin at specified redshifts.
         """
 
         n_z_normalized = self.nz_dic_WL[''.join(['n', str(bin_i)])]
@@ -260,17 +261,17 @@ class Photo:
 
         Parameters
         ----------
-        z: float
-            Redshift at which integrand is being evaluated.
-        PandW_i_j_z_k: float
-           Value of the product of kernel for bin i, kernel for bin j,
+        z: array
+            List of redshifts at which integrand is being evaluated.
+        PandW_i_j_z_k: array
+           List of values of the product of kernel for bin i, kernel for bin j,
            and the power spectrum at redshift z and scale k.
 
         Returns
         -------
-        kern_mult_power: float
-           Value of the angular power spectrum integrand at
-           a given redshift and multipole :math:`\ell`.
+        kern_mult_power: array
+           Values of the angular power spectrum integrand at
+           the input redshift array and multipole :math:`\ell`.
         """
         kern_mult_power = (PandW_i_j_z_k /
                            (self.theory['H_z_func'](z) *
@@ -324,10 +325,10 @@ class Photo:
         P_ii = self.theory['Pii']
         P_di = self.theory['Pdeltai']
 
-        current_k = (ell + 0.5) / self.theory['r_z_func'](int_zs)
-        pow_dd = P_dd(int_zs, current_k, grid=False)
-        pow_ii = P_ii(int_zs, current_k, grid=False)
-        pow_di = P_di(int_zs, current_k, grid=False)
+        int_ks = (ell + 0.5) / self.theory['r_z_func'](int_zs)
+        pow_dd = P_dd(int_zs, int_ks, grid=False)
+        pow_ii = P_ii(int_zs, int_ks, grid=False)
+        pow_di = P_di(int_zs, int_ks, grid=False)
 
         kern_i = np.interp(int_zs, self.interpwin[:, 0],
                            self.interpwin[:, bin_i])
@@ -384,8 +385,8 @@ class Photo:
         c_int_arr = np.empty(len(int_zs))
         P_int = self.theory['Pgg_phot']
 
-        current_k = (ell + 0.5) / self.theory['r_z_func'](int_zs)
-        power = P_int(int_zs, current_k, grid=False)
+        int_ks = (ell + 0.5) / self.theory['r_z_func'](int_zs)
+        power = P_int(int_zs, int_ks, grid=False)
 
         kern_i = np.interp(int_zs, self.interpwingal[:, 0],
                            self.interpwingal[:, bin_i])
@@ -438,9 +439,9 @@ class Photo:
         P_gd = self.theory['Pgdelta_phot']
         P_gi = self.theory['Pgi_phot']
 
-        current_k = (ell + 0.5) / self.theory['r_z_func'](int_zs)
-        pow_gd = P_gd(int_zs, current_k, grid=False)
-        pow_gi = P_gi(int_zs, current_k, grid=False)
+        int_ks = (ell + 0.5) / self.theory['r_z_func'](int_zs)
+        pow_gd = P_gd(int_zs, int_ks, grid=False)
+        pow_gi = P_gi(int_zs, int_ks, grid=False)
 
         kern_i = np.interp(int_zs, self.interpwin[:, 0],
                            self.interpwin[:, bin_i])

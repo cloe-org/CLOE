@@ -260,23 +260,23 @@ class Photo:
 
         Parameters
         ----------
-        z: float
-            Redshift at which integrand is being evaluated.
-        PandW_i_j_z_k: float
-           Value of the product of kernel for bin i, kernel for bin j,
+        z: numpy.ndarray
+            List of redshifts at which integrand is being evaluated.
+        PandW_i_j_z_k: numpy.ndarray
+           Values of the product of kernel for bin i, kernel for bin j,
            and the power spectrum at redshift z and scale k.
 
         Returns
         -------
-        kern_mult_power: float
-           Value of the angular power spectrum integrand at
-           a given redshift and multipole :math:`\ell`.
+        kern_mult_power: numpy.ndarray
+           Values of the angular power spectrum integrand at
+           the given redshifts and multipole :math:`\ell`.
         """
         kern_mult_power = (PandW_i_j_z_k /
                            (self.theory['H_z_func'](z) *
                             (self.theory['r_z_func'](z)) ** 2.0))
 
-        if np.isnan(PandW_i_j_z_k):
+        if (np.isnan(PandW_i_j_z_k).any()):
             raise Exception('Requested k, z values are outside of power'
                             ' spectrum interpolation range.')
         return kern_mult_power
@@ -317,31 +317,34 @@ class Photo:
            Value of the angular shear power spectrum.
         """
 
-        int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
+        zs_arr = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
-        c_int_arr = np.empty(len(int_zs))
+        c_int_arr = np.empty(len(zs_arr))
         P_dd = self.theory['Pk_interpolator'].P
         P_ii = self.theory['Pii']
         P_di = self.theory['Pdeltai']
-        for ii, rshift in enumerate(int_zs):
-            current_k = (ell + 0.5) / self.theory['r_z_func'](rshift)
-            pow_dd = np.atleast_1d(P_dd(rshift, current_k))[0]
-            pow_ii = np.atleast_1d(P_ii(rshift, current_k))[0]
-            pow_di = np.atleast_1d(P_di(rshift, current_k))[0]
-            kern_i = np.interp(rshift, self.interpwin[:, 0],
-                               self.interpwin[:, bin_i])
-            kern_j = np.interp(rshift, self.interpwin[:, 0],
-                               self.interpwin[:, bin_j])
-            kernia_i = np.interp(rshift, self.interpwinia[:, 0],
-                                 self.interpwinia[:, bin_i])
-            kernia_j = np.interp(rshift, self.interpwinia[:, 0],
-                                 self.interpwinia[:, bin_j])
-            pandw_dd = kern_i * kern_j * pow_dd
-            pandw_ii = kernia_i * kernia_j * pow_ii
-            pandw_di = (kern_i * kernia_j + kernia_i * kern_j) * pow_di
-            pandwijk = pandw_dd + pandw_ii + pandw_di
-            c_int_arr[ii] = self.Cl_generic_integrand(rshift, pandwijk)
-        c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
+
+        ks_arr = (ell + 0.5) / self.theory['r_z_func'](zs_arr)
+        pow_dd = P_dd(zs_arr, ks_arr, grid=False)
+        pow_ii = P_ii(zs_arr, ks_arr, grid=False)
+        pow_di = P_di(zs_arr, ks_arr, grid=False)
+
+        kern_i = np.interp(zs_arr, self.interpwin[:, 0],
+                           self.interpwin[:, bin_i])
+        kern_j = np.interp(zs_arr, self.interpwin[:, 0],
+                           self.interpwin[:, bin_j])
+        kernia_i = np.interp(zs_arr, self.interpwinia[:, 0],
+                             self.interpwinia[:, bin_i])
+        kernia_j = np.interp(zs_arr, self.interpwinia[:, 0],
+                             self.interpwinia[:, bin_j])
+
+        pandw_dd = kern_i * kern_j * pow_dd
+        pandw_ii = kernia_i * kernia_j * pow_ii
+        pandw_di = (kern_i * kernia_j + kernia_i * kern_j) * pow_di
+        pandwijk = pandw_dd + pandw_ii + pandw_di
+
+        c_int_arr = self.Cl_generic_integrand(zs_arr, pandwijk)
+        c_final = self.theory['c'] * integrate.trapz(c_int_arr, zs_arr)
 
         return c_final
 
@@ -376,23 +379,22 @@ class Photo:
            galaxy clustering photometric.
         """
 
-        int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
+        zs_arr = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
-        c_int_arr = np.empty(len(int_zs))
-        P_int = self.theory['Pgg_phot']
-        for ii, rshift in enumerate(int_zs):
-            # (ACD): Although k is specified here for the GC window function,
-            # note that the implementation currently uses a scale-independent
-            # bias.
-            current_k = (ell + 0.5) / self.theory['r_z_func'](rshift)
-            power = np.atleast_1d(P_int(rshift, current_k))[0]
-            kern_i = np.interp(rshift, self.interpwingal[:, 0],
-                               self.interpwingal[:, bin_i])
-            kern_j = np.interp(rshift, self.interpwingal[:, 0],
-                               self.interpwingal[:, bin_j])
-            pandwijk = kern_i * kern_j * power
-            c_int_arr[ii] = self.Cl_generic_integrand(rshift, pandwijk)
-        c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
+        c_int_arr = np.empty(len(zs_arr))
+        P_gg = self.theory['Pgg_phot']
+
+        ks_arr = (ell + 0.5) / self.theory['r_z_func'](zs_arr)
+        power = P_gg(zs_arr, ks_arr, grid=False)
+
+        kern_i = np.interp(zs_arr, self.interpwingal[:, 0],
+                           self.interpwingal[:, bin_i])
+        kern_j = np.interp(zs_arr, self.interpwingal[:, 0],
+                           self.interpwingal[:, bin_j])
+        pandwijk = kern_i * kern_j * power
+
+        c_int_arr = self.Cl_generic_integrand(zs_arr, pandwijk)
+        c_final = self.theory['c'] * integrate.trapz(c_int_arr, zs_arr)
 
         return c_final
 
@@ -430,28 +432,27 @@ class Photo:
            galaxy clustering photometric angular power spectrum.
         """
 
-        int_zs = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
+        zs_arr = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
-        c_int_arr = np.empty(len(int_zs))
+        c_int_arr = np.empty(len(zs_arr))
         P_gd = self.theory['Pgdelta_phot']
         P_gi = self.theory['Pgi_phot']
-        for ii, rshift in enumerate(int_zs):
-            # (ACD): Although k is specified here for the GC window function,
-            # note that the implementation currently uses a scale-independent
-            # bias.
-            current_k = (ell + 0.5) / self.theory['r_z_func'](rshift)
-            pow_gd = np.atleast_1d(P_gd(rshift, current_k))[0]
-            pow_gi = np.atleast_1d(P_gi(rshift, current_k))[0]
-            kern_i = np.interp(rshift, self.interpwin[:, 0],
-                               self.interpwin[:, bin_i])
-            kernia_i = np.interp(rshift, self.interpwinia[:, 0],
-                                 self.interpwinia[:, bin_i])
-            kern_j = np.interp(rshift, self.interpwingal[:, 0],
-                               self.interpwingal[:, bin_j])
-            pandw_gd = kern_i * kern_j * pow_gd
-            pandw_gi = kernia_i * kern_j * pow_gi
-            pandwijk = pandw_gd + pandw_gi
-            c_int_arr[ii] = self.Cl_generic_integrand(rshift, pandwijk)
-        c_final = self.theory['c'] * integrate.trapz(c_int_arr, int_zs)
+
+        ks_arr = (ell + 0.5) / self.theory['r_z_func'](zs_arr)
+        pow_gd = P_gd(zs_arr, ks_arr, grid=False)
+        pow_gi = P_gi(zs_arr, ks_arr, grid=False)
+
+        kern_i = np.interp(zs_arr, self.interpwin[:, 0],
+                           self.interpwin[:, bin_i])
+        kernia_i = np.interp(zs_arr, self.interpwinia[:, 0],
+                             self.interpwinia[:, bin_i])
+        kern_j = np.interp(zs_arr, self.interpwingal[:, 0],
+                           self.interpwingal[:, bin_j])
+        pandw_gd = kern_i * kern_j * pow_gd
+        pandw_gi = kernia_i * kern_j * pow_gi
+        pandwijk = pandw_gd + pandw_gi
+
+        c_int_arr = self.Cl_generic_integrand(zs_arr, pandwijk)
+        c_final = self.theory['c'] * integrate.trapz(c_int_arr, zs_arr)
 
         return c_final

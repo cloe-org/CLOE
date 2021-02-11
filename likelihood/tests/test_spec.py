@@ -113,8 +113,8 @@ class cosmoinitTestCase(TestCase):
                           'r_z_func': rz_interp, 'd_z_func': dz_interp,
                           'H_z_func_Mpc': Hmpc_interp,
                           'H_z_func': Hz_interp,
-                          'z_win': np.linspace(0.0, 4.0, 100),
-                          'k_win': np.linspace(0.001, 10.0, 100),
+                          'z_win': zs_base,
+                          'k_win': ks_base,
                           'MG_sigma': MG_interp, 'c': const.c.to('km/s').value}
 
         # MM: precomputed parameters
@@ -164,6 +164,11 @@ class cosmoinitTestCase(TestCase):
         fid_dA_interp = interpolate.InterpolatedUnivariateSpline(x=zs_H,
                                                                  y=fid_d_A_arr,
                                                                  ext=0)
+    
+        # ACD: Note - the 'fiducial' cosmology declared here is purely for the
+        # purposes of testing the spec module. It is not representative of our
+        # fiducial model nor does it correspond to the fiducial model used by
+        # OU-LE3 to compute distances.
 
         fid_mock_dic = {'H0': 67.5,
                         'omch2': 0.122,
@@ -179,8 +184,8 @@ class cosmoinitTestCase(TestCase):
                         'c': const.c.to('km/s').value,
                         'd_z_func': fid_dA_interp,
                         'H_z_func': fid_H_interp,
-                        'z_win': np.linspace(0.0, 4.0, 100),
-                        'k_win': np.linspace(0.001, 10.0, 100),
+                        'z_win': zs_base,
+                        'k_win': ks_base,
                         'MG_sigma': MG_interp}
 
         self.fiducial_dict = fid_mock_dic

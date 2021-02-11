@@ -115,6 +115,7 @@ class EuclidLikelihood(Likelihood):
             'ombh2': self.fiducial_cosmology.cosmo_dic['ombh2'],
             'omch2': self.fiducial_cosmology.cosmo_dic['omch2'],
             'omnuh2': self.fiducial_cosmology.cosmo_dic['omnuh2'],
+            'omk': self.fiducial_cosmology.cosmo_dic['Omk'],
             'H0': self.fiducial_cosmology.cosmo_dic['H0'],
             'H0_Mpc': self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value,
             'Omnu': (self.fiducial_cosmology.cosmo_dic['omnuh2'] /
@@ -124,6 +125,8 @@ class EuclidLikelihood(Likelihood):
             'nnu': self.fiducial_cosmology.cosmo_dic['nnu'],
             'ns': self.fiducial_cosmology.cosmo_dic['ns'],
             'As': self.fiducial_cosmology.cosmo_dic['As'],
+            'w': self.fiducial_cosmology.cosmo_dic['w'],
+            'wa': self.fiducial_cosmology.cosmo_dic['wa']
         },
             'theory': {'camb':
                        {'stop_at_error': True,
@@ -177,7 +180,7 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology.cosmo_dic['Omm'] = \
             model_fiducial.provider.get_param('omegam')
         self.fiducial_cosmology.cosmo_dic['Omk'] = \
-            model_fiducial.provider.get_param('omegam')
+            model_fiducial.provider.get_param('omk')
         self.fiducial_cosmology.cosmo_dic['z_win'] = self.z_win
         self.fiducial_cosmology.cosmo_dic['k_win'] = self.k_win
         self.fiducial_cosmology.cosmo_dic['comov_dist'] = \

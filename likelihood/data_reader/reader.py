@@ -169,7 +169,7 @@ class Reader:
                 # GCH: OU-LE3 spec files always with omnuh2=0
                 'omnuh2': 0.0,
                 'Omnu': 0.0}
-
+            # GCH: we ignore Omega_R
             fid_cosmo_file.close()
 
         except ReaderError:

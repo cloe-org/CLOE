@@ -138,7 +138,7 @@ class Cosmology:
             mu function from Modified Gravity parametrization
         MG_sigma: function
             sigma function from Modified Gravity parametrization
-        NL_boost: int
+        NL_boost: float
             Non-linear boost factor
         nuisance_parameters: dict
             Contains all nuisance bias parameters
@@ -150,10 +150,10 @@ class Cosmology:
             initialized values of the fiducial
             cosmology dictionary corresponds to:
 
-                * Photo-z values corrsponding to
+                * Photo-z values corresponding to
                 :math:`b_{(x,i)}=\sqrt{1+\bar{b}_{(x,i)}}`
 
-                * Spectroscopic bias values of arXiv:1910.09273
+                * Spectroscopic bias values in arXiv:1910.09273
 
                 * IA values in arXiv:1910.09273
         """

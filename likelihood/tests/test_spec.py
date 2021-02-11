@@ -164,7 +164,7 @@ class cosmoinitTestCase(TestCase):
         fid_dA_interp = interpolate.InterpolatedUnivariateSpline(x=zs_H,
                                                                  y=fid_d_A_arr,
                                                                  ext=0)
-    
+
         # ACD: Note - the 'fiducial' cosmology declared here is purely for the
         # purposes of testing the spec module. It is not representative of our
         # fiducial model nor does it correspond to the fiducial model used by

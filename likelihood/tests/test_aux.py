@@ -14,6 +14,7 @@ from unittest import TestCase
 from likelihood.auxiliary.plotter import Plotter
 from pathlib import Path
 
+
 def mock_MG_func(z, k):
     """
     Test MG function that simply returns 1.

@@ -92,13 +92,13 @@ class plotterTestCase(TestCase):
         spec_zkm = np.load(str(cur_dir) + '/test_input/spec_zkm.npy')
 
         pdd = np.load(str(cur_dir) + '/test_input/pdd.npy')
-        pdi = np.load(str(cur_dir) + '/test_input/pdi.npy')
-        pgd = np.load(str(cur_dir) + '/test_input/pgd.npy')
-        pgg = np.load(str(cur_dir) + '/test_input/pgg.npy')
+        pdi_phot = np.load(str(cur_dir) + '/test_input/pdi.npy')
+        pgd_phot = np.load(str(cur_dir) + '/test_input/pgd.npy')
+        pgg_phot = np.load(str(cur_dir) + '/test_input/pgg.npy')
         pgi_phot = np.load(str(cur_dir) + '/test_input/pgi_phot.npy')
         pgi_spec = np.load(str(cur_dir) + '/test_input/pgi_spec.npy')
         pgg_spec = np.load(str(cur_dir) + '/test_input/pgg_spec.npy')
-        pii = np.load(str(cur_dir) + '/test_input/pii.npy')
+        pii_phot = np.load(str(cur_dir) + '/test_input/pii.npy')
 
         zs_base = np.linspace(0.0, 4.0, 100)
         ks_base = np.logspace(-3.0, 1.0, 100)
@@ -134,16 +134,16 @@ class plotterTestCase(TestCase):
         mock_cosmo_dic['Pk_interpolator'] = p_matter
         mock_cosmo_dic['Pk_delta'] = p_matter
         mock_cosmo_dic['Pgg_phot'] = interpolate.interp2d(zs_base, ks_base,
-                                                          pgg.T,
+                                                          pgg_phot.T,
                                                           fill_value=0.0)
         mock_cosmo_dic['Pgdelta_phot'] = interpolate.interp2d(zs_base, ks_base,
-                                                              pgd.T,
+                                                              pgd_phot.T,
                                                               fill_value=0.0)
         mock_cosmo_dic['Pii'] = interpolate.interp2d(zs_base, ks_base,
-                                                     pii.T,
+                                                     pii_phot.T,
                                                      fill_value=0.0)
         mock_cosmo_dic['Pdeltai'] = interpolate.interp2d(zs_base, ks_base,
-                                                         pdi.T,
+                                                         pdi_phot.T,
                                                          fill_value=0.0)
         mock_cosmo_dic['Pgi_phot'] = interpolate.interp2d(zs_base, ks_base,
                                                           pgi_phot.T,

@@ -11,6 +11,7 @@ class NonlinearError(Exception):
     r"""
     Class to define Exception Error
     """
+
     pass
 
 
@@ -20,7 +21,8 @@ class Nonlinear:
     """
 
     def __init__(self, cosmo_dic):
-        """
+        """Initialise
+
         Initialise class and non-linear code
 
         Parameters
@@ -31,7 +33,8 @@ class Nonlinear:
         self.theory = cosmo_dic
 
     def update_dic(self, cosmo_dic):
-        """
+        """Update Dic
+
         Call all routines updating the cosmo dictionary
 
         Parameters
@@ -49,7 +52,8 @@ class Nonlinear:
         return self.theory
 
     def calculate_boost(self):
-        """
+        """Calculate Boost
+
         Check non-linear flag and computes the corresponding
         boost-factor, adding it to the dictionary
         """
@@ -59,7 +63,8 @@ class Nonlinear:
         self.theory['NL_boost'] = boost
 
     def linear_boost(self, redshift, scale):
-        """
+        """Linear Boost
+
         Returns the boost factor for the linear case (i.e. 1)
 
         Parameters

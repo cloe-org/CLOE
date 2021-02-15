@@ -1,3 +1,6 @@
+"""PHOTOMETRIC MODULE
+"""
+
 # General imports
 import numpy as np
 import likelihood.cosmo
@@ -12,6 +15,7 @@ class PhotoError(Exception):
     r"""
     Class to define Exception Error
     """
+
     pass
 
 
@@ -21,7 +25,8 @@ class Photo:
     """
 
     def __init__(self, cosmo_dic, nz_dic_WL, nz_dic_GC):
-        """
+        """Initialize
+
         Constructor of the class Photo
 
         Parameters
@@ -74,7 +79,8 @@ class Photo:
             self.interpwingal[:, tomi] = self.GC_window(self.z_winterp, tomi)
 
     def GC_window(self, z, bin_i):
-        r"""
+        r"""GC Window
+
         Implements the galaxy clustering photometric window function.
 
         .. math::
@@ -101,7 +107,8 @@ class Photo:
         return W_i_G
 
     def WL_window_integrand(self, zprime, z, nz):
-        r"""
+        r"""WL Window Integrand
+
         Calculates the Weak-lensing (WL) kernel integrand as
 
         .. math::
@@ -128,7 +135,8 @@ class Photo:
         return wint
 
     def WL_window(self, bin_i, k=0.0001):
-        r"""
+        r"""WL Window
+
         Calculates the weak lensing shear kernel for a given tomographic bin.
         Uses broadcasting to compute a 2D-array of integrands and then applies
         integrate.trapz on the array along one axis.
@@ -177,7 +185,8 @@ class Photo:
         return W_val
 
     def WL_window_slow(self, z, bin_i, k=0.0001):
-        r"""
+        r"""WL Window Slow
+
         Calculates the weak lensing shear kernel for a given tomographic bin.
 
         .. math::
@@ -217,7 +226,8 @@ class Photo:
         return W_val
 
     def IA_window(self, z, bin_i):
-        r"""
+        r"""IA Window
+
         Calculates the intrinsic alignment (IA) weight function for a
         given tomographic bin
 
@@ -246,7 +256,8 @@ class Photo:
         return W_IA
 
     def Cl_generic_integrand(self, z, PandW_i_j_z_k):
-        r"""
+        r"""Cl Generic Integrand
+
         Calculates the angular power spectrum integrand
         for any two probes and tomographic bins for which
         the bins are supplied. The power
@@ -282,7 +293,8 @@ class Photo:
         return kern_mult_power
 
     def Cl_WL(self, ell, bin_i, bin_j, int_step=0.05):
-        r"""
+        r"""Cl WL
+
         Calculates angular power spectrum for weak lensing,
         for the supplied bins. Includes intrinsic alignments.
 
@@ -349,7 +361,8 @@ class Photo:
         return c_final
 
     def Cl_GC_phot(self, ell, bin_i, bin_j, int_step=0.05):
-        r"""
+        r"""Cl GC Phot
+
         Calculates angular power spectrum for photometric galaxy clustering,
         for the supplied bins.
 
@@ -399,7 +412,8 @@ class Photo:
         return c_final
 
     def Cl_cross(self, ell, bin_i, bin_j, int_step=0.02):
-        r"""
+        r"""Cl Cross
+
         Calculates angular power spectrum for cross-correlation
         between weak lensing and galaxy clustering, for the supplied bins.
         Includes intrinsic alignments.

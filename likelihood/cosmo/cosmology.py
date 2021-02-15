@@ -14,6 +14,7 @@ class CosmologyError(Exception):
     r"""
     Class to define Exception Error
     """
+
     pass
 
 
@@ -23,7 +24,8 @@ class Cosmology:
     """
 
     def __init__(self):
-        """
+        r"""Initialize
+
         Cosmology dictionary parameters
         -------------------------------
         H0: float
@@ -265,7 +267,8 @@ class Cosmology:
     # ATTENTION !!!
     # THIS FUNCTION IS DEPRECATED
     def growth_rate(self, zs, ks):
-        r"""
+        r"""Growth Rate
+
         Adds an interpolator for the growth rate (this function is actually
         deprecated since we use the growth rate directly from  Cobaya)
 
@@ -301,7 +304,8 @@ class Cosmology:
             print('ATTENTION: Check k is a value, not a list')
 
     def growth_rate_cobaya(self):
-        r"""
+        r"""Growth Rate Cobaya
+
         Calculates growth rate according to
 
         .. math::
@@ -321,7 +325,8 @@ class Cosmology:
                 y=growth, ext=2)
 
     def interp_comoving_dist(self):
-        """
+        """Interp Comoving Dist
+
         Adds an interpolator for comoving distance to the dictionary so that
         it can be evaluated at redshifts not explictly supplied to cobaya.
 
@@ -338,7 +343,8 @@ class Cosmology:
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['comov_dist'], ext=2)
 
     def interp_angular_dist(self):
-        """
+        """Interp Angular Dist
+
         Adds an interpolator for angular distance to the dictionary so that
         it can be evaluated at redshifts not explictly supplied to cobaya.
 
@@ -355,7 +361,8 @@ class Cosmology:
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['angular_dist'], ext=2)
 
     def interp_H(self):
-        """
+        """Interp H
+
         Adds an interpolator for the Hubble parameter to the dictionary so that
         it can be evaluated at redshifts not explictly supplied to Cobaya.
 
@@ -373,7 +380,8 @@ class Cosmology:
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['H'], ext=2)
 
     def interp_H_Mpc(self):
-        """
+        """Interp H Mpc
+
         Adds an interpolator for the Hubble parameter in Mpc to the
         dictionary so that it can be evaluated at redshifts not
         explictly supplied to Cobaya.
@@ -393,7 +401,8 @@ class Cosmology:
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['H_Mpc'], ext=2)
 
     def interp_sigma8(self):
-        """
+        r"""Interp Sigma8
+
         Adds an interpolator for the matter fluctuation
         parameter :math:`\sigma_8` to the dictionary so that it
         can be evaluated at redshifts not explictly supplied to Cobaya
@@ -412,7 +421,8 @@ class Cosmology:
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['sigma_8'], ext=2)
 
     def interp_fsigma8(self):
-        """
+        r"""Interp fsigma8
+
         Adds an interpolator for :math:`f\sigma_8` to the dictionary
         so that it can be evaluated at redshifts
         not explictly supplied to Cobaya
@@ -434,7 +444,8 @@ class Cosmology:
                                                          0.678, 0.789, 0.900,
                                                          1.019, 1.155, 1.324,
                                                          1.576, 2.50]):
-        r"""
+        r"""Istf Phot Galbias
+
         Updates galaxy bias for the photometric GC probes at a given
         redshift z
 
@@ -478,7 +489,8 @@ class Cosmology:
 
     def istf_spec_galbias(self, redshift, bin_edge_list=[0.90, 1.10, 1.30,
                                                          1.50, 1.80]):
-        """
+        """Istf Spec Galbias
+
         Updates galaxy bias for the spectroscopic galaxy clustering
         probe, at given redshift, according to default recipe.
 
@@ -518,7 +530,8 @@ class Cosmology:
         return bi_val
 
     def Pgg_phot_def(self, redshift, k_scale):
-        r"""
+        r"""Pgg Phot Def
+
         Computes the galaxy-galaxy power spectrum for the photometric probe.
 
         .. math::
@@ -544,7 +557,8 @@ class Cosmology:
         return pval
 
     def Pgg_spec_def(self, redshift, k_scale, mu_rsd):
-        r"""
+        r"""Pgg Spec Def
+
         Computes the redshift-space galaxy-galaxy power spectrum for the
         spectroscopic probe.
 
@@ -577,7 +591,8 @@ class Cosmology:
         return pval
 
     def Pgd_phot_def(self, redshift, k_scale):
-        r"""
+        r"""Pgd Phot Def
+
         Computes the galaxy-matter power spectrum for the photometric probe.
 
         .. math::
@@ -603,7 +618,8 @@ class Cosmology:
         return pval
 
     def Pgd_spec_def(self, redshift, k_scale, mu_rsd):
-        r"""
+        r"""Pgd Spec Def
+
         Computes the redshift-space galaxy-matter power spectrum for the
         spectroscopic probe.
 
@@ -637,7 +653,8 @@ class Cosmology:
         return pval
 
     def fia(self, redshift, k_scale=0.001):
-        r"""
+        r"""Fia
+
         Computes the intrinsic alignment function. For v1.0
         we set :math:`\beta_{\rm IA}=0`.
 
@@ -669,7 +686,8 @@ class Cosmology:
         return fia
 
     def Pii_def(self, redshift, k_scale):
-        r"""
+        r"""Pii Def
+
         Computes the intrinsic alignment (intrinsic-intrinsic) power spectrum.
 
         .. math::
@@ -693,7 +711,8 @@ class Cosmology:
         return pval
 
     def Pdeltai_def(self, redshift, k_scale):
-        r"""
+        r"""Pdeltai Def
+
         Computes the density-intrinsic power spectrum.
 
         .. math::
@@ -717,7 +736,8 @@ class Cosmology:
         return pval
 
     def Pgi_phot_def(self, redshift, k_scale):
-        r"""
+        r"""Pgi Phot Def
+
         Computes the photometric galaxy-intrinsic power spectrum.
 
         .. math::
@@ -742,7 +762,8 @@ class Cosmology:
         return pval
 
     def Pgi_spec_def(self, redshift, k_scale):
-        r"""
+        r"""Pgi Spec Def
+
         Computes the spectroscopic galaxy-intrinsic power spectrum.
 
         .. math::
@@ -767,7 +788,8 @@ class Cosmology:
         return pval
 
     def interp_phot_galaxy_spectra(self):
-        """
+        """Interp Phot Galaxy Spectra
+
         Creates interpolators for the photometric galaxy
         clustering and galaxy-matter power spectra, and adds them to cosmo_dic.
         Note: the interpolators for v1.0 span the range :math:`k=[0.001,100.0]`
@@ -830,7 +852,8 @@ class Cosmology:
         return
 
     def MG_mu_def(self, redshift, k_scale, MG_mu):
-        r"""
+        r"""MG Mu Def
+
         Returns the function :math:`\mu(z, k)` according to the
         Modified Gravity (MG) parametrization
 
@@ -859,7 +882,8 @@ class Cosmology:
         return MG_mu
 
     def MG_sigma_def(self, redshift, k_scale, MG_sigma):
-        r"""
+        r"""MG Sigma Def
+
         Returns the function :math:`\Sigma(z, k)` according to the
         Modified Gravity (MG) parametrization
 
@@ -888,7 +912,8 @@ class Cosmology:
         return MG_sigma
 
     def update_cosmo_dic(self, zs, ks, MG_mu=1.0, MG_sigma=1.0):
-        """
+        """Update Cosmo Dic
+
         Update the dictionary with other cosmological quantities
 
         Parameters

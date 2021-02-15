@@ -13,8 +13,9 @@ from scipy import integrate
 
 class ReaderError(Exception):
     r"""
-
+    ReaderError
     """
+
     pass
 
 
@@ -24,7 +25,8 @@ class Reader:
     """
 
     def __init__(self, data_subdirectory='ExternalBenchmark'):
-        """
+        """Initialize
+
         Parameters
         ----------
         data_subdirectory: str
@@ -52,7 +54,8 @@ class Reader:
         return
 
     def reader_raw_nz(self, file_dest, file_name):
-        """
+        """Reader Raw Nz
+
         General routine to read the galaxy density
         distribution n(z) files
 
@@ -88,7 +91,8 @@ class Reader:
                    file_dest='Photometric',
                    file_name_GC='niTab-EP10-RB00.dat',
                    file_name_WL='niTab-EP10-RB00.dat'):
-        """
+        """Compute Nz
+
         Function to save n(z) dictionaries as attributes of the Reader class
         It saves the interpolators of the raw data.
 
@@ -129,7 +133,8 @@ class Reader:
                      file_dest='Spectroscopic/data/Sefusatti_multipoles_pk',
                      file_names='cov_power_galaxies_dk0p004_z%s.fits',
                      zstr=["1.", "1.2", "1.4", "1.65"]):
-        """
+        """Read GC Spec
+
         Function to read OU-LE3 spectroscopic galaxy clustering files, based
         on location provided to Reader class. Adds contents to the data
         dictionary (Reader.data_dict).
@@ -219,7 +224,8 @@ class Reader:
 
     def read_phot(self, file_dest='Photometric/data', IA_model_str='zNLA',
                   cov_model_str='Gauss'):
-        """
+        """Read Phot
+
         Function to read OU-LE3 photometric galaxy clustering and weak lensing
         files, based on location provided to Reader class. Adds contents to
         the data dictionary (Reader.data_dict).

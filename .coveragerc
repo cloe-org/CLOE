@@ -1,4 +1,5 @@
 [run]
+omit = ./likelihood/info.py
 
 [report]
 show_missing = True

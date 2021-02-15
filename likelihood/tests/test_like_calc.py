@@ -64,4 +64,4 @@ class likecalcTestCase(TestCase):
         npt.assert_allclose(self.like_tt.loglike(
             self.model_test.cosmology.cosmo_dic,
             self.model_fiducial.cosmology.cosmo_dic),
-                self.check_loglike, rtol=1e-06, err_msg='Loglike failed')
+                self.check_loglike, rtol=1e-03, err_msg='Loglike failed')

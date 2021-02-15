@@ -33,6 +33,11 @@ class Spec:
         self.theory = cosmo_dic
         self.fiducial = fiducial_dic
 
+        mu_min = -1.0
+        mu_max = 1.0
+        mu_samp = 2001
+        self.mu_grid = np.linspace(mu_min, mu_max, mu_samp)
+
     def scaling_factor_perp(self, z):
         r"""Scaling Factor Perp
 
@@ -206,7 +211,7 @@ class Spec:
         prefactor = 1.0 / self.scaling_factor_parall(z) / \
             (self.scaling_factor_perp(z))**2.0 * (2.0 * m + 1.0) / 2.0
 
-        integral = prefactor * integrate.quad(self.multipole_spectra_integrand,
-                                              a=-1.0, b=1.0, args=(z, k, m))[0]
+        p_int_arr = self.multipole_spectra_integrand(self.mu_grid, z, k, m)
+        integral = prefactor * integrate.trapz(p_int_arr, self.mu_grid)
 
         return integral

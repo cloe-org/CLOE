@@ -19,8 +19,15 @@ print("****** running script: ", sys.argv[0])
 
 #ATTENTION: CHANGE THIS TO YOUR LOCAL PATH where your external codes are installed: CAMB, polychord, likelihoods...
 
-runoption = 0
+if len(sys.argv) > 1:
+    runoption = sys.argv[1]
+else:
+    runoption = 0
+runoption = int(runoption)
+print('runoption = ', runoption)
+
 if runoption == 0:
+    print('Full likelihood evaluation!')
     info = {
         #'params': Cobaya's protected key of the input dictionary.
         # Includes the parameters that the user would like to sample over:
@@ -134,6 +141,9 @@ if runoption == 0:
 #########################
 
 if runoption == 1:
+    print('Computation of photometric and spectrscopic observables only!')
+    print("Initializing the photometric calculation.")
+
     def mock_MG_func(z, k):
         return 1.0
 
@@ -302,6 +312,7 @@ if runoption == 1:
 
     ##############################
     # SPEC
+    print("Initializing the spectroscopic calculation.")
     spec_zkm = np.load(str(cur_dir) + '/likelihood/tests/test_input/spec_zkm.npy')
     pgg_spec = np.load(str(cur_dir) + '/likelihood/tests/test_input/pgg_spec.npy')
     mock_cosmo_dic['Pgg_spec'] = interpolate.LinearNDInterpolator(spec_zkm,
@@ -346,36 +357,37 @@ if runoption == 1:
     a=time.time()
     p0_spec = spec.multipole_spectra(1.0, 0.1, 0)
     b=time.time()
-    print(p0_spec)
+    print('P0 = ', p0_spec)
     print("Time: ", b - a)
 
     print("Computing multipole spectrum P1")
     a=time.time()
     p1_spec = spec.multipole_spectra(1.0, 0.1, 1)
     b=time.time()
-    print(p1_spec)
+    print('P1 = ', p1_spec)
     print("Time: ", b - a)
 
-    print("Computing multipole spectrum P2")
-    a=time.time()
-    p2_spec = spec.multipole_spectra(1.0, 0.1, 2)
-    b=time.time()
-    print(p2_spec)
-    print("Time: ", b - a)
+    #(SJ): uncomment P2/P3/P4 once speed issue is resolved.
+    # print("Computing multipole spectrum P2")
+    # a=time.time()
+    # p2_spec = spec.multipole_spectra(1.0, 0.1, 2)
+    # b=time.time()
+    # print('P2 = ', p2_spec)
+    # print("Time: ", b - a)
 
-    print("Computing multipole spectrum P3")
-    a=time.time()
-    p3_spec = spec.multipole_spectra(1.0, 0.1, 3)
-    b=time.time()
-    print(p3_spec)
-    print("Time: ", b - a)
+    # print("Computing multipole spectrum P3")
+    # a=time.time()
+    # p3_spec = spec.multipole_spectra(1.0, 0.1, 3)
+    # b=time.time()
+    # print('P3 = ', p3_spec)
+    # print("Time: ", b - a)
 
-    print("Computing multipole spectrum P4")
-    a=time.time()
-    p4_spec = spec.multipole_spectra(1.0, 0.1, 4)
-    b=time.time()
-    print(p4_spec)
-    print("Time: ", b - a)
+    # print("Computing multipole spectrum P4")
+    # a=time.time()
+    # p4_spec = spec.multipole_spectra(1.0, 0.1, 4)
+    # b=time.time()
+    # print('P4 = ', p4_spec)
+    # print("Time: ", b - a)
     ##############################
 
 print("calculation finished")

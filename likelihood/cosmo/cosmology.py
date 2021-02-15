@@ -345,11 +345,9 @@ class Cosmology:
         Adds an interpolator for angular distance to the dictionary so that
         it can be evaluated at redshifts not explictly supplied to cobaya.
 
-        Returns
-        -------
-        interpolator: object
-            Interpolates angular diameter distance  as a function of redshift
-
+        Updates 'key' in the cosmo_dic attribute of the class by adding an
+        interpolator object of angular diameter distance
+        as a function of redshift
         """
         if self.cosmo_dic['z_win'] is None:
             raise Exception('Boltzmann code redshift binning has not been '
@@ -564,7 +562,7 @@ class Cosmology:
         pval: float
             Value of galaxy-galaxy power spectrum
             at a given redshift, k-mode and :math:`\mu_{k}`
-            for galaxy cclustering spectroscopic
+            for galaxy clustering spectroscopic
         """
         bias = self.istf_spec_galbias(redshift)
         growth = self.cosmo_dic['f_z'](redshift)

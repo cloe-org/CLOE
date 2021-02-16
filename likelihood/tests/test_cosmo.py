@@ -14,7 +14,6 @@ import numpy.testing as npt
 from scipy import integrate
 from astropy import constants as const
 from likelihood.cosmo.cosmology import Cosmology
-from likelihood.cobaya_interface import EuclidLikelihood
 from likelihood.tests.test_wrapper import CobayaModel
 from scipy.interpolate import InterpolatedUnivariateSpline
 
@@ -26,7 +25,7 @@ class cosmoinitTestCase(TestCase):
         cosmo = Cosmology()
         cosmo.cosmo_dic['ombh2'] = 0.022
         cosmo.cosmo_dic['omch2'] = 0.12
-        cosmo.cosmo_dic['H0'] = 68.0
+        cosmo.cosmo_dic['H0'] = 67.0
         cosmo.cosmo_dic['tau'] = 0.07
         cosmo.cosmo_dic['mnu'] = 0.06
         cosmo.cosmo_dic['nnu'] = 3.046
@@ -34,37 +33,26 @@ class cosmoinitTestCase(TestCase):
         cosmo.cosmo_dic['As'] = 2.1e-9
         cosmo.cosmo_dic['H0_Mpc'] = \
             cosmo.cosmo_dic['H0'] / const.c.to('km/s').value,
-        cosmo.cosmo_dic['Omc'] = \
-            cosmo.cosmo_dic['omch2'] / (cosmo.cosmo_dic['H0'] / 100.)**2.
-        cosmo.cosmo_dic['Omb'] = \
-            cosmo.cosmo_dic['ombh2'] / (cosmo.cosmo_dic['H0'] / 100.)**2.
-        cosmo.cosmo_dic['Omnu'] = \
-            cosmo.cosmo_dic['omnuh2'] / (cosmo.cosmo_dic['H0'] / 100.)**2.
-        cosmo.cosmo_dic['Omk'] = \
-            cosmo.cosmo_dic['omkh2'] / (cosmo.cosmo_dic['H0'] / 100.)**2.
-
-        cosmo.cosmo_dic['Omm'] = (cosmo.cosmo_dic['Omc'] +
-                                  cosmo.cosmo_dic['Omb'] +
-                                  cosmo.cosmo_dic['Omnu'])
-
         # (GCH): create wrapper model
         self.model_test = CobayaModel(cosmo)
         self.model_test.update_cosmo()
         # (GCH): Check values
-        self.H0check = 68.0
+        self.H0check = 67.0
         self.Dcheck = 1.0
-        self.fcheck = 0.516266
-        self.Hcheck = 75.234214
+        self.fcheck = 0.525454
+        self.Hcheck = 74.349422
         self.bias_gc_phot_check = 1.220245876862528
-        self.bias_gc_spec_check = 1.46
-        self.Pgg_phot_test = 57627.032026
-        self.Pgd_phot_test = 41167.417014
-        self.Pgg_spec_test = 83066.735675
-        self.Pgd_spec_test = 60330.848988
-        self.Pii_test = 2.257532
-        self.Pdeltai_test = -257.666214
-        self.Pgi_phot_test = -360.686685
-        self.Pgi_spec_test = -376.192673
+        self.bias_gc_spec_check = 1.46148
+        self.Pgg_phot_test = 57222.765638
+        self.Pgg_phot_test_interpolation = 57169.87062
+        self.Pgd_phot_test = 40878.618469
+        self.Pgd_phot_test_interpolation = 40840.831493
+        self.Pgg_spec_test = 82548.320427
+        self.Pgd_spec_test = 59890.445816
+        self.Pii_test = 2.417099
+        self.Pdeltai_test = -265.680094
+        self.Pgi_phot_test = -371.904686
+        self.Pgi_spec_test = -388.28625
         self.MG_mu_test = 1.0
         self.MG_sigma_test = 1.0
 
@@ -77,6 +65,7 @@ class cosmoinitTestCase(TestCase):
         self.bias_gc_spec_check = None
         self.Pgg_phot_test = None
         self.Pgd_phot_test = None
+        self.Pgd_phot_test_interpolation = None
         self.Pgg_spec_test = None
         self.Pgd_spec_test = None
         self.Pii_test = None
@@ -167,14 +156,14 @@ class cosmoinitTestCase(TestCase):
 
     def test_Pgg_phot_interp(self):
         test_p = self.model_test.cosmology.cosmo_dic['Pgg_phot'](1.0, 0.01)
-        npt.assert_allclose(test_p, self.Pgg_phot_test,
+        npt.assert_allclose(test_p, self.Pgg_phot_test_interpolation,
                             rtol=1e-3,
                             err_msg='Error in GC-phot Pgg interpolation')
 
     def test_Pg_delta_phot_interp(self):
         test_p = self.model_test.cosmology.cosmo_dic['Pgdelta_phot'](1.0,
                                                                      0.01)
-        npt.assert_allclose(test_p, self.Pgd_phot_test,
+        npt.assert_allclose(test_p, self.Pgd_phot_test_interpolation,
                             rtol=1e-3,
                             err_msg='Error in GC-phot Pgdelta interpolation')
 

@@ -171,11 +171,12 @@ class Reader:
                 'w': fid_cosmo_file[1].header['W_STATE'],
                 'omkh2': fid_cosmo_file[1].header['OMEGA_K'] *
                 fid_cosmo_file[1].header['HUBBLE']**2,
-                'omnuh2': 0}
-
+                # GCH: OU-LE3 spec files always with omnuh2=0
+                'omnuh2': 0.0,
+                'Omnu': 0.0}
+            # GCH: we ignore Omega_R
             fid_cosmo_file.close()
-        # GCH: remember, for the moment we ignore Omega_R and
-        # neutrinos
+
         except ReaderError:
             print('There was an error when reading the fiducial '
                   'data from OU-level3 files')

@@ -88,7 +88,7 @@ class Euclike:
 
         Returns
         -------
-        datavec_dict: dictionary
+        datavec_dict: dict
             returns a dictionary of arrays with the transformed photo data
         """
 
@@ -123,13 +123,13 @@ class Euclike:
 
         Parameters
         ----------
-        dictionary: dictionary
+        dictionary: dict
             cosmology dictionary from the Cosmology class
             which is updated at each sampling step
 
         Returns
         -------
-        theoryvec_dict: dictionary
+        theoryvec_dict: dict
             returns a dictionary of arrays with the transformed photo theory
             vector
         """
@@ -182,17 +182,17 @@ class Euclike:
 
         Parameters
         ----------
-        dictionary: dictionary
+        dictionary: dict
             cosmology dictionary from the Cosmology class
             which is updated at each sampling step
 
-        dictionary_fiducial: dictionary
+        dictionary_fiducial: dict
             cosmology dictionary from the Cosmology class
             at the fiducial cosmology
 
         Returns
         -------
-        theoryvec: float array
+        theoryvec: list
             returns the theory array with same indexing/format as the data
         """
 
@@ -216,7 +216,7 @@ class Euclike:
 
         Returns
         -------
-        datavec: float array
+        datavec: list
             returns the data as a single array across z, mu, k
         """
 
@@ -323,11 +323,11 @@ class Euclike:
             List of (sampled) parameters needed by the likelihood.
             This includes nuisance parameters and settings keys.
 
-        dictionary: dictionary
+        dictionary: dict
             cosmology dictionary from the Cosmology class
             which is updated at each sampling step
 
-        dictionary_fiducial: dictionary
+        dictionary_fiducial: dict
             cosmology dictionary from the Cosmology class
             at the fiducial cosmology
 

@@ -18,8 +18,9 @@ class datareaderTestCase(TestCase):
         self.main_key_check = ['GC-Spec', 'GC-Phot', 'WL', 'XC-Phot']
         self.nz_key_check = ['n1', 'n2', 'n3', 'n4', 'n5',
                              'n6', 'n7', 'n8', 'n9', 'n10']
-        self.fiducial_key_check = ['H0', 'omch2', 'ombh2', 'ns',
-                                   'sigma_8_0', 'w', 'omkh2', 'omnuh2']
+        self.fiducial_key_check = ['H0', 'omch2', 'ombh2',
+                                   'ns', 'sigma_8_0', 'w',
+                                   'omkh2', 'omnuh2', 'Omnu']
         self.cov_check_GC_spec = 1.213573e+08
         self.cov_check_WL = 2.478089e-09
         self.cov_check_GC_phot = 1.554181e-05

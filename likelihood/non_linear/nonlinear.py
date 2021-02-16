@@ -44,7 +44,9 @@ class Nonlinear:
 
         Returns
         -------
+        cosmo_dic: dict
             Updated dictionary
+
         """
         self.theory = cosmo_dic
         self.calculate_boost()
@@ -76,7 +78,9 @@ class Nonlinear:
 
         Returns
         -------
-        Value of linear boost at input redhsift and scale
+        boost: float
+           Value of linear boost at input redshift and scale
+
         """
         boost = 1.0
         return boost

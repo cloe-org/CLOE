@@ -19,19 +19,20 @@ class CosmologyError(Exception):
 
 
 class Cosmology:
-    """
+    r"""
     Class for cosmological observables
     """
 
     def __init__(self):
-        r"""Initialize
+        r"""
+        List of cosmological parameters implemented
 
-        Cosmology dictionary parameters
-        -------------------------------
+        Parameters
+        ----------
         H0: float
-            Present-day Hubble constant (km s^{-1} Mpc^{-1})
+            Present-day Hubble constant :math:`(km·s^{-1}·Mpc^{-1})`
         H0_Mpc: float
-            Present-day Hubble constant (Mpc^{-1})
+            Present-day Hubble constant :math:`(Mpc^{-1})`
         omch2: float
             Present-day CDM energy density
             Omega_CDM * (H0/100)**2
@@ -55,9 +56,11 @@ class Cosmology:
         ns: float
             spectral tilt of the primordial
             power spectrum
-        sigma_8_0: double
+        sigma_8_0: float
             sigma8 evaluated at z = 0
         w: float
+           Dark energy equation of state
+        wa: float
            Dark energy equation of state
         omnuh2: float
             Present-day massive neutrinos energy density
@@ -69,26 +72,33 @@ class Cosmology:
             Present-day total matter energy density
             Omega_m
             Assumes sum of baryons, CDM and neutrinos
+        Omc: float
+            Present-day cold dark matter energy density
+            Omega_cdm
+        Omk: float
+            Present-day curvature energy density
+            Omega_k
         mnu: float
             Sum of massive neutrino species masses (eV)
-        comov_dist: array-like
+        comov_dist: list
             Value of comoving distances at redshifts z_win
-        angular_dist: array-like
+        angular_dist: list
             Value of angular diameter distances at redshifts z_win
-        H: array-like
+        H: list
             Hubble function evaluated at redshifts z_win
-        H_Mpc: array-like
-            Hubble function evaluated at redshifts z_win in units of Mpc^{-1}
+        H_Mpc: list
+            Hubble function evaluated at redshifts z_win in units
+            of :math:`Mpc^{-1}`
         Pk_interpolator: function
             Interpolator function for power spectrum from Boltzmann code
         Pk_delta: function
             Interpolator function for delta from Boltzmann code
-        fsigma8: array
+        fsigma8: list
             fsigma8 function evaluated at z
-        sigma_8: array
+        sigma_8: list
             sigma8 function evaluated at z
         c: float
-            Speed-of-light in units of km s^{-1}
+            Speed-of-light in units of :math:`km·s^{-1}`
         r_z_func: function
             Interpolated function for comoving distance
         d_z_func: function
@@ -102,10 +112,10 @@ class Cosmology:
         H_z_func: function
             Interpolated function for Hubble parameter
         H_z_func_Mpc: function
-            Interpolated function for Hubble parameter in Mpc^{-1}
-        z_win: array-like
+            Interpolated function for Hubble parameter in :math:`Mpc^{-1}`
+        z_win: list
             Array of redshifts ar which H and comov_dist are evaluated at
-        k_win: array-like
+        k_win: list
             Array of k values which will be used to evaluate galaxy power
             spectra
         Pgg_phot: function
@@ -128,9 +138,9 @@ class Cosmology:
             mu function from Modified Gravity parametrization
         MG_sigma: function
             sigma function from Modified Gravity parametrization
-        NL_boost: function
+        NL_boost: float
             Non-linear boost factor
-        nuisance_parameters: dictionary
+        nuisance_parameters: dict
             Contains all nuisance bias parameters
             and IA parameters which are sampled over.
             At the moment, we have implemented
@@ -138,35 +148,50 @@ class Cosmology:
             recipe and 4 for spec recipe,
             and 3 IA parameters. The
             initialized values of the fiducial
-            cosmology dictionary corresponds to
-            (1) Photo-z: values corrsponding to
+            cosmology dictionary corresponds to:
 
-            .. math::
-                b_{x,i} = \sqrt{1+\bar{z}_{x,i}}\\
+                * Photo-z values corresponding to
+                :math:`b_{(x,i)}=\sqrt{1+\bar{b}_{(x,i)}}`
 
-            (2) Spec: bias values
-            of arXiv:1910.0923
-            (3) IA values in arXiv:1910.0923
+                * Spectroscopic bias values in arXiv:1910.09273
+
+                * IA values in arXiv:1910.09273
         """
         # (GCH): initialize cosmo dictionary
         # (ACD): Added speed of light to dictionary.!!!Important:it's in units
         # of km/s to be dimensionally consistent with H0.!!!!
-        self.cosmo_dic = {'H0': 67.5,
+        self.cosmo_dic = {  # Constants
+                          'H0': 67.0,
                           'omch2': 0.122,
                           'ombh2': 0.022,
-                          'omnuh2': 0.00028,
-                          'omkh2': 0.0,
+                          'omnuh2': 0.000644,
+                          'Omnu': 0.00143715,
+                          'Omk': 0.0,
+                          'Omm': 0.32,
+                          'Omc': 0.27,
+                          'Omb': 0.05,
                           'w': -1.0,
+                          'wa': 0.0,
                           'mnu': 0.06,
                           'tau': 0.07,
                           'nnu': 3.046,
-                          'ns': 0.9674,
+                          'ns': 0.96,
                           'As': 2.1e-9,
                           'sigma_8_0': 0.816,
+                          'c': const.c.to('km/s').value,
+                          'MG_mu': None,
+                          'MG_sigma': None,
+                          # Lists
+                          'z_win': None,
+                          'k_win': None,
                           'comov_dist': None,
                           'angular_dist': None,
                           'H': None,
                           'H_Mpc': None,
+                          'fsigma8': None,
+                          'sigma_8': None,
+                          'D_z_k': None,
+                          # Interpolators
                           'Pk_interpolator': None,
                           'Pk_delta': None,
                           'Pgg_phot': None,
@@ -177,20 +202,14 @@ class Cosmology:
                           'Pdeltai': None,
                           'Pgi_phot': None,
                           'Pgi_spec': None,
-                          'fsigma8': None,
-                          'sigma_8': None,
-                          'f_z': None,
-                          'c': const.c.to('km/s').value,
-                          'z_win': None,
-                          'k_win': None,
                           'r_z_func': None,
                           'd_z_func': None,
                           'H_z_func': None,
                           'H_z_func_Mpc': None,
                           'sigma8_z_func': None,
                           'fsigma8_z_func': None,
-                          'MG_mu': None,
-                          'MG_sigma': None,
+                          'f_z': None,
+                          # NL_boost
                           'NL_boost': None,
                           'nuisance_parameters': {
                              'like_selection': 2,
@@ -206,30 +225,16 @@ class Cosmology:
                              'b8_photo': 1.4964959071110084,
                              'b9_photo': 1.5652475842498528,
                              'b10_photo': 1.7429859437184225,
-                             'b1_spec': 1.46,
-                             'b2_spec': 1.61,
-                             'b3_spec': 1.75,
-                             'b4_spec': 1.90,
+                             'b1_spec': 1.4614804,
+                             'b2_spec': 1.6060949,
+                             'b3_spec': 1.7464790,
+                             'b4_spec': 1.8988660,
                              'aia': 1.72,
                              'nia': -0.41,
                              'bia': 0.0}}
 
-        # MM: adding some derived parameters
         self.cosmo_dic['H0_Mpc'] = (self.cosmo_dic['H0'] /
                                     const.c.to('km/s').value)
-        self.cosmo_dic['Omc'] = (self.cosmo_dic['omch2'] /
-                                 (self.cosmo_dic['H0'] / 100.)**2.)
-        self.cosmo_dic['Omb'] = (self.cosmo_dic['ombh2'] /
-                                 (self.cosmo_dic['H0'] / 100.)**2.)
-        self.cosmo_dic['Omnu'] = (self.cosmo_dic['omnuh2'] /
-                                  (self.cosmo_dic['H0'] / 100.)**2.)
-        self.cosmo_dic['Omk'] = (self.cosmo_dic['omkh2'] /
-                                 (self.cosmo_dic['H0'] / 100.)**2.)
-
-        self.cosmo_dic['Omm'] = (self.cosmo_dic['Omc'] +
-                                 self.cosmo_dic['Omb'] +
-                                 self.cosmo_dic['Omnu'])
-
         self.nonlinear = Nonlinear(self.cosmo_dic)
 
     def growth_factor(self, zs, ks):
@@ -242,14 +247,13 @@ class Cosmology:
 
         Parameters
         ----------
-        zs: array
-            list of redshift for the power spectrum
-        ks: array
+        zs: list
+        ks: list
             list of modes for the power spectrum
 
         Returns
         -------
-        D_z_k: numpy.ndarray
+        D_z_k: list
             Growth factor as function of redshift and k-mode
 
         """
@@ -277,9 +281,9 @@ class Cosmology:
 
         Parameters
         ----------
-        zs: array
+        zs: list
             list of redshift for the power spectrum
-        ks: array
+        ks: list
             list of modes for the power spectrum
 
         Returns
@@ -309,12 +313,11 @@ class Cosmology:
         Calculates growth rate according to
 
         .. math::
-                   f(z) &=f\sigma_8(z) / sigma_8(z)\\
+                   f(z) &=f\sigma_8(z) / \sigma_8(z)\\
 
-        Returns
-        -------
-        interpolator growth rate
-
+        Updates 'key' in the cosmo_dic attribute of the class
+        by adding an interpolator object
+        which interpolates f(z)
         """
         fs8 = self.cosmo_dic['fsigma8_z_func'](self.cosmo_dic['z_win'])
         s8 = self.cosmo_dic['sigma8_z_func'](self.cosmo_dic['z_win'])
@@ -330,11 +333,9 @@ class Cosmology:
         Adds an interpolator for comoving distance to the dictionary so that
         it can be evaluated at redshifts not explictly supplied to cobaya.
 
-        Returns
-        -------
-        interpolator: object
-            Interpolates comoving distance as a function of redshift
-
+        Updates 'key' in the cosmo_dic attribute of the class
+        by adding an interpolator object
+        which interpolates comoving distance as a function of redshift
         """
         if self.cosmo_dic['z_win'] is None:
             raise Exception('Boltzmann code redshift binning has not been '
@@ -348,11 +349,9 @@ class Cosmology:
         Adds an interpolator for angular distance to the dictionary so that
         it can be evaluated at redshifts not explictly supplied to cobaya.
 
-        Returns
-        -------
-        interpolator: object
-            Interpolates angular diameter distance  as a function of redshift
-
+        Updates 'key' in the cosmo_dic attribute of the class by adding an
+        interpolator object of angular diameter distance
+        as a function of redshift
         """
         if self.cosmo_dic['z_win'] is None:
             raise Exception('Boltzmann code redshift binning has not been '
@@ -366,12 +365,10 @@ class Cosmology:
         Adds an interpolator for the Hubble parameter to the dictionary so that
         it can be evaluated at redshifts not explictly supplied to Cobaya.
 
-        Returns
-        -------
-        interpolator: object
-            Interpolates the Hubble parameter
-            H(z) as a function of redshift
-
+        Updates 'key' in the cosmo_dic attribute of the class
+        by adding an interpolator object
+        which interpolates the Hubble parameter
+        H(z) as a function of redshift
         """
         if self.cosmo_dic['z_win'] is None:
             raise Exception('Boltzmann code redshift binning has not been '
@@ -386,12 +383,10 @@ class Cosmology:
         dictionary so that it can be evaluated at redshifts not
         explictly supplied to Cobaya.
 
-        Returns
-        -------
-        interpolator: object
-            Interpolates the Hubble parameter
-            H(z) as a function of redshift
-
+        Updates 'key' in the cosmo_dic attribute of the class
+        by adding an interpolator object
+        which interpolates the Hubble parameter
+        H(z) in Mpc as a function of redshift
         """
         if self.cosmo_dic['z_win'] is None:
             raise Exception('Boltzmann code redshift binning has not been '
@@ -407,11 +402,9 @@ class Cosmology:
         parameter :math:`\sigma_8` to the dictionary so that it
         can be evaluated at redshifts not explictly supplied to Cobaya
 
-        Returns
-        -------
-        interpolator: object
-            Interpolates :math:`\sigma_8` as a function of redshift
-
+        Updates 'key' in the cosmo_dic attribute of the class
+        by adding an interpolator object
+        which interpolates :math:`\sigma_8` as a function of redshift
         """
         if self.cosmo_dic['z_win'] is None:
             raise Exception('Boltzmann code redshift binning has not been '
@@ -427,11 +420,10 @@ class Cosmology:
         so that it can be evaluated at redshifts
         not explictly supplied to Cobaya
 
-        Returns
-        -------
-        interpolator: object
-            Interpolates :math:`f\sigma_8` as a function of redshift
-
+        Updates 'key' in the cosmo_dic attribute of the class
+        by adding an interpolator object
+        which interpolates :math:`f\sigma_8` as a
+        function of redshift
         """
         if self.cosmo_dic['z_win'] is None:
             raise Exception('Boltzmann code redshift binning has not been '
@@ -582,7 +574,7 @@ class Cosmology:
         pval: float
             Value of galaxy-galaxy power spectrum
             at a given redshift, k-mode and :math:`\mu_{k}`
-            for galaxy cclustering spectroscopic
+            for galaxy clustering spectroscopic
         """
         bias = self.istf_spec_galbias(redshift)
         growth = self.cosmo_dic['f_z'](redshift)
@@ -794,11 +786,10 @@ class Cosmology:
         clustering and galaxy-matter power spectra, and adds them to cosmo_dic.
         Note: the interpolators for v1.0 span the range :math:`k=[0.001,100.0]`
 
-        Returns
-        -------
-        interpolator: object
-            Interpolates photometric galaxy clustering and galaxy-matter
-            power spectra as a function of redshift and k-mode
+        Updates 'keys' of the cosmo_dic attribute of the class, adding
+        interpolator objects (interpolates photometric galaxy
+        clustering and galaxy-matter power spectra as a
+        function of redshift and k-mode)
         """
         # AP: Removed the interpolation of the spectroscopic galaxy power
         # spectra and renamed this method to reflect that the interpolation
@@ -918,10 +909,11 @@ class Cosmology:
 
         Parameters
         ----------
-        zs: array
+        zs: list
             list of redshift for the power spectrum
-        ks: array
-            list of modes for the power spectrum
+        ks: float
+            value of k-scale at which the growth factor
+            is evaluated
         MG_mu: float
             constant value of modified gravity mu function
         MG_sigma: float

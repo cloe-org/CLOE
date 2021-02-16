@@ -25,9 +25,9 @@ class Spec:
 
         Parameters
         ----------
-        cosmo_dic: dictionary
+        cosmo_dic: dict
             cosmological dictionary from cosmo
-        fiducial_dic: dictionary
+        fiducial_dic: dict
             fiducial dictionary
         """
         self.theory = cosmo_dic

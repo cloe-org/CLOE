@@ -17,4 +17,5 @@ dependencies:
     - cobaya>=3.0
     - pytest>=6.2
     - pytest-cov>=2.10
-    - pytest-pep8
+    - pytest-pycodestyle>=2.2.0
+    - pytest-pydocstyle>=2.2.0

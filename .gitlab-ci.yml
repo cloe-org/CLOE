@@ -16,15 +16,33 @@ before_script:
 # Install package
 Install:
   script: python setup.py test
+  artifacts:
+    when: always
+    reports:
+      junit: pytest.xml
+      cobertura: coverage.xml
 
-# Build API docs
+# Build temporary API docs for reviewer
+Check_HTML:
+  script:
+    - &build_script |
+      source activate likelihood
+      pip install sphinx sphinx-rtd-theme numpydoc
+      mkdir docs/build
+      sphinx-apidoc -feo docs/source likelihood
+      sphinx-build docs/source docs/build
+    - mv docs/build html_build
+  artifacts:
+    paths:
+      - html_build/
+    expose_as: 'API HTML Build'
+  except:
+      - master
+
+# Build API docs for deployment
 pages:
   script:
-    - source activate likelihood
-    - pip install sphinx sphinx-rtd-theme numpydoc
-    - mkdir docs/build
-    - sphinx-apidoc -feo docs/source likelihood
-    - sphinx-build docs/source docs/build
+    - *build_script
     - mv docs/build public/
   artifacts:
     paths:
@@ -34,10 +52,11 @@ pages:
 
 # Get Profiling Report
 Profiling:
-  script: 
+  script:
     - python -m cProfile -o profiling.pstats scripts/profiling_script_C_ells_ph.py
     - mkdir products
     - mv profiling.pstats products/
   artifacts:
     paths:
-      - products
+      - products/
+    expose_as: 'Profiling Report'

@@ -15,6 +15,7 @@ class EuclikeError(Exception):
     r"""
     Class to define Exception Error
     """
+
     pass
 
 
@@ -24,7 +25,8 @@ class Euclike:
     """
 
     def __init__(self):
-        """
+        """Initialize
+
         Constructor of the class Euclike. The data and covariance are
         read and arranged into their final format only once here.
         """
@@ -80,7 +82,8 @@ class Euclike:
                 self.indices_all.append([i + 1, j + 1])
 
     def create_photo_data(self):
-        """
+        """Create Photo Data
+
         Arranges the photo data vector for the likelihood into its final format
 
         Returns
@@ -114,7 +117,8 @@ class Euclike:
         return datavec_dict
 
     def create_photo_theory(self, phot_ins, full_photo):
-        """
+        """Create Photo Theory
+
         Obtains the photo theory for the likelihood.
 
         Parameters
@@ -172,12 +176,18 @@ class Euclike:
         return theoryvec_dict
 
     def create_spec_theory(self, dictionary, dictionary_fiducial):
-        """
+        """Create Spec Theory
+
         Obtains the theory for the likelihood.
 
         Parameters
+<<<<<<< HEAD
         -------
         dictionary: dict
+=======
+        ----------
+        dictionary: dictionary
+>>>>>>> 63002b9537d60d8b592f3b1915ba6be6810b972a
             cosmology dictionary from the Cosmology class
             which is updated at each sampling step
 
@@ -205,7 +215,8 @@ class Euclike:
         return theoryvec
 
     def create_spec_data(self):
-        """
+        """Create Spec Data
+
         Arranges the data vector for the likelihood into its final format
 
         Returns
@@ -223,7 +234,8 @@ class Euclike:
         return datavec
 
     def create_spec_cov(self):
-        """
+        """Create Spec Cov
+
         Arranges the covariance for the likelihood into its final format
 
         Returns
@@ -257,7 +269,8 @@ class Euclike:
         return covfull
 
     def loglike_photo(self, dictionary, full_photo):
-        """
+        """Loglike Photo
+
         Calculates loglike photometric based on
         the flag 'full_photo'. If True, calculates
         all probes. If false, only calculates GC+WL
@@ -305,7 +318,8 @@ class Euclike:
         return loglike_photo
 
     def loglike(self, dictionary, dictionary_fiducial):
-        """
+        """Loglike
+
         Calculates the log-likelihood for a given model
 
         Parameters
@@ -323,7 +337,7 @@ class Euclike:
             at the fiducial cosmology
 
         Returns
-        ----------
+        -------
         loglike: float
             loglike = -2 ln(likelihood) for the Euclid observables
         """

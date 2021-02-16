@@ -148,7 +148,7 @@ class EuclidLikelihood(Likelihood):
                                          "Pk_interpolator":
                                          {"z": self.z_win,
                                           "k_max": self.k_max_Boltzmannn,
-                                          "nonlinear": False,
+                                          "nonlinear": [False, True],
                                           "vars_pairs": ([["delta_tot",
                                                            "delta_tot"]])},
                                          "comoving_radial_distance":

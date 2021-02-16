@@ -122,7 +122,7 @@ class Euclike:
         Obtains the photo theory for the likelihood.
 
         Parameters
-        -------
+        ----------
         dictionary: dict
             cosmology dictionary from the Cosmology class
             which is updated at each sampling step
@@ -181,13 +181,8 @@ class Euclike:
         Obtains the theory for the likelihood.
 
         Parameters
-<<<<<<< HEAD
-        -------
-        dictionary: dict
-=======
         ----------
-        dictionary: dictionary
->>>>>>> 63002b9537d60d8b592f3b1915ba6be6810b972a
+        dictionary: dict
             cosmology dictionary from the Cosmology class
             which is updated at each sampling step
 

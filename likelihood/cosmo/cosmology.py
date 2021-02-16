@@ -25,8 +25,7 @@ class Cosmology:
 
     def __init__(self):
         r"""
-        This is the list of current implemented cosmological
-        parameters in the cosmo_dic
+        List of cosmological parameters implemented
 
         Parameters
         ----------

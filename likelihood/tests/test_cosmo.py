@@ -25,7 +25,7 @@ class cosmoinitTestCase(TestCase):
         cosmo = Cosmology()
         cosmo.cosmo_dic['ombh2'] = 0.022
         cosmo.cosmo_dic['omch2'] = 0.12
-        cosmo.cosmo_dic['H0'] = 68.0
+        cosmo.cosmo_dic['H0'] = 67.0
         cosmo.cosmo_dic['tau'] = 0.07
         cosmo.cosmo_dic['mnu'] = 0.06
         cosmo.cosmo_dic['nnu'] = 3.046
@@ -37,21 +37,22 @@ class cosmoinitTestCase(TestCase):
         self.model_test = CobayaModel(cosmo)
         self.model_test.update_cosmo()
         # (GCH): Check values
-        self.H0check = 68.0
+        self.H0check = 67.0
         self.Dcheck = 1.0
-        self.fcheck = 0.517014
-        self.Hcheck = 75.25182
+        self.fcheck = 0.525454
+        self.Hcheck = 74.349422
         self.bias_gc_phot_check = 1.220245876862528
         self.bias_gc_spec_check = 1.46148
-        self.Pgg_phot_test = 56966.342327
-        self.Pgd_phot_test = 40733.180956
-        self.Pgd_phot_test_interpolation = 40695.435595
-        self.Pgg_spec_test = 82364.912687
-        self.Pgd_spec_test = 59772.520009
-        self.Pii_test = 2.247159
-        self.Pdeltai_test = -255.714171
-        self.Pgi_phot_test = -357.954173
-        self.Pgi_spec_test = -373.721248
+        self.Pgg_phot_test = 57222.765638
+        self.Pgg_phot_test_interpolation = 57169.87062
+        self.Pgd_phot_test = 40878.618469
+        self.Pgd_phot_test_interpolation = 40840.831493
+        self.Pgg_spec_test = 82548.320427
+        self.Pgd_spec_test = 59890.445816
+        self.Pii_test = 2.417099
+        self.Pdeltai_test = -265.680094
+        self.Pgi_phot_test = -371.904686
+        self.Pgi_spec_test = -388.28625
         self.MG_mu_test = 1.0
         self.MG_sigma_test = 1.0
 
@@ -155,7 +156,7 @@ class cosmoinitTestCase(TestCase):
 
     def test_Pgg_phot_interp(self):
         test_p = self.model_test.cosmology.cosmo_dic['Pgg_phot'](1.0, 0.01)
-        npt.assert_allclose(test_p, self.Pgg_phot_test,
+        npt.assert_allclose(test_p, self.Pgg_phot_test_interpolation,
                             rtol=1e-3,
                             err_msg='Error in GC-phot Pgg interpolation')
 

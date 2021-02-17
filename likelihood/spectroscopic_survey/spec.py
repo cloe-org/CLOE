@@ -19,7 +19,8 @@ class Spec:
     """
 
     def __init__(self, cosmo_dic, fiducial_dic):
-        """
+        """Initialize
+
         Constructor of the class Spec
 
         Parameters
@@ -33,7 +34,8 @@ class Spec:
         self.fiducial = fiducial_dic
 
     def scaling_factor_perp(self, z):
-        r"""
+        r"""Scaling Factor Perp
+
         Computation of the perpendicular scaling factor
 
         .. math::
@@ -53,7 +55,8 @@ class Spec:
         return self.theory['d_z_func'](z) / self.fiducial['d_z_func'](z)
 
     def scaling_factor_parall(self, z):
-        r"""
+        r"""Scaling Factor Parall
+
         Computation of the parallel scaling factor
 
         .. math::
@@ -72,7 +75,8 @@ class Spec:
         return self.fiducial['H_z_func'](z) / self.theory['H_z_func'](z)
 
     def get_k(self, k_prime, mu_prime, z):
-        r"""
+        r"""Get k
+
         Computation of the wavenumber k
 
         .. math::
@@ -101,7 +105,8 @@ class Spec:
                           (1 - (mu_prime)**2))**(1. / 2)
 
     def get_mu(self, mu_prime, z):
-        r"""
+        r"""Get Mu
+
         Computation of the cosine of the angle
 
         .. math::
@@ -131,7 +136,8 @@ class Spec:
             (1 - (mu_prime)**2))**(-1. / 2)
 
     def multipole_spectra_integrand(self, mu_rsd, z, k, m):
-        r"""
+        r"""Multipole Spectra Integrand
+
         Computation of multipole power spectrum integrand.
         Note: we consider :math:`\ell = m` in the code
 
@@ -169,7 +175,8 @@ class Spec:
         return integrand
 
     def multipole_spectra(self, z, k, m):
-        r"""
+        r"""Multipole Spectra
+
         Computation of multipole power spectra.
         Note: we consider :math:`\ell = m` in the code.
 

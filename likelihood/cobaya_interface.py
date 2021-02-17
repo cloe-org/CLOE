@@ -1,3 +1,7 @@
+"""COBAYA INTERFACE
+"""
+
+
 # General import
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,6 +23,7 @@ class CobayaInterfaceError(Exception):
     r"""
     Class to define Exception Error
     """
+
     pass
 
 
@@ -59,7 +64,7 @@ class EuclidLikelihood(Likelihood):
               'bia': None}
 
     def initialize(self):
-        r""" initialize
+        r"""Initialize
 
         Set up values for initial variables
         and create instance of Cosmology class
@@ -148,7 +153,7 @@ class EuclidLikelihood(Likelihood):
                                          "Pk_interpolator":
                                          {"z": self.z_win,
                                           "k_max": self.k_max_Boltzmannn,
-                                          "nonlinear": False,
+                                          "nonlinear": [False, True],
                                           "vars_pairs": ([["delta_tot",
                                                            "delta_tot"]])},
                                          "comoving_radial_distance":
@@ -214,14 +219,14 @@ class EuclidLikelihood(Likelihood):
             0.05)
 
     def get_requirements(self):
-        r""" get_requirements
+        r"""Get Requirements
 
         New 'theory needs'. Asks for the theory
         requirements to the theory code via
         Cobaya.
 
         Returns
-        ----------
+        -------
         dictionary specifying quantities i
         calculated by a theory code are needed
 
@@ -248,7 +253,7 @@ class EuclidLikelihood(Likelihood):
                 "fsigma8": {"z": self.z_win, "units": None}}
 
     def passing_requirements(self, model, **params_dic):
-        r""" passing_requirements
+        r"""Passing Requirements
 
         Gets cosmological quantities from the theory code
         from COBAYA and passes them to an instance of the
@@ -340,7 +345,7 @@ class EuclidLikelihood(Likelihood):
                 **only_nuisance_params)
 
     def logp(self, **params_values):
-        r""" logp
+        r"""Logp
 
         Executes passing_requirements,
         updates cosmology dictionary,
@@ -352,7 +357,7 @@ class EuclidLikelihood(Likelihood):
               List of (sampled) parameters obtained from
               the theory code or asked by the likelihood
         Returns
-        ----------
+        -------
         loglike: float
             value of the function log_likelihood
         """

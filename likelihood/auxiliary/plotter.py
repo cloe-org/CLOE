@@ -15,6 +15,7 @@ class PlotError(Exception):
     """
     Class to define Exception Error
     """
+
     pass
 
 
@@ -52,7 +53,8 @@ class Plotter:
     def plot_Cl_phot(self, ells, bin_i, bin_j, pl_ax, probe='WL',
                      pl_label=None, pl_colour='b', pl_linestyle='-',
                      no_bins=10):
-        """
+        """Plot Cl Phot
+
         Function to plot given photometric Cls computed with the cosmobox code
         for a given set of ells, and bin combination.
 
@@ -108,7 +110,8 @@ class Plotter:
     def plot_external_Cl_phot(self, bin_m, bin_n, pl_ax, probe='WL',
                               pl_label=None, pl_colour='b', pl_linestyle='-',
                               no_bins=10):
-        """
+        """Plot External Cl Phot
+
         Plots external OU-LE3 angular power spectra for a stated individual
         probe, for given redshift bin combination, and errors on those.
 
@@ -186,7 +189,8 @@ class Plotter:
     def plot_Cl_XC(self, ells, bin_WL, bin_GC, pl_ax, pl_label=None,
                    pl_colour='b', pl_linestyle='-', no_bins_WL=10,
                    no_bins_GC=10):
-        """
+        """Plot Cl XC
+
         Function to plot XC Cls computed with the cosmobox code
         for a given set of ells, and bin combination.
 
@@ -233,7 +237,8 @@ class Plotter:
     def plot_external_Cl_XC(self, bin_WL, bin_GC, pl_ax, pl_label=None,
                             pl_colour='b', pl_linestyle='-', no_bins_WL=10,
                             no_bins_GC=10):
-        """
+        """Plot External Cl XC
+
         Plots external OU-LE3 XC-Phot power spectra, for given redshift bin
         combination, and errors on those.
 
@@ -292,7 +297,8 @@ class Plotter:
 
     def plot_GC_spec_multipole(self, redshift, ks, multipole_order, pl_ax,
                                pl_label=None, pl_colour='b', pl_linestyle='-'):
-        """
+        """Plot GC Spec Multipole
+
         Plots GC-spec multipole spectra as calculated by the cosmobox, for a
         given redshift, set of ks, and multipole order.
 
@@ -335,7 +341,8 @@ class Plotter:
 
     def plot_external_GC_spec(self, redshift, multipole_order, pl_ax,
                               pl_label=None, pl_colour='b', pl_linestyle='-'):
-        """
+        """Plot External GC Spec
+
         Plots GC-spec multipole spectra from OU-LE3 files, for a
         given redshift, and multipole order, with errors.
 

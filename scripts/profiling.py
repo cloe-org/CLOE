@@ -9,7 +9,7 @@ from pathlib import Path
 from likelihood.photometric_survey import photo
 from likelihood.spectroscopic_survey.spec import Spec
 
-#Import cobaya -need to be installed
+#Import  cobaya -need to be installed
 import cobaya
 #Import external loglike from the Likelihood Package within cobaya interface module
 from likelihood.cobaya_interface import EuclidLikelihood

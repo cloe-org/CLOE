@@ -524,9 +524,9 @@ class Cosmology:
             raise Exception('Spectroscopic galaxy bias cannot be obtained '
                             'as redshift is above the highest bin edge')
         elif redshift < bin_edge_list[0]:
-            # bi_val = istf_bias_list[0]
-            raise Exception('Spectroscopic galaxy bias cannot be obtained '
-                            'as redshift is below the lowest bin edge.')
+            bi_val = istf_bias_list[0]
+            # raise Exception('Spectroscopic galaxy bias cannot be obtained '
+            #                 'as redshift is below the lowest bin edge.')
         return bi_val
 
     def Pgg_phot_def(self, redshift, k_scale):

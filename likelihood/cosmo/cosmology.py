@@ -818,7 +818,8 @@ class Cosmology:
         pii = np.array([self.Pii_def(zz, ks_base) for zz in zs_base])
         pdeltai = np.array([self.Pdeltai_def(zz, ks_base) for zz in zs_base])
         pgi_phot = np.array([self.Pgi_phot_def(zz, ks_base) for zz in zs_base])
-        # pgi_spec = np.array([self.Pgi_spec_def(zz, ks_base) for zz in zs_base])
+        # pgi_spec = np.array([self.Pgi_spec_def(zz, ks_base)
+        #                      for zz in zs_base])
 
         self.cosmo_dic['Pgg_phot'] = \
             interpolate.RectBivariateSpline(zs_base,

@@ -201,11 +201,11 @@ class cosmoinitTestCase(TestCase):
                             rtol=1e-3,
                             err_msg='Error in GC-phot Pgi calculation')
 
-    def test_Pgi_spec(self):
-        test_p = self.model_test.cosmology.Pgi_spec_def(1.0, 0.01)
-        npt.assert_allclose(test_p, self.Pgi_spec_test,
-                            rtol=1e-3,
-                            err_msg='Error in GC-spec Pgi calculation')
+    # def test_Pgi_spec(self):
+    #     test_p = self.model_test.cosmology.Pgi_spec_def(1.0, 0.01)
+    #     npt.assert_allclose(test_p, self.Pgi_spec_test,
+    #                         rtol=1e-3,
+    #                         err_msg='Error in GC-spec Pgi calculation')
 
     def test_MG_mu_def(self):
         test_mu = self.model_test.cosmology.MG_mu_def(1.0, 0.01,

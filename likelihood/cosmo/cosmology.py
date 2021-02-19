@@ -526,9 +526,9 @@ class Cosmology:
             raise Exception('Spectroscopic galaxy bias cannot be obtained '
                             'as redshift is above the highest bin edge')
         elif redshift < bin_edge_list[0]:
-            bi_val = istf_bias_list[0]
-            # raise Exception('Spectroscopic galaxy bias cannot be obtained '
-            #                 'as redshift is below the lowest bin edge.')
+            # bi_val = istf_bias_list[0]
+            raise Exception('Spectroscopic galaxy bias cannot be obtained '
+                            'as redshift is below the lowest bin edge.')
         return bi_val
 
     def Pgg_phot_def(self, redshift, k_scale):
@@ -818,7 +818,7 @@ class Cosmology:
         pii = np.array([self.Pii_def(zz, ks_base) for zz in zs_base])
         pdeltai = np.array([self.Pdeltai_def(zz, ks_base) for zz in zs_base])
         pgi_phot = np.array([self.Pgi_phot_def(zz, ks_base) for zz in zs_base])
-        pgi_spec = np.array([self.Pgi_spec_def(zz, ks_base) for zz in zs_base])
+        # pgi_spec = np.array([self.Pgi_spec_def(zz, ks_base) for zz in zs_base])
 
         self.cosmo_dic['Pgg_phot'] = \
             interpolate.RectBivariateSpline(zs_base,
@@ -845,11 +845,11 @@ class Cosmology:
                                             ks_base,
                                             pgi_phot,
                                             kx=1, ky=1)
-        self.cosmo_dic['Pgi_spec'] = \
-            interpolate.RectBivariateSpline(zs_base,
-                                            ks_base,
-                                            pgi_spec,
-                                            kx=1, ky=1)
+        # self.cosmo_dic['Pgi_spec'] = \
+        #     interpolate.RectBivariateSpline(zs_base,
+        #                                     ks_base,
+        #                                     pgi_spec,
+        #                                     kx=1, ky=1)
         return
 
     def MG_mu_def(self, redshift, k_scale, MG_mu):
@@ -946,6 +946,7 @@ class Cosmology:
         # spec spectra are not interpolated so they are added
         # here in this method
         self.cosmo_dic['Pgg_spec'] = self.Pgg_spec_def
+        self.cosmo_dic['Pgi_spec'] = self.Pgi_spec_def
         self.cosmo_dic['Pgdelta_spec'] = self.Pgd_spec_def
         # (GCH): for the moment we use our own definition
         # of the growth factor

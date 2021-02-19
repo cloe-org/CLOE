@@ -8,7 +8,7 @@ import numpy as np
 from likelihood.non_linear.nonlinear import Nonlinear
 from scipy import interpolate
 from astropy import constants as const
-
+import sys
 
 class CosmologyError(Exception):
     r"""
@@ -469,6 +469,8 @@ class Cosmology:
                           self.cosmo_dic['nuisance_parameters']['b8_photo'],
                           self.cosmo_dic['nuisance_parameters']['b9_photo'],
                           self.cosmo_dic['nuisance_parameters']['b10_photo']]
+
+        print("spec galbias redshift", redshift)
 
         if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
             for i in range(len(bin_edge_list) - 1):

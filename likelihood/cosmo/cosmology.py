@@ -515,13 +515,13 @@ class Cosmology:
                           self.cosmo_dic['nuisance_parameters']['b3_spec'],
                           self.cosmo_dic['nuisance_parameters']['b4_spec']]
 
-        if bin_edge_list[0] <= redshift <= bin_edge_list[-1]:
+        if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
             for i in range(len(bin_edge_list) - 1):
                 if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
                     bi_val = istf_bias_list[i]
-                elif redshift == bin_edge_list[-1]:
-                    bi_val = istf_bias_list[-1]
-        elif redshift > bin_edge_list[-1]:
+                # elif redshift == bin_edge_list[-1]:
+                #     bi_val = istf_bias_list[-1]
+        elif redshift >= bin_edge_list[-1]:
             # (SJ): let us throw an exception instead
             # bi_val = istf_bias_list[-1]
             raise Exception('Spectroscopic galaxy bias cannot be obtained '
@@ -813,10 +813,11 @@ class Cosmology:
         ks_base = self.cosmo_dic['k_win']
         zs_base = self.cosmo_dic['z_win']
 
-        bin_edge_list=np.array([0.90, 1.10, 1.30, 1.50, 1.80])
+        bin_edge_list = np.array([0.90, 1.10, 1.30, 1.50, 1.80])
         zs_base_np = np.array(zs_base)
-        zs_base_pgi = np.where(np.logical_and(zs_base_np>=bin_edge_list[0],
-                                              zs_base_np<bin_edge_list[-1]))
+        zs_base_pgi = zs_base_np[np.where(np.logical_and(
+                                          zs_base_np[:] >= bin_edge_list[0],
+                                          zs_base_np[:] < bin_edge_list[-1]))]
 
         pgg_phot = np.array([self.Pgg_phot_def(zz, ks_base) for zz in zs_base])
         pgdelta_phot = np.array([self.Pgd_phot_def(zz, ks_base)

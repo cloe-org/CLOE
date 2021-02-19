@@ -10,6 +10,7 @@ from scipy import interpolate
 from astropy import constants as const
 import sys
 
+
 class CosmologyError(Exception):
     r"""
     Class to define Exception Error
@@ -812,14 +813,19 @@ class Cosmology:
         ks_base = self.cosmo_dic['k_win']
         zs_base = self.cosmo_dic['z_win']
 
+        bin_edge_list=np.array([0.90, 1.10, 1.30, 1.50, 1.80])
+        zs_base_np = np.array(zs_base)
+        zs_base_pgi = np.where(np.logical_and(zs_base_np>=bin_edge_list[0],
+                                              zs_base_np<bin_edge_list[-1]))
+
         pgg_phot = np.array([self.Pgg_phot_def(zz, ks_base) for zz in zs_base])
         pgdelta_phot = np.array([self.Pgd_phot_def(zz, ks_base)
                                  for zz in zs_base])
         pii = np.array([self.Pii_def(zz, ks_base) for zz in zs_base])
         pdeltai = np.array([self.Pdeltai_def(zz, ks_base) for zz in zs_base])
         pgi_phot = np.array([self.Pgi_phot_def(zz, ks_base) for zz in zs_base])
-        # pgi_spec = np.array([self.Pgi_spec_def(zz, ks_base)
-        #                      for zz in zs_base])
+        pgi_spec = np.array([self.Pgi_spec_def(zz, ks_base)
+                             for zz in zs_base_pgi])
 
         self.cosmo_dic['Pgg_phot'] = \
             interpolate.RectBivariateSpline(zs_base,
@@ -846,11 +852,11 @@ class Cosmology:
                                             ks_base,
                                             pgi_phot,
                                             kx=1, ky=1)
-        # self.cosmo_dic['Pgi_spec'] = \
-        #     interpolate.RectBivariateSpline(zs_base,
-        #                                     ks_base,
-        #                                     pgi_spec,
-        #                                     kx=1, ky=1)
+        self.cosmo_dic['Pgi_spec'] = \
+            interpolate.RectBivariateSpline(zs_base_pgi,
+                                            ks_base,
+                                            pgi_spec,
+                                            kx=1, ky=1)
         return
 
     def MG_mu_def(self, redshift, k_scale, MG_mu):
@@ -947,7 +953,7 @@ class Cosmology:
         # spec spectra are not interpolated so they are added
         # here in this method
         self.cosmo_dic['Pgg_spec'] = self.Pgg_spec_def
-        self.cosmo_dic['Pgi_spec'] = self.Pgi_spec_def
+        # self.cosmo_dic['Pgi_spec'] = self.Pgi_spec_def
         self.cosmo_dic['Pgdelta_spec'] = self.Pgd_spec_def
         # (GCH): for the moment we use our own definition
         # of the growth factor

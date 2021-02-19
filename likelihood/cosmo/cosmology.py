@@ -8,7 +8,6 @@ import numpy as np
 from likelihood.non_linear.nonlinear import Nonlinear
 from scipy import interpolate
 from astropy import constants as const
-import sys
 
 
 class CosmologyError(Exception):
@@ -471,8 +470,6 @@ class Cosmology:
                           self.cosmo_dic['nuisance_parameters']['b9_photo'],
                           self.cosmo_dic['nuisance_parameters']['b10_photo']]
 
-        print("spec galbias redshift", redshift)
-
         if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
             for i in range(len(bin_edge_list) - 1):
                 if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
@@ -519,8 +516,6 @@ class Cosmology:
             for i in range(len(bin_edge_list) - 1):
                 if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
                     bi_val = istf_bias_list[i]
-                # elif redshift == bin_edge_list[-1]:
-                #     bi_val = istf_bias_list[-1]
         elif redshift >= bin_edge_list[-1]:
             # (SJ): let us throw an exception instead
             # bi_val = istf_bias_list[-1]
@@ -814,10 +809,9 @@ class Cosmology:
         zs_base = self.cosmo_dic['z_win']
 
         bin_edge_list = np.array([0.90, 1.10, 1.30, 1.50, 1.80])
-        zs_base_np = np.array(zs_base)
-        zs_base_pgi = zs_base_np[np.where(np.logical_and(
-                                          zs_base_np >= bin_edge_list[0],
-                                          zs_base_np < bin_edge_list[-1]))]
+        zs_base_pgi = zs_base[np.where(np.logical_and(
+                                       zs_base >= bin_edge_list[0],
+                                       zs_base < bin_edge_list[-1]))]
 
         pgg_phot = np.array([self.Pgg_phot_def(zz, ks_base) for zz in zs_base])
         pgdelta_phot = np.array([self.Pgd_phot_def(zz, ks_base)
@@ -954,7 +948,6 @@ class Cosmology:
         # spec spectra are not interpolated so they are added
         # here in this method
         self.cosmo_dic['Pgg_spec'] = self.Pgg_spec_def
-        # self.cosmo_dic['Pgi_spec'] = self.Pgi_spec_def
         self.cosmo_dic['Pgdelta_spec'] = self.Pgd_spec_def
         # (GCH): for the moment we use our own definition
         # of the growth factor

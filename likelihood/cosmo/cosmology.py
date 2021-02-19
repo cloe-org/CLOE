@@ -809,7 +809,7 @@ class Cosmology:
         zs_base = self.cosmo_dic['z_win']
 
         bin_edge_list = np.array([0.90, 1.10, 1.30, 1.50, 1.80])
-        zs_base_pgi = zs_base[np.where(np.logical_and(
+        zs_base_spec = zs_base[np.where(np.logical_and(
                                        zs_base >= bin_edge_list[0],
                                        zs_base < bin_edge_list[-1]))]
 
@@ -820,7 +820,7 @@ class Cosmology:
         pdeltai = np.array([self.Pdeltai_def(zz, ks_base) for zz in zs_base])
         pgi_phot = np.array([self.Pgi_phot_def(zz, ks_base) for zz in zs_base])
         pgi_spec = np.array([self.Pgi_spec_def(zz, ks_base)
-                             for zz in zs_base_pgi])
+                             for zz in zs_base_spec])
 
         self.cosmo_dic['Pgg_phot'] = \
             interpolate.RectBivariateSpline(zs_base,
@@ -848,7 +848,7 @@ class Cosmology:
                                             pgi_phot,
                                             kx=1, ky=1)
         self.cosmo_dic['Pgi_spec'] = \
-            interpolate.RectBivariateSpline(zs_base_pgi,
+            interpolate.RectBivariateSpline(zs_base_spec,
                                             ks_base,
                                             pgi_spec,
                                             kx=1, ky=1)

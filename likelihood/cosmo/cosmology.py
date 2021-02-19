@@ -816,8 +816,8 @@ class Cosmology:
         bin_edge_list = np.array([0.90, 1.10, 1.30, 1.50, 1.80])
         zs_base_np = np.array(zs_base)
         zs_base_pgi = zs_base_np[np.where(np.logical_and(
-                                          zs_base_np[:] >= bin_edge_list[0],
-                                          zs_base_np[:] < bin_edge_list[-1]))]
+                                          zs_base_np >= bin_edge_list[0],
+                                          zs_base_np < bin_edge_list[-1]))]
 
         pgg_phot = np.array([self.Pgg_phot_def(zz, ks_base) for zz in zs_base])
         pgdelta_phot = np.array([self.Pgd_phot_def(zz, ks_base)

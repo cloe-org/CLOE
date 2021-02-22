@@ -49,6 +49,8 @@ Open and play with ```DEMO.ipynb```
 
 *  **data**: folder that contains, at the moment, the fiducial data
 *  **docs**: automatically generated documentation
+*  **notebooks**: folder containing example notebooks
+*  **scripts**: folder containing example scripts
 *  **likelihood**: likelihood code
      *  ```cobaya_interface.py```: interface with COBAYA, pass theory needed to other classes, returns loglike
      * like_calc: code that calculates the likelihood given the data and the theory prediction
@@ -62,7 +64,9 @@ Open and play with ```DEMO.ipynb```
     * photometric_survey: code for photo-z observables 
         *  ```photo.py```: class with the theoretical prediction of the photo-z observables ([documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/likelihood.photometric_survey.photo.html))
     * spectroscopic_survey: code for the spectroscopy GC observable
-        * ```spec.py```: class with the theoretical prediction of the spectroscopy GC observables  ([documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/likelihood.spectroscopic_survey.spec.html))
+        * ```spec.py```: class with the theoretical prediction of the spectroscopy GC observables  ([documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/likelihood.spectroscopic_survey.spec.html))       
+    * auxiliary: code for auxiliary functions
+        * ```plotter.py```: class with plotting functions  ([documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/likelihood.auxiliary.plotter.html))
     * test: unit tests to check likelihood code
         *   ```test_cosmo.py```: class with unit tests for cosmology class cosmology.py
         *   ```test_shear.py```: class with unit tests for shear class shear.py

@@ -268,6 +268,8 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['H0'] = self.provider.get_param("H0")
             self.cosmo.cosmo_dic['H0_Mpc'] = \
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
+            self.cosmo.cosmo_dic['As'] = self.provider.get_param('As')
+            self.cosmo.cosmo_dic['ns'] = self.provider.get_param('ns')
             self.cosmo.cosmo_dic['omch2'] = self.provider.get_param('omch2')
             self.cosmo.cosmo_dic['ombh2'] = self.provider.get_param('ombh2')
             self.cosmo.cosmo_dic['Omc'] = self.provider.get_param('omegac')
@@ -308,6 +310,8 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['H0'] = model.provider.get_param("H0")
             self.cosmo.cosmo_dic['H0_Mpc'] = \
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
+            self.cosmo.cosmo_dic['As'] = model.provider.get_param('As')
+            self.cosmo.cosmo_dic['ns'] = model.provider.get_param('ns')
             self.cosmo.cosmo_dic['omch2'] = model.provider.get_param('omch2')
             self.cosmo.cosmo_dic['ombh2'] = model.provider.get_param('ombh2')
             self.cosmo.cosmo_dic['Omc'] = model.provider.get_param('omegac')

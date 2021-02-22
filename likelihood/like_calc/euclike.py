@@ -123,9 +123,11 @@ class Euclike:
 
         Parameters
         ----------
-        dictionary: dict
-            cosmology dictionary from the Cosmology class
-            which is updated at each sampling step
+        photo_ins: object
+            initialized instance of the class Photo
+        full_photo: boolean
+            selects whether to use full photometric
+            data (with XC) or not
 
         Returns
         -------
@@ -271,6 +273,16 @@ class Euclike:
         all probes. If false, only calculates GC+WL
         assuming they are independent.
 
+        Parameters
+        ----------
+        dictionary: dict
+            cosmology dictionary from the Cosmology class
+            which is updated at each sampling step
+
+        full_photo: boolean
+            selects whether to use full photometric
+            data (with XC) or not
+
         Returns
         -------
         loglike_photo: float
@@ -319,10 +331,6 @@ class Euclike:
 
         Parameters
         ----------
-        data_params: tuple
-            List of (sampled) parameters needed by the likelihood.
-            This includes nuisance parameters and settings keys.
-
         dictionary: dict
             cosmology dictionary from the Cosmology class
             which is updated at each sampling step
@@ -333,18 +341,18 @@ class Euclike:
 
         Returns
         -------
-        loglike: float
+        loglike_tot: float
             loglike = -2 ln(likelihood) for the Euclid observables
         """
         like_selection = dictionary['nuisance_parameters']['like_selection']
         full_photo = dictionary['nuisance_parameters']['full_photo']
         if like_selection == 1:
-            self.loglike = self.loglike_photo(dictionary, full_photo)
+            self.loglike_tot = self.loglike_photo(dictionary, full_photo)
         elif like_selection == 2:
             self.thvec = self.create_spec_theory(
                              dictionary, dictionary_fiducial)
             dmt = self.specdatafinal - self.thvec
-            self.loglike = -0.5 * np.dot(
+            self.loglike_tot = -0.5 * np.dot(
                 np.dot(dmt, self.specinvcovfinal), dmt.T)
         elif like_selection == 12:
             self.thvec = self.create_spec_theory(
@@ -354,9 +362,9 @@ class Euclike:
                                     dmt, self.specinvcovfinal), dmt.T)
             self.loglike_photo = self.loglike_photo(dictionary, full_photo)
             # (SJ): only addition below if no cross-covariance
-            self.loglike = self.loglike_photo + self.loglike_spec
+            self.loglike_tot = self.loglike_photo + self.loglike_spec
         else:
             raise CobayaInterfaceError(
                 r"Choose like selection '1' or '2' or '12'")
 
-        return self.loglike
+        return self.loglike_tot

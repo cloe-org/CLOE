@@ -34,7 +34,6 @@ def mock_MG_func(z, k):
     return 1.0
 
 
-
 class mock_P_obj:
     def __init__(self, p_interp):
         self.P = p_interp

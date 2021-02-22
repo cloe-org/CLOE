@@ -16,6 +16,12 @@ this_directory = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+# Function to automatically find scripts.
+def find_scripts():
+    sdir = 'scripts'
+    return [os.path.join(sdir, val) for val in os.listdir(sdir) if
+            val.endswith('.py') and '__init__' not in val]
+
 setup(
     name=__name__,
     author=release_info['__author__'],
@@ -23,6 +29,7 @@ setup(
     version=release_info['__version__'],
     url=release_info['__url__'],
     packages=find_packages(),
+    scripts=find_scripts(),
     include_package_data=True,
     install_requires=release_info['__requires__'],
     license=release_info['__license__'],

@@ -1,4 +1,4 @@
-"""UNIT TESTS FOR SHEAR
+"""UNIT TESTS FOR SPEC
 
 This module contains unit tests for the Spec sub-module of the
 spectroscopy survey module.

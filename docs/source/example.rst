@@ -10,7 +10,7 @@ One way for the likelihood to be run is from an interactive python interpreter (
 From a Python interpreter
 -------------------------
 
-The external likelihood needs to be invoked from the text file **cobaya** uses. This file consists of a yaml text, which can be translated into python-dictionaries. For instance:
+An external likelihood can be supplied to **cobaya** directly through a Python interpreter. In order to do this, the choice of likelihood and parameters must be stored in a Python dictionary. For example:
 
 .. code:: python
 
@@ -34,18 +34,17 @@ The external likelihood needs to be invoked from the text file **cobaya** uses. 
             'H0': 67, #Hubble parameter evaluated today (z=0) in km/s/Mpc
             'tau': 0.0925, #optical depth
             'mnu': 0.06, #  sum of the mass of neutrinos in eV
-            'nnu': 3.046, #N_eff of relativistic species
+            'nnu': 3.046, # N_eff, or number of relativistic species
             'As': 2.12605e-9, #Amplitude of the primordial scalar power spectrum
             'ns': {'prior':{'min':0.8, 'max':1.2}}, # primordial power spectrum tilt (sampled with an uniform prior)
-            'w': -1, #Dark energy fluid model
-            'wa': 0, #Dark energy fluid model
+            'w': -1, # Present-day Dark energy equation of state parameter in PPF fluid model
+            'wa': 0, # Early-time Dark energy equation of state parameter in PPF fluid model
             'omk': 0.0, #curvature density
             'omegam': None, #DERIVED parameter: Omega matter density
             'omegab': None, #DERIVED parameter: Omega barion density
             'omeganu': None, #DERIVED parameter: Omega neutrino density
             'omnuh2': None, #DERIVED parameter: Omega neutrino density times de reduced Hubble parameter squared
             'omegac': None, #DERIVED parameter: Omega cold dark matter density
-            'N_eff': None,
             # (UC): change 'like_selection' based on which observational probe you would like to use.
             # Choose among:
             # 1: photometric survey
@@ -89,9 +88,9 @@ The external likelihood needs to be invoked from the text file **cobaya** uses. 
         # ATTENTION: If you have CAMB/CLASS already installed and
         # you are not using the likelihood conda environment
         # or option (2) in cell (3) (Cobaya modules), you can add an extra key called 'path' within the camb dictionary
-        # to point to your already installed CAMB code
+        # to point to your already installed CAMB code:
         'theory': {'camb':
-                   {'stop_at_error': True,
+                   {'stop_at_error': True, #'path': 'path/to/camb',
                     'extra_args':{'num_massive_neutrinos': 1,
                                   'dark_energy_model': 'ppf'}}},
         #'sampler': Cobaya's protected key of the input dictionary.
@@ -133,7 +132,7 @@ The external likelihood needs to be invoked from the text file **cobaya** uses. 
 
 The dictionary above has several  *keys*:
 
-- A ``params`` key: parameters that are going to be explored (or derived). Most of the time, these will be computed from the ``theory`` code (i.e: **CAMB**). If sampled, you can choose their ``prior``, the Latex label for them that will be used in the plots, the reference (``ref``) starting point for the chains (optional), and the initial spread of the MCMC covariance matrix (``proposal``).
+- A ``params`` key: parameters that are going to be explored (or derived). Most of the time, these will be computed from the ``theory`` code (i.e: **CAMB** or **CLASS**). If sampled, you can choose their ``prior``, the Latex label for them that will be used in the plots, the reference (``ref``) starting point for the chains (optional), and the initial spread of the MCMC covariance matrix (``proposal``).
 - A ``theory`` key: Boltzmann Solver we want to use (i.e: **CAMB** or **CLASS**) to compute theoretical quantities.
 - A ``sampler`` key: block stating that we will use the ``mcmc`` sampler to explore the prior+likelihood described above, stating the maximum number of samples used, how many initial samples to ignore, and that we will sequentially refine our initial guess for a covariance matrix. Another samplers such as **polychord** are accepted.
 - A ``modules`` key: path where your external codes (i.e: **CAMB** or **polychord**) are installed. If they are not installed using the structure **cobaya** automatically creates when using automatic installation, you can give particular paths to each of the codes in the corresponding *key*.
@@ -145,16 +144,16 @@ Once this dictionary has been set up, to run **cobaya** from the **jupyter noteb
 
 .. code:: python
 
-    # Import Cobaya run function
+    # Import cobaya run function
     from cobaya.run import run
 
-    # Let's run Cobaya
+    # Let's run cobaya
     # the function run returns
     # info_updated: an information dictionary updated with the defaults,
     # equivalent to the updated yaml file produced by the shell invocation
     # samples: a sampler object, with a sampler.products()
     # being a dictionary of results.
-    # For the mcmc sampler, the dictionary contains only one chain under the key sample.
+    # For the mcmc sampler, the dictionary contains only one chain under the key sampler.
 
     info_updated, samples = run(info)
 

@@ -37,8 +37,8 @@ An external likelihood can be supplied to **cobaya** directly through a Python i
             'nnu': 3.046, # N_eff, or number of relativistic species
             'As': 2.12605e-9, #Amplitude of the primordial scalar power spectrum
             'ns': {'prior':{'min':0.8, 'max':1.2}}, # primordial power spectrum tilt (sampled with an uniform prior)
-            'w': -1, # Present-day Dark energy equation of state parameter in PPF fluid model
-            'wa': 0, # Early-time Dark energy equation of state parameter in PPF fluid model
+            'w': -1, # Present-day Dark energy equation of state parameter in PPF model
+            'wa': 0, # Early-time Dark energy equation of state parameter in PPF model
             'omk': 0.0, #curvature density
             'omegam': None, #DERIVED parameter: Omega matter density
             'omegab': None, #DERIVED parameter: Omega barion density
@@ -153,7 +153,7 @@ Once this dictionary has been set up, to run **cobaya** from the **jupyter noteb
     # equivalent to the updated yaml file produced by the shell invocation
     # samples: a sampler object, with a sampler.products()
     # being a dictionary of results.
-    # For the mcmc sampler, the dictionary contains only one chain under the key sampler.
+    # For the mcmc sampler, the dictionary contains only one chain under the key 'sampler'.
 
     info_updated, samples = run(info)
 

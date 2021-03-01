@@ -375,7 +375,7 @@ class Euclike:
             self.loglike_spec = -0.5 * np.dot(np.dot(
                                     dmt, self.specinvcovfinal), dmt.T)
             self.loglike_photo, self.photothvec = \
-                    self.loglike_photo(dictionary, full_photo)
+                self.loglike_photo(dictionary, full_photo)
             # (SJ): only addition below if no cross-covariance
             self.loglike_tot = self.loglike_photo + self.loglike_spec
         else:

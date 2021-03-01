@@ -101,15 +101,26 @@ class Euclike:
                 del(self.data_ins.data_dict['XC-Phot'][index])
         # GCH: transform GC-Phot
         # We ignore the first value (ells) and last (cov matrix)
-        datavec_dict['GC-Phot'] = np.array([v for key, v in list(
-            self.data_ins.data_dict['GC-Phot'].items())[1:-1]]).reshape((
-                len(self.photoinvcovfinal_GC)))
-        datavec_dict['WL'] = np.array([v for key, v in list(
-            self.data_ins.data_dict['WL'].items())[1:-1]]).reshape((
-                len(self.photoinvcovfinal_WL)))
-        datavec_dict['XC-Phot'] = np.array([v for key, v in list(
-            self.data_ins.data_dict['XC-Phot'].items())[1:-2]]).reshape((
-                len(self.photoinvcovfinal_XC)))
+        datavec_dict['GC-Phot'] = np.array(
+                [self.data_ins.data_dict['GC-Phot'][key][ind]
+                 for ind
+                 in range(len(self.data_ins.data_dict['GC-Phot']['ells']))
+                 for key, v
+                 in list(self.data_ins.data_dict['GC-Phot'].items())[1:-1]])
+
+        datavec_dict['WL'] = np.array(
+                [self.data_ins.data_dict['WL'][key][ind]
+                 for ind in range(len(self.data_ins.data_dict['WL']['ells']))
+                 for key, v
+                 in list(self.data_ins.data_dict['WL'].items())[1:-1]])
+
+        datavec_dict['XC-Phot'] = np.array(
+                [self.data_ins.data_dict['XC-Phot'][key][ind]
+                 for ind
+                 in range(len(self.data_ins.data_dict['XC-Phot']['ells']))
+                 for key, v
+                 in list(self.data_ins.data_dict['XC-Phot'].items())[1:-2]])
+
         datavec_dict['all'] = np.concatenate((datavec_dict['WL'],
                                               datavec_dict['XC-Phot'],
                                               datavec_dict['GC-Phot']), axis=0)

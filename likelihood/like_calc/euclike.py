@@ -152,22 +152,24 @@ class Euclike:
         theoryvec_dict['GC-Phot'] = np.array([phot_ins.Cl_GC_phot(ell,
                                                                   element[0],
                                                                   element[1])
-                                              for
-                                              element in
-                                              self.indices_diagonal_gcphot
                                               for ell in
                                               self.data_ins.data_dict[
                                               'GC-Phot']
-                                              ['ells']])
+                                              ['ells']
+                                              for
+                                              element in
+                                              self.indices_diagonal_gcphot])
+
         # GCH: getting theory WL
         theoryvec_dict['WL'] = np.array([phot_ins.Cl_WL(ell,
                                                         element[0],
-                                                        element[1]) for
-                                         element in
-                                         self.indices_diagonal_wl
+                                                        element[1])
                                          for ell in
                                          self.data_ins.data_dict['WL']
-                                         ['ells']])
+                                         ['ells']
+                                         for
+                                         element in
+                                         self.indices_diagonal_wl])
         # GCH: getting theory XC-Phot
         if full_photo:
             theoryvec_dict['XC-Phot'] = np.array([phot_ins.Cl_cross(ell,

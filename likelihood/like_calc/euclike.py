@@ -335,7 +335,7 @@ class Euclike:
                 dmt_all.T)
         else:
             print('ATTENTION: full_photo has to be either True/False')
-        return loglike_photo
+        return loglike_photo, theoryvec_dict
 
     def loglike(self, dictionary, dictionary_fiducial):
         """Loglike
@@ -360,20 +360,22 @@ class Euclike:
         like_selection = dictionary['nuisance_parameters']['like_selection']
         full_photo = dictionary['nuisance_parameters']['full_photo']
         if like_selection == 1:
-            self.loglike_tot = self.loglike_photo(dictionary, full_photo)
+            self.loglike_tot, self.photothvec = \
+                    self.loglike_photo(dictionary, full_photo)
         elif like_selection == 2:
-            self.thvec = self.create_spec_theory(
+            self.specthvec = self.create_spec_theory(
                              dictionary, dictionary_fiducial)
-            dmt = self.specdatafinal - self.thvec
+            dmt = self.specdatafinal - self.specthvec
             self.loglike_tot = -0.5 * np.dot(
                 np.dot(dmt, self.specinvcovfinal), dmt.T)
         elif like_selection == 12:
-            self.thvec = self.create_spec_theory(
+            self.specthvec = self.create_spec_theory(
                              dictionary, dictionary_fiducial)
-            dmt = self.specdatafinal - self.thvec
+            dmt = self.specdatafinal - self.specthvec
             self.loglike_spec = -0.5 * np.dot(np.dot(
                                     dmt, self.specinvcovfinal), dmt.T)
-            self.loglike_photo = self.loglike_photo(dictionary, full_photo)
+            self.loglike_photo, self.photothvec = \
+                    self.loglike_photo(dictionary, full_photo)
             # (SJ): only addition below if no cross-covariance
             self.loglike_tot = self.loglike_photo + self.loglike_spec
         else:

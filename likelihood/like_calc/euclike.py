@@ -324,7 +324,7 @@ class Euclike:
             # (GCH): save loglike
             loglike_photo = loglike_GC + loglike_WL
         # If True, calls massive cov mat
-        if full_photo:
+        elif full_photo:
             # (GCH): construct dmt
             dmt_all = self.photodatafinal['all'] - \
                     theoryvec_dict['all']

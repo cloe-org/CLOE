@@ -247,13 +247,14 @@ class Cosmology:
 
         Parameters
         ----------
-        zs: list
+        zs: numpy.ndarray
+            redshifts for the power spectrum
         ks: list
             list of modes for the power spectrum
 
         Returns
         -------
-        D_z_k: list
+        D_z_k: numpy.ndarray
             Growth factor as function of redshift and k-mode
 
         """
@@ -450,7 +451,7 @@ class Cosmology:
         redshift: float
             Redshift at which to calculate bias.
         bin_edge_list: list
-            List of tomographic redshift bin edges for photometic GC probe.
+            List of tomographic redshift bin edges for photometric GC probe.
             Default is Euclid IST: Forecasting choices.
 
         Returns
@@ -534,12 +535,12 @@ class Cosmology:
         ----------
         redshift: float
             Redshift at which to evaluate the power spectrum.
-        k_scale: float
+        k_scale: float or list or numpy.ndarray
             k-mode at which to evaluate the  power spectrum.
 
         Returns
         -------
-        pval: float
+        pval:  float or numpy.ndarray
             Value of galaxy-galaxy power spectrum
             at a given redshift and k-mode for galaxy
             clustering photometric
@@ -563,15 +564,15 @@ class Cosmology:
         ----------
         redshift: float
             Redshift at which to evaluate the power spectrum.
-        k_scale: float
+        k_scale: float or list or numpy.ndarray
             k-mode at which to evaluate the power spectrum.
-        mu_rsd: float
-            cosinus of the angle between the pair separation and
+        mu_rsd: float or numpy.ndarray
+            cosine of the angle between the pair separation and
             the line of sight
 
         Returns
         -------
-        pval: float
+        pval: float or numpy.ndarray
             Value of galaxy-galaxy power spectrum
             at a given redshift, k-mode and :math:`\mu_{k}`
             for galaxy clustering spectroscopic
@@ -595,12 +596,12 @@ class Cosmology:
         ----------
         redshift: float
             Redshift at which to evaluate the power spectrum.
-        k_scale: float
+        k_scale: float or list or numpy.ndarray
             k-mode at which to evaluate the power spectrum.
 
         Returns
         -------
-        pval: float
+        pval: float or numpy.ndarray
             Value of galaxy-matter power spectrum
             at a given redshift and k-mode for galaxy clustering
             photometric
@@ -624,15 +625,15 @@ class Cosmology:
         ----------
         redshift: float
             Redshift at which to evaluate the power spectrum.
-        k_scale: float
+        k_scale: float or list or numpy.ndarray
             k-mode at which to evaluate the power spectrum.
-        mu_rsd: float
-            cosinus of the angle between the pair separation
+        mu_rsd: float or numpy.ndarray
+            cosine of the angle between the pair separation
             and the line of sight
 
         Returns
         -------
-        pval: float
+        pval: float or numpy.ndarray.
             Value of galaxy-matter power spectrum
             at a given redshift, k-mode and :math:`\mu_{k}`
             for galaxy clustering spectroscopic
@@ -657,12 +658,12 @@ class Cosmology:
 
         Parameters
         ----------
-        redshift: float
+        redshift: float or numpy.ndarray
             Redshift at which to evaluate the power spectrum.
 
         Returns
         -------
-        fia: float
+        fia: float or numpy.ndarray
             Value of intrinsic alignment function at
             a given redshift
         """
@@ -687,14 +688,14 @@ class Cosmology:
 
         Parameters
         ----------
-        redshift: float
+        redshift: float or numpy.ndarray
             Redshift at which to evaluate the power spectrum.
-        k_scale: float
+        k_scale: float or list or numpy.ndarray
             k-mode at which to evaluate the power spectrum.
 
         Returns
         -------
-        pval: float
+        pval: float or numpy.ndarray
             Value of intrinsic alignment power spectrum
             at a given redshift and k-mode
         """
@@ -712,14 +713,14 @@ class Cosmology:
 
         Parameters
         ----------
-        redshift: float
+        redshift: float or numpy.ndarray
             Redshift at which to evaluate the power spectrum.
-        k_scale: float
+        k_scale: float or list or numpy.ndarray
             k-mode at which to evaluate the power spectrum.
 
         Returns
         -------
-        pval: float
+        pval: float or numpy.ndarray
             Value of density-intrinsic power spectrum
             at a given redshift and k-mode
         """
@@ -738,14 +739,14 @@ class Cosmology:
 
         Parameters
         ----------
-        redshift: float
+        redshift: float or numpy.ndarray
             Redshift at which to evaluate the power spectrum.
-        k_scale: float
+        k_scale: float or list or numpy.ndarray
             k-mode at which to evaluate the power spectrum.
 
         Returns
         -------
-        pval: float
+        pval: float or numpy.ndarray
             Value of photometric galaxy-intrinsic power spectrum
             at a given redshift and k-mode
         """
@@ -764,14 +765,14 @@ class Cosmology:
 
         Parameters
         ----------
-        redshift: float
+        redshift: float or numpy.ndarray
             Redshift at which to evaluate the power spectrum.
-        k_scale: float
+        k_scale: float or list or numpy.ndarray
             k-mode at which to evaluate the power spectrum.
 
         Returns
         -------
-        pval: float
+        pval: float or numpy.ndarray
             Value of spectroscopic galaxy-intrinsic power spectrum
             at a given redshift and k-mode
         """
@@ -857,7 +858,7 @@ class Cosmology:
         ----------
         redshift: float
             Redshift at which to evaluate :math:`\mu(z, k)`.
-        k_scale: float
+        k_scale: float or list or numpy.ndarray
             k-mode at which to evaluate :math:`\mu(z, k)`.
         MG_mu: float
             Value of constant (for v1.0) :math:`\mu(z, k)`

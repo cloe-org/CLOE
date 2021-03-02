@@ -116,10 +116,10 @@ class Euclike:
 
         datavec_dict['XC-Phot'] = np.array(
                 [self.data_ins.data_dict['XC-Phot'][key][ind]
-                 for key, v
-                 in list(self.data_ins.data_dict['XC-Phot'].items())[1:-2]
                  for ind
-                 in range(len(self.data_ins.data_dict['XC-Phot']['ells']))])
+                 in range(len(self.data_ins.data_dict['XC-Phot']['ells']))
+                 for key, v
+                 in list(self.data_ins.data_dict['XC-Phot'].items())[1:-2]])
 
         datavec_dict['all'] = np.concatenate((datavec_dict['WL'],
                                               datavec_dict['XC-Phot'],
@@ -175,13 +175,13 @@ class Euclike:
             theoryvec_dict['XC-Phot'] = np.array([phot_ins.Cl_cross(ell,
                                                                     element[0],
                                                                     element[1])
-                                                  for
-                                                  element in
-                                                  self.indices_all
                                                   for ell in
                                                   self.data_ins.data_dict[
                                                   'XC-Phot']
-                                                  ['ells']])
+                                                  ['ells']
+                                                  for
+                                                  element in
+                                                  self.indices_all])
             theoryvec_dict['all'] = np.concatenate(
                 (theoryvec_dict['WL'],
                  theoryvec_dict['XC-Phot'],

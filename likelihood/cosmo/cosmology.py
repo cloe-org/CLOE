@@ -517,9 +517,14 @@ class Cosmology:
                 if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
                     bi_val = istf_bias_list[i]
         elif redshift >= bin_edge_list[-1]:
-            bi_val = istf_bias_list[-1]
+            # (SJ): let us throw an exception instead
+            # bi_val = istf_bias_list[-1]
+            raise Exception('Spectroscopic galaxy bias cannot be obtained '
+                            'as redshift is above the highest bin edge')
         elif redshift < bin_edge_list[0]:
-            bi_val = istf_bias_list[0]
+            # bi_val = istf_bias_list[0]
+            raise Exception('Spectroscopic galaxy bias cannot be obtained '
+                            'as redshift is below the lowest bin edge.')
         return bi_val
 
     def Pgg_phot_def(self, redshift, k_scale):
@@ -803,13 +808,19 @@ class Cosmology:
         ks_base = self.cosmo_dic['k_win']
         zs_base = self.cosmo_dic['z_win']
 
+        bin_edge_list = np.array([0.90, 1.10, 1.30, 1.50, 1.80])
+        zs_base_spec = zs_base[np.where(np.logical_and(
+                                       zs_base >= bin_edge_list[0],
+                                       zs_base < bin_edge_list[-1]))]
+
         pgg_phot = np.array([self.Pgg_phot_def(zz, ks_base) for zz in zs_base])
         pgdelta_phot = np.array([self.Pgd_phot_def(zz, ks_base)
                                  for zz in zs_base])
         pii = np.array([self.Pii_def(zz, ks_base) for zz in zs_base])
         pdeltai = np.array([self.Pdeltai_def(zz, ks_base) for zz in zs_base])
         pgi_phot = np.array([self.Pgi_phot_def(zz, ks_base) for zz in zs_base])
-        pgi_spec = np.array([self.Pgi_spec_def(zz, ks_base) for zz in zs_base])
+        pgi_spec = np.array([self.Pgi_spec_def(zz, ks_base)
+                             for zz in zs_base_spec])
 
         self.cosmo_dic['Pgg_phot'] = \
             interpolate.RectBivariateSpline(zs_base,
@@ -837,7 +848,7 @@ class Cosmology:
                                             pgi_phot,
                                             kx=1, ky=1)
         self.cosmo_dic['Pgi_spec'] = \
-            interpolate.RectBivariateSpline(zs_base,
+            interpolate.RectBivariateSpline(zs_base_spec,
                                             ks_base,
                                             pgi_spec,
                                             kx=1, ky=1)

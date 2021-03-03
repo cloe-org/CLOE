@@ -171,7 +171,7 @@ class photoinitTestCase(TestCase):
         self.win_tol = 1e-03
         self.cl_tol = 1e-03
         self.integrand_check = -0.948932
-        self.wbincheck = 1.573854e-06
+        self.wbincheck = 1.102535e-06
         self.H0 = 67.0
         self.c = const.c.to('km/s').value
         self.omch2 = 0.12
@@ -182,8 +182,8 @@ class photoinitTestCase(TestCase):
         self.W_IA_check = 0.0001049580
         self.cl_integrand_check = 0.000718
         self.cl_WL_check = 7.100511e-09
-        self.cl_GC_check = 2.890929e-05
-        self.cl_cross_check = 1.133102e-07
+        self.cl_GC_check = 2.89485e-05
+        self.cl_cross_check = 1.130265e-07
         self.flatnz = interpolate.InterpolatedUnivariateSpline(
             np.linspace(0.0, 4.6, 20), np.ones(20), ext=2)
 

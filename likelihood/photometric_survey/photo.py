@@ -52,7 +52,7 @@ class Photo:
         z_wmin2 = 1e-4
         z_wmin3 = 1e-3
         z_wmax = 4.0
-        z_wsamp = 140
+        z_wsamp = 1000
         self.z_trapz_sampling = 500
         self.z_winterp = np.logspace(z_wlogmin, np.log10(z_wmax), z_wsamp)
         self.z_winterp[0] = z_wmin1

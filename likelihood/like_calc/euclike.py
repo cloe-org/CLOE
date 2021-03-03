@@ -101,15 +101,26 @@ class Euclike:
                 del(self.data_ins.data_dict['XC-Phot'][index])
         # GCH: transform GC-Phot
         # We ignore the first value (ells) and last (cov matrix)
-        datavec_dict['GC-Phot'] = np.array([v for key, v in list(
-            self.data_ins.data_dict['GC-Phot'].items())[1:-1]]).reshape((
-                len(self.photoinvcovfinal_GC)))
-        datavec_dict['WL'] = np.array([v for key, v in list(
-            self.data_ins.data_dict['WL'].items())[1:-1]]).reshape((
-                len(self.photoinvcovfinal_WL)))
-        datavec_dict['XC-Phot'] = np.array([v for key, v in list(
-            self.data_ins.data_dict['XC-Phot'].items())[1:-2]]).reshape((
-                len(self.photoinvcovfinal_XC)))
+        datavec_dict['GC-Phot'] = np.array(
+                [self.data_ins.data_dict['GC-Phot'][key][ind]
+                 for ind
+                 in range(len(self.data_ins.data_dict['GC-Phot']['ells']))
+                 for key, v
+                 in list(self.data_ins.data_dict['GC-Phot'].items())[1:-1]])
+
+        datavec_dict['WL'] = np.array(
+                [self.data_ins.data_dict['WL'][key][ind]
+                 for ind in range(len(self.data_ins.data_dict['WL']['ells']))
+                 for key, v
+                 in list(self.data_ins.data_dict['WL'].items())[1:-1]])
+
+        datavec_dict['XC-Phot'] = np.array(
+                [self.data_ins.data_dict['XC-Phot'][key][ind]
+                 for ind
+                 in range(len(self.data_ins.data_dict['XC-Phot']['ells']))
+                 for key, v
+                 in list(self.data_ins.data_dict['XC-Phot'].items())[1:-2]])
+
         datavec_dict['all'] = np.concatenate((datavec_dict['WL'],
                                               datavec_dict['XC-Phot'],
                                               datavec_dict['GC-Phot']), axis=0)
@@ -141,34 +152,36 @@ class Euclike:
         theoryvec_dict['GC-Phot'] = np.array([phot_ins.Cl_GC_phot(ell,
                                                                   element[0],
                                                                   element[1])
-                                              for
-                                              element in
-                                              self.indices_diagonal_gcphot
                                               for ell in
                                               self.data_ins.data_dict[
                                               'GC-Phot']
-                                              ['ells']])
+                                              ['ells']
+                                              for
+                                              element in
+                                              self.indices_diagonal_gcphot])
+
         # GCH: getting theory WL
         theoryvec_dict['WL'] = np.array([phot_ins.Cl_WL(ell,
                                                         element[0],
-                                                        element[1]) for
-                                         element in
-                                         self.indices_diagonal_wl
+                                                        element[1])
                                          for ell in
                                          self.data_ins.data_dict['WL']
-                                         ['ells']])
+                                         ['ells']
+                                         for
+                                         element in
+                                         self.indices_diagonal_wl])
         # GCH: getting theory XC-Phot
         if full_photo:
             theoryvec_dict['XC-Phot'] = np.array([phot_ins.Cl_cross(ell,
                                                                     element[0],
                                                                     element[1])
-                                                  for
-                                                  element in
-                                                  self.indices_all
                                                   for ell in
                                                   self.data_ins.data_dict[
                                                   'XC-Phot']
-                                                  ['ells']])
+                                                  ['ells']
+                                                  for
+                                                  element in
+                                                  self.indices_all])
             theoryvec_dict['all'] = np.concatenate(
                 (theoryvec_dict['WL'],
                  theoryvec_dict['XC-Phot'],
@@ -305,13 +318,13 @@ class Euclike:
                 theoryvec_dict['WL']
             # (GCH): cal loglike
             loglike_GC = -0.5 * \
-                np.dot(np.dot(dmt_GC, self.photoinvcovfinal_GC), dmt_GC.T)
+                np.dot(np.dot(dmt_GC, self.photoinvcovfinal_GC), dmt_GC)
             loglike_WL = -0.5 * \
-                np.dot(np.dot(dmt_WL, self.photoinvcovfinal_WL), dmt_WL.T)
+                np.dot(np.dot(dmt_WL, self.photoinvcovfinal_WL), dmt_WL)
             # (GCH): save loglike
             loglike_photo = loglike_GC + loglike_WL
         # If True, calls massive cov mat
-        if full_photo:
+        elif full_photo:
             # (GCH): construct dmt
             dmt_all = self.photodatafinal['all'] - \
                     theoryvec_dict['all']
@@ -319,10 +332,10 @@ class Euclike:
             # (GCH): cal loglike
             loglike_photo = -0.5 * np.dot(
                 np.dot(dmt_all, self.photoinvcovfinal_all),
-                dmt_all.T)
+                dmt_all)
         else:
             print('ATTENTION: full_photo has to be either True/False')
-        return loglike_photo
+        return loglike_photo, theoryvec_dict
 
     def loglike(self, dictionary, dictionary_fiducial):
         """Loglike
@@ -347,20 +360,22 @@ class Euclike:
         like_selection = dictionary['nuisance_parameters']['like_selection']
         full_photo = dictionary['nuisance_parameters']['full_photo']
         if like_selection == 1:
-            self.loglike_tot = self.loglike_photo(dictionary, full_photo)
+            self.loglike_tot, self.photothvec = \
+                    self.loglike_photo(dictionary, full_photo)
         elif like_selection == 2:
-            self.thvec = self.create_spec_theory(
+            self.specthvec = self.create_spec_theory(
                              dictionary, dictionary_fiducial)
-            dmt = self.specdatafinal - self.thvec
+            dmt = self.specdatafinal - self.specthvec
             self.loglike_tot = -0.5 * np.dot(
-                np.dot(dmt, self.specinvcovfinal), dmt.T)
+                np.dot(dmt, self.specinvcovfinal), dmt)
         elif like_selection == 12:
-            self.thvec = self.create_spec_theory(
+            self.specthvec = self.create_spec_theory(
                              dictionary, dictionary_fiducial)
-            dmt = self.specdatafinal - self.thvec
+            dmt = self.specdatafinal - self.specthvec
             self.loglike_spec = -0.5 * np.dot(np.dot(
-                                    dmt, self.specinvcovfinal), dmt.T)
-            self.loglike_photo = self.loglike_photo(dictionary, full_photo)
+                                    dmt, self.specinvcovfinal), dmt)
+            self.loglike_photo, self.photothvec = \
+                self.loglike_photo(dictionary, full_photo)
             # (SJ): only addition below if no cross-covariance
             self.loglike_tot = self.loglike_photo + self.loglike_spec
         else:

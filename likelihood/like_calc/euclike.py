@@ -318,9 +318,9 @@ class Euclike:
                 theoryvec_dict['WL']
             # (GCH): cal loglike
             loglike_GC = -0.5 * \
-                np.dot(np.dot(dmt_GC, self.photoinvcovfinal_GC), dmt_GC.T)
+                np.dot(np.dot(dmt_GC, self.photoinvcovfinal_GC), dmt_GC)
             loglike_WL = -0.5 * \
-                np.dot(np.dot(dmt_WL, self.photoinvcovfinal_WL), dmt_WL.T)
+                np.dot(np.dot(dmt_WL, self.photoinvcovfinal_WL), dmt_WL)
             # (GCH): save loglike
             loglike_photo = loglike_GC + loglike_WL
         # If True, calls massive cov mat
@@ -332,7 +332,7 @@ class Euclike:
             # (GCH): cal loglike
             loglike_photo = -0.5 * np.dot(
                 np.dot(dmt_all, self.photoinvcovfinal_all),
-                dmt_all.T)
+                dmt_all)
         else:
             print('ATTENTION: full_photo has to be either True/False')
         return loglike_photo, theoryvec_dict
@@ -367,13 +367,13 @@ class Euclike:
                              dictionary, dictionary_fiducial)
             dmt = self.specdatafinal - self.specthvec
             self.loglike_tot = -0.5 * np.dot(
-                np.dot(dmt, self.specinvcovfinal), dmt.T)
+                np.dot(dmt, self.specinvcovfinal), dmt)
         elif like_selection == 12:
             self.specthvec = self.create_spec_theory(
                              dictionary, dictionary_fiducial)
             dmt = self.specdatafinal - self.specthvec
             self.loglike_spec = -0.5 * np.dot(np.dot(
-                                    dmt, self.specinvcovfinal), dmt.T)
+                                    dmt, self.specinvcovfinal), dmt)
             self.loglike_photo, self.photothvec = \
                 self.loglike_photo(dictionary, full_photo)
             # (SJ): only addition below if no cross-covariance

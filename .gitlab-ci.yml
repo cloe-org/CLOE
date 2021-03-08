@@ -53,7 +53,8 @@ pages:
 # Get Profiling Report
 Profiling:
   script: 
-    - python -m cProfile -o profiling.pstats scripts/profiling.py
+    - python profiling.py 1
+    - python -m cProfile -o profiling.pstats profiling.py
     - mkdir products
     - mv profiling.pstats products/
   artifacts:

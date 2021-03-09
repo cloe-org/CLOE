@@ -212,6 +212,6 @@ class Spec:
             (self.scaling_factor_perp(z))**2.0 * (2.0 * m + 1.0) / 2.0
 
         p_int_arr = self.multipole_spectra_integrand(self.mu_grid, z, k, m)
-        integral = prefactor * integrate.trapz(p_int_arr, self.mu_grid)
+        integral = prefactor * integrate.simps(p_int_arr, self.mu_grid)
 
         return integral

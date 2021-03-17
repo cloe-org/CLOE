@@ -21,13 +21,13 @@ class datareaderTestCase(TestCase):
         self.fiducial_key_check = ['H0', 'omch2', 'ombh2',
                                    'ns', 'sigma_8_0', 'w',
                                    'omkh2', 'omnuh2', 'Omnu']
-        self.cov_check_GC_spec = 1.213573e+08
-        self.cov_check_WL = 1.145978e-08
-        self.cov_check_GC_phot = 7.666760e-06
-        self.cov_check_XC = 2.412282e-04
-        self.cl_phot_WL_check = 7.280999e-05
-        self.cl_phot_GC_check = 2.181704e-03
-        self.cl_phot_XC_check = 2.482407e-04
+        self.cov_check_GC_spec = 1.217193e+08
+        self.cov_check_WL = 2.552296e-09
+        self.cov_check_GC_phot = 1.584799e-05
+        self.cov_check_XC = 4.278344e-04
+        self.cl_phot_WL_check = 7.144606e-05
+        self.cl_phot_GC_check = 2.250382e-03
+        self.cl_phot_XC_check = 2.520791e-04
 
         # (GCH): added tests for n(z) data
         self.data_tester.compute_nz()

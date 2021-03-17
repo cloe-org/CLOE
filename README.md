@@ -13,14 +13,6 @@ Check [documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-im
 Check [documentation](https://cobaya.readthedocs.io/en/latest/index.html)
 
 
-## Stand-alone build
-
-The Euclid-Box package can be obtained by cloning this repository using git and get  installed by simply running:
-
-```bash
-python setup.py install
-```
-
 ### Conda environment
 
 To build the package in a dedicated Conda environment with development tools run:
@@ -28,6 +20,14 @@ To build the package in a dedicated Conda environment with development tools run
 ```bash
 conda env create -f environment.yml
 conda activate likelihood
+python setup.py install
+```
+
+### Stand-alone build
+
+The Euclid-Box package can be obtained by cloning this repository using git and get  installed by simply running:
+
+```bash
 python setup.py install
 ```
 

@@ -14,7 +14,7 @@ dependencies:
   - pip>=19.0
   - pip:
     - baccoemu>=1.1
-    - cobaya>=3.0
+    - git+https://github.com/CobayaSampler/cobaya
     - pytest>=6.2
     - pytest-cov>=2.10
     - pytest-pycodestyle>=2.2.0

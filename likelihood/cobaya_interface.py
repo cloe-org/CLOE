@@ -78,7 +78,7 @@ class EuclidLikelihood(Likelihood):
         # The k_min is internally chosen by cobaya.
         # This needs to be changed
 
-        self.k_max_Boltzmannn = 10.0
+        self.k_max_Boltzmannn = 50.0
         self.k_min_GC_phot_interp = 0.001
         self.k_max_GC_phot_interp = 100.0
         self.k_samp_GC = 100

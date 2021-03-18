@@ -60,8 +60,7 @@ info = {
     'theory': {'camb':
                {'stop_at_error': True,
                 'extra_args':{'num_massive_neutrinos': 1,
-                              'dark_energy_model': 'ppf',
-                              'share_delta_neff': True}}},
+                              'dark_energy_model': 'ppf'}}},
     'sampler': {'mcmc': {'max_tries': 100000}},
     'likelihood': {'Euclid': EuclidLikelihood},
     'force': True,

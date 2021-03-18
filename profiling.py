@@ -67,6 +67,7 @@ if runoption == 0:
             # or Galaxy Clustering photometric, Weak Lensing and the cross-correlation between them ('full_photo': True)
             # This flag is not used if 'like_selection: 2'
             'full_photo': True,
+            'NL_flag': 1,
             # (UC): galaxy bias parameters:
             # The bias parameters below are currently fixed to the
             # values used by the Inter Science Taskforce: Forcast (IST:F)
@@ -87,7 +88,11 @@ if runoption == 0:
             'b1_spec': 1.46,
             'b2_spec': 1.61,
             'b3_spec': 1.75,
-            'b4_spec': 1.90},
+            'b4_spec': 1.90,
+            # Intrinsic alignment parameters
+            'aia': 1.72,
+            'nia': -0.41,
+            'bia': 0.0},
         #'theory': Cobaya's protected key of the input dictionary.
         # Cobaya needs to ask some minimum theoretical requirements to a Boltzman Solver
         # (UC): you can choose between CAMB or CLASS

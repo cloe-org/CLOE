@@ -248,7 +248,7 @@ class likecalcTestCase(TestCase):
         # self.check_loglike = 4569.446812
         # (ACD): The correct check value, using the h scaling for the h from
         # supplied external file is:
-        self.check_loglike = -86.386838
+        self.check_loglike = -88.97017
 
     def tearDown(self):
         self.check_loglike = None

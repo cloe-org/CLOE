@@ -31,6 +31,7 @@ info = {
         'w': -1.,
         'wa': 0.,
         'tau': 0.0925,
+        'omnuh2': 0.000644201,
         'mnu': 0.06,
         'nnu': 3.046,
         'omk': 0.0,
@@ -60,7 +61,22 @@ info = {
     'theory': {'camb':
                {'stop_at_error': True,
                 'extra_args':{'num_massive_neutrinos': 1,
-                              'dark_energy_model': 'ppf'}}},
+                              'dark_energy_model': 'ppf',
+                              'share_delta_neff': True,
+                              'num_nu_massless': 2.046,
+                              'num_nu_massive': 1,
+                              'nu_mass_eigenstates': 1,
+                              'accurate_massive_neutrino_transfers': True,
+                              'kmax': 50.,
+                              'k_per_logint': 50,
+                              'AccuracyBoost': 3,
+                              'WantCls' : False,
+                              'WantTransfer' : True,
+                              'WantScalars' : True,
+                              'WantTensors' : True,
+                              'WantVectors' : True,
+                              'lAccuracyBoost': 3,
+                              'lSampleBoost': 1}}},
     'sampler': {'mcmc': {'max_tries': 100000}},
     'likelihood': {'Euclid': EuclidLikelihood},
     'force': True,
@@ -69,4 +85,3 @@ info = {
 
 
 updated_info, sampler = run(info)
-

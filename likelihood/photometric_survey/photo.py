@@ -292,7 +292,7 @@ class Photo:
                             ' spectrum interpolation range.')
         return kern_mult_power
 
-    def Cl_WL(self, ell, bin_i, bin_j, int_step=0.05):
+    def Cl_WL(self, ell, bin_i, bin_j, int_step=0.01):
         r"""Cl WL
 
         Calculates angular power spectrum for weak lensing,

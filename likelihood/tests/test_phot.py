@@ -181,7 +181,7 @@ class photoinitTestCase(TestCase):
         self.W_i_Gcheck = 5.241556e-09
         self.W_IA_check = 0.0001049580
         self.cl_integrand_check = 0.000718
-        self.cl_WL_check = 7.100511e-09
+        self.cl_WL_check = 7.060126e-09
         self.cl_GC_check = 2.89485e-05
         self.cl_cross_check = 1.130265e-07
         self.flatnz = interpolate.InterpolatedUnivariateSpline(

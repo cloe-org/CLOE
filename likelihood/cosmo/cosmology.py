@@ -433,14 +433,53 @@ class Cosmology:
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['fsigma8'], ext=2)
 
+    def istf_phot_galbias_interpolator(
+        self,
+        redshift_mean=[
+            0.2095,
+            0.489,
+            0.619,
+            0.7335,
+            0.8445,
+            0.9595,
+            1.087,
+            1.2395,
+            1.4500000000000002,
+            2.0380000000000003]):
+        r"""Istf Phot Galbias interpolator
+
+        Creates a linear interpolator for the galaxy bias for the
+        photometric GC probes at a given redshift z
+
+        Parameters
+        ----------
+        redshift_mean: list
+            List of tomographic redshift bin means for photometric GC probe.
+            Default is Euclid IST: Forecasting choices.
+        """
+        istf_bias_list = [self.cosmo_dic['nuisance_parameters']['b1_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b2_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b3_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b4_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b5_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b6_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b7_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b8_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b9_photo'],
+                          self.cosmo_dic['nuisance_parameters']['b10_photo']]
+
+        b_inter = interpolate.interp1d(redshift_mean, istf_bias_list,
+                                       fill_value="extrapolate")
+        self.cosmo_dic['b_inter'] = b_inter
+
     def istf_phot_galbias(self, redshift, bin_edge_list=[0.001, 0.418, 0.560,
                                                          0.678, 0.789, 0.900,
                                                          1.019, 1.155, 1.324,
                                                          1.576, 2.50]):
         r"""Istf Phot Galbias
 
-        Updates galaxy bias for the photometric GC probes at a given
-        redshift z
+        Updates galaxy bias for the photometric GC probes by
+        interpolation at a given redshift z
 
         Note: for redshifts above the final bin (z > 2.5), we use the bias
         from the final bin. Similarly, for redshifts below the first bin
@@ -459,25 +498,13 @@ class Cosmology:
         bi_val: float
             Value of photometric galaxy bias at input redshift
         """
-        istf_bias_list = [self.cosmo_dic['nuisance_parameters']['b1_photo'],
-                          self.cosmo_dic['nuisance_parameters']['b2_photo'],
-                          self.cosmo_dic['nuisance_parameters']['b3_photo'],
-                          self.cosmo_dic['nuisance_parameters']['b4_photo'],
-                          self.cosmo_dic['nuisance_parameters']['b5_photo'],
-                          self.cosmo_dic['nuisance_parameters']['b6_photo'],
-                          self.cosmo_dic['nuisance_parameters']['b7_photo'],
-                          self.cosmo_dic['nuisance_parameters']['b8_photo'],
-                          self.cosmo_dic['nuisance_parameters']['b9_photo'],
-                          self.cosmo_dic['nuisance_parameters']['b10_photo']]
 
         if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
-            for i in range(len(bin_edge_list) - 1):
-                if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
-                    bi_val = istf_bias_list[i]
+            bi_val = self.cosmo_dic['b_inter'](redshift)
         elif redshift >= bin_edge_list[-1]:
-            bi_val = istf_bias_list[-1]
+            bi_val = self.cosmo_dic['b_inter'](bin_edge_list[-1])
         elif redshift < bin_edge_list[0]:
-            bi_val = istf_bias_list[0]
+            bi_val = self.cosmo_dic['b_inter'](bin_edge_list[0])
         return bi_val
 
     def istf_spec_galbias(self, redshift, bin_edge_list=[0.90, 1.10, 1.30,
@@ -935,6 +962,7 @@ class Cosmology:
         """
         # (GCH): update dictionary with H(z)
         # r(z), fsigma8, sigma8, f(z), D_A(z),
+        # photo-bias interpolator
         # photo-spectra
         self.interp_H()
         self.interp_H_Mpc()
@@ -943,6 +971,7 @@ class Cosmology:
         self.interp_sigma8()
         self.growth_rate_cobaya()
         self.interp_angular_dist()
+        self.istf_phot_galbias_interpolator()
         self.interp_phot_galaxy_spectra()
         # (GCH): As mentioned in interp_phot_galaxy_spectra
         # spec spectra are not interpolated so they are added

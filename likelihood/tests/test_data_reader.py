@@ -22,12 +22,12 @@ class datareaderTestCase(TestCase):
                                    'ns', 'sigma_8_0', 'w',
                                    'omkh2', 'omnuh2', 'Omnu']
         self.cov_check_GC_spec = 1.217193e+08
-        self.cov_check_WL = 2.552296e-09
-        self.cov_check_GC_phot = 1.584799e-05
-        self.cov_check_XC = 4.278344e-04
-        self.cl_phot_WL_check = 7.144606e-05
-        self.cl_phot_GC_check = 2.250382e-03
-        self.cl_phot_XC_check = 2.520791e-04
+        self.cov_check_WL = 2.552293e-09
+        self.cov_check_GC_phot = 1.609232e-05
+        self.cov_check_XC = 4.360890e-04
+        self.cl_phot_WL_check = 7.144612e-05
+        self.cl_phot_GC_check = 2.239632e-03
+        self.cl_phot_XC_check = 2.535458e-04
 
         # (GCH): added tests for n(z) data
         self.data_tester.compute_nz()

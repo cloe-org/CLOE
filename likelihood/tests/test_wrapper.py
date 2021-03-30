@@ -104,9 +104,7 @@ class CobayaModel:
             ("delta_tot", "delta_tot"), nonlinear=False)
         self.cosmology.cosmo_dic['fsigma8'] = \
             self.model.provider.get_fsigma8(self.z_win)
-        R, z, sigma_R = \
-            self.model.provider.get_sigma_R()
-        self.cosmology.cosmo_dic['sigma_8'] = \
-            sigma_R[:, 0]
+        self.cosmology.cosmo_dic['sigma8'] = \
+            self.model.provider.get_sigma8_z(self.z_win)
         self.cosmology.update_cosmo_dic(self.cosmology.cosmo_dic['z_win'],
                                         0.05)

@@ -95,7 +95,7 @@ class Cosmology:
             Interpolator function for delta from Boltzmann code
         fsigma8: list
             fsigma8 function evaluated at z
-        sigma_8: list
+        sigma8: list
             sigma8 function evaluated at z
         c: float
             Speed-of-light in units of :math:`km·s^{-1}`
@@ -189,7 +189,7 @@ class Cosmology:
                           'H': None,
                           'H_Mpc': None,
                           'fsigma8': None,
-                          'sigma_8': None,
+                          'sigma8': None,
                           'D_z_k': None,
                           # Interpolators
                           'Pk_interpolator': None,
@@ -412,7 +412,7 @@ class Cosmology:
                             'supplied to cosmo_dic.')
         self.cosmo_dic['sigma8_z_func'] = \
             interpolate.InterpolatedUnivariateSpline(
-                x=self.cosmo_dic['z_win'], y=self.cosmo_dic['sigma_8'], ext=2)
+                x=self.cosmo_dic['z_win'], y=self.cosmo_dic['sigma8'], ext=2)
 
     def interp_fsigma8(self):
         r"""Interp fsigma8

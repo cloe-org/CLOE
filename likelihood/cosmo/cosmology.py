@@ -56,7 +56,7 @@ class Cosmology:
         ns: float
             spectral tilt of the primordial
             power spectrum
-        sigma_8_0: float
+        sigma8_0: float
             sigma8 evaluated at z = 0
         w: float
            Dark energy equation of state
@@ -95,7 +95,7 @@ class Cosmology:
             Interpolator function for delta from Boltzmann code
         fsigma8: list
             fsigma8 function evaluated at z
-        sigma_8: list
+        sigma8: list
             sigma8 function evaluated at z
         c: float
             Speed-of-light in units of :math:`km·s^{-1}`
@@ -177,7 +177,7 @@ class Cosmology:
                           'nnu': 3.046,
                           'ns': 0.96,
                           'As': 2.1e-9,
-                          'sigma_8_0': 0.816,
+                          'sigma8_0': 0.816,
                           'c': const.c.to('km/s').value,
                           'MG_mu': None,
                           'MG_sigma': None,
@@ -189,7 +189,7 @@ class Cosmology:
                           'H': None,
                           'H_Mpc': None,
                           'fsigma8': None,
-                          'sigma_8': None,
+                          'sigma8': None,
                           'D_z_k': None,
                           # Interpolators
                           'Pk_interpolator': None,
@@ -412,7 +412,7 @@ class Cosmology:
                             'supplied to cosmo_dic.')
         self.cosmo_dic['sigma8_z_func'] = \
             interpolate.InterpolatedUnivariateSpline(
-                x=self.cosmo_dic['z_win'], y=self.cosmo_dic['sigma_8'], ext=2)
+                x=self.cosmo_dic['z_win'], y=self.cosmo_dic['sigma8'], ext=2)
 
     def interp_fsigma8(self):
         r"""Interp fsigma8
@@ -981,7 +981,7 @@ class Cosmology:
         # (GCH): for the moment we use our own definition
         # of the growth factor
         self.cosmo_dic['D_z_k'] = self.growth_factor(zs, ks)
-        self.cosmo_dic['sigma_8_0'] = \
+        self.cosmo_dic['sigma8_0'] = \
             self.cosmo_dic['sigma8_z_func'](0)
         self.cosmo_dic['MG_mu'] = lambda x, y: self.MG_mu_def(x, y, MG_mu)
         self.cosmo_dic['MG_sigma'] = lambda x, y: self.MG_sigma_def(x, y,

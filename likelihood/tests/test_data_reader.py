@@ -19,7 +19,7 @@ class datareaderTestCase(TestCase):
         self.nz_key_check = ['n1', 'n2', 'n3', 'n4', 'n5',
                              'n6', 'n7', 'n8', 'n9', 'n10']
         self.fiducial_key_check = ['H0', 'omch2', 'ombh2',
-                                   'ns', 'sigma_8_0', 'w',
+                                   'ns', 'sigma8_0', 'w',
                                    'omkh2', 'omnuh2', 'Omnu']
         self.cov_check_GC_spec = 1.217193e+08
         self.cov_check_WL = 2.552293e-09

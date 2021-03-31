@@ -167,7 +167,7 @@ class Reader:
                 'ombh2': fid_cosmo_file[1].header['OMEGA_B'] *
                 fid_cosmo_file[1].header['HUBBLE']**2,
                 'ns': fid_cosmo_file[1].header['INDEX_N'],
-                'sigma_8_0': fid_cosmo_file[1].header['SIGMA_8'],
+                'sigma8_0': fid_cosmo_file[1].header['SIGMA_8'],
                 'w': fid_cosmo_file[1].header['W_STATE'],
                 'omkh2': fid_cosmo_file[1].header['OMEGA_K'] *
                 fid_cosmo_file[1].header['HUBBLE']**2,

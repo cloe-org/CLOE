@@ -164,17 +164,7 @@ class EuclidLikelihood(Likelihood):
                                                     "units": "km/s/Mpc"},
                                          "fsigma8": {"z": self.z_win,
                                                      "units": None},
-                                         "sigma_R": {"z": self.z_win,
-                                                     "vars_pairs":
-                                                     [["delta_tot",
-                                                       "delta_tot"]],
-                                                     "R": [8 / 0.67]}})
-        # (GCH): ATTENTION: in sigma_R, R is in Mpc, but we want it in
-        # Mpc/h. A solution could be to make an interpolation
-        # There is also a problem with the k (at which k fsigma_8 is
-        # evaluated?
-        # Still, for the fiducial IST cosmology, fsigma8/sigma8
-        # where R=8/0.67 does not agree. Something else happens
+                                         "sigma8_z": {"z": self.z_win}})
 
         # (GCH): evaluation of posterior, required by Cobaya
         model_fiducial.logposterior({})
@@ -209,10 +199,9 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology.cosmo_dic['fsigma8'] = \
             model_fiducial.provider.get_fsigma8(
             self.z_win)
-        R_fiducial, z_fiducial, sigma_R_fiducial = \
-            model_fiducial.provider.get_sigma_R()
-        self.fiducial_cosmology.cosmo_dic['sigma_8'] = \
-            sigma_R_fiducial[:, 0]
+        self.fiducial_cosmology.cosmo_dic['sigma8'] = \
+            model_fiducial.provider.get_sigma8_z(
+            self.z_win)
         # (GCH): update dictionary with interpolators
         self.fiducial_cosmology.update_cosmo_dic(
             self.fiducial_cosmology.cosmo_dic['z_win'],
@@ -246,10 +235,7 @@ class EuclidLikelihood(Likelihood):
                 "comoving_radial_distance": {"z": self.z_win},
                 "angular_diameter_distance": {"z": self.z_win},
                 "Hubble": {"z": self.z_win, "units": "km/s/Mpc"},
-                "sigma_R": {"z": self.z_win,
-                            "vars_pairs": [["delta_tot",
-                                            "delta_tot"]],
-                            "R": [8 / 0.67]},
+                "sigma8_z": {"z": self.z_win},
                 "fsigma8": {"z": self.z_win, "units": None}}
 
     def passing_requirements(self, model, **params_dic):
@@ -295,8 +281,8 @@ class EuclidLikelihood(Likelihood):
                 ("delta_tot", "delta_tot"), nonlinear=False)
             self.cosmo.cosmo_dic['z_win'] = self.z_win
             self.cosmo.cosmo_dic['k_win'] = self.k_win
-            R, z, sigma_R = self.provider.get_sigma_R()
-            self.cosmo.cosmo_dic['sigma_8'] = sigma_R[:, 0]
+            self.cosmo.cosmo_dic['sigma8'] = self.provider.get_sigma8_z(
+                self.cosmo.cosmo_dic['z_win'])
             self.cosmo.cosmo_dic['fsigma8'] = self.provider.get_fsigma8(
                 self.cosmo.cosmo_dic['z_win'])
             # Filter nuisance parameters for new dict
@@ -338,8 +324,8 @@ class EuclidLikelihood(Likelihood):
                 ("delta_tot", "delta_tot"), nonlinear=False)
             self.cosmo.cosmo_dic['z_win'] = self.z_win
             self.cosmo.cosmo_dic['k_win'] = self.k_win
-            R, z, sigma_R = model.provider.get_sigma_R()
-            self.cosmo.cosmo_dic['sigma_8'] = sigma_R[:, 0]
+            self.cosmo.cosmo_dic['sigma8'] = model.provider.get_sigma8_z(
+                self.cosmo.cosmo_dic['z_win'])
             self.cosmo.cosmo_dic['fsigma8'] = model.provider.get_fsigma8(
                 self.cosmo.cosmo_dic['z_win'])
             new_keys = params_dic.keys() - self.cosmo.cosmo_dic.keys()

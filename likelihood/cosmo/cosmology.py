@@ -56,7 +56,7 @@ class Cosmology:
         ns: float
             spectral tilt of the primordial
             power spectrum
-        sigma_8_0: float
+        sigma8_0: float
             sigma8 evaluated at z = 0
         w: float
            Dark energy equation of state
@@ -177,7 +177,7 @@ class Cosmology:
                           'nnu': 3.046,
                           'ns': 0.96,
                           'As': 2.1e-9,
-                          'sigma_8_0': 0.816,
+                          'sigma8_0': 0.816,
                           'c': const.c.to('km/s').value,
                           'MG_mu': None,
                           'MG_sigma': None,
@@ -981,7 +981,7 @@ class Cosmology:
         # (GCH): for the moment we use our own definition
         # of the growth factor
         self.cosmo_dic['D_z_k'] = self.growth_factor(zs, ks)
-        self.cosmo_dic['sigma_8_0'] = \
+        self.cosmo_dic['sigma8_0'] = \
             self.cosmo_dic['sigma8_z_func'](0)
         self.cosmo_dic['MG_mu'] = lambda x, y: self.MG_mu_def(x, y, MG_mu)
         self.cosmo_dic['MG_sigma'] = lambda x, y: self.MG_sigma_def(x, y,

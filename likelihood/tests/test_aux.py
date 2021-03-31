@@ -103,7 +103,7 @@ class plotterTestCase(TestCase):
         mock_cosmo_dic = {'ombh2': 0.022445, 'omch2': 0.121203, 'H0': 67.0,
                           'tau': 0.07, 'mnu': 0.06, 'nnu': 3.046,
                           'omkh2': 0.0, 'omnuh2': 0.0, 'ns': 0.96,
-                          'w': -1.0, 'sigma_8_0': 0.816,
+                          'w': -1.0, 'sigma8_0': 0.816,
                           'As': 2.115e-9, 'sigma8_z_func': sig_8_interp,
                           'fsigma8_z_func': f_sig_8_interp,
                           'f_z': f_z_interp,

@@ -22,9 +22,9 @@ class datareaderTestCase(TestCase):
                                    'ns', 'sigma8_0', 'w',
                                    'omkh2', 'omnuh2', 'Omnu']
         self.cov_check_GC_spec = 1.217193e+08
-        self.cov_check_WL = 2.552293e-09
-        self.cov_check_GC_phot = 1.609232e-05
-        self.cov_check_XC = 4.360890e-04
+        self.cov_check_WL = 2.654605e-09
+        self.cov_check_GC_phot = 1.693992e-05
+        self.cov_check_XC = 4.403701e-04
         self.cl_phot_WL_check = 7.144612e-05
         self.cl_phot_GC_check = 2.239632e-03
         self.cl_phot_XC_check = 2.535458e-04

@@ -49,7 +49,7 @@ class Euclike:
             self.data_ins.data_dict['WL']['cov'])
         self.photoinvcovfinal_XC = np.linalg.inv(
             self.data_ins.data_dict['XC-Phot']['cov_XC_only'])
-        # GCH: order of this matrix is WL, XC, GC
+        # Order of this matrix is WL, XC, GC
         self.photoinvcovfinal_all = np.linalg.inv(
             self.data_ins.data_dict['XC-Phot']['cov'])
         # Tranforming data
@@ -58,7 +58,7 @@ class Euclike:
         # This refers to the non-redundant bin combinations for
         # which we have measurements (i.e. 1-1, 1-2, ..., 1-10,
         # 2-2, 2-3, ..., 2-10, 3-3, 3-4, etc, in the case of ten
-        # tomographic bins for WL and GC-phot. Meanhile, all bin
+        # tomographic bins for WL and GC-Phot. Meanhile, all bin
         # combinations exist for XC, i.e. for example both 1-2
         # and 2-1, both 1-3 and 3-1, etc).
         numtomo_wl = self.data_ins.numtomo_wl
@@ -99,7 +99,7 @@ class Euclike:
         for index in list(self.data_ins.data_dict['XC-Phot'].keys()):
             if 'B' in index:
                 del(self.data_ins.data_dict['XC-Phot'][index])
-        # GCH: transform GC-Phot
+        # Transform GC-Phot
         # We ignore the first value (ells) and last (cov matrix)
         datavec_dict['GC-Phot'] = np.array(
                 [self.data_ins.data_dict['GC-Phot'][key][ind]
@@ -148,7 +148,7 @@ class Euclike:
         """
         theoryvec_dict = {'GC-Phot': None, 'WL': None, 'XC-Phot': None,
                           'all': None}
-        # GCH: compute theory for GC-Phot
+        # Obtain the theory for GC-Phot
         theoryvec_dict['GC-Phot'] = np.array([phot_ins.Cl_GC_phot(ell,
                                                                   element[0],
                                                                   element[1])
@@ -160,7 +160,7 @@ class Euclike:
                                               element in
                                               self.indices_diagonal_gcphot])
 
-        # GCH: getting theory WL
+        # Obtain the theory for WL
         theoryvec_dict['WL'] = np.array([phot_ins.Cl_WL(ell,
                                                         element[0],
                                                         element[1])
@@ -170,7 +170,7 @@ class Euclike:
                                          for
                                          element in
                                          self.indices_diagonal_wl])
-        # GCH: getting theory XC-Phot
+        # Obtain the theory for XC-Phot
         if full_photo:
             theoryvec_dict['XC-Phot'] = np.array([phot_ins.Cl_cross(ell,
                                                                     element[0],
@@ -213,8 +213,6 @@ class Euclike:
 
         spec_ins = Spec(dictionary, dictionary_fiducial)
         theoryvec = []
-        # (SJ): k_ins seemingly in h/Mpc units, tentative transformation here.
-        # (SJ): Commented line below is pre-transformation, kept for now
         for z_ins in self.zkeys:
             for m_ins in [0, 2, 4]:
                 for k_ins in self.data_ins.data_dict['GC-Spec'][z_ins]['k_pk']:
@@ -255,16 +253,16 @@ class Euclike:
         """
 
         self.covnumz = len(self.zkeys)
-        # (SJ): covnumk generalizes so that each z can have different k binning
+        # covnumk generalizes so that each z can have different k binning
         self.covnumk = []
         self.covnumk.append(0)
         for z_ins in self.zkeys:
             self.covnumk.append(
                 3 * len(self.data_ins.data_dict['GC-Spec'][z_ins]['k_pk']))
 
-        # (SJ): Put all covariances into a single/larger covariance.
-        # (SJ): As no cross-covariances, this takes on a block-form
-        # (SJ): along the diagonal.
+        # Put all covariances into a single/larger covariance.
+        # As no cross-covariances, this takes on a block-form
+        # along the diagonal.
         covfull = np.zeros([sum(self.covnumk), sum(self.covnumk)])
         kc = 0
         c1 = 0
@@ -302,34 +300,34 @@ class Euclike:
             returns photo-z chi2
         """
 
-        # (GCH): photo-class instance
+        # Photo class instance
         phot_ins = Photo(
                 dictionary,
                 self.data_ins.nz_dict_WL,
                 self.data_ins.nz_dict_GC_Phot)
-        # (GCH): theory vec cal
+        # Obtain the theory vector
         theoryvec_dict = self.create_photo_theory(phot_ins, full_photo)
         loglike_photo = 0
         if not full_photo:
-            # (GCH): construct dmt
+            # Construct data minus theory
             dmt_GC = self.photodatafinal['GC-Phot'] - \
                     theoryvec_dict['GC-Phot']
             dmt_WL = self.photodatafinal['WL'] - \
                 theoryvec_dict['WL']
-            # (GCH): cal loglike
+            # Obtain loglike
             loglike_GC = -0.5 * \
                 np.dot(np.dot(dmt_GC, self.photoinvcovfinal_GC), dmt_GC)
             loglike_WL = -0.5 * \
                 np.dot(np.dot(dmt_WL, self.photoinvcovfinal_WL), dmt_WL)
-            # (GCH): save loglike
+            # Save loglike
             loglike_photo = loglike_GC + loglike_WL
         # If True, calls massive cov mat
         elif full_photo:
-            # (GCH): construct dmt
+            # Construct data minus theory
             dmt_all = self.photodatafinal['all'] - \
                     theoryvec_dict['all']
 
-            # (GCH): cal loglike
+            # Obtain loglike
             loglike_photo = -0.5 * np.dot(
                 np.dot(dmt_all, self.photoinvcovfinal_all),
                 dmt_all)
@@ -355,7 +353,7 @@ class Euclike:
         Returns
         -------
         loglike_tot: float
-            loglike = -2 ln(likelihood) for the Euclid observables
+            loglike = Ln(likelihood) for the Euclid observables
         """
         like_selection = dictionary['nuisance_parameters']['like_selection']
         full_photo = dictionary['nuisance_parameters']['full_photo']
@@ -376,7 +374,7 @@ class Euclike:
                                     dmt, self.specinvcovfinal), dmt)
             self.loglike_photo, self.photothvec = \
                 self.loglike_photo(dictionary, full_photo)
-            # (SJ): only addition below if no cross-covariance
+            # Only addition below if no cross-covariance
             self.loglike_tot = self.loglike_photo + self.loglike_spec
         else:
             raise CobayaInterfaceError(

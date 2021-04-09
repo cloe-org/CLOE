@@ -136,7 +136,7 @@ class plotterTestCase(TestCase):
                               'bia': 0.0}
                           }
 
-        # MM: precomputed parameters
+        # precomputed parameters
         mock_cosmo_dic['H0_Mpc'] = \
             mock_cosmo_dic['H0'] / const.c.to('km/s').value
         mock_cosmo_dic['Omb'] = \

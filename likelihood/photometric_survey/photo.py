@@ -46,7 +46,7 @@ class Photo:
                             'exists in cosmo_dic.')
         self.cl_int_z_min = 0.001
         self.cl_int_z_max = self.theory['z_win'][-1]
-        # (SJ): The size of z_winterp sufficient for now, could be tuned later
+        # The size of z_winterp sufficient for now, could be tuned later
         z_wlogmin = -2
         z_wmin1 = 0
         z_wmin2 = 1e-4
@@ -58,8 +58,8 @@ class Photo:
         self.z_winterp[0] = z_wmin1
         self.z_winterp[1] = z_wmin2
         self.z_winterp[2] = z_wmin3
-        # (SJ): Number of bins should be generalized, hard-coded for now
-        # (SJ): z_wtomo is the number of tomographic bins + 1
+        # Number of bins should be generalized, hard-coded for now
+        # z_wtomo is the number of tomographic bins + 1
 
         z_wtomo_wl = len(self.nz_dic_WL)
         z_wtomo_gc = len(self.nz_dic_GC)

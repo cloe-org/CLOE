@@ -18,7 +18,8 @@ from likelihood.cobaya_interface import EuclidLikelihood
 
 print("Running script: ", sys.argv[0])
 
-#Attention: Change this to your local path where your external codes are installed: CAMB, polychord, likelihoods...
+# Attention: If working outside of the likelihood environment, change this to your
+# local path where your external codes are installed (CAMB, polychord, likelihoods, etc).
 
 if len(sys.argv) > 1:
     runoption = sys.argv[1]
@@ -30,11 +31,11 @@ print('runoption = ', runoption)
 if runoption == 0:
     print('Full likelihood evaluation!')
     info = {
-        #'params': Cobaya's protected key of the input dictionary.
+        # 'params': Cobaya's protected key of the input dictionary.
         # Includes the parameters that the user would like to sample over:
         'params': {
             # Each parameter below (which is a 'key' of another sub-dictionary) can contain a dictionary
-            # with the key 'prior', 'latex'...
+            # with the key 'prior', 'latex', etc.
             # If the prior dictionary is not passed to a parameter, this parameter is fixed.
             # In this example, we are sampling the parameter ns
             # For more information see: https://cobaya.readthedocs.io/en/latest/example.html
@@ -93,7 +94,7 @@ if runoption == 0:
             'aia': 1.72,
             'nia': -0.41,
             'bia': 0.0},
-        #'theory': Cobaya's protected key of the input dictionary.
+        # 'theory': Cobaya's protected key of the input dictionary.
         # Cobaya needs to ask some minimum theoretical requirements to a Boltzman Solver
         # You can choose between CAMB or CLASS
         # In this DEMO, we use CAMB and specify some CAMB arguments
@@ -108,7 +109,7 @@ if runoption == 0:
                    {'stop_at_error': True,
                     'extra_args':{'num_massive_neutrinos': 1,
                                   'dark_energy_model': 'ppf'}}},
-        #'sampler': Cobaya's protected key of the input dictionary.
+        # 'sampler': Cobaya's protected key of the input dictionary.
         # You can choose the sampler you want to use.
         # Check Cobaya's documentation to see the list of available samplers
         # In this DEMO, we use the 'evaluate' sampler to make a single computation of the posterior distributions
@@ -119,20 +120,20 @@ if runoption == 0:
         # For example: chains...
         # Modify the path below within 'output' to choose a name and a directory for those files
         'output': 'chains/my_euclid_experiment',
-        #'likelihood': Cobaya's protected key of the input dictionary.
+        # 'likelihood': Cobaya's protected key of the input dictionary.
         # The user can select which data wants to use for the analysis.
         # Check Cobaya's documentation to see the list of the current available data experiments
         # In this DEMO, we load the Euclid-Likelihood as an external function, and name it 'Euclid'
         'likelihood': {'Euclid': EuclidLikelihood},
-        #'debug': Cobaya's protected key of the input dictionary.
+        # 'debug': Cobaya's protected key of the input dictionary.
         # How much information you want Cobaya to print. If debug: True, it prints every detail
         # exectuted internally in Cobaya
         'debug': True,
-        #'timing': Cobaya's protected key of the input dictionary.
+        # 'timing': Cobaya's protected key of the input dictionary.
         # If timing: True, Cobaya returns how much time it took it to make a computation of the posterior
         # and how much time take each of the modules to perform their tasks
         'timing': True,
-        #'force': Cobaya's protected key of the input dictionary.
+        # 'force': Cobaya's protected key of the input dictionary.
         # If 'force': True, Cobaya forces deleting the previous output files, if found, with the same name
         'force': True
         }

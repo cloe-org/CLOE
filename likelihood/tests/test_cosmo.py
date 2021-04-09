@@ -5,7 +5,7 @@ This module contains unit tests for the cosmo module.
 
 """
 
-# (GCH): Use Cobaya Model wrapper
+# Use Cobaya Model wrapper
 
 from cobaya.model import get_model
 from unittest import TestCase
@@ -21,7 +21,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 class cosmoinitTestCase(TestCase):
 
     def setUp(self):
-        # (GCH): define cosmology values in Cosmology dict
+        # Define cosmology values in Cosmology dict
         cosmo = Cosmology()
         cosmo.cosmo_dic['ombh2'] = 0.022
         cosmo.cosmo_dic['omch2'] = 0.12
@@ -33,10 +33,10 @@ class cosmoinitTestCase(TestCase):
         cosmo.cosmo_dic['As'] = 2.1e-9
         cosmo.cosmo_dic['H0_Mpc'] = \
             cosmo.cosmo_dic['H0'] / const.c.to('km/s').value,
-        # (GCH): create wrapper model
+        # Create wrapper model
         self.model_test = CobayaModel(cosmo)
         self.model_test.update_cosmo()
-        # (GCH): Check values
+        # Check values
         self.H0check = 67.0
         self.Dcheck = 1.0
         self.fcheck = 0.525454

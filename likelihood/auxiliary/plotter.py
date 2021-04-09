@@ -39,7 +39,7 @@ class Plotter:
         self.read_data.compute_nz()
         self.read_data.read_GC_spec()
         self.read_data.read_phot()
-        # ACD: As we currently don't have a way to load fiducial r(z), d(z) and
+        # As we currently don't have a way to load fiducial r(z), d(z) and
         # H(z)s, these are currently set to match the ones from the cosmo_dic.
         # This will need to be fixed once this is decided.
         fid_dict = self.read_data.data_spec_fiducial_cosmo
@@ -90,7 +90,7 @@ class Plotter:
             raise Exception('Must choose valid type of probe: WL, or GC-Phot.')
         if bin_i > no_bins or bin_j > no_bins:
             raise Exception('Requested bin index greater than number of bins.')
-        # ACD: NOTE - As the range of ell-modes from OU-LE3 is not set in
+        # Note: As the range of ell-modes from OU-LE3 is not set in
         # stone, if this changes, the following exception handling will need to
         # be reviewed.
         if np.min(ells) < 10.0 or np.max(ells) > 5000.0:
@@ -162,7 +162,7 @@ class Plotter:
             pl_label = "OU-LE3 Bin {:d} - Bin {:d}".format(bin_i, bin_j)
         pl_ax.plot(ells, ext_cs, label=pl_label, color=pl_colour,
                    linestyle=pl_linestyle)
-        # ACD: NOTE - As covariance format is not set in stone, if the format
+        # Note:As covariance format is not set in stone, if the format
         # changes, the following code will need to be reviewed to correct the
         # error bar calculation.
         cov_diags = np.sqrt(np.diagonal(self.read_data.data_dict[probe][
@@ -221,7 +221,7 @@ class Plotter:
         """
         if bin_WL > no_bins_WL or bin_GC > no_bins_GC:
             raise Exception('Requested bin index greater than number of bins.')
-        # ACD: NOTE - As the range of ell-modes from OU-LE3 is not set in
+        # Note: As the range of ell-modes from OU-LE3 is not set in
         # stone, if this changes, the following exception handling will need to
         # be reviewed.
         if np.min(ells) < 10.0 or np.max(ells) > 5000.0:
@@ -275,7 +275,7 @@ class Plotter:
                                                                       bin_GC)
         pl_ax.plot(ells, ext_cs, label=pl_label, color=pl_colour,
                    linestyle=pl_linestyle)
-        # ACD: NOTE - As covariance format is not set in stone, if the format
+        # Note: As the covariance format is not set in stone, if the format
         # changes, the following code will need to be reviewed to correct the
         # error bar calculation.
         cov_full = self.read_data.data_dict['XC-Phot']['cov']
@@ -321,7 +321,7 @@ class Plotter:
         pl_linestyle: str
             Matplotlib linestyle choice for current plot. Default is '-'.
         """
-        # ACD: NOTE - These limits for k are set based on what is currently the
+        # Note: These limits for k are set based on what is currently the
         # expected range for OU-LE3 data. Should this change, this range should
         # also be adjusted accordingly.
         if np.min(ks) < 0.001 or np.max(ks) > 0.5:
@@ -368,7 +368,7 @@ class Plotter:
             raise Exception('Euclid maximum redshift for GC-spec is 1.8.')
         if multipole_order not in [0, 2, 4]:
             raise Exception('Multipole order must be 0, 2, or 4.')
-        # ACD: NOTE - The format for the GC-Spec Covariance matrix is also not
+        # Note: The format for the GC-Spec Covariance matrix is also not
         # completely fixed yet. If the format changes, this section of code
         # should be reviewed to ensure it correctly extracts the error bars.
         cov = self.read_data.data_dict['GC-Spec'][redshift]['cov']

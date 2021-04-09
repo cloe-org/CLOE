@@ -136,7 +136,7 @@ class cosmoinitTestCase(TestCase):
                               'bia': 0.0}
                           }
 
-        # MM: precomputed parameters
+        # precomputed parameters
         mock_cosmo_dic['H0_Mpc'] = \
             mock_cosmo_dic['H0'] / const.c.to('km/s').value
         mock_cosmo_dic['Omb'] = \
@@ -183,7 +183,7 @@ class cosmoinitTestCase(TestCase):
                                                                  y=fid_d_A_arr,
                                                                  ext=0)
 
-        # ACD: Note - the 'fiducial' cosmology declared here is purely for the
+        # Note: the 'fiducial' cosmology declared here is purely for the
         # purposes of testing the spec module. It is not representative of our
         # fiducial model nor does it correspond to the fiducial model used by
         # OU-LE3 to compute distances.

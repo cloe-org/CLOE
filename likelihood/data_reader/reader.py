@@ -38,7 +38,7 @@ class Reader:
         self.data_dict = {'GC-Spec': None, 'GC-Phot': None, 'WL': None,
                           'XC-Phot': None}
 
-        # (GCH): Added dictionaries for n(z)
+        # Added dictionaries for n(z)
         # Both raw data and interpolated data
         self.nz_dict_WL = {}
         self.nz_dict_GC_Phot = {}
@@ -47,8 +47,8 @@ class Reader:
         self.numtomo_gcphot = {}
         self.numtomo_wl = {}
 
-        # (GCH): Added empty dict to fill in
-        # fiducial cosmology data from Spec OU-level3 files
+        # Added empty dict to fill in fiducial
+        # cosmology data from Spec OU-level3 files
         self.data_spec_fiducial_cosmo = {}
 
         return
@@ -73,12 +73,12 @@ class Reader:
             dictionary containing raw n(z) data
         """
         try:
-            # (GCH): open file and read the content
+            # Open file and read the content
             f = open(Path(self.dat_dir_main, Path(file_dest),
                           Path(file_name)), "r")
             content = f.read()
             f.close()
-            # (GCH): get the arbitrary header and save in a dict
+            # Obtain the arbitrary header and save in a dict
             nz = np.genfromtxt(content.splitlines(), names=True)
             nz_dict = {x: nz[x] for x in nz.dtype.names}
 
@@ -106,7 +106,7 @@ class Reader:
         file_name_WL: str
             Name of the n(z) files for WL
         """
-        # (GCH): GC n(z) data
+        # GC-Phot n(z) data
         self.nz_dict_GC_Phot_raw.update(
             self.reader_raw_nz(
                 file_dest, file_name_GC))
@@ -118,7 +118,7 @@ class Reader:
                         self.nz_dict_GC_Phot_raw[x],
                         self.nz_dict_GC_Phot_raw['z']), ext=2) for x in list(
                     self.nz_dict_GC_Phot_raw.keys())[1:]})
-        # (GCH): WL n(z) data
+        # WL n(z) data
         self.nz_dict_WL_raw.update(
             self.reader_raw_nz(
                 file_dest, file_name_WL))
@@ -171,10 +171,10 @@ class Reader:
                 'w': fid_cosmo_file[1].header['W_STATE'],
                 'omkh2': fid_cosmo_file[1].header['OMEGA_K'] *
                 fid_cosmo_file[1].header['HUBBLE']**2,
-                # GCH: OU-LE3 spec files always with omnuh2=0
+                # OU-LE3 spec files always with omnuh2 = 0
                 'omnuh2': 0.000644201,
                 'Omnu': 0.001435066}
-            # GCH: we ignore Omega_R
+            # Omega_radiation is ignored here
             fid_cosmo_file.close()
 
         except ReaderError:

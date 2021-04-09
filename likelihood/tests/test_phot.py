@@ -107,7 +107,7 @@ class photoinitTestCase(TestCase):
                           'k_win': np.linspace(0.001, 10.0, 100),
                           'MG_sigma': MG_interp, 'c': const.c.to('km/s').value}
 
-        # MM: precomputed parameters
+        # precomputed parameters
         mock_cosmo_dic['H0_Mpc'] = \
             mock_cosmo_dic['H0'] / const.c.to('km/s').value
         mock_cosmo_dic['Omb'] = \
@@ -120,7 +120,7 @@ class photoinitTestCase(TestCase):
                                  mock_cosmo_dic['Omc'] +
                                  mock_cosmo_dic['Omb'])
 
-        # (SJ): by setting below to zero, obtain previous non-IA results
+        # by setting below to zero, obtain previous non-IA results
         # mock_cosmo_dic['nuisance_parameters']['aia'] = 0
         # mock_cosmo_dic['nuisance_parameters']['bia'] = 0
         # mock_cosmo_dic['nuisance_parameters']['nia'] = 0
@@ -225,7 +225,7 @@ class photoinitTestCase(TestCase):
                            'omch2': self.omch2,
                            'ombh2': self.ombh2})
 
-    # (SJ): wab here refers to the product of the two window functions.
+    # wab here refers to the product of the two window functions.
     def test_power_exception(self):
         pow = float("NaN")
         wab = 1.0 * 2.0

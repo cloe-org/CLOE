@@ -18,7 +18,7 @@ from likelihood.cobaya_interface import EuclidLikelihood
 
 print("Running script: ", sys.argv[0])
 
-#ATTENTION: CHANGE THIS TO YOUR LOCAL PATH where your external codes are installed: CAMB, polychord, likelihoods...
+#Attention: Change this to your local path where your external codes are installed: CAMB, polychord, likelihoods...
 
 if len(sys.argv) > 1:
     runoption = sys.argv[1]
@@ -33,7 +33,7 @@ if runoption == 0:
         #'params': Cobaya's protected key of the input dictionary.
         # Includes the parameters that the user would like to sample over:
         'params': {
-            # (UC): each parameter below (which is a 'key' of another sub-dictionary) can contain a dictionary
+            # Each parameter below (which is a 'key' of another sub-dictionary) can contain a dictionary
             # with the key 'prior', 'latex'...
             # If the prior dictionary is not passed to a parameter, this parameter is fixed.
             # In this example, we are sampling the parameter ns
@@ -55,20 +55,20 @@ if runoption == 0:
             'omnuh2': None, #DERIVED parameter: Omega neutrino density times de reduced Hubble parameter squared
             'omegac': None, #DERIVED parameter: Omega cold dark matter density
             'N_eff': None,
-            # (UC): change 'like_selection' based on which observational probe you would like to use.
+            # Change 'like_selection' based on which observational probe you would like to use.
             # Choose among:
             # 1: photometric survey
             # 2: spectroscopic survey
             # 12: both surveys
             'like_selection': 12,
-            # (UC): if you selected the photometric survey (1) or both (12) in 'like_selection'
+            # If you selected the photometric survey (1) or both (12) in 'like_selection'
             # you may want to choose between:
             # using Galaxy Clustering photometric and Weak Lensing probes combined assuming they are independent ('full_photo': False)
             # or Galaxy Clustering photometric, Weak Lensing and the cross-correlation between them ('full_photo': True)
             # This flag is not used if 'like_selection: 2'
             'full_photo': True,
             'NL_flag': 1,
-            # (UC): galaxy bias parameters:
+            # Galaxy bias parameters:
             # The bias parameters below are currently fixed to the
             # values used by the Inter Science Taskforce: Forcast (IST:F)
             # and presented in the corresponding IST:F paper (arXiv: 1910.09273).
@@ -95,12 +95,12 @@ if runoption == 0:
             'bia': 0.0},
         #'theory': Cobaya's protected key of the input dictionary.
         # Cobaya needs to ask some minimum theoretical requirements to a Boltzman Solver
-        # (UC): you can choose between CAMB or CLASS
+        # You can choose between CAMB or CLASS
         # In this DEMO, we use CAMB and specify some CAMB arguments
         # such as the number of massive neutrinos
         # and the dark energy model
         #
-        # ATTENTION: If you have CAMB/CLASS already installed and
+        # Attention: If you have CAMB/CLASS already installed and
         # you are not using the likelihood conda environment
         # or option (2) in cell (3) (Cobaya modules), you can add an extra key called 'path' within the camb dictionary
         # to point to your already installed CAMB code
@@ -109,36 +109,36 @@ if runoption == 0:
                     'extra_args':{'num_massive_neutrinos': 1,
                                   'dark_energy_model': 'ppf'}}},
         #'sampler': Cobaya's protected key of the input dictionary.
-        # (UC): you can choose the sampler you want to use.
+        # You can choose the sampler you want to use.
         # Check Cobaya's documentation to see the list of available samplers
         # In this DEMO, we use the 'evaluate' sampler to make a single computation of the posterior distributions
-        # WARNING: at the moment, the only sampler that works is 'evaluate'
+        # Note: at the moment, the only sampler that works is 'evaluate'
         'sampler': {'evaluate': None},
         #'output': Cobaya's protected key of the input dictionary.
         # Where are the results going to be stored, in case that the sampler produce output files?
         # For example: chains...
-        # (UC): modify the path below within 'output' to choose a name and a directory for those files
+        # Modify the path below within 'output' to choose a name and a directory for those files
         'output': 'chains/my_euclid_experiment',
         #'likelihood': Cobaya's protected key of the input dictionary.
-        # (UC): The user can select which data wants to use for the analysis.
+        # The user can select which data wants to use for the analysis.
         # Check Cobaya's documentation to see the list of the current available data experiments
         # In this DEMO, we load the Euclid-Likelihood as an external function, and name it 'Euclid'
         'likelihood': {'Euclid': EuclidLikelihood},
         #'debug': Cobaya's protected key of the input dictionary.
-        # (UC): how much information you want Cobaya to print? If debug: True, it prints every single detail
-        # that is going on internally in Cobaya
+        # How much information you want Cobaya to print. If debug: True, it prints every detail
+        # exectuted internally in Cobaya
         'debug': True,
         #'timing': Cobaya's protected key of the input dictionary.
-        # (UC): if timing: True, Cobaya returns how much time it took it to make a computation of the posterior
+        # If timing: True, Cobaya returns how much time it took it to make a computation of the posterior
         # and how much time take each of the modules to perform their tasks
         'timing': True,
         #'force': Cobaya's protected key of the input dictionary.
-        # (UC): if 'force': True, Cobaya forces deleting the previous output files, if found, with the same name
+        # If 'force': True, Cobaya forces deleting the previous output files, if found, with the same name
         'force': True
         }
 
-    # GCH: THIS IS JUST A CALL TO THE LIKELIHOOD
-    # FULL CALCULATION PHOTO + SPEC
+    # This is just a call to the likelihood
+    # Full calculation photo + spec
     from cobaya.model import get_model
     model = get_model(info)
     model.logposterior({})

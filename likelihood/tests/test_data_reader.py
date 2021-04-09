@@ -29,7 +29,7 @@ class datareaderTestCase(TestCase):
         self.cl_phot_GC_check = 2.239632e-03
         self.cl_phot_XC_check = 2.535458e-04
 
-        # (GCH): added tests for n(z) data
+        # Added tests for n(z) data
         self.data_tester.compute_nz()
         self.nz_dict_GC_Phot_check = 3.190402
         self.nz_dict_WL_check = 3.190402

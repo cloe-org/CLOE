@@ -35,12 +35,11 @@ class EuclidLikelihood(Likelihood):
     of Cobaya
     """
 
-    # (GCH): alias for cov-mat
+    # Alias for cov-mat
     aliases = ["myEuclid"]
     # Speed in evaluations/second (after theory inputs calculated).
     speed = 500
-    # (GCH): which parameters are required by likelihood?
-    # Define them here!
+    # Define parameters required by the likelihood here
     # For the moment, only 14 different bias terms
     params = {"like_selection": None,
               'full_photo': None,
@@ -71,12 +70,12 @@ class EuclidLikelihood(Likelihood):
 
         """
 
-        # (SJ): For now, example sampling in wavenumber (k)
+        # For now, example sampling in wavenumber (k)
         self.k_min_Boltzmannn = 0.001
-        # ATTENTION: The k_min is not passed to cobaya to build
-        # the matter power spectrum interpolator !!
-        # The k_min is internally chosen by cobaya.
-        # This needs to be changed
+        # Note: k_min is not passed to Cobaya to build
+        # the matter power spectrum interpolator.
+        # The k_min is internally chosen by Cobaya.
+        # This needs to be changed.
 
         self.k_max_Boltzmannn = 50.0
         self.k_min_GC_phot_interp = 0.001
@@ -86,12 +85,12 @@ class EuclidLikelihood(Likelihood):
                                  np.log10(self.k_max_GC_phot_interp),
                                  self.k_samp_GC)
 
-        # (SJ): For now, example sampling in redshift (z)
+        # For now, example sampling in redshift (z)
         self.z_min = 0.0
         self.z_max = 4.0
         self.z_samp = 100
         self.z_win = np.linspace(self.z_min, self.z_max, self.z_samp)
-        # (SJ): log sampling below
+        # Logarithmic sampling below
         # self.z_min1 = 0.0
         # self.z_min2 = 1e-4
         # self.z_min3 = 1e-3
@@ -107,13 +106,13 @@ class EuclidLikelihood(Likelihood):
         # Initialize Euclike module
         self.likefinal = Euclike()
 
-        # (GCH): initialize Cosmology class for sampling
+        # Initialize Cosmology class for sampling
         self.cosmo = Cosmology()
 
-        # (GCH): initialize the fiducial model
-        # ATTENTION: This will work if CAMB is installed globally
+        # Initialize the fiducial model
+        # This will work if CAMB is installed globally
         self.fiducial_cosmology = Cosmology()
-        # (GCH): update fiducial cosmo dic with fiducial info from reader
+        # Update fiducial cosmo dic with fiducial info from reader
         self.fiducial_cosmology.cosmo_dic.update(
             self.likefinal.data_spec_fiducial_cosmo)
         self.info_fiducial = {'params': {
@@ -139,11 +138,11 @@ class EuclidLikelihood(Likelihood):
                                        'dark_energy_model': 'ppf'}}},
             # Likelihood: we load the likelihood as an external function
             'likelihood': {'one': None}}
-        # Update fiducial cobaya dictionary with the IST-f
-        # fiducial values of biases
+        # Update fiducial cobaya dictionary with the IST-F
+        # Fiducial values of biases
         self.info_fiducial['params'].update(
             self.fiducial_cosmology.cosmo_dic['nuisance_parameters'])
-        # (GCH): use get_model wrapper for fiducial
+        # Use get_model wrapper for fiducial
         model_fiducial = get_model(self.info_fiducial)
         model_fiducial.add_requirements({"omegam": None,
                                          "omegab": None,
@@ -166,10 +165,10 @@ class EuclidLikelihood(Likelihood):
                                                      "units": None},
                                          "sigma8_z": {"z": self.z_win}})
 
-        # (GCH): evaluation of posterior, required by Cobaya
+        # Evaluation of posterior, required by Cobaya
         model_fiducial.logposterior({})
 
-        # (GCH): update fiducial cosmology dictionary
+        # Update fiducial cosmology dictionary
         self.fiducial_cosmology.cosmo_dic['Omc'] = \
             model_fiducial.provider.get_param('omegac')
         self.fiducial_cosmology.cosmo_dic['Omm'] = \
@@ -202,7 +201,7 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology.cosmo_dic['sigma8'] = \
             model_fiducial.provider.get_sigma8_z(
             self.z_win)
-        # (GCH): update dictionary with interpolators
+        # Update dictionary with interpolators
         self.fiducial_cosmology.update_cosmo_dic(
             self.fiducial_cosmology.cosmo_dic['z_win'],
             0.05)
@@ -353,7 +352,7 @@ class EuclidLikelihood(Likelihood):
         """
         model = None
         self.passing_requirements(model, **params_values)
-        # (GCH): update cosmo_dic to interpolators
+        # Update cosmo_dic to interpolators
         self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.05)
         loglike = self.likefinal.loglike(self.cosmo.cosmo_dic,
                                          self.fiducial_cosmology.cosmo_dic)

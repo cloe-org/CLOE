@@ -3,7 +3,7 @@
 
 """
 
-# (GCH): Use Cobaya Model wrapper
+# Use Cobaya Model wrapper
 
 from cobaya.model import get_model
 from likelihood.cobaya_interface import EuclidLikelihood
@@ -20,7 +20,7 @@ class CobayaModel:
         z_max = 4.0
         z_samp = 100
         self.z_win = np.linspace(z_min, z_max, z_samp)
-        # ACD: Note that this k_min does not currently interface with cobaya
+        # Note that this k_min does not currently interface with cobaya
         # Once the Cobaya interface is adjusted to use a set k_min, the same
         # value should be used here.
         self.k_min_Boltzmannn = 0.001

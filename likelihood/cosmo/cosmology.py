@@ -157,9 +157,9 @@ class Cosmology:
 
                 * IA values in arXiv:1910.09273
         """
-        # (GCH): initialize cosmo dictionary
-        # (ACD): Added speed of light to dictionary.!!!Important:it's in units
-        # of km/s to be dimensionally consistent with H0.!!!!
+        # Initialize cosmo dictionary
+        # Note: added speed of light to dictionary. It is in
+        # units of km/s to be dimensionally consistent with H0
         self.cosmo_dic = {  # Constants
                           'H0': 67.0,
                           'omch2': 0.122,
@@ -258,10 +258,9 @@ class Cosmology:
             Growth factor as function of redshift and k-mode
 
         """
-        # GCH: Careful! This should be updated in the future!
-        # we want to obtain delta directly from Cobaya
-        # (in process)
-        # This quantity depends on z and k
+        # This function will be updated.
+        # We want to obtain delta directly from Cobaya.
+        # Here depends on z and k.
         try:
             D_z_k = self.cosmo_dic['Pk_delta'].P(zs, ks)
             D_z_k = np.sqrt(D_z_k / self.cosmo_dic['Pk_delta'].P(0.0, ks))
@@ -269,8 +268,7 @@ class Cosmology:
         except CosmologyError:
             print('Computation error in D(z, k)')
 
-    # ATTENTION !!!
-    # THIS FUNCTION IS DEPRECATED
+    # This function is deprecated
     def growth_rate(self, zs, ks):
         r"""Growth Rate
 
@@ -293,11 +291,10 @@ class Cosmology:
             Interpolator growth rate as function of redshift and k-mode
 
         """
-        # GCH: Careful! This should be updated in the future!
-        # we want to obtain delta directly from Cobaya
-        # (in process)
-        # This quantity depends on z and k
-        # I assume 1+z=1/a where a: scale factor
+        # To be updated.
+        # We want to obtain delta directly from Cobaya.
+        # This function depends on both z and k.
+        # Here 1 + z = 1 / a where a is the scale factor
         D_z_k = self.growth_factor(zs, ks)
         # This will work when k is fixed, not an array
         try:
@@ -544,7 +541,7 @@ class Cosmology:
                 if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
                     bi_val = istf_bias_list[i]
         elif redshift >= bin_edge_list[-1]:
-            # (SJ): let us throw an exception instead
+            # Let us throw an exception instead
             # bi_val = istf_bias_list[-1]
             raise Exception('Spectroscopic galaxy bias cannot be obtained '
                             'as redshift is above the highest bin edge')
@@ -704,7 +701,7 @@ class Cosmology:
         nia = self.cosmo_dic['nuisance_parameters']['nia']
         bia = self.cosmo_dic['nuisance_parameters']['bia']
         omegam = self.cosmo_dic['Omm']
-        # SJ: temporary lum for now, to be read in from IST:forecast file
+        # Temporary lum for now, to be read in from IST:forecast file
         lum = 1.0
         fia = (-aia * c1 * omegam / self.growth_factor(redshift, k_scale) *
                (1 + redshift)**nia * lum**bia)
@@ -824,11 +821,11 @@ class Cosmology:
         clustering and galaxy-matter power spectra as a
         function of redshift and k-mode)
         """
-        # AP: Removed the interpolation of the spectroscopic galaxy power
+        # Removed the interpolation of the spectroscopic galaxy power
         # spectra and renamed this method to reflect that the interpolation
-        # is carrioed out only on the photometric spectra. This is because,
+        # is carried out only on the photometric spectra. This is because
         # in order to interface the spec module with Pgg_spec we need it
-        # in redshift-space , i.e. Pgg_spec(z, k, rsd_mu), and a 3-d
+        # in redshift-space, i.e. Pgg_spec(z, k, rsd_mu), and a 3-d
         # interpolation drastically increases the evaluation time.
         # Pgg_spec and Pgd_spec are added to the cosmo dic in the method
         # update_cosmo_dic
@@ -960,9 +957,9 @@ class Cosmology:
         NL_flag: string
             flag for non-linear boost factor
         """
-        # (GCH): update dictionary with H(z)
+        # Update dictionary with H(z),
         # r(z), fsigma8, sigma8, f(z), D_A(z),
-        # photo-bias interpolator
+        # photo-bias interpolator,
         # photo-spectra
         self.interp_H()
         self.interp_H_Mpc()
@@ -973,12 +970,12 @@ class Cosmology:
         self.interp_angular_dist()
         self.istf_phot_galbias_interpolator()
         self.interp_phot_galaxy_spectra()
-        # (GCH): As mentioned in interp_phot_galaxy_spectra
+        # As mentioned in interp_phot_galaxy_spectra
         # spec spectra are not interpolated so they are added
         # here in this method
         self.cosmo_dic['Pgg_spec'] = self.Pgg_spec_def
         self.cosmo_dic['Pgdelta_spec'] = self.Pgd_spec_def
-        # (GCH): for the moment we use our own definition
+        # For the moment we use our own definition
         # of the growth factor
         self.cosmo_dic['D_z_k'] = self.growth_factor(zs, ks)
         self.cosmo_dic['sigma8_0'] = \

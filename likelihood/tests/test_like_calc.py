@@ -134,7 +134,7 @@ class likecalcTestCase(TestCase):
                               'nia': -0.41,
                               'bia': 0.0}}
 
-        # MM: precomputed parameters
+        # precomputed parameters
         mock_cosmo_dic['H0_Mpc'] = \
             mock_cosmo_dic['H0'] / const.c.to('km/s').value
         mock_cosmo_dic['Omb'] = \
@@ -181,11 +181,10 @@ class likecalcTestCase(TestCase):
                                                                  y=fid_d_A_arr,
                                                                  ext=0)
 
-        # ACD: Note - the 'fiducial' cosmology declared here is purely for the
+        # Note: the 'fiducial' cosmology declared here is purely for the
         # purposes of testing the spec module. It is not representative of our
         # fiducial model nor does it correspond to the fiducial model used by
         # OU-LE3 to compute distances.
-
         fid_mock_dic = {'H0': 67.5,
                         'omch2': 0.122,
                         'ombh2': 0.022,
@@ -230,23 +229,7 @@ class likecalcTestCase(TestCase):
         # init Euclike
         self.like_tt = Euclike()
 
-        # (SJ): For now use loglike below, to be updated
-        # (SJ): First one without, second one with h and (2pi/h)^3 corrections
-        # (SJ): third one with only 1/h^3 correction, pre-update to data
-        # self.check_loglike = 4.607437e+11
-        # self.check_loglike = 30568.400834
-        # (AP): The following is with the original bias interpolator
-        #       of the spec class
-        # self.check_loglike = 1.963907e+11
-        # (AP): The following is with the IST:F predictions
-        # self.check_loglike = 2.459737e+11
-        # (AP): The following is with the correct amplitude of GCSpec ((2pi)^3)
-        # self.check_loglike = -2284.723389
-        # (ACD): The following is the incorrect amplitude when assuming
-        # fiducial cosmology from code rather than for file for unit
-        # conversion:
-        # self.check_loglike = 4569.446812
-        # (ACD): The correct check value, using the h scaling for the h from
+        # The correct check value, using the h scaling for the h from
         # supplied external file is:
         self.check_loglike = -88.074928
 

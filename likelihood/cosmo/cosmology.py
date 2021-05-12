@@ -156,6 +156,11 @@ class Cosmology:
                 * Spectroscopic bias values in arXiv:1910.09273
 
                 * IA values in arXiv:1910.09273
+
+            This dictionary also stores the choice of likelihood
+            to be evaluated, i.e. photometric, spectroscopic, or 3x2pt.
+            By default, if a choice isn't explicitly specified, the 3x2pt
+            likelihood is calculated.
         """
         # Initialize cosmo dictionary
         # Note: added speed of light to dictionary. It is in
@@ -212,7 +217,7 @@ class Cosmology:
                           # NL_boost
                           'NL_boost': None,
                           'nuisance_parameters': {
-                             'like_selection': 2,
+                             'like_selection': 12,
                              'full_photo': True,
                              'NL_flag': 1,
                              'b1_photo': 1.0997727037892875,

@@ -30,6 +30,9 @@ class Euclike:
         Constructor of the class Euclike. The data and covariance are
         read and arranged into their final format only once here.
         """
+        # Flag to allow printing  of likelihood selection only once.
+        self.l_select_print_flag = True
+
         self.data_ins = reader.Reader()
         self.data_ins.compute_nz()
         # Read spec
@@ -379,5 +382,19 @@ class Euclike:
         else:
             raise CobayaInterfaceError(
                 r"Choose like selection '1' or '2' or '12'")
+        # The first time the likelihood is called, this will explicitly print
+        # the choice of likelihood.
+        if self.l_select_print_flag:
+            def_msg = ''
+            if like_selection == 1:
+                choice = 'PHOTOMETRIC'
+            elif like_selection == 2:
+                choice = 'SPECTROSCOPIC'
+            else:
+                choice = '3x2 PT'
+                def_msg = (' (IF like_selection HAS NOT BEEN EXPLICITLY' +
+                           ' SPECIFIED, THE 3x2 PT IS CHOSEN BY DEFAULT.')
+            print('NOTE: ', choice, ' LIKELIHOOD REQUESTED' + def_msg)
+            self.l_select_print_flag = False
 
         return self.loglike_tot

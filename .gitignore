@@ -22,3 +22,7 @@ dist/
 # Notebook checkpoints #
 ########################
 *.ipynb_checkpoints*
+
+# Files #
+#########
+notebooks/DEMO.py

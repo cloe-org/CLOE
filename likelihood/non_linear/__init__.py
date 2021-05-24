@@ -6,6 +6,12 @@ In this module IST:NL will code up different non-linear recipes
 
 """
 
-__all__ = ['nonlinear']  # list submodules
+__all__ = ['miscellanous',
+           'power_spectrum',
+           'pgg_spec',
+           'pgg_phot',
+           'pgL_phot',
+           'pLL_phot',
+           'nonlinear']  # list submodules
 
 from . import *

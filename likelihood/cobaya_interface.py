@@ -35,33 +35,6 @@ class EuclidLikelihood(Likelihood):
     of Cobaya
     """
 
-    # Alias for cov-mat
-    aliases = ["myEuclid"]
-    # Speed in evaluations/second (after theory inputs calculated).
-    speed = 500
-    # Define parameters required by the likelihood here
-    # For the moment, only 14 different bias terms
-    params = {"like_selection": None,
-              'full_photo': None,
-              'NL_flag': None,
-              'b1_photo': None,
-              'b2_photo': None,
-              'b3_photo': None,
-              'b4_photo': None,
-              'b5_photo': None,
-              'b6_photo': None,
-              'b7_photo': None,
-              'b8_photo': None,
-              'b9_photo': None,
-              'b10_photo': None,
-              'b1_spec': None,
-              'b2_spec': None,
-              'b3_spec': None,
-              'b4_spec': None,
-              'aia': None,
-              'nia': None,
-              'bia': None}
-
     def initialize(self):
         r"""Initialize
 

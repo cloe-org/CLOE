@@ -33,7 +33,7 @@ def model_generator(model=1):
         nuisance = str(
             Path(
                 Path(__file__).resolve().parents[1])) \
-        + '/Models/nuisance_bias.yaml'
+            + '/Models/nuisance_bias.yaml'
         with open(nuisance) as file:
             model_file = yaml.load(file, Loader=yaml.FullLoader)
             # print(model_file)

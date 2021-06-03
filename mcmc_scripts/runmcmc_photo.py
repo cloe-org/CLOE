@@ -1,3 +1,9 @@
+import sys, os
+script_path = os.path.realpath(os.getcwd())
+if script_path.endswith('mcmc_scripts'):
+    sys.path.append(os.path.realpath(os.path.join(script_path,os.pardir)))
+else:
+    sys.path.append(script_path)
 from cobaya.run import run
 from likelihood.cobaya_interface import EuclidLikelihood
 import numpy as np

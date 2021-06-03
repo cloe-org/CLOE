@@ -14,4 +14,4 @@ source /users/sjoudaki/anaconda3/etc/profile.d/conda.sh
 conda activate likelihood
 
 ## Here 8 refers to the number of chains
-mpirun -n 8 python runmcmc_spectro.py
+mpirun -n 8 python mcmc_scripts/runmcmc_spectro.py

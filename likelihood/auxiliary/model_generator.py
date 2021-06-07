@@ -10,14 +10,14 @@ from pathlib import Path
 
 def model_generator(model=1):
     """
-    Model generator function
+    Model generator function.
 
-    THIS IS A TEST
+    THIS IS A TENTATIVE TEST!
 
     Parameters
     ----------
     model: int
-        Tentative. Select number corresponding to a model
+        Tentative. Select number corresponding to a model.
     """
 
     # Right now the likelihood expects always the following params
@@ -30,13 +30,13 @@ def model_generator(model=1):
         'bia': 0.0}
 
     if model == 1:
+        # If model = 1 is selected, bias are added
         nuisance = str(
             Path(
                 Path(__file__).resolve().parents[1])) \
             + '/Models/nuisance_bias.yaml'
         with open(nuisance) as file:
             model_file = yaml.load(file, Loader=yaml.FullLoader)
-            # print(model_file)
             nuisance_params.update(model_file)
     params = str(Path(Path(__file__).resolve().parents[1])) + '/params.yaml'
     with open(params, 'w') as outfile:

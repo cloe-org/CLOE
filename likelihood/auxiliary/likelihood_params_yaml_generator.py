@@ -5,10 +5,11 @@ Contains function that generates params.yaml
 
 
 import yaml
+import os
 from pathlib import Path
 
 
-def model_generator(model=1):
+def params_generator(model=1):
     """
     Model generator function.
 
@@ -36,27 +37,25 @@ def model_generator(model=1):
         # If model = 1 is selected, bias and ia params are added
         nuisance_bias_path = parent_path + '/Models/nuisance_bias.yaml'
         nuisance_ia_path = parent_path + '/Models/nuisance_ia.yaml'
-        try:
-            with open(nuisance_bias_path) as file:
-                nuisance_bias_file = yaml.load(file, Loader=yaml.FullLoader)
-                likelihood_params.update(nuisance_bias_file)
-        except OSError as err:
-            print("Cannot open {0}. Error: {1}".format(nuisance_bias_path,
-                                                       err))
-        try:
-            with open(nuisance_ia_path) as file:
-                nuisance_ia_file = yaml.load(file, Loader=yaml.FullLoader)
-                likelihood_params.update(nuisance_ia_file)
-        except OSError as err:
-            print("Cannot open {0}. Error: {1}".format(nuisance_ia_path,
-                                                       err))
+
+        params_list = [nuisance_bias_path, nuisance_ia_path]
+        for element in params_list:
+            try:
+                with open(element) as file:
+                    element_file = yaml.load(file, Loader=yaml.FullLoader)
+                    likelihood_params.update(element_file)
+            except OSError as err:
+                print("Cannot open {0}. Error: {1}".format(element,
+                                                           err))
     else:
         print("ATTENTION: No other model is available. Please choose 1.")
 
     # added warning
     params_path = parent_path + '/params.yaml'
-    print('WARNING:\n')
-    print("Be aware that {} will be created or overwritten".format(
-        params_path))
+    if os.path.exists(params_path):
+        print('WARNING:\n')
+        print("Be aware that {} will be created or overwritten".format(
+            params_path))
     with open(params_path, 'w') as outfile:
         yaml.dump(likelihood_params, outfile, default_flow_style=False)
+        print("{} written".format(params_path))

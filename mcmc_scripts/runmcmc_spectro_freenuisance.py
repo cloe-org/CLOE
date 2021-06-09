@@ -1,3 +1,9 @@
+import sys, os
+script_path = os.path.realpath(os.getcwd())
+if script_path.endswith('mcmc_scripts'):
+    sys.path.append(os.path.realpath(os.path.join(script_path,os.pardir)))
+else:
+    sys.path.append(script_path) 
 from cobaya.run import run
 from likelihood.cobaya_interface import EuclidLikelihood
 import numpy as np
@@ -51,10 +57,22 @@ info = {
         'b8_photo': 1.4964959071110084,
         'b9_photo': 1.5652475842498528,
         'b10_photo': 1.7429859437184225,
-        'b1_spec': 1.4614804,
-        'b2_spec': 1.6060949,
-        'b3_spec': 1.7464790,
-        'b4_spec': 1.8988660,
+        'b1_spec': {'prior': {'min': 0.1, 'max': 3.},
+                    'ref': {'dist': 'norm', 'loc': 1.46, 'scale': 0.1},
+                    'proposal': 0.1,
+                    'latex': 'b_1^{\rm GCsp}'},
+        'b2_spec': {'prior': {'min': 0.1, 'max': 3.},
+                    'ref': {'dist': 'norm', 'loc': 1.61, 'scale': 0.1},
+                    'proposal': 0.1,
+                    'latex': 'b_2^{\rm GCsp}'},
+        'b3_spec': {'prior': {'min': 0.1, 'max': 3.},
+                    'ref': {'dist': 'norm', 'loc': 1.75, 'scale': 0.1},
+                    'proposal': 0.1,
+                    'latex': 'b_3^{\rm GCsp}'},
+        'b4_spec': {'prior': {'min': 0.1, 'max': 3.},
+                    'ref': {'dist': 'norm', 'loc': 1.90, 'scale': 0.1},
+                    'proposal': 0.1,
+                    'latex': 'b_4^{\rm GCsp}'}, 
         'aia': 1.72,
         'nia': -0.41,
         'bia': 0.0},
@@ -80,7 +98,7 @@ info = {
     'sampler': {'mcmc': {'max_tries': 100000}},
     'likelihood': {'Euclid': EuclidLikelihood},
     'force': True,
-    'output': 'chains/spectroscopic'
+    'output': 'chains/spectroscopic_freenuisance'
     }
 
 

@@ -15,6 +15,21 @@ def generate_params_yaml(model=1):
 
     THIS IS A PROOF OF PRINCIPLE
 
+    Cobaya requests parameters defined in the theory
+    code (i.e: CAMB/CLASS and the LCDM parameters)
+    and also parameters defined by the likelihood
+    (i.e: CLOE and nuisance parameters).
+
+    When invoking Cobaya with CLOE, CLOE will
+    understand LCDM parameters but not the
+    nuisance parameters unless they are defined
+    either the `cobaya_interface.py` or in a
+    yaml file.
+
+    This function creates that yaml file so that
+    Cobaya understands that CLOE requests some
+    nuisance parameters.
+
     Parameters
     ----------
     model: int

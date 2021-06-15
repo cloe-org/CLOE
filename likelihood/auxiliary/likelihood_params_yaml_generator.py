@@ -23,7 +23,7 @@ def generate_params_yaml(model=1):
     When invoking Cobaya with CLOE, CLOE will
     understand LCDM parameters but not the
     nuisance parameters unless they are defined
-    either the `cobaya_interface.py` or in a
+    either in the `cobaya_interface.py` or in a
     yaml file.
 
     This function creates that yaml file so that
@@ -60,15 +60,17 @@ def generate_params_yaml(model=1):
                     params_file = yaml.load(file, Loader=yaml.FullLoader)
                     likelihood_params.update(params_file)
             except OSError as err:
-                print("Cannot open {0}. Error: {1}".format(params_path,
-                                                           err))
+                print("File {0} not found. Error: {1}".format(params_path,
+                                                              err))
+            except BaseException:
+                print("an unexpected error occurred")
     else:
         print("ATTENTION: No other model is available. Please choose 1.")
 
     params_path = parent_path + '/params.yaml'
     if os.path.exists(params_path):
         print('WARNING:\n')
-        print("Be aware that {} will be overwritten".format(
+        print("Be aware that {} has been overwritten".format(
             params_path))
     with open(params_path, 'w') as outfile:
         yaml.dump(likelihood_params, outfile, default_flow_style=False)

@@ -14,9 +14,11 @@ import os
 import cobaya
 #Import external loglike from the Likelihood Package within cobaya interface module
 from likelihood.cobaya_interface import EuclidLikelihood
-
+# Generate likelihood params yaml file
+from likelihood.auxiliary.likelihood_params_yaml_generator import generate_params_yaml
 
 print("Running script: ", sys.argv[0])
+generate_params_yaml(model = 1)
 
 # Attention: If working outside of the likelihood environment, change this to your
 # local path where your external codes are installed (CAMB, polychord, likelihoods, etc).

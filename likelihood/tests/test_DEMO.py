@@ -42,7 +42,11 @@ class DEMOTestCase(TestCase):
 
     def test_DEMO_execute(self):
         # Execute the DEMO script
-        test_execute = subprocess.call(shlex.split('ipython {}'.format(
-                self.notebook_path + self.notebook_name + '.py')))
+        test_execute = subprocess.call(
+            shlex.split(
+                'ipython {}'.format(
+                    self.notebook_path +
+                    self.notebook_name +
+                    '.py')))
         npt.assert_equal(test_execute, self.test,
                          err_msg='Error in DEMO! Open it up and CHECK')

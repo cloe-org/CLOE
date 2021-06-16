@@ -6,6 +6,7 @@ Contains function that generates params.yaml
 
 import yaml
 import os
+import sys
 from pathlib import Path
 
 
@@ -62,8 +63,10 @@ def generate_params_yaml(model=1):
             except OSError as err:
                 print("File {0} not found. Error: {1}".format(params_path,
                                                               err))
+                sys.exit(1)
             except BaseException:
                 print("an unexpected error occurred")
+                sys.exit(1)
     else:
         print("ATTENTION: No other model is available. Please choose 1.")
 

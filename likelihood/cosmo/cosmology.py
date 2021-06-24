@@ -732,6 +732,14 @@ class Cosmology:
             Value of intrinsic alignment function at
             a given redshift
         """
+        growth = self.cosmo_dic['D_z_k_func'](redshift, k_scale)
+        ztype = isinstance(redshift, np.ndarray)
+        ktype = isinstance(k_scale, np.ndarray)
+        if (not(ztype) and not(ktype)):
+            growth = growth[0, 0]
+        elif (ztype ^ ktype):
+            growth = growth[0]
+
         c1 = 0.0134
         aia = self.cosmo_dic['nuisance_parameters']['aia']
         nia = self.cosmo_dic['nuisance_parameters']['nia']
@@ -739,7 +747,7 @@ class Cosmology:
         omegam = self.cosmo_dic['Omm']
         # Temporary lum for now, to be read in from IST:forecast file
         lum = 1.0
-        fia = (-aia * c1 * omegam / self.growth_factor(redshift, k_scale) *
+        fia = (-aia * c1 * omegam / growth *
                (1 + redshift)**nia * lum**bia)
         return fia
 

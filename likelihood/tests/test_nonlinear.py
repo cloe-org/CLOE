@@ -41,7 +41,7 @@ class nonlinearinitTestCase(TestCase):
         self.Pgd_phot_test = 41294.412017
         self.Pgg_spec_test = 82548.320427
         self.Pgd_spec_test = 59890.445816
-        self.Pii_test = np.array([[2.417099, 0.902693, 0.321648]])
+        self.Pii_test = np.array([2.417099, 0.902693, 0.321648])
         self.Pdeltai_test = -265.680094
         self.Pgi_phot_test = -375.687484
         self.Pgi_spec_test = -388.28625
@@ -54,7 +54,7 @@ class nonlinearinitTestCase(TestCase):
         self.k2 = 0.05
         self.k3 = 0.1
         self.mu = 0.5
-        self.arrshape = (1, 3)
+        self.arrsize = 3
 
         self.D_test = 0.6061337447181263
         self.fia_test = -0.00909382071134854
@@ -109,8 +109,8 @@ class nonlinearinitTestCase(TestCase):
         type_check = isinstance(test_p, np.ndarray)
         assert type_check, 'Error in returned data type of Pii_def'
 
-        assert test_p.shape == self.arrshape, '''Error in shape of array
-                                               returned by Pii_def'''
+        assert test_p.size == self.arrsize, '''Error in size of array returned
+                                             by Pii_def'''
 
         npt.assert_allclose(test_p, self.Pii_test,
                             rtol=self.rtol,

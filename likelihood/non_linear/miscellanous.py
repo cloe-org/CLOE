@@ -55,14 +55,21 @@ class Misc:
             Value of intrinsic alignment function at
             a given redshift
         """
+        growth = self.theory['D_z_k_func'](redshift, k_scale)
+        ztype = isinstance(redshift, np.ndarray)
+        ktype = isinstance(k_scale, np.ndarray)
+        if (not(ztype) and not(ktype)):
+            growth = growth[0, 0]
+        elif (ztype ^ ktype):
+            growth = growth[0]
+
         c1 = 0.0134
         aia = self.theory['nuisance_parameters']['aia']
         nia = self.theory['nuisance_parameters']['nia']
         bia = self.theory['nuisance_parameters']['bia']
         omegam = self.theory['Omm']
         lum = 1.0
-        fia = (-aia * c1 * omegam / self.theory['D_z_k_func'](redshift,
-                                                              k_scale) *
+        fia = (-aia * c1 * omegam / growth *
                (1 + redshift)**nia * lum**bia)
         return fia
 

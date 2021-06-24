@@ -33,34 +33,6 @@ class Misc:
         """
         self.theory = cosmo_dic
 
-    def growth_factor(self, zs, ks):
-        r"""
-        Computes growth factor according to
-
-        .. math::
-            D(z, k) &=\sqrt{P_{\rm \delta\delta}(z, k)\
-            /P_{\rm \delta\delta}(z=0, k)}\\
-
-        Parameters
-        ----------
-        zs: numpy.ndarray
-            redshifts for the power spectrum
-        ks: list
-            list of modes for the power spectrum
-
-        Returns
-        -------
-        D_z_k: numpy.ndarray
-            Growth factor as function of redshift and k-mode
-
-        """
-        try:
-            D_z_k = self.theory['Pk_delta'].P(zs, ks)
-            D_z_k = np.sqrt(D_z_k / self.theory['Pk_delta'].P(0.0, ks))
-            return D_z_k
-        except CosmologyError:
-            print('Computation error in D(z, k)')
-
     def fia(self, redshift, k_scale=0.001):
         r"""Fia
 
@@ -89,7 +61,8 @@ class Misc:
         bia = self.theory['nuisance_parameters']['bia']
         omegam = self.theory['Omm']
         lum = 1.0
-        fia = (-aia * c1 * omegam / self.growth_factor(redshift, k_scale) *
+        fia = (-aia * c1 * omegam / self.theory['D_z_k_func'](redshift,
+                                                              k_scale) *
                (1 + redshift)**nia * lum**bia)
         return fia
 

@@ -211,6 +211,7 @@ class Cosmology:
                           'd_z_func': None,
                           'H_z_func': None,
                           'H_z_func_Mpc': None,
+                          'D_z_k_func': None,
                           'sigma8_z_func': None,
                           'fsigma8_z_func': None,
                           'f_z': None,
@@ -268,7 +269,7 @@ class Cosmology:
         ----------
         zs: numpy.ndarray
             redshifts for the power spectrum
-        ks: list
+        ks: numpy.ndarray
             list of modes for the power spectrum
 
         Returns
@@ -286,6 +287,7 @@ class Cosmology:
             return D_z_k
         except CosmologyError:
             print('Computation error in D(z, k)')
+            return None
 
     # This function is deprecated
     def growth_rate(self, zs, ks):
@@ -343,6 +345,21 @@ class Cosmology:
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'],
                 y=growth, ext=2)
+
+    def interp_growth_factor(self):
+        """Interpolates the growth factor
+
+        Adds an interpolator for the growth factor (function of redshift and
+        scale) to the cosmo dictionary
+        """
+        z_win = self.cosmo_dic['z_win']
+        k_win = self.cosmo_dic['k_win']
+        growth_grid = self.growth_factor(z_win, k_win)
+        self.cosmo_dic['D_z_k_func'] = \
+            interpolate.RectBivariateSpline(z_win,
+                                            k_win,
+                                            growth_grid,
+                                            kx=3, ky=3)
 
     def interp_comoving_dist(self):
         """Interp Comoving Dist
@@ -986,6 +1003,7 @@ class Cosmology:
         self.interp_comoving_dist()
         self.interp_fsigma8()
         self.interp_sigma8()
+        self.interp_growth_factor()
         self.growth_rate_cobaya()
         self.interp_angular_dist()
         # For the moment we use our own definition

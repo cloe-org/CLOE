@@ -118,6 +118,12 @@ class cosmoinitTestCase(TestCase):
         npt.assert_equal(D, self.Dcheck,
                          err_msg='Error in D_z_k calculation ')
 
+    def test_cosmo_growth_factor_interp(self):
+        D = self.model_test.cosmology.cosmo_dic['D_z_k_func'](0.0, 0.002)
+        npt.assert_allclose(D, self.Dcheck,
+                            rtol=1e-3,
+                            err_msg='Error in growth factor interpolation')
+
     def test_cosmo_growth_rate(self):
         f = self.model_test.cosmology.growth_rate(
             self.model_test.cosmology.cosmo_dic['z_win'], 0.002)

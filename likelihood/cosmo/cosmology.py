@@ -287,7 +287,6 @@ class Cosmology:
             return D_z_k
         except CosmologyError:
             print('Computation error in D(z, k)')
-            return None
 
     # This function is deprecated
     def growth_rate(self, zs, ks):

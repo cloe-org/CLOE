@@ -33,6 +33,7 @@ class cosmoinitTestCase(TestCase):
         cosmo.cosmo_dic['As'] = 2.1e-9
         cosmo.cosmo_dic['H0_Mpc'] = \
             cosmo.cosmo_dic['H0'] / const.c.to('km/s').value,
+        cosmo.cosmo_dic['nuisance_parameters']['NL_flag'] = 0
         # Create wrapper model
         self.model_test = CobayaModel(cosmo)
         self.model_test.update_cosmo()
@@ -97,6 +98,20 @@ class cosmoinitTestCase(TestCase):
             self.Hcheck,
             err_msg='Cosmology dictionary assignment '
             'failed')
+
+    def test_pk_source(self):
+        source = self.model_test.cosmology.pk_source
+        type_check = isinstance(source, Cosmology)
+        assert type_check, 'Error in returned data type of pk_source'
+        # To test the nonlinear case we simply check if the object returned
+        # from pk_source is not a Cosmology object. Otherwise we should
+        # import the Nonlinear class, going against the independency among
+        # different modules in the unit tests
+        self.model_test.cosmology.cosmo_dic[
+            'nuisance_parameters']['NL_flag'] = 1
+        source = self.model_test.cosmology.pk_source
+        type_check = isinstance(source, Cosmology)
+        assert not(type_check), 'Error in returned data type of pk_source'
 
     def test_cosmo_growth_factor(self):
         D = self.model_test.cosmology.growth_factor(0.0, 0.002)

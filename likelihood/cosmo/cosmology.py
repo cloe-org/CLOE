@@ -219,7 +219,7 @@ class Cosmology:
                           'nuisance_parameters': {
                              'like_selection': 12,
                              'full_photo': True,
-                             'NL_flag': 1,
+                             'NL_flag': 0,
                              'b1_photo': 1.0997727037892875,
                              'b2_photo': 1.220245876862528,
                              'b3_photo': 1.2723993083933989,
@@ -241,6 +241,20 @@ class Cosmology:
         self.cosmo_dic['H0_Mpc'] = (self.cosmo_dic['H0'] /
                                     const.c.to('km/s').value)
         self.nonlinear = Nonlinear(self.cosmo_dic)
+
+    @property
+    def pk_source(self):
+        r"""Identifier for linear vs non-linear class
+
+        Selects either the same Cosmology class from which it is called
+        or the attribute corresponding to the instance of a Nonlinear class,
+        based on the value of the nonlinear flag
+
+        """
+        if (self.cosmo_dic['nuisance_parameters']['NL_flag'] == 0):
+            return self
+        else:
+            return self.nonlinear
 
     def growth_factor(self, zs, ks):
         r"""
@@ -814,71 +828,76 @@ class Cosmology:
             self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
         return pval
 
-    def interp_phot_galaxy_spectra(self):
-        """Interp Phot Galaxy Spectra
+    def obtain_power_spectra(self):
+        """Adds photometric/spectroscopic power spectra to the cosmo dictionary
 
-        Creates interpolators for the photometric galaxy
-        clustering and galaxy-matter power spectra, and adds them to cosmo_dic.
+        Creates interpolators (functions of redshift and scale) for the
+        photometric galaxy power spectra (galaxy-galaxy and galaxy-matter)
+        and the IA-related power spectra, based on the recipe defined by
+        the value of the non-linear flag, and assigns them to the corresponding
+        keys of the cosmo dictionary.
+
+        Assigns the direct function (functions of redshift, scale and angle
+        with the line of sight) for the spectroscopic galaxy power spectra
+        (galaxy-galaxy and galaxy-matter) based on the recipe defined by the
+        value of the non-linear flag, to the corresponding keys of the cosmo
+        dictionary.
+
         Note: the interpolators for v1.0 span the range :math:`k=[0.001,100.0]`
-
-        Updates 'keys' of the cosmo_dic attribute of the class, adding
-        interpolator objects (interpolates photometric galaxy
-        clustering and galaxy-matter power spectra as a
-        function of redshift and k-mode)
         """
-        # Removed the interpolation of the spectroscopic galaxy power
-        # spectra and renamed this method to reflect that the interpolation
-        # is carried out only on the photometric spectra. This is because
-        # in order to interface the spec module with Pgg_spec we need it
-        # in redshift-space, i.e. Pgg_spec(z, k, rsd_mu), and a 3-d
-        # interpolation drastically increases the evaluation time.
-        # Pgg_spec and Pgd_spec are added to the cosmo dic in the method
-        # update_cosmo_dic
-        ks_base = self.cosmo_dic['k_win']
-        zs_base = self.cosmo_dic['z_win']
+
+        k_win = self.cosmo_dic['k_win']
+        z_win = self.cosmo_dic['z_win']
 
         bin_edge_list = np.array([0.90, 1.10, 1.30, 1.50, 1.80])
-        zs_base_spec = zs_base[np.where(np.logical_and(
-                                       zs_base >= bin_edge_list[0],
-                                       zs_base < bin_edge_list[-1]))]
+        z_win_spec = z_win[np.where(np.logical_and(
+                                       z_win >= bin_edge_list[0],
+                                       z_win < bin_edge_list[-1]))]
 
-        pgg_phot = np.array([self.Pgg_phot_def(zz, ks_base) for zz in zs_base])
-        pgdelta_phot = np.array([self.Pgd_phot_def(zz, ks_base)
-                                 for zz in zs_base])
-        pii = np.array([self.Pii_def(zz, ks_base) for zz in zs_base])
-        pdeltai = np.array([self.Pdeltai_def(zz, ks_base) for zz in zs_base])
-        pgi_phot = np.array([self.Pgi_phot_def(zz, ks_base) for zz in zs_base])
-        pgi_spec = np.array([self.Pgi_spec_def(zz, ks_base)
-                             for zz in zs_base_spec])
+        pksrc = self.pk_source
+        pgg_phot = np.array([pksrc.Pgg_phot_def(zz, k_win)
+                             for zz in z_win])
+        pgdelta_phot = np.array([pksrc.Pgd_phot_def(zz, k_win)
+                                 for zz in z_win])
+        pii = np.array([pksrc.Pii_def(zz, k_win)
+                        for zz in z_win])
+        pdeltai = np.array([pksrc.Pdeltai_def(zz, k_win)
+                            for zz in z_win])
+        pgi_phot = np.array([pksrc.Pgi_phot_def(zz, k_win)
+                             for zz in z_win])
+        pgi_spec = np.array([pksrc.Pgi_spec_def(zz, k_win)
+                             for zz in z_win_spec])
+        self.cosmo_dic['Pgg_spec'] = pksrc.Pgg_spec_def
+        self.cosmo_dic['Pgdelta_spec'] = pksrc.Pgd_spec_def
 
         self.cosmo_dic['Pgg_phot'] = \
-            interpolate.RectBivariateSpline(zs_base,
-                                            ks_base,
+            interpolate.RectBivariateSpline(z_win,
+                                            k_win,
                                             pgg_phot,
                                             kx=1, ky=1)
         self.cosmo_dic['Pgdelta_phot'] = \
-            interpolate.RectBivariateSpline(zs_base,
-                                            ks_base,
+            interpolate.RectBivariateSpline(z_win,
+                                            k_win,
                                             pgdelta_phot,
                                             kx=1, ky=1)
         self.cosmo_dic['Pii'] = \
-            interpolate.RectBivariateSpline(zs_base,
-                                            ks_base,
+            interpolate.RectBivariateSpline(z_win,
+                                            k_win,
                                             pii,
                                             kx=1, ky=1)
         self.cosmo_dic['Pdeltai'] = \
-            interpolate.RectBivariateSpline(zs_base,
-                                            ks_base,
+            interpolate.RectBivariateSpline(z_win,
+                                            k_win,
                                             pdeltai,
                                             kx=1, ky=1)
         self.cosmo_dic['Pgi_phot'] = \
-            interpolate.RectBivariateSpline(zs_base,
-                                            ks_base,
+            interpolate.RectBivariateSpline(z_win,
+                                            k_win,
                                             pgi_phot,
                                             kx=1, ky=1)
         self.cosmo_dic['Pgi_spec'] = \
-            interpolate.RectBivariateSpline(zs_base_spec,
-                                            ks_base,
+            interpolate.RectBivariateSpline(z_win_spec,
+                                            k_win,
                                             pgi_spec,
                                             kx=1, ky=1)
         return
@@ -959,13 +978,9 @@ class Cosmology:
             constant value of modified gravity mu function
         MG_sigma: float
             constant value of modified gravity sigma function
-        NL_flag: string
-            flag for non-linear boost factor
         """
         # Update dictionary with H(z),
-        # r(z), fsigma8, sigma8, f(z), D_A(z),
-        # photo-bias interpolator,
-        # photo-spectra
+        # r(z), fsigma8, sigma8, f(z), D_A(z)
         self.interp_H()
         self.interp_H_Mpc()
         self.interp_comoving_dist()
@@ -973,13 +988,6 @@ class Cosmology:
         self.interp_sigma8()
         self.growth_rate_cobaya()
         self.interp_angular_dist()
-        self.istf_phot_galbias_interpolator()
-        self.interp_phot_galaxy_spectra()
-        # As mentioned in interp_phot_galaxy_spectra
-        # spec spectra are not interpolated so they are added
-        # here in this method
-        self.cosmo_dic['Pgg_spec'] = self.Pgg_spec_def
-        self.cosmo_dic['Pgdelta_spec'] = self.Pgd_spec_def
         # For the moment we use our own definition
         # of the growth factor
         self.cosmo_dic['D_z_k'] = self.growth_factor(zs, ks)
@@ -988,4 +996,9 @@ class Cosmology:
         self.cosmo_dic['MG_mu'] = lambda x, y: self.MG_mu_def(x, y, MG_mu)
         self.cosmo_dic['MG_sigma'] = lambda x, y: self.MG_sigma_def(x, y,
                                                                     MG_sigma)
-        self.cosmo_dic = self.nonlinear.update_dic(self.cosmo_dic)
+        # Update nonlinear module, by calling the update_dic method
+        # of the nonlinear instance
+        self.nonlinear.update_dic(self.cosmo_dic)
+        # Update dictionary with bias interpolator and power spectra
+        self.istf_phot_galbias_interpolator()
+        self.obtain_power_spectra()

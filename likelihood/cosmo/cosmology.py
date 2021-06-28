@@ -113,6 +113,8 @@ class Cosmology:
             Interpolated function for Hubble parameter
         H_z_func_Mpc: function
             Interpolated function for Hubble parameter in :math:`Mpc^{-1}`
+        D_z_k_func: function
+            Interpolated function for growth factor
         z_win: list
             Array of redshifts ar which H and comov_dist are evaluated at
         k_win: list
@@ -282,8 +284,8 @@ class Cosmology:
         # We want to obtain delta directly from Cobaya.
         # Here depends on z and k.
         try:
-            D_z_k = self.cosmo_dic['Pk_delta'].P(zs, ks)
-            D_z_k = np.sqrt(D_z_k / self.cosmo_dic['Pk_delta'].P(0.0, ks))
+            P_z_k = self.cosmo_dic['Pk_delta'].P(zs, ks)
+            D_z_k = np.sqrt(P_z_k / self.cosmo_dic['Pk_delta'].P(0.0, ks))
             return D_z_k
         except CosmologyError:
             print('Computation error in D(z, k)')

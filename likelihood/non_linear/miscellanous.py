@@ -33,34 +33,6 @@ class Misc:
         """
         self.theory = cosmo_dic
 
-    def growth_factor(self, zs, ks):
-        r"""
-        Computes growth factor according to
-
-        .. math::
-            D(z, k) &=\sqrt{P_{\rm \delta\delta}(z, k)\
-            /P_{\rm \delta\delta}(z=0, k)}\\
-
-        Parameters
-        ----------
-        zs: numpy.ndarray
-            redshifts for the power spectrum
-        ks: list
-            list of modes for the power spectrum
-
-        Returns
-        -------
-        D_z_k: numpy.ndarray
-            Growth factor as function of redshift and k-mode
-
-        """
-        try:
-            D_z_k = self.theory['Pk_delta'].P(zs, ks)
-            D_z_k = np.sqrt(D_z_k / self.theory['Pk_delta'].P(0.0, ks))
-            return D_z_k
-        except CosmologyError:
-            print('Computation error in D(z, k)')
-
     def fia(self, redshift, k_scale=0.001):
         r"""Fia
 
@@ -83,13 +55,21 @@ class Misc:
             Value of intrinsic alignment function at
             a given redshift
         """
+        growth = self.theory['D_z_k_func'](redshift, k_scale)
+        ztype = isinstance(redshift, np.ndarray)
+        ktype = isinstance(k_scale, np.ndarray)
+        if (not(ztype) and not(ktype)):
+            growth = growth[0, 0]
+        elif (ztype ^ ktype):
+            growth = growth[0]
+
         c1 = 0.0134
         aia = self.theory['nuisance_parameters']['aia']
         nia = self.theory['nuisance_parameters']['nia']
         bia = self.theory['nuisance_parameters']['bia']
         omegam = self.theory['Omm']
         lum = 1.0
-        fia = (-aia * c1 * omegam / self.growth_factor(redshift, k_scale) *
+        fia = (-aia * c1 * omegam / growth *
                (1 + redshift)**nia * lum**bia)
         return fia
 

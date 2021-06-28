@@ -137,16 +137,11 @@ class nonlinearinitTestCase(TestCase):
                             rtol=self.rtol,
                             err_msg='Error in value returned by Pgi_spec_def')
 
-    def test_growth_factor(self):
-        D = self.model_test.cosmology.nonlinear.misc.growth_factor(self.z1,
-                                                                   self.k1)
-        npt.assert_equal(D, self.D_test,
-                         err_msg='Error in value returned by growth_factor')
-
     def test_fia(self):
         fia = self.model_test.cosmology.nonlinear.misc.fia(self.z1, self.k1)
-        npt.assert_equal(fia, self.fia_test,
-                         err_msg='Error in value returned by fia')
+        npt.assert_allclose(fia, self.fia_test,
+                            rtol=self.rtol,
+                            err_msg='Error in value returned by fia')
 
     def test_istf_spec_galbias(self):
         b = self.model_test.cosmology.nonlinear.misc.istf_spec_galbias(self.z1)

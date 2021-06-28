@@ -113,6 +113,8 @@ class Cosmology:
             Interpolated function for Hubble parameter
         H_z_func_Mpc: function
             Interpolated function for Hubble parameter in :math:`Mpc^{-1}`
+        D_z_k_func: function
+            Interpolated function for growth factor
         z_win: list
             Array of redshifts ar which H and comov_dist are evaluated at
         k_win: list
@@ -211,6 +213,7 @@ class Cosmology:
                           'd_z_func': None,
                           'H_z_func': None,
                           'H_z_func_Mpc': None,
+                          'D_z_k_func': None,
                           'sigma8_z_func': None,
                           'fsigma8_z_func': None,
                           'f_z': None,
@@ -268,7 +271,7 @@ class Cosmology:
         ----------
         zs: numpy.ndarray
             redshifts for the power spectrum
-        ks: list
+        ks: numpy.ndarray
             list of modes for the power spectrum
 
         Returns
@@ -281,8 +284,8 @@ class Cosmology:
         # We want to obtain delta directly from Cobaya.
         # Here depends on z and k.
         try:
-            D_z_k = self.cosmo_dic['Pk_delta'].P(zs, ks)
-            D_z_k = np.sqrt(D_z_k / self.cosmo_dic['Pk_delta'].P(0.0, ks))
+            P_z_k = self.cosmo_dic['Pk_delta'].P(zs, ks)
+            D_z_k = np.sqrt(P_z_k / self.cosmo_dic['Pk_delta'].P(0.0, ks))
             return D_z_k
         except CosmologyError:
             print('Computation error in D(z, k)')
@@ -343,6 +346,21 @@ class Cosmology:
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'],
                 y=growth, ext=2)
+
+    def interp_growth_factor(self):
+        """Interpolates the growth factor
+
+        Adds an interpolator for the growth factor (function of redshift and
+        scale) to the cosmo dictionary
+        """
+        z_win = self.cosmo_dic['z_win']
+        k_win = self.cosmo_dic['k_win']
+        growth_grid = self.growth_factor(z_win, k_win)
+        self.cosmo_dic['D_z_k_func'] = \
+            interpolate.RectBivariateSpline(z_win,
+                                            k_win,
+                                            growth_grid,
+                                            kx=3, ky=3)
 
     def interp_comoving_dist(self):
         """Interp Comoving Dist
@@ -715,6 +733,14 @@ class Cosmology:
             Value of intrinsic alignment function at
             a given redshift
         """
+        growth = self.cosmo_dic['D_z_k_func'](redshift, k_scale)
+        ztype = isinstance(redshift, np.ndarray)
+        ktype = isinstance(k_scale, np.ndarray)
+        if (not(ztype) and not(ktype)):
+            growth = growth[0, 0]
+        elif (ztype ^ ktype):
+            growth = growth[0]
+
         c1 = 0.0134
         aia = self.cosmo_dic['nuisance_parameters']['aia']
         nia = self.cosmo_dic['nuisance_parameters']['nia']
@@ -722,7 +748,7 @@ class Cosmology:
         omegam = self.cosmo_dic['Omm']
         # Temporary lum for now, to be read in from IST:forecast file
         lum = 1.0
-        fia = (-aia * c1 * omegam / self.growth_factor(redshift, k_scale) *
+        fia = (-aia * c1 * omegam / growth *
                (1 + redshift)**nia * lum**bia)
         return fia
 
@@ -986,6 +1012,7 @@ class Cosmology:
         self.interp_comoving_dist()
         self.interp_fsigma8()
         self.interp_sigma8()
+        self.interp_growth_factor()
         self.growth_rate_cobaya()
         self.interp_angular_dist()
         # For the moment we use our own definition

@@ -272,8 +272,9 @@ if runoption == 1:
             mock_cosmo_dic['Omm'] = (mock_cosmo_dic['Omnu'] +
                                      mock_cosmo_dic['Omc'] +
                                      mock_cosmo_dic['Omb'])
-            p_matter = mock_P_obj(interpolate.interp2d(zs_base, ks_base, pdd.T,
-                                                   fill_value=0))
+            p_matter = mock_P_obj(interpolate.RectBivariateSpline(zs_base,
+                                                              ks_base,
+                                                              pdd))
             mock_cosmo_dic['Pk_delta'] = p_matter
             mock_cosmo_dic['Pgg_phot'] = interpolate.RectBivariateSpline(zs_base, ks_base,
                                                               pgg.T,

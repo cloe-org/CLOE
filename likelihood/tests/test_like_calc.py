@@ -149,7 +149,6 @@ class likecalcTestCase(TestCase):
 
         p_matter = mock_P_obj(interpolate.interp2d(zs_base, ks_base, pdd.T,
                                                    fill_value=0))
-        mock_cosmo_dic['Pk_interpolator'] = p_matter
         mock_cosmo_dic['Pk_delta'] = p_matter
         mock_cosmo_dic['Pgg_phot'] = interpolate.interp2d(zs_base, ks_base,
                                                           pgg.T,

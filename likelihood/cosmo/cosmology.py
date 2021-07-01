@@ -89,10 +89,10 @@ class Cosmology:
         H_Mpc: list
             Hubble function evaluated at redshifts z_win in units
             of :math:`Mpc^{-1}`
-        Pk_interpolator: function
-            Interpolator function for power spectrum from Boltzmann code
         Pk_delta: function
             Interpolator function for delta from Boltzmann code
+        Pk_weyl: function
+            Interpolator function for Weyl from Boltzmann code
         fsigma8: list
             fsigma8 function evaluated at z
         sigma8: list
@@ -199,8 +199,8 @@ class Cosmology:
                           'sigma8': None,
                           'D_z_k': None,
                           # Interpolators
-                          'Pk_interpolator': None,
                           'Pk_delta': None,
+                          'Pk_weyl': None,
                           'Pgg_phot': None,
                           'Pgdelta_phot': None,
                           'Pgg_spec': None,

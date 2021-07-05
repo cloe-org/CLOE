@@ -128,7 +128,6 @@ class photoinitTestCase(TestCase):
         p_matter = mock_P_obj(interpolate.RectBivariateSpline(zs_base,
                                                               ks_base,
                                                               pdd))
-        mock_cosmo_dic['Pk_interpolator'] = p_matter
         mock_cosmo_dic['Pk_delta'] = p_matter
         mock_cosmo_dic['Pgg_phot'] = \
             interpolate.RectBivariateSpline(zs_base,

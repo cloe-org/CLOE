@@ -332,7 +332,7 @@ class Photo:
         zs_arr = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
         c_int_arr = np.empty(len(zs_arr))
-        P_dd = self.theory['Pk_interpolator'].P
+        P_dd = self.theory['Pk_delta'].P
         P_ii = self.theory['Pii']
         P_di = self.theory['Pdeltai']
 

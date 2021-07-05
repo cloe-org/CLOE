@@ -97,11 +97,12 @@ class CobayaModel:
         self.cosmology.cosmo_dic['angular_dist'] = \
             self.model.provider.get_angular_diameter_distance(
             self.cosmology.cosmo_dic['z_win'])
-        self.cosmology.cosmo_dic['Pk_interpolator'] = \
-            self.model.provider.get_Pk_interpolator(nonlinear=False)
         self.cosmology.cosmo_dic['Pk_delta'] = \
             self.model.provider.get_Pk_interpolator(
             ("delta_tot", "delta_tot"), nonlinear=False)
+        self.cosmology.cosmo_dic['Pk_weyl'] = \
+            self.model.provider.get_Pk_interpolator(
+            ("Weyl", "Weyl"), nonlinear=False)
         self.cosmology.cosmo_dic['fsigma8'] = \
             self.model.provider.get_fsigma8(self.z_win)
         self.cosmology.cosmo_dic['sigma8'] = \

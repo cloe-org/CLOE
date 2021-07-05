@@ -127,7 +127,9 @@ class EuclidLikelihood(Likelihood):
                                           "k_max": self.k_max_Boltzmannn,
                                           "nonlinear": [False, True],
                                           "vars_pairs": ([["delta_tot",
-                                                           "delta_tot"]])},
+                                                           "delta_tot"],
+                                                          ["Weyl",
+                                                           "Weyl"]])},
                                          "comoving_radial_distance":
                                          {"z": self.z_win},
                                          "angular_diameter_distance":
@@ -162,12 +164,12 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology.cosmo_dic['H_Mpc'] = \
             model_fiducial.provider.get_Hubble(
             self.z_win, units='1/Mpc'),
-        self.fiducial_cosmology.cosmo_dic['Pk_interpolator'] = \
-            model_fiducial.provider.get_Pk_interpolator(
-            nonlinear=False),
         self.fiducial_cosmology.cosmo_dic['Pk_delta'] = \
             model_fiducial.provider.get_Pk_interpolator(
             ("delta_tot", "delta_tot"), nonlinear=False)
+        self.fiducial_cosmology.cosmo_dic['Pk_weyl'] = \
+            model_fiducial.provider.get_Pk_interpolator(
+            ("Weyl", "Weyl"), nonlinear=False),
         self.fiducial_cosmology.cosmo_dic['fsigma8'] = \
             model_fiducial.provider.get_fsigma8(
             self.z_win)
@@ -203,7 +205,9 @@ class EuclidLikelihood(Likelihood):
                  "k_max": self.k_max_Boltzmannn,
                  "nonlinear": False,
                  "vars_pairs": ([["delta_tot",
-                                  "delta_tot"]])},
+                                  "delta_tot"],
+                                 ["Weyl",
+                                  "Weyl"]])},
                 "comoving_radial_distance": {"z": self.z_win},
                 "angular_diameter_distance": {"z": self.z_win},
                 "Hubble": {"z": self.z_win, "units": "km/s/Mpc"},
@@ -248,11 +252,12 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['H'] = self.provider.get_Hubble(self.z_win)
             self.cosmo.cosmo_dic['H_Mpc'] = \
                 self.provider.get_Hubble(self.z_win, units='1/Mpc')
-            self.cosmo.cosmo_dic['Pk_interpolator'] = \
-                self.provider.get_Pk_interpolator(nonlinear=False)
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 self.provider.get_Pk_interpolator(
                 ("delta_tot", "delta_tot"), nonlinear=False)
+            self.cosmo.cosmo_dic['Pk_weyl'] = \
+                self.provider.get_Pk_interpolator(
+                ("Weyl", "Weyl"), nonlinear=False)
             self.cosmo.cosmo_dic['z_win'] = self.z_win
             self.cosmo.cosmo_dic['k_win'] = self.k_win
             self.cosmo.cosmo_dic['sigma8'] = self.provider.get_sigma8_z(
@@ -293,11 +298,12 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['H'] = model.provider.get_Hubble(self.z_win)
             self.cosmo.cosmo_dic['H_Mpc'] = \
                 model.provider.get_Hubble(self.z_win, units='1/Mpc')
-            self.cosmo.cosmo_dic['Pk_interpolator'] = \
-                model.provider.get_Pk_interpolator(nonlinear=False)
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 model.provider.get_Pk_interpolator(
                 ("delta_tot", "delta_tot"), nonlinear=False)
+            self.cosmo.cosmo_dic['Pk_weyl'] = \
+                model.provider.get_Pk_interpolator(
+                ("Weyl", "Weyl"), nonlinear=False)
             self.cosmo.cosmo_dic['z_win'] = self.z_win
             self.cosmo.cosmo_dic['k_win'] = self.k_win
             self.cosmo.cosmo_dic['sigma8'] = model.provider.get_sigma8_z(

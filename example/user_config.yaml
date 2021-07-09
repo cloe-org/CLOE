@@ -1,0 +1,5 @@
+backend: Cobaya
+Cobaya:
+  likelihood:
+    Euclid: !!python/name:likelihood.cobaya_interface.EuclidLikelihood ''
+  output: chains/my_euclid_experiment

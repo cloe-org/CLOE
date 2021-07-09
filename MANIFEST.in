@@ -4,3 +4,4 @@ include data/ExternalBenchmark/Photometric/data/*
 include data/ExternalBenchmark/Spectroscopic/*
 include data/ExternalBenchmark/Spectroscopic/data/*
 include data/ExternalBenchmark/Spectroscopic/data/Sefusatti_multipoles_pk/*
+recursive-include likelihood *.yaml

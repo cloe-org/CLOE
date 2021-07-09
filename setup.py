@@ -18,7 +18,7 @@ with open(os.path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 # Function to automatically find scripts.
 def find_scripts():
-    sdir = '.'
+    sdir = './scripts'
     return [os.path.join(sdir, val) for val in os.listdir(sdir) if
             val.endswith('.py') and '__init__' not in val]
 

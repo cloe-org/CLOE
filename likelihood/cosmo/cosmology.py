@@ -632,8 +632,8 @@ class Cosmology:
         pval = (bias + growth * mu_rsd ** 2.0) ** 2.0 * power
         return pval
 
-    def Pgd_phot_def(self, redshift, k_scale):
-        r"""Pgd Phot Def
+    def Pgdelta_phot_def(self, redshift, k_scale):
+        r"""Pgdelta Phot Def
 
         Computes the galaxy-matter power spectrum for the photometric probe.
 
@@ -659,8 +659,8 @@ class Cosmology:
                 self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
         return pval
 
-    def Pgd_spec_def(self, redshift, k_scale, mu_rsd):
-        r"""Pgd Spec Def
+    def Pgdelta_spec_def(self, redshift, k_scale, mu_rsd):
+        r"""Pgdelta Spec Def
 
         Computes the redshift-space galaxy-matter power spectrum for the
         spectroscopic probe.
@@ -864,7 +864,7 @@ class Cosmology:
         pksrc = self.pk_source
         pgg_phot = np.array([pksrc.Pgg_phot_def(zz, k_win)
                              for zz in z_win])
-        pgdelta_phot = np.array([pksrc.Pgd_phot_def(zz, k_win)
+        pgdelta_phot = np.array([pksrc.Pgdelta_phot_def(zz, k_win)
                                  for zz in z_win])
         pii = np.array([pksrc.Pii_def(zz, k_win)
                         for zz in z_win])
@@ -875,7 +875,7 @@ class Cosmology:
         pgi_spec = np.array([pksrc.Pgi_spec_def(zz, k_win)
                              for zz in z_win_spec])
         self.cosmo_dic['Pgg_spec'] = pksrc.Pgg_spec_def
-        self.cosmo_dic['Pgdelta_spec'] = pksrc.Pgd_spec_def
+        self.cosmo_dic['Pgdelta_spec'] = pksrc.Pgdelta_spec_def
 
         self.cosmo_dic['Pgg_phot'] = \
             interpolate.RectBivariateSpline(z_win,

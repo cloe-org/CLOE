@@ -6,7 +6,6 @@ This module contains unit tests for the data_reader module.
 """
 
 from unittest import TestCase
-import numpy as np
 import numpy.testing as npt
 from likelihood.data_reader.reader import Reader
 

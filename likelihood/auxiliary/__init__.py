@@ -7,6 +7,7 @@ other part of the likelihood code. It contains plotting routines.
 
 """
 
-__all__ = ['plotter']  # list submodules
+__all__ = ['plotter',
+           'redshift_bins']  # list submodules
 
 from . import *

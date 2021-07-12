@@ -3,8 +3,6 @@
 Class to compute non-linear recipes.
 """
 
-import numpy as np
-from scipy import interpolate
 from likelihood.non_linear.miscellanous import Misc
 from likelihood.non_linear.pgg_spec import Pgg_spec_model
 from likelihood.non_linear.pgg_phot import Pgg_phot_model

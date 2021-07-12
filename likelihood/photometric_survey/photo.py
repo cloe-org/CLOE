@@ -3,10 +3,7 @@
 
 # General imports
 import numpy as np
-import likelihood.cosmo
 from scipy import integrate
-from scipy import interpolate
-import os.path
 
 # General error class
 

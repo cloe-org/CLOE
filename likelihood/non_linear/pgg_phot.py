@@ -4,8 +4,6 @@ module: pgg_phot
 Contains recipes for the photometric galaxy x galaxy power spectrum.
 """
 
-# Global
-import numpy as np
 from likelihood.non_linear.power_spectrum import PowerSpectrum
 
 

@@ -5,17 +5,13 @@ This module contains unit tests for the non-linear module.
 
 """
 
-# Use Cobaya Model wrapper
 
-from cobaya.model import get_model
 from unittest import TestCase
 import numpy as np
 import numpy.testing as npt
-from scipy import integrate
 from astropy import constants as const
 from likelihood.cosmo.cosmology import Cosmology
 from likelihood.tests.test_wrapper import CobayaModel
-from scipy.interpolate import InterpolatedUnivariateSpline
 
 
 class nonlinearinitTestCase(TestCase):
@@ -148,12 +144,12 @@ class nonlinearinitTestCase(TestCase):
         npt.assert_allclose(b, self.bspec,
                             rtol=self.rtol,
                             err_msg='Error in istf_spec_galbias')
-        self.assertRaises(Exception,
+        self.assertRaises(ValueError,
                           (self.model_test.cosmology
                            .nonlinear.misc
                            .istf_spec_galbias),
                           self.z2)
-        self.assertRaises(Exception,
+        self.assertRaises(ValueError,
                           (self.model_test.cosmology
                            .nonlinear.misc
                            .istf_spec_galbias),

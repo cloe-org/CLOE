@@ -1,6 +1,6 @@
 from unittest import TestCase
 from unittest.mock import patch
-from likelihood.massage.massage import Massage
+import likelihood.massage.massage as massage
 import numpy
 
 
@@ -28,7 +28,7 @@ class Massage_test(TestCase):
     # test that the size of the output matrix is as expected, and that
     # 100 random entries match the expectation
     def test_merge_matrices(self):
-        outMatrix = Massage.merge_matrices(self.mat1, self.mat2)
+        outMatrix = massage.merge_matrices(self.mat1, self.mat2)
         expectedRows = self.nRows1 + self.nRows2
         expectedCols = self.nCols1 + self.nCols2
         self.assertEqual(outMatrix.shape[0], expectedRows,

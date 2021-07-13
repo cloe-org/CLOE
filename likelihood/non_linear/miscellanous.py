@@ -6,8 +6,8 @@ in the nonlinear module (only temporary to mimic the
 linear implementation made by IST:L)
 """
 
-# Global
 import numpy as np
+import likelihood.auxiliary.redshift_bins as rb
 
 
 class Misc:
@@ -58,9 +58,9 @@ class Misc:
         growth = self.theory['D_z_k_func'](redshift, k_scale)
         ztype = isinstance(redshift, np.ndarray)
         ktype = isinstance(k_scale, np.ndarray)
-        if (not(ztype) and not(ktype)):
+        if not ztype and not ktype:
             growth = growth[0, 0]
-        elif (ztype ^ ktype):
+        elif ztype ^ ktype:
             growth = growth[0]
 
         c1 = 0.0134
@@ -70,15 +70,14 @@ class Misc:
         omegam = self.theory['Omm']
         lum = 1.0
         fia = (-aia * c1 * omegam / growth *
-               (1 + redshift)**nia * lum**bia)
+               (1 + redshift) ** nia * lum ** bia)
         return fia
 
-    def istf_spec_galbias(self, redshift, bin_edge_list=[0.90, 1.10, 1.30,
-                                                         1.50, 1.80]):
+    def istf_spec_galbias(self, redshift, bin_edges=None):
         """Istf Spec Galbias
 
         Gets galaxy bias for the spectroscopic galaxy clustering
-        probe, at given redshift, according to the linear recipe
+        probe, at given redshift(s), according to the linear recipe
         used for version 1.0 of CLOE (default recipe).
 
         Attention: this function is going to be removed from the
@@ -89,48 +88,43 @@ class Misc:
 
         Parameters
         ----------
-        redshift: float
-            Redshift at which to calculate bias.
-        bin_edge_list: list
-            List of redshift bin edges for spectroscopic GC probe.
+        redshift: float or numpy.ndarray
+            Redshift(s) at which to calculate bias.
+        bin_edges: numpy.ndarray
+            Array of redshift bin edges for spectroscopic GC probe.
             Default is Euclid IST: Forecasting choices.
 
         Returns
         -------
-        bi_val: float
-            Value of spectroscopic galaxy bias at input redshift
+        bi_val: float or numpy.ndarray
+            Value(s) of spectroscopic galaxy bias at input redshift(s)
 
         Raises
         ------
         ValueError
             If redshift is outside of the bounds defined by the first
-            and last element of bin_edge_list
+            and last element of bin_edges
         """
 
-        istf_bias_list = [self.theory['nuisance_parameters']['b1_spec'],
-                          self.theory['nuisance_parameters']['b2_spec'],
-                          self.theory['nuisance_parameters']['b3_spec'],
-                          self.theory['nuisance_parameters']['b4_spec']]
+        if bin_edges is None:
+            bin_edges = np.array([0.90, 1.10, 1.30, 1.50, 1.80])
 
-        if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
-            for i in range(len(bin_edge_list) - 1):
-                if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
-                    bi_val = istf_bias_list[i]
-        elif redshift >= bin_edge_list[-1]:
-            raise Exception('Spectroscopic galaxy bias cannot be obtained '
-                            'as redshift is above the highest bin edge')
-        elif redshift < bin_edge_list[0]:
-            raise Exception('Spectroscopic galaxy bias cannot be obtained '
-                            'as redshift is below the lowest bin edge.')
-        return bi_val
+        nuisance_src = self.theory['nuisance_parameters']
 
-    def istf_phot_galbias(self, redshift, bin_edge_list=[0.001, 0.418, 0.560,
-                                                         0.678, 0.789, 0.900,
-                                                         1.019, 1.155, 1.324,
-                                                         1.576, 2.50]):
+        try:
+            z_bin = rb.find_bin(redshift, bin_edges, False)
+            bi_val = np.array([nuisance_src[f'b{i}_spec']
+                              for i in np.nditer(z_bin)])
+            return bi_val[0] if np.isscalar(redshift) else bi_val
+        except (ValueError, KeyError):
+            raise ValueError('Spectroscopic galaxy bias cannot be obtained. '
+                             'Check that redshift is inside the bin edges'
+                             'and valid bi_spec\'s are provided.')
+
+    def istf_phot_galbias(self, redshift, bin_edges=None):
         r"""Istf Phot Galbias
 
-        Gets galaxy bias for the photometric GC probes by
+        Gets galaxy bias(es) for the photometric GC probes by
         interpolation at a given redshift z
 
         Note: for redshifts above the final bin (z > 2.5), we use the bias
@@ -139,25 +133,21 @@ class Misc:
 
         Parameters
         ----------
-        redshift: float
-            Redshift at which to calculate bias.
-        bin_edge_list: list
-            List of tomographic redshift bin edges for photometric GC probe.
+        redshift: float or numpy.ndarray
+            Redshift(s) at which to calculate bias.
+        bin_edges: numpy.ndarray
+            Array of tomographic redshift bin edges for photometric GC probe.
             Default is Euclid IST: Forecasting choices.
 
         Returns
         -------
-        bi_val: float
-            Value of photometric galaxy bias at input redshift
+        bi_val: float or numpy.ndarray
+            Value(s) of photometric galaxy bias at input redshift(s)
         """
 
-        if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
-            z_in_range = redshift
-        elif redshift >= bin_edge_list[-1]:
-            z_in_range = bin_edge_list[-1]
-        elif redshift < bin_edge_list[0]:
-            z_in_range = bin_edge_list[0]
+        if bin_edges is None:
+            bin_edges = np.array([0.001, 0.418, 0.560, 0.678, 0.789,
+                                  0.900, 1.019, 1.155, 1.324, 1.576, 2.50])
 
-        bi_val = self.theory['b_inter'](z_in_range)
-
-        return bi_val
+        z_in_range = rb.coerce(redshift, bin_edges)
+        return self.theory['b_inter'](z_in_range)

@@ -4,8 +4,6 @@ module: pgL_phot
 Contains recipes for the photometric galaxy x lensing power spectrum.
 """
 
-# Global
-import numpy as np
 from likelihood.non_linear.power_spectrum import PowerSpectrum
 
 
@@ -14,8 +12,8 @@ class PgL_phot_model(PowerSpectrum):
     Class for computation of photometric galaxy x lensing power spectrum
     """
 
-    def Pgd_phot_def(self, redshift, k_scale):
-        r"""Pgd Phot Def
+    def Pgdelta_phot_def(self, redshift, k_scale):
+        r"""Pgdelta Phot Def
 
         Computes the galaxy-matter power spectrum for the photometric probe.
 

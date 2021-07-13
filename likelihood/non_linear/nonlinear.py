@@ -3,8 +3,6 @@
 Class to compute non-linear recipes.
 """
 
-import numpy as np
-from scipy import interpolate
 from likelihood.non_linear.miscellanous import Misc
 from likelihood.non_linear.pgg_spec import Pgg_spec_model
 from likelihood.non_linear.pgg_phot import Pgg_phot_model
@@ -113,14 +111,14 @@ class Nonlinear:
         return self.Pgg_spec_model.Pgg_spec_def(redshift,
                                                 k_scale, mu_rsd)
 
-    def Pgd_spec_def(self, redshift, k_scale, mu_rsd):
-        r"""Interface for Pgd_spec_def
+    def Pgdelta_spec_def(self, redshift, k_scale, mu_rsd):
+        r"""Interface for Pgdelta_spec_def
 
         Returns the spectroscopic galaxy-density power spectrum,
         defined in the pgg_spec module
         """
-        return self.Pgg_spec_model.Pgd_spec_def(redshift,
-                                                k_scale, mu_rsd)
+        return self.Pgg_spec_model.Pgdelta_spec_def(redshift,
+                                                    k_scale, mu_rsd)
 
     def Pgg_phot_def(self, redshift, k_scale):
         r"""Interface for Pgg_phot_def
@@ -162,10 +160,10 @@ class Nonlinear:
         """
         return self.PLL_phot_model.Pgi_spec_def(redshift, k_scale)
 
-    def Pgd_phot_def(self, redshift, k_scale):
-        r"""Interface for Pgd_phot_def
+    def Pgdelta_phot_def(self, redshift, k_scale):
+        r"""Interface for Pgdelta_phot_def
 
         Returns the photometric galaxy-density power spectrum,
         defined in the pgL_phot module
         """
-        return self.PgL_phot_model.Pgd_phot_def(redshift, k_scale)
+        return self.PgL_phot_model.Pgdelta_phot_def(redshift, k_scale)

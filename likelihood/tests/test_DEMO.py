@@ -6,7 +6,6 @@ This module contains unit tests for the DEMO jupyter notebook
 """
 
 from unittest import TestCase
-import numpy as np
 import numpy.testing as npt
 import subprocess
 import os

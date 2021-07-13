@@ -4,9 +4,6 @@ module: power_spectrum
 Contains mother class for a generic power spectrum.
 """
 
-# Global
-import numpy as np
-
 
 class PowerSpectrum:
     r"""

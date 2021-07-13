@@ -5,17 +5,13 @@ This module contains unit tests for the non-linear module.
 
 """
 
-# Use Cobaya Model wrapper
 
-from cobaya.model import get_model
 from unittest import TestCase
 import numpy as np
 import numpy.testing as npt
-from scipy import integrate
 from astropy import constants as const
 from likelihood.cosmo.cosmology import Cosmology
 from likelihood.tests.test_wrapper import CobayaModel
-from scipy.interpolate import InterpolatedUnivariateSpline
 
 
 class nonlinearinitTestCase(TestCase):
@@ -38,9 +34,9 @@ class nonlinearinitTestCase(TestCase):
         self.model_test.update_cosmo()
         # Check values
         self.Pgg_phot_test = 58392.759202
-        self.Pgd_phot_test = 41294.412017
+        self.Pgdelta_phot_test = 41294.412017
         self.Pgg_spec_test = 82548.320427
-        self.Pgd_spec_test = 59890.445816
+        self.Pgdelta_spec_test = 59890.445816
         self.Pii_test = np.array([2.417099, 0.902693, 0.321648])
         self.Pdeltai_test = -265.680094
         self.Pgi_phot_test = -375.687484
@@ -63,9 +59,9 @@ class nonlinearinitTestCase(TestCase):
 
     def tearDown(self):
         self.Pgg_phot_test = None
-        self.Pgd_phot_test = None
+        self.Pgdelta_phot_test = None
         self.Pgg_spec_test = None
-        self.Pgd_spec_test = None
+        self.Pgdelta_spec_test = None
         self.Pii_test = None
         self.Pdeltai_test = None
         self.Pgi_phot_test = None
@@ -78,12 +74,14 @@ class nonlinearinitTestCase(TestCase):
                             rtol=self.rtol,
                             err_msg='Error in value returned by Pgg_phot_def')
 
-    def test_Pgd_phot_def(self):
-        test_p = self.model_test.cosmology.nonlinear.Pgd_phot_def(self.z1,
-                                                                  self.k1)
-        npt.assert_allclose(test_p, self.Pgd_phot_test,
-                            rtol=self.rtol,
-                            err_msg='Error in value returned by Pgd_phot_def')
+    def test_Pgdelta_phot_def(self):
+        test_p = self.model_test.cosmology.nonlinear.Pgdelta_phot_def(self.z1,
+                                                                      self.k1)
+        npt.assert_allclose(
+            test_p,
+            self.Pgdelta_phot_test,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgdelta_phot_def')
 
     def test_Pgg_spec_def(self):
         test_p = self.model_test.cosmology.nonlinear.Pgg_spec_def(self.z1,
@@ -93,13 +91,15 @@ class nonlinearinitTestCase(TestCase):
                             rtol=self.rtol,
                             err_msg='Error in value returned by Pgg_spec_def')
 
-    def test_Pgd_spec_def(self):
-        test_p = self.model_test.cosmology.nonlinear.Pgd_spec_def(self.z1,
-                                                                  self.k1,
-                                                                  self.mu)
-        npt.assert_allclose(test_p, self.Pgd_spec_test,
-                            rtol=self.rtol,
-                            err_msg='Error in value returned by Pgd_spec_def')
+    def test_Pgdelta_spec_def(self):
+        test_p = self.model_test.cosmology.nonlinear.Pgdelta_spec_def(self.z1,
+                                                                      self.k1,
+                                                                      self.mu)
+        npt.assert_allclose(
+            test_p,
+            self.Pgdelta_spec_test,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgdelta_spec_def')
 
     def test_Pii_def(self):
         test_p = self.model_test.cosmology.nonlinear.Pii_def(self.z1,
@@ -148,12 +148,12 @@ class nonlinearinitTestCase(TestCase):
         npt.assert_allclose(b, self.bspec,
                             rtol=self.rtol,
                             err_msg='Error in istf_spec_galbias')
-        self.assertRaises(Exception,
+        self.assertRaises(ValueError,
                           (self.model_test.cosmology
                            .nonlinear.misc
                            .istf_spec_galbias),
                           self.z2)
-        self.assertRaises(Exception,
+        self.assertRaises(ValueError,
                           (self.model_test.cosmology
                            .nonlinear.misc
                            .istf_spec_galbias),

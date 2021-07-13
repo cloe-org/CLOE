@@ -5,17 +5,11 @@ This module contains unit tests for the cosmo module.
 
 """
 
-# Use Cobaya Model wrapper
-
-from cobaya.model import get_model
 from unittest import TestCase
-import numpy as np
 import numpy.testing as npt
-from scipy import integrate
 from astropy import constants as const
 from likelihood.cosmo.cosmology import Cosmology
 from likelihood.tests.test_wrapper import CobayaModel
-from scipy.interpolate import InterpolatedUnivariateSpline
 
 
 class cosmoinitTestCase(TestCase):
@@ -42,14 +36,12 @@ class cosmoinitTestCase(TestCase):
         self.Dcheck = 1.0
         self.fcheck = 0.525454
         self.Hcheck = 74.349422
-        self.bias_gc_phot_check = 1.194815
-        self.bias_gc_spec_check = 1.46148
         self.Pgg_phot_test = 58392.759202
         self.Pgg_phot_test_interpolation = 58332.02434
-        self.Pgd_phot_test = 41294.412017
-        self.Pgd_phot_test_interpolation = 41253.453724
+        self.Pgdelta_phot_test = 41294.412017
+        self.Pgdelta_phot_test_interpolation = 41253.453724
         self.Pgg_spec_test = 82548.320427
-        self.Pgd_spec_test = 59890.445816
+        self.Pgdelta_spec_test = 59890.445816
         self.Pii_test = 2.417099
         self.Pdeltai_test = -265.680094
         self.Pgi_phot_test = -375.687484
@@ -62,13 +54,11 @@ class cosmoinitTestCase(TestCase):
         self.Dcheck = None
         self.fcheck = None
         self.Hcheck = None
-        self.bias_gc_phot_check = None
-        self.bias_gc_spec_check = None
         self.Pgg_phot_test = None
-        self.Pgd_phot_test = None
-        self.Pgd_phot_test_interpolation = None
+        self.Pgdelta_phot_test = None
+        self.Pgdelta_phot_test_interpolation = None
         self.Pgg_spec_test = None
-        self.Pgd_spec_test = None
+        self.Pgdelta_spec_test = None
         self.Pii_test = None
         self.Pdeltai_test = None
         self.Pgi_phot_test = None
@@ -111,7 +101,7 @@ class cosmoinitTestCase(TestCase):
             'nuisance_parameters']['NL_flag'] = 1
         source = self.model_test.cosmology.pk_source
         type_check = isinstance(source, Cosmology)
-        assert not(type_check), 'Error in returned data type of pk_source'
+        assert not type_check, 'Error in returned data type of pk_source'
 
     def test_cosmo_growth_factor(self):
         D = self.model_test.cosmology.growth_factor(0.0, 0.002)
@@ -139,17 +129,70 @@ class cosmoinitTestCase(TestCase):
         npt.assert_equal(emptflag_D, True,
                          err_msg='D_z_k not calculated ')
 
-    def test_phot_bias(self):
-        val = self.model_test.cosmology.istf_phot_galbias(0.43)
-        npt.assert_allclose(val, self.bias_gc_phot_check,
+    def test_istf_phot_galbias(self):
+        # interpolate a straight-line (b, z) grid to ease the checks
+        nuipar = self.model_test.cosmology.cosmo_dic['nuisance_parameters']
+        zs_means = [1., 2., 3.]
+        nuipar['b1_photo'] = 2.
+        nuipar['b2_photo'] = 4.
+        nuipar['b3_photo'] = 6.
+        self.model_test.cosmology.istf_phot_galbias_interpolator(zs_means)
+        # check scalar redshift input
+        bi_val_actual = self.model_test.cosmology.istf_phot_galbias(1.5)
+        npt.assert_almost_equal(bi_val_actual, desired=3.,
+                                decimal=3,
+                                err_msg='Error in istf_phot_galbias')
+        # check redshift input below zs edges: returns b(z at edge)
+        bi_val_actual = \
+            self.model_test.cosmology.istf_phot_galbias(0.98, [1., 2.])
+        npt.assert_almost_equal(bi_val_actual, desired=2.,
+                                decimal=3,
+                                err_msg='Error in istf_phot_galbias (z<)')
+        # check redshift input above zs edges: returns b(z at edge)
+        bi_val_actual = \
+            self.model_test.cosmology.istf_phot_galbias(2.04, [1., 2.])
+        npt.assert_almost_equal(bi_val_actual, desired=4.,
+                                decimal=3,
+                                err_msg='Error in istf_phot_galbias (z>)')
+        # check vector redshift input: output size and values
+        zs_vec = [1.5, 2.5]
+        bi_val_actual = self.model_test.cosmology.istf_phot_galbias(zs_vec)
+        npt.assert_equal(len(bi_val_actual), len(zs_vec),
+                         err_msg='Output size of istf_phot_galbias'
+                                 '(vec) does not match with input')
+        npt.assert_allclose(bi_val_actual, desired=[3., 5.],
                             rtol=1e-3,
-                            err_msg='Error in GC-phot bias calculation')
+                            err_msg='Array output istf_phot_galbias')
 
-    def test_spec_bias(self):
-        val = self.model_test.cosmology.istf_spec_galbias(1.0)
-        npt.assert_allclose(val, self.bias_gc_spec_check,
-                            rtol=1e-3,
-                            err_msg='Error in GC-spec bias calculation')
+    def test_istf_spec_galbias(self):
+        # assign custom b1_spec and b2_spec for maintainability
+        nuipar = self.model_test.cosmology.cosmo_dic['nuisance_parameters']
+        nuipar['b1_spec'] = 1.23
+        nuipar['b2_spec'] = 4.56
+        # check scalar redshift input: z in 1st bin returns b1_spec
+        bi_val_actual = \
+            self.model_test.cosmology.istf_spec_galbias(1.5, [1., 2.])
+        bi_val_desired = nuipar['b1_spec']
+        npt.assert_equal(bi_val_actual, bi_val_desired,
+                         err_msg='Error in istf_spec_galbias: b1_spec')
+        # check redshift outside bounds, with z=0 and z=10
+        npt.assert_raises(ValueError,
+                          self.model_test.cosmology.istf_spec_galbias,
+                          redshift=0)
+        npt.assert_raises(ValueError,
+                          self.model_test.cosmology.istf_spec_galbias,
+                          redshift=10)
+        # check vector redshift input: output size and values
+        zs_vec = [1.5, 2.5]
+        z_edge = [1.0, 2.0, 3.0]
+        bi_val_actual = \
+            self.model_test.cosmology.istf_spec_galbias(zs_vec, z_edge)
+        bi_val_desired = [nuipar['b1_spec'], nuipar['b2_spec']]
+        npt.assert_equal(len(bi_val_actual), len(zs_vec),
+                         err_msg='Output size of istf_spec_galbias'
+                                 '(vec) does not match with input')
+        npt.assert_array_equal(bi_val_actual, bi_val_desired,
+                               err_msg='Array output istf_spec_galbias')
 
     def test_Pgg_phot(self):
         test_p = self.model_test.cosmology.Pgg_phot_def(1.0, 0.01)
@@ -157,9 +200,9 @@ class cosmoinitTestCase(TestCase):
                             rtol=1e-3,
                             err_msg='Error in GC-phot Pgg calculation')
 
-    def test_Pg_delta_phot(self):
-        test_p = self.model_test.cosmology.Pgd_phot_def(1.0, 0.01)
-        npt.assert_allclose(test_p, self.Pgd_phot_test,
+    def test_Pgdelta_phot(self):
+        test_p = self.model_test.cosmology.Pgdelta_phot_def(1.0, 0.01)
+        npt.assert_allclose(test_p, self.Pgdelta_phot_test,
                             rtol=1e-3,
                             err_msg='Error in GC-phot Pgdelta calculation')
 
@@ -169,9 +212,9 @@ class cosmoinitTestCase(TestCase):
                             rtol=1e-3,
                             err_msg='Error in GC-spec Pgg calculation')
 
-    def test_Pg_delta_spec(self):
-        test_p = self.model_test.cosmology.Pgd_spec_def(1.0, 0.01, 0.5)
-        npt.assert_allclose(test_p, self.Pgd_spec_test,
+    def test_Pgdelta_spec(self):
+        test_p = self.model_test.cosmology.Pgdelta_spec_def(1.0, 0.01, 0.5)
+        npt.assert_allclose(test_p, self.Pgdelta_spec_test,
                             rtol=1e-3,
                             err_msg='Error in GC-spec Pgdelta calculation')
 
@@ -181,10 +224,10 @@ class cosmoinitTestCase(TestCase):
                             rtol=1e-3,
                             err_msg='Error in GC-phot Pgg interpolation')
 
-    def test_Pg_delta_phot_interp(self):
+    def test_Pgdelta_phot_interp(self):
         test_p = self.model_test.cosmology.cosmo_dic['Pgdelta_phot'](1.0,
                                                                      0.01)
-        npt.assert_allclose(test_p, self.Pgd_phot_test_interpolation,
+        npt.assert_allclose(test_p, self.Pgdelta_phot_test_interpolation,
                             rtol=1e-3,
                             err_msg='Error in GC-phot Pgdelta interpolation')
 
@@ -196,11 +239,11 @@ class cosmoinitTestCase(TestCase):
                             rtol=1e-3,
                             err_msg='Error in GC-spec Pgg (cosmo-dic)')
 
-    def test_Pg_delta_spec_interp(self):
+    def test_Pgdelta_spec_interp(self):
         test_p = self.model_test.cosmology.cosmo_dic['Pgdelta_spec'](1.0,
                                                                      0.01,
                                                                      0.5)
-        npt.assert_allclose(test_p, self.Pgd_spec_test,
+        npt.assert_allclose(test_p, self.Pgdelta_spec_test,
                             rtol=1e-3,
                             err_msg='Error in GC-spec Pgdelta (cosmo-dic)')
 

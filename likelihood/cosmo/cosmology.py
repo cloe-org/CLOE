@@ -5,9 +5,10 @@ Class to store cosmological parameters and functions.
 """
 
 import numpy as np
-from likelihood.non_linear.nonlinear import Nonlinear
 from scipy import interpolate
 from astropy import constants as const
+from likelihood.non_linear.nonlinear import Nonlinear
+from likelihood.auxiliary import redshift_bins as rb
 
 
 class CosmologyError(Exception):
@@ -254,7 +255,7 @@ class Cosmology:
         based on the value of the nonlinear flag
 
         """
-        if (self.cosmo_dic['nuisance_parameters']['NL_flag'] == 0):
+        if self.cosmo_dic['nuisance_parameters']['NL_flag'] == 0:
             return self
         else:
             return self.nonlinear
@@ -467,19 +468,7 @@ class Cosmology:
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['fsigma8'], ext=2)
 
-    def istf_phot_galbias_interpolator(
-        self,
-        redshift_mean=[
-            0.2095,
-            0.489,
-            0.619,
-            0.7335,
-            0.8445,
-            0.9595,
-            1.087,
-            1.2395,
-            1.4500000000000002,
-            2.0380000000000003]):
+    def istf_phot_galbias_interpolator(self, redshift_means=None):
         r"""Istf Phot Galbias interpolator
 
         Creates a linear interpolator for the galaxy bias for the
@@ -487,32 +476,30 @@ class Cosmology:
 
         Parameters
         ----------
-        redshift_mean: list
-            List of tomographic redshift bin means for photometric GC probe.
+        redshift_means: array_like
+            Array of tomographic redshift bin means for photometric GC probe.
             Default is Euclid IST: Forecasting choices.
         """
-        istf_bias_list = [self.cosmo_dic['nuisance_parameters']['b1_photo'],
-                          self.cosmo_dic['nuisance_parameters']['b2_photo'],
-                          self.cosmo_dic['nuisance_parameters']['b3_photo'],
-                          self.cosmo_dic['nuisance_parameters']['b4_photo'],
-                          self.cosmo_dic['nuisance_parameters']['b5_photo'],
-                          self.cosmo_dic['nuisance_parameters']['b6_photo'],
-                          self.cosmo_dic['nuisance_parameters']['b7_photo'],
-                          self.cosmo_dic['nuisance_parameters']['b8_photo'],
-                          self.cosmo_dic['nuisance_parameters']['b9_photo'],
-                          self.cosmo_dic['nuisance_parameters']['b10_photo']]
 
-        b_inter = interpolate.interp1d(redshift_mean, istf_bias_list,
+        if redshift_means is None:
+            redshift_means = np.array([0.2095, 0.489, 0.619, 0.7335,
+                                       0.8445, 0.9595, 1.087, 1.2395,
+                                       1.4500000000000002,
+                                       2.0380000000000003])
+
+        nuisance_par = self.cosmo_dic['nuisance_parameters']
+
+        istf_bias_list = [nuisance_par[f'b{idx}_photo']
+                          for idx, vl in enumerate(redshift_means, start=1)]
+
+        b_inter = interpolate.interp1d(redshift_means, istf_bias_list,
                                        fill_value="extrapolate")
         self.cosmo_dic['b_inter'] = b_inter
 
-    def istf_phot_galbias(self, redshift, bin_edge_list=[0.001, 0.418, 0.560,
-                                                         0.678, 0.789, 0.900,
-                                                         1.019, 1.155, 1.324,
-                                                         1.576, 2.50]):
+    def istf_phot_galbias(self, redshift, bin_edges=None):
         r"""Istf Phot Galbias
 
-        Updates galaxy bias for the photometric GC probes by
+        Gets galaxy bias(es) for the photometric GC probes by
         interpolation at a given redshift z
 
         Note: for redshifts above the final bin (z > 2.5), we use the bias
@@ -521,72 +508,68 @@ class Cosmology:
 
         Parameters
         ----------
-        redshift: float
-            Redshift at which to calculate bias.
-        bin_edge_list: list
-            List of tomographic redshift bin edges for photometric GC probe.
+        redshift: float or numpy.ndarray
+            Redshift(s) at which to calculate bias.
+        bin_edges: numpy.ndarray
+            Array of tomographic redshift bin edges for photometric GC probe.
             Default is Euclid IST: Forecasting choices.
 
         Returns
         -------
-        bi_val: float
-            Value of photometric galaxy bias at input redshift
+        bi_val: float of numpy.ndarray
+            Value(s) of photometric galaxy bias at input redshift(s)
         """
 
-        if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
-            bi_val = self.cosmo_dic['b_inter'](redshift)
-        elif redshift >= bin_edge_list[-1]:
-            bi_val = self.cosmo_dic['b_inter'](bin_edge_list[-1])
-        elif redshift < bin_edge_list[0]:
-            bi_val = self.cosmo_dic['b_inter'](bin_edge_list[0])
-        return bi_val
+        if bin_edges is None:
+            bin_edges = np.array([0.001, 0.418, 0.560, 0.678, 0.789,
+                                  0.900, 1.019, 1.155, 1.324, 1.576, 2.50])
 
-    def istf_spec_galbias(self, redshift, bin_edge_list=[0.90, 1.10, 1.30,
-                                                         1.50, 1.80]):
+        z_in_range = rb.coerce(redshift, bin_edges)
+        return self.cosmo_dic['b_inter'](z_in_range)
+
+    def istf_spec_galbias(self, redshift, bin_edges=None):
         """Istf Spec Galbias
 
-        Updates galaxy bias for the spectroscopic galaxy clustering
-        probe, at given redshift, according to default recipe.
-
-        Note: for redshifts above the final bin (z > 1.80), we use the bias
-        from the final bin. Similarly, for redshifts below the first bin
-        (z < 0.90), we use the bias of the first bin.
+        Gets galaxy bias for the spectroscopic galaxy clustering
+        probe, at given redshift(s), according to the linear recipe
+        used for version 1.0 of CLOE (default recipe).
 
         Attention: this will change in the future
 
         Parameters
         ----------
-        redshift: float
-            Redshift at which to calculate bias.
-        bin_edge_list: list
-            List of redshift bin edges for spectroscopic GC probe.
+        redshift: float or numpy.ndarray
+            Redshift(s) at which to calculate bias.
+        bin_edges: numpy.ndarray
+            Array of redshift bin edges for spectroscopic GC probe.
             Default is Euclid IST: Forecasting choices.
 
         Returns
         -------
-        bi_val: float
-            Value of spectroscopic galaxy bias at input redshift
+        bi_val: float or numpy.ndarray
+            Value(s) of spectroscopic galaxy bias at input redshift(s)
+
+        Raises
+        ------
+        ValueError
+            If redshift is outside of the bounds defined by the first
+            and last element of bin_edges
         """
 
-        istf_bias_list = [self.cosmo_dic['nuisance_parameters']['b1_spec'],
-                          self.cosmo_dic['nuisance_parameters']['b2_spec'],
-                          self.cosmo_dic['nuisance_parameters']['b3_spec'],
-                          self.cosmo_dic['nuisance_parameters']['b4_spec']]
+        if bin_edges is None:
+            bin_edges = np.array([0.90, 1.10, 1.30, 1.50, 1.80])
 
-        if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
-            for i in range(len(bin_edge_list) - 1):
-                if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
-                    bi_val = istf_bias_list[i]
-        elif redshift >= bin_edge_list[-1]:
-            # Let us throw an exception instead
-            # bi_val = istf_bias_list[-1]
-            raise Exception('Spectroscopic galaxy bias cannot be obtained '
-                            'as redshift is above the highest bin edge')
-        elif redshift < bin_edge_list[0]:
-            # bi_val = istf_bias_list[0]
-            raise Exception('Spectroscopic galaxy bias cannot be obtained '
-                            'as redshift is below the lowest bin edge.')
-        return bi_val
+        nuisance_src = self.cosmo_dic['nuisance_parameters']
+
+        try:
+            z_bin = rb.find_bin(redshift, bin_edges, False)
+            bi_val = np.array([nuisance_src[f'b{i}_spec']
+                              for i in np.nditer(z_bin)])
+            return bi_val[0] if np.isscalar(redshift) else bi_val
+        except (ValueError, KeyError):
+            raise ValueError('Spectroscopic galaxy bias cannot be obtained. '
+                             'Check that redshift is inside the bin edges'
+                             'and valid bi_spec\'s are provided.')
 
     def Pgg_phot_def(self, redshift, k_scale):
         r"""Pgg Phot Def
@@ -649,8 +632,8 @@ class Cosmology:
         pval = (bias + growth * mu_rsd ** 2.0) ** 2.0 * power
         return pval
 
-    def Pgd_phot_def(self, redshift, k_scale):
-        r"""Pgd Phot Def
+    def Pgdelta_phot_def(self, redshift, k_scale):
+        r"""Pgdelta Phot Def
 
         Computes the galaxy-matter power spectrum for the photometric probe.
 
@@ -676,8 +659,8 @@ class Cosmology:
                 self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
         return pval
 
-    def Pgd_spec_def(self, redshift, k_scale, mu_rsd):
-        r"""Pgd Spec Def
+    def Pgdelta_spec_def(self, redshift, k_scale, mu_rsd):
+        r"""Pgdelta Spec Def
 
         Computes the redshift-space galaxy-matter power spectrum for the
         spectroscopic probe.
@@ -736,9 +719,9 @@ class Cosmology:
         growth = self.cosmo_dic['D_z_k_func'](redshift, k_scale)
         ztype = isinstance(redshift, np.ndarray)
         ktype = isinstance(k_scale, np.ndarray)
-        if (not(ztype) and not(ktype)):
+        if not ztype and not ktype:
             growth = growth[0, 0]
-        elif (ztype ^ ktype):
+        elif ztype ^ ktype:
             growth = growth[0]
 
         c1 = 0.0134
@@ -875,15 +858,13 @@ class Cosmology:
         k_win = self.cosmo_dic['k_win']
         z_win = self.cosmo_dic['z_win']
 
-        bin_edge_list = np.array([0.90, 1.10, 1.30, 1.50, 1.80])
-        z_win_spec = z_win[np.where(np.logical_and(
-                                       z_win >= bin_edge_list[0],
-                                       z_win < bin_edge_list[-1]))]
+        spec_bin_edges = np.array([0.90, 1.10, 1.30, 1.50, 1.80])
+        z_win_spec = rb.reduce(z_win, spec_bin_edges[0], spec_bin_edges[-1])
 
         pksrc = self.pk_source
         pgg_phot = np.array([pksrc.Pgg_phot_def(zz, k_win)
                              for zz in z_win])
-        pgdelta_phot = np.array([pksrc.Pgd_phot_def(zz, k_win)
+        pgdelta_phot = np.array([pksrc.Pgdelta_phot_def(zz, k_win)
                                  for zz in z_win])
         pii = np.array([pksrc.Pii_def(zz, k_win)
                         for zz in z_win])
@@ -894,7 +875,7 @@ class Cosmology:
         pgi_spec = np.array([pksrc.Pgi_spec_def(zz, k_win)
                              for zz in z_win_spec])
         self.cosmo_dic['Pgg_spec'] = pksrc.Pgg_spec_def
-        self.cosmo_dic['Pgdelta_spec'] = pksrc.Pgd_spec_def
+        self.cosmo_dic['Pgdelta_spec'] = pksrc.Pgdelta_spec_def
 
         self.cosmo_dic['Pgg_phot'] = \
             interpolate.RectBivariateSpline(z_win,

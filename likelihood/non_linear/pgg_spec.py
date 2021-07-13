@@ -4,8 +4,6 @@ module: pgg_spec
 Contains recipes for the spectroscopic galaxy x galaxy power spectrum.
 """
 
-# Global
-import numpy as np
 from likelihood.non_linear.power_spectrum import PowerSpectrum
 
 
@@ -51,8 +49,8 @@ class Pgg_spec_model(PowerSpectrum):
         pval = (bias + growth * mu_rsd ** 2.0) ** 2.0 * power
         return pval
 
-    def Pgd_spec_def(self, redshift, k_scale, mu_rsd):
-        r"""Pgd Spec Def
+    def Pgdelta_spec_def(self, redshift, k_scale, mu_rsd):
+        r"""Pgdelta Spec Def
 
         Computes the redshift-space galaxy-matter power spectrum for the
         spectroscopic probe.

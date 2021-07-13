@@ -1,10 +1,10 @@
 from unittest import TestCase
 from unittest.mock import patch
-import likelihood.massage.massage as massage
+import likelihood.auxiliary.matrix_manipulator as matrix_manipulator
 import numpy
 
 
-class Massage_test(TestCase):
+class MatrixManipulator_test(TestCase):
 
     def setUp(self):
         dimMin = 10
@@ -28,7 +28,7 @@ class Massage_test(TestCase):
     # test that the size of the output matrix is as expected, and that
     # 100 random entries match the expectation
     def test_merge_matrices(self):
-        outMatrix = massage.merge_matrices(self.mat1, self.mat2)
+        outMatrix = matrix_manipulator.merge_matrices(self.mat1, self.mat2)
         expectedRows = self.nRows1 + self.nRows2
         expectedCols = self.nCols1 + self.nCols2
         self.assertEqual(outMatrix.shape[0], expectedRows,

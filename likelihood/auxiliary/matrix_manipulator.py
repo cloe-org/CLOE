@@ -35,10 +35,8 @@ def merge_matrices(matrix1, matrix2):
         matrix1, respectively.
         All the elements outside the two diagonal blocks are set to 0.
     """
-    nRows1 = matrix1.shape[0]
-    nCols1 = matrix1.shape[1]
-    nRows2 = matrix2.shape[0]
-    nCols2 = matrix2.shape[1]
+    nRows1, nCols1 = matrix1.shape
+    nRows2, nCols2 = matrix2.shape
     outMatrix = numpy.block([
         [matrix1, numpy.zeros((nRows1, nCols2))],
         [numpy.zeros((nRows2, nCols1)), matrix2]

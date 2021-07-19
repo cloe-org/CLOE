@@ -7,12 +7,8 @@ import numpy
 class MatrixManipulator_test(TestCase):
 
     def setUp(self):
-        dimMin = 10
-        dimMax = 50
-        self.nRows1 = numpy.random.randint(dimMin, dimMax)
-        self.nCols1 = numpy.random.randint(dimMin, dimMax)
-        self.nRows2 = numpy.random.randint(dimMin, dimMax)
-        self.nCols2 = numpy.random.randint(dimMin, dimMax)
+        self.nRows1, self.nCols1, self.nRows2, self.nCols2 =\
+            numpy.random.randint(low=10, high=50, size=4)
         self.mat1 = numpy.random.randn(self.nRows1, self.nCols1)
         self.mat2 = numpy.random.randn(self.nRows2, self.nCols2)
         self.desiredMatrix = numpy.block([

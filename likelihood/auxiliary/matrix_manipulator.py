@@ -39,14 +39,8 @@ def merge_matrices(matrix1, matrix2):
     nCols1 = matrix1.shape[1]
     nRows2 = matrix2.shape[0]
     nCols2 = matrix2.shape[1]
-    outMatrix = numpy.zeros((nRows1 + nRows2, nCols1 + nCols2))
-
-    for row in range(0, nRows1):
-        for col in range(0, nCols1):
-            outMatrix[row, col] = matrix1[row, col]
-
-    for row in range(0, nRows2):
-        for col in range(0, nCols2):
-            outMatrix[nRows1 + row, nCols1 + col] = matrix2[row, col]
-
+    outMatrix = numpy.block([
+        [matrix1, numpy.zeros((nRows1, nCols2))],
+        [numpy.zeros((nRows2, nCols1)), matrix2]
+    ])
     return outMatrix

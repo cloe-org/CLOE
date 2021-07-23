@@ -47,20 +47,22 @@ class Misc:
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift at which to evaluate the power spectrum.
+            Redshift(s) at which to evaluate the intrinsic alignment.
+        k_scale: float or numpy.ndarray
+            k-mode(s) at which to evaluate the intrinsic alignment.
 
         Returns
         -------
         fia: float or numpy.ndarray
-            Value of intrinsic alignment function at
-            a given redshift
+            Value(s) of intrinsic alignment function at
+            given redshift(s) and k-mode(s)
         """
         growth = self.theory['D_z_k_func'](redshift, k_scale)
-        ztype = isinstance(redshift, np.ndarray)
-        ktype = isinstance(k_scale, np.ndarray)
-        if not ztype and not ktype:
+        z_is_array = isinstance(redshift, np.ndarray)
+        k_is_array = isinstance(k_scale, np.ndarray)
+        if not z_is_array and not k_is_array:
             growth = growth[0, 0]
-        elif ztype ^ ktype:
+        elif z_is_array ^ k_is_array:
             growth = growth[0]
 
         c1 = 0.0134

@@ -4,11 +4,15 @@
 Top level user interface class for running CLOE
 """
 
+import numpy as np
 from likelihood.auxiliary import yaml_handler, likelihood_params_yaml_generator
 from likelihood.cobaya_interface import EuclidLikelihood
 import cobaya.run
+from cobaya.model import get_model
 from pathlib import Path
 import collections.abc
+from likelihood.auxiliary.plotter import Plotter
+import matplotlib.pyplot as plt
 
 
 class LikelihoodUI:
@@ -16,7 +20,8 @@ class LikelihoodUI:
 
     """
 
-    def __init__(self, user_config_file=None, defaults_config_file=None):
+    def __init__(self, user_config_file=None, defaults_config_file=None,
+                 user_dict=None):
         r"""Constructor.
 
         Load the default configuration for running CLOE, then (if provided)
@@ -36,6 +41,11 @@ class LikelihoodUI:
            of the parameters that do not appear in the user_config_file. If
            not provided, the file defaults_config.yaml in the top level of
            the project will be used.
+
+        user_dict: dict, optional
+            User-defined dictionary whose keys have higher priority with
+            respect to the corresponding keys of user_config_file and
+            defaults_config_file.
         """
         if defaults_config_file is None:
             defaults_dir = 'config_yaml'
@@ -51,6 +61,12 @@ class LikelihoodUI:
             self._config = self._update_config(
                 orig_config=self._config,
                 update_config=user_config
+            )
+
+        if (user_dict) is not None:
+            self._config = self._update_config(
+                orig_config=self._config,
+                update_config=user_dict
             )
 
     def run(self):
@@ -109,6 +125,65 @@ class LikelihoodUI:
             raise KeyError(f'key \'{key}\' not found in input configuration')
         likelihood_params_yaml_generator.generate_params_yaml(model=1)
         return cobaya.run(self._config[key])
+
+    def plot(self, settings):
+        r"""Main method to plot CLOE observables
+
+        Read the backend from the input configuration and call the desired
+        plotting routine.
+
+        Parameters
+        ----------
+        settings: str
+           Name of the yaml configuration file for the plotting routines
+
+        Raises
+        ------
+        KeyError
+           if the yaml file does not contain the 'backend' key
+        ValueError
+           if the specified backend is not supported
+        """
+        key = 'backend'
+        if key not in self._config:
+            raise KeyError(f'key \'{key}\' not found in input configuration')
+
+        backend = self._config[key]
+        if backend == 'Cobaya':
+            return self._plot_cobaya(settings)
+        elif backend == 'Cosmosis':
+            raise NotImplementedError('Support for the Cosmosis backend is'
+                                      ' not yet implemented')
+        else:
+            raise ValueError(f'The requested backend is not supported: '
+                             f'{backend}')
+
+    def _plot_cobaya(self, settings):
+        r"""Obtain plots and files of CLOE observables using Cobaya as backend
+
+        Parameters
+        ----------
+        settings: str
+           Name of the yaml configuration file for the plotting routines
+        """
+        likelihood_params_yaml_generator.generate_params_yaml(model=1)
+        model = get_model(self._config['Cobaya'])
+        logposterior = model.logposterior({})
+        like = EuclidLikelihood()
+        like.initialize()
+        like.passing_requirements(model, **model.provider.params)
+        like.cosmo.update_cosmo_dic(like.cosmo.cosmo_dic['z_win'], 0.05)
+
+        if (settings is None):
+            plotter = Plotter(like.cosmo.cosmo_dic)
+        else:
+            settings = yaml_handler.yaml_read(settings)
+            plotter = Plotter(like.cosmo.cosmo_dic, settings)
+
+        plotter.output_Cl_WL()
+        plotter.output_Cl_phot()
+        plotter.output_Cl_XC()
+        plotter.output_GC_spec()
 
     @staticmethod
     def _update_config(orig_config, update_config):

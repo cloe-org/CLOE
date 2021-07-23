@@ -3,3 +3,5 @@ Cobaya:
   likelihood:
     Euclid: !!python/name:likelihood.cobaya_interface.EuclidLikelihood ''
   output: chains/my_euclid_experiment
+  params:
+    ns: 0.96

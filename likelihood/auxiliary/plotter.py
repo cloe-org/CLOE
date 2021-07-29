@@ -5,10 +5,16 @@ Contains class to plot cosmological observables.
 """
 
 import numpy as np
-
+import matplotlib.pyplot as plt
+from likelihood.auxiliary.run_method import run_is_interactive
+from likelihood.auxiliary.plotter_default import default_settings
 from likelihood.photometric_survey.photo import Photo
 from likelihood.spectroscopic_survey.spec import Spec
 from likelihood.data_reader.reader import Reader
+from matplotlib import rc
+rc('font', **{'family': 'serif',
+              'serif': ['Times']})
+rc('text', usetex=True)
 
 
 class PlotError(Exception):
@@ -24,7 +30,7 @@ class Plotter:
     Class to plot observables (angular power spectra and multipoles).
     """
 
-    def __init__(self, cosmo_dic):
+    def __init__(self, cosmo_dic, settings=default_settings):
         """
         Constructor of class Plotter.
 
@@ -50,6 +56,64 @@ class Plotter:
                               self.read_data.nz_dict_GC_Phot)
         self.spec_ins = Spec(cosmo_dic, fid_dict)
 
+        self.binX = settings['binX']
+        self.binY = settings['binY']
+        self.lmin = settings['lmin']
+        self.lmax = settings['lmax']
+        self.nl = settings['nl']
+        self.ells = self._set_binning(self.lmin, self.lmax, self.nl,
+                                      settings['ltype'])
+        self.pcols = settings['photo_colours']
+        self.pls = settings['photo_linestyle']
+
+        self.redshift = settings['redshift']
+        self.kmin = settings['kmin']
+        self.kmax = settings['kmax']
+        self.nk = settings['nk']
+        self.ks = self._set_binning(self.kmin, self.kmax, self.nk,
+                                    settings['ktype'])
+        self.scols = settings['spec_colours']
+        self.sls = settings['spec_linestyle']
+
+        self.path = settings['path']
+        self.file_WL = settings['file_WL']
+        self.file_GCphot = settings['file_GCphot']
+        self.file_XC = settings['file_XC']
+        self.file_GCspec = settings['file_GCspec']
+
+    def _set_binning(self, xmin, xmax, nx, btype):
+        r"""Set bins according to edges, number of samples and bin type
+
+        Parameters
+        ----------
+        xmin: float
+            The left edge of the bins
+        xmax: float
+            The right edge of the bins
+        nx: float
+            Number of bins
+        btype: str
+            Binning type (can be either 'lin' or 'log')
+
+        Returns
+        -------
+        numpy.ndarray
+            The linear/logarithmic sampling in the range [xmin,xmax]
+            with nx number of samples
+
+        Raises
+        ------
+        ValueError
+            If btype is neither 'lin' or 'log'
+        """
+        if (btype == 'lin'):
+            return np.linspace(xmin, xmax, nk)
+        elif (btype == 'log'):
+            return np.logspace(np.log10(xmin), np.log10(xmax), nx)
+        else:
+            raise ValueError('Bin type has to be chosen from '
+                             '[\'lin\', \'log\']')
+
     def plot_Cl_phot(self, ells, bin_i, bin_j, pl_ax, probe='WL',
                      pl_label=None, pl_colour='b', pl_linestyle='-',
                      no_bins=10):
@@ -60,7 +124,7 @@ class Plotter:
 
         Parameters
         ----------
-        ells: array
+        ells: numpy.ndarray
             Ell-modes at which to evaluate power spectra. Note: minimum allowed
             ell is 10, and maximum is 5000.
         bin_i: int
@@ -196,7 +260,7 @@ class Plotter:
 
         Parameters
         ----------
-        ells: array
+        ells: numpy.ndarray
             Ell-modes at which to evaluate power spectra. Note: minimum allowed
             ell is 10, and maximum is 5000.
         bin_WL: int
@@ -306,7 +370,7 @@ class Plotter:
         ----------
         redshift: float
             Redshift at which to evaluate spectrum.
-        ks: array
+        ks: numpy.ndarray
             Wavenumber values at which to evaluate spectrum.
         multipole_order: int
             Multipole order of spectrum to be evaluated. Note: Must be 0, 2, or
@@ -395,3 +459,173 @@ class Plotter:
         pl_ax.fill_between(samp_ks, pk - epk, pk + epk, color=pl_colour,
                            alpha=0.2)
         return pl_ax
+
+    def output_Cl_WL(self):
+        r"""Plot WL observable
+        """
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1)
+        ax = self.plot_external_Cl_phot(self.binX, self.binY, ax,
+                                        probe='WL', pl_label='Benchmark')
+        ax = self.plot_Cl_phot(self.ells, self.binX, self.binY, ax,
+                               probe='WL', pl_colour=self.pcols,
+                               pl_linestyle=self.pls)
+        self._set_ax(ax, title=f'Weak-Lensing bins {self.binX}-{self.binY}',
+                     xlabel=r'$\ell$', ylabel=r'$C_\ell$ $[\mathrm{sr}^{-1}]$',
+                     fontsize=20, xscale='log', yscale='log')
+        ax.legend()
+        plt.tight_layout()
+
+        filename = self.path + self.file_WL
+        if run_is_interactive():
+            plt.show()
+        else:
+            plt.savefig(f'{filename}.png', dpi=300)
+
+        c_func = self.phot_ins.Cl_WL
+        cl_arr = np.array([c_func(cur_ell, self.binX, self.binY)
+                           for cur_ell in self.ells])
+        np.savetxt(f'{filename}.dat', list(zip(self.ells, cl_arr)),
+                   fmt='%.12e', delimiter='\t', newline='\n',
+                   header=f'{"ell" : >16}{"Cell[sr^(-1)]" : >24}')
+
+    def output_Cl_phot(self):
+        r"""Plot photometric clustering observable
+        """
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1)
+        ax = self.plot_external_Cl_phot(self.binX, self.binY, ax,
+                                        probe='GC-Phot', pl_label='Benchmark')
+        ax = self.plot_Cl_phot(self.ells, self.binX, self.binY, ax,
+                               probe='GC-Phot', pl_colour=self.pcols,
+                               pl_linestyle=self.pls)
+        self._set_ax(ax, title=f'GC-photo bins {self.binX}-{self.binY}',
+                     xlabel=r'$\ell$', ylabel=r'$C_\ell$ $[\mathrm{sr}^{-1}]$',
+                     fontsize=20, xscale='log', yscale='log')
+        ax.legend()
+        plt.tight_layout()
+
+        filename = self.path + self.file_GCphot
+        if run_is_interactive():
+            plt.show()
+        else:
+            plt.savefig(f'{filename}.png', dpi=300)
+
+        c_func = self.phot_ins.Cl_GC_phot
+        cl_arr = np.array([c_func(cur_ell, self.binX, self.binY)
+                           for cur_ell in self.ells])
+        np.savetxt('%s.dat' % (filename), list(zip(self.ells, cl_arr)),
+                   fmt='%.12e', delimiter='\t', newline='\n',
+                   header=f'{"ell" : >16}{"Cell[sr^(-1)]" : >24}')
+
+    def output_Cl_XC(self):
+        r"""Plot WL-photometric clustering cross-correlation observable
+        """
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1)
+        ax = self.plot_external_Cl_XC(self.binX, self.binY, ax,
+                                      pl_label='Benchmark')
+        ax = self.plot_Cl_XC(self.ells, self.binX, self.binY, ax,
+                             pl_colour=self.pcols,
+                             pl_linestyle=self.pls)
+        self._set_ax(ax, title=f'WL x GC-photo bins {self.binX}-{self.binY}',
+                     xlabel=r'$\ell$', ylabel=r'$C_\ell$ $[\mathrm{sr}^{-1}]$',
+                     fontsize=20, xscale='log')
+        ax.legend()
+        plt.tight_layout()
+
+        filename = self.path + self.file_XC
+        if run_is_interactive():
+            plt.show()
+        else:
+            plt.savefig(f'{filename}.png', dpi=300)
+
+        cl_arr = np.array([self.phot_ins.Cl_cross(cur_ell, self.binX,
+                                                  self.binY)
+                           for cur_ell in self.ells])
+        np.savetxt(f'{filename}.dat', list(zip(self.ells, cl_arr)),
+                   fmt='%.12e', delimiter='\t', newline='\n',
+                   header=f'{"ell" : >16}{"Cell[sr^(-1)]" : >24}')
+
+    def output_GC_spec(self):
+        r"""Plot spectroscopic clustering observable
+        """
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1)
+        if (self.redshift in [1.0, 1.2, 1.4, 1.65]):
+            ax = self.plot_external_GC_spec(str(self.redshift), 0, ax,
+                                            pl_colour='blue')
+            ax = self.plot_external_GC_spec(str(self.redshift), 2, ax,
+                                            pl_colour='royalblue')
+            ax = self.plot_external_GC_spec(str(self.redshift), 4, ax,
+                                            pl_colour='dodgerblue')
+        ax = self.plot_GC_spec_multipole(self.redshift, self.ks, 0,
+                                         ax, pl_colour=self.scols[0],
+                                         pl_linestyle=self.sls)
+        ax = self.plot_GC_spec_multipole(self.redshift, self.ks, 2,
+                                         ax, pl_colour=self.scols[1],
+                                         pl_linestyle=self.sls)
+        ax = self.plot_GC_spec_multipole(self.redshift, self.ks, 4,
+                                         ax, pl_colour=self.scols[2],
+                                         pl_linestyle=self.sls)
+        self._set_ax(ax, title=f'GC-spec $z={self.redshift}$',
+                     xlabel=r'$k$ $[\mathrm{Mpc}^{-1}]$',
+                     ylabel=r'$P_\ell$ $[\mathrm{Mpc}^3]$',
+                     fontsize=20, xscale='log', yscale='log')
+        l1, = ax.plot([], [], color=self.scols[0])
+        l2, = ax.plot([], [], color=self.scols[1])
+        l3, = ax.plot([], [], color=self.scols[2])
+        ax.legend([l1, l2, l3],
+                  ['$l=0$', '$l=2$', '$l=4$'])
+        plt.tight_layout()
+
+        filename = self.path + self.file_GCspec
+        if run_is_interactive():
+            plt.show()
+        else:
+            plt.savefig(f'{filename}.png', dpi=300)
+
+        pk0 = np.array([self.spec_ins.multipole_spectra(self.redshift, k_val,
+                                                        0)
+                        for k_val in self.ks])
+        pk2 = np.array([self.spec_ins.multipole_spectra(self.redshift, k_val,
+                                                        2)
+                        for k_val in self.ks])
+        pk4 = np.array([self.spec_ins.multipole_spectra(self.redshift, k_val,
+                                                        4)
+                        for k_val in self.ks])
+        np.savetxt(f'{filename}.dat', list(zip(self.ks, pk0, pk2, pk4)),
+                   fmt='%.12e', delimiter='\t', newline='\n',
+                   header=(
+                    f'{"k[Mpc^(-1)]" : >16}'
+                    f'{"P0[Mpc^3]" : >24}'
+                    f'{"P2[Mpc^3]" : >24}'
+                    f'{"P4[Mpc^3]" : >24}'
+                          ))
+
+    def _set_ax(self, axes, title, xlabel, ylabel,
+                fontsize=20, xscale='linear', yscale='linear'):
+        r"""Set title, axis labels, fontsize and scales of a given axes object
+
+        Parameters
+        ----------
+        axes: matplotlib.axes object
+           Instance on which the settings are applied
+        title: str
+            Title of the axes object
+        xlabel: str
+            Label of the x-axis
+        ylabel: str
+            Label of the y-axis
+        fontsize: str, optional
+            Fontsize for title and axis labels
+        xscale: str, optional
+            Scale of the x-axis
+        yscale: str, optional
+            Scale of the y-axis
+        """
+        axes.set_xlabel(xlabel, fontsize=fontsize)
+        axes.set_ylabel(ylabel, fontsize=fontsize)
+        axes.set_xscale(xscale)
+        axes.set_yscale(yscale)
+        axes.set_title(title, fontsize=fontsize)

@@ -1,6 +1,6 @@
-"""likelihood_params_yaml_generator
+"""likelihood_yaml_generator
 
-Contains function that generates params.yaml
+Contains functions that generate params.yaml and data.yaml
 """
 
 

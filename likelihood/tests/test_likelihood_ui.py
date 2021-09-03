@@ -9,16 +9,26 @@ class LikelihoodUI_test(TestCase):
     def setUp(self):
         self.file_name = '/dev/null'
         # does not have a key named backend
-        self.config_no_backend_key = {'name': 'anything', 'type': 'first'}
+        self.config_no_backend_key = {
+            'name': 'anything', 'type': 'first', 'data': 'any'
+        }
         # the backend is invalid
-        self.config_backend_invalid = {'backend': 'invalid', 'type': 'first'}
+        self.config_backend_invalid = {
+            'backend': 'invalid', 'type': 'first', 'data': 'any'
+        }
         # the backend is Cosmosis
-        self.config_backend_cosmosis = {'backend': 'Cosmosis', 'type': 'first'}
+        self.config_backend_cosmosis = {
+            'backend': 'Cosmosis', 'type': 'first', 'data': 'any'
+        }
         # has a key/value pair that is backend/Cobaya, but misses a key named
         # Cobaya
-        self.config_no_cobaya_key = {'backend': 'Cobaya', 'NotCobaya': 'any'}
+        self.config_no_cobaya_key = {
+            'backend': 'Cobaya', 'NotCobaya': 'any', 'data': 'any'
+        }
         # has a key/value pair that is backend/Cobaya, and a key named Cobaya
-        self.config_good = {'backend': 'Cobaya', 'Cobaya': 'whatever'}
+        self.config_good = {
+            'backend': 'Cobaya', 'Cobaya': 'whatever', 'data': 'any'
+        }
         # for testing _update_config(), since it contains a nested dictionary
         # and a plain key/value pair, this should be sufficient to achieve
         # full coverage
@@ -83,11 +93,14 @@ class LikelihoodUI_test(TestCase):
     # test behavior when the requested backend is cobaya
     @patch('likelihood.auxiliary.yaml_handler.yaml_read')
     @patch('likelihood.auxiliary'
-           '.likelihood_params_yaml_generator.generate_params_yaml')
+           '.likelihood_yaml_generator.generate_params_yaml')
+    @patch('likelihood.auxiliary'
+           '.likelihood_yaml_generator.generate_data_yaml')
     @patch('cobaya.run')
     def test_run_backend_cobaya(
             self,
             cobaya_run_mock,
+            data_gen_mock,
             params_gen_mock,
             yaml_read_mock
     ):
@@ -102,11 +115,14 @@ class LikelihoodUI_test(TestCase):
     # instantiated with no arguments
     @patch('likelihood.auxiliary.yaml_handler.yaml_read')
     @patch('likelihood.auxiliary'
-           '.likelihood_params_yaml_generator.generate_params_yaml')
+           '.likelihood_yaml_generator.generate_params_yaml')
+    @patch('likelihood.auxiliary'
+           '.likelihood_yaml_generator.generate_data_yaml')
     @patch('cobaya.run')
     def test_init_no_args(
             self,
             cobaya_run_mock,
+            data_gen_mock,
             params_gen_mock,
             yaml_read_mock
     ):
@@ -122,7 +138,7 @@ class LikelihoodUI_test(TestCase):
     # Verify that an exception is thrown in this case
     @patch('likelihood.auxiliary.yaml_handler.yaml_read')
     @patch('likelihood.auxiliary'
-           '.likelihood_params_yaml_generator.generate_params_yaml')
+           '.likelihood_yaml_generator.generate_params_yaml')
     @patch('cobaya.run')
     def test_run_cobaya_no_cobaya_key(
             self,
@@ -139,11 +155,14 @@ class LikelihoodUI_test(TestCase):
     # are performed and with the proper arguments
     @patch('likelihood.auxiliary.yaml_handler.yaml_read')
     @patch('likelihood.auxiliary'
-           '.likelihood_params_yaml_generator.generate_params_yaml')
+           '.likelihood_yaml_generator.generate_params_yaml')
+    @patch('likelihood.auxiliary'
+           '.likelihood_yaml_generator.generate_data_yaml')
     @patch('cobaya.run')
     def test_run_cobaya_success(
             self,
             cobaya_run_mock,
+            data_gen_mock,
             params_gen_mock,
             yaml_read_mock
     ):

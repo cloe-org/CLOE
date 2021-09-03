@@ -136,6 +136,24 @@ class plotterTestCase(TestCase):
                               'bia': 0.0}
                           }
 
+        mock_data = {
+          'sample': 'ExternalBenchmark',
+          'spec': {
+            'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
+            'redshifts': ["1.", "1.2", "1.4", "1.65"]},
+          'photo': {
+            'ndens_GC': 'niTab-EP10-RB00.dat',
+            'ndens_WL': 'niTab-EP10-RB00.dat',
+            'root_GC': 'Cls_{:s}_PosPos.fits',
+            'root_WL': 'Cls_{:s}_ShearShear.fits',
+            'root_XC': 'Cls_{:s}_PosShear.fits',
+            'IA_model': 'zNLA',
+            'cov_GC': 'CovMat-PosPos-{:s}-20Bins.dat',
+            'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.dat',
+            'cov_3x2': 'CovMat-3x2pt-{:s}-20Bins.dat',
+            'cov_model': 'Gauss'}
+        }
+
         # precomputed parameters
         mock_cosmo_dic['H0_Mpc'] = \
             mock_cosmo_dic['H0'] / const.c.to('km/s').value
@@ -175,7 +193,7 @@ class plotterTestCase(TestCase):
         fig1 = plt.figure()
         self.ax1 = fig1.add_subplot(1, 1, 1)
 
-        self.plot_inst = Plotter(mock_cosmo_dic)
+        self.plot_inst = Plotter(mock_cosmo_dic, mock_data)
 
     def tearDown(self):
         pass

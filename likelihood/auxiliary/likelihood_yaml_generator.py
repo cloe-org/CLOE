@@ -81,3 +81,31 @@ def generate_params_yaml(model=1):
     with open(params_path, 'w') as outfile:
         yaml.dump(likelihood_params, outfile, default_flow_style=False)
         print("{} written".format(params_path))
+
+
+def generate_data_yaml(data):
+    """
+    Data Generator function.
+
+    The Cobaya interface requires a data dictionary storing paths
+    to data files. This function saves the data dictionary to a yaml file,
+    e.g. data.yaml, which is subsequently called inside EuclidLikelihood.yaml
+
+    Parameters
+    ----------
+    data: dict
+        Dictionary containing specifications for data loading and handling.
+    """
+
+    parent_path = str(
+            Path(
+                Path(__file__).resolve().parents[1]))
+
+    data_path = parent_path + '/data.yaml'
+    if os.path.exists(data_path):
+        print('WARNING:\n')
+        print("Be aware that {} has been overwritten".format(
+            data_path))
+    with open(data_path, 'w') as outfile:
+        yaml.dump(data, outfile, default_flow_style=False)
+        print("{} written".format(data_path))

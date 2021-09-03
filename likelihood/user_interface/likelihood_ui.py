@@ -5,7 +5,7 @@ Top level user interface class for running CLOE
 """
 
 import numpy as np
-from likelihood.auxiliary import yaml_handler, likelihood_params_yaml_generator
+from likelihood.auxiliary import yaml_handler, likelihood_yaml_generator
 from likelihood.cobaya_interface import EuclidLikelihood
 import cobaya.run
 from cobaya.model import get_model
@@ -123,7 +123,9 @@ class LikelihoodUI:
         key = 'Cobaya'
         if key not in self._config:
             raise KeyError(f'key \'{key}\' not found in input configuration')
-        likelihood_params_yaml_generator.generate_params_yaml(model=1)
+        likelihood_yaml_generator.generate_params_yaml(model=1)
+        likelihood_yaml_generator.generate_data_yaml(
+            self._config['data'])
         return cobaya.run(self._config[key])
 
     def plot(self, settings):
@@ -166,7 +168,8 @@ class LikelihoodUI:
         settings: str
            Name of the yaml configuration file for the plotting routines
         """
-        likelihood_params_yaml_generator.generate_params_yaml(model=1)
+        likelihood_yaml_generator.generate_params_yaml(model=1)
+        likelihood_yaml_generator.generate_data_yaml(self._config['data'])
         model = get_model(self._config['Cobaya'])
         logposterior = model.logposterior({})
         like = EuclidLikelihood()
@@ -175,10 +178,11 @@ class LikelihoodUI:
         like.cosmo.update_cosmo_dic(like.cosmo.cosmo_dic['z_win'], 0.05)
 
         if (settings is None):
-            plotter = Plotter(like.cosmo.cosmo_dic)
+            plotter = Plotter(like.cosmo.cosmo_dic, like.likefinal.data)
         else:
             settings = yaml_handler.yaml_read(settings)
-            plotter = Plotter(like.cosmo.cosmo_dic, settings)
+            plotter = Plotter(like.cosmo.cosmo_dic, like.likefinal.data,
+                              settings)
 
         plotter.output_Cl_WL()
         plotter.output_Cl_phot()

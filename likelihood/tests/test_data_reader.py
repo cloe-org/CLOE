@@ -13,7 +13,25 @@ from likelihood.data_reader.reader import Reader
 class datareaderTestCase(TestCase):
 
     def setUp(self):
-        self.data_tester = Reader()
+        mock_data = {
+          'sample': 'ExternalBenchmark',
+          'spec': {
+            'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
+            'redshifts': ["1.", "1.2", "1.4", "1.65"]},
+          'photo': {
+            'ndens_GC': 'niTab-EP10-RB00.dat',
+            'ndens_WL': 'niTab-EP10-RB00.dat',
+            'root_GC': 'Cls_{:s}_PosPos.fits',
+            'root_WL': 'Cls_{:s}_ShearShear.fits',
+            'root_XC': 'Cls_{:s}_PosShear.fits',
+            'IA_model': 'zNLA',
+            'cov_GC': 'CovMat-PosPos-{:s}-20Bins.dat',
+            'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.dat',
+            'cov_3x2': 'CovMat-3x2pt-{:s}-20Bins.dat',
+            'cov_model': 'Gauss'}
+        }
+
+        self.data_tester = Reader(mock_data)
         self.main_key_check = ['GC-Spec', 'GC-Phot', 'WL', 'XC-Phot']
         self.nz_key_check = ['n1', 'n2', 'n3', 'n4', 'n5',
                              'n6', 'n7', 'n8', 'n9', 'n10']

@@ -15,7 +15,8 @@ import cobaya
 #Import external loglike from the Likelihood Package within cobaya interface module
 from likelihood.cobaya_interface import EuclidLikelihood
 # Generate likelihood params yaml file
-from likelihood.auxiliary.likelihood_params_yaml_generator import generate_params_yaml
+from likelihood.auxiliary.likelihood_yaml_generator import generate_params_yaml
+from likelihood.auxiliary.likelihood_yaml_generator import generate_data_yaml
 
 print("Running script: ", sys.argv[0])
 generate_params_yaml(model = 1)
@@ -137,8 +138,37 @@ if runoption == 0:
         'timing': True,
         # 'force': Cobaya's protected key of the input dictionary.
         # If 'force': True, Cobaya forces deleting the previous output files, if found, with the same name
-        'force': True
+        'force': True,
+	    'data': {
+            #'sample' specifies the first folder below the main data folder
+            'sample': 'ExternalBenchmark',
+            #'spec' and 'photo' specify paths to data files.
+            'spec': {
+                # GC Spec root name should contain z{:s} string
+                # to enable iteration over bins
+                'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
+                'redshifts': ["1.", "1.2", "1.4", "1.65"]
+                },
+            'photo': {
+                'ndens_GC': 'niTab-EP10-RB00.dat',
+                'ndens_WL': 'niTab-EP10-RB00.dat',
+                # Photometric root names should contain z{:s} string
+                # to specify IA model
+                'root_GC': 'Cls_{:s}_PosPos.fits',
+                'root_WL': 'Cls_{:s}_ShearShear.fits',
+                'root_XC': 'Cls_{:s}_PosShear.fits',
+                'IA_model': 'zNLA',
+                # Photometric covariances root names should contain z{:s} string
+                # to specify how the covariance was calculated
+                'cov_GC': 'CovMat-PosPos-{:s}-20Bins.dat',
+                'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.dat',
+                'cov_3x2': 'CovMat-3x2pt-{:s}-20Bins.dat',
+                'cov_model': 'Gauss'
+                }
+            }
         }
+
+    generate_data_yaml(info['data'])
 
     # This is just a call to the likelihood
     # Full calculation photo + spec

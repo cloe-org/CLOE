@@ -394,9 +394,8 @@ class Plotter:
             raise Exception('Euclid maximum redshift for GC-spec is 1.8.')
         if multipole_order not in [0, 2, 4]:
             raise Exception('Multipole order must be 0, 2, or 4.')
-        pk_arr = np.array([self.spec_ins.multipole_spectra(redshift, k_val,
-                                                           multipole_order) for
-                           k_val in ks])
+        pk_arr = np.array([self.spec_ins.multipole_spectra(
+            redshift, k_val, ms=[multipole_order]) for k_val in ks])
         if pl_label is None:
             pl_label = "l={:d}".format(multipole_order)
         pl_ax.plot(ks, pk_arr, label=pl_label, color=pl_colour,

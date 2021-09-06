@@ -51,10 +51,13 @@ def generate_params_yaml(model=1):
     if model == 0:
         pass
     if model == 1:
-        # If model = 1 is selected, bias and ia params are added
+        # If model = 1 is selected, bias and ia params
+        # and spec multipoles are added
         nuisance_bias_path = parent_path + '/Models/nuisance_bias.yaml'
         nuisance_ia_path = parent_path + '/Models/nuisance_ia.yaml'
-        params_path_list = [nuisance_bias_path, nuisance_ia_path]
+        spec_path = parent_path + '/Models/spec.yaml'
+        params_path_list = [nuisance_bias_path, nuisance_ia_path,
+                            spec_path]
         for params_path_element in params_path_list:
             try:
                 with open(params_path_element) as file:

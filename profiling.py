@@ -258,7 +258,10 @@ if runoption == 1:
                                   'b4_spec': 1.8988660,
                                   'aia': 1.72,
                                   'nia': -0.41,
-                                  'bia': 0.0}
+                                  'bia': 0.0,
+                                  'multipole_0': 0,
+                                  'multipole_2': 2,
+                                  'multipole_4': 4}
                               }
 
             mock_cosmo_dic['H0_Mpc'] = \
@@ -342,7 +345,10 @@ if runoption == 1:
                                 'b4_spec': 1.8988660,
                                 'aia': 1.72,
                                 'nia': -0.41,
-                                'bia': 0.0}
+                                'bia': 0.0,
+                                'multipole_0': 0,
+                                'multipole_2': 2,
+                                'multipole_4': 4}
                             }
 
             self.fiducial_dict = fid_mock_dic
@@ -411,38 +417,46 @@ if runoption == 1:
             print("All examples are here at z = 1, k = 0.1/Mpc.")
             print("Computing multipole spectrum P0")
             a=time.time()
-            p0_spec = self.spec.multipole_spectra(1.0, 0.1, 0)
+            p0_spec = self.spec.multipole_spectra(1.0, 0.1, ms=[0])
             b=time.time()
             print('P0 = ', p0_spec)
             print("Time: ", b - a)
 
             print("Computing multipole spectrum P1")
             a=time.time()
-            p1_spec = self.spec.multipole_spectra(1.0, 0.1, 1)
+            p1_spec = self.spec.multipole_spectra(1.0, 0.1, ms=[1])
             b=time.time()
             print('P1 = ', p1_spec)
             print("Time: ", b - a)
 
             print("Computing multipole spectrum P2")
             a=time.time()
-            p2_spec = self.spec.multipole_spectra(1.0, 0.1, 2)
+            p2_spec = self.spec.multipole_spectra(1.0, 0.1, ms=[2])
             b=time.time()
             print('P2 = ', p2_spec)
             print("Time: ", b - a)
 
             print("Computing multipole spectrum P3")
             a=time.time()
-            p3_spec = self.spec.multipole_spectra(1.0, 0.1, 3)
+            p3_spec = self.spec.multipole_spectra(1.0, 0.1, ms=[3])
             b=time.time()
             print('P3 = ', p3_spec)
             print("Time: ", b - a)
 
             print("Computing multipole spectrum P4")
             a=time.time()
-            p4_spec = self.spec.multipole_spectra(1.0, 0.1, 4)
+            p4_spec = self.spec.multipole_spectra(1.0, 0.1, ms=[4])
             b=time.time()
             print('P4 = ', p4_spec)
             print("Time: ", b - a)
+
+            print("Computing ALL multipole spectra")
+            a=time.time()
+            pall_spec = self.spec.multipole_spectra(1.0, 0.1)
+            b=time.time()
+            print('P024 = ', pall_spec)
+            print("Time: ", b - a)
+
 
         def istf_spec_galbias(self, redshift,
                               bin_edge_list=[0.90, 1.10, 1.30,

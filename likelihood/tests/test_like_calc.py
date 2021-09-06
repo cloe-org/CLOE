@@ -132,7 +132,10 @@ class likecalcTestCase(TestCase):
                               'b4_spec': 1.8988660,
                               'aia': 1.72,
                               'nia': -0.41,
-                              'bia': 0.0}}
+                              'bia': 0.0,
+                              'multipole_0': 0,
+                              'multipole_2': 2,
+                              'multipole_4': 4}}
 
         # precomputed parameters
         mock_cosmo_dic['H0_Mpc'] = \
@@ -221,7 +224,10 @@ class likecalcTestCase(TestCase):
                             'b4_spec': 1.8988660,
                             'aia': 1.72,
                             'nia': -0.41,
-                            'bia': 0.0}}
+                            'bia': 0.0,
+                            'multipole_0': 0,
+                            'multipole_2': 2,
+                            'multipole_4': 4}}
 
         self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic

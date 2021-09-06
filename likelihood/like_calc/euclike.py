@@ -215,14 +215,17 @@ class Euclike:
         """
 
         spec_ins = Spec(dictionary, dictionary_fiducial)
+        m_ins = [v for k, v in dictionary['nuisance_parameters'].items()
+                 if k.startswith('multipole_')]
         theoryvec = []
+        k_m_matrices = []
         for z_ins in self.zkeys:
-            for m_ins in [0, 2, 4]:
-                for k_ins in self.data_ins.data_dict['GC-Spec'][z_ins]['k_pk']:
-                    theoryvec = np.append(
-                                    theoryvec, spec_ins.multipole_spectra(
-                                        float(z_ins), k_ins, m_ins))
-
+            k_m_matrix = []
+            for k_ins in self.data_ins.data_dict['GC-Spec'][z_ins]['k_pk']:
+                k_m_matrix.append(spec_ins.multipole_spectra(
+                                        float(z_ins), k_ins, ms=m_ins))
+            k_m_matrices.append(k_m_matrix)
+        theoryvec = np.hstack(k_m_matrices).T.flatten()
         return theoryvec
 
     def create_spec_data(self):
@@ -241,7 +244,6 @@ class Euclike:
             for m_ins in [0, 2, 4]:
                 datavec = np.append(datavec, self.data_ins.data_dict[
                               'GC-Spec'][z_ins]['pk' + str(m_ins)])
-
         return datavec
 
     def create_spec_cov(self):

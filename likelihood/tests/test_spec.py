@@ -39,7 +39,7 @@ class mock_P_obj:
         self.P = p_interp
 
 
-class cosmoinitTestCase(TestCase):
+class specinitTestCase(TestCase):
 
     def setUp(self):
         cur_dir = Path(__file__).resolve().parents[0]
@@ -326,38 +326,38 @@ class cosmoinitTestCase(TestCase):
         self.check_get_mu = None
 
     def test_multipole_spectra_m0(self):
-        npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, 0),
+        npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, ms=[0]),
                             self.check_multipole_spectra_m0,
                             rtol=1e-05,
                             err_msg='Multipole spectrum m = 0 failed')
 
     def test_multipole_spectra_m1(self):
-        npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, 1),
+        npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, ms=[1]),
                             self.check_multipole_spectra_m1,
                             atol=1e-10,
                             err_msg='Multipole spectrum m = 1 failed')
 
     def test_multipole_spectra_m2(self):
-        npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, 2),
+        npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, ms=[2]),
                             self.check_multipole_spectra_m2,
                             rtol=2e-04,
                             err_msg='Multipole spectrum m = 2 failed')
 
     def test_multipole_spectra_m3(self):
-        npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, 3),
+        npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, ms=[3]),
                             self.check_multipole_spectra_m3,
                             atol=1e-10,
                             err_msg='Multipole spectrum m = 3 failed')
 
     def test_multipole_spectra_m4(self):
-        npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, 4),
+        npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, ms=[4]),
                             self.check_multipole_spectra_m4,
                             rtol=1e-05,
                             err_msg='Multipole spectrum m = 4 failed')
 
     def test_multipole_spectra_integrand(self):
         npt.assert_allclose(self.spec.multipole_spectra_integrand(0.7, 1.0,
-                                                                  0.1, 2),
+                                                                  0.1, [2]),
                             self.check_multipole_spectra_integrand,
                             rtol=1e-06,
                             err_msg='Multipole spectra integrand failed')

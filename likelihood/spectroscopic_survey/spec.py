@@ -34,6 +34,9 @@ class Spec:
         mu_max = 1.0
         mu_samp = 2001
         self.mu_grid = np.linspace(mu_min, mu_max, mu_samp)
+        self.m = [v for k, v in cosmo_dic['nuisance_parameters'].items()
+                  if k.startswith('multipole_')]
+        self.legendrepol = [legendre(ms)(self.mu_grid) for ms in self.m]
 
     def scaling_factor_perp(self, z):
         r"""Scaling Factor Perp
@@ -169,14 +172,18 @@ class Spec:
         if self.theory['Pgg_spec'] is None:
             raise Exception('Pgg_spec is not defined inside the cosmo dic. '
                             'Run update_cosmo_dic() method first.')
-        legendrepol = legendre(m)(mu_rsd)
-        integrand = (self.theory['Pgg_spec'](z, self.get_k(k, mu_rsd, z),
-                                             self.get_mu(mu_rsd, z)) *
-                     legendrepol)
 
-        return integrand
+        galspec = self.theory['Pgg_spec'](z, self.get_k(k, mu_rsd, z),
+                                          self.get_mu(mu_rsd, z))
+        if len(m) == 1:
+            integrand = [galspec * legendre(m[0])(mu_rsd)]
+            return integrand
+        else:
+            integrand = [galspec *
+                         self.legendrepol[i] for i in range(0, len(self.m))]
+            return integrand
 
-    def multipole_spectra(self, z, k, m):
+    def multipole_spectra(self, z, k, ms=[0, 2, 4]):
         r"""Multipole Spectra
 
         Computation of multipole power spectra.
@@ -195,8 +202,8 @@ class Spec:
             Redshift at which to evaluate power spectrum.
         k: float
             Scale (wavenumber) at which to evaluate power spectrum.
-        m: float
-            Order of the Legendre expansion.
+        ms: list
+            Orders of the Legendre expansion.
 
 
         Returns
@@ -205,10 +212,18 @@ class Spec:
             Multipole power spectrum
         """
 
-        prefactor = 1.0 / self.scaling_factor_parall(z) / \
-            (self.scaling_factor_perp(z))**2.0 * (2.0 * m + 1.0) / 2.0
+        p_int_arr = self.multipole_spectra_integrand(self.mu_grid, z, k,
+                                                     ms)
+        integral = []
 
-        p_int_arr = self.multipole_spectra_integrand(self.mu_grid, z, k, m)
-        integral = prefactor * integrate.simps(p_int_arr, self.mu_grid)
+        for i, m in enumerate(ms):
+            prefactor = 1.0 / self.scaling_factor_parall(z) / \
+                (self.scaling_factor_perp(z))**2.0 * (2.0 * m + 1.0) / 2.0
 
-        return integral
+            integral.append(
+                prefactor *
+                integrate.simps(
+                    p_int_arr[i],
+                    self.mu_grid))
+
+        return np.array(integral)

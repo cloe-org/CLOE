@@ -42,6 +42,8 @@ def main():
     ui = LikelihoodUI(user_config_file=args.config, user_dict=dict)
     if (args.action=='run'):
         ui.run()
+    elif (args.action=='process'):
+        ui.process_chain()
     elif (args.action=='plot'):
         ui.plot(args.settings)
     else:

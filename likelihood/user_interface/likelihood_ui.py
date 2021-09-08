@@ -13,6 +13,7 @@ from pathlib import Path
 import collections.abc
 from likelihood.auxiliary.plotter import Plotter
 import matplotlib.pyplot as plt
+from likelihood.auxiliary.getdist_routines import triangle_plot_cobaya
 
 
 class LikelihoodUI:
@@ -188,6 +189,34 @@ class LikelihoodUI:
         plotter.output_Cl_phot()
         plotter.output_Cl_XC()
         plotter.output_GC_spec()
+
+    def process_chain(self):
+        r"""Main method to obtain triangle plots
+
+        Read the output key from the input dictionary and produce a triangle
+        plot. For the moment, this function only works if Cobaya is specified
+        as backend.
+
+        Raises
+        ------
+        KeyError
+           if the yaml file does not contain the 'backend' key
+        ValueError
+           if the specified backend is not supported
+        """
+        key = 'backend'
+        if key not in self._config:
+            raise KeyError(f'key \'{key}\' not found in input configuration')
+
+        backend = self._config[key]
+        if backend != 'Cobaya':
+            raise ValueError(f'The requested backend is not supported: '
+                             f'{backend}')
+
+        parent_path = str(Path(Path(__file__).resolve().parents[2]))
+        chain_path = parent_path + '/' + self._config[backend]['output']
+
+        triangle_plot_cobaya(chain_path)
 
     @staticmethod
     def _update_config(orig_config, update_config):

@@ -143,8 +143,8 @@ class Reader:
         redshifts = self.data['spec']['redshifts']
 
         if 'z{:s}' not in root:
-            raise Exception('GC Spec file names should contain z{:s} string '
-                            'to enable iteration over bins.')
+            raise ValueError('GC Spec file names should contain z{:s} string '
+                             'to enable iteration over bins.')
         cur_fname = root.format(redshifts[0])
         full_path = Path(self.dat_dir_main, file_dest, cur_fname)
         GC_spec_dict = {}
@@ -239,12 +239,9 @@ class Reader:
 
         full_path = Path(self.dat_dir_main, file_dest)
 
-        GC_file = fits.open(Path(full_path, root_GC.format(
-            IA_model)))
-        WL_file = fits.open(Path(full_path, root_WL.format(
-            IA_model)))
-        XC_file = fits.open(Path(full_path, root_XC.format(
-            IA_model)))
+        GC_file = fits.open(Path(full_path, root_GC.format(IA_model)))
+        WL_file = fits.open(Path(full_path, root_WL.format(IA_model)))
+        XC_file = fits.open(Path(full_path, root_XC.format(IA_model)))
 
         GC_phot_dict['ells'] = GC_file[1].data
         WL_dict['ells'] = WL_file[1].data

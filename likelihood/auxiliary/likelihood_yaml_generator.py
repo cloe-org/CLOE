@@ -7,6 +7,7 @@ Contains functions that generate params.yaml and data.yaml
 import yaml
 import os
 import sys
+import warnings
 from pathlib import Path
 
 
@@ -37,10 +38,7 @@ def generate_params_yaml(model=1):
         Tentative. Select number corresponding to a model.
     """
 
-    parent_path = str(
-            Path(
-                Path(__file__).resolve().parents[1]))
-
+    parent_path = str(Path(Path(__file__).resolve().parents[1]))
     # As June 2021, CLOE V1.0 the likelihood
     # expects always the following params
     likelihood_params = {
@@ -64,23 +62,22 @@ def generate_params_yaml(model=1):
                     params_file = yaml.load(file, Loader=yaml.FullLoader)
                     likelihood_params.update(params_file)
             except OSError as err:
-                print("File {0} not found. Error: {1}".format(params_path,
+                print('File {0} not found. Error: {1}'.format(params_path,
                                                               err))
                 sys.exit(1)
             except BaseException:
-                print("an unexpected error occurred")
+                print('an unexpected error occurred')
                 sys.exit(1)
     else:
-        print("ATTENTION: No other model is available. Please choose 1.")
+        print('ATTENTION: No other model is available. Please choose 1.')
 
     params_path = parent_path + '/params.yaml'
     if os.path.exists(params_path):
-        print('WARNING:\n')
-        print("Be aware that {} has been overwritten".format(
-            params_path))
+        warnings.warn(
+            'Be aware that {} has been overwritten'.format(params_path))
     with open(params_path, 'w') as outfile:
         yaml.dump(likelihood_params, outfile, default_flow_style=False)
-        print("{} written".format(params_path))
+        print('{} written'.format(params_path))
 
 
 def generate_data_yaml(data):
@@ -97,15 +94,12 @@ def generate_data_yaml(data):
         Dictionary containing specifications for data loading and handling.
     """
 
-    parent_path = str(
-            Path(
-                Path(__file__).resolve().parents[1]))
-
+    parent_path = str(Path(Path(__file__).resolve().parents[1]))
     data_path = parent_path + '/data.yaml'
     if os.path.exists(data_path):
-        print('WARNING:\n')
-        print("Be aware that {} has been overwritten".format(
-            data_path))
+        warnings.warn(
+            'Be aware that {} has been overwritten'.format(data_path))
+
     with open(data_path, 'w') as outfile:
         yaml.dump(data, outfile, default_flow_style=False)
-        print("{} written".format(data_path))
+        print('{} written'.format(data_path))

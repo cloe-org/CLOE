@@ -12,6 +12,7 @@ from likelihood.like_calc.euclike import Euclike
 from astropy import constants as const
 from pathlib import Path
 from scipy import interpolate
+from likelihood.tests.test_input.data import mock_data
 
 
 def mock_MG_func(z, k):
@@ -232,24 +233,6 @@ class likecalcTestCase(TestCase):
         self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic
         # init Euclike
-        mock_data = {
-          'sample': 'ExternalBenchmark',
-          'spec': {
-            'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
-            'redshifts': ["1.", "1.2", "1.4", "1.65"]},
-          'photo': {
-            'ndens_GC': 'niTab-EP10-RB00.dat',
-            'ndens_WL': 'niTab-EP10-RB00.dat',
-            'root_GC': 'Cls_{:s}_PosPos.fits',
-            'root_WL': 'Cls_{:s}_ShearShear.fits',
-            'root_XC': 'Cls_{:s}_PosShear.fits',
-            'IA_model': 'zNLA',
-            'cov_GC': 'CovMat-PosPos-{:s}-20Bins.dat',
-            'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.dat',
-            'cov_3x2': 'CovMat-3x2pt-{:s}-20Bins.dat',
-            'cov_model': 'Gauss'}
-        }
-
         self.like_tt = Euclike(mock_data)
 
         # The correct check value, using the h scaling for the h from

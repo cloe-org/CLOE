@@ -45,17 +45,17 @@ def run_script(log):
                         help='specify additional arguments')
     args = parser.parse_args()
 
-    dict=json.loads(args.dict)
+    dict = json.loads(args.dict)
 
     log.info('Instantiating user interface')
     ui = LikelihoodUI(user_config_file=args.config, user_dict=dict)
-    if (args.action=='run'):
+    if (args.action == 'run'):
         log.info('Selected RUN mode')
         ui.run()
-    elif (args.action=='process'):
+    elif (args.action == 'process'):
         log.info('Selected PROCESS mode')
         ui.process_chain()
-    elif (args.action=='plot'):
+    elif (args.action == 'plot'):
         log.info('Selected PLOT mode')
         ui.plot(args.settings)
     else:
@@ -63,6 +63,7 @@ def run_script(log):
 
     log.info('Exiting CLOE')
     close_logger(log)
+    
 
 def main():
     """Main function.

@@ -24,17 +24,19 @@ class Reader:
     Class to read external data files.
     """
 
-    def __init__(self, data_subdirectory='ExternalBenchmark'):
+    def __init__(self, data):
         """Initialize
 
         Parameters
         ----------
-        data_subdirectory: str
-            Location of subdirectory within which desired files are stored.
+        data: dict
+            Dictionary containing specifications for data loading and handling.
         """
+        self.data = data
+
         root_dir = Path(__file__).resolve().parents[2]
         self.dat_dir_main = Path(root_dir, Path('data'),
-                                 Path(data_subdirectory))
+                                 Path(self.data['sample']))
         self.data_dict = {'GC-Spec': None, 'GC-Phot': None, 'WL': None,
                           'XC-Phot': None}
 
@@ -87,10 +89,7 @@ class Reader:
             raise Exception(
                 'n(z) files not found. Please, check out the files')
 
-    def compute_nz(self,
-                   file_dest='Photometric',
-                   file_name_GC='niTab-EP10-RB00.dat',
-                   file_name_WL='niTab-EP10-RB00.dat'):
+    def compute_nz(self, file_dest='Photometric'):
         """Compute Nz
 
         Function to save n(z) dictionaries as attributes of the Reader class
@@ -101,12 +100,9 @@ class Reader:
         file_dest: str
             Sub-folder of Reader.data_subdirectory within which to find
             the n(z) data.
-        file_name_GC: str
-            Name of the n(z) files for GC
-        file_name_WL: str
-            Name of the n(z) files for WL
         """
         # GC-Phot n(z) data
+        file_name_GC = self.data['photo']['ndens_GC']
         self.nz_dict_GC_Phot_raw.update(
             self.reader_raw_nz(
                 file_dest, file_name_GC))
@@ -119,6 +115,7 @@ class Reader:
                         self.nz_dict_GC_Phot_raw['z']), ext=2) for x in list(
                     self.nz_dict_GC_Phot_raw.keys())[1:]})
         # WL n(z) data
+        file_name_WL = self.data['photo']['ndens_WL']
         self.nz_dict_WL_raw.update(
             self.reader_raw_nz(
                 file_dest, file_name_WL))
@@ -129,10 +126,7 @@ class Reader:
                                     self.nz_dict_WL_raw['z']), ext=2) for x in
                                 list(self.nz_dict_WL_raw.keys())[1:]})
 
-    def read_GC_spec(self,
-                     file_dest='Spectroscopic/data/Sefusatti_multipoles_pk',
-                     file_names='cov_power_galaxies_dk0p004_z%s.fits',
-                     zstr=["1.", "1.2", "1.4", "1.65"]):
+    def read_GC_spec(self, file_dest='Spectroscopic/data'):
         """Read GC Spec
 
         Function to read OU-LE3 spectroscopic galaxy clustering files, based
@@ -144,16 +138,14 @@ class Reader:
         file_dest: str
             Sub-folder of self.data_subdirectory within which to find
             spectroscopic data.
-        file_names: str
-            General structure of file names. Note: must contain 'z%s' to
-            enable iteration over redshifts.
-        zstr: list
-            List of strings denoting spectroscopic redshift bins.
         """
-        if 'z%s' not in file_names:
-            raise Exception('GC Spec file names should contain z%s string to '
-                            'enable iteration over bins.')
-        cur_fname = file_names % zstr[0]
+        root = self.data['spec']['root']
+        redshifts = self.data['spec']['redshifts']
+
+        if 'z{:s}' not in root:
+            raise ValueError('GC Spec file names should contain z{:s} string '
+                             'to enable iteration over bins.')
+        cur_fname = root.format(redshifts[0])
         full_path = Path(self.dat_dir_main, file_dest, cur_fname)
         GC_spec_dict = {}
         fid_cosmo_file = fits.open(full_path)
@@ -185,8 +177,8 @@ class Reader:
         p_fac = 1.0 / ((self.data_spec_fiducial_cosmo['H0'] / 100.0) ** 3.0)
         cov_fac = p_fac ** 2.0
 
-        for z_label in zstr:
-            cur_it_fname = file_names % z_label
+        for z_label in redshifts:
+            cur_it_fname = root.format(z_label)
             cur_full_path = Path(self.dat_dir_main, file_dest, cur_it_fname)
             fits_file = fits.open(cur_full_path)
             average = fits_file[1].data
@@ -223,8 +215,7 @@ class Reader:
         self.data_dict['GC-Spec'] = GC_spec_dict
         return
 
-    def read_phot(self, file_dest='Photometric/data', IA_model_str='zNLA',
-                  cov_model_str='Gauss'):
+    def read_phot(self, file_dest='Photometric/data'):
         """Read Phot
 
         Function to read OU-LE3 photometric galaxy clustering and weak lensing
@@ -236,13 +227,11 @@ class Reader:
         file_dest: str
             Sub-folder of self.data_subdirectory within which to find
             photometric data.
-        IA_model_str: str
-            String used to denote particular intrinsic alignment model used.
-        cov_model_str: str
-            String used to denote type of covariance matrices constructed.
-            E.g. 'Gauss' for Gaussian, 'GaussSSC' for Gaussian + Super Sampled
-            Covariance.
         """
+        root_GC = self.data['photo']['root_GC']
+        root_WL = self.data['photo']['root_WL']
+        root_XC = self.data['photo']['root_XC']
+        IA_model = self.data['photo']['IA_model']
 
         GC_phot_dict = {}
         WL_dict = {}
@@ -250,12 +239,9 @@ class Reader:
 
         full_path = Path(self.dat_dir_main, file_dest)
 
-        GC_file = fits.open(Path(full_path, 'Cls_{:s}_PosPos.fits'.format(
-            IA_model_str)))
-        WL_file = fits.open(Path(full_path, 'Cls_{:s}_ShearShear.fits'.format(
-            IA_model_str)))
-        XC_file = fits.open(Path(full_path, 'Cls_{:s}_PosShear.fits'.format(
-            IA_model_str)))
+        GC_file = fits.open(Path(full_path, root_GC.format(IA_model)))
+        WL_file = fits.open(Path(full_path, root_WL.format(IA_model)))
+        XC_file = fits.open(Path(full_path, root_XC.format(IA_model)))
 
         GC_phot_dict['ells'] = GC_file[1].data
         WL_dict['ells'] = WL_file[1].data
@@ -318,15 +304,16 @@ class Reader:
             cur_lab = cur_ind[0] + left_digit + '-' + cur_ind[2] + right_digit
             XC_phot_dict[cur_lab] = XC_file[k].data
 
-        GC_cov = np.loadtxt(Path(full_path,
-                                 'CovMat-PosPos-{:s}-20Bins.dat'.format(
-                                     cov_model_str)))
-        WL_cov = np.loadtxt(Path(full_path,
-                                 'CovMat-ShearShear-{:s}-20Bins.dat'.format(
-                                     cov_model_str)))
-        tx2_cov = np.loadtxt(Path(full_path,
-                                  'CovMat-3x2pt-{:s}-20Bins.dat'.format(
-                                      cov_model_str)))
+        GC_cov_str = self.data['photo']['cov_GC'].format(self.data[
+            'photo']['cov_model'])
+        WL_cov_str = self.data['photo']['cov_WL'].format(self.data[
+            'photo']['cov_model'])
+        tx2_cov_str = self.data['photo']['cov_3x2'].format(self.data[
+            'photo']['cov_model'])
+
+        GC_cov = np.loadtxt(Path(full_path, GC_cov_str))
+        WL_cov = np.loadtxt(Path(full_path, WL_cov_str))
+        tx2_cov = np.loadtxt(Path(full_path, tx2_cov_str))
 
         tot_XC_bins = self.numtomo_wl * self.numtomo_gcphot
         tot_GC_bins = len(GC_cov) / len(GC_phot_dict['ells'])

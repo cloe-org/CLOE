@@ -8,6 +8,7 @@
 from cobaya.model import get_model
 from likelihood.cobaya_interface import EuclidLikelihood
 import numpy as np
+from likelihood.tests.test_input.data import mock_data
 
 
 class CobayaModel:
@@ -59,6 +60,7 @@ class CobayaModel:
             'likelihood': {'euclid': EuclidLikelihood}}
         self.info['params'].update(
             cosmo_inst.cosmo_dic['nuisance_parameters'])
+        self.info['data'] = mock_data
 
     def get_cobaya_model(self):
         self.define_info(self.cosmology)

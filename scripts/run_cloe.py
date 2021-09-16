@@ -8,15 +8,23 @@ import json
 from likelihood.user_interface.likelihood_ui import LikelihoodUI
 from os import sys
 from warnings import warn
+from likelihood.auxiliary.logger import open_logger, close_logger, catch_error
 
 
-def main():
-    """Main function.
+def run_script(log):
+    """Method to run the script
 
     Parse command line arguments, instantiate a likelihood_ui object and invoke
-    the run() method.
-    """
+    the method based on the action parameter.
 
+    Parameters
+    ----------
+    log: logging.Logger
+       Instance of logging.Logger, specifying the logger of the run.
+    """
+    log.info('Starting CLOE')
+
+    log.info('Parsing the arguments')
     parser = argparse.ArgumentParser()
     parser.add_argument('config',
                         type=str,
@@ -37,17 +45,40 @@ def main():
                         help='specify additional arguments')
     args = parser.parse_args()
 
-    dict=json.loads(args.dict)
+    dict = json.loads(args.dict)
 
+    log.info('Instantiating user interface')
     ui = LikelihoodUI(user_config_file=args.config, user_dict=dict)
-    if (args.action=='run'):
+    if (args.action == 'run'):
+        log.info('Selected RUN mode')
         ui.run()
-    elif (args.action=='plot'):
+    elif (args.action == 'process'):
+        log.info('Selected PROCESS mode')
+        ui.process_chain()
+    elif (args.action == 'plot'):
+        log.info('Selected PLOT mode')
         ui.plot(args.settings)
     else:
         warn('Specified action not supported.')
 
-    return 0
+    log.info('Exiting CLOE')
+    close_logger(log)
+    
+
+def main():
+    """Main function.
+
+    Opens a logger and calls run_script
+    """
+
+    try:
+        log = open_logger('CLOE')
+        run_script(log)
+        return 0
+
+    except Exception as err:
+        catch_error(err, log)
+        return 1
 
 
 if __name__ == "__main__":

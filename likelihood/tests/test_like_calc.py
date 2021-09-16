@@ -12,6 +12,7 @@ from likelihood.like_calc.euclike import Euclike
 from astropy import constants as const
 from pathlib import Path
 from scipy import interpolate
+from likelihood.tests.test_input.data import mock_data
 
 
 def mock_MG_func(z, k):
@@ -232,7 +233,7 @@ class likecalcTestCase(TestCase):
         self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic
         # init Euclike
-        self.like_tt = Euclike()
+        self.like_tt = Euclike(mock_data)
 
         # The correct check value, using the h scaling for the h from
         # supplied external file is:

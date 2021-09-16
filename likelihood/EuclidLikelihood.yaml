@@ -2,3 +2,4 @@ aliases: [euclid]
 # Speed in evaluations/second
 speed: 500
 params: !defaults [params]
+data: !defaults [data]

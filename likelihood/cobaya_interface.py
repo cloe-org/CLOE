@@ -77,7 +77,7 @@ class EuclidLikelihood(Likelihood):
         # self.z_win[2] = self.z_min3
 
         # Initialize Euclike module
-        self.likefinal = Euclike()
+        self.likefinal = Euclike(self.data)
 
         # Initialize Cosmology class for sampling
         self.cosmo = Cosmology()

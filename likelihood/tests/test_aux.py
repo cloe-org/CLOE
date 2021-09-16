@@ -13,6 +13,7 @@ from astropy import constants as const
 from unittest import TestCase
 from likelihood.auxiliary.plotter import Plotter
 from pathlib import Path
+from likelihood.tests.test_input.data import mock_data
 
 
 def mock_MG_func(z, k):
@@ -175,7 +176,7 @@ class plotterTestCase(TestCase):
         fig1 = plt.figure()
         self.ax1 = fig1.add_subplot(1, 1, 1)
 
-        self.plot_inst = Plotter(mock_cosmo_dic)
+        self.plot_inst = Plotter(mock_cosmo_dic, mock_data)
 
     def tearDown(self):
         pass

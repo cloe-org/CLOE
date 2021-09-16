@@ -30,7 +30,7 @@ class Plotter:
     Class to plot observables (angular power spectra and multipoles).
     """
 
-    def __init__(self, cosmo_dic, settings=default_settings):
+    def __init__(self, cosmo_dic, data, settings=default_settings):
         """
         Constructor of class Plotter.
 
@@ -39,9 +39,13 @@ class Plotter:
         cosmo_dic: dict
             Cosmological dictionary in structure specified within
             cosmo.cosmology.
+        data: dict
+            Dictionary containing specifications for data loading and handling.
+        settings: dict
+            Dictionary containing settings for plotting observables.
         """
         self.cosmo_dic = cosmo_dic
-        self.read_data = Reader()
+        self.read_data = Reader(data)
         self.read_data.compute_nz()
         self.read_data.read_GC_spec()
         self.read_data.read_phot()

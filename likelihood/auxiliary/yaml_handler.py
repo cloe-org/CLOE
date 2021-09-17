@@ -6,6 +6,7 @@ to the CLOE-specific configuration.
 """
 
 import yaml
+from os.path import exists
 
 
 def yaml_read(file_name):
@@ -30,11 +31,50 @@ def yaml_read(file_name):
     according to the pyyaml documentation could be dangerous if used on
     files from untrusted sources.
     """
+
     with open(file_name, 'r') as file:
         return yaml.load(file.read(), Loader=yaml.FullLoader)
 
 
-def yaml_write(file_name, config):
+def yaml_read_and_check_dict(file_name: str, needed_keys: list):
+    r"""Read a stream from a yaml file and check the dictionary.
+
+    Get a dictionary from a yaml file,
+    checks that the dictionary contains the specified needed keys.
+
+    Parameters
+    ----------
+    file_name: str
+        The name of the file where to read the dictionary from.
+    needed_keys: list of str
+        The keys that should be in the dictionary
+
+    Returns
+    -------
+    dictionary: dict
+        The dictionary read from the input file
+
+    Raises
+    ------
+    TypeError
+        if a dictionary is not read from the yaml file
+    KeyError
+        if any of the needed keys are not present in the dictionary.
+    """
+
+    dictionary = yaml_read(file_name)
+
+    if type(dictionary) is not dict:
+        raise TypeError(f'File {file_name} not formatted as dictionary')
+
+    for key in needed_keys:
+        if key not in dictionary:
+            raise KeyError(f'key \'{key}\' not found in {file_name}')
+
+    return dictionary
+
+
+def yaml_write(file_name, config, overwrite=False):
     r"""Write a dictionary to a yaml file.
 
     Parameters
@@ -43,18 +83,30 @@ def yaml_write(file_name, config):
         The name of the file the stream will be written to.
     config: dict
         The dictionary to be written to file
+    overwrite: bool
+        Overwrite the output file, if already exists?
 
     Raises
     ------
     TypeError
        if the config input parameter is not a dict
+    RuntimeError
+        if the output file already exists and overwrite is set to False
 
     Notes
     -----
     The writing is performed using the python builtin i/o functions and the
     pyyaml package.
     """
+
     if type(config) is not dict:
         raise TypeError('Input configuration is not a dict: {config}')
+
+    file_exists = exists(file_name)
+    if file_exists and not overwrite:
+        raise RuntimeError(f'File {file_name} already exists.\n')
+    elif file_exists and overwrite:
+        print(f'Overwriting file {file_name}.\n')
+
     with open(file_name, 'w') as file:
         file.write(yaml.dump(config))

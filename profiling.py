@@ -19,7 +19,7 @@ from likelihood.auxiliary.likelihood_yaml_generator import generate_params_yaml
 from likelihood.auxiliary.likelihood_yaml_generator import generate_data_yaml
 
 print("Running script: ", sys.argv[0])
-generate_params_yaml(model = 1)
+generate_params_yaml(model = ['nuisance_bias', 'nuisance_ia'])
 
 # Attention: If working outside of the likelihood environment, change this to your
 # local path where your external codes are installed (CAMB, polychord, likelihoods, etc).

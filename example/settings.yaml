@@ -17,8 +17,8 @@ kmin: 0.001
 kmax: 0.5
 nk: 1000
 # Style settings for multipoles
-spec_colours: ['C0', 'C1', 'C2']
-spec_linestyle: 'solid'
+spectro_colours: ['C0', 'C1', 'C2']
+spectro_linestyle: 'solid'
 # Output
 path: 'output/'
 # Output file names

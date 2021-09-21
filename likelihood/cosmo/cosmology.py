@@ -125,17 +125,17 @@ class Cosmology:
             Galaxy-galaxy power spectrum for GC-phot
         Pgdelta_phot: function
             Galaxy-matter power spectrum for GC-phot
-        Pgg_spec: function
-            Galaxy-galaxy power spectrum for GC-spec
-        Pgdelta_spec: function
-            Galaxy-matter power spectrum for GC-spec
+        Pgg_spectro: function
+            Galaxy-galaxy power spectrum for GC-spectro
+        Pgdelta_spectro: function
+            Galaxy-matter power spectrum for GC-spectro
         Pii: function
             Intrinsic alignment (intrinsic-intrinsic) power spectrum
         Pdeltai: function
             Density-intrinsic cross-spectrum
         Pgi_phot: function
             Photometric galaxy-intrinsic cross-spectrum
-        Pgi_spec: function
+        Pgi_spectro: function
             Spectroscopic galaxy-intrinsic cross-spectrum
         MG_mu: function
             mu function from Modified Gravity parametrization
@@ -148,7 +148,7 @@ class Cosmology:
             and IA parameters which are sampled over.
             At the moment, we have implemented
             10 constant bias for photo-z
-            recipe and 4 for spec recipe,
+            recipe and 4 for spectro recipe,
             and 3 IA parameters. The
             initialized values of the fiducial
             cosmology dictionary corresponds to:
@@ -204,12 +204,12 @@ class Cosmology:
                           'Pk_weyl': None,
                           'Pgg_phot': None,
                           'Pgdelta_phot': None,
-                          'Pgg_spec': None,
-                          'Pgdelta_spec': None,
+                          'Pgg_spectro': None,
+                          'Pgdelta_spectro': None,
                           'Pii': None,
                           'Pdeltai': None,
                           'Pgi_phot': None,
-                          'Pgi_spec': None,
+                          'Pgi_spectro': None,
                           'r_z_func': None,
                           'd_z_func': None,
                           'H_z_func': None,
@@ -234,10 +234,10 @@ class Cosmology:
                              'b8_photo': 1.4964959071110084,
                              'b9_photo': 1.5652475842498528,
                              'b10_photo': 1.7429859437184225,
-                             'b1_spec': 1.4614804,
-                             'b2_spec': 1.6060949,
-                             'b3_spec': 1.7464790,
-                             'b4_spec': 1.8988660,
+                             'b1_spectro': 1.4614804,
+                             'b2_spectro': 1.6060949,
+                             'b3_spectro': 1.7464790,
+                             'b4_spectro': 1.8988660,
                              'aia': 1.72,
                              'nia': -0.41,
                              'bia': 0.0,
@@ -530,8 +530,8 @@ class Cosmology:
         z_in_range = rb.coerce(redshift, bin_edges)
         return self.cosmo_dic['b_inter'](z_in_range)
 
-    def istf_spec_galbias(self, redshift, bin_edges=None):
-        """Istf Spec Galbias
+    def istf_spectro_galbias(self, redshift, bin_edges=None):
+        """Istf Spectro Galbias
 
         Gets galaxy bias for the spectroscopic galaxy clustering
         probe, at given redshift(s), according to the linear recipe
@@ -566,7 +566,7 @@ class Cosmology:
 
         try:
             z_bin = rb.find_bin(redshift, bin_edges, False)
-            bi_val = np.array([nuisance_src[f'b{i}_spec']
+            bi_val = np.array([nuisance_src[f'b{i}_spectro']
                               for i in np.nditer(z_bin)])
             return bi_val[0] if np.isscalar(redshift) else bi_val
         except (ValueError, KeyError):
@@ -601,15 +601,15 @@ class Cosmology:
                 self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
         return pval
 
-    def Pgg_spec_def(self, redshift, k_scale, mu_rsd):
-        r"""Pgg Spec Def
+    def Pgg_spectro_def(self, redshift, k_scale, mu_rsd):
+        r"""Pgg Spectro Def
 
         Computes the redshift-space galaxy-galaxy power spectrum for the
         spectroscopic probe.
 
         .. math::
-            P_{\rm gg}^{\rm spec}(z, k) &=\
-            [b_{\rm g}^{\rm spec}(z) + f(z, k)\mu_{k}^2]^2\
+            P_{\rm gg}^{\rm spectro}(z, k) &=\
+            [b_{\rm g}^{\rm spectro}(z) + f(z, k)\mu_{k}^2]^2\
             P_{\rm \delta\delta}(z, k)\\
 
         Parameters
@@ -629,7 +629,7 @@ class Cosmology:
             at a given redshift, k-mode and :math:`\mu_{k}`
             for galaxy clustering spectroscopic
         """
-        bias = self.istf_spec_galbias(redshift)
+        bias = self.istf_spectro_galbias(redshift)
         growth = self.cosmo_dic['f_z'](redshift)
         power = self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
         pval = (bias + growth * mu_rsd ** 2.0) ** 2.0 * power
@@ -662,15 +662,15 @@ class Cosmology:
                 self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
         return pval
 
-    def Pgdelta_spec_def(self, redshift, k_scale, mu_rsd):
-        r"""Pgdelta Spec Def
+    def Pgdelta_spectro_def(self, redshift, k_scale, mu_rsd):
+        r"""Pgdelta Spectro Def
 
         Computes the redshift-space galaxy-matter power spectrum for the
         spectroscopic probe.
 
         .. math::
-            P_{\rm g \delta}^{\rm spec}(z, k) &=\
-            [b_{\rm g}^{\rm spec}(z) + f(z, k)\mu_{k}^2][1 + f(z, k)\mu_{k}^2]\
+            P_{\rm g \delta}^{\rm spectro}(z, k) &=\
+            [b_{\rm g}^{\rm spectro}(z)+f(z, k)\mu_{k}^2][1+f(z, k)\mu_{k}^2]\
             P_{\rm \delta\delta}(z, k)\\
 
         Parameters
@@ -690,7 +690,7 @@ class Cosmology:
             at a given redshift, k-mode and :math:`\mu_{k}`
             for galaxy clustering spectroscopic
         """
-        bias = self.istf_spec_galbias(redshift)
+        bias = self.istf_spectro_galbias(redshift)
         growth = self.cosmo_dic['f_z'](redshift)
         power = self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
         pval = ((bias + growth * mu_rsd ** 2.0) *
@@ -816,14 +816,14 @@ class Cosmology:
             self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
         return pval
 
-    def Pgi_spec_def(self, redshift, k_scale):
-        r"""Pgi Spec Def
+    def Pgi_spectro_def(self, redshift, k_scale):
+        r"""Pgi Spectro Def
 
         Computes the spectroscopic galaxy-intrinsic power spectrum.
 
         .. math::
-            P_{\rm gI}^{\rm spec}(z, k) &=\
-            [f_{\rm IA}(z)]b_g^{\rm spec}(z)P_{\rm \delta\delta}(z, k)\\
+            P_{\rm gI}^{\rm spectro}(z, k) &=\
+            [f_{\rm IA}(z)]b_g^{\rm spectro}(z)P_{\rm \delta\delta}(z, k)\\
 
         Parameters
         ----------
@@ -838,7 +838,7 @@ class Cosmology:
             Value of spectroscopic galaxy-intrinsic power spectrum
             at a given redshift and k-mode
         """
-        pval = self.fia(redshift) * self.istf_spec_galbias(redshift) * \
+        pval = self.fia(redshift) * self.istf_spectro_galbias(redshift) * \
             self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
         return pval
 
@@ -863,8 +863,8 @@ class Cosmology:
         k_win = self.cosmo_dic['k_win']
         z_win = self.cosmo_dic['z_win']
 
-        spec_bin_edges = np.array([0.90, 1.10, 1.30, 1.50, 1.80])
-        z_win_spec = rb.reduce(z_win, spec_bin_edges[0], spec_bin_edges[-1])
+        spe_bin_edges = np.array([0.90, 1.10, 1.30, 1.50, 1.80])
+        z_win_spectro = rb.reduce(z_win, spe_bin_edges[0], spe_bin_edges[-1])
 
         pksrc = self.pk_source
         pgg_phot = np.array([pksrc.Pgg_phot_def(zz, k_win)
@@ -877,10 +877,10 @@ class Cosmology:
                             for zz in z_win])
         pgi_phot = np.array([pksrc.Pgi_phot_def(zz, k_win)
                              for zz in z_win])
-        pgi_spec = np.array([pksrc.Pgi_spec_def(zz, k_win)
-                             for zz in z_win_spec])
-        self.cosmo_dic['Pgg_spec'] = pksrc.Pgg_spec_def
-        self.cosmo_dic['Pgdelta_spec'] = pksrc.Pgdelta_spec_def
+        pgi_spectro = np.array([pksrc.Pgi_spectro_def(zz, k_win)
+                               for zz in z_win_spectro])
+        self.cosmo_dic['Pgg_spectro'] = pksrc.Pgg_spectro_def
+        self.cosmo_dic['Pgdelta_spectro'] = pksrc.Pgdelta_spectro_def
 
         self.cosmo_dic['Pgg_phot'] = \
             interpolate.RectBivariateSpline(z_win,
@@ -907,10 +907,10 @@ class Cosmology:
                                             k_win,
                                             pgi_phot,
                                             kx=1, ky=1)
-        self.cosmo_dic['Pgi_spec'] = \
-            interpolate.RectBivariateSpline(z_win_spec,
+        self.cosmo_dic['Pgi_spectro'] = \
+            interpolate.RectBivariateSpline(z_win_spectro,
                                             k_win,
-                                            pgi_spec,
+                                            pgi_spectro,
                                             kx=1, ky=1)
         return
 

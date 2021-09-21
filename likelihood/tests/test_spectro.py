@@ -1,16 +1,16 @@
-"""UNIT TESTS FOR SPEC
+"""UNIT TESTS FOR SPECTRO
 
-This module contains unit tests for the Spec sub-module of the
+This module contains unit tests for the Spectro sub-module of the
 spectroscopy survey module.
 =======
 
 """
 
 from unittest import TestCase
+from likelihood.spectroscopic_survey.spectro import Spectro
 import numpy as np
 import numpy.testing as npt
 from scipy import interpolate
-from likelihood.spectroscopic_survey.spec import Spec
 from astropy import constants as const
 from pathlib import Path
 
@@ -94,7 +94,7 @@ class specinitTestCase(TestCase):
         pgd = np.load(str(cur_dir) + '/test_input/pgd.npy')
         pgg = np.load(str(cur_dir) + '/test_input/pgg.npy')
         pgi_phot = np.load(str(cur_dir) + '/test_input/pgi_phot.npy')
-        pgi_spec = np.load(str(cur_dir) + '/test_input/pgi_spec.npy')
+        pgi_spectro = np.load(str(cur_dir) + '/test_input/pgi_spectro.npy')
         pii = np.load(str(cur_dir) + '/test_input/pii.npy')
 
         zs_base = np.linspace(0.0, 4.0, 100)
@@ -127,10 +127,10 @@ class specinitTestCase(TestCase):
                               'b8_photo': 1.4964959071110084,
                               'b9_photo': 1.5652475842498528,
                               'b10_photo': 1.7429859437184225,
-                              'b1_spec': 1.4614804,
-                              'b2_spec': 1.6060949,
-                              'b3_spec': 1.7464790,
-                              'b4_spec': 1.8988660,
+                              'b1_spectro': 1.4614804,
+                              'b2_spectro': 1.6060949,
+                              'b3_spectro': 1.7464790,
+                              'b4_spectro': 1.8988660,
                               'aia': 1.72,
                               'nia': -0.41,
                               'bia': 0.0}
@@ -152,40 +152,43 @@ class specinitTestCase(TestCase):
         p_matter = mock_P_obj(interpolate.interp2d(zs_base, ks_base, pdd.T,
                                                    fill_value=0))
         mock_cosmo_dic['Pk_delta'] = p_matter
-        mock_cosmo_dic['Pgg_phot'] = interpolate.interp2d(zs_base, ks_base,
-                                                          pgg.T,
-                                                          fill_value=0.0)
-        mock_cosmo_dic['Pgdelta_phot'] = interpolate.interp2d(zs_base, ks_base,
-                                                              pgd.T,
-                                                              fill_value=0.0)
-        mock_cosmo_dic['Pii'] = interpolate.interp2d(zs_base, ks_base,
-                                                     pii.T,
-                                                     fill_value=0.0)
-        mock_cosmo_dic['Pdeltai'] = interpolate.interp2d(zs_base, ks_base,
-                                                         pdi.T,
-                                                         fill_value=0.0)
-        mock_cosmo_dic['Pgi_phot'] = interpolate.interp2d(zs_base, ks_base,
-                                                          pgi_phot.T,
-                                                          fill_value=0.0)
-        mock_cosmo_dic['Pgi_spec'] = interpolate.interp2d(zs_base, ks_base,
-                                                          pgi_spec.T,
-                                                          fill_value=0.0)
-        mock_cosmo_dic['Pgg_spec'] = np.vectorize(self.Pgg_spec_def)
+        mock_cosmo_dic['Pgg_phot'] = \
+            interpolate.interp2d(zs_base, ks_base, pgg.T, fill_value=0.0)
 
-        fid_H_arr = np.load(str(cur_dir) + '/test_input/spec_fid_HZ.npy')
-        fid_d_A_arr = np.load(str(cur_dir) + '/test_input/spec_fid_d_A.npy')
+        mock_cosmo_dic['Pgdelta_phot'] = \
+            interpolate.interp2d(zs_base, ks_base, pgd.T, fill_value=0.0)
 
-        fid_H_interp = interpolate.InterpolatedUnivariateSpline(x=zs_H,
-                                                                y=fid_H_arr,
-                                                                ext=0)
-        fid_dA_interp = interpolate.InterpolatedUnivariateSpline(x=zs_H,
-                                                                 y=fid_d_A_arr,
-                                                                 ext=0)
+        mock_cosmo_dic['Pii'] = \
+            interpolate.interp2d(zs_base, ks_base, pii.T, fill_value=0.0)
+
+        mock_cosmo_dic['Pdeltai'] = \
+            interpolate.interp2d(zs_base, ks_base, pdi.T, fill_value=0.0)
+
+        mock_cosmo_dic['Pgi_phot'] = \
+            interpolate.interp2d(zs_base, ks_base,
+                                 pgi_phot.T, fill_value=0.0)
+
+        mock_cosmo_dic['Pgi_spectro'] = \
+            interpolate.interp2d(zs_base, ks_base,
+                                 pgi_spectro.T, fill_value=0.0)
+
+        mock_cosmo_dic['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
+
+        fid_H_arr = np.load(str(cur_dir) + '/test_input/spectro_fid_HZ.npy')
+        fid_d_A_arr = np.load(str(cur_dir) +
+                              '/test_input/spectro_fid_d_A.npy')
+
+        fid_H_interp = \
+            interpolate.InterpolatedUnivariateSpline(x=zs_H, y=fid_H_arr,
+                                                     ext=0)
+        fid_dA_interp =\
+            interpolate.InterpolatedUnivariateSpline(x=zs_H, y=fid_d_A_arr,
+                                                     ext=0)
 
         # Note: the 'fiducial' cosmology declared here is purely for the
-        # purposes of testing the spec module. It is not representative of our
-        # fiducial model nor does it correspond to the fiducial model used by
-        # OU-LE3 to compute distances.
+        # purposes of testing the spectro module. It is not representative
+        # of our fiducial model nor does it correspond to the fiducial
+        # model used by OU-LE3 to compute distances.
 
         fid_mock_dic = {'H0': 67.5,
                         'omch2': 0.122,
@@ -218,10 +221,10 @@ class specinitTestCase(TestCase):
                             'b8_photo': 1.4964959071110084,
                             'b9_photo': 1.5652475842498528,
                             'b10_photo': 1.7429859437184225,
-                            'b1_spec': 1.4614804,
-                            'b2_spec': 1.6060949,
-                            'b3_spec': 1.7464790,
-                            'b4_spec': 1.8988660,
+                            'b1_spectro': 1.4614804,
+                            'b2_spectro': 1.6060949,
+                            'b3_spectro': 1.7464790,
+                            'b4_spectro': 1.8988660,
                             'aia': 1.72,
                             'nia': -0.41,
                             'bia': 0.0}
@@ -230,8 +233,7 @@ class specinitTestCase(TestCase):
         self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic
 
-        self.spec = Spec(self.test_dict,
-                         self.fiducial_dict)
+        self.spectro = Spectro(self.test_dict, self.fiducial_dict)
 
         self.check_multipole_spectra_m0 = 12292.778742
         self.check_multipole_spectra_m1 = 0.0
@@ -244,9 +246,7 @@ class specinitTestCase(TestCase):
         self.check_get_k = 0.000993
         self.check_get_mu = 1.00
 
-    def istf_spec_galbias(self, redshift,
-                          bin_edge_list=[0.90, 1.10, 1.30,
-                                         1.50, 1.80]):
+    def istf_spectro_galbias(self, redshift, bin_edge_list=None):
         """
         Updates galaxy bias for the spectroscopic galaxy clustering
         probe, at given redshift, according to default recipe.
@@ -271,10 +271,14 @@ class specinitTestCase(TestCase):
             Value of spectroscopic galaxy bias at input redshift
         """
 
-        istf_bias_list = [self.test_dict['nuisance_parameters']['b1_spec'],
-                          self.test_dict['nuisance_parameters']['b2_spec'],
-                          self.test_dict['nuisance_parameters']['b3_spec'],
-                          self.test_dict['nuisance_parameters']['b4_spec']]
+        if bin_edge_list is None:
+            bin_edge_list = [0.90, 1.10, 1.30, 1.50, 1.80]
+
+        nuisance_dic = self.test_dict['nuisance_parameters']
+        istf_bias_list = [nuisance_dic['b1_spectro'],
+                          nuisance_dic['b2_spectro'],
+                          nuisance_dic['b3_spectro'],
+                          nuisance_dic['b4_spectro']]
 
         if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
             for i in range(len(bin_edge_list) - 1):
@@ -286,14 +290,14 @@ class specinitTestCase(TestCase):
             bi_val = istf_bias_list[0]
         return bi_val
 
-    def Pgg_spec_def(self, redshift, k_scale, mu_rsd):
+    def Pgg_spectro_def(self, redshift, k_scale, mu_rsd):
         r"""
         Computes the redshift-space galaxy-galaxy power spectrum for the
         spectroscopic probe.
 
         .. math::
-            P_{\rm gg}^{\rm spec}(z, k) &=\
-            [b_{\rm g}^{\rm spec}(z) + f(z, k)\mu_{k}^2]^2\
+            P_{\rm gg}^{\rm spectro}(z, k) &=\
+            [b_{\rm g}^{\rm spectro}(z) + f(z, k)\mu_{k}^2]^2\
             P_{\rm \delta\delta}(z, k)\\
 
         Parameters
@@ -313,7 +317,7 @@ class specinitTestCase(TestCase):
             at a given redshift, k-mode and :math:`\mu_{k}`
             for galaxy cclustering spectroscopic
         """
-        bias = self.istf_spec_galbias(redshift)
+        bias = self.istf_spectro_galbias(redshift)
         growth = self.test_dict['f_z'](redshift)
         power = self.test_dict['Pk_delta'].P(redshift, k_scale)
         pval = (bias + growth * mu_rsd ** 2.0) ** 2.0 * power
@@ -326,62 +330,63 @@ class specinitTestCase(TestCase):
         self.check_get_mu = None
 
     def test_multipole_spectra_m0(self):
-        npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, ms=[0]),
+        npt.assert_allclose(self.spectro.multipole_spectra(1.0, 0.1, ms=[0]),
                             self.check_multipole_spectra_m0,
                             rtol=1e-05,
                             err_msg='Multipole spectrum m = 0 failed')
 
     def test_multipole_spectra_m1(self):
-        npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, ms=[1]),
+        npt.assert_allclose(self.spectro.multipole_spectra(1.0, 0.1, ms=[1]),
                             self.check_multipole_spectra_m1,
                             atol=1e-10,
                             err_msg='Multipole spectrum m = 1 failed')
 
     def test_multipole_spectra_m2(self):
-        npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, ms=[2]),
+        npt.assert_allclose(self.spectro.multipole_spectra(1.0, 0.1, ms=[2]),
                             self.check_multipole_spectra_m2,
                             rtol=2e-04,
                             err_msg='Multipole spectrum m = 2 failed')
 
     def test_multipole_spectra_m3(self):
-        npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, ms=[3]),
+        npt.assert_allclose(self.spectro.multipole_spectra(1.0, 0.1, ms=[3]),
                             self.check_multipole_spectra_m3,
                             atol=1e-10,
                             err_msg='Multipole spectrum m = 3 failed')
 
     def test_multipole_spectra_m4(self):
-        npt.assert_allclose(self.spec.multipole_spectra(1.0, 0.1, ms=[4]),
+        npt.assert_allclose(self.spectro.multipole_spectra(1.0, 0.1, ms=[4]),
                             self.check_multipole_spectra_m4,
                             rtol=1e-05,
                             err_msg='Multipole spectrum m = 4 failed')
 
     def test_multipole_spectra_integrand(self):
-        npt.assert_allclose(self.spec.multipole_spectra_integrand(0.7, 1.0,
-                                                                  0.1, [2]),
+        npt.assert_allclose(self.spectro.multipole_spectra_integrand(0.7, 1.0,
+                                                                     0.1,
+                                                                     [2]),
                             self.check_multipole_spectra_integrand,
                             rtol=1e-06,
                             err_msg='Multipole spectra integrand failed')
 
     def test_scaling_factor_perp(self):
-        npt.assert_allclose(self.spec.scaling_factor_perp(0.01),
+        npt.assert_allclose(self.spectro.scaling_factor_perp(0.01),
                             self.check_scaling_factor_perp,
                             rtol=1e-03,
                             err_msg='Scaling Factor Perp failed')
 
     def test_scaling_factor_parall(self):
-        npt.assert_allclose(self.spec.scaling_factor_parall(0.01),
+        npt.assert_allclose(self.spectro.scaling_factor_parall(0.01),
                             self.check_scaling_factor_parall,
                             rtol=1e-03,
                             err_msg='Scaling Factor Parall failed')
 
     def test_get_k(self):
-        npt.assert_allclose(self.spec.get_k(0.001, 1, 0.01),
+        npt.assert_allclose(self.spectro.get_k(0.001, 1, 0.01),
                             self.check_get_k,
                             rtol=1e-03,
                             err_msg='get_k failed')
 
     def test_get_mu(self):
-        npt.assert_allclose(self.spec.get_mu(1, 0.01),
+        npt.assert_allclose(self.spectro.get_mu(1, 0.01),
                             self.check_get_mu,
                             rtol=1e-03,
                             err_msg='get_mu failed')

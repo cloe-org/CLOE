@@ -37,7 +37,7 @@ class Reader:
         root_dir = Path(__file__).resolve().parents[2]
         self.dat_dir_main = Path(root_dir, Path('data'),
                                  Path(self.data['sample']))
-        self.data_dict = {'GC-Spec': None, 'GC-Phot': None, 'WL': None,
+        self.data_dict = {'GC-Spectro': None, 'GC-Phot': None, 'WL': None,
                           'XC-Phot': None}
 
         # Added dictionaries for n(z)
@@ -50,8 +50,8 @@ class Reader:
         self.numtomo_wl = {}
 
         # Added empty dict to fill in fiducial
-        # cosmology data from Spec OU-level3 files
-        self.data_spec_fiducial_cosmo = {}
+        # cosmology data from Spectro OU-level3 files
+        self.data_spectro_fiducial_cosmo = {}
 
         return
 
@@ -126,8 +126,8 @@ class Reader:
                                     self.nz_dict_WL_raw['z']), ext=2) for x in
                                 list(self.nz_dict_WL_raw.keys())[1:]})
 
-    def read_GC_spec(self, file_dest='Spectroscopic/data'):
-        """Read GC Spec
+    def read_GC_spectro(self, file_dest='Spectroscopic/data'):
+        """Read GC Spectro
 
         Function to read OU-LE3 spectroscopic galaxy clustering files, based
         on location provided to Reader class. Adds contents to the data
@@ -139,18 +139,18 @@ class Reader:
             Sub-folder of self.data_subdirectory within which to find
             spectroscopic data.
         """
-        root = self.data['spec']['root']
-        redshifts = self.data['spec']['redshifts']
+        root = self.data['spectro']['root']
+        redshifts = self.data['spectro']['redshifts']
 
         if 'z{:s}' not in root:
-            raise ValueError('GC Spec file names should contain z{:s} string '
-                             'to enable iteration over bins.')
+            raise ValueError('GC Spectro file names should contain z{:s} '
+                             'string to enable iteration over bins.')
         cur_fname = root.format(redshifts[0])
         full_path = Path(self.dat_dir_main, file_dest, cur_fname)
-        GC_spec_dict = {}
+        GC_spectro_dict = {}
         fid_cosmo_file = fits.open(full_path)
         try:
-            self.data_spec_fiducial_cosmo = {
+            self.data_spectro_fiducial_cosmo = {
                 'H0': fid_cosmo_file[1].header['HUBBLE'] *
                 100,
                 'omch2': (fid_cosmo_file[1].header['OMEGA_M'] -
@@ -163,7 +163,7 @@ class Reader:
                 'w': fid_cosmo_file[1].header['W_STATE'],
                 'omkh2': fid_cosmo_file[1].header['OMEGA_K'] *
                 fid_cosmo_file[1].header['HUBBLE']**2,
-                # OU-LE3 spec files always with omnuh2 = 0
+                # OU-LE3 spectro files always with omnuh2 = 0
                 'omnuh2': 0.000644201,
                 'Omnu': 0.001435066}
             # Omega_radiation is ignored here
@@ -173,8 +173,8 @@ class Reader:
             print('There was an error when reading the fiducial '
                   'data from OU-level3 files')
 
-        k_fac = (self.data_spec_fiducial_cosmo['H0'] / 100.0)
-        p_fac = 1.0 / ((self.data_spec_fiducial_cosmo['H0'] / 100.0) ** 3.0)
+        k_fac = (self.data_spectro_fiducial_cosmo['H0'] / 100.0)
+        p_fac = 1.0 / ((self.data_spectro_fiducial_cosmo['H0'] / 100.0) ** 3.0)
         cov_fac = p_fac ** 2.0
 
         for z_label in redshifts:
@@ -200,19 +200,19 @@ class Reader:
             cov_l_i = np.reshape(cov_l_i, newshape=(3 * nk, 3 * nk))
             cov_l_j = np.reshape(cov_l_j, newshape=(3 * nk, 3 * nk))
 
-            GC_spec_dict['{:s}'.format(z_label)] = {'k_pk': kk,
-                                                    'pk0': pk0,
-                                                    'pk2': pk2,
-                                                    'pk4': pk4,
-                                                    'cov': cov,
-                                                    'cov_k_i': cov_k_i,
-                                                    'cov_k_j': cov_k_j,
-                                                    'cov_l_i': cov_l_i,
-                                                    'cov_l_j': cov_l_j}
+            GC_spectro_dict['{:s}'.format(z_label)] = {'k_pk': kk,
+                                                       'pk0': pk0,
+                                                       'pk2': pk2,
+                                                       'pk4': pk4,
+                                                       'cov': cov,
+                                                       'cov_k_i': cov_k_i,
+                                                       'cov_k_j': cov_k_j,
+                                                       'cov_l_i': cov_l_i,
+                                                       'cov_l_j': cov_l_j}
 
             fits_file.close()
 
-        self.data_dict['GC-Spec'] = GC_spec_dict
+        self.data_dict['GC-Spectro'] = GC_spectro_dict
         return
 
     def read_phot(self, file_dest='Photometric/data'):

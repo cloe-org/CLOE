@@ -4,7 +4,6 @@
 Contains interfaces to getdist routines
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
 from getdist.mcsamples import loadMCSamples
 from getdist import plots

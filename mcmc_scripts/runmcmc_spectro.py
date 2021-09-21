@@ -6,8 +6,6 @@ else:
     sys.path.append(script_path) 
 from cobaya.run import run
 from likelihood.cobaya_interface import EuclidLikelihood
-import numpy as np
-from copy import deepcopy
 
 info = {
     'params': {
@@ -57,10 +55,10 @@ info = {
         'b8_photo': 1.4964959071110084,
         'b9_photo': 1.5652475842498528,
         'b10_photo': 1.7429859437184225,
-        'b1_spec': 1.4614804,
-        'b2_spec': 1.6060949,
-        'b3_spec': 1.7464790,
-        'b4_spec': 1.8988660,
+        'b1_spectro': 1.4614804,
+        'b2_spectro': 1.6060949,
+        'b3_spectro': 1.7464790,
+        'b4_spectro': 1.8988660,
         'aia': 1.72,
         'nia': -0.41,
         'bia': 0.0},

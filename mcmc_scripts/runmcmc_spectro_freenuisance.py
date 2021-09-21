@@ -6,8 +6,6 @@ else:
     sys.path.append(script_path) 
 from cobaya.run import run
 from likelihood.cobaya_interface import EuclidLikelihood
-import numpy as np
-from copy import deepcopy
 
 info = {
     'params': {
@@ -57,19 +55,19 @@ info = {
         'b8_photo': 1.4964959071110084,
         'b9_photo': 1.5652475842498528,
         'b10_photo': 1.7429859437184225,
-        'b1_spec': {'prior': {'min': 0.1, 'max': 3.},
+        'b1_spectro': {'prior': {'min': 0.1, 'max': 3.},
                     'ref': {'dist': 'norm', 'loc': 1.46, 'scale': 0.1},
                     'proposal': 0.1,
                     'latex': 'b_1^{\rm GCsp}'},
-        'b2_spec': {'prior': {'min': 0.1, 'max': 3.},
+        'b2_spectro': {'prior': {'min': 0.1, 'max': 3.},
                     'ref': {'dist': 'norm', 'loc': 1.61, 'scale': 0.1},
                     'proposal': 0.1,
                     'latex': 'b_2^{\rm GCsp}'},
-        'b3_spec': {'prior': {'min': 0.1, 'max': 3.},
+        'b3_spectro': {'prior': {'min': 0.1, 'max': 3.},
                     'ref': {'dist': 'norm', 'loc': 1.75, 'scale': 0.1},
                     'proposal': 0.1,
                     'latex': 'b_3^{\rm GCsp}'},
-        'b4_spec': {'prior': {'min': 0.1, 'max': 3.},
+        'b4_spectro': {'prior': {'min': 0.1, 'max': 3.},
                     'ref': {'dist': 'norm', 'loc': 1.90, 'scale': 0.1},
                     'proposal': 0.1,
                     'latex': 'b_4^{\rm GCsp}'}, 

@@ -4,7 +4,6 @@
 
 # General import
 import numpy as np
-import matplotlib.pyplot as plt
 from astropy import constants as const
 
 # Cobaya import of general Likelihood class
@@ -87,7 +86,7 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology = Cosmology()
         # Update fiducial cosmo dic with fiducial info from reader
         self.fiducial_cosmology.cosmo_dic.update(
-            self.likefinal.data_spec_fiducial_cosmo)
+            self.likefinal.data_spectro_fiducial_cosmo)
         self.info_fiducial = {'params': {
             'ombh2': self.fiducial_cosmology.cosmo_dic['ombh2'],
             'omch2': self.fiducial_cosmology.cosmo_dic['omch2'],

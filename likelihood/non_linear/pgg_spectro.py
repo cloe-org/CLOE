@@ -1,5 +1,5 @@
 """
-module: pgg_spec
+module: pgg_spectro
 
 Contains recipes for the spectroscopic galaxy x galaxy power spectrum.
 """
@@ -7,20 +7,20 @@ Contains recipes for the spectroscopic galaxy x galaxy power spectrum.
 from likelihood.non_linear.power_spectrum import PowerSpectrum
 
 
-class Pgg_spec_model(PowerSpectrum):
+class Pgg_spectro_model(PowerSpectrum):
     r"""
     Class for computation of spectroscopic galaxy x galaxy power spectrum
     """
 
-    def Pgg_spec_def(self, redshift, k_scale, mu_rsd):
-        r"""Pgg Spec Def
+    def Pgg_spectro_def(self, redshift, k_scale, mu_rsd):
+        r"""Pgg Spectro Def
 
         Computes the redshift-space galaxy-galaxy power spectrum for the
         spectroscopic probe.
 
         .. math::
-            P_{\rm gg}^{\rm spec}(z, k) &=\
-            [b_{\rm g}^{\rm spec}(z) + f(z, k)\mu_{k}^2]^2\
+            P_{\rm gg}^{\rm spectro}(z, k) &=\
+            [b_{\rm g}^{\rm spectro}(z) + f(z, k)\mu_{k}^2]^2\
             P_{\rm \delta\delta}(z, k)\\
 
         Note: either k_scale or mu_rsd must be a float (e.g. simultaneously
@@ -43,21 +43,21 @@ class Pgg_spec_model(PowerSpectrum):
             at a given redshift, k-mode and :math:`\mu_{k}`
             for galaxy clustering spectroscopic
         """
-        bias = self.misc.istf_spec_galbias(redshift)
+        bias = self.misc.istf_spectro_galbias(redshift)
         growth = self.theory['f_z'](redshift)
         power = self.theory['Pk_delta'].P(redshift, k_scale)
         pval = (bias + growth * mu_rsd ** 2.0) ** 2.0 * power
         return pval
 
-    def Pgdelta_spec_def(self, redshift, k_scale, mu_rsd):
-        r"""Pgdelta Spec Def
+    def Pgdelta_spectro_def(self, redshift, k_scale, mu_rsd):
+        r"""Pgdelta Spectro Def
 
         Computes the redshift-space galaxy-matter power spectrum for the
         spectroscopic probe.
 
         .. math::
-            P_{\rm g \delta}^{\rm spec}(z, k) &=\
-            [b_{\rm g}^{\rm spec}(z) + f(z, k)\mu_{k}^2][1 + f(z, k)\mu_{k}^2]\
+            P_{\rm g \delta}^{\rm spectro}(z, k) &=\
+            [b_{\rm g}^{\rm spectro}(z)+f(z, k)\mu_{k}^2][1+f(z, k)\mu_{k}^2]\
             P_{\rm \delta\delta}(z, k)\\
 
         Note: either k_scale or mu_rsd must be a float (e.g. simultaneously
@@ -80,7 +80,7 @@ class Pgg_spec_model(PowerSpectrum):
             at a given redshift, k-mode and :math:`\mu_{k}`
             for galaxy clustering spectroscopic
         """
-        bias = self.misc.istf_spec_galbias(redshift)
+        bias = self.misc.istf_spectro_galbias(redshift)
         growth = self.theory['f_z'](redshift)
         power = self.theory['Pk_delta'].P(redshift, k_scale)
         pval = ((bias + growth * mu_rsd ** 2.0) *

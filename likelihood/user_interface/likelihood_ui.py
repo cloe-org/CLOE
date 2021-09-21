@@ -4,7 +4,6 @@
 Top level user interface class for running CLOE
 """
 
-import numpy as np
 from likelihood.auxiliary import yaml_handler, likelihood_yaml_generator
 from likelihood.cobaya_interface import EuclidLikelihood
 import cobaya.run
@@ -12,7 +11,6 @@ from cobaya.model import get_model
 from pathlib import Path
 import collections.abc
 from likelihood.auxiliary.plotter import Plotter
-import matplotlib.pyplot as plt
 from likelihood.auxiliary.getdist_routines import triangle_plot_cobaya
 
 
@@ -64,7 +62,7 @@ class LikelihoodUI:
                 update_config=user_config
             )
 
-        if (user_dict) is not None:
+        if user_dict is not None:
             self._config = self._update_config(
                 orig_config=self._config,
                 update_config=user_dict
@@ -178,7 +176,7 @@ class LikelihoodUI:
         like.passing_requirements(model, **model.provider.params)
         like.cosmo.update_cosmo_dic(like.cosmo.cosmo_dic['z_win'], 0.05)
 
-        if (settings is None):
+        if settings is None:
             plotter = Plotter(like.cosmo.cosmo_dic, like.likefinal.data)
         else:
             settings = yaml_handler.yaml_read(settings)
@@ -188,7 +186,7 @@ class LikelihoodUI:
         plotter.output_Cl_WL()
         plotter.output_Cl_phot()
         plotter.output_Cl_XC()
-        plotter.output_GC_spec()
+        plotter.output_GC_spectro()
 
     def process_chain(self):
         r"""Main method to obtain triangle plots
@@ -235,7 +233,7 @@ class LikelihoodUI:
            The updated dict
         """
         for key, val in update_config.items():
-            if(isinstance(val, collections.abc.Mapping)):
+            if isinstance(val, collections.abc.Mapping):
                 orig_config[key] = (
                     LikelihoodUI._update_config(orig_config.get(key, {}), val)
                 )

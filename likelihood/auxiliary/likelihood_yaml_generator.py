@@ -11,7 +11,7 @@ import sys
 import warnings
 
 
-def generate_params_yaml(model=1):
+def generate_params_yaml(model=['nuisance_bias', 'nuisance_ia']):
     """
     Params Generator function.
 
@@ -49,9 +49,10 @@ def generate_params_yaml(model=1):
         'full_photo': True,
         'NL_flag': False}
 
-    if model == 0:
+    if not model:
+        print('ATTENTION: no model was selected')
         pass
-    if model == 1:
+    if model == ['nuisance_bias', 'nuisance_ia']:
         # If model = 1 is selected, bias and ia params
         # and spec multipoles are added
         nuisance_bias_path = parent_path + '/Models/nuisance_bias.yaml'
@@ -72,7 +73,8 @@ def generate_params_yaml(model=1):
                 print('an unexpected error occurred')
                 sys.exit(1)
     else:
-        print('ATTENTION: No other model is available. Please choose 1.')
+        print("ATTENTION: No other model is available." +
+              "Please choose nuisance_bias or nuisance_ia.")
 
     params_path = parent_path + '/params.yaml'
     if os.path.exists(params_path):

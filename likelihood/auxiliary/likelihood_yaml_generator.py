@@ -7,11 +7,10 @@ from pathlib import Path
 from likelihood.auxiliary import yaml_handler
 import yaml
 import os
-import sys
 import warnings
 
 
-def generate_params_yaml(model=['nuisance_bias', 'nuisance_ia']):
+def generate_params_yaml(model=None):
     """
     Params Generator function.
 
@@ -37,8 +36,8 @@ def generate_params_yaml(model=['nuisance_bias', 'nuisance_ia']):
 
     Parameters
     ----------
-    model: int
-        Tentative. Select number corresponding to a model.
+    model: list of strings
+        Strings corresponding to a model.
     """
 
     parent_path = str(Path(Path(__file__).resolve().parents[1]))
@@ -49,40 +48,18 @@ def generate_params_yaml(model=['nuisance_bias', 'nuisance_ia']):
         'full_photo': True,
         'NL_flag': False}
 
-    if not model:
-        print('ATTENTION: no model was selected')
-        pass
-    if model == ['nuisance_bias', 'nuisance_ia']:
-        # If model = 1 is selected, bias and ia params
-        # and spec multipoles are added
-        nuisance_bias_path = parent_path + '/Models/nuisance_bias.yaml'
-        nuisance_ia_path = parent_path + '/Models/nuisance_ia.yaml'
-        spec_path = parent_path + '/Models/spec.yaml'
-        params_path_list = [nuisance_bias_path, nuisance_ia_path,
-                            spec_path]
-        for params_path_element in params_path_list:
-            try:
-                with open(params_path_element) as file:
-                    params_file = yaml.load(file, Loader=yaml.FullLoader)
-                    likelihood_params.update(params_file)
-            except OSError as err:
-                print('File {0} not found. Error: {1}'.
-                      format(params_path_element, err))
-                sys.exit(1)
-            except BaseException:
-                print('an unexpected error occurred')
-                sys.exit(1)
-    else:
-        print("ATTENTION: No other model is available." +
-              "Please choose nuisance_bias or nuisance_ia.")
+    if model is None:
+        model = ['nuisance_bias', 'nuisance_ia', 'spectro']
+
+    model_paths = [parent_path + '/Models/' + mm + '.yaml' for mm in model]
+
+    for model_path in model_paths:
+        model_params = yaml_handler.yaml_read(model_path)
+        likelihood_params.update(model_params)
 
     params_path = parent_path + '/params.yaml'
-    if os.path.exists(params_path):
-        warnings.warn(
-            'Be aware that {} has been overwritten'.format(params_path))
-    with open(params_path, 'w') as outfile:
-        yaml.dump(likelihood_params, outfile, default_flow_style=False)
-        print('{} written'.format(params_path))
+    yaml_handler.yaml_write(params_path, likelihood_params, True)
+    print('{} written'.format(params_path))
 
 
 def load_model_dict_from_yaml(file_name: str):

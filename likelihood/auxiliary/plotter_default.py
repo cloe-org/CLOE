@@ -18,8 +18,8 @@ default_settings = {
     'kmin': 0.001,  # Minimum scale for spectroscopic probes
     'kmax': 0.5,  # Maximum scale for spectroscopic probes
     'nk': 1000,  # Number of bins for spectroscopic probes
-    'spec_colours': ['r', 'r', 'r'],  # Line colour for spectroscopic probes
-    'spec_linestyle': 'dashed',  # Line style for spectroscopic probes
+    'spectro_colours': ['r', 'r', 'r'],  # Line color for spectroscopic probes
+    'spectro_linestyle': 'dashed',  # Line style for spectroscopic probes
     'path': 'output/',  # Output path for storing product files
     'file_WL': 'CLOE_WL_predictions',  # Root for WL probe
     'file_GCphot': 'CLOE_GCphot_predictions',  # Root for GCphot probe

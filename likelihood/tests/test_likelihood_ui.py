@@ -1,7 +1,6 @@
 from unittest import TestCase
 from unittest.mock import patch
 from likelihood.user_interface.likelihood_ui import LikelihoodUI
-import os
 
 
 class LikelihoodUI_test(TestCase):

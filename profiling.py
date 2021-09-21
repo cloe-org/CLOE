@@ -1,25 +1,23 @@
-#General imports
+# General imports
 import numpy as np
-from scipy import integrate
 from scipy import interpolate
 import sys
 from astropy import constants as const
 import time
 from pathlib import Path
 from likelihood.photometric_survey import photo
-from likelihood.spectroscopic_survey.spec import Spec
+from likelihood.spectroscopic_survey.spectro import Spectro
 from unittest import TestCase
-import os
-#Import cobaya -need to be installed
+# Import cobaya -need to be installed
 import cobaya
-#Import external loglike from the Likelihood Package within cobaya interface module
+# Import external loglike from the Likelihood Package within cobaya interface module
 from likelihood.cobaya_interface import EuclidLikelihood
 # Generate likelihood params yaml file
 from likelihood.auxiliary.likelihood_yaml_generator import generate_params_yaml
 from likelihood.auxiliary.likelihood_yaml_generator import generate_data_yaml
 
 print("Running script: ", sys.argv[0])
-generate_params_yaml(model = ['nuisance_bias', 'nuisance_ia'])
+generate_params_yaml(model = ['nuisance_bias', 'nuisance_ia', 'spectro'])
 
 # Attention: If working outside of the likelihood environment, change this to your
 # local path where your external codes are installed (CAMB, polychord, likelihoods, etc).
@@ -41,23 +39,23 @@ if runoption == 0:
             # with the key 'prior', 'latex', etc.
             # If the prior dictionary is not passed to a parameter, this parameter is fixed.
             # In this example, we are sampling the parameter ns
-            # For more information see: https://cobaya.readthedocs.io/en/latest/example.html
-            'ombh2': 0.022445, #Omega density of baryons times the reduced Hubble parameter squared
-            'omch2': 0.1205579307, #Omega density of cold dark matter times the reduced Hubble parameter squared
-            'H0': 67, #Hubble parameter evaluated today (z=0) in km/s/Mpc
-            'tau': 0.0925, #optical depth
-            'mnu': 0.06, #  sum of the mass of neutrinos in eV
-            'nnu': 3.046, #N_eff of relativistic species
-            'As': 2.12605e-9, #Amplitude of the primordial scalar power spectrum
+            #  For more information see: https://cobaya.readthedocs.io/en/latest/example.html
+            'ombh2': 0.022445,  # Omega density of baryons times the reduced Hubble parameter squared
+            'omch2': 0.1205579307,  # Omega density of cold dark matter times the reduced Hubble parameter squared
+            'H0': 67,  # Hubble parameter evaluated today (z=0) in km/s/Mpc
+            'tau': 0.0925,  # optical depth
+            'mnu': 0.06,  # sum of the mass of neutrinos in eV
+            'nnu': 3.046,  # N_eff of relativistic species
+            'As': 2.12605e-9,  # Amplitude of the primordial scalar power spectrum
             'ns': 0.9674,  # primordial power spectrum tilt
-            'w': -1, #Dark energy fluid model
-            'wa': 0, #Dark energy fluid model
-            'omk': 0.0, #curvature density
-            'omegam': None, #DERIVED parameter: Omega matter density
-            'omegab': None, #DERIVED parameter: Omega barion density
-            'omeganu': None, #DERIVED parameter: Omega neutrino density
-            'omnuh2': None, #DERIVED parameter: Omega neutrino density times de reduced Hubble parameter squared
-            'omegac': None, #DERIVED parameter: Omega cold dark matter density
+            'w': -1,  # Dark energy fluid model
+            'wa': 0,  # Dark energy fluid model
+            'omk': 0.0,  # curvature density
+            'omegam': None,  # DERIVED parameter: Omega matter density
+            'omegab': None,  # DERIVED parameter: Omega barion density
+            'omeganu': None,  # DERIVED parameter: Omega neutrino density
+            'omnuh2': None,  # DERIVED parameter: Omega neutrino density times de reduced Hubble parameter squared
+            'omegac': None,  # DERIVED parameter: Omega cold dark matter density
             'N_eff': None,
             # Change 'like_selection' based on which observational probe you would like to use.
             # Choose among:
@@ -67,7 +65,8 @@ if runoption == 0:
             'like_selection': 12,
             # If you selected the photometric survey (1) or both (12) in 'like_selection'
             # you may want to choose between:
-            # using Galaxy Clustering photometric and Weak Lensing probes combined assuming they are independent ('full_photo': False)
+            # using Galaxy Clustering photometric and Weak Lensing probes combined
+            # assuming they are independent ('full_photo': False)
             # or Galaxy Clustering photometric, Weak Lensing and the cross-correlation between them ('full_photo': True)
             # This flag is not used if 'like_selection: 2'
             'full_photo': True,
@@ -89,14 +88,18 @@ if runoption == 0:
             'b9_photo': 1.5652475842498528,
             'b10_photo': 1.7429859437184225,
             # Spectroscopic bias parameters
-            'b1_spec': 1.46,
-            'b2_spec': 1.61,
-            'b3_spec': 1.75,
-            'b4_spec': 1.90,
+            'b1_spectro': 1.46,
+            'b2_spectro': 1.61,
+            'b3_spectro': 1.75,
+            'b4_spectro': 1.90,
             # Intrinsic alignment parameters
             'aia': 1.72,
             'nia': -0.41,
-            'bia': 0.0},
+            'bia': 0.0,
+            # GC-Spectro Multipole parameters
+            'multipole_0': 0,
+            'multipole_2': 2,
+            'multipole_4': 4},
         # 'theory': Cobaya's protected key of the input dictionary.
         # Cobaya needs to ask some minimum theoretical requirements to a Boltzman Solver
         # You can choose between CAMB or CLASS
@@ -110,17 +113,17 @@ if runoption == 0:
         # to point to your already installed CAMB code
         'theory': {'camb':
                    {'stop_at_error': True,
-                    'extra_args':{'num_massive_neutrinos': 1,
-                                  'dark_energy_model': 'ppf'}}},
+                    'extra_args': {'num_massive_neutrinos': 1,
+                                   'dark_energy_model': 'ppf'}}},
         # 'sampler': Cobaya's protected key of the input dictionary.
         # You can choose the sampler you want to use.
         # Check Cobaya's documentation to see the list of available samplers
         # In this DEMO, we use the 'evaluate' sampler to make a single computation of the posterior distributions
         # Note: at the moment, the only sampler that works is 'evaluate'
         'sampler': {'evaluate': None},
-        #'output': Cobaya's protected key of the input dictionary.
+        # 'output': Cobaya's protected key of the input dictionary.
         # Where are the results going to be stored, in case that the sampler produce output files?
-        # For example: chains...
+        #  For example: chains...
         # Modify the path below within 'output' to choose a name and a directory for those files
         'output': 'chains/my_euclid_experiment',
         # 'likelihood': Cobaya's protected key of the input dictionary.
@@ -139,12 +142,12 @@ if runoption == 0:
         # 'force': Cobaya's protected key of the input dictionary.
         # If 'force': True, Cobaya forces deleting the previous output files, if found, with the same name
         'force': True,
-	    'data': {
-            #'sample' specifies the first folder below the main data folder
+        'data': {
+            # 'sample' specifies the first folder below the main data folder
             'sample': 'ExternalBenchmark',
-            #'spec' and 'photo' specify paths to data files.
-            'spec': {
-                # GC Spec root name should contain z{:s} string
+            # 'spectro' and 'photo' specify paths to data files.
+            'spectro': {
+                # GC Spectro root name should contain z{:s} string
                 # to enable iteration over bins
                 'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
                 'redshifts': ["1.", "1.2", "1.4", "1.65"]
@@ -171,7 +174,7 @@ if runoption == 0:
     generate_data_yaml(info['data'])
 
     # This is just a call to the likelihood
-    # Full calculation photo + spec
+    # Full calculation photo + spectro
     from cobaya.model import get_model
     model = get_model(info)
     model.logposterior({})
@@ -248,8 +251,10 @@ if runoption == 1:
             pdi = np.load(str(cur_dir) + '/likelihood/tests/test_input/pdi.npy')
             pgd = np.load(str(cur_dir) + '/likelihood/tests/test_input/pgd.npy')
             pgg = np.load(str(cur_dir) + '/likelihood/tests/test_input/pgg.npy')
-            pgi_phot = np.load(str(cur_dir) + '/likelihood/tests/test_input/pgi_phot.npy')
-            pgi_spec = np.load(str(cur_dir) + '/likelihood/tests/test_input/pgi_spec.npy')
+            pgi_phot = np.load(str(cur_dir)
+                               + '/likelihood/tests/test_input/pgi_phot.npy')
+            pgi_spectro = np.load(str(cur_dir)
+                                  + '/likelihood/tests/test_input/pgi_spectro.npy')
             pii = np.load(str(cur_dir) + '/likelihood/tests/test_input/pii.npy')
 
             zs_base = np.linspace(0.0, 4.0, 100)
@@ -282,10 +287,10 @@ if runoption == 1:
                                   'b8_photo': 1.4964959071110084,
                                   'b9_photo': 1.5652475842498528,
                                   'b10_photo': 1.7429859437184225,
-                                  'b1_spec': 1.4614804,
-                                  'b2_spec': 1.6060949,
-                                  'b3_spec': 1.7464790,
-                                  'b4_spec': 1.8988660,
+                                  'b1_spectro': 1.4614804,
+                                  'b2_spectro': 1.6060949,
+                                  'b3_spectro': 1.7464790,
+                                  'b4_spectro': 1.8988660,
                                   'aia': 1.72,
                                   'nia': -0.41,
                                   'bia': 0.0,
@@ -306,31 +311,34 @@ if runoption == 1:
                                      mock_cosmo_dic['Omc'] +
                                      mock_cosmo_dic['Omb'])
             p_matter = mock_P_obj(interpolate.RectBivariateSpline(zs_base,
-                                                              ks_base,
-                                                              pdd))
+                                                                  ks_base,
+                                                                  pdd))
             mock_cosmo_dic['Pk_delta'] = p_matter
-            mock_cosmo_dic['Pgg_phot'] = interpolate.RectBivariateSpline(zs_base, ks_base,
-                                                              pgg.T,
-                                                              kx=1, ky=1)
-            mock_cosmo_dic['Pgdelta_phot'] = interpolate.RectBivariateSpline(zs_base, ks_base,
-                                                                  pgd.T,
-                                                                  kx=1, ky=1)
-            mock_cosmo_dic['Pii'] = interpolate.RectBivariateSpline(zs_base, ks_base,
-                                                         pii.T,
-                                                         kx=1, ky=1)
-            mock_cosmo_dic['Pdeltai'] = interpolate.RectBivariateSpline(zs_base, ks_base,
-                                                             pdi.T,
-                                                             kx=1, ky=1)
-            mock_cosmo_dic['Pgi_phot'] = interpolate.RectBivariateSpline(zs_base, ks_base,
-                                                              pgi_phot.T,
-                                                              kx=1, ky=1)
-            mock_cosmo_dic['Pgi_spec'] = interpolate.RectBivariateSpline(zs_base, ks_base,
-                                                              pgi_spec.T,
-                                                              kx=1, ky=1)
-            mock_cosmo_dic['Pgg_spec'] = np.vectorize(self.Pgg_spec_def)
+            mock_cosmo_dic['Pgg_phot'] = \
+                interpolate.RectBivariateSpline(zs_base, ks_base,
+                                                pgg.T, kx=1, ky=1)
+            mock_cosmo_dic['Pgdelta_phot'] = \
+                interpolate.RectBivariateSpline(zs_base, ks_base,
+                                                pgd.T, kx=1, ky=1)
+            mock_cosmo_dic['Pii'] = \
+                interpolate.RectBivariateSpline(zs_base, ks_base,
+                                                pii.T, kx=1, ky=1)
+            mock_cosmo_dic['Pdeltai'] = \
+                interpolate.RectBivariateSpline(zs_base, ks_base,
+                                                pdi.T, kx=1, ky=1)
 
-            fid_H_arr = np.load(str(cur_dir) + '/likelihood/tests/test_input/spec_fid_HZ.npy')
-            fid_d_A_arr = np.load(str(cur_dir) + '/likelihood/tests/test_input/spec_fid_d_A.npy')
+            mock_cosmo_dic['Pgi_phot'] = \
+                interpolate.RectBivariateSpline(zs_base, ks_base,
+                                                pgi_phot.T, kx=1, ky=1)
+
+            mock_cosmo_dic['Pgi_spectro'] = \
+                interpolate.RectBivariateSpline(zs_base, ks_base,
+                                                pgi_spectro.T, kx=1, ky=1)
+
+            mock_cosmo_dic['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
+
+            fid_H_arr = np.load(str(cur_dir) + '/likelihood/tests/test_input/spectro_fid_HZ.npy')
+            fid_d_A_arr = np.load(str(cur_dir) + '/likelihood/tests/test_input/spectro_fid_d_A.npy')
 
             fid_H_interp = interpolate.InterpolatedUnivariateSpline(x=zs_H,
                                                                     y=fid_H_arr,
@@ -369,10 +377,10 @@ if runoption == 1:
                                 'b8_photo': 1.4964959071110084,
                                 'b9_photo': 1.5652475842498528,
                                 'b10_photo': 1.7429859437184225,
-                                'b1_spec': 1.4614804,
-                                'b2_spec': 1.6060949,
-                                'b3_spec': 1.7464790,
-                                'b4_spec': 1.8988660,
+                                'b1_spectro': 1.4614804,
+                                'b2_spectro': 1.6060949,
+                                'b3_spectro': 1.7464790,
+                                'b4_spectro': 1.8988660,
                                 'aia': 1.72,
                                 'nia': -0.41,
                                 'bia': 0.0,
@@ -384,7 +392,7 @@ if runoption == 1:
             self.fiducial_dict = fid_mock_dic
             self.test_dict = mock_cosmo_dic
 
-            self.spec = Spec(self.test_dict, self.fiducial_dict)
+            self.spectro = Spectro(self.test_dict, self.fiducial_dict)
 
             nz_dic_WL = np.load(str(cur_dir) +
                                 '/likelihood/tests/test_input/nz_dict_WL.npy',
@@ -416,85 +424,86 @@ if runoption == 1:
             # print("len_ell_max: ", len_ell_max, "  ell_min: ", ell_min, "  ell_max:", ell_max)
             print("C_ells_list: ", C_ells_list)
             # Compute C_GC_11
-            a=time.time()
+            a = time.time()
             C_GC_11 = np.array([self.phot.Cl_GC_phot(ell, 1, 1, int_step=int_step_GC) for ell in C_ells_list])
-            b=time.time()
+            b = time.time()
             print('C_{G_phot-G_phot} = ', C_GC_11)
             print("Time: ", b - a)
 
             print("Computing shear-shear C_ells")
             print("len_ell_max: ", len_ell_max, "  ell_min: ", ell_min, "  ell_max:", ell_max)
             # Compute C_LL_11
-            a=time.time()
+            a = time.time()
             C_LL_11 = np.array([self.phot.Cl_WL(ell, 1, 1, int_step=int_step_WL) for ell in C_ells_list])
-            b=time.time()
+            b = time.time()
             print('C_{shear-shear} = ', C_LL_11)
             print("Time: ", b - a)
 
             print("Computing shear-galaxy C_ells")
             print("len_ell_max: ", len_ell_max, "  ell_min: ", ell_min, "  ell_max:", ell_max)
             # Compute C_cross_11
-            a=time.time()
+            a = time.time()
             C_cross_11 = np.array([self.phot.Cl_cross(ell, 1, 1, int_step=int_step_cross) for ell in C_ells_list])
-            b=time.time()
+            b = time.time()
             print('C_{G_phot-shear} = ', C_cross_11)
             print("Time: ", b - a)
 
             ##############################
-            # SPEC
+            # SPECTRO
             print("Initializing the spectroscopic calculation.")
 
             print("All examples are here at z = 1, k = 0.1/Mpc.")
             print("Computing multipole spectrum P0")
-            a=time.time()
-            p0_spec = self.spec.multipole_spectra(1.0, 0.1, ms=[0])
-            b=time.time()
-            print('P0 = ', p0_spec)
+            a = time.time()
+            p0_spectro = self.spectro.multipole_spectra(1.0, 0.1, ms=[0])
+            b = time.time()
+            print('P0 = ', p0_spectro)
             print("Time: ", b - a)
 
             print("Computing multipole spectrum P1")
-            a=time.time()
-            p1_spec = self.spec.multipole_spectra(1.0, 0.1, ms=[1])
-            b=time.time()
-            print('P1 = ', p1_spec)
+            a = time.time()
+            p1_spectro = self.spectro.multipole_spectra(1.0, 0.1, ms=[1])
+            b = time.time()
+            print('P1 = ', p1_spectro)
             print("Time: ", b - a)
 
             print("Computing multipole spectrum P2")
-            a=time.time()
-            p2_spec = self.spec.multipole_spectra(1.0, 0.1, ms=[2])
-            b=time.time()
-            print('P2 = ', p2_spec)
+            a = time.time()
+            p2_spectro = self.spectro.multipole_spectra(1.0, 0.1, ms=[2])
+            b = time.time()
+            print('P2 = ', p2_spectro)
             print("Time: ", b - a)
 
             print("Computing multipole spectrum P3")
-            a=time.time()
-            p3_spec = self.spec.multipole_spectra(1.0, 0.1, ms=[3])
-            b=time.time()
-            print('P3 = ', p3_spec)
+            a = time.time()
+            p3_spectro = self.spectro.multipole_spectra(1.0, 0.1, ms=[3])
+            b = time.time()
+            print('P3 = ', p3_spectro)
             print("Time: ", b - a)
 
             print("Computing multipole spectrum P4")
-            a=time.time()
-            p4_spec = self.spec.multipole_spectra(1.0, 0.1, ms=[4])
-            b=time.time()
-            print('P4 = ', p4_spec)
+            a = time.time()
+            p4_spectro = self.spectro.multipole_spectra(1.0, 0.1, ms=[4])
+            b = time.time()
+            print('P4 = ', p4_spectro)
             print("Time: ", b - a)
 
             print("Computing ALL multipole spectra")
-            a=time.time()
-            pall_spec = self.spec.multipole_spectra(1.0, 0.1)
-            b=time.time()
-            print('P024 = ', pall_spec)
+            a = time.time()
+            pall_spectro = self.spectro.multipole_spectra(1.0, 0.1)
+            b = time.time()
+            print('P024 = ', pall_spectro)
             print("Time: ", b - a)
 
+        def istf_spectro_galbias(self, redshift, bin_edge_list=None):
 
-        def istf_spec_galbias(self, redshift,
-                              bin_edge_list=[0.90, 1.10, 1.30,
-                                             1.50, 1.80]):
-            istf_bias_list = [self.test_dict['nuisance_parameters']['b1_spec'],
-                              self.test_dict['nuisance_parameters']['b2_spec'],
-                              self.test_dict['nuisance_parameters']['b3_spec'],
-                              self.test_dict['nuisance_parameters']['b4_spec']]
+            if bin_edge_list is None:
+                bin_edge_list = [0.90, 1.10, 1.30, 1.50, 1.80]
+
+            istf_bias_list = [self.test_dict['nuisance_parameters']['b1_spectro'],
+                              self.test_dict['nuisance_parameters']['b2_spectro'],
+                              self.test_dict['nuisance_parameters']['b3_spectro'],
+                              self.test_dict['nuisance_parameters']['b4_spectro']]
 
             if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
                 for i in range(len(bin_edge_list) - 1):
@@ -506,8 +515,8 @@ if runoption == 1:
                 bi_val = istf_bias_list[0]
             return bi_val
 
-        def Pgg_spec_def(self, redshift, k_scale, mu_rsd):
-            bias = self.istf_spec_galbias(redshift)
+        def Pgg_spectro_def(self, redshift, k_scale, mu_rsd):
+            bias = self.istf_spectro_galbias(redshift)
             growth = self.test_dict['f_z'](redshift)
             power = self.test_dict['Pk_delta'].P(redshift, k_scale)
             pval = (bias + growth * mu_rsd ** 2.0) ** 2.0 * power

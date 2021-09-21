@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from likelihood.auxiliary.run_method import run_is_interactive
 from likelihood.auxiliary.plotter_default import default_settings
 from likelihood.photometric_survey.photo import Photo
-from likelihood.spectroscopic_survey.spec import Spec
+from likelihood.spectroscopic_survey.spectro import Spectro
 from likelihood.data_reader.reader import Reader
 from matplotlib import rc
 rc('font', **{'family': 'serif',
@@ -47,18 +47,18 @@ class Plotter:
         self.cosmo_dic = cosmo_dic
         self.read_data = Reader(data)
         self.read_data.compute_nz()
-        self.read_data.read_GC_spec()
+        self.read_data.read_GC_spectro()
         self.read_data.read_phot()
         # As we currently don't have a way to load fiducial r(z), d(z) and
         # H(z)s, these are currently set to match the ones from the cosmo_dic.
         # This will need to be fixed once this is decided.
-        fid_dict = self.read_data.data_spec_fiducial_cosmo
+        fid_dict = self.read_data.data_spectro_fiducial_cosmo
         fid_dict['d_z_func'] = self.cosmo_dic['d_z_func']
         fid_dict['r_z_func'] = self.cosmo_dic['r_z_func']
         fid_dict['H_z_func'] = self.cosmo_dic['H_z_func']
         self.phot_ins = Photo(cosmo_dic, self.read_data.nz_dict_WL,
                               self.read_data.nz_dict_GC_Phot)
-        self.spec_ins = Spec(cosmo_dic, fid_dict)
+        self.spec_ins = Spectro(cosmo_dic, fid_dict)
 
         self.binX = settings['binX']
         self.binY = settings['binY']
@@ -76,8 +76,8 @@ class Plotter:
         self.nk = settings['nk']
         self.ks = self._set_binning(self.kmin, self.kmax, self.nk,
                                     settings['ktype'])
-        self.scols = settings['spec_colours']
-        self.sls = settings['spec_linestyle']
+        self.scols = settings['spectro_colours']
+        self.sls = settings['spectro_linestyle']
 
         self.path = settings['path']
         self.file_WL = settings['file_WL']
@@ -94,14 +94,14 @@ class Plotter:
             The left edge of the bins
         xmax: float
             The right edge of the bins
-        nx: float
+        nx: int
             Number of bins
         btype: str
             Binning type (can be either 'lin' or 'log')
 
         Returns
         -------
-        numpy.ndarray
+        binning: numpy.ndarray
             The linear/logarithmic sampling in the range [xmin,xmax]
             with nx number of samples
 
@@ -110,9 +110,9 @@ class Plotter:
         ValueError
             If btype is neither 'lin' or 'log'
         """
-        if (btype == 'lin'):
-            return np.linspace(xmin, xmax, nk)
-        elif (btype == 'log'):
+        if btype == 'lin':
+            return np.linspace(xmin, xmax, nx)
+        elif btype == 'log':
             return np.logspace(np.log10(xmin), np.log10(xmax), nx)
         else:
             raise ValueError('Bin type has to be chosen from '
@@ -363,11 +363,12 @@ class Plotter:
                            color=pl_colour, alpha=0.2)
         return pl_ax
 
-    def plot_GC_spec_multipole(self, redshift, ks, multipole_order, pl_ax,
-                               pl_label=None, pl_colour='b', pl_linestyle='-'):
-        """Plot GC Spec Multipole
+    def plot_GC_spectro_multipole(self, redshift, ks, multipole_order, pl_ax,
+                                  pl_label=None, pl_colour='b',
+                                  pl_linestyle='-'):
+        """Plot GC Spectro Multipole
 
-        Plots GC-spec multipole spectra as calculated by the cosmobox, for a
+        Plots GC-spectro multipole spectra as calculated by the cosmobox, for a
         given redshift, set of ks, and multipole order.
 
         Parameters
@@ -395,7 +396,7 @@ class Plotter:
         if np.min(ks) < 0.001 or np.max(ks) > 0.5:
             raise Exception('ks must be between 0.001 and 0.5')
         if redshift > 1.8:
-            raise Exception('Euclid maximum redshift for GC-spec is 1.8.')
+            raise Exception('Euclid maximum redshift for GC-spectro is 1.8.')
         if multipole_order not in [0, 2, 4]:
             raise Exception('Multipole order must be 0, 2, or 4.')
         pk_arr = np.array([self.spec_ins.multipole_spectra(
@@ -406,11 +407,12 @@ class Plotter:
                    linestyle=pl_linestyle)
         return pl_ax
 
-    def plot_external_GC_spec(self, redshift, multipole_order, pl_ax,
-                              pl_label=None, pl_colour='b', pl_linestyle='-'):
-        """Plot External GC Spec
+    def plot_external_GC_spectro(self, redshift, multipole_order, pl_ax,
+                                 pl_label=None, pl_colour='b',
+                                 pl_linestyle='-'):
+        """Plot External GC Spectro
 
-        Plots GC-spec multipole spectra from OU-LE3 files, for a
+        Plots GC-spectro multipole spectra from OU-LE3 files, for a
         given redshift, and multipole order, with errors.
 
         Parameters
@@ -432,24 +434,24 @@ class Plotter:
             Matplotlib linestyle choice for current plot. Default is '-'.
         """
         if float(redshift) > 1.8:
-            raise Exception('Euclid maximum redshift for GC-spec is 1.8.')
+            raise Exception('Euclid maximum redshift for GC-spectro is 1.8.')
         if multipole_order not in [0, 2, 4]:
             raise Exception('Multipole order must be 0, 2, or 4.')
-        # Note: The format for the GC-Spec Covariance matrix is also not
+        # Note: The format for the GC-Spectro Covariance matrix is also not
         # completely fixed yet. If the format changes, this section of code
         # should be reviewed to ensure it correctly extracts the error bars.
-        cov = self.read_data.data_dict['GC-Spec'][redshift]['cov']
-        samp_ks = self.read_data.data_dict['GC-Spec'][redshift]['k_pk']
+        cov = self.read_data.data_dict['GC-Spectro'][redshift]['cov']
+        samp_ks = self.read_data.data_dict['GC-Spectro'][redshift]['k_pk']
         errs = np.sqrt(np.diagonal(cov))
         nk = len(samp_ks)
         if multipole_order == 0:
-            pk = self.read_data.data_dict['GC-Spec'][redshift]['pk0']
+            pk = self.read_data.data_dict['GC-Spectro'][redshift]['pk0']
             epk = errs[0:nk]
         elif multipole_order == 2:
-            pk = self.read_data.data_dict['GC-Spec'][redshift]['pk2']
+            pk = self.read_data.data_dict['GC-Spectro'][redshift]['pk2']
             epk = errs[nk:2 * nk]
         elif multipole_order == 4:
-            pk = self.read_data.data_dict['GC-Spec'][redshift]['pk4']
+            pk = self.read_data.data_dict['GC-Spectro'][redshift]['pk4']
             epk = errs[2 * nk:]
         if pl_label is None:
             pl_label = "OU-LE3 l={:d}".format(multipole_order)
@@ -550,28 +552,28 @@ class Plotter:
                    fmt='%.12e', delimiter='\t', newline='\n',
                    header=f'{"ell" : >16}{"Cell[sr^(-1)]" : >24}')
 
-    def output_GC_spec(self):
+    def output_GC_spectro(self):
         r"""Plot spectroscopic clustering observable
         """
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
-        if (self.redshift in [1.0, 1.2, 1.4, 1.65]):
-            ax = self.plot_external_GC_spec(str(self.redshift), 0, ax,
-                                            pl_colour='blue')
-            ax = self.plot_external_GC_spec(str(self.redshift), 2, ax,
-                                            pl_colour='royalblue')
-            ax = self.plot_external_GC_spec(str(self.redshift), 4, ax,
-                                            pl_colour='dodgerblue')
-        ax = self.plot_GC_spec_multipole(self.redshift, self.ks, 0,
-                                         ax, pl_colour=self.scols[0],
-                                         pl_linestyle=self.sls)
-        ax = self.plot_GC_spec_multipole(self.redshift, self.ks, 2,
-                                         ax, pl_colour=self.scols[1],
-                                         pl_linestyle=self.sls)
-        ax = self.plot_GC_spec_multipole(self.redshift, self.ks, 4,
-                                         ax, pl_colour=self.scols[2],
-                                         pl_linestyle=self.sls)
-        self._set_ax(ax, title=f'GC-spec $z={self.redshift}$',
+        if self.redshift in [1.0, 1.2, 1.4, 1.65]:
+            ax = self.plot_external_GC_spectro(str(self.redshift), 0, ax,
+                                               pl_colour='blue')
+            ax = self.plot_external_GC_spectro(str(self.redshift), 2, ax,
+                                               pl_colour='royalblue')
+            ax = self.plot_external_GC_spectro(str(self.redshift), 4, ax,
+                                               pl_colour='dodgerblue')
+        ax = self.plot_GC_spectro_multipole(self.redshift, self.ks, 0, ax,
+                                            pl_colour=self.scols[0],
+                                            pl_linestyle=self.sls)
+        ax = self.plot_GC_spectro_multipole(self.redshift, self.ks, 2, ax,
+                                            pl_colour=self.scols[1],
+                                            pl_linestyle=self.sls)
+        ax = self.plot_GC_spectro_multipole(self.redshift, self.ks, 4, ax,
+                                            pl_colour=self.scols[2],
+                                            pl_linestyle=self.sls)
+        self._set_ax(ax, title=f'GC-spectro $z={self.redshift}$',
                      xlabel=r'$k$ $[\mathrm{Mpc}^{-1}]$',
                      ylabel=r'$P_\ell$ $[\mathrm{Mpc}^3]$',
                      fontsize=20, xscale='log', yscale='log')

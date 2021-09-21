@@ -75,8 +75,8 @@ class Misc:
                (1 + redshift) ** nia * lum ** bia)
         return fia
 
-    def istf_spec_galbias(self, redshift, bin_edges=None):
-        """Istf Spec Galbias
+    def istf_spectro_galbias(self, redshift, bin_edges=None):
+        """Istf Spectro Galbias
 
         Gets galaxy bias for the spectroscopic galaxy clustering
         probe, at given redshift(s), according to the linear recipe
@@ -115,13 +115,13 @@ class Misc:
 
         try:
             z_bin = rb.find_bin(redshift, bin_edges, False)
-            bi_val = np.array([nuisance_src[f'b{i}_spec']
+            bi_val = np.array([nuisance_src[f'b{i}_spectro']
                               for i in np.nditer(z_bin)])
             return bi_val[0] if np.isscalar(redshift) else bi_val
         except (ValueError, KeyError):
             raise ValueError('Spectroscopic galaxy bias cannot be obtained. '
                              'Check that redshift is inside the bin edges'
-                             'and valid bi_spec\'s are provided.')
+                             'and valid bi_spectro\'s are provided.')
 
     def istf_phot_galbias(self, redshift, bin_edges=None):
         r"""Istf Phot Galbias

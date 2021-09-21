@@ -4,7 +4,7 @@
 
 mock_data = {
   'sample': 'ExternalBenchmark',
-  'spec': {
+  'spectro': {
     'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
     'redshifts': ["1.", "1.2", "1.4", "1.65"]},
   'photo': {

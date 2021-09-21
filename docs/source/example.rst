@@ -74,10 +74,10 @@ An external likelihood can be supplied to **cobaya** directly through a Python i
             'b9_photo': 1.5652475842498528,
             'b10_photo': 1.7429859437184225,
             # Spectroscopic bias parameters
-            'b1_spec': 1.46,
-            'b2_spec': 1.61,
-            'b3_spec': 1.75,
-            'b4_spec': 1.90},
+            'b1_spectro': 1.46,
+            'b2_spectro': 1.61,
+            'b3_spectro': 1.75,
+            'b4_spectro': 1.90},
         #'theory': Cobaya's protected key of the input dictionary.
         # Cobaya needs to ask some minimum theoretical requirements to a Boltzman Solver
         # (UC): you can choose between CAMB or CLASS

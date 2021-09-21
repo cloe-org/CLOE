@@ -15,13 +15,13 @@ class datareaderTestCase(TestCase):
 
     def setUp(self):
         self.data_tester = Reader(mock_data)
-        self.main_key_check = ['GC-Spec', 'GC-Phot', 'WL', 'XC-Phot']
+        self.main_key_check = ['GC-Spectro', 'GC-Phot', 'WL', 'XC-Phot']
         self.nz_key_check = ['n1', 'n2', 'n3', 'n4', 'n5',
                              'n6', 'n7', 'n8', 'n9', 'n10']
         self.fiducial_key_check = ['H0', 'omch2', 'ombh2',
                                    'ns', 'sigma8_0', 'w',
                                    'omkh2', 'omnuh2', 'Omnu']
-        self.cov_check_GC_spec = 1.217193e+08
+        self.cov_check_GC_spectro = 1.217193e+08
         self.cov_check_WL = 2.654605e-09
         self.cov_check_GC_phot = 1.693992e-05
         self.cov_check_XC = 4.403701e-04
@@ -80,13 +80,13 @@ class datareaderTestCase(TestCase):
                             'raw n(z) WL data')
 
     def test_gc_fname_exception(self):
-        npt.assert_raises(Exception, self.data_tester.read_GC_spec,
+        npt.assert_raises(Exception, self.data_tester.read_GC_spectro,
                           file_names='cov_power_galaxies_dk0p004.fits')
 
     def test_bench_gc_cov_check(self):
-        self.data_tester.read_GC_spec()
-        test_cov = self.data_tester.data_dict['GC-Spec']['1.2']['cov'][1, 1]
-        npt.assert_allclose(test_cov, self.cov_check_GC_spec,
+        self.data_tester.read_GC_spectro()
+        test_cov = self.data_tester.data_dict['GC-Spectro']['1.2']['cov'][1, 1]
+        npt.assert_allclose(test_cov, self.cov_check_GC_spectro,
                             rtol=1e-3,
                             err_msg='Error in loading external spectroscopic'
                                     ' test data.')
@@ -145,7 +145,7 @@ class datareaderTestCase(TestCase):
                                     ' test power spectra data.')
 
     def test_fiducial_reading_check(self):
-        self.data_tester.read_GC_spec()
+        self.data_tester.read_GC_spectro()
         npt.assert_equal(list(
-                        self.data_tester.data_spec_fiducial_cosmo.keys()),
+                        self.data_tester.data_spectro_fiducial_cosmo.keys()),
                         self.fiducial_key_check)

@@ -4,7 +4,7 @@ Class to compute non-linear recipes.
 """
 
 from likelihood.non_linear.miscellanous import Misc
-from likelihood.non_linear.pgg_spec import Pgg_spec_model
+from likelihood.non_linear.pgg_spectro import Pgg_spectro_model
 from likelihood.non_linear.pgg_phot import Pgg_phot_model
 from likelihood.non_linear.pgL_phot import PgL_phot_model
 from likelihood.non_linear.pLL_phot import PLL_phot_model
@@ -37,7 +37,7 @@ class Nonlinear:
 
         self.misc = Misc(cosmo_dic)
 
-        self.Pgg_spec_model = Pgg_spec_model(cosmo_dic, self.misc)
+        self.Pgg_spectro_model = Pgg_spectro_model(cosmo_dic, self.misc)
         self.Pgg_phot_model = Pgg_phot_model(cosmo_dic, self.misc)
         self.PgL_phot_model = PgL_phot_model(cosmo_dic, self.misc)
         self.PLL_phot_model = PLL_phot_model(cosmo_dic, self.misc)
@@ -63,7 +63,7 @@ class Nonlinear:
 
         self.misc.update_dic(cosmo_dic)
 
-        self.Pgg_spec_model.update_dic(cosmo_dic, self.misc)
+        self.Pgg_spectro_model.update_dic(cosmo_dic, self.misc)
         self.Pgg_phot_model.update_dic(cosmo_dic, self.misc)
         self.PgL_phot_model.update_dic(cosmo_dic, self.misc)
         self.PLL_phot_model.update_dic(cosmo_dic, self.misc)
@@ -102,23 +102,23 @@ class Nonlinear:
         boost = 1.0
         return boost
 
-    def Pgg_spec_def(self, redshift, k_scale, mu_rsd):
-        r"""Interface for Pgg_spec_def
+    def Pgg_spectro_def(self, redshift, k_scale, mu_rsd):
+        r"""Interface for Pgg_spectro_def
 
         Returns the spectroscopic galaxy-galaxy power spectrum,
-        defined in the pgg_spec module
+        defined in the pgg_spectro module
         """
-        return self.Pgg_spec_model.Pgg_spec_def(redshift,
-                                                k_scale, mu_rsd)
+        return self.Pgg_spectro_model.Pgg_spectro_def(redshift,
+                                                      k_scale, mu_rsd)
 
-    def Pgdelta_spec_def(self, redshift, k_scale, mu_rsd):
-        r"""Interface for Pgdelta_spec_def
+    def Pgdelta_spectro_def(self, redshift, k_scale, mu_rsd):
+        r"""Interface for Pgdelta_spectro_def
 
         Returns the spectroscopic galaxy-density power spectrum,
-        defined in the pgg_spec module
+        defined in the pgg_spectro module
         """
-        return self.Pgg_spec_model.Pgdelta_spec_def(redshift,
-                                                    k_scale, mu_rsd)
+        return self.Pgg_spectro_model.Pgdelta_spectro_def(redshift,
+                                                          k_scale, mu_rsd)
 
     def Pgg_phot_def(self, redshift, k_scale):
         r"""Interface for Pgg_phot_def
@@ -152,13 +152,13 @@ class Nonlinear:
         """
         return self.PLL_phot_model.Pgi_phot_def(redshift, k_scale)
 
-    def Pgi_spec_def(self, redshift, k_scale):
-        r"""Interface for Pgi_spec_def
+    def Pgi_spectro_def(self, redshift, k_scale):
+        r"""Interface for Pgi_spectro_def
 
         Returns the spectroscopic galaxy-intrinsic power spectrum,
         defined in the pLL_phot module
         """
-        return self.PLL_phot_model.Pgi_spec_def(redshift, k_scale)
+        return self.PLL_phot_model.Pgi_spectro_def(redshift, k_scale)
 
     def Pgdelta_phot_def(self, redshift, k_scale):
         r"""Interface for Pgdelta_phot_def

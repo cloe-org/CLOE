@@ -95,7 +95,7 @@ class plotterTestCase(TestCase):
         pgd = np.load(str(cur_dir) + '/test_input/pgd.npy')
         pgg = np.load(str(cur_dir) + '/test_input/pgg.npy')
         pgi_phot = np.load(str(cur_dir) + '/test_input/pgi_phot.npy')
-        pgi_spec = np.load(str(cur_dir) + '/test_input/pgi_spec.npy')
+        pgi_spectro = np.load(str(cur_dir) + '/test_input/pgi_spectro.npy')
         pii = np.load(str(cur_dir) + '/test_input/pii.npy')
 
         zs_base = np.linspace(0.0, 4.0, 100)
@@ -128,10 +128,10 @@ class plotterTestCase(TestCase):
                               'b8_photo': 1.4964959071110084,
                               'b9_photo': 1.5652475842498528,
                               'b10_photo': 1.7429859437184225,
-                              'b1_spec': 1.4614804,
-                              'b2_spec': 1.6060949,
-                              'b3_spec': 1.7464790,
-                              'b4_spec': 1.8988660,
+                              'b1_spectro': 1.4614804,
+                              'b2_spectro': 1.6060949,
+                              'b3_spectro': 1.7464790,
+                              'b4_spectro': 1.8988660,
                               'aia': 1.72,
                               'nia': -0.41,
                               'bia': 0.0}
@@ -168,11 +168,9 @@ class plotterTestCase(TestCase):
         mock_cosmo_dic['Pgi_phot'] = interpolate.interp2d(zs_base, ks_base,
                                                           pgi_phot.T,
                                                           fill_value=0.0)
-        mock_cosmo_dic['Pgi_spec'] = interpolate.interp2d(zs_base, ks_base,
-                                                          pgi_spec.T,
-                                                          fill_value=0.0)
-        mock_cosmo_dic['Pgg_spec'] = np.vectorize(self.Pgg_spec_def)
-
+        mock_cosmo_dic['Pgi_spectro'] = interpolate.interp2d(zs_base, ks_base,
+                                                             pgi_spectro.T,
+                                                             fill_value=0.0)
         fig1 = plt.figure()
         self.ax1 = fig1.add_subplot(1, 1, 1)
 
@@ -180,80 +178,6 @@ class plotterTestCase(TestCase):
 
     def tearDown(self):
         pass
-
-    def istf_spec_galbias(self, redshift,
-                          bin_edge_list=[0.90, 1.10, 1.30, 1.50, 1.80]):
-        """
-        Updates galaxy bias for the spectroscopic galaxy clustering
-        probe, at given redshift, according to default recipe.
-
-        Note: for redshifts above the final bin (z > 1.80), we use the bias
-        from the final bin. Similarly, for redshifts below the first bin
-        (z < 0.90), we use the bias of the first bin.
-
-        Attention: this will change in the future
-
-        Parameters
-        ----------
-        redshift: float
-            Redshift at which to calculate bias.
-        bin_edge_list: list
-            List of redshift bin edges for spectroscopic GC probe.
-            Default is Euclid IST: Forecasting choices.
-
-        Returns
-        -------
-        bi_val: float
-            Value of spectroscopic galaxy bias at input redshift
-        """
-
-        istf_bias_list = [self.test_dict['nuisance_parameters']['b1_spec'],
-                          self.test_dict['nuisance_parameters']['b2_spec'],
-                          self.test_dict['nuisance_parameters']['b3_spec'],
-                          self.test_dict['nuisance_parameters']['b4_spec']]
-
-        if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
-            for i in range(len(bin_edge_list) - 1):
-                if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
-                    bi_val = istf_bias_list[i]
-        elif redshift >= bin_edge_list[-1]:
-            bi_val = istf_bias_list[-1]
-        elif redshift < bin_edge_list[0]:
-            bi_val = istf_bias_list[0]
-        return bi_val
-
-    def Pgg_spec_def(self, redshift, k_scale, mu_rsd):
-        r"""
-        Computes the redshift-space galaxy-galaxy power spectrum for the
-        spectroscopic probe.
-
-        .. math::
-            P_{\rm gg}^{\rm spec}(z, k) &=\
-            [b_{\rm g}^{\rm spec}(z) + f(z, k)\mu_{k}^2]^2\
-            P_{\rm \delta\delta}(z, k)\\
-
-        Parameters
-        ----------
-        redshift: float
-            Redshift at which to evaluate the power spectrum.
-        k_scale: float
-            k-mode at which to evaluate the power spectrum.
-        mu_rsd: float
-            cosinus of the angle between the pair separation and
-            the line of sight
-
-        Returns
-        -------
-        pval: float
-            Value of galaxy-galaxy power spectrum
-            at a given redshift, k-mode and :math:`\mu_{k}`
-            for galaxy cclustering spectroscopic
-        """
-        bias = self.istf_spec_galbias(redshift)
-        growth = self.test_dict['f_z'](redshift)
-        power = self.test_dict['Pk_delta'].P(redshift, k_scale)
-        pval = (bias + growth * mu_rsd ** 2.0) ** 2.0 * power
-        return pval
 
     def test_plotter_init(self):
         npt.assert_raises(Exception, Plotter)
@@ -281,20 +205,20 @@ class plotterTestCase(TestCase):
         npt.assert_raises(Exception, self.plot_inst.plot_external_Cl_XC,
                           10, 1)
 
-    def test_plot_GC_spec_multipole_excep(self):
-        npt.assert_raises(Exception, self.plot_inst.plot_GC_spec_multipole,
+    def test_plot_GC_spectro_multipole_excep(self):
+        npt.assert_raises(Exception, self.plot_inst.plot_GC_spectro_multipole,
                           0.1, np.array([0.1]), 5, self.ax1)
-        npt.assert_raises(Exception, self.plot_inst.plot_GC_spec_multipole,
+        npt.assert_raises(Exception, self.plot_inst.plot_GC_spectro_multipole,
                           0.1, np.array([0.1]), 2)
-        npt.assert_raises(Exception, self.plot_inst.plot_GC_spec_multipole,
+        npt.assert_raises(Exception, self.plot_inst.plot_GC_spectro_multipole,
                           0.1, np.array([10.0]), 2, self.ax1)
-        npt.assert_raises(Exception, self.plot_inst.plot_GC_spec_multipole,
+        npt.assert_raises(Exception, self.plot_inst.plot_GC_spectro_multipole,
                           3.0, np.array([0.1]), 2, self.ax1)
 
-    def test_ext_GC_spec_multipole_excep(self):
-        npt.assert_raises(Exception, self.plot_inst.plot_GC_spec_multipole,
+    def test_ext_GC_spectro_multipole_excep(self):
+        npt.assert_raises(Exception, self.plot_inst.plot_GC_spectro_multipole,
                           "1.2", 5, self.ax1)
-        npt.assert_raises(Exception, self.plot_inst.plot_GC_spec_multipole,
+        npt.assert_raises(Exception, self.plot_inst.plot_GC_spectro_multipole,
                           "1.2", 2)
-        npt.assert_raises(Exception, self.plot_inst.plot_GC_spec_multipole,
+        npt.assert_raises(Exception, self.plot_inst.plot_GC_spectro_multipole,
                           "3.0", 2, self.ax1)

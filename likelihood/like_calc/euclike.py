@@ -7,7 +7,7 @@ Contains class to compute the Euclid likelihood
 import numpy as np
 from likelihood.cosmo.cosmology import Cosmology
 from likelihood.photometric_survey.photo import Photo
-from likelihood.spectroscopic_survey.spec import Spec
+from likelihood.spectroscopic_survey.spectro import Spectro
 from likelihood.data_reader import reader
 
 
@@ -43,15 +43,15 @@ class Euclike:
 
         self.data_ins = reader.Reader(self.data)
         self.data_ins.compute_nz()
-        # Read spec
-        self.data_ins.read_GC_spec()
-        self.zkeys = self.data_ins.data_dict['GC-Spec'].keys()
-        self.data_spec_fiducial_cosmo = \
-            self.data_ins.data_spec_fiducial_cosmo
+        # Read spectro
+        self.data_ins.read_GC_spectro()
+        self.zkeys = self.data_ins.data_dict['GC-Spectro'].keys()
+        self.data_spectro_fiducial_cosmo = \
+            self.data_ins.data_spectro_fiducial_cosmo
         # Transforming data
-        self.specdatafinal = self.create_spec_data()
-        self.speccovfinal = self.create_spec_cov()
-        self.specinvcovfinal = np.linalg.inv(self.speccovfinal)
+        self.spectrodatafinal = self.create_spectro_data()
+        self.spectrocovfinal = self.create_spectro_cov()
+        self.spectroinvcovfinal = np.linalg.inv(self.spectrocovfinal)
         # Read photo
         self.data_ins.read_phot()
         self.photoinvcovfinal_GC = np.linalg.inv(
@@ -145,7 +145,7 @@ class Euclike:
 
         Parameters
         ----------
-        photo_ins: object
+        phot_ins: object
             initialized instance of the class Photo
         full_photo: boolean
             selects whether to use full photometric
@@ -201,8 +201,8 @@ class Euclike:
 
         return theoryvec_dict
 
-    def create_spec_theory(self, dictionary, dictionary_fiducial):
-        """Create Spec Theory
+    def create_spectro_theory(self, dictionary, dictionary_fiducial):
+        """Create Spectro Theory
 
         Obtains the theory for the likelihood.
 
@@ -222,22 +222,21 @@ class Euclike:
             returns the theory array with same indexing/format as the data
         """
 
-        spec_ins = Spec(dictionary, dictionary_fiducial)
+        spec_ins = Spectro(dictionary, dictionary_fiducial)
         m_ins = [v for k, v in dictionary['nuisance_parameters'].items()
                  if k.startswith('multipole_')]
-        theoryvec = []
         k_m_matrices = []
         for z_ins in self.zkeys:
             k_m_matrix = []
-            for k_ins in self.data_ins.data_dict['GC-Spec'][z_ins]['k_pk']:
+            for k_ins in self.data_ins.data_dict['GC-Spectro'][z_ins]['k_pk']:
                 k_m_matrix.append(spec_ins.multipole_spectra(
                                         float(z_ins), k_ins, ms=m_ins))
             k_m_matrices.append(k_m_matrix)
         theoryvec = np.hstack(k_m_matrices).T.flatten()
         return theoryvec
 
-    def create_spec_data(self):
-        """Create Spec Data
+    def create_spectro_data(self):
+        """Create Spectro Data
 
         Arranges the data vector for the likelihood into its final format
 
@@ -251,11 +250,11 @@ class Euclike:
         for z_ins in self.zkeys:
             for m_ins in [0, 2, 4]:
                 datavec = np.append(datavec, self.data_ins.data_dict[
-                              'GC-Spec'][z_ins]['pk' + str(m_ins)])
+                              'GC-Spectro'][z_ins]['pk' + str(m_ins)])
         return datavec
 
-    def create_spec_cov(self):
-        """Create Spec Cov
+    def create_spectro_cov(self):
+        """Create Spectro Cov
 
         Arranges the covariance for the likelihood into its final format
 
@@ -271,7 +270,7 @@ class Euclike:
         self.covnumk.append(0)
         for z_ins in self.zkeys:
             self.covnumk.append(
-                3 * len(self.data_ins.data_dict['GC-Spec'][z_ins]['k_pk']))
+                3 * len(self.data_ins.data_dict['GC-Spectro'][z_ins]['k_pk']))
 
         # Put all covariances into a single/larger covariance.
         # As no cross-covariances, this takes on a block-form
@@ -283,7 +282,7 @@ class Euclike:
         for z_ins in self.zkeys:
             c1 = c1 + self.covnumk[kc]
             c2 = c2 + self.covnumk[kc + 1]
-            covfull[c1:c2, c1:c2] = self.data_ins.data_dict['GC-Spec'][
+            covfull[c1:c2, c1:c2] = self.data_ins.data_dict['GC-Spectro'][
                                         z_ins]['cov']
             kc = kc + 1
 
@@ -374,21 +373,21 @@ class Euclike:
             self.loglike_tot, self.photothvec = \
                     self.loglike_photo(dictionary, full_photo)
         elif like_selection == 2:
-            self.specthvec = self.create_spec_theory(
+            self.specthvec = self.create_spectro_theory(
                              dictionary, dictionary_fiducial)
-            dmt = self.specdatafinal - self.specthvec
+            dmt = self.spectrodatafinal - self.specthvec
             self.loglike_tot = -0.5 * np.dot(
-                np.dot(dmt, self.specinvcovfinal), dmt)
+                np.dot(dmt, self.spectroinvcovfinal), dmt)
         elif like_selection == 12:
-            self.specthvec = self.create_spec_theory(
+            self.specthvec = self.create_spectro_theory(
                              dictionary, dictionary_fiducial)
-            dmt = self.specdatafinal - self.specthvec
-            self.loglike_spec = -0.5 * np.dot(np.dot(
-                                    dmt, self.specinvcovfinal), dmt)
+            dmt = self.spectrodatafinal - self.specthvec
+            self.loglike_spectro = -0.5 * np.dot(np.dot(
+                                    dmt, self.spectroinvcovfinal), dmt)
             self.loglike_photo, self.photothvec = \
                 self.loglike_photo(dictionary, full_photo)
             # Only addition below if no cross-covariance
-            self.loglike_tot = self.loglike_photo + self.loglike_spec
+            self.loglike_tot = self.loglike_photo + self.loglike_spectro
         else:
             raise CobayaInterfaceError(
                 r"Choose like selection '1' or '2' or '12'")

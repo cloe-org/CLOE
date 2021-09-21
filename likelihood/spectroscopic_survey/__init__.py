@@ -6,6 +6,6 @@ In this module we include functions needed for spectroscopic observables
 
 """
 
-__all__ = ['spec']  # list submodules
+__all__ = ['spectro']  # list submodules
 
 from . import *

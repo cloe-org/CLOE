@@ -1,5 +1,5 @@
 """
-module: spec
+module: spectro
 
 Prototype computation of spectroscopic galaxy clustering likelihood.
 """
@@ -10,7 +10,7 @@ from scipy.special import legendre
 from scipy import integrate
 
 
-class Spec:
+class Spectro:
     r"""
     Class for Galaxy clustering spectroscopic observable
     """
@@ -18,7 +18,7 @@ class Spec:
     def __init__(self, cosmo_dic, fiducial_dic):
         """Initialize
 
-        Constructor of the class Spec
+        Constructor of the class Spectro
 
         Parameters
         ----------
@@ -107,7 +107,7 @@ class Spec:
         """
         return k_prime * (self.scaling_factor_parall(z)**(-2) * mu_prime**2 +
                           self.scaling_factor_perp(z)**(-2) *
-                          (1 - (mu_prime)**2))**(1. / 2)
+                          (1 - mu_prime**2))**(1. / 2)
 
     def get_mu(self, mu_prime, z):
         r"""Get Mu
@@ -138,7 +138,7 @@ class Spec:
         return mu_prime * self.scaling_factor_parall(z)**(-1) * (
             self.scaling_factor_parall(z)**(-2) * mu_prime**2 +
             self.scaling_factor_perp(z)**(-2) *
-            (1 - (mu_prime)**2))**(-1. / 2)
+            (1 - mu_prime**2))**(-1. / 2)
 
     def multipole_spectra_integrand(self, mu_rsd, z, k, m):
         r"""Multipole Spectra Integrand
@@ -147,7 +147,7 @@ class Spec:
         Note: we consider :math:`\ell = m` in the code
 
         .. math::
-            L_\ell(\mu_k')P_{\rm gg}^{\rm spec}\
+            L_\ell(\mu_k')P_{\rm gg}^{\rm spectro}\
             \left[k(k',\mu_k'),\mu_k(\mu_k');z\right]\\
 
 
@@ -160,21 +160,20 @@ class Spec:
             Redshift at which to evaluate power spectrum.
         k: float
             Scale (wavenumber) at which to evaluate power spectrum.
-        m: float
+        m: int
             Order of the Legendre expansion.
-
 
         Returns
         -------
         integrand: float
             Integrand of multipole power spectrum
         """
-        if self.theory['Pgg_spec'] is None:
-            raise Exception('Pgg_spec is not defined inside the cosmo dic. '
+        if self.theory['Pgg_spectro'] is None:
+            raise Exception('Pgg_spectro is not defined inside the cosmo dic. '
                             'Run update_cosmo_dic() method first.')
 
-        galspec = self.theory['Pgg_spec'](z, self.get_k(k, mu_rsd, z),
-                                          self.get_mu(mu_rsd, z))
+        galspec = self.theory['Pgg_spectro'](z, self.get_k(k, mu_rsd, z),
+                                             self.get_mu(mu_rsd, z))
         if len(m) == 1:
             integrand = [galspec * legendre(m[0])(mu_rsd)]
             return integrand
@@ -192,7 +191,7 @@ class Spec:
         .. math::
             P_{{\rm obs},\ell}(k';z)=\frac{1}{[q_\perp(z)]^2 q_\parallel(z)} \
             \frac{2\ell+1}{2}\int^1_{-1} L_\ell(\mu_k') \
-            P_{\rm gg}^{\rm spec}\left[k(k',\mu_k'),\mu_k(\mu_k') \
+            P_{\rm gg}^{\rm spectro}\left[k(k',\mu_k'),\mu_k(\mu_k') \
             {;z}\right]\,{\rm d}\mu_k'\\
 
 

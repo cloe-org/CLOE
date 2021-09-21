@@ -32,15 +32,17 @@ class nonlinearinitTestCase(TestCase):
         # Create wrapper model
         self.model_test = CobayaModel(cosmo)
         self.model_test.update_cosmo()
+        self.nl = self.model_test.cosmology.nonlinear
+
         # Check values
         self.Pgg_phot_test = 58392.759202
         self.Pgdelta_phot_test = 41294.412017
-        self.Pgg_spec_test = 82548.320427
-        self.Pgdelta_spec_test = 59890.445816
+        self.Pgg_spectro_test = 82548.320427
+        self.Pgdelta_spectro_test = 59890.445816
         self.Pii_test = np.array([2.417099, 0.902693, 0.321648])
         self.Pdeltai_test = -265.680094
         self.Pgi_phot_test = -375.687484
-        self.Pgi_spec_test = -388.28625
+        self.Pgi_spectro_test = -388.28625
 
         self.rtol = 1e-3
         self.z1 = 1.0
@@ -58,109 +60,102 @@ class nonlinearinitTestCase(TestCase):
         self.bphot = 1.41406
 
     def tearDown(self):
+        self.nl = None
         self.Pgg_phot_test = None
         self.Pgdelta_phot_test = None
-        self.Pgg_spec_test = None
-        self.Pgdelta_spec_test = None
+        self.Pgg_spectro_test = None
+        self.Pgdelta_spectro_test = None
         self.Pii_test = None
         self.Pdeltai_test = None
         self.Pgi_phot_test = None
-        self.Pgi_spec_test = None
+        self.Pgi_spectro_test = None
 
     def test_Pgg_phot_def(self):
-        test_p = self.model_test.cosmology.nonlinear.Pgg_phot_def(self.z1,
-                                                                  self.k1)
+        test_p = self.nl.Pgg_phot_def(self.z1, self.k1)
         npt.assert_allclose(test_p, self.Pgg_phot_test,
                             rtol=self.rtol,
                             err_msg='Error in value returned by Pgg_phot_def')
 
     def test_Pgdelta_phot_def(self):
-        test_p = self.model_test.cosmology.nonlinear.Pgdelta_phot_def(self.z1,
-                                                                      self.k1)
+        test_p = self.nl.Pgdelta_phot_def(self.z1, self.k1)
         npt.assert_allclose(
             test_p,
             self.Pgdelta_phot_test,
             rtol=self.rtol,
             err_msg='Error in value returned by Pgdelta_phot_def')
 
-    def test_Pgg_spec_def(self):
-        test_p = self.model_test.cosmology.nonlinear.Pgg_spec_def(self.z1,
-                                                                  self.k1,
-                                                                  self.mu)
-        npt.assert_allclose(test_p, self.Pgg_spec_test,
+    def test_Pgg_spectro_def(self):
+        test_p = self.nl.Pgg_spectro_def(self.z1, self.k1, self.mu)
+        npt.assert_allclose(test_p, self.Pgg_spectro_test,
                             rtol=self.rtol,
-                            err_msg='Error in value returned by Pgg_spec_def')
+                            err_msg='Error in value returned '
+                                    'by Pgg_spectro_def')
 
-    def test_Pgdelta_spec_def(self):
-        test_p = self.model_test.cosmology.nonlinear.Pgdelta_spec_def(self.z1,
-                                                                      self.k1,
-                                                                      self.mu)
+    def test_Pgdelta_spectro_def(self):
+        test_p = self.nl.Pgdelta_spectro_def(self.z1, self.k1, self.mu)
         npt.assert_allclose(
-            test_p,
-            self.Pgdelta_spec_test,
+            test_p, self.Pgdelta_spectro_test,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pgdelta_spec_def')
+            err_msg='Error in value returned by Pgdelta_spectro_def')
 
     def test_Pii_def(self):
-        test_p = self.model_test.cosmology.nonlinear.Pii_def(self.z1,
-                                                             [self.k1,
-                                                              self.k2,
-                                                              self.k3])
+        test_p = self.nl.Pii_def(self.z1, [self.k1, self.k2, self.k3])
         type_check = isinstance(test_p, np.ndarray)
         assert type_check, 'Error in returned data type of Pii_def'
 
-        assert test_p.size == self.arrsize, '''Error in size of array returned
-                                             by Pii_def'''
+        assert test_p.size == self.arrsize, 'Error in size of array ' \
+                                            'returned by Pii_def'
 
         npt.assert_allclose(test_p, self.Pii_test,
                             rtol=self.rtol,
-                            err_msg='Error in values returned by Pii_def')
+                            err_msg='Error in values returned '
+                                    'by Pii_def')
 
     def test_Pdeltai_def(self):
-        test_p = self.model_test.cosmology.nonlinear.Pdeltai_def(self.z1,
-                                                                 self.k1)
+        test_p = self.nl.Pdeltai_def(self.z1, self.k1)
         npt.assert_allclose(test_p, self.Pdeltai_test,
                             rtol=self.rtol,
-                            err_msg='Error in value returned by Pdeltai_def')
+                            err_msg='Error in value returned '
+                                    'by Pdeltai_def')
 
     def test_Pgi_phot_def(self):
-        test_p = self.model_test.cosmology.nonlinear.Pgi_phot_def(self.z1,
-                                                                  self.k1)
+        test_p = self.nl.Pgi_phot_def(self.z1, self.k1)
         npt.assert_allclose(test_p, self.Pgi_phot_test,
                             rtol=self.rtol,
-                            err_msg='Error in value returned by Pgi_phot_def')
+                            err_msg='Error in value returned '
+                                    'by Pgi_phot_def')
 
-    def test_Pgi_spec_def(self):
-        test_p = self.model_test.cosmology.nonlinear.Pgi_spec_def(self.z1,
-                                                                  self.k1)
-        npt.assert_allclose(test_p, self.Pgi_spec_test,
+    def test_Pgi_spectro_def(self):
+        test_p = self.nl.Pgi_spectro_def(self.z1, self.k1)
+        npt.assert_allclose(test_p, self.Pgi_spectro_test,
                             rtol=self.rtol,
-                            err_msg='Error in value returned by Pgi_spec_def')
+                            err_msg='Error in value returned '
+                                    'by Pgi_spectro_def')
 
     def test_fia(self):
-        fia = self.model_test.cosmology.nonlinear.misc.fia(self.z1, self.k1)
+        fia = self.nl.misc.fia(self.z1, self.k1)
         npt.assert_allclose(fia, self.fia_test,
                             rtol=self.rtol,
                             err_msg='Error in value returned by fia')
 
-    def test_istf_spec_galbias(self):
-        b = self.model_test.cosmology.nonlinear.misc.istf_spec_galbias(self.z1)
+    def test_istf_spectro_galbias(self):
+        b = self.nl.misc.istf_spectro_galbias(self.z1)
         npt.assert_allclose(b, self.bspec,
                             rtol=self.rtol,
-                            err_msg='Error in istf_spec_galbias')
+                            err_msg='Error in istf_spectro_galbias')
         self.assertRaises(ValueError,
                           (self.model_test.cosmology
                            .nonlinear.misc
-                           .istf_spec_galbias),
+                           .istf_spectro_galbias),
                           self.z2)
         self.assertRaises(ValueError,
                           (self.model_test.cosmology
                            .nonlinear.misc
-                           .istf_spec_galbias),
+                           .istf_spectro_galbias),
                           self.z3)
 
     def test_istf_phot_galbias(self):
-        b = self.model_test.cosmology.nonlinear.misc.istf_phot_galbias(self.z1)
+        b = self.nl.misc.istf_phot_galbias(self.z1)
         npt.assert_allclose(b, self.bphot,
                             rtol=self.rtol,
                             err_msg='Error in istf_phot_galbias')

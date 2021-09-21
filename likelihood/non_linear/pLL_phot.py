@@ -98,14 +98,14 @@ class PLL_phot_model(PowerSpectrum):
             self.theory['Pk_delta'].P(redshift, k_scale)
         return pval
 
-    def Pgi_spec_def(self, redshift, k_scale):
-        r"""Pgi Spec Def
+    def Pgi_spectro_def(self, redshift, k_scale):
+        r"""Pgi Spectro Def
 
         Computes the spectroscopic galaxy-intrinsic power spectrum.
 
         .. math::
-            P_{\rm gI}^{\rm spec}(z, k) &=\
-            [f_{\rm IA}(z)]b_g^{\rm spec}(z)P_{\rm \delta\delta}(z, k)\\
+            P_{\rm gI}^{\rm spectro}(z, k) &=\
+            [f_{\rm IA}(z)]b_g^{\rm spectro}(z)P_{\rm \delta\delta}(z, k)\\
 
         Note: either redshift or k_scale must be a float (e.g. simultaneously
         setting both of them to numpy.ndarray makes the code crash)
@@ -124,6 +124,6 @@ class PLL_phot_model(PowerSpectrum):
             at a given redshift and k-mode
         """
         pval = self.misc.fia(redshift) * \
-            self.misc.istf_spec_galbias(redshift) * \
+            self.misc.istf_spectro_galbias(redshift) * \
             self.theory['Pk_delta'].P(redshift, k_scale)
         return pval

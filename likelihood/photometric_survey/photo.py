@@ -284,7 +284,7 @@ class Photo:
                            (self.theory['H_z_func'](z) *
                             (self.theory['r_z_func'](z)) ** 2.0))
 
-        if (np.isnan(PandW_i_j_z_k).any()):
+        if np.isnan(PandW_i_j_z_k).any():
             raise Exception('Requested k, z values are outside of power'
                             ' spectrum interpolation range.')
         return kern_mult_power

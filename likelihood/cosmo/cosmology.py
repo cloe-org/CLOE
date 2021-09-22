@@ -121,6 +121,8 @@ class Cosmology:
         k_win: list
             Array of k values which will be used to evaluate galaxy power
             spectra
+        Pmm_phot: function
+            Matter-matter power spectrum for photometric probes
         Pgg_phot: function
             Galaxy-galaxy power spectrum for GC-phot
         Pgdelta_phot: function
@@ -202,6 +204,7 @@ class Cosmology:
                           # Interpolators
                           'Pk_delta': None,
                           'Pk_weyl': None,
+                          'Pmm_phot': None,
                           'Pgg_phot': None,
                           'Pgdelta_phot': None,
                           'Pgg_spectro': None,
@@ -574,6 +577,31 @@ class Cosmology:
                              'Check that redshift is inside the bin edges'
                              'and valid bi_spec\'s are provided.')
 
+    def Pmm_phot_def(self, redshift, k_scale, grid=True):
+        r"""Pmm Phot Def
+
+        Computes the matter-matter power spectrum for the photometric probe.
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum.
+        k_scale: float or list or numpy.ndarray
+            k-mode at which to evaluate the  power spectrum.
+        grid: bool
+            Specifies whether to evaluate the function on the full meshgrid
+            (x[i],y[j]) (grid=False) or just on the diagonal entries
+            (x[i],y[i]) (grid=True).
+
+        Returns
+        -------
+        pval:  float or numpy.ndarray
+            Value of matter-matter power spectrum
+            at a given redshift and k-mode for photometric probes
+        """
+        pval = self.cosmo_dic['Pk_delta'].P(redshift, k_scale, grid=grid)
+        return pval
+
     def Pgg_phot_def(self, redshift, k_scale):
         r"""Pgg Phot Def
 
@@ -879,6 +907,8 @@ class Cosmology:
                              for zz in z_win])
         pgi_spectro = np.array([pksrc.Pgi_spectro_def(zz, k_win)
                                for zz in z_win_spectro])
+
+        self.cosmo_dic['Pmm_phot'] = pksrc.Pmm_phot_def
         self.cosmo_dic['Pgg_spectro'] = pksrc.Pgg_spectro_def
         self.cosmo_dic['Pgdelta_spectro'] = pksrc.Pgdelta_spectro_def
 

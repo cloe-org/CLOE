@@ -12,6 +12,31 @@ class PLL_phot_model(PowerSpectrum):
     Class for computation of lensing x lensing power spectrum
     """
 
+    def Pmm_phot_def(self, redshift, k_scale, grid=True):
+        r"""Pmm Phot Def
+
+        Computes the matter-matter power spectrum for the photometric probe.
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum.
+        k_scale: float or list or numpy.ndarray
+            k-mode at which to evaluate the  power spectrum.
+        grid: bool
+            Specifies whether to evaluate the function on the full meshgrid
+            (x[i],y[j]) (grid=False) or just on the diagonal entries
+            (x[i],y[i]) (grid=True).
+
+        Returns
+        -------
+        pval:  float or numpy.ndarray
+            Value of matter-matter power spectrum
+            at a given redshift and k-mode for photometric probes
+        """
+        pval = self.theory['Pk_delta'].P(redshift, k_scale, grid=grid)
+        return pval
+
     def Pii_def(self, redshift, k_scale):
         r"""Pii Def
 

@@ -125,7 +125,6 @@ class photoinitTestCase(TestCase):
         # mock_cosmo_dic['nuisance_parameters']['bia'] = 0
         # mock_cosmo_dic['nuisance_parameters']['nia'] = 0
 
-
         mock_cosmo_dic['Pmm_phot'] = \
             interpolate.RectBivariateSpline(zs_base,
                                             ks_base,

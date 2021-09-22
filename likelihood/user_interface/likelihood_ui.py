@@ -122,7 +122,7 @@ class LikelihoodUI:
         key = 'Cobaya'
         if key not in self._config:
             raise KeyError(f'key \'{key}\' not found in input configuration')
-        likelihood_yaml_generator.generate_params_yaml(model=1)
+        likelihood_yaml_generator.generate_params_yaml()
         likelihood_yaml_generator.generate_data_yaml(
             self._config['data'])
         return cobaya.run(self._config[key])
@@ -167,7 +167,7 @@ class LikelihoodUI:
         settings: str
            Name of the yaml configuration file for the plotting routines
         """
-        likelihood_yaml_generator.generate_params_yaml(model=1)
+        likelihood_yaml_generator.generate_params_yaml()
         likelihood_yaml_generator.generate_data_yaml(self._config['data'])
         model = get_model(self._config['Cobaya'])
         logposterior = model.logposterior({})

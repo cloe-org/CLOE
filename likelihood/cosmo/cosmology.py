@@ -590,8 +590,8 @@ class Cosmology:
             k-mode at which to evaluate the  power spectrum.
         grid: bool
             Specifies whether to evaluate the function on the full meshgrid
-            (x[i],y[j]) (grid=False) or just on the diagonal entries
-            (x[i],y[i]) (grid=True).
+            (redshift[i], k_scale[j]) (grid=True) or just on the diagonal
+            entries (redshift[i], k_scale[i]) (grid=False).
 
         Returns
         -------

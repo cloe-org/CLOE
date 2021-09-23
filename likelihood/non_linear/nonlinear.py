@@ -102,13 +102,13 @@ class Nonlinear:
         boost = 1.0
         return boost
 
-    def Pmm_phot_def(self, redshift, k_scale, grid):
+    def Pmm_phot_def(self, redshift, k_scale):
         r"""Interface for Pmm_phot_def
 
         Returns the photometric matter-matter power spectrum,
         defined in the pLL_phot module
         """
-        return self.PLL_phot_model.Pmm_phot_def(redshift, k_scale, grid)
+        return self.PLL_phot_model.Pmm_phot_def(redshift, k_scale)
 
     def Pgg_spectro_def(self, redshift, k_scale, mu_rsd):
         r"""Interface for Pgg_spectro_def

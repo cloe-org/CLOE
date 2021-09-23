@@ -577,7 +577,7 @@ class Cosmology:
                              'Check that redshift is inside the bin edges'
                              'and valid bi_spec\'s are provided.')
 
-    def Pmm_phot_def(self, redshift, k_scale, grid=True):
+    def Pmm_phot_def(self, redshift, k_scale):
         r"""Pmm Phot Def
 
         Computes the matter-matter power spectrum for the photometric probe.
@@ -588,10 +588,6 @@ class Cosmology:
             Redshift at which to evaluate the power spectrum.
         k_scale: float or list or numpy.ndarray
             k-mode at which to evaluate the  power spectrum.
-        grid: bool
-            Specifies whether to evaluate the function on the full meshgrid
-            (redshift[i], k_scale[j]) (grid=True) or just on the diagonal
-            entries (redshift[i], k_scale[i]) (grid=False).
 
         Returns
         -------
@@ -599,7 +595,7 @@ class Cosmology:
             Value of matter-matter power spectrum
             at a given redshift and k-mode for photometric probes
         """
-        pval = self.cosmo_dic['Pk_delta'].P(redshift, k_scale, grid=grid)
+        pval = self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
         return pval
 
     def Pgg_phot_def(self, redshift, k_scale):
@@ -895,6 +891,8 @@ class Cosmology:
         z_win_spectro = rb.reduce(z_win, spe_bin_edges[0], spe_bin_edges[-1])
 
         pksrc = self.pk_source
+        pmm_phot = np.array([pksrc.Pmm_phot_def(zz, k_win)
+                             for zz in z_win])
         pgg_phot = np.array([pksrc.Pgg_phot_def(zz, k_win)
                              for zz in z_win])
         pgdelta_phot = np.array([pksrc.Pgdelta_phot_def(zz, k_win)
@@ -908,10 +906,13 @@ class Cosmology:
         pgi_spectro = np.array([pksrc.Pgi_spectro_def(zz, k_win)
                                for zz in z_win_spectro])
 
-        self.cosmo_dic['Pmm_phot'] = pksrc.Pmm_phot_def
         self.cosmo_dic['Pgg_spectro'] = pksrc.Pgg_spectro_def
         self.cosmo_dic['Pgdelta_spectro'] = pksrc.Pgdelta_spectro_def
 
+        self.cosmo_dic['Pmm_phot'] = \
+            interpolate.RectBivariateSpline(z_win,
+                                            k_win,
+                                            pgg_phot)
         self.cosmo_dic['Pgg_phot'] = \
             interpolate.RectBivariateSpline(z_win,
                                             k_win,

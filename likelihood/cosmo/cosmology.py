@@ -912,7 +912,8 @@ class Cosmology:
         self.cosmo_dic['Pmm_phot'] = \
             interpolate.RectBivariateSpline(z_win,
                                             k_win,
-                                            pgg_phot)
+                                            pmm_phot,
+                                            kx=1, ky=1)
         self.cosmo_dic['Pgg_phot'] = \
             interpolate.RectBivariateSpline(z_win,
                                             k_win,

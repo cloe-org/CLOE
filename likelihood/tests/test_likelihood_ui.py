@@ -170,7 +170,7 @@ class LikelihoodUI_test(TestCase):
         ui._run_cobaya()
         self.assertEqual(params_gen_mock.call_count, 1)
         self.assertEqual(cobaya_run_mock.call_count, 1)
-        params_gen_mock.assert_called_with(model=1)
+        params_gen_mock.assert_called_with()
         cobaya_run_mock.assert_called_with(self.config_good['Cobaya'])
 
     # update a dictionary containing a nested dictionary and a plain key/value

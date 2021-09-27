@@ -297,7 +297,7 @@ class Photo:
 
         .. math::
             C_{ij}^{\rm LL}(\ell)= c \int \frac{dz}{H(z)r^2(z)}\
-            \left\lbrace W_{i}^{\rm \gamma}\left[ k_{\ell}(z), z \right]\
+            \bigg\lbrace W_{i}^{\rm \gamma}\left[ k_{\ell}(z), z \right]\
             W_{j}^{\rm \gamma}\left[ k_{\ell}(z), z \right ]\
             P_{\rm \delta \delta}\left[ k_{\ell}(z), z \right] +\\
             \left[ W_{i}^{\rm IA}(z)W_{j}^{\rm \gamma}\
@@ -305,7 +305,7 @@ class Photo:
             \left[ k_{\ell}(z), z \right]W_{j}^{\rm IA}(z)\right]\
             P_{\rm \delta I}\left[ k_{\ell}(z), z \right]+\\
             W_{i}^{\rm IA}(z)W_{j}^{\rm IA}(z)\
-            P_{\rm II}\left[k_{\ell}(z), z\right] \right\rbrace \\
+            P_{\rm II}\left[k_{\ell}(z), z\right] \bigg\rbrace \\
 
         Parameters
         ----------
@@ -329,7 +329,7 @@ class Photo:
         zs_arr = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
         c_int_arr = np.empty(len(zs_arr))
-        P_dd = self.theory['Pk_delta'].P
+        P_dd = self.theory['Pmm_phot']
         P_ii = self.theory['Pii']
         P_di = self.theory['Pdeltai']
 

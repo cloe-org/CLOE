@@ -24,7 +24,7 @@ class Euclike:
     Class to compute the Euclid likelihood from the theory, data, covariance.
     """
 
-    def __init__(self, data):
+    def __init__(self, data, observables):
         """Initialize
 
         Constructor of the class Euclike. The data and covariance are
@@ -35,11 +35,15 @@ class Euclike:
         data: dict
             Dictionary containing specifications for data loading and handling,
             to be passed to the data reader module.
+        observables: dict
+            Dictionary containing specification for the chosen observables by
+            the user.
         """
         # Flag to allow printing  of likelihood selection only once.
         self.l_select_print_flag = True
 
         self.data = data
+        self.observables = observables
 
         self.data_ins = reader.Reader(self.data)
         self.data_ins.compute_nz()

@@ -1,0 +1,9 @@
+WL:
+  WL: True
+  GCphoto: True
+  GCspectro: False
+GCphoto:
+  GCphoto: True
+  GCspectro: False
+GCspectro:
+  GCspectro: True

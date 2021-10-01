@@ -9,6 +9,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
+import warnings
 
 
 def observables_visualization(observables_dict, palette='standard'):
@@ -58,8 +59,14 @@ def observables_selection_checker(observables_dict):
     observables_dict: dict
         dictionary with the observables selection
     """
-    if observables_dict['WL']['GCspectro']:
+    if (observables_dict['WL']['GCspectro'] or
+            observables_dict['GCphot']['GCspectro']):
         observables_dict['WL']['GCspectro'] = False
-        print('ATTENTION: CLOE does not compute WLxGCspectro.\n')
-        print('It has been changed to "False". \n')
+        observables_dict['GCphot']['GCspectro'] = False
+        warnings.warn(
+            'Attention: CLOE only computes cross-correlations '
+            'for the photometric survey!')
+        warnings.warn(
+            "Entries ['WL']['GCphot'] and ['GCphot']['GCspec'] "
+            "are changed to False.")
     return observables_dict

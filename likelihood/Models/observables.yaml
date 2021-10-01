@@ -1,9 +1,20 @@
+# This yaml file contains the user selection for
+# the Euclid observables computed theoretically
+# in CLOE.
+# 
+# It takes the form of a upper-triangular matrix
+# with 'True' for the selected observables and
+# 'False' for those which are not requested.
+#
+# WL: Weak Lensing
+# GCphot: Galaxy Clustering photometric
+# GCspectro: Galaxy Clustering spectroscopic
 WL:
   WL: True
-  GCphoto: True
-  GCspectro: False
-GCphoto:
-  GCphoto: True
+  GCphot: True
+  GCspectro: True
+GCphot:
+  GCphot: True
   GCspectro: False
 GCspectro:
   GCspectro: True

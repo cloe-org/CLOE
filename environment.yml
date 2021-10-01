@@ -13,6 +13,7 @@ dependencies:
   - scipy>=1.3
   - pip>=19.0
   - mpi4py>=3.0.3
+  - seaborn
   - pip:
     - git+https://github.com/CobayaSampler/cobaya
     #- cobaya==3.0.4

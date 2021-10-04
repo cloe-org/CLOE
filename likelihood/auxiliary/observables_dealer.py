@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap
+from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 import warnings
 
 
@@ -39,9 +39,15 @@ def observables_visualization(observables_dict, palette='standard'):
         'protanopia': ('white', '#ae9c45', '#a7b8f8'),
         'deuteranopia': ('white', '#c59434', '#a3b7f9')
     }
-
-    sns.heatmap(observables_df, annot=False,
-                cmap=ListedColormap(cmaps[palette]), cbar=False)
+    cmap = LinearSegmentedColormap.from_list(palette,
+                                             cmaps[palette],
+                                             len(cmaps[palette]))
+    ax = sns.heatmap(observables_df, annot=False,
+                     cmap=cmap,
+                     cbar=True)
+    colorbar = ax.collections[0].colorbar
+    colorbar.set_ticks([-0.667, 0, 0.667])
+    colorbar.set_ticklabels(['No input', 'False', 'True'])
     plt.title("matrix with observables selection")
     plt.show()
     return observables_df

@@ -26,7 +26,9 @@ class LikelihoodUI_test(TestCase):
         }
         # has a key/value pair that is backend/Cobaya, and a key named Cobaya
         self.config_good = {
-            'backend': 'Cobaya', 'Cobaya': 'whatever', 'data': 'any'
+            'backend': 'Cobaya',
+            'Cobaya': {'params': 'file.yaml'},
+            'data': 'any'
         }
         # for testing _update_config(), since it contains a nested dictionary
         # and a plain key/value pair, this should be sufficient to achieve
@@ -57,87 +59,94 @@ class LikelihoodUI_test(TestCase):
         self.config_nested_update = None
         self.config_nested_updated = None
 
-    # test behavior when the key specifying the backend is not present in
+    # test init when the key specifying the backend is not present in
     # the input configuration
-    @patch('likelihood.auxiliary.yaml_handler.yaml_read')
-    @patch('cobaya.run')
-    def test_run_no_backend_key(self, cobaya_run_mock, yaml_read_mock):
+    @patch('likelihood.auxiliary.yaml_handler.yaml_read_and_check_dict')
+    def test_init_no_backend_key(self, yaml_read_mock):
         yaml_read_mock.return_value = self.config_no_backend_key
-        ui = LikelihoodUI(user_config_file=self.file_name)
-        self.assertRaises(KeyError, ui.run)
+        self.assertRaises(KeyError,
+                          LikelihoodUI,
+                          user_config_file=self.file_name)
         self.assertEqual(yaml_read_mock.call_count, 2)
-        self.assertEqual(cobaya_run_mock.call_count, 0)
 
-    # test behavior when the requested backend is not valid
-    @patch('likelihood.auxiliary.yaml_handler.yaml_read')
-    @patch('cobaya.run')
-    def test_run_backend_invalid(self, cobaya_run_mock, yaml_read_mock):
+    # test initialization when the requested backend is not valid
+    @patch('likelihood.auxiliary.yaml_handler.yaml_read_and_check_dict')
+    def test_init_backend_invalid(self, yaml_read_mock):
         yaml_read_mock.return_value = self.config_backend_invalid
-        ui = LikelihoodUI(user_config_file=self.file_name)
-        self.assertRaises(ValueError, ui.run)
+        self.assertRaises(ValueError,
+                          LikelihoodUI,
+                          user_config_file=self.file_name)
         self.assertEqual(yaml_read_mock.call_count, 2)
-        self.assertEqual(cobaya_run_mock.call_count, 0)
 
-    # test behavior when the requested backend is cosmosis (supported but not
+    # test init when the requested backend is cosmosis (supported but not
     # implemented)
-    @patch('likelihood.auxiliary.yaml_handler.yaml_read')
-    @patch('cobaya.run')
-    def test_run_backend_cosmosis(self, cobaya_run_mock, yaml_read_mock):
+    @patch('likelihood.auxiliary.yaml_handler.yaml_read_and_check_dict')
+    def test_init_backend_cosmosis(self, yaml_read_mock):
         yaml_read_mock.return_value = self.config_backend_cosmosis
-        ui = LikelihoodUI(user_config_file=self.file_name)
-        self.assertRaises(NotImplementedError, ui.run)
+        self.assertRaises(NotImplementedError,
+                          LikelihoodUI,
+                          user_config_file=self.file_name)
         self.assertEqual(yaml_read_mock.call_count, 2)
-        self.assertEqual(cobaya_run_mock.call_count, 0)
 
     # test behavior when the requested backend is cobaya
     @patch('likelihood.auxiliary.yaml_handler.yaml_read')
-    @patch('likelihood.auxiliary'
-           '.likelihood_yaml_generator.generate_params_yaml')
-    @patch('likelihood.auxiliary'
-           '.likelihood_yaml_generator.generate_data_yaml')
+    @patch('likelihood.auxiliary.likelihood_yaml_handler'
+           '.update_cobaya_dict_from_model_yaml')
+    @patch('likelihood.auxiliary.likelihood_yaml_handler'
+           '.write_params_yaml_from_model_yaml')
+    @patch('likelihood.auxiliary.likelihood_yaml_handler'
+           '.write_data_yaml_from_data_dict')
     @patch('cobaya.run')
     def test_run_backend_cobaya(
             self,
             cobaya_run_mock,
             data_gen_mock,
-            params_gen_mock,
+            params_write_mock,
+            dict_update_mock,
             yaml_read_mock
     ):
         yaml_read_mock.return_value = self.config_good
         ui = LikelihoodUI(user_config_file=self.file_name)
         ui.run()
         self.assertEqual(yaml_read_mock.call_count, 2)
-        self.assertEqual(params_gen_mock.call_count, 1)
+        self.assertEqual(data_gen_mock.call_count, 1)
+        self.assertEqual(params_write_mock.call_count, 1)
+        self.assertEqual(dict_update_mock.call_count, 1)
         self.assertEqual(cobaya_run_mock.call_count, 1)
 
     # test behavior of __init__() when the LikelihoodUI object is
     # instantiated with no arguments
     @patch('likelihood.auxiliary.yaml_handler.yaml_read')
-    @patch('likelihood.auxiliary'
-           '.likelihood_yaml_generator.generate_params_yaml')
-    @patch('likelihood.auxiliary'
-           '.likelihood_yaml_generator.generate_data_yaml')
+    @patch('likelihood.auxiliary.likelihood_yaml_handler'
+           '.update_cobaya_dict_from_model_yaml')
+    @patch('likelihood.auxiliary.likelihood_yaml_handler'
+           '.write_params_yaml_from_model_yaml')
+    @patch('likelihood.auxiliary.likelihood_yaml_handler'
+           '.write_data_yaml_from_data_dict')
     @patch('cobaya.run')
     def test_init_no_args(
             self,
             cobaya_run_mock,
             data_gen_mock,
-            params_gen_mock,
+            params_write_mock,
+            dict_update_mock,
             yaml_read_mock
     ):
         yaml_read_mock.return_value = self.config_good
         ui = LikelihoodUI()
         ui.run()
         self.assertEqual(yaml_read_mock.call_count, 1)
-        self.assertEqual(params_gen_mock.call_count, 1)
+        self.assertEqual(data_gen_mock.call_count, 1)
+        self.assertEqual(params_write_mock.call_count, 1)
+        self.assertEqual(dict_update_mock.call_count, 1)
         self.assertEqual(cobaya_run_mock.call_count, 1)
 
     # test behavior of the run_cobaya() private method when the input
     # configuration does not contain a key named 'Cobaya'.
     # Verify that an exception is thrown in this case
-    @patch('likelihood.auxiliary.yaml_handler.yaml_read')
-    @patch('likelihood.auxiliary'
-           '.likelihood_yaml_generator.generate_params_yaml')
+    @patch('likelihood.auxiliary.yaml_handler.yaml_read_and_check_dict')
+    @patch('likelihood.auxiliary.likelihood_yaml_handler'
+           '.write_params_yaml_from_model_yaml')
     @patch('cobaya.run')
     def test_run_cobaya_no_cobaya_key(
             self,
@@ -153,24 +162,25 @@ class LikelihoodUI_test(TestCase):
     # test run_cobaya private method: verify that the proper external calls
     # are performed and with the proper arguments
     @patch('likelihood.auxiliary.yaml_handler.yaml_read')
+    @patch('likelihood.auxiliary.likelihood_yaml_handler'
+           '.update_cobaya_dict_from_model_yaml')
     @patch('likelihood.auxiliary'
-           '.likelihood_yaml_generator.generate_params_yaml')
-    @patch('likelihood.auxiliary'
-           '.likelihood_yaml_generator.generate_data_yaml')
+           '.likelihood_yaml_handler.write_params_yaml_from_model_yaml')
     @patch('cobaya.run')
     def test_run_cobaya_success(
             self,
             cobaya_run_mock,
-            data_gen_mock,
-            params_gen_mock,
+            params_write_mock,
+            dict_update_mock,
             yaml_read_mock
     ):
         yaml_read_mock.return_value = self.config_good
+        dict_update_mock.return_value = self.config_good['Cobaya']
         ui = LikelihoodUI(user_config_file=self.file_name)
         ui._run_cobaya()
-        self.assertEqual(params_gen_mock.call_count, 1)
+        self.assertEqual(params_write_mock.call_count, 1)
+        self.assertEqual(dict_update_mock.call_count, 1)
         self.assertEqual(cobaya_run_mock.call_count, 1)
-        params_gen_mock.assert_called_with()
         cobaya_run_mock.assert_called_with(self.config_good['Cobaya'])
 
     # update a dictionary containing a nested dictionary and a plain key/value
@@ -183,3 +193,22 @@ class LikelihoodUI_test(TestCase):
             )
         )
         self.assertDictEqual(self.config_nested_updated, updated)
+
+    def test_get_and_check_no_backend_key(self):
+        self.assertRaises(KeyError,
+                          LikelihoodUI._get_and_check_backend,
+                          self.config_no_backend_key)
+
+    def test_get_and_check_backend_cobaya(self):
+        backend = LikelihoodUI._get_and_check_backend(self.config_good)
+        self.assertEqual(backend, 'Cobaya')
+
+    def test_get_and_check_backend_cosmosis(self):
+        self.assertRaises(NotImplementedError,
+                          LikelihoodUI._get_and_check_backend,
+                          self.config_backend_cosmosis)
+
+    def test_get_and_check_backend_invalid(self):
+        self.assertRaises(ValueError,
+                          LikelihoodUI._get_and_check_backend,
+                          self.config_backend_invalid)

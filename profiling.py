@@ -13,11 +13,10 @@ import cobaya
 # Import external loglike from the Likelihood Package within cobaya interface module
 from likelihood.cobaya_interface import EuclidLikelihood
 # Generate likelihood params yaml file
-from likelihood.auxiliary.likelihood_yaml_generator import generate_params_yaml
-from likelihood.auxiliary.likelihood_yaml_generator import generate_data_yaml
+from likelihood.auxiliary.likelihood_yaml_handler import write_params_yaml_from_cobaya_dict
+from likelihood.auxiliary.likelihood_yaml_handler import write_data_yaml_from_data_dict
 
 print("Running script: ", sys.argv[0])
-generate_params_yaml(model = ['nuisance_bias', 'nuisance_ia', 'spectro'])
 
 # Attention: If working outside of the likelihood environment, change this to your
 # local path where your external codes are installed (CAMB, polychord, likelihoods, etc).
@@ -73,7 +72,7 @@ if runoption == 0:
             'NL_flag': 1,
             # Galaxy bias parameters:
             # The bias parameters below are currently fixed to the
-            # values used by the Inter Science Taskforce: Forcast (IST:F)
+            # values used by the Inter Science Taskforce: Forecast (IST:F)
             # and presented in the corresponding IST:F paper (arXiv: 1910.09273).
             # However, they can be changed by the user and even sample over them by putting a prior
             # Photometric bias parameters
@@ -133,7 +132,7 @@ if runoption == 0:
         'likelihood': {'Euclid': EuclidLikelihood},
         # 'debug': Cobaya's protected key of the input dictionary.
         # How much information you want Cobaya to print. If debug: True, it prints every detail
-        # exectuted internally in Cobaya
+        # executed internally in Cobaya
         'debug': True,
         # 'timing': Cobaya's protected key of the input dictionary.
         # If timing: True, Cobaya returns how much time it took it to make a computation of the posterior
@@ -171,7 +170,8 @@ if runoption == 0:
             }
         }
 
-    generate_data_yaml(info['data'])
+    write_data_yaml_from_data_dict(info['data'])
+    write_params_yaml_from_cobaya_dict(info)
 
     # This is just a call to the likelihood
     # Full calculation photo + spectro
@@ -403,11 +403,8 @@ if runoption == 1:
                                 '/likelihood/tests/test_input/nz_dict_GC_phot.npy',
                                 allow_pickle=True).item()
 
-            # self.phot = photo.Photo(mock_cosmo_dic, nz_dic_WL, nz_dic_GC)
             self.phot = photo.Photo(self.test_dict, nz_dic_WL, nz_dic_GC)
 
-            # from likelihood.photometric_survey.photo import Photo
-            # photo = Photo(cosmology.cosmo_dic, nz_dic_WL, nz_dic_GC)
             len_ell_max = 10
             ell_min = 10
             ell_max = 1000
@@ -423,7 +420,6 @@ if runoption == 1:
             int_step_cross = 0.02
 
             print("Computing galaxy-galaxy C_ells")
-            # print("len_ell_max: ", len_ell_max, "  ell_min: ", ell_min, "  ell_max:", ell_max)
             print("C_ells_list: ", C_ells_list)
             # Compute C_GC_11
             a = time.time()

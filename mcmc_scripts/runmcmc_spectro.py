@@ -1,11 +1,14 @@
-import sys, os
-script_path = os.path.realpath(os.getcwd())
-if script_path.endswith('mcmc_scripts'):
-    sys.path.append(os.path.realpath(os.path.join(script_path,os.pardir)))
-else:
-    sys.path.append(script_path) 
+import sys
+import os
 from cobaya.run import run
 from likelihood.cobaya_interface import EuclidLikelihood
+from likelihood.auxiliary.likelihood_yaml_handler import write_params_yaml_from_cobaya_dict
+
+script_path = os.path.realpath(os.getcwd())
+if script_path.endswith('mcmc_scripts'):
+    sys.path.append(os.path.realpath(os.path.join(script_path, os.pardir)))
+else:
+    sys.path.append(script_path)
 
 info = {
     'params': {
@@ -64,28 +67,28 @@ info = {
         'bia': 0.0},
     'theory': {'camb':
                {'stop_at_error': True,
-                'extra_args':{'num_massive_neutrinos': 1,
-                              'dark_energy_model': 'ppf',
-                              'share_delta_neff': True,
-                              'num_nu_massless': 2.046,
-                              'num_nu_massive': 1,
-                              'nu_mass_eigenstates': 1,
-                              'accurate_massive_neutrino_transfers': True,
-                              'kmax': 50.,
-                              'k_per_logint': 50,
-                              'AccuracyBoost': 2,
-                              'WantCls' : False,
-                              'WantTransfer' : True,
-                              'WantScalars' : True,
-                              'WantTensors' : True,
-                              'WantVectors' : True,
-                              'lAccuracyBoost': 2,
-                              'lSampleBoost': 1}}},
+                'extra_args': {'num_massive_neutrinos': 1,
+                               'dark_energy_model': 'ppf',
+                               'share_delta_neff': True,
+                               'num_nu_massless': 2.046,
+                               'num_nu_massive': 1,
+                               'nu_mass_eigenstates': 1,
+                               'accurate_massive_neutrino_transfers': True,
+                               'kmax': 50.,
+                               'k_per_logint': 50,
+                               'AccuracyBoost': 2,
+                               'WantCls': False,
+                               'WantTransfer': True,
+                               'WantScalars': True,
+                               'WantTensors': True,
+                               'WantVectors': True,
+                               'lAccuracyBoost': 2,
+                               'lSampleBoost': 1}}},
     'sampler': {'mcmc': {'max_tries': 100000}},
     'likelihood': {'Euclid': EuclidLikelihood},
     'force': True,
     'output': 'chains/spectroscopic'
     }
 
-
+write_params_yaml_from_cobaya_dict(info)
 updated_info, sampler = run(info)

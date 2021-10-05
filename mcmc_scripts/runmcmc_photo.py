@@ -1,11 +1,14 @@
-import sys, os
-script_path = os.path.realpath(os.getcwd())
-if script_path.endswith('mcmc_scripts'):
-    sys.path.append(os.path.realpath(os.path.join(script_path,os.pardir)))
-else:
-    sys.path.append(script_path)
+import sys
+import os
 from cobaya.run import run
 from likelihood.cobaya_interface import EuclidLikelihood
+from likelihood.auxiliary.likelihood_yaml_handler import write_params_yaml_from_cobaya_dict
+
+script_path = os.path.realpath(os.getcwd())
+if script_path.endswith('mcmc_scripts'):
+    sys.path.append(os.path.realpath(os.path.join(script_path, os.pardir)))
+else:
+    sys.path.append(script_path)
 
 info = {
     'params': {
@@ -63,14 +66,13 @@ info = {
         'bia': 0.0},
     'theory': {'camb':
                {'stop_at_error': True,
-                'extra_args':{'num_massive_neutrinos': 1,
-                              'dark_energy_model': 'ppf'}}},
+                'extra_args': {'num_massive_neutrinos': 1,
+                               'dark_energy_model': 'ppf'}}},
     'sampler': {'mcmc': {'max_tries': 100000}},
     'likelihood': {'Euclid': EuclidLikelihood},
     'force': True,
     'output': 'chains/photometric'
     }
 
-
+write_params_yaml_from_cobaya_dict(info)
 updated_info, sampler = run(info)
-

@@ -1,11 +1,14 @@
-import sys, os
-script_path = os.path.realpath(os.getcwd())
-if script_path.endswith('mcmc_scripts'):
-    sys.path.append(os.path.realpath(os.path.join(script_path,os.pardir)))
-else:
-    sys.path.append(script_path) 
+import sys
+import os
 from cobaya.run import run
 from likelihood.cobaya_interface import EuclidLikelihood
+from likelihood.auxiliary.likelihood_yaml_handler import write_params_yaml_from_cobaya_dict
+
+script_path = os.path.realpath(os.getcwd())
+if script_path.endswith('mcmc_scripts'):
+    sys.path.append(os.path.realpath(os.path.join(script_path, os.pardir)))
+else:
+    sys.path.append(script_path)
 
 info = {
     'params': {
@@ -45,45 +48,45 @@ info = {
         'full_photo': False,
         'NL_flag': False,
         'b1_photo': {'prior': {'min': 0.1, 'max': 3.},
-                    'ref': {'dist': 'norm', 'loc': 1.0997727037892875, 'scale': 0.1},
-                    'proposal': 0.1,
-                    'latex': 'b_1^{\rm GCph}'},
+                     'ref': {'dist': 'norm', 'loc': 1.0997727037892875, 'scale': 0.1},
+                     'proposal': 0.1,
+                     'latex': 'b_1^{\rm GCph}'},
         'b2_photo': {'prior': {'min': 0.1, 'max': 3.},
-                    'ref': {'dist': 'norm', 'loc': 1.220245876862528, 'scale': 0.1},
-                    'proposal': 0.1,
-                    'latex': 'b_2^{\rm GCph}'},
+                     'ref': {'dist': 'norm', 'loc': 1.220245876862528, 'scale': 0.1},
+                     'proposal': 0.1,
+                     'latex': 'b_2^{\rm GCph}'},
         'b3_photo': {'prior': {'min': 0.1, 'max': 3.},
-                    'ref': {'dist': 'norm', 'loc': 1.2723993083933989, 'scale': 0.1},
-                    'proposal': 0.1,
-                    'latex': 'b_3^{\rm GCph}'},
+                     'ref': {'dist': 'norm', 'loc': 1.2723993083933989, 'scale': 0.1},
+                     'proposal': 0.1,
+                     'latex': 'b_3^{\rm GCph}'},
         'b4_photo': {'prior': {'min': 0.1, 'max': 3.},
-                    'ref': {'dist': 'norm', 'loc': 1.316624471897739, 'scale': 0.1},
-                    'proposal': 0.1,
-                    'latex': 'b_4^{\rm GCph}'},
+                     'ref': {'dist': 'norm', 'loc': 1.316624471897739, 'scale': 0.1},
+                     'proposal': 0.1,
+                     'latex': 'b_4^{\rm GCph}'},
         'b5_photo': {'prior': {'min': 0.1, 'max': 3.},
-                    'ref': {'dist': 'norm', 'loc': 1.35812370570578, 'scale': 0.1},
-                    'proposal': 0.1,
-                    'latex': 'b_5^{\rm GCph}'},
+                     'ref': {'dist': 'norm', 'loc': 1.35812370570578, 'scale': 0.1},
+                     'proposal': 0.1,
+                     'latex': 'b_5^{\rm GCph}'},
         'b6_photo': {'prior': {'min': 0.1, 'max': 3.},
-                    'ref': {'dist': 'norm', 'loc': 1.3998214171814918, 'scale': 0.1},
-                    'proposal': 0.1,
-                    'latex': 'b_6^{\rm GCph}'},
+                     'ref': {'dist': 'norm', 'loc': 1.3998214171814918, 'scale': 0.1},
+                     'proposal': 0.1,
+                     'latex': 'b_6^{\rm GCph}'},
         'b7_photo': {'prior': {'min': 0.1, 'max': 3.},
-                    'ref': {'dist': 'norm', 'loc': 1.4446452851824907, 'scale': 0.1},
-                    'proposal': 0.1,
-                    'latex': 'b_7^{\rm GCph}'},
+                     'ref': {'dist': 'norm', 'loc': 1.4446452851824907, 'scale': 0.1},
+                     'proposal': 0.1,
+                     'latex': 'b_7^{\rm GCph}'},
         'b8_photo': {'prior': {'min': 0.1, 'max': 3.},
-                    'ref': {'dist': 'norm', 'loc': 1.4964959071110084, 'scale': 0.1},
-                    'proposal': 0.1,
-                    'latex': 'b_8^{\rm GCph}'},
+                     'ref': {'dist': 'norm', 'loc': 1.4964959071110084, 'scale': 0.1},
+                     'proposal': 0.1,
+                     'latex': 'b_8^{\rm GCph}'},
         'b9_photo': {'prior': {'min': 0.1, 'max': 3.},
-                    'ref': {'dist': 'norm', 'loc': 1.5652475842498528, 'scale': 0.1},
-                    'proposal': 0.1,
-                    'latex': 'b_9^{\rm GCph}'},
+                     'ref': {'dist': 'norm', 'loc': 1.5652475842498528, 'scale': 0.1},
+                     'proposal': 0.1,
+                     'latex': 'b_9^{\rm GCph}'},
         'b10_photo': {'prior': {'min': 0.1, 'max': 3.},
-                    'ref': {'dist': 'norm', 'loc': 1.7429859437184225, 'scale': 0.1},
-                    'proposal': 0.1,
-                    'latex': 'b_{10}^{\rm GCph}'} 
+                      'ref': {'dist': 'norm', 'loc': 1.7429859437184225, 'scale': 0.1},
+                      'proposal': 0.1,
+                      'latex': 'b_{10}^{\rm GCph}'},
         'b1_spectro': 1.46,
         'b2_spectro': 1.61,
         'b3_spectro': 1.75,
@@ -99,14 +102,13 @@ info = {
         'bia': 0.0}, 
     'theory': {'camb':
                {'stop_at_error': True,
-                'extra_args':{'num_massive_neutrinos': 1,
-                              'dark_energy_model': 'ppf'}}},
+                'extra_args': {'num_massive_neutrinos': 1,
+                               'dark_energy_model': 'ppf'}}},
     'sampler': {'mcmc': {'max_tries': 100000}},
     'likelihood': {'Euclid': EuclidLikelihood},
     'force': True,
     'output': 'chains/photometric_freenuisance'
     }
 
-
+write_params_yaml_from_cobaya_dict(info)
 updated_info, sampler = run(info)
-

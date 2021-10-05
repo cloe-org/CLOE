@@ -5,7 +5,6 @@ user_models:
   nuisance_ia: nuisance_ia.yaml
   spectro: spectro.yaml
 user_options:
-  model_path: ./likelihood/Models
-  in_cobaya_shell_path: ./likelihood/config_yaml/cobaya_shell.yaml
+  model_path: ./configs/models
   out_params_yaml_path: ./likelihood/params.yaml
-  overwrite: false
+  overwrite: true

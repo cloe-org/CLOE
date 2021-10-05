@@ -236,7 +236,7 @@ class likecalcTestCase(TestCase):
         self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic
         # init Euclike
-        self.like_tt = Euclike(mock_data)
+        self.like_tt = Euclike(mock_data, {})
 
         # The correct check value, using the h scaling for the h from
         # supplied external file is:

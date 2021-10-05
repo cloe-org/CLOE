@@ -1,6 +1,6 @@
 """Logger
 
-This module containd routines to handle loggers
+This module contains routines to handle loggers
 """
 
 import sys
@@ -58,7 +58,7 @@ def catch_error(exception, log=None):
 
     Parameters
     ----------
-    exception : str
+    exception : error or str
         Exception message string
     log : logging.Logger, optional
         Logging structure instance (default is ``None``)

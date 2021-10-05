@@ -4,11 +4,10 @@ Contains function to read the observable dictionary
 and plot the visualization of the matrix
 """
 
-import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+from matplotlib.colors import LinearSegmentedColormap
 import warnings
 
 

@@ -5,9 +5,9 @@ This is the top level script for running the CLOE user interface.
 """
 import argparse
 import json
-from likelihood.user_interface.likelihood_ui import LikelihoodUI
-from os import sys
+import sys
 from warnings import warn
+from likelihood.user_interface.likelihood_ui import LikelihoodUI
 from likelihood.auxiliary.logger import open_logger, close_logger, catch_error
 
 
@@ -45,17 +45,17 @@ def run_script(log):
                         help='specify additional arguments')
     args = parser.parse_args()
 
-    dict = json.loads(args.dict)
+    user_dict = json.loads(args.dict)
 
     log.info('Instantiating user interface')
-    ui = LikelihoodUI(user_config_file=args.config, user_dict=dict)
-    if (args.action == 'run'):
+    ui = LikelihoodUI(user_config_file=args.config, user_dict=user_dict)
+    if args.action == 'run':
         log.info('Selected RUN mode')
         ui.run()
-    elif (args.action == 'process'):
+    elif args.action == 'process':
         log.info('Selected PROCESS mode')
         ui.process_chain()
-    elif (args.action == 'plot'):
+    elif args.action == 'plot':
         log.info('Selected PLOT mode')
         ui.plot(args.settings)
     else:
@@ -71,11 +71,11 @@ def main():
     Opens a logger and calls run_script
     """
 
+    log = None
     try:
         log = open_logger('CLOE')
         run_script(log)
         return 0
-
     except Exception as err:
         catch_error(err, log)
         return 1

@@ -6,6 +6,7 @@ to the CLOE-specific configuration.
 """
 
 import yaml
+from warnings import warn
 from os.path import exists
 
 
@@ -47,7 +48,7 @@ def yaml_read_and_check_dict(file_name: str, needed_keys: list):
     file_name: str
         The name of the file where to read the dictionary from.
     needed_keys: list of str
-        The keys that should be in the dictionary
+        The keys that must be in the dictionary
 
     Returns
     -------
@@ -106,7 +107,7 @@ def yaml_write(file_name, config, overwrite=False):
     if file_exists and not overwrite:
         raise RuntimeError(f'File {file_name} already exists.\n')
     elif file_exists and overwrite:
-        print(f'Overwriting file {file_name}.\n')
+        warn(f'Overwriting file {file_name}.')
 
     with open(file_name, 'w') as file:
-        file.write(yaml.dump(config))
+        file.write(yaml.dump(config, default_flow_style=False))

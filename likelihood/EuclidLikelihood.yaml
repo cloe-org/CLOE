@@ -3,4 +3,4 @@ aliases: [euclid]
 speed: 500
 params: !defaults [params]
 data: !defaults [data]
-observables: !defaults [Models/observables]
+observables: !defaults [../configs/observables]

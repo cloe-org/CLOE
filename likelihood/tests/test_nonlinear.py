@@ -16,7 +16,8 @@ from likelihood.tests.test_wrapper import CobayaModel
 
 class nonlinearinitTestCase(TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls) -> None:
         # Define cosmology values in Cosmology dict
         cosmo = Cosmology()
         cosmo.cosmo_dic['ombh2'] = 0.022
@@ -30,10 +31,11 @@ class nonlinearinitTestCase(TestCase):
         cosmo.cosmo_dic['H0_Mpc'] = \
             cosmo.cosmo_dic['H0'] / const.c.to('km/s').value,
         # Create wrapper model
-        self.model_test = CobayaModel(cosmo)
-        self.model_test.update_cosmo()
-        self.nl = self.model_test.cosmology.nonlinear
+        cls.model_test = CobayaModel(cosmo)
+        cls.model_test.update_cosmo()
+        cls.nl = cls.model_test.cosmology.nonlinear
 
+    def setUp(self) -> None:
         # Check values
         self.Pgg_phot_test = 58392.759202
         self.Pgdelta_phot_test = 41294.412017
@@ -60,7 +62,6 @@ class nonlinearinitTestCase(TestCase):
         self.bphot = 1.41406
 
     def tearDown(self):
-        self.nl = None
         self.Pgg_phot_test = None
         self.Pgdelta_phot_test = None
         self.Pgg_spectro_test = None

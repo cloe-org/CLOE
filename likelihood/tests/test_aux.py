@@ -42,7 +42,8 @@ class mock_P_obj:
 
 class plotterTestCase(TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls) -> None:
         cur_dir = Path(__file__).resolve().parents[0]
         cmov_file = np.loadtxt(str(cur_dir) +
                                '/test_input/ComDist-LCDM-Lin-zNLA.dat')
@@ -172,9 +173,9 @@ class plotterTestCase(TestCase):
                                                              pgi_spectro.T,
                                                              fill_value=0.0)
         fig1 = plt.figure()
-        self.ax1 = fig1.add_subplot(1, 1, 1)
+        cls.ax1 = fig1.add_subplot(1, 1, 1)
 
-        self.plot_inst = Plotter(mock_cosmo_dic, mock_data)
+        cls.plot_inst = Plotter(mock_cosmo_dic, mock_data)
 
     def tearDown(self):
         pass

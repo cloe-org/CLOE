@@ -14,9 +14,10 @@ from likelihood.tests.test_wrapper import CobayaModel
 
 class cosmoinitTestCase(TestCase):
 
-    def setUp(self):
-        # Define cosmology values in Cosmology dict
+    @classmethod
+    def setUpClass(cls) -> None:
         cosmo = Cosmology()
+        # Define cosmology values in Cosmology dict
         cosmo.cosmo_dic['ombh2'] = 0.022
         cosmo.cosmo_dic['omch2'] = 0.12
         cosmo.cosmo_dic['H0'] = 67.0
@@ -29,8 +30,10 @@ class cosmoinitTestCase(TestCase):
             cosmo.cosmo_dic['H0'] / const.c.to('km/s').value,
         cosmo.cosmo_dic['nuisance_parameters']['NL_flag'] = 0
         # Create wrapper model
-        self.model_test = CobayaModel(cosmo)
-        self.model_test.update_cosmo()
+        cls.model_test = CobayaModel(cosmo)
+        cls.model_test.update_cosmo()
+
+    def setUp(self) -> None:
         # Check values
         self.H0check = 67.0
         self.Dcheck = 1.0
@@ -124,9 +127,10 @@ class cosmoinitTestCase(TestCase):
     def test_update_cosmo_dic(self):
         self.model_test.cosmology.update_cosmo_dic(
             self.model_test.cosmology.cosmo_dic['z_win'], 0.002)
+        keyDfound = False
         if 'D_z_k' in self.model_test.cosmology.cosmo_dic:
-            emptflag_D = True
-        npt.assert_equal(emptflag_D, True,
+            keyDfound = True
+        npt.assert_equal(keyDfound, True,
                          err_msg='D_z_k not calculated ')
 
     def test_istf_phot_galbias(self):

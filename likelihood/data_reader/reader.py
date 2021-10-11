@@ -5,7 +5,7 @@ Contains class to read external data
 """
 
 import numpy as np
-from astropy.io import fits
+from astropy.io import fits, ascii
 from pathlib import Path
 from scipy import interpolate
 from scipy import integrate
@@ -239,70 +239,24 @@ class Reader:
 
         full_path = Path(self.dat_dir_main, file_dest)
 
-        GC_file = fits.open(Path(full_path, root_GC.format(IA_model)))
-        WL_file = fits.open(Path(full_path, root_WL.format(IA_model)))
-        XC_file = fits.open(Path(full_path, root_XC.format(IA_model)))
-
-        GC_phot_dict['ells'] = GC_file[1].data
-        WL_dict['ells'] = WL_file[1].data
-        XC_phot_dict['ells'] = XC_file[1].data
+        GC_file = ascii.read(Path(full_path, root_GC.format(IA_model)))
+        WL_file = ascii.read(Path(full_path, root_WL.format(IA_model)))
+        XC_file = ascii.read(Path(full_path, root_XC.format(IA_model)))
 
         self.numtomo_wl = len(self.nz_dict_WL)
         self.numtomo_gcphot = len(self.nz_dict_GC_Phot)
 
-        for i in range(2, len(GC_file)):
-            cur_ind = GC_file[i].header['EXTNAME']
-            cur_comb = GC_file[i].header['BIN_COMB']
-            if len(cur_comb) > 3:
-                if cur_comb[:2] == '10':
-                    left_digit = '10'
-                else:
-                    left_digit = cur_comb[0]
-                if cur_comb[-2:] == '10':
-                    right_digit = '10'
-                else:
-                    right_digit = cur_comb[-1]
-            else:
-                left_digit = cur_comb[0]
-                right_digit = cur_comb[-1]
-            cur_lab = cur_ind[0] + left_digit + '-' + cur_ind[2] + right_digit
-            GC_phot_dict[cur_lab] = GC_file[i].data
+        header_GC = GC_file.colnames
+        for i in range(len(header_GC)):
+            GC_phot_dict[header_GC[i]] = GC_file[header_GC[i]].data
 
-        for j in range(2, len(WL_file)):
-            cur_ind = WL_file[j].header['EXTNAME']
-            cur_comb = WL_file[j].header['BIN_COMB']
-            if len(cur_comb) > 3:
-                if cur_comb[:2] == '10':
-                    left_digit = '10'
-                else:
-                    left_digit = cur_comb[0]
-                if cur_comb[-2:] == '10':
-                    right_digit = '10'
-                else:
-                    right_digit = cur_comb[-1]
-            else:
-                left_digit = cur_comb[0]
-                right_digit = cur_comb[-1]
-            cur_lab = cur_ind[0] + left_digit + '-' + cur_ind[2] + right_digit
-            WL_dict[cur_lab] = WL_file[j].data
+        header_WL = WL_file.colnames
+        for i in range(len(header_WL)):
+            WL_dict[header_WL[i]] = WL_file[header_WL[i]].data
 
-        for k in range(2, len(XC_file)):
-            cur_ind = XC_file[k].header['EXTNAME']
-            cur_comb = XC_file[k].header['BIN_COMB']
-            if len(cur_comb) > 3:
-                if cur_comb[:2] == '10':
-                    left_digit = '10'
-                else:
-                    left_digit = cur_comb[0]
-                if cur_comb[-2:] == '10':
-                    right_digit = '10'
-                else:
-                    right_digit = cur_comb[-1]
-            else:
-                left_digit = cur_comb[0]
-                right_digit = cur_comb[-1]
-            cur_lab = cur_ind[0] + left_digit + '-' + cur_ind[2] + right_digit
-            XC_phot_dict[cur_lab] = XC_file[k].data
+        header_XC = XC_file.colnames
+        for i in range(len(header_XC)):
+            XC_phot_dict[header_XC[i]] = XC_file[header_XC[i]].data
 
         GC_cov_str = self.data['photo']['cov_GC'].format(self.data[
             'photo']['cov_model'])
@@ -344,7 +298,7 @@ class Reader:
         self.data_dict['WL'] = WL_dict
         self.data_dict['XC-Phot'] = XC_phot_dict
 
-        GC_file.close()
-        WL_file.close()
-        XC_file.close()
+        del(GC_file)
+        del(WL_file)
+        del(XC_file)
         return

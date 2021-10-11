@@ -156,9 +156,9 @@ if runoption == 0:
                 'ndens_WL': 'niTab-EP10-RB00.dat',
                 # Photometric root names should contain z{:s} string
                 # to specify IA model
-                'root_GC': 'Cls_{:s}_PosPos.fits',
-                'root_WL': 'Cls_{:s}_ShearShear.fits',
-                'root_XC': 'Cls_{:s}_PosShear.fits',
+                'root_GC': 'Cls_{:s}_PosPos.dat',
+                'root_WL': 'Cls_{:s}_ShearShear.dat',
+                'root_XC': 'Cls_{:s}_PosShear.dat',
                 'IA_model': 'zNLA',
                 # Photometric covariances root names should contain z{:s} string
                 # to specify how the covariance was calculated

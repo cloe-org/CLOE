@@ -10,9 +10,9 @@ mock_data = {
   'photo': {
     'ndens_GC': 'niTab-EP10-RB00.dat',
     'ndens_WL': 'niTab-EP10-RB00.dat',
-    'root_GC': 'Cls_{:s}_PosPos.fits',
-    'root_WL': 'Cls_{:s}_ShearShear.fits',
-    'root_XC': 'Cls_{:s}_PosShear.fits',
+    'root_GC': 'Cls_{:s}_PosPos.dat',
+    'root_WL': 'Cls_{:s}_ShearShear.dat',
+    'root_XC': 'Cls_{:s}_PosShear.dat',
     'IA_model': 'zNLA',
     'cov_GC': 'CovMat-PosPos-{:s}-20Bins.dat',
     'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.dat',

@@ -236,7 +236,11 @@ class likecalcTestCase(TestCase):
         self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic
         # init Euclike
-        self.like_tt = Euclike(mock_data, {})
+
+        mock_obs = {'WL': {'WL': False, 'GCphot': False, 'GCspectro': False},
+                    'GCphot': {'GCphot': False, 'GCspectro': False},
+                    'GCspectro': {'GCspectro': True}}
+        self.like_tt = Euclike(mock_data, mock_obs)
 
         # The correct check value, using the h scaling for the h from
         # supplied external file is:

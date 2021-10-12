@@ -12,13 +12,14 @@ class Masking_test(TestCase):
         self.fake_masking_vector = (
             numpy.random.randint(2, size=self.fake_vec_size))
         self.fake_data_vector = numpy.random.randn(self.fake_vec_size)
-        self.fake_covariance_matrix = (
+        self.fake_inverse_covariance_matrix = (
             numpy.random.randn(self.fake_vec_size, self.fake_vec_size))
-        self.covariance_matrix_not_2d = numpy.random.randn(10, 10, 10)
-        self.covariance_matrix_not_square = numpy.random.randn(3, 2)
+        self.inverse_covariance_matrix_not_2d = numpy.random.randn(10, 10, 10)
+        self.inverse_covariance_matrix_not_square = numpy.random.randn(3, 2)
         self.masking = Masking()
         self.masking.set_data_vector(self.fake_data_vector)
-        self.masking.set_covariance_matrix(self.fake_covariance_matrix)
+        self.masking.set_inverse_covariance_matrix(
+            self.fake_inverse_covariance_matrix)
         self.masking.set_masking_vector(self.fake_masking_vector)
         self.masked_vec_size = numpy.count_nonzero(self.fake_masking_vector)
 
@@ -26,9 +27,9 @@ class Masking_test(TestCase):
         self.fake_vec_size = None
         self.fake_masking_vector = None
         self.fake_data_vector = None
-        self.fake_covariance_matrix = None
-        self.covariance_matrix_not_2d = None
-        self.covariance_matrix_not_square = None
+        self.fake_inverse_covariance_matrix = None
+        self.inverse_covariance_matrix_not_2d = None
+        self.inverse_covariance_matrix_not_square = None
         self.masking = None
         self.masked_vec_size = None
 
@@ -36,7 +37,7 @@ class Masking_test(TestCase):
     # and resets the value of masked data vector and masked covariance matrix
     def test_set_masking_vector(self):
         self.masking.get_masked_data_vector()
-        self.masking.get_masked_covariance_matrix()
+        self.masking.get_masked_inverse_covariance_matrix()
         self.masking.set_masking_vector(self.fake_masking_vector)
 
         npt.assert_array_equal(
@@ -50,7 +51,7 @@ class Masking_test(TestCase):
             f' set_masking_vector()'
         )
         self.assertIsNone(
-            self.masking._masked_covariance_matrix,
+            self.masking._masked_inverse_covariance_matrix,
             msg=f'masked covariance matrix is not None after calling'
             f' set_masking_vector()')
 
@@ -70,32 +71,34 @@ class Masking_test(TestCase):
 
     # test that the covariance matrix is set and the masked covariance matrix
     # is reset
-    def test_set_covariance_matrix(self):
-        self.masking.get_masked_covariance_matrix()
-        self.masking.set_covariance_matrix(self.fake_covariance_matrix)
+    def test_set_inverse_covariance_matrix(self):
+        self.masking.get_masked_inverse_covariance_matrix()
+        self.masking.set_inverse_covariance_matrix(
+            self.fake_inverse_covariance_matrix)
         npt.assert_array_equal(
-            self.masking._covariance_matrix,
-            self.fake_covariance_matrix,
-            err_msg=f'covariance_matrix was not set in set_covariance_matrix()'
+            self.masking._inverse_covariance_matrix,
+            self.fake_inverse_covariance_matrix,
+            err_msg=f'inverse covariance_matrix was not set in'
+            f' set_inverse_covariance_matrix()'
         )
         self.assertIsNone(
-            self.masking._masked_covariance_matrix,
-            msg=f'masked covariance matrix was not reset in'
-            f' set_covariance_matrix()'
+            self.masking._masked_inverse_covariance_matrix,
+            msg=f'masked inverse covariance matrix was not reset in'
+            f' set_inverse_covariance_matrix()'
         )
 
     # test that an error is raised if the covariance matrix has a bad format
-    def test_set_covariance_matrix_invalid(self):
+    def test_set_inverse_covariance_matrix_invalid(self):
         self.assertRaises(
             TypeError,
-            self.masking.set_covariance_matrix,
-            self.covariance_matrix_not_2d,
+            self.masking.set_inverse_covariance_matrix,
+            self.inverse_covariance_matrix_not_2d,
         )
 
         self.assertRaises(
             TypeError,
-            self.masking.set_covariance_matrix,
-            self.covariance_matrix_not_square,
+            self.masking.set_inverse_covariance_matrix,
+            self.inverse_covariance_matrix_not_square,
         )
 
     # Test that the masked data vector has the expected size.
@@ -126,28 +129,28 @@ class Masking_test(TestCase):
     # Test that the masked covariance matrix has the expected dimensions.
     # Test that an error is raised when the masking vector or the covariance
     # matrix are not set.
-    def test_get_masked_covariance_matrix(self):
+    def test_get_masked_inverse_covariance_matrix(self):
 
         npt.assert_array_equal(
             (self.masked_vec_size, self.masked_vec_size),
-            self.masking.get_masked_covariance_matrix().shape,
-            err_msg=f'Masked covariance matrix has unexpected shape:'
-            f' {self.masking.get_masked_covariance_matrix().shape} instead of'
-            f' ({self.masked_vec_size}, {self.masked_vec_size}),'
+            self.masking.get_masked_inverse_covariance_matrix().shape,
+            err_msg=f'Masked inverse covariance matrix has unexpected shape:'
+            f' {self.masking.get_masked_inverse_covariance_matrix().shape}'
+            f' instead of ({self.masked_vec_size}, {self.masked_vec_size}),'
         )
 
         # repeat the call to the function, just for the sake of coverage
-        self.masking.get_masked_covariance_matrix()
+        self.masking.get_masked_inverse_covariance_matrix()
 
         self.masking._masking_vector = None
         self.assertRaises(
             TypeError,
-            self.masking.get_masked_covariance_matrix,
+            self.masking.get_masked_inverse_covariance_matrix,
         )
 
         self.masking._masking_vector = self.fake_masking_vector
-        self.masking._covariance_matrix = None
+        self.masking._inverse_covariance_matrix = None
         self.assertRaises(
             TypeError,
-            self.masking.get_masked_covariance_matrix,
+            self.masking.get_masked_inverse_covariance_matrix,
         )

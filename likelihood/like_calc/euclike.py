@@ -9,6 +9,8 @@ from likelihood.cosmo.cosmology import Cosmology
 from likelihood.photometric_survey.photo import Photo
 from likelihood.spectroscopic_survey.spectro import Spectro
 from likelihood.data_reader import reader
+from likelihood.masking.masking import Masking
+from likelihood.masking.data_handler import Data_handler
 from likelihood.masking.masking_vector_wrapper import MaskingVectorWrapper
 
 
@@ -62,6 +64,8 @@ class Euclike:
         self.spectroinvcovfinal = np.linalg.inv(self.spectrocovfinal)
         # Read photo
         self.data_ins.read_phot()
+        # Tranforming data
+        self.photodatafinal = self.create_photo_data()
         self.photoinvcovfinal_GC = np.linalg.inv(
             self.data_ins.data_dict['GC-Phot']['cov'])
         self.photoinvcovfinal_WL = np.linalg.inv(
@@ -71,8 +75,7 @@ class Euclike:
         # Order of this matrix is WL, XC, GC
         self.photoinvcovfinal_all = np.linalg.inv(
             self.data_ins.data_dict['XC-Phot']['cov'])
-        # Tranforming data
-        self.photodatafinal = self.create_photo_data()
+
         # Calculate permutations i,j bins for WL, GC-Phot, XC.
         # This refers to the non-redundant bin combinations for
         # which we have measurements (i.e. 1-1, 1-2, ..., 1-10,
@@ -105,6 +108,30 @@ class Euclike:
         # in create_spectro_theory() and its value is then cached for future
         # use.
         self.num_spectro_elements = None
+
+        # Reshaping the data vectors and covarinace matrices
+        # into dictionaries to be passed to the data_handler class
+        self.datafinal = {**self.photodatafinal,
+                          'GC-Spectro': self.spectrodatafinal}
+        self.covfinal = {'WL': self.data_ins.data_dict['WL']['cov'],
+                         'XC-Phot': self.data_ins.data_dict['XC-Phot'][
+                            'cov_XC_only'],
+                         'GC-Phot': self.data_ins.data_dict['GC-Phot']['cov'],
+                         'GC-Spectro': self.spectrocovfinal}
+
+        data_handler_ins = Data_handler(self.datafinal,
+                                        self.covfinal,
+                                        self.observables)
+        self.data_vector, self.invcov_matrix, self.masking_vector = \
+            data_handler_ins.get_data_and_masking_vector()
+
+        mask_ins = Masking()
+        mask_ins.set_data_vector(self.data_vector)
+        mask_ins.set_inverse_covariance_matrix(self.invcov_matrix)
+        mask_ins.set_masking_vector(self.masking_vector)
+        self.masked_data_vector = mask_ins.get_masked_data_vector()
+        self.masked_invcov_matrix = (
+            mask_ins.get_masked_inverse_covariance_matrix())
 
     def create_photo_data(self):
         """Create Photo Data

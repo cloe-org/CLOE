@@ -9,6 +9,7 @@ from likelihood.cosmo.cosmology import Cosmology
 from likelihood.photometric_survey.photo import Photo
 from likelihood.spectroscopic_survey.spectro import Spectro
 from likelihood.data_reader import reader
+from likelihood.masking.masking_vector_wrapper import MaskingVectorWrapper
 
 
 class EuclikeError(Exception):
@@ -44,6 +45,9 @@ class Euclike:
 
         self.data = data
         self.observables = observables
+        self.masking_vector = np.ones(5700)
+        self.masking_vector_wrapper = MaskingVectorWrapper()
+        self.masking_vector_wrapper.set_masking_vector(self.masking_vector)
 
         self.data_ins = reader.Reader(self.data)
         self.data_ins.compute_nz()
@@ -96,6 +100,12 @@ class Euclike:
             for j in range(0, len(x)):
                 self.indices_all.append([i + 1, j + 1])
 
+        # Identifies the number of elements of the spectroscopic part of the
+        # theory vector. It is evaluated once the first time it is needed
+        # in create_spectro_theory() and its value is then cached for future
+        # use.
+        self.num_spectro_elements = None
+
     def create_photo_data(self):
         """Create Photo Data
 
@@ -146,6 +156,9 @@ class Euclike:
         """Create Photo Theory
 
         Obtains the photo theory for the likelihood.
+        The theory is evaluated only for the probes specified in the masking
+        vector. For the probes for which the theory is not evaluated, an array
+        of zeros is included in the returned dictionary.
 
         Parameters
         ----------
@@ -159,49 +172,56 @@ class Euclike:
         -------
         theoryvec_dict: dict
             returns a dictionary of arrays with the transformed photo theory
-            vector
+            vector.
+            For the probes for which the theory is not evaluated, an array of
+            zeros of the same size is included in the returned dictionary.
         """
         theoryvec_dict = {'GC-Phot': None, 'WL': None, 'XC-Phot': None,
                           'all': None}
         # Obtain the theory for GC-Phot
-        theoryvec_dict['GC-Phot'] = np.array([phot_ins.Cl_GC_phot(ell,
-                                                                  element[0],
-                                                                  element[1])
-                                              for ell in
-                                              self.data_ins.data_dict[
-                                              'GC-Phot']
-                                              ['ells']
-                                              for
-                                              element in
-                                              self.indices_diagonal_gcphot])
+        if self.masking_vector_wrapper.get_gc_phot_enabled():
+            theoryvec_dict['GC-Phot'] = np.array(
+                [phot_ins.Cl_GC_phot(ell, element[0], element[1])
+                 for ell in self.data_ins.data_dict['GC-Phot']['ells']
+                 for element in self.indices_diagonal_gcphot]
+            )
+        else:
+            theoryvec_dict['GC-Phot'] = np.zeros(
+                len(self.data_ins.data_dict['GC-Phot']['ells']) *
+                len(self.indices_diagonal_gcphot)
+            )
 
         # Obtain the theory for WL
-        theoryvec_dict['WL'] = np.array([phot_ins.Cl_WL(ell,
-                                                        element[0],
-                                                        element[1])
-                                         for ell in
-                                         self.data_ins.data_dict['WL']
-                                         ['ells']
-                                         for
-                                         element in
-                                         self.indices_diagonal_wl])
+        if self.masking_vector_wrapper.get_wl_enabled():
+            theoryvec_dict['WL'] = np.array(
+                [phot_ins.Cl_WL(ell, element[0], element[1])
+                 for ell in self.data_ins.data_dict['WL']['ells']
+                 for element in self.indices_diagonal_wl]
+            )
+        else:
+            theoryvec_dict['WL'] = np.zeros(
+                 len(self.data_ins.data_dict['WL']['ells']) *
+                 len(self.indices_diagonal_wl)
+            )
+
         # Obtain the theory for XC-Phot
-        if full_photo:
-            theoryvec_dict['XC-Phot'] = np.array([phot_ins.Cl_cross(ell,
-                                                                    element[0],
-                                                                    element[1])
-                                                  for ell in
-                                                  self.data_ins.data_dict[
-                                                  'XC-Phot']
-                                                  ['ells']
-                                                  for
-                                                  element in
-                                                  self.indices_all])
-            theoryvec_dict['all'] = np.concatenate(
-                (theoryvec_dict['WL'],
-                 theoryvec_dict['XC-Phot'],
-                 theoryvec_dict['GC-Phot']),
-                axis=0)
+        if self.masking_vector_wrapper.get_xc_phot_enabled():
+            theoryvec_dict['XC-Phot'] = np.array(
+                [phot_ins.Cl_cross(ell, element[0], element[1])
+                 for ell in self.data_ins.data_dict['XC-Phot']['ells']
+                 for element in self.indices_all]
+            )
+        else:
+            theoryvec_dict['XC-Phot'] = np.zeros(
+                 len(self.data_ins.data_dict['XC-Phot']['ells']) *
+                 len(self.indices_all)
+            )
+
+        theoryvec_dict['all'] = np.concatenate(
+            (theoryvec_dict['WL'],
+             theoryvec_dict['XC-Phot'],
+             theoryvec_dict['GC-Phot']),
+            axis=0)
 
         return theoryvec_dict
 
@@ -209,6 +229,8 @@ class Euclike:
         """Create Spectro Theory
 
         Obtains the theory for the likelihood.
+        The theory is evaluated only if the GC-Spectro probe is enabled in the
+        masking vector.
 
         Parameters
         ----------
@@ -223,21 +245,44 @@ class Euclike:
         Returns
         -------
         theoryvec: list
-            returns the theory array with same indexing/format as the data
+            returns the theory array with same indexing/format as the data.
+            If the GC-Spectro probe is not enabled in the masking vector,
+            an array of zeros of the same size is returned.
         """
+        if self.masking_vector_wrapper.get_gc_spectro_enabled():
+            spec_ins = Spectro(dictionary, dictionary_fiducial)
+            m_ins = [v for k, v in dictionary['nuisance_parameters'].items()
+                     if k.startswith('multipole_')]
+            k_m_matrices = []
+            for z_ins in self.zkeys:
+                k_m_matrix = []
+                for k_ins in (
+                        self.data_ins.data_dict['GC-Spectro'][z_ins]['k_pk']):
+                    k_m_matrix.append(
+                        spec_ins.multipole_spectra(
+                            float(z_ins),
+                            k_ins,
+                            ms=m_ins
+                        )
+                    )
+                k_m_matrices.append(k_m_matrix)
+            theoryvec = np.hstack(k_m_matrices).T.flatten()
+            return theoryvec
 
-        spec_ins = Spectro(dictionary, dictionary_fiducial)
-        m_ins = [v for k, v in dictionary['nuisance_parameters'].items()
-                 if k.startswith('multipole_')]
-        k_m_matrices = []
-        for z_ins in self.zkeys:
-            k_m_matrix = []
-            for k_ins in self.data_ins.data_dict['GC-Spectro'][z_ins]['k_pk']:
-                k_m_matrix.append(spec_ins.multipole_spectra(
-                                        float(z_ins), k_ins, ms=m_ins))
-            k_m_matrices.append(k_m_matrix)
-        theoryvec = np.hstack(k_m_matrices).T.flatten()
-        return theoryvec
+        else:
+            if self.num_spectro_elements is None:
+                self.num_spectro_elements = (
+                    sum(
+                        [k.startswith('multipole_')
+                         for k in dictionary['nuisance_parameters'].keys()]
+                    ) *
+                    sum(
+                        len(self.data_ins.data_dict['GC-Spectro'][z]['k_pk'])
+                        for z in self.zkeys
+                    )
+                )
+            theoryvec = np.zeros(num_spectro_elements)
+            return theoryvec
 
     def create_spectro_data(self):
         """Create Spectro Data

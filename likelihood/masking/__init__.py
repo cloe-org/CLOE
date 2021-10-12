@@ -5,6 +5,7 @@ Modules for implementing the masking of the data vector and of the covariance
 matrix.
 """
 
-__all__ = ['masking']  # list submodules
+__all__ = ['data_handler',
+           'masking']  # list submodules
 
 from . import *

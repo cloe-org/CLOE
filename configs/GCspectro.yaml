@@ -1,0 +1,10 @@
+statistics: legendre_multiples
+multipoles:
+  multipole_0: True
+  multipole_2: True
+  multipole_4: True
+bins:
+  n1: True
+  n2: True
+  n3: True
+  n4: True

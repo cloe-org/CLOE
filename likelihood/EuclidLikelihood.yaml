@@ -3,4 +3,9 @@ aliases: [euclid]
 speed: 500
 params: !defaults [params]
 data: !defaults [data]
-observables: !defaults [../configs/observables]
+observables: 
+  selection: !defaults [../configs/observables]
+  specifications:
+    WL: !defaults [../configs/WL]
+    GCphot: !defaults [../configs/GCphot]
+    GCspectro: !defaults [../configs/GCspectro]

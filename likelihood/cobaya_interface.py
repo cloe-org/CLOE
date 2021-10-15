@@ -79,9 +79,9 @@ class EuclidLikelihood(Likelihood):
         # Visualization of the observables matrix
         # self.observables_pf = observables_visualization(
         #    self.observables)
-
+        # print(self.observables)
         # Initialize Euclike module
-        self.likefinal = Euclike(self.data, self.observables)
+        self.likefinal = Euclike(self.data, self.observables['selection'])
 
         # Initialize Cosmology class for sampling
         self.cosmo = Cosmology()

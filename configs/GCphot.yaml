@@ -1,0 +1,15 @@
+statistics: angular_power_spectra
+l_range:
+  l_min: 20
+  l_max: 2000
+bins:
+  n1: True
+  n2: True
+  n3: True
+  n4: True
+  n5: True
+  n6: True
+  n7: True
+  n8: True
+  n9: True
+  n10: True

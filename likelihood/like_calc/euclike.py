@@ -11,7 +11,6 @@ from likelihood.spectroscopic_survey.spectro import Spectro
 from likelihood.data_reader import reader
 from likelihood.masking.masking import Masking
 from likelihood.masking.data_handler import Data_handler
-from likelihood.masking.masking_vector_wrapper import MaskingVectorWrapper
 
 
 class EuclikeError(Exception):
@@ -42,15 +41,7 @@ class Euclike:
             Dictionary containing specification for the chosen observables by
             the user.
         """
-        # Flag to allow printing  of likelihood selection only once.
-        self.l_select_print_flag = True
-
         self.data = data
-        self.observables = observables
-        self.masking_vector = np.ones(5700)
-        self.masking_vector_wrapper = MaskingVectorWrapper()
-        self.masking_vector_wrapper.set_masking_vector(self.masking_vector)
-
         self.data_ins = reader.Reader(self.data)
         self.data_ins.compute_nz()
         # Read spectro
@@ -59,22 +50,12 @@ class Euclike:
         self.data_spectro_fiducial_cosmo = \
             self.data_ins.data_spectro_fiducial_cosmo
         # Transforming data
-        self.spectrodatafinal = self.create_spectro_data()
-        self.spectrocovfinal = self.create_spectro_cov()
-        self.spectroinvcovfinal = np.linalg.inv(self.spectrocovfinal)
+        spectrodata = self.create_spectro_data()
+        spectrocov = self.create_spectro_cov()
         # Read photo
         self.data_ins.read_phot()
         # Tranforming data
-        self.photodatafinal = self.create_photo_data()
-        self.photoinvcovfinal_GC = np.linalg.inv(
-            self.data_ins.data_dict['GC-Phot']['cov'])
-        self.photoinvcovfinal_WL = np.linalg.inv(
-            self.data_ins.data_dict['WL']['cov'])
-        self.photoinvcovfinal_XC = np.linalg.inv(
-            self.data_ins.data_dict['XC-Phot']['cov_XC_only'])
-        # Order of this matrix is WL, XC, GC
-        self.photoinvcovfinal_all = np.linalg.inv(
-            self.data_ins.data_dict['XC-Phot']['cov'])
+        photodata = self.create_photo_data()
 
         # Calculate permutations i,j bins for WL, GC-Phot, XC.
         # This refers to the non-redundant bin combinations for
@@ -103,35 +84,29 @@ class Euclike:
             for j in range(0, len(x)):
                 self.indices_all.append([i + 1, j + 1])
 
-        # Identifies the number of elements of the spectroscopic part of the
-        # theory vector. It is evaluated once the first time it is needed
-        # in create_spectro_theory() and its value is then cached for future
-        # use.
-        self.num_spectro_elements = None
-
         # Reshaping the data vectors and covarinace matrices
         # into dictionaries to be passed to the data_handler class
-        self.datafinal = {**self.photodatafinal,
-                          'GC-Spectro': self.spectrodatafinal}
-        self.covfinal = {'WL': self.data_ins.data_dict['WL']['cov'],
-                         'XC-Phot': self.data_ins.data_dict['XC-Phot'][
-                            'cov_XC_only'],
-                         'GC-Phot': self.data_ins.data_dict['GC-Phot']['cov'],
-                         'GC-Spectro': self.spectrocovfinal}
+        datafinal = {**photodata,
+                     'GC-Spectro': spectrodata}
+        covfinal = {'WL': self.data_ins.data_dict['WL']['cov'],
+                    'XC-Phot': self.data_ins.data_dict['XC-Phot'][
+                        'cov_XC_only'],
+                    'GC-Phot': self.data_ins.data_dict['GC-Phot']['cov'],
+                    'GC-Spectro': spectrocov}
 
-        data_handler_ins = Data_handler(self.datafinal,
-                                        self.covfinal,
-                                        self.observables)
+        self.data_handler_ins = Data_handler(datafinal,
+                                             covfinal,
+                                             observables)
         self.data_vector, self.invcov_matrix, self.masking_vector = \
-            data_handler_ins.get_data_and_masking_vector()
+            self.data_handler_ins.get_data_and_masking_vector()
 
-        mask_ins = Masking()
-        mask_ins.set_data_vector(self.data_vector)
-        mask_ins.set_inverse_covariance_matrix(self.invcov_matrix)
-        mask_ins.set_masking_vector(self.masking_vector)
-        self.masked_data_vector = mask_ins.get_masked_data_vector()
+        self.mask_ins = Masking()
+        self.mask_ins.set_data_vector(self.data_vector)
+        self.mask_ins.set_inverse_covariance_matrix(self.invcov_matrix)
+        self.mask_ins.set_masking_vector(self.masking_vector)
+        self.masked_data_vector = self.mask_ins.get_masked_data_vector()
         self.masked_invcov_matrix = (
-            mask_ins.get_masked_inverse_covariance_matrix())
+            self.mask_ins.get_masked_inverse_covariance_matrix())
 
     def create_photo_data(self):
         """Create Photo Data
@@ -179,7 +154,7 @@ class Euclike:
 
         return datavec_dict
 
-    def create_photo_theory(self, phot_ins, full_photo):
+    def create_photo_theory(self, dictionary):
         """Create Photo Theory
 
         Obtains the photo theory for the likelihood.
@@ -189,68 +164,67 @@ class Euclike:
 
         Parameters
         ----------
-        phot_ins: object
-            initialized instance of the class Photo
-        full_photo: boolean
-            selects whether to use full photometric
-            data (with XC) or not
+        dictionary: dict
+            cosmology dictionary from the Cosmology class which is updated at
+            each sampling step
 
         Returns
         -------
-        theoryvec_dict: dict
-            returns a dictionary of arrays with the transformed photo theory
-            vector.
-            For the probes for which the theory is not evaluated, an array of
-            zeros of the same size is included in the returned dictionary.
+        photo_theory_vec: array
+            returns an array with the photo theory vector.
+            The elements of the array corresponiding to probes for which the
+            theory is not evaluated, are set to zero.
         """
-        theoryvec_dict = {'GC-Phot': None, 'WL': None, 'XC-Phot': None,
-                          'all': None}
-        # Obtain the theory for GC-Phot
-        if self.masking_vector_wrapper.get_gc_phot_enabled():
-            theoryvec_dict['GC-Phot'] = np.array(
-                [phot_ins.Cl_GC_phot(ell, element[0], element[1])
-                 for ell in self.data_ins.data_dict['GC-Phot']['ells']
-                 for element in self.indices_diagonal_gcphot]
-            )
-        else:
-            theoryvec_dict['GC-Phot'] = np.zeros(
-                len(self.data_ins.data_dict['GC-Phot']['ells']) *
-                len(self.indices_diagonal_gcphot)
-            )
+
+        # Photo class instance
+        phot_ins = Photo(
+            dictionary,
+            self.data_ins.nz_dict_WL,
+            self.data_ins.nz_dict_GC_Phot)
 
         # Obtain the theory for WL
-        if self.masking_vector_wrapper.get_wl_enabled():
-            theoryvec_dict['WL'] = np.array(
+        if self.data_handler_ins.use_wl:
+            wl_array = np.array(
                 [phot_ins.Cl_WL(ell, element[0], element[1])
                  for ell in self.data_ins.data_dict['WL']['ells']
                  for element in self.indices_diagonal_wl]
             )
         else:
-            theoryvec_dict['WL'] = np.zeros(
+            wl_array = np.zeros(
                  len(self.data_ins.data_dict['WL']['ells']) *
                  len(self.indices_diagonal_wl)
             )
 
         # Obtain the theory for XC-Phot
-        if self.masking_vector_wrapper.get_xc_phot_enabled():
-            theoryvec_dict['XC-Phot'] = np.array(
+        if self.data_handler_ins.use_xc_phot:
+            xc_phot_array = np.array(
                 [phot_ins.Cl_cross(ell, element[0], element[1])
                  for ell in self.data_ins.data_dict['XC-Phot']['ells']
                  for element in self.indices_all]
             )
         else:
-            theoryvec_dict['XC-Phot'] = np.zeros(
+            xc_phot_array = np.zeros(
                  len(self.data_ins.data_dict['XC-Phot']['ells']) *
                  len(self.indices_all)
             )
 
-        theoryvec_dict['all'] = np.concatenate(
-            (theoryvec_dict['WL'],
-             theoryvec_dict['XC-Phot'],
-             theoryvec_dict['GC-Phot']),
-            axis=0)
+        # Obtain the theory for GC-Phot
+        if self.data_handler_ins.use_gc_phot:
+            gc_phot_array = np.array(
+                [phot_ins.Cl_GC_phot(ell, element[0], element[1])
+                 for ell in self.data_ins.data_dict['GC-Phot']['ells']
+                 for element in self.indices_diagonal_gcphot]
+            )
+        else:
+            gc_phot_array = np.zeros(
+                len(self.data_ins.data_dict['GC-Phot']['ells']) *
+                len(self.indices_diagonal_gcphot)
+            )
 
-        return theoryvec_dict
+        photo_theory_vec = np.concatenate(
+            (wl_array, xc_phot_array, gc_phot_array), axis=0)
+
+        return photo_theory_vec
 
     def create_spectro_theory(self, dictionary, dictionary_fiducial):
         """Create Spectro Theory
@@ -276,7 +250,7 @@ class Euclike:
             If the GC-Spectro probe is not enabled in the masking vector,
             an array of zeros of the same size is returned.
         """
-        if self.masking_vector_wrapper.get_gc_spectro_enabled():
+        if self.data_handler_ins.use_gc_spectro:
             spec_ins = Spectro(dictionary, dictionary_fiducial)
             m_ins = [v for k, v in dictionary['nuisance_parameters'].items()
                      if k.startswith('multipole_')]
@@ -297,18 +271,7 @@ class Euclike:
             return theoryvec
 
         else:
-            if self.num_spectro_elements is None:
-                self.num_spectro_elements = (
-                    sum(
-                        [k.startswith('multipole_')
-                         for k in dictionary['nuisance_parameters'].keys()]
-                    ) *
-                    sum(
-                        len(self.data_ins.data_dict['GC-Spectro'][z]['k_pk'])
-                        for z in self.zkeys
-                    )
-                )
-            theoryvec = np.zeros(num_spectro_elements)
+            theoryvec = np.zeros(self.data_handler_ins.gc_spectro_size)
             return theoryvec
 
     def create_spectro_data(self):
@@ -340,88 +303,28 @@ class Euclike:
             returns a single covariance from sub-covariances (split in z)
         """
 
-        self.covnumz = len(self.zkeys)
         # covnumk generalizes so that each z can have different k binning
-        self.covnumk = []
-        self.covnumk.append(0)
+        covnumk = []
+        covnumk.append(0)
         for z_ins in self.zkeys:
-            self.covnumk.append(
+            covnumk.append(
                 3 * len(self.data_ins.data_dict['GC-Spectro'][z_ins]['k_pk']))
 
         # Put all covariances into a single/larger covariance.
         # As no cross-covariances, this takes on a block-form
         # along the diagonal.
-        covfull = np.zeros([sum(self.covnumk), sum(self.covnumk)])
+        covfull = np.zeros([sum(covnumk), sum(covnumk)])
         kc = 0
         c1 = 0
         c2 = 0
         for z_ins in self.zkeys:
-            c1 = c1 + self.covnumk[kc]
-            c2 = c2 + self.covnumk[kc + 1]
+            c1 = c1 + covnumk[kc]
+            c2 = c2 + covnumk[kc + 1]
             covfull[c1:c2, c1:c2] = self.data_ins.data_dict['GC-Spectro'][
                                         z_ins]['cov']
             kc = kc + 1
 
         return covfull
-
-    def loglike_photo(self, dictionary, full_photo):
-        """Loglike Photo
-
-        Calculates loglike photometric based on
-        the flag 'full_photo'. If True, calculates
-        all probes. If false, only calculates GC+WL
-        assuming they are independent.
-
-        Parameters
-        ----------
-        dictionary: dict
-            cosmology dictionary from the Cosmology class
-            which is updated at each sampling step
-
-        full_photo: boolean
-            selects whether to use full photometric
-            data (with XC) or not
-
-        Returns
-        -------
-        loglike_photo: float
-            returns photo-z chi2
-        """
-
-        # Photo class instance
-        phot_ins = Photo(
-                dictionary,
-                self.data_ins.nz_dict_WL,
-                self.data_ins.nz_dict_GC_Phot)
-        # Obtain the theory vector
-        theoryvec_dict = self.create_photo_theory(phot_ins, full_photo)
-        loglike_photo = 0
-        if not full_photo:
-            # Construct data minus theory
-            dmt_GC = self.photodatafinal['GC-Phot'] - \
-                    theoryvec_dict['GC-Phot']
-            dmt_WL = self.photodatafinal['WL'] - \
-                theoryvec_dict['WL']
-            # Obtain loglike
-            loglike_GC = -0.5 * \
-                np.dot(np.dot(dmt_GC, self.photoinvcovfinal_GC), dmt_GC)
-            loglike_WL = -0.5 * \
-                np.dot(np.dot(dmt_WL, self.photoinvcovfinal_WL), dmt_WL)
-            # Save loglike
-            loglike_photo = loglike_GC + loglike_WL
-        # If True, calls massive cov mat
-        elif full_photo:
-            # Construct data minus theory
-            dmt_all = self.photodatafinal['all'] - \
-                    theoryvec_dict['all']
-
-            # Obtain loglike
-            loglike_photo = -0.5 * np.dot(
-                np.dot(dmt_all, self.photoinvcovfinal_all),
-                dmt_all)
-        else:
-            print('ATTENTION: full_photo has to be either True/False')
-        return loglike_photo, theoryvec_dict
 
     def loglike(self, dictionary, dictionary_fiducial):
         """Loglike
@@ -443,43 +346,18 @@ class Euclike:
         loglike_tot: float
             loglike = Ln(likelihood) for the Euclid observables
         """
-        like_selection = dictionary['nuisance_parameters']['like_selection']
-        full_photo = dictionary['nuisance_parameters']['full_photo']
-        if like_selection == 1:
-            self.loglike_tot, self.photothvec = \
-                    self.loglike_photo(dictionary, full_photo)
-        elif like_selection == 2:
-            self.specthvec = self.create_spectro_theory(
-                             dictionary, dictionary_fiducial)
-            dmt = self.spectrodatafinal - self.specthvec
-            self.loglike_tot = -0.5 * np.dot(
-                np.dot(dmt, self.spectroinvcovfinal), dmt)
-        elif like_selection == 12:
-            self.specthvec = self.create_spectro_theory(
-                             dictionary, dictionary_fiducial)
-            dmt = self.spectrodatafinal - self.specthvec
-            self.loglike_spectro = -0.5 * np.dot(np.dot(
-                                    dmt, self.spectroinvcovfinal), dmt)
-            self.loglike_photo, self.photothvec = \
-                self.loglike_photo(dictionary, full_photo)
-            # Only addition below if no cross-covariance
-            self.loglike_tot = self.loglike_photo + self.loglike_spectro
-        else:
-            raise CobayaInterfaceError(
-                r"Choose like selection '1' or '2' or '12'")
-        # The first time the likelihood is called, this will explicitly print
-        # the choice of likelihood.
-        if self.l_select_print_flag:
-            def_msg = ''
-            if like_selection == 1:
-                choice = 'PHOTOMETRIC'
-            elif like_selection == 2:
-                choice = 'SPECTROSCOPIC'
-            else:
-                choice = '3x2 PT'
-                def_msg = (' (IF like_selection HAS NOT BEEN EXPLICITLY' +
-                           ' SPECIFIED, THE 3x2 PT IS CHOSEN BY DEFAULT.')
-            print('NOTE: ', choice, ' LIKELIHOOD REQUESTED' + def_msg)
-            self.l_select_print_flag = False
+        photo_theory_vec = self.create_photo_theory(dictionary)
+        spectro_theory_vec = self.create_spectro_theory(dictionary,
+                                                        dictionary_fiducial)
 
-        return self.loglike_tot
+        theory_vec = np.concatenate(
+            (photo_theory_vec, spectro_theory_vec), axis=0)
+        self.mask_ins.set_theory_vector(theory_vec)
+        masked_data_minus_theory = (
+            self.masked_data_vector - self.mask_ins.get_masked_theory_vector())
+
+        loglike = -0.5 * np.dot(
+            np.dot(masked_data_minus_theory, self.masked_invcov_matrix),
+            masked_data_minus_theory)
+
+        return loglike

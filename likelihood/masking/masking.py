@@ -17,9 +17,11 @@ class Masking:
         All the data members are initialized to None
         """
         self._data_vector = None
+        self._theory_vector = None
         self._inverse_covariance_matrix = None
         self._masking_vector = None
         self._masked_data_vector = None
+        self._masked_theory_vector = None
         self._masked_covariance_matrix = None
 
     def set_inverse_covariance_matrix(self, matrix):
@@ -30,7 +32,7 @@ class Masking:
         matrix: numpy.ndarray
           The input matrix should be a 2-d array representing a square matrix,
           whose number of rows and columns must match the size of the data
-          vector and of the masking vector.
+          vector, of the theory vector and of the masking vector.
           It is assumed that the inverse covariance matrix is already unrolled
           and stacked with the same arrangement used for the data and masking
           vectors.
@@ -59,7 +61,7 @@ class Masking:
         ----------
         vector: numpy.array of int
           The masking vector is a 1-d array of int and its size must match
-          that of the data vector.
+          that of the data vector and of the theory vector.
         """
         self._masking_vector = vector.astype(bool)
         self._masked_data_vector = None
@@ -72,10 +74,22 @@ class Masking:
         ----------
         vector: numpy.array
           The data vector is a 1-d array. Its size must match the size of the
-          masking vector.
+          masking vector and of the theory vector.
         """
         self._data_vector = vector
         self._masked_data_vector = None
+
+    def set_theory_vector(self, vector):
+        r"""Set the theory vector
+
+        Parameters
+        ----------
+        vector: numpy.array
+          The theory vector is a 1-d array. Its size must match the size of
+          the masking vector and of the data vector.
+        """
+        self._theory_vector = vector
+        self._masked_theory_vector = None
 
     def get_masked_data_vector(self):
         r"""Get the masked data vector
@@ -103,6 +117,34 @@ class Masking:
             self._masked_data_vector = self._data_vector[self._masking_vector]
 
         return self._masked_data_vector
+
+    def get_masked_theory_vector(self):
+        r"""Get the masked theory vector
+
+        Returns
+        -------
+        numpy.array
+          The masked theory vector, obtained by removing from the input theory
+          vector the elements corresponding to zero-entries in the masking
+          vector.
+          The size of the masked theory vector is given by the number of
+          nonzero entries in the masking vector.
+
+        Raises
+        ------
+        TypeError
+          if the masking vector is not set or the theory vector is not set
+        """
+        if self._masking_vector is None:
+            raise TypeError(f'The masking vector is not set')
+        if self._theory_vector is None:
+            raise TypeError(f'The theory vector is not set')
+
+        if self._masked_theory_vector is None:
+            self._masked_theory_vector = (
+                self._theory_vector[self._masking_vector])
+
+        return self._masked_theory_vector
 
     def get_masked_inverse_covariance_matrix(self):
         r"""Get the masked inverse covariance matrix

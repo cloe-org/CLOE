@@ -82,3 +82,50 @@ class datahandlerTestCase(TestCase):
                          self.masking_vector,
                          err_msg=f'Values of masking vector do not match'
                          f' expected values.')
+
+    # test whether the observables are read correctly from the input
+    # dictionary: assing random values to the input flags and check whether
+    # the same values are obtained by calling the corresponding getters
+    def test_observables(self):
+        data = {'WL': self.wl_vec,
+                'XC-Phot': self.xc_phot_vec,
+                'GC-Phot': self.gc_phot_vec,
+                'GC-Spectro': self.gc_spectro_vec}
+        cov = {'WL': self.wl_cov,
+               'XC-Phot': self.xc_phot_cov,
+               'GC-Phot': self.gc_phot_cov,
+               'GC-Spectro': self.gc_spectro_cov}
+
+        use_wl, use_xc_phot, use_gc_phot, use_gc_spectro = (
+            np.random.choice([True, False], size=4)
+        )
+        obs = {'WL': {'WL': use_wl, 'GCphot': use_xc_phot, 'GCspectro': False},
+               'GCphot': {'GCphot': use_gc_phot, 'GCspectro': False},
+               'GCspectro': {'GCspectro': use_gc_spectro}}
+        data_handler = Data_handler(data, cov, obs)
+        npt.assert_equal(data_handler.use_wl, use_wl,
+                         err_msg=f'Unexpected value of use_wl flag:'
+                         f' {data_handler.use_wl} instead of {use_wl}')
+        npt.assert_equal(data_handler.use_xc_phot, use_xc_phot,
+                         err_msg=f'Unexpected value of use_xc_phot flag:'
+                         f' {data_handler.use_xc_phot} instead of'
+                         f' {use_xc_phot}')
+        npt.assert_equal(data_handler.use_gc_phot, use_gc_phot,
+                         err_msg=f'Unexpected value of use_gc_phot flag:'
+                         f' {data_handler.use_gc_phot} instead of'
+                         f' {use_gc_phot}')
+        npt.assert_equal(data_handler.use_gc_spectro, use_gc_spectro,
+                         err_msg=f'Unexpected value of use_wl flag:'
+                         f' {data_handler.use_gc_spectro} instead of'
+                         f' {use_gc_spectro}')
+
+    # test whether the size of the gc_spectro part of the data vector is as
+    # expected: just read the gc_spectro_size property of the data handler
+    # and check whether it matches the value specified in setUp()
+    def test_spectro_data_size(self):
+        npt.assert_equal(self.data_handler.gc_spectro_size,
+                         self.gc_spectro_size,
+                         err_msg=f'Unexpected size of the gc_spectro part of'
+                         f' the data vector:'
+                         f' {self.data_handler.gc_spectro_size} instead of'
+                         f' {self.gc_spectro_size}')

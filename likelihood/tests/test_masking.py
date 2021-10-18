@@ -12,12 +12,14 @@ class Masking_test(TestCase):
         self.fake_masking_vector = (
             numpy.random.randint(2, size=self.fake_vec_size))
         self.fake_data_vector = numpy.random.randn(self.fake_vec_size)
+        self.fake_theory_vector = numpy.random.randn(self.fake_vec_size)
         self.fake_inverse_covariance_matrix = (
             numpy.random.randn(self.fake_vec_size, self.fake_vec_size))
         self.inverse_covariance_matrix_not_2d = numpy.random.randn(10, 10, 10)
         self.inverse_covariance_matrix_not_square = numpy.random.randn(3, 2)
         self.masking = Masking()
         self.masking.set_data_vector(self.fake_data_vector)
+        self.masking.set_theory_vector(self.fake_theory_vector)
         self.masking.set_inverse_covariance_matrix(
             self.fake_inverse_covariance_matrix)
         self.masking.set_masking_vector(self.fake_masking_vector)
@@ -67,6 +69,20 @@ class Masking_test(TestCase):
         self.assertIsNone(
             self.masking._masked_data_vector,
             msg=f'masked data vector was not reset in set_data_vector()'
+        )
+
+    # test that the theory vector is set and the masked theory vector is reset
+    def test_set_theory_vector(self):
+        self.masking.get_masked_theory_vector()
+        self.masking.set_theory_vector(self.fake_theory_vector)
+        npt.assert_array_equal(
+            self.masking._theory_vector,
+            self.fake_theory_vector,
+            err_msg=f'theory vector was not set in set_theory_vector()'
+        )
+        self.assertIsNone(
+            self.masking._masked_theory_vector,
+            msg=f'masked theory vector was not reset in set_theory_vector()'
         )
 
     # test that the covariance matrix is set and the masked covariance matrix
@@ -124,6 +140,31 @@ class Masking_test(TestCase):
         self.assertRaises(
             TypeError,
             self.masking.get_masked_data_vector,
+        )
+
+    # Test that the masked theory vector has the expected size.
+    # Test that an error is raised when the theory vector or the masking
+    # vector are not set.
+    def test_get_masked_theory_vector(self):
+        self.assertEqual(
+            self.masked_vec_size,
+            len(self.masking.get_masked_theory_vector()),
+            msg=f'Masked theory vector has unexpected size:'
+            f' {len(self.masking.get_masked_theory_vector())} instead of'
+            f' {self.masked_vec_size}'
+        )
+
+        self.masking._masking_vector = None
+        self.assertRaises(
+            TypeError,
+            self.masking.get_masked_theory_vector,
+        )
+
+        self.masking._masking_vector = self.fake_masking_vector
+        self.masking._theory_vector = None
+        self.assertRaises(
+            TypeError,
+            self.masking.get_masked_theory_vector,
         )
 
     # Test that the masked covariance matrix has the expected dimensions.

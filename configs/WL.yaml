@@ -1,15 +1,132 @@
-statistics: angular_power_spectra
-l_range:
-  l_min: 20
-  l_max: 2000
+# This yaml file contains the user specifications 
+# for the Euclid observables computed theoretically
+# in CLOE.
+# 
+# PROBE: WL autocorrelation
+#
+# GCspectro: Weak Lensing
+#
+# Note: you can concatenate l_ranges as
+# i.e: l_range: [[20, 400], [401, 4000]]
+statistics: angular_power_spectrum
 bins:
-  n1: True
-  n2: True
-  n3: True
-  n4: True
-  n5: True
-  n6: True
-  n7: True
-  n8: True
-  n9: True
-  n10: True
+  n1: 
+    n1: 
+      l_range: [[20, 4000]]
+    n2: 
+      l_range: [[20, 4000]]
+    n3: 
+      l_range: [[20, 4000]]
+    n4: 
+      l_range: [[20, 4000]]
+    n5: 
+      l_range: [[20, 4000]]
+    n6: 
+      l_range: [[20, 4000]]
+    n7: 
+      l_range: [[20, 4000]]
+    n8: 
+      l_range: [[20, 4000]]
+    n9: 
+      l_range: [[20, 4000]]
+    n10: 
+      l_range: [[20, 4000]]
+  n2: 
+    n2: 
+      l_range: [[20, 4000]]
+    n3: 
+      l_range: [[20, 4000]]
+    n4: 
+      l_range: [[20, 4000]]
+    n5: 
+      l_range: [[20, 4000]]
+    n6: 
+      l_range: [[20, 4000]]
+    n7: 
+      l_range: [[20, 4000]]
+    n8: 
+      l_range: [[20, 4000]]
+    n9: 
+      l_range: [[20, 4000]]
+    n10: 
+      l_range: [[20, 4000]]
+  n3: 
+    n3: 
+      l_range: [[20, 4000]]
+    n4: 
+      l_range: [[20, 4000]]
+    n5: 
+      l_range: [[20, 4000]]
+    n6: 
+      l_range: [[20, 4000]]
+    n7: 
+      l_range: [[20, 4000]]
+    n8: 
+      l_range: [[20, 4000]]
+    n9: 
+      l_range: [[20, 4000]]
+    n10: 
+      l_range: [[20, 4000]]
+  n4: 
+    n4: 
+      l_range: [[20, 4000]]
+    n5: 
+      l_range: [[20, 4000]]
+    n6: 
+      l_range: [[20, 4000]]
+    n7: 
+      l_range: [[20, 4000]]
+    n8: 
+      l_range: [[20, 4000]]
+    n9: 
+      l_range: [[20, 4000]]
+    n10: 
+      l_range: [[20, 4000]]
+  n5: 
+    n5: 
+      l_range: [[20, 4000]]
+    n6: 
+      l_range: [[20, 4000]]
+    n7: 
+      l_range: [[20, 4000]]
+    n8: 
+      l_range: [[20, 4000]]
+    n9: 
+      l_range: [[20, 4000]]
+    n10: 
+      l_range: [[20, 4000]]
+  n6: 
+    n6: 
+      l_range: [[20, 4000]]
+    n7: 
+      l_range: [[20, 4000]]
+    n8: 
+      l_range: [[20, 4000]]
+    n9: 
+      l_range: [[20, 4000]]
+    n10: 
+      l_range: [[20, 4000]]
+  n7: 
+    n7: 
+      l_range: [[20, 4000]]
+    n8: 
+      l_range: [[20, 4000]]
+    n9: 
+      l_range: [[20, 4000]]
+    n10: 
+      l_range: [[20, 4000]]
+  n8: 
+    n8: 
+      l_range: [[20, 4000]]
+    n9: 
+      l_range: [[20, 4000]]
+    n10: 
+      l_range: [[20, 4000]]
+  n9: 
+    n9: 
+      l_range: [[20, 4000]]
+    n10: 
+      l_range: [[20, 4000]]
+  n10: 
+    n10: 
+      l_range: [[20, 4000]]

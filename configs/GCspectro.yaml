@@ -1,10 +1,40 @@
-statistics: legendre_multiples
+# This yaml file contains the user specifications 
+# for the Euclid observables computed theoretically
+# in CLOE.
+# 
+# PROBE: GCspectro
+#
+# GCspectro: Galaxy Clustering spectroscopic
+#
+# Note: you can concatenate k_ranges as
+# i.e: k_range: [[0.01, 0.2], [0.3, 0.5]]
+statistics: legendre_multipole_power_spectrum
 multipoles:
   multipole_0: True
   multipole_2: True
   multipole_4: True
 bins:
-  n1: True
-  n2: True
-  n3: True
-  n4: True
+  n1: 
+    n1: 
+      k_range: [[0.01, 0.5]]
+    n2: 
+      k_range: [[0.01, 0.5]]
+    n3: 
+      k_range: [[0.01, 0.5]]
+    n4: 
+      k_range: [[0.01, 0.5]]
+  n2: 
+    n2: 
+      k_range: [[0.01, 0.5]]
+    n3: 
+      k_range: [[0.01, 0.5]]
+    n4: 
+      k_range: [[0.01, 0.5]]
+  n3: 
+    n3: 
+      k_range: [[0.01, 0.5]]
+    n4: 
+      k_range: [[0.01, 0.5]]
+  n4: 
+    n4: 
+      k_range: [[0.01, 0.5]]

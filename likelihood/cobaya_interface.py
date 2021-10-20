@@ -14,7 +14,7 @@ from cobaya.model import get_model
 # Import likelihoods classes and functions
 from likelihood.cosmo.cosmology import Cosmology
 from likelihood.like_calc.euclike import Euclike
-# from likelihood.auxiliary.observables_dealer import observables_visualization
+from likelihood.auxiliary.observables_dealer import observables_visualization
 
 # Error classes
 
@@ -75,13 +75,12 @@ class EuclidLikelihood(Likelihood):
         # self.z_win[0] = self.z_min1
         # self.z_win[1] = self.z_min2
         # self.z_win[2] = self.z_min3
-
         # Visualization of the observables matrix
-        # self.observables_pf = observables_visualization(
-        #    self.observables)
-        # print(self.observables)
+        if self.plot_observables_selection:
+            self.observables_pf = observables_visualization(
+             self.observables_selection)
         # Initialize Euclike module
-        self.likefinal = Euclike(self.data, self.observables['selection'])
+        self.likefinal = Euclike(self.data, self.observables_selection)
 
         # Initialize Cosmology class for sampling
         self.cosmo = Cosmology()

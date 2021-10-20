@@ -1,0 +1,10 @@
+# This yaml file contains the user specifications 
+# for the Euclid observables computed theoretically
+# in CLOE.
+#
+# PROBE: GCphot-GCspectro cross-corrrelation
+#
+# GCphot: Galaxy Clustering photometric
+# GCspectro: Galaxy Clustering spectroscopic
+#
+# Note: this is not yet provided by CLOE

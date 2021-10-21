@@ -4,7 +4,7 @@
 # 
 # PROBE: WL autocorrelation
 #
-# GCspectro: Weak Lensing
+# WL: Weak Lensing
 #
 # Note: you can concatenate l_ranges as
 # i.e: l_range: [[20, 400], [401, 4000]]

@@ -9,20 +9,40 @@
 # Note: you can concatenate k_ranges as
 # i.e: k_range: [[0.01, 0.2], [0.3, 0.5]]
 statistics: legendre_multipole_power_spectrum
-multipoles:
-  0: True
-  2: True
-  4: True
 bins:
   n1: 
-    n1: 
-      k_range: [[0.01, 0.5]]
+    n1:
+      multipoles:
+        0:
+          k_range: [[0.01, 0.5]]
+        2: 
+          k_range: [[0.01, 0.5]]
+        4:
+          k_range: [[0.01, 0.5]]
   n2: 
-    n2: 
-      k_range: [[0.01, 0.5]]
+    n2:
+      multipoles:
+        0:
+          k_range: [[0.01, 0.5]]
+        2:
+          k_range: [[0.01, 0.5]]
+        4:
+          k_range: [[0.01, 0.5]]
   n3: 
     n3: 
-      k_range: [[0.01, 0.5]]
+      multipoles:
+        0:
+          k_range: [[0.01, 0.5]]
+        2:
+          k_range: [[0.01, 0.5]]
+        4:
+          k_range: [[0.01, 0.5]]
   n4: 
-    n4: 
-      k_range: [[0.01, 0.5]]
+    n4:
+      multipoles:
+        0:
+          k_range: [[0.01, 0.5]]
+        2:
+          k_range: [[0.01, 0.5]]
+        4:
+          k_range: [[0.01, 0.5]]

@@ -21,7 +21,7 @@ observables_specifications:
   GCphot: !defaults [../configs/GCphot]
   GCspectro: !defaults [../configs/GCspectro]
   WL-GCphot: !defaults [../configs/WL-GCphot]
-  # Atention: This is not yet provide by CLOE
+  # Note: This is not yet provided by CLOE
   # therefore it will load empty dictionaries
   GCphot-GCspectro: !defaults [../configs/GCphot-GCspectro]
   WL-GCspectro: !defaults [../configs/WL-GCspectro]

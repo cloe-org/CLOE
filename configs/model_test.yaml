@@ -5,6 +5,6 @@ user_models:
   nuisance_ia: nuisance_ia.yaml
   spectro: spectro.yaml
 user_options:
-#  model_path: ./configs/models
-#  out_params_yaml_path: ./likelihood/params.yaml
+  model_path: ./configs/models
+  out_params_yaml_path: ./likelihood/params.yaml
   overwrite: true

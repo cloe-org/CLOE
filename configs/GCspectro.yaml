@@ -6,8 +6,9 @@
 # PROBE: GCspectro auto-correlation 
 # power spectrum
 #
-# GCspectro: Galaxy Clustering spectroscopic
-#
+# GCspec: Number density fluctuations of 
+# the spectroscopic galaxy sample
+# 
 # Note: For a given redshift bin, 
 # the range of scales (in wavenumber k) can be 
 # concatenated as for example

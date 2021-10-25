@@ -5,7 +5,8 @@
 # 
 # PROBE: GCphot auto-correlation power spectrum
 #
-# GCphot: Galaxy Clustering photometric
+# GCphot: Number density fluctuations of 
+# the photometric galaxy sample
 #
 # Note: For a given tomographic bin combination, 
 # the range of angular scales (in multipoles ell) 

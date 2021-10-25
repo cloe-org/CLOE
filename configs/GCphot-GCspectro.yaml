@@ -6,7 +6,8 @@
 # PROBE: GCphot-GCspectro 
 # cross-corrrelation power spectrum
 #
-# GCphot: Galaxy Clustering photometric
-# GCspectro: Galaxy Clustering spectroscopic
-#
+# GCphot: Number density fluctuations of 
+# the photometric galaxy sample
+# GCspectro: Number density fluctuations of 
+# the spectroscopic galaxy sample
 # Note: this is not yet provided by CLOE

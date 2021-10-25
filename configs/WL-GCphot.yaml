@@ -7,7 +7,8 @@
 # power spectrum
 #
 # WL: Weak Lensing
-# GCphot: Galaxy Clustering photometric
+# GCphot: Number density fluctuations of 
+# the photometric galaxy sample
 #
 # Note: For a given tomographic bin combination, 
 # the range of angular scales (in multipoles ell) 

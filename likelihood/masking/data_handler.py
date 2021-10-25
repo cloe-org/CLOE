@@ -116,6 +116,31 @@ class Data_handler:
                 self._invcov_matrix,
                 self._masking_vector)
 
+    @property
+    def use_wl(self):
+        r"""Get whether the WL probe should be used"""
+        return self._use_wl
+
+    @property
+    def use_xc_phot(self):
+        r"""Get whether the XC-Phot probe should be used"""
+        return self._use_xc_phot
+
+    @property
+    def use_gc_phot(self):
+        r"""Get whether the GC-Phot probe should be used"""
+        return self._use_gc_phot
+
+    @property
+    def use_gc_spectro(self):
+        r"""Get whether GC-Spectro probe should be used"""
+        return self._use_gc_spectro
+
+    @property
+    def gc_spectro_size(self):
+        r"""Get the size of the GC-Spectro part of the data vector"""
+        return self._gc_spectro_size
+
     def _create_data_vector(self):
         r"""Creates the final unmasked data vector.
 

@@ -1,8 +1,10 @@
 # This yaml file contains the user specifications 
-# for the Euclid observables computed theoretically
-# in CLOE.
+# about the scales and redshift/tomographic bins 
+# of the Euclid data to include 
+# in the likelihood analysis.
 #
-# PROBE: WL-GCspectro cross-corrrelation
+# PROBE: WL-GCspectro cross-corrrelation 
+# power spectrum
 #
 # WL: Weak Lensing
 # GCspectro: Galaxy Clustering spectroscopic

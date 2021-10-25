@@ -1,223 +1,229 @@
 # This yaml file contains the user specifications 
-# for the Euclid observables computed theoretically
-# in CLOE.
+# about the scales and redshift/tomographic bins 
+# of the Euclid data to include 
+# in the likelihood analysis.
 # 
-# PROBE: WL-GCphot cross-corrrelation
+# PROBE: WL-GCphot cross-corrrelation 
+# power spectrum
 #
 # WL: Weak Lensing
 # GCphot: Galaxy Clustering photometric
 #
-# Note: you can concatenate l_ranges as
-# i.e: l_range: [[20, 400], [401, 4000]]
+# Note: For a given tomographic bin combination, 
+# the range of angular scales (in multipoles ell) 
+# can be concatenated as for example
+# ell_range: [[20, 400], [401, 4000]]
+# To exclude all angular scales, 
+# an empty list can be provided
 statistics: angular_power_spectrum
 bins:
   n1: 
     n1: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n2: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n3: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n4: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n5: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n6: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n7: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n8: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n9: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n10: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
   n2:
     n1: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n2: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n3: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n4: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n5: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n6: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n7: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n8: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n9: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n10: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
   n3:
     n1: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n2: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n3: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n4: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n5: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n6: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n7: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n8: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n9: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n10: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
   n4: 
     n1: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n2: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n3: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n4: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n5: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n6: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n7: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n8: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n9: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n10: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
   n5: 
     n1: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n2: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n3: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n4: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n5: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n6: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n7: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n8: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n9: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n10: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
   n6:
     n1: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n2: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n3: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n4: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n5: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n6: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n7: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n8: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n9: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n10: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
   n7: 
     n1: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n2: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n3: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n4: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n5: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n6: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n7: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n8: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n9: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n10: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
   n8: 
     n1: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n2: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n3: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n4: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n5: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n6: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n7: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n8: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n9: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n10: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
   n9: 
     n1: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n2: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n3: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n4: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n5: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n6: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n7: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n8: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n9: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n10: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
   n10: 
     n1: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n2: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n3: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n4: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n5: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n6: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n7: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n8: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n9: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]
     n10: 
-      l_range: [[20, 4000]]
+      ell_range: [[20, 4000]]

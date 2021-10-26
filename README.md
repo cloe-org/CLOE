@@ -41,7 +41,9 @@ python setup.py test
 
 Note that this requires the development tools.
 
-### How do I run CLOE?
+### Running CLOE
+
+To run CLOE, execute:
 
 ```bash
 python run_cloe.py configs/config_default.yaml

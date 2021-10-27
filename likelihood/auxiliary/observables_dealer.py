@@ -27,11 +27,8 @@ def observables_visualization(observables_dict, palette='standard'):
         Choose between 'standard', 'protanopia',
         'deuteranopia'
     """
-    # Checks if everything looks nice
-    observables_dict_checked = observables_selection_checker(observables_dict)
-
     observables_df = pd.DataFrame(
-        observables_dict_checked).fillna(-1).astype(int).T
+        observables_dict).fillna(-1).astype(int).T
 
     cmaps = {
         'standard': ('white', '#f4d4d4', '#85c0f9'),
@@ -75,3 +72,49 @@ def observables_selection_checker(observables_dict):
             "Entries ['WL']['GCphot'] and ['GCphot']['GCspec'] "
             "are changed to False.")
     return observables_dict
+
+
+def observables_selection_specifications_checker(observables_dict,
+                                                 specifications_dict):
+    """
+    Observables selection and specifications checker
+
+    Merges in a single dictionary the observable selection
+    and the specifications loaded in the cobaya_interface.py
+
+    Parameters
+    ----------
+    observables_dict: dict
+        dictionary with the observables selection
+    observables_dict: dict
+        dictionary with the observables selection
+    """
+    # First check observables selection
+    checked_observables_dict = observables_selection_checker(observables_dict)
+    # Define empty dict for merging
+    merged_dict = {'selection': {}, 'specifications': {}}
+    merged_dict['selection'] = checked_observables_dict
+    # Check each entry of the observables selection and
+    # add specifications
+    if checked_observables_dict['WL']['WL']:
+        merged_dict['specifications']['WL'] = specifications_dict['WL']
+    if checked_observables_dict['GCphot']['GCphot']:
+        merged_dict['specifications']['GCphot'] = \
+            specifications_dict['GCphot']
+    if checked_observables_dict['GCspectro']['GCspectro']:
+        merged_dict['specifications']['GCspectro'] = \
+            specifications_dict['GCspectro']
+    if checked_observables_dict['WL']['GCphot']:
+        merged_dict['specifications']['WL-GCphot'] = \
+            specifications_dict['WL-GCphot']
+    # At the moment, these quantities below are not computed
+    # by CLOE and we are forcing this selection to be False.
+    # Therefore, the specifications are not loaded.
+    # They are added here for completeness in the future
+    if checked_observables_dict['GCphot']['GCspectro']:
+        merged_dict['specifications']['GCphot-GCspectro'] = \
+            specifications_dict['GCphot-GCspectro']
+    if checked_observables_dict['GCphot']['GCspectro']:
+        merged_dict['specifications']['GCphot-GCspectro'] = \
+            specifications_dict['GCphot-GCspectro']
+    return merged_dict

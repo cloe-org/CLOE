@@ -3,11 +3,12 @@
 # of the Euclid data to include 
 # in the likelihood analysis.
 # 
-# PROBE: GCspectro auto-correlation 
+# Probe: GCspectro auto-correlation 
 # power spectrum
 #
-# GCspec: Number density fluctuations of 
-# the spectroscopic galaxy sample
+# GCspectro: Number density fluctuations of 
+# the spectroscopic galaxy sample 
+# in redshift space
 # 
 # Note: For a given redshift bin, 
 # the range of scales (in wavenumber k) can be 

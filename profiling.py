@@ -69,7 +69,7 @@ if runoption == 0:
             # or Galaxy Clustering photometric, Weak Lensing and the cross-correlation between them ('full_photo': True)
             # This flag is not used if 'like_selection: 2'
             'full_photo': True,
-            'NL_flag': 1,
+            'NL_flag': 2,
             # Galaxy bias parameters:
             # The bias parameters below are currently fixed to the
             # values used by the Inter Science Taskforce: Forecast (IST:F)
@@ -113,7 +113,8 @@ if runoption == 0:
         'theory': {'camb':
                    {'stop_at_error': True,
                     'extra_args': {'num_massive_neutrinos': 1,
-                                   'dark_energy_model': 'ppf'}}},
+                                   'dark_energy_model': 'ppf',
+                                   'halofit_version': 'mead2020'}}},
         # 'sampler': Cobaya's protected key of the input dictionary.
         # You can choose the sampler you want to use.
         # Check Cobaya's documentation to see the list of available samplers

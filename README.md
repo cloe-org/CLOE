@@ -1,6 +1,6 @@
 [![pipeline status](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/badges/master/pipeline.svg)](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/commits/master) [![coverage report](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/badges/master/coverage.svg)](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/commits/master)
 
-# Euclid-Box
+# CLOE: Cosmology Likelihood for Observables in Euclid
 
 This repository contains the theoretical computation of Euclid observables as well as the computation of the likelihood given some fiducial data. The likelihood is designed to work as an external likelihood for the Bayesian Analysis Code `Cobaya`.
 
@@ -25,7 +25,7 @@ python setup.py install
 
 ### Stand-alone build
 
-The Euclid-Box package can be obtained by cloning this repository using git and get  installed by simply running:
+The CLOE package can be obtained by cloning this repository using git and get  installed by simply running:
 
 ```bash
 python setup.py install
@@ -41,6 +41,13 @@ python setup.py test
 
 Note that this requires the development tools.
 
+### Running CLOE
+
+To run CLOE, execute:
+
+```bash
+python run_cloe.py configs/config_default.yaml
+```
 
 ### How do I import the likelihood as an external likelihood for `Cobaya`?
 Open and play with ```DEMO.ipynb```

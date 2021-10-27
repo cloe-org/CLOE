@@ -93,6 +93,8 @@ class LikelihoodUI_test(TestCase):
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
            '.update_cobaya_dict_from_model_yaml')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
+           '.update_cobaya_dict_with_halofit_version')
+    @patch('likelihood.auxiliary.likelihood_yaml_handler'
            '.write_params_yaml_from_model_yaml')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
            '.write_data_yaml_from_data_dict')
@@ -102,6 +104,7 @@ class LikelihoodUI_test(TestCase):
             cobaya_run_mock,
             data_gen_mock,
             params_write_mock,
+            halofit_update_mock,
             dict_update_mock,
             yaml_read_mock
     ):
@@ -112,6 +115,7 @@ class LikelihoodUI_test(TestCase):
         self.assertEqual(data_gen_mock.call_count, 1)
         self.assertEqual(params_write_mock.call_count, 1)
         self.assertEqual(dict_update_mock.call_count, 1)
+        self.assertEqual(halofit_update_mock.call_count, 1)
         self.assertEqual(cobaya_run_mock.call_count, 1)
 
     # test behavior of __init__() when the LikelihoodUI object is
@@ -119,6 +123,8 @@ class LikelihoodUI_test(TestCase):
     @patch('likelihood.auxiliary.yaml_handler.yaml_read')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
            '.update_cobaya_dict_from_model_yaml')
+    @patch('likelihood.auxiliary.likelihood_yaml_handler'
+           '.update_cobaya_dict_with_halofit_version')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
            '.write_params_yaml_from_model_yaml')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
@@ -129,6 +135,7 @@ class LikelihoodUI_test(TestCase):
             cobaya_run_mock,
             data_gen_mock,
             params_write_mock,
+            halofit_update_mock,
             dict_update_mock,
             yaml_read_mock
     ):
@@ -139,6 +146,7 @@ class LikelihoodUI_test(TestCase):
         self.assertEqual(data_gen_mock.call_count, 1)
         self.assertEqual(params_write_mock.call_count, 1)
         self.assertEqual(dict_update_mock.call_count, 1)
+        self.assertEqual(halofit_update_mock.call_count, 1)
         self.assertEqual(cobaya_run_mock.call_count, 1)
 
     # test behavior of the run_cobaya() private method when the input
@@ -164,6 +172,8 @@ class LikelihoodUI_test(TestCase):
     @patch('likelihood.auxiliary.yaml_handler.yaml_read')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
            '.update_cobaya_dict_from_model_yaml')
+    @patch('likelihood.auxiliary.likelihood_yaml_handler'
+           '.update_cobaya_dict_with_halofit_version')
     @patch('likelihood.auxiliary'
            '.likelihood_yaml_handler.write_params_yaml_from_model_yaml')
     @patch('cobaya.run')
@@ -171,6 +181,7 @@ class LikelihoodUI_test(TestCase):
             self,
             cobaya_run_mock,
             params_write_mock,
+            halofit_update_mock,
             dict_update_mock,
             yaml_read_mock
     ):
@@ -180,6 +191,7 @@ class LikelihoodUI_test(TestCase):
         ui._run_cobaya()
         self.assertEqual(params_write_mock.call_count, 1)
         self.assertEqual(dict_update_mock.call_count, 1)
+        self.assertEqual(halofit_update_mock.call_count, 1)
         self.assertEqual(cobaya_run_mock.call_count, 1)
         cobaya_run_mock.assert_called_with(self.config_good['Cobaya'])
 

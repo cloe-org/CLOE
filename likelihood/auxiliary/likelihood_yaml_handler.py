@@ -298,3 +298,61 @@ def write_data_yaml_from_data_dict(data: dict):
     data_file = str(parent_path / 'data.yaml')
     yaml_handler.yaml_write(data_file, data, overwrite=True)
     print('Written data file: {}'.format(data_file))
+
+
+def update_cobaya_dict_with_halofit_version(cobaya_dict: dict, file_name: str):
+    """Updates the main cobaya dictionary with the halofit version to use
+
+    The choice of the halofit_version key can be done only outside of the
+    EuclidLikelihood class. This function reads a model dictionary from file,
+    reads the value of the non-linear flag, and updates the cobaya dictionary
+    accordingly.
+
+    Parameters
+    ----------
+    cobaya_dict: dict
+        The Cobaya dictionary
+    file_name: str
+        The name of the user model yaml file.
+    """
+    model_dict = load_model_dict_from_yaml(file_name)
+
+    if model_dict is None:
+        raise ValueError('Empty model dictionary')
+
+    model_path = \
+        Path(__file__).resolve().parents[2] / 'configs' / 'models'
+
+    options = model_dict['user_options']
+    for key, value in options.items():
+        if key == 'model_path':
+            model_path = Path(value)
+
+    model = model_dict['user_models']
+    full_filepath = (model_path / Path(model['likelihood_flags'])).resolve()
+    likelihood_flags_dict = yaml_handler.yaml_read(str(full_filepath))
+
+    set_halofit_version(cobaya_dict, likelihood_flags_dict['NL_flag'])
+
+
+def set_halofit_version(cobaya_dict: dict, NL_flag: int):
+    """Sets the halofit version of a cobaya dictionary according to a flag
+
+    Parameters
+    ----------
+    cobaya_dict: dict
+        The Cobaya dictionary
+    NL_flag: int
+        The non-linear flag
+    """
+
+    def switch_halofit_version(flag):
+        switcher = {
+            1: 'takahashi',
+            2: 'mead2020'
+        }
+        return switcher.get(flag, 'mead2020')
+
+    if NL_flag > 0:
+        cobaya_dict['theory']['camb']['extra_args'][
+            'halofit_version'] = switch_halofit_version(NL_flag)

@@ -86,8 +86,8 @@ def observables_selection_specifications_checker(observables_dict,
     ----------
     observables_dict: dict
         dictionary with the observables selection
-    observables_dict: dict
-        dictionary with the observables selection
+    specifications_dict: dict
+        dictionary with the observables specifications
     """
     # First check observables selection
     checked_observables_dict = observables_selection_checker(observables_dict)
@@ -114,7 +114,7 @@ def observables_selection_specifications_checker(observables_dict,
     if checked_observables_dict['GCphot']['GCspectro']:
         merged_dict['specifications']['GCphot-GCspectro'] = \
             specifications_dict['GCphot-GCspectro']
-    if checked_observables_dict['GCphot']['GCspectro']:
-        merged_dict['specifications']['GCphot-GCspectro'] = \
-            specifications_dict['GCphot-GCspectro']
+    if checked_observables_dict['WL']['GCspectro']:
+        merged_dict['specifications']['WL-GCspectro'] = \
+            specifications_dict['WL-GCspectro']
     return merged_dict

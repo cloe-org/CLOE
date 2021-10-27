@@ -61,7 +61,7 @@ class Euclike:
         # This refers to the non-redundant bin combinations for
         # which we have measurements (i.e. 1-1, 1-2, ..., 1-10,
         # 2-2, 2-3, ..., 2-10, 3-3, 3-4, etc, in the case of ten
-        # tomographic bins for WL and GC-Phot. Meanhile, all bin
+        # tomographic bins for WL and GC-Phot. Meanwhile, all bin
         # combinations exist for XC, i.e. for example both 1-2
         # and 2-1, both 1-3 and 3-1, etc).
         numtomo_wl = self.data_ins.numtomo_wl
@@ -84,7 +84,7 @@ class Euclike:
             for j in range(0, len(x)):
                 self.indices_all.append([i + 1, j + 1])
 
-        # Reshaping the data vectors and covarinace matrices
+        # Reshaping the data vectors and covariance matrices
         # into dictionaries to be passed to the data_handler class
         datafinal = {**photodata,
                      'GC-Spectro': spectrodata}
@@ -172,7 +172,7 @@ class Euclike:
         -------
         photo_theory_vec: array
             returns an array with the photo theory vector.
-            The elements of the array corresponiding to probes for which the
+            The elements of the array corresponding to probes for which the
             theory is not evaluated, are set to zero.
         """
 
@@ -263,8 +263,7 @@ class Euclike:
                         spec_ins.multipole_spectra(
                             float(z_ins),
                             k_ins,
-                            ms=m_ins
-                        )
+                            ms=m_ins)
                     )
                 k_m_matrices.append(k_m_matrix)
             theoryvec = np.hstack(k_m_matrices).T.flatten()
@@ -304,8 +303,7 @@ class Euclike:
         """
 
         # covnumk generalizes so that each z can have different k binning
-        covnumk = []
-        covnumk.append(0)
+        covnumk = [0]
         for z_ins in self.zkeys:
             covnumk.append(
                 3 * len(self.data_ins.data_dict['GC-Spectro'][z_ins]['k_pk']))

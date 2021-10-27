@@ -34,9 +34,12 @@ class Spectro:
         mu_max = 1.0
         mu_samp = 2001
         self.mu_grid = np.linspace(mu_min, mu_max, mu_samp)
-        self.m = [v for k, v in cosmo_dic['nuisance_parameters'].items()
-                  if k.startswith('multipole_')]
-        self.legendrepol = [legendre(ms)(self.mu_grid) for ms in self.m]
+        self.ms = [v for k, v in cosmo_dic['nuisance_parameters'].items()
+                   if k.startswith('multipole_')]
+        self.ms = sorted(set(self.ms))
+        leg_m_max = 10
+        self.dict_m_legendrepol = \
+            {m: legendre(m)(self.mu_grid) for m in range(leg_m_max)}
 
     def scaling_factor_perp(self, z):
         r"""Scaling Factor Perp
@@ -95,13 +98,13 @@ class Spectro:
            Redshift at which to evaluate the galaxy power spectrum.
         k_prime: float
            Fiducial scale (wavenumber) at which to evaluate the galaxy power
-        mu_prime: float
+        mu_prime: float or numpy.ndarray of float
            Fiducial cosine of the angle between the wavenumber and
            line of sight (Alcock–Paczynski distorted).
 
         Returns
         -------
-        get_k: float
+        get_k: float or numpy.ndarray of float
            Value of the scalar wavenumber  at given redshift
            cosine of the angle and fiducial wavenumber
         """
@@ -124,13 +127,13 @@ class Spectro:
         ----------
         z: float
            Redshift at which to evaluate the galaxy power spectrum.
-        mu_prime: float
+        mu_prime: float or numpy.ndarray of float
            Fiducial cosine of the angle between the wavenumber
            and line of sight (Alcock–Paczynski distorted).
 
         Returns
         -------
-        get_mu: float
+        get_mu: float or numpy.ndarray of float
            Value of the cosine of the angle at given redshift
            and fiducial wavenumber
         """
@@ -140,53 +143,51 @@ class Spectro:
             self.scaling_factor_perp(z)**(-2) *
             (1 - mu_prime**2))**(-1. / 2)
 
-    def multipole_spectra_integrand(self, mu_rsd, z, k, m):
+    def multipole_spectra_integrand(self, mu_rsd, z, k, ms):
         r"""Multipole Spectra Integrand
 
-        Computation of multipole power spectrum integrand.
-        Note: we consider :math:`\ell = m` in the code
+        Computation of multipole power spectra integrand
+        over the whole :math:`\mu_k'` grid [-1, 1].
+        Note: we name :math:`\ell = m` in the code
 
         .. math::
             L_\ell(\mu_k')P_{\rm gg}^{\rm spectro}\
             \left[k(k',\mu_k'),\mu_k(\mu_k');z\right]\\
 
-
         Parameters
         ----------
-        mu_rsd: float
-           Cosine of the angle between the wavenumber and
+        mu_rsd: numpy.ndarray of float
+           Cosines of the angles between the wavenumber and
            line of sight (Alcock–Paczynski distorted).
+           Warning: only mu_rsd = self.mu_grid works (issue 706)
         z: float
             Redshift at which to evaluate power spectrum.
         k: float
             Scale (wavenumber) at which to evaluate power spectrum.
-        m: int
+        ms: list of int
             Order of the Legendre expansion.
 
         Returns
         -------
-        integrand: float
-            Integrand of multipole power spectrum
+        integrand: numpy.ndarray of numpy.ndarray of float
+            Integrand (over :math:`\mu_k'` between [-1,1])
+            of multipole power spectrum expansion, for all m
         """
         if self.theory['Pgg_spectro'] is None:
             raise Exception('Pgg_spectro is not defined inside the cosmo dic. '
                             'Run update_cosmo_dic() method first.')
 
-        galspec = self.theory['Pgg_spectro'](z, self.get_k(k, mu_rsd, z),
-                                             self.get_mu(mu_rsd, z))
-        if len(m) == 1:
-            integrand = [galspec * legendre(m[0])(mu_rsd)]
-            return integrand
-        else:
-            integrand = [galspec *
-                         self.legendrepol[i] for i in range(0, len(self.m))]
-            return integrand
+        galspec = \
+            self.theory['Pgg_spectro'](z, self.get_k(k, mu_rsd, z),
+                                       self.get_mu(mu_rsd, z))
 
-    def multipole_spectra(self, z, k, ms=[0, 2, 4]):
+        return galspec * np.array([self.dict_m_legendrepol[m] for m in ms])
+
+    def multipole_spectra(self, z, k, ms=None):
         r"""Multipole Spectra
 
         Computation of multipole power spectra.
-        Note: we consider :math:`\ell = m` in the code.
+        Note: we name :math:`\ell = m` in the code.
 
         .. math::
             P_{{\rm obs},\ell}(k';z)=\frac{1}{[q_\perp(z)]^2 q_\parallel(z)} \
@@ -194,35 +195,34 @@ class Spectro:
             P_{\rm gg}^{\rm spectro}\left[k(k',\mu_k'),\mu_k(\mu_k') \
             {;z}\right]\,{\rm d}\mu_k'\\
 
-
         Parameters
         ----------
         z: float
             Redshift at which to evaluate power spectrum.
         k: float
             Scale (wavenumber) at which to evaluate power spectrum.
-        ms: list
-            Orders of the Legendre expansion.
-
+        ms: list of int
+            Orders of the Legendre expansion. Default is [0, 2, 4]
 
         Returns
         -------
-        integral: float
-            Multipole power spectrum
+        spectra: numpy.ndarray of float
+            Multipole power spectra
         """
 
-        p_int_arr = self.multipole_spectra_integrand(self.mu_grid, z, k,
-                                                     ms)
-        integral = []
+        if ms is None:
+            ms = self.ms
 
-        for i, m in enumerate(ms):
-            prefactor = 1.0 / self.scaling_factor_parall(z) / \
-                (self.scaling_factor_perp(z))**2.0 * (2.0 * m + 1.0) / 2.0
+        constant = 1.0 / self.scaling_factor_parall(z) / \
+            self.scaling_factor_perp(z) ** 2.0 / 2.0
 
-            integral.append(
-                prefactor *
-                integrate.simps(
-                    p_int_arr[i],
-                    self.mu_grid))
+        prefactors = np.array([constant * (2.0 * m + 1.0) for m in ms])
 
-        return np.array(integral)
+        integrals = \
+            integrate.simps(self.multipole_spectra_integrand(self.mu_grid,
+                                                             z, k, ms),
+                            self.mu_grid)
+
+        spectra = prefactors * integrals
+
+        return np.asarray(spectra)

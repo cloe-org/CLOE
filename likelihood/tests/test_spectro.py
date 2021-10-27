@@ -41,7 +41,8 @@ class mock_P_obj:
 
 class specinitTestCase(TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls) -> None:
         cur_dir = Path(__file__).resolve().parents[0]
         cmov_file = np.loadtxt(str(cur_dir) +
                                '/test_input/ComDist-LCDM-Lin-zNLA.dat')
@@ -133,7 +134,10 @@ class specinitTestCase(TestCase):
                               'b4_spectro': 1.8988660,
                               'aia': 1.72,
                               'nia': -0.41,
-                              'bia': 0.0}
+                              'bia': 0.0,
+                              'multipole_0': 0,
+                              'multipole_2': 2,
+                              'multipole_4': 4}
                           }
 
         # precomputed parameters
@@ -171,8 +175,6 @@ class specinitTestCase(TestCase):
         mock_cosmo_dic['Pgi_spectro'] = \
             interpolate.interp2d(zs_base, ks_base,
                                  pgi_spectro.T, fill_value=0.0)
-
-        mock_cosmo_dic['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
 
         fid_H_arr = np.load(str(cur_dir) + '/test_input/spectro_fid_HZ.npy')
         fid_d_A_arr = np.load(str(cur_dir) +
@@ -227,24 +229,33 @@ class specinitTestCase(TestCase):
                             'b4_spectro': 1.8988660,
                             'aia': 1.72,
                             'nia': -0.41,
-                            'bia': 0.0}
+                            'bia': 0.0,
+                            'multipole_0': 0,
+                            'multipole_2': 2,
+                            'multipole_4': 4}
                         }
 
-        self.fiducial_dict = fid_mock_dic
-        self.test_dict = mock_cosmo_dic
+        cls.test_dict = mock_cosmo_dic
+        cls.spectro = Spectro(cls.test_dict, fid_mock_dic)
 
-        self.spectro = Spectro(self.test_dict, self.fiducial_dict)
-
+    def setUp(self):
+        self.test_dict['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
         self.check_multipole_spectra_m0 = 12292.778742
-        self.check_multipole_spectra_m1 = 0.0
+        self.check_multipole_spectra_m1 = 0.
         self.check_multipole_spectra_m2 = 8408.473137
-        self.check_multipole_spectra_m3 = 0.0
+        self.check_multipole_spectra_m3 = 0.
         self.check_multipole_spectra_m4 = 678.085174
         self.check_multipole_spectra_integrand = 3343.949991
         self.check_scaling_factor_perp = 1.007444
         self.check_scaling_factor_parall = 1.007426
         self.check_get_k = 0.000993
         self.check_get_mu = 1.00
+
+    def tearDown(self):
+        self.check_scaling_factor_perp = None
+        self.check_scaling_factor_parall = None
+        self.check_get_k = None
+        self.check_get_mu = None
 
     def istf_spectro_galbias(self, redshift, bin_edge_list=None):
         """
@@ -323,12 +334,6 @@ class specinitTestCase(TestCase):
         pval = (bias + growth * mu_rsd ** 2.0) ** 2.0 * power
         return pval
 
-    def tearDown(self):
-        self.check_scaling_factor_perp = None
-        self.check_scaling_factor_parall = None
-        self.check_get_k = None
-        self.check_get_mu = None
-
     def test_multipole_spectra_m0(self):
         npt.assert_allclose(self.spectro.multipole_spectra(1.0, 0.1, ms=[0]),
                             self.check_multipole_spectra_m0,
@@ -359,11 +364,17 @@ class specinitTestCase(TestCase):
                             rtol=1e-05,
                             err_msg='Multipole spectrum m = 4 failed')
 
+    def test_multipole_spectra_m100(self):
+        npt.assert_raises(KeyError, self.spectro.multipole_spectra,
+                          1.0, 0.1, ms=[100])
+
     def test_multipole_spectra_integrand(self):
-        npt.assert_allclose(self.spectro.multipole_spectra_integrand(0.7, 1.0,
-                                                                     0.1,
-                                                                     [2]),
-                            self.check_multipole_spectra_integrand,
+        mu_grid = np.linspace(-1, 1, 2001)
+        integrand = \
+            self.spectro.multipole_spectra_integrand(mu_grid, 1.0, 0.1, [2])
+        idx = np.where(mu_grid == 0.7)
+        value = integrand[0][idx]
+        npt.assert_allclose(value, self.check_multipole_spectra_integrand,
                             rtol=1e-06,
                             err_msg='Multipole spectra integrand failed')
 

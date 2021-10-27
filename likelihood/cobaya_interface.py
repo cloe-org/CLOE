@@ -80,6 +80,13 @@ class EuclidLikelihood(Likelihood):
         # self.observables_pf = observables_visualization(
         #    self.observables)
 
+        # Select which power spectra to require from the Boltzmann solver
+        self.NL_flag = self.params['NL_flag']
+        if self.NL_flag > 0:
+            self.use_NL = [False, True]
+        else:
+            self.use_NL = False
+
         # Initialize Euclike module
         self.likefinal = Euclike(self.data, self.observables)
 
@@ -87,62 +94,90 @@ class EuclidLikelihood(Likelihood):
         self.cosmo = Cosmology()
 
         # Initialize the fiducial model
+        self.set_fiducial_cosmology()
+
+    def set_fiducial_cosmology(self):
+        r"""Sets the fiducial cosmology class
+
+        This method reads the input fiducial cosmology from the instance of
+        the Euclike class, and sets up a dedicated Cosmology class.
+        """
         # This will work if CAMB is installed globally
         self.fiducial_cosmology = Cosmology()
         # Update fiducial cosmo dic with fiducial info from reader
         self.fiducial_cosmology.cosmo_dic.update(
             self.likefinal.data_spectro_fiducial_cosmo)
-        self.info_fiducial = {'params': {
-            'ombh2': self.fiducial_cosmology.cosmo_dic['ombh2'],
-            'omch2': self.fiducial_cosmology.cosmo_dic['omch2'],
-            'omnuh2': self.fiducial_cosmology.cosmo_dic['omnuh2'],
-            'omk': self.fiducial_cosmology.cosmo_dic['Omk'],
-            'H0': self.fiducial_cosmology.cosmo_dic['H0'],
-            'H0_Mpc': self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value,
-            'Omnu': (self.fiducial_cosmology.cosmo_dic['omnuh2'] /
-                     (self.cosmo.cosmo_dic['H0'] / 100.)**2.),
-            'tau': self.fiducial_cosmology.cosmo_dic['tau'],
-            'mnu': self.fiducial_cosmology.cosmo_dic['mnu'],
-            'nnu': self.fiducial_cosmology.cosmo_dic['nnu'],
-            'ns': self.fiducial_cosmology.cosmo_dic['ns'],
-            'As': self.fiducial_cosmology.cosmo_dic['As'],
-            'w': self.fiducial_cosmology.cosmo_dic['w'],
-            'wa': self.fiducial_cosmology.cosmo_dic['wa']
-        },
-            'theory': {'camb':
-                       {'stop_at_error': True,
-                        'extra_args': {'num_massive_neutrinos': 1,
-                                       'dark_energy_model': 'ppf'}}},
+        self.info_fiducial = {
+            'params': {
+                'ombh2': self.fiducial_cosmology.cosmo_dic['ombh2'],
+                'omch2': self.fiducial_cosmology.cosmo_dic['omch2'],
+                'omnuh2': self.fiducial_cosmology.cosmo_dic['omnuh2'],
+                'omk': self.fiducial_cosmology.cosmo_dic['Omk'],
+                'H0': self.fiducial_cosmology.cosmo_dic['H0'],
+                'H0_Mpc': (self.cosmo.cosmo_dic['H0'] /
+                           const.c.to('km/s').value),
+                'Omnu': (self.fiducial_cosmology.cosmo_dic['omnuh2'] /
+                         (self.cosmo.cosmo_dic['H0'] / 100.)**2.),
+                'tau': self.fiducial_cosmology.cosmo_dic['tau'],
+                'mnu': self.fiducial_cosmology.cosmo_dic['mnu'],
+                'nnu': self.fiducial_cosmology.cosmo_dic['nnu'],
+                'ns': self.fiducial_cosmology.cosmo_dic['ns'],
+                'As': self.fiducial_cosmology.cosmo_dic['As'],
+                'w': self.fiducial_cosmology.cosmo_dic['w'],
+                'wa': self.fiducial_cosmology.cosmo_dic['wa']
+            },
+            'theory': {
+                'camb': {
+                    'stop_at_error': True,
+                    'extra_args': {
+                        'num_massive_neutrinos': 1,
+                        'dark_energy_model': 'ppf'
+                    }
+                }
+            },
             # Likelihood: we load the likelihood as an external function
-            'likelihood': {'one': None}}
+            'likelihood': {
+                'one': None
+            }
+        }
+
         # Update fiducial cobaya dictionary with the IST-F
         # Fiducial values of biases
         self.info_fiducial['params'].update(
             self.fiducial_cosmology.cosmo_dic['nuisance_parameters'])
         # Use get_model wrapper for fiducial
         model_fiducial = get_model(self.info_fiducial)
-        model_fiducial.add_requirements({"omegam": None,
-                                         "omegab": None,
-                                         "omegac": None,
-                                         "omnuh2": None,
-                                         "omeganu": None,
-                                         "Pk_interpolator":
-                                         {"z": self.z_win,
-                                          "k_max": self.k_max_Boltzmannn,
-                                          "nonlinear": [False, True],
-                                          "vars_pairs": ([["delta_tot",
-                                                           "delta_tot"],
-                                                          ["Weyl",
-                                                           "Weyl"]])},
-                                         "comoving_radial_distance":
-                                         {"z": self.z_win},
-                                         "angular_diameter_distance":
-                                         {"z": self.z_win},
-                                         "Hubble": {"z": self.z_win,
-                                                    "units": "km/s/Mpc"},
-                                         "fsigma8": {"z": self.z_win,
-                                                     "units": None},
-                                         "sigma8_z": {"z": self.z_win}})
+        model_fiducial.add_requirements({
+            'omegam': None,
+            'omegab': None,
+            'omegac': None,
+            'omnuh2': None,
+            'omeganu': None,
+            'Pk_interpolator': {
+                'z': self.z_win,
+                'k_max': self.k_max_Boltzmannn,
+                'nonlinear': False,
+                'vars_pairs': ([['delta_tot', 'delta_tot'],
+                                ['Weyl', 'Weyl']])
+            },
+            'comoving_radial_distance': {
+                'z': self.z_win
+            },
+            'angular_diameter_distance': {
+                'z': self.z_win
+            },
+            'Hubble': {
+                'z': self.z_win,
+                'units': 'km/s/Mpc'
+            },
+            'fsigma8': {
+                'z': self.z_win,
+                'units': None
+            },
+            'sigma8_z': {
+                'z': self.z_win
+            }
+        })
 
         # Evaluation of posterior, required by Cobaya
         model_fiducial.logposterior({})
@@ -170,10 +205,10 @@ class EuclidLikelihood(Likelihood):
             self.z_win, units='1/Mpc'),
         self.fiducial_cosmology.cosmo_dic['Pk_delta'] = \
             model_fiducial.provider.get_Pk_interpolator(
-            ("delta_tot", "delta_tot"), nonlinear=False)
+            ('delta_tot', 'delta_tot'), nonlinear=False)
         self.fiducial_cosmology.cosmo_dic['Pk_weyl'] = \
             model_fiducial.provider.get_Pk_interpolator(
-            ("Weyl", "Weyl"), nonlinear=False),
+            ('Weyl', 'Weyl'), nonlinear=False),
         self.fiducial_cosmology.cosmo_dic['fsigma8'] = \
             model_fiducial.provider.get_fsigma8(
             self.z_win)
@@ -199,24 +234,24 @@ class EuclidLikelihood(Likelihood):
 
         """
 
-        return {"omegam": None,
-                "omegab": None,
-                "omegac": None,
-                "omnuh2": None,
-                "omeganu": None,
-                "Pk_interpolator":
-                {"z": self.z_win,
-                 "k_max": self.k_max_Boltzmannn,
-                 "nonlinear": False,
-                 "vars_pairs": ([["delta_tot",
-                                  "delta_tot"],
-                                 ["Weyl",
-                                  "Weyl"]])},
-                "comoving_radial_distance": {"z": self.z_win},
-                "angular_diameter_distance": {"z": self.z_win},
-                "Hubble": {"z": self.z_win, "units": "km/s/Mpc"},
-                "sigma8_z": {"z": self.z_win},
-                "fsigma8": {"z": self.z_win, "units": None}}
+        return {'omegam': None,
+                'omegab': None,
+                'omegac': None,
+                'omnuh2': None,
+                'omeganu': None,
+                'Pk_interpolator':
+                {'z': self.z_win,
+                 'k_max': self.k_max_Boltzmannn,
+                 'nonlinear': self.use_NL,
+                 'vars_pairs': ([['delta_tot',
+                                  'delta_tot'],
+                                 ['Weyl',
+                                  'Weyl']])},
+                'comoving_radial_distance': {'z': self.z_win},
+                'angular_diameter_distance': {'z': self.z_win},
+                'Hubble': {'z': self.z_win, 'units': 'km/s/Mpc'},
+                'sigma8_z': {'z': self.z_win},
+                'fsigma8': {'z': self.z_win, 'units': None}}
 
     def passing_requirements(self, model, **params_dic):
         r"""Passing Requirements
@@ -231,7 +266,7 @@ class EuclidLikelihood(Likelihood):
         """
 
         try:
-            self.cosmo.cosmo_dic['H0'] = self.provider.get_param("H0")
+            self.cosmo.cosmo_dic['H0'] = self.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
             self.cosmo.cosmo_dic['As'] = self.provider.get_param('As')
@@ -258,10 +293,14 @@ class EuclidLikelihood(Likelihood):
                 self.provider.get_Hubble(self.z_win, units='1/Mpc')
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 self.provider.get_Pk_interpolator(
-                ("delta_tot", "delta_tot"), nonlinear=False)
+                ('delta_tot', 'delta_tot'), nonlinear=False)
+            if self.params['NL_flag'] > 0:
+                self.cosmo.cosmo_dic['Pk_halofit'] = \
+                    self.provider.get_Pk_interpolator(
+                    ('delta_tot', 'delta_tot'), nonlinear=True)
             self.cosmo.cosmo_dic['Pk_weyl'] = \
                 self.provider.get_Pk_interpolator(
-                ("Weyl", "Weyl"), nonlinear=False)
+                ('Weyl', 'Weyl'), nonlinear=False)
             self.cosmo.cosmo_dic['z_win'] = self.z_win
             self.cosmo.cosmo_dic['k_win'] = self.k_win
             self.cosmo.cosmo_dic['sigma8'] = self.provider.get_sigma8_z(
@@ -276,7 +315,7 @@ class EuclidLikelihood(Likelihood):
                 **only_nuisance_params)
 
         except (TypeError, AttributeError):
-            self.cosmo.cosmo_dic['H0'] = model.provider.get_param("H0")
+            self.cosmo.cosmo_dic['H0'] = model.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
             self.cosmo.cosmo_dic['As'] = model.provider.get_param('As')
@@ -304,10 +343,14 @@ class EuclidLikelihood(Likelihood):
                 model.provider.get_Hubble(self.z_win, units='1/Mpc')
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 model.provider.get_Pk_interpolator(
-                ("delta_tot", "delta_tot"), nonlinear=False)
+                ('delta_tot', 'delta_tot'), nonlinear=False)
+            if self.params['NL_flag'] > 0:
+                self.cosmo.cosmo_dic['Pk_halofit'] = \
+                    model.provider.get_Pk_interpolator(
+                    ('delta_tot', 'delta_tot'), nonlinear=True)
             self.cosmo.cosmo_dic['Pk_weyl'] = \
                 model.provider.get_Pk_interpolator(
-                ("Weyl", "Weyl"), nonlinear=False)
+                ('Weyl', 'Weyl'), nonlinear=False)
             self.cosmo.cosmo_dic['z_win'] = self.z_win
             self.cosmo.cosmo_dic['k_win'] = self.k_win
             self.cosmo.cosmo_dic['sigma8'] = model.provider.get_sigma8_z(

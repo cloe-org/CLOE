@@ -114,6 +114,7 @@ class LikelihoodUI:
         lyh.write_params_yaml_from_model_yaml(model_path)
         cobaya_dict = \
             lyh.update_cobaya_dict_from_model_yaml(cobaya_dict, model_path)
+        lyh.update_cobaya_dict_with_halofit_version(cobaya_dict, model_path)
 
         return cobaya.run(cobaya_dict)
 
@@ -147,6 +148,7 @@ class LikelihoodUI:
         lyh.write_params_yaml_from_model_yaml(model_path)
         cobaya_dict = \
             lyh.update_cobaya_dict_from_model_yaml(cobaya_dict, model_path)
+        lyh.update_cobaya_dict_with_halofit_version(cobaya_dict, model_path)
         model = get_model(cobaya_dict)
 
         logposterior = model.logposterior({})

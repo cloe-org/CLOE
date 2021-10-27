@@ -2,15 +2,12 @@ import numpy as np
 import os, sys
 from pathlib import Path
 from likelihood.cobaya_interface import EuclidLikelihood
-from likelihood.auxiliary.likelihood_yaml_generator import generate_params_yaml
-from likelihood.auxiliary.likelihood_yaml_generator import generate_data_yaml
+from likelihood.auxiliary.likelihood_yaml_handler import write_data_yaml_from_data_dict
 from cobaya.model import get_model
 from likelihood.photometric_survey.photo import Photo
 
 parent_path = str(Path(Path(__file__).resolve().parents[1]))
 data_path = parent_path + '/data/ExternalBenchmark/Photometric/data/'
-
-generate_params_yaml(model = ['nuisance_bias', 'nuisance_ia', 'spectro'])
 
 info = {
     'params': {
@@ -47,7 +44,7 @@ info = {
     'b2_spectro': 1.61,
     'b3_spectro': 1.75,
     'b4_spectro': 1.90,
-    'NL_flag': False,
+    'NL_flag': 2,
     'aia': 1.72,
     'nia': -0.41,
     'bia': 0.0,
@@ -57,7 +54,8 @@ info = {
 'theory': {'camb':
            {'stop_at_error': True,
             'extra_args':{'num_massive_neutrinos': 1,
-                          'dark_energy_model': 'ppf'}}},
+                          'dark_energy_model': 'ppf',
+                          'halofit_version': 'mead2020'}}},
 'sampler': {'evaluate': None},
 'output': 'chains/my_euclid_experiment',
 'likelihood': {'Euclid': EuclidLikelihood},
@@ -82,7 +80,7 @@ info = {
         'cov_model': 'Gauss'}}
 }
 
-generate_data_yaml(info['data'])
+write_data_yaml_from_data_dict(info['data'])
 
 model = get_model(info)
 logposterior = model.logposterior({})

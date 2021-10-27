@@ -92,6 +92,8 @@ class Cosmology:
             of :math:`Mpc^{-1}`
         Pk_delta: function
             Interpolator function for delta from Boltzmann code
+        Pk_halofit: function
+            Interpolator function for non-linear Pk from Boltzmann code
         Pk_weyl: function
             Interpolator function for Weyl from Boltzmann code
         fsigma8: list
@@ -203,6 +205,7 @@ class Cosmology:
                           'D_z_k': None,
                           # Interpolators
                           'Pk_delta': None,
+                          'Pk_halofit': None,
                           'Pk_weyl': None,
                           'Pmm_phot': None,
                           'Pgg_phot': None,

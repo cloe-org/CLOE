@@ -31,3 +31,4 @@ data:
     cov_WL: CovMat-ShearShear-{:s}-20Bins.dat
     cov_3x2: CovMat-3x2pt-{:s}-20Bins.dat
     cov_model: Gauss
+

@@ -8,3 +8,4 @@ user_options:
   model_path: ./configs/models
   out_params_yaml_path: ./likelihood/params.yaml
   overwrite: true
+

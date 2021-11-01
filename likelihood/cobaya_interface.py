@@ -83,9 +83,8 @@ class EuclidLikelihood(Likelihood):
         # Visualization of the observables matrix
         if self.plot_observables_selection:
             self.observables_pf = observables_visualization(
-             observables['selection'])
+             self.observables['selection'])
         # Select which power spectra to require from the Boltzmann solver
-        self.NL_flag = self.params['NL_flag']
         if self.NL_flag > 0:
             self.use_NL = [False, True]
         else:
@@ -271,6 +270,7 @@ class EuclidLikelihood(Likelihood):
         """
 
         try:
+            self.cosmo.cosmo_dic['NL_flag'] = self.NL_flag
             self.cosmo.cosmo_dic['H0'] = self.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
@@ -299,7 +299,7 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 self.provider.get_Pk_interpolator(
                 ('delta_tot', 'delta_tot'), nonlinear=False)
-            if self.params['NL_flag'] > 0:
+            if self.NL_flag > 0:
                 self.cosmo.cosmo_dic['Pk_halofit'] = \
                     self.provider.get_Pk_interpolator(
                     ('delta_tot', 'delta_tot'), nonlinear=True)
@@ -320,6 +320,7 @@ class EuclidLikelihood(Likelihood):
                 **only_nuisance_params)
 
         except (TypeError, AttributeError):
+            self.cosmo.cosmo_dic['NL_flag'] = self.NL_flag
             self.cosmo.cosmo_dic['H0'] = model.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
@@ -349,7 +350,7 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 model.provider.get_Pk_interpolator(
                 ('delta_tot', 'delta_tot'), nonlinear=False)
-            if self.params['NL_flag'] > 0:
+            if self.NL_flag > 0:
                 self.cosmo.cosmo_dic['Pk_halofit'] = \
                     model.provider.get_Pk_interpolator(
                     ('delta_tot', 'delta_tot'), nonlinear=True)

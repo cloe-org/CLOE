@@ -77,7 +77,7 @@ class Nonlinear:
         boost-factor, adding it to the dictionary
         """
         switcher = {1: self.linear_boost}
-        boost = switcher.get(self.theory['nuisance_parameters']['NL_flag'],
+        boost = switcher.get(self.theory['NL_flag'],
                              "Invalid modeling option")
         self.theory['NL_boost'] = boost
 

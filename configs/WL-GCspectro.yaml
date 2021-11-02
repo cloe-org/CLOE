@@ -1,0 +1,14 @@
+# This yaml file contains the user specifications 
+# about the scales and redshift/tomographic bins 
+# of the Euclid data to include 
+# in the likelihood analysis.
+#
+# Probe: WL-GCspectro cross-corrrelation 
+# power spectrum
+#
+# WL: Weak Lensing
+# GCspectro: Number density fluctuations of 
+# the spectroscopic galaxy sample 
+# in redshfit space
+# 
+# Note: this is not yet provided by CLOE

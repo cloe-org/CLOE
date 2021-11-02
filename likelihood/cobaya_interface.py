@@ -14,7 +14,7 @@ from cobaya.model import get_model
 # Import likelihoods classes and functions
 from likelihood.cosmo.cosmology import Cosmology
 from likelihood.like_calc.euclike import Euclike
-# from likelihood.auxiliary.observables_dealer import observables_visualization
+from likelihood.auxiliary.observables_dealer import *
 
 # Error classes
 
@@ -75,20 +75,25 @@ class EuclidLikelihood(Likelihood):
         # self.z_win[0] = self.z_min1
         # self.z_win[1] = self.z_min2
         # self.z_win[2] = self.z_min3
-
+        # Check the selection and specification requirements
+        self.observables = \
+            observables_selection_specifications_checker(
+                self.observables_selection,
+                self.observables_specifications)
         # Visualization of the observables matrix
-        # self.observables_pf = observables_visualization(
-        #    self.observables)
-
+        if self.plot_observables_selection:
+            self.observables_pf = observables_visualization(
+             observables['selection'])
         # Select which power spectra to require from the Boltzmann solver
         self.NL_flag = self.params['NL_flag']
         if self.NL_flag > 0:
             self.use_NL = [False, True]
         else:
             self.use_NL = False
-
         # Initialize Euclike module
-        self.likefinal = Euclike(self.data, self.observables)
+        # To Sergio: pass to Euclike self.observables, which is the merged dict
+        # if I do it now, the code will complain
+        self.likefinal = Euclike(self.data, self.observables_selection)
 
         # Initialize Cosmology class for sampling
         self.cosmo = Cosmology()

@@ -15,7 +15,7 @@ def yaml_read(file_name):
 
     Parameters
     ----------
-    file_name: str
+    file_name: Path or str
         The name of the file where to read the configuration from.
 
     Returns
@@ -37,7 +37,7 @@ def yaml_read(file_name):
         return yaml.load(file.read(), Loader=yaml.FullLoader)
 
 
-def yaml_read_and_check_dict(file_name: str, needed_keys: list):
+def yaml_read_and_check_dict(file_name, needed_keys: list):
     r"""Read a stream from a yaml file and check the dictionary.
 
     Get a dictionary from a yaml file,
@@ -45,7 +45,7 @@ def yaml_read_and_check_dict(file_name: str, needed_keys: list):
 
     Parameters
     ----------
-    file_name: str
+    file_name: Path or str
         The name of the file where to read the dictionary from.
     needed_keys: list of str
         The keys that must be in the dictionary
@@ -80,7 +80,7 @@ def yaml_write(file_name, config, overwrite=False):
 
     Parameters
     ----------
-    file_name: str
+    file_name: Path or str
         The name of the file the stream will be written to.
     config: dict
         The dictionary to be written to file

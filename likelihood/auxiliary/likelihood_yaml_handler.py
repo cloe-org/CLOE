@@ -9,6 +9,51 @@ from copy import deepcopy
 from likelihood.auxiliary import yaml_handler
 
 
+def get_default_configs_path():
+    """
+    Returns the default configs path.
+
+    This function returns a path object with the
+    default path of the configs directory.
+
+    Returns
+    -------
+    models_path: Path
+        the default path of the configs directory.
+    """
+    return Path(__file__).resolve().parents[2] / 'configs'
+
+
+def get_default_models_path():
+    """
+    Returns the default models path.
+
+    This function returns a path object with the
+    default path of the models directory.
+
+    Returns
+    -------
+    models_path: Path
+        the default path of the models directory.
+    """
+    return get_default_configs_path() / 'models'
+
+
+def get_default_params_yaml_path():
+    """
+    Returns the default path of params.yaml.
+
+    This function returns a path object with the
+    default path of params.yaml.
+
+    Returns
+    -------
+    params_yaml_path: Path
+        the default path of params.yaml.
+    """
+    return Path(__file__).resolve().parents[1] / 'params.yaml'
+
+
 def generate_params_yaml(models=None):
     """Generates params.yaml from a model list.
 
@@ -33,8 +78,7 @@ def generate_params_yaml(models=None):
         Strings corresponding to a model.
     """
 
-    likelihood_path = Path(__file__).resolve().parents[1]
-    models_path = likelihood_path / 'config' / 'models'
+    models_path = get_default_models_path()
 
     if models is None:
         models = ['nuisance_bias', 'nuisance_ia',
@@ -46,12 +90,12 @@ def generate_params_yaml(models=None):
         model_params = yaml_handler.yaml_read(model_path)
         likelihood_params.update(model_params)
 
-    params_path = str(likelihood_path / 'params.yaml')
+    params_path = get_default_params_yaml_path()
     yaml_handler.yaml_write(params_path, likelihood_params, True)
     print('{} written'.format(params_path))
 
 
-def load_model_dict_from_yaml(file_name: str):
+def load_model_dict_from_yaml(file_name):
     """Loads user model dictionary from yaml file.
 
     Get a dictionary from a yaml file,
@@ -59,7 +103,7 @@ def load_model_dict_from_yaml(file_name: str):
 
     Parameters
     ----------
-    file_name: str
+    file_name: Path or str
         The name of the yaml file where to read the dictionary from.
 
     Returns
@@ -89,15 +133,15 @@ def write_params_yaml_from_cobaya_dict(cobaya_dict: dict, file_path=None):
     ----------
     cobaya_dict: dict
         The Cobaya dictionary (it is not modified)
-    file_path: str
+    file_path: Path or str
         The output file path (default: likelihood/params.yaml)
     """
     params_dict = cobaya_dict['params']
     params_without_cosmo = get_params_dict_without_cosmo_params(params_dict)
 
     if file_path is None:
-        file_path = Path(__file__).resolve().parents[1] / 'params.yaml'
-    yaml_handler.yaml_write(str(file_path), params_without_cosmo, True)
+        file_path = get_default_params_yaml_path()
+    yaml_handler.yaml_write(file_path, params_without_cosmo, True)
 
 
 def get_params_dict_without_cosmo_params(params_dict: dict):
@@ -171,13 +215,7 @@ def generate_params_dict_from_model_dict(model_dict: dict,
     if model_dict is None:
         raise ValueError('Empty model dictionary')
 
-    model_path = \
-        Path(__file__).resolve().parents[2] / 'configs' / 'models'
-
-    options = model_dict['user_options']
-    for key, value in options.items():
-        if key == 'model_path':
-            model_path = Path(value)
+    model_path = get_default_models_path()
 
     model = model_dict['user_models']
     if model is None:
@@ -190,20 +228,20 @@ def generate_params_dict_from_model_dict(model_dict: dict,
         if key == 'cosmology' and include_cosmology is False:
             continue
         full_filepath = (model_path / Path(filename)).resolve()
-        specific_dict = yaml_handler.yaml_read(str(full_filepath))
+        specific_dict = yaml_handler.yaml_read(full_filepath)
         params_dict.update(specific_dict)
 
     return params_dict
 
 
-def generate_params_dict_from_model_yaml(file_name: str):
+def generate_params_dict_from_model_yaml(file_name):
     """Generates the params dictionary from the model yaml file.
 
     The cosmological parameters are *included* in the dictionary.
 
     Parameters
     ----------
-    file_name: str
+    file_name: Path or str
         The name of the user model yaml file.
 
     Returns
@@ -231,28 +269,26 @@ def write_params_yaml_from_model_dict(model_dict: dict):
         The user model dictionary.
     """
 
-    params_filepath = Path(__file__).resolve().parents[1] / 'params.yaml'
+    params_filepath = get_default_params_yaml_path()
     overwrite = False
 
     options = model_dict['user_options']
     for key, value in options.items():
-        if key == 'out_params_yaml_path':
-            params_filepath = Path(value).resolve()
-        elif key == 'overwrite':
+        if key == 'overwrite':
             overwrite = value
 
     param_dict = generate_params_dict_from_model_dict(model_dict, False)
-    yaml_handler.yaml_write(str(params_filepath), param_dict, overwrite)
+    yaml_handler.yaml_write(params_filepath, param_dict, overwrite)
 
 
-def write_params_yaml_from_model_yaml(file_name: str):
+def write_params_yaml_from_model_yaml(file_name):
     """Writes the params yaml file from the model yaml file.
 
     The cosmological parameters are *excluded* in params.yaml.
 
     Parameters
     ----------
-    file_name: str
+    file_name: Path or str
         The name of the user model yaml file.
     """
 
@@ -260,14 +296,14 @@ def write_params_yaml_from_model_yaml(file_name: str):
     write_params_yaml_from_model_dict(model_dict)
 
 
-def update_cobaya_dict_from_model_yaml(cobaya_dict: dict, file_name: str):
+def update_cobaya_dict_from_model_yaml(cobaya_dict: dict, file_name):
     """Updates a Cobaya dictionary starting from the model yaml file
 
     Parameters
     ----------
     cobaya_dict: dict
         The Cobaya dictionary
-    file_name: str
+    file_name: Path or str
         The name of the user model yaml file.
 
     Returns
@@ -295,12 +331,12 @@ def write_data_yaml_from_data_dict(data: dict):
     """
 
     parent_path = Path(__file__).resolve().parents[1]
-    data_file = str(parent_path / 'data.yaml')
+    data_file = parent_path / 'data.yaml'
     yaml_handler.yaml_write(data_file, data, overwrite=True)
     print('Written data file: {}'.format(data_file))
 
 
-def update_cobaya_dict_with_halofit_version(cobaya_dict: dict, file_name: str):
+def update_cobaya_dict_with_halofit_version(cobaya_dict: dict, file_name):
     """Updates the main cobaya dictionary with the halofit version to use
 
     The choice of the halofit_version key can be done only outside of the
@@ -312,7 +348,7 @@ def update_cobaya_dict_with_halofit_version(cobaya_dict: dict, file_name: str):
     ----------
     cobaya_dict: dict
         The Cobaya dictionary
-    file_name: str
+    file_name: Path or str
         The name of the user model yaml file.
     """
     model_dict = load_model_dict_from_yaml(file_name)
@@ -320,17 +356,11 @@ def update_cobaya_dict_with_halofit_version(cobaya_dict: dict, file_name: str):
     if model_dict is None:
         raise ValueError('Empty model dictionary')
 
-    model_path = \
-        Path(__file__).resolve().parents[2] / 'configs' / 'models'
-
-    options = model_dict['user_options']
-    for key, value in options.items():
-        if key == 'model_path':
-            model_path = Path(value)
+    model_path = get_default_models_path()
 
     model = model_dict['user_models']
     full_filepath = (model_path / Path(model['likelihood_flags'])).resolve()
-    likelihood_flags_dict = yaml_handler.yaml_read(str(full_filepath))
+    likelihood_flags_dict = yaml_handler.yaml_read(full_filepath)
 
     set_halofit_version(cobaya_dict, likelihood_flags_dict['NL_flag'])
 

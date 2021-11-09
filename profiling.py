@@ -56,19 +56,6 @@ if runoption == 0:
             'omnuh2': None,  # DERIVED parameter: Omega neutrino density times de reduced Hubble parameter squared
             'omegac': None,  # DERIVED parameter: Omega cold dark matter density
             'N_eff': None,
-            # Change 'like_selection' based on which observational probe you would like to use.
-            # Choose among:
-            # 1: photometric survey
-            # 2: spectroscopic survey
-            # 12: both surveys
-            'like_selection': 12,
-            # If you selected the photometric survey (1) or both (12) in 'like_selection'
-            # you may want to choose between:
-            # using Galaxy Clustering photometric and Weak Lensing probes combined
-            # assuming they are independent ('full_photo': False)
-            # or Galaxy Clustering photometric, Weak Lensing and the cross-correlation between them ('full_photo': True)
-            # This flag is not used if 'like_selection: 2'
-            'full_photo': True,
             'NL_flag': 2,
             # Galaxy bias parameters:
             # The bias parameters below are currently fixed to the
@@ -94,11 +81,7 @@ if runoption == 0:
             # Intrinsic alignment parameters
             'aia': 1.72,
             'nia': -0.41,
-            'bia': 0.0,
-            # GC-Spectro Multipole parameters
-            'multipole_0': 0,
-            'multipole_2': 2,
-            'multipole_4': 4},
+            'bia': 0.0},
         # 'theory': Cobaya's protected key of the input dictionary.
         # Cobaya needs to ask some minimum theoretical requirements to a Boltzman Solver
         # You can choose between CAMB or CLASS
@@ -275,8 +258,6 @@ if runoption == 1:
                               'k_win': ks_base,
                               'MG_sigma': MG_interp, 'c': const.c.to('km/s').value,
                               'nuisance_parameters': {
-                                  'like_selection': 2,
-                                  'full_photo': True,
                                   'NL_flag': 1,
                                   'b1_photo': 1.0997727037892875,
                                   'b2_photo': 1.220245876862528,
@@ -294,10 +275,7 @@ if runoption == 1:
                                   'b4_spectro': 1.8988660,
                                   'aia': 1.72,
                                   'nia': -0.41,
-                                  'bia': 0.0,
-                                  'multipole_0': 0,
-                                  'multipole_2': 2,
-                                  'multipole_4': 4}
+                                  'bia': 0.0}
                               }
 
             mock_cosmo_dic['H0_Mpc'] = \
@@ -367,8 +345,6 @@ if runoption == 1:
                             'k_win': ks_base,
                             'MG_sigma': MG_interp,
                             'nuisance_parameters': {
-                                'like_selection': 2,
-                                'full_photo': True,
                                 'NL_flag': 1,
                                 'b1_photo': 1.0997727037892875,
                                 'b2_photo': 1.220245876862528,
@@ -386,10 +362,7 @@ if runoption == 1:
                                 'b4_spectro': 1.8988660,
                                 'aia': 1.72,
                                 'nia': -0.41,
-                                'bia': 0.0,
-                                'multipole_0': 0,
-                                'multipole_2': 2,
-                                'multipole_4': 4}
+                                'bia': 0.0}
                             }
 
             self.fiducial_dict = fid_mock_dic

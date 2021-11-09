@@ -115,8 +115,6 @@ class specinitTestCase(TestCase):
                           'k_win': ks_base,
                           'MG_sigma': MG_interp, 'c': const.c.to('km/s').value,
                           'nuisance_parameters': {
-                              'like_selection': 2,
-                              'full_photo': True,
                               'NL_flag': 1,
                               'b1_photo': 1.0997727037892875,
                               'b2_photo': 1.220245876862528,
@@ -134,10 +132,7 @@ class specinitTestCase(TestCase):
                               'b4_spectro': 1.8988660,
                               'aia': 1.72,
                               'nia': -0.41,
-                              'bia': 0.0,
-                              'multipole_0': 0,
-                              'multipole_2': 2,
-                              'multipole_4': 4}
+                              'bia': 0.0}
                           }
 
         # precomputed parameters
@@ -210,8 +205,6 @@ class specinitTestCase(TestCase):
                         'k_win': ks_base,
                         'MG_sigma': MG_interp,
                         'nuisance_parameters': {
-                            'like_selection': 2,
-                            'full_photo': True,
                             'NL_flag': 1,
                             'b1_photo': 1.0997727037892875,
                             'b2_photo': 1.220245876862528,
@@ -229,10 +222,7 @@ class specinitTestCase(TestCase):
                             'b4_spectro': 1.8988660,
                             'aia': 1.72,
                             'nia': -0.41,
-                            'bia': 0.0,
-                            'multipole_0': 0,
-                            'multipole_2': 2,
-                            'multipole_4': 4}
+                            'bia': 0.0}
                         }
 
         cls.test_dict = mock_cosmo_dic

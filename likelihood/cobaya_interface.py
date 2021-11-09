@@ -92,7 +92,7 @@ class EuclidLikelihood(Likelihood):
         # Initialize Euclike module
         # To Sergio: pass to Euclike self.observables, which is the merged dict
         # if I do it now, the code will complain
-        self.likefinal = Euclike(self.data, self.observables_selection)
+        self.likefinal = Euclike(self.data, self.observables)
 
         # Initialize Cosmology class for sampling
         self.cosmo = Cosmology()
@@ -392,5 +392,4 @@ class EuclidLikelihood(Likelihood):
         self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.05)
         loglike = self.likefinal.loglike(self.cosmo.cosmo_dic,
                                          self.fiducial_cosmology.cosmo_dic)
-
         return loglike

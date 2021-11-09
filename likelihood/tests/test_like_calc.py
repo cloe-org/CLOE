@@ -114,8 +114,6 @@ class likecalcTestCase(TestCase):
                           'k_win': ks_base,
                           'MG_sigma': MG_interp, 'c': const.c.to('km/s').value,
                           'nuisance_parameters': {
-                              'like_selection': 2,
-                              'full_photo': True,
                               'NL_flag': 1,
                               'b1_photo': 1.0997727037892875,
                               'b2_photo': 1.220245876862528,
@@ -133,10 +131,7 @@ class likecalcTestCase(TestCase):
                               'b4_spectro': 1.8988660,
                               'aia': 1.72,
                               'nia': -0.41,
-                              'bia': 0.0,
-                              'multipole_0': 0,
-                              'multipole_2': 2,
-                              'multipole_4': 4}}
+                              'bia': 0.0}}
 
         # precomputed parameters
         mock_cosmo_dic['H0_Mpc'] = \
@@ -208,10 +203,8 @@ class likecalcTestCase(TestCase):
                         'z_win': zs_base,
                         'k_win': ks_base,
                         'MG_sigma': MG_interp,
+                        'NL_flag': 1,
                         'nuisance_parameters': {
-                            'like_selection': 2,
-                            'full_photo': True,
-                            'NL_flag': 1,
                             'b1_photo': 1.0997727037892875,
                             'b2_photo': 1.220245876862528,
                             'b3_photo': 1.2723993083933989,
@@ -228,18 +221,17 @@ class likecalcTestCase(TestCase):
                             'b4_spectro': 1.8988660,
                             'aia': 1.72,
                             'nia': -0.41,
-                            'bia': 0.0,
-                            'multipole_0': 0,
-                            'multipole_2': 2,
-                            'multipole_4': 4}}
+                            'bia': 0.}}
 
         self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic
         # init Euclike
-
-        mock_obs = {'WL': {'WL': False, 'GCphot': False, 'GCspectro': False},
-                    'GCphot': {'GCphot': False, 'GCspectro': False},
-                    'GCspectro': {'GCspectro': True}}
+        mock_obs = {}
+        mock_obs['selection'] = {
+            'WL': {
+                'WL': False, 'GCphot': False, 'GCspectro': False}, 'GCphot': {
+                'GCphot': False, 'GCspectro': False}, 'GCspectro': {
+                'GCspectro': True}}
         self.like_tt = Euclike(mock_data, mock_obs)
 
         # The correct check value, using the h scaling for the h from

@@ -462,7 +462,7 @@ if runoption == 1:
 
             print("Computing ALL multipole spectra")
             a = time.time()
-            pall_spectro = self.spectro.multipole_spectra(1.0, 0.1)
+            pall_spectro = self.spectro.multipole_spectra(1.0, 0.1, ms=[0, 2, 4])
             b = time.time()
             print('P024 = ', pall_spectro)
             print("Time: ", b - a)

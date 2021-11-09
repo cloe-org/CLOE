@@ -93,7 +93,6 @@ class Euclike:
                         'cov_XC_only'],
                     'GC-Phot': self.data_ins.data_dict['GC-Phot']['cov'],
                     'GC-Spectro': spectrocov}
-        print(observables)
         self.data_handler_ins = Data_handler(datafinal,
                                              covfinal,
                                              observables['selection'])

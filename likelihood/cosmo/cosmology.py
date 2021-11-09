@@ -217,6 +217,7 @@ class Cosmology:
                           'Pgi_phot': None,
                           'Pgi_spectro': None,
                           'r_z_func': None,
+                          'f_K_z_func': None,
                           'd_z_func': None,
                           'H_z_func': None,
                           'H_z_func_Mpc': None,
@@ -387,6 +388,27 @@ class Cosmology:
                             'supplied to cosmo_dic.')
         self.cosmo_dic['r_z_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['comov_dist'], ext=2)
+
+    def interp_transverse_comoving_dist(self):
+        """Interp Transverse Comoving Dist
+
+        Adds an interpolator for the transverse comoving distance to the
+        dictionary so that it can be evaluated at redshifts not explictly
+        supplied to cobaya.
+
+        Updates 'key' in the cosmo_dic attribute of the class
+        by adding an interpolator object which interpolates
+        transverse comoving distance as a function of redshift
+        """
+        if self.cosmo_dic['z_win'] is None:
+            raise Exception('Boltzmann code redshift binning has not been '
+                            'supplied to cosmo_dic.')
+        transverse_comoving_dist = (self.cosmo_dic['angular_dist'] *
+                                    (1.0 + self.cosmo_dic['z_win']))
+        self.cosmo_dic['f_K_z_func'] = \
+            interpolate.InterpolatedUnivariateSpline(
+                x=self.cosmo_dic['z_win'],
+                y=transverse_comoving_dist, ext=2)
 
     def interp_angular_dist(self):
         """Interp Angular Dist
@@ -1031,6 +1053,7 @@ class Cosmology:
         self.interp_H()
         self.interp_H_Mpc()
         self.interp_comoving_dist()
+        self.interp_transverse_comoving_dist()
         self.interp_fsigma8()
         self.interp_sigma8()
         self.interp_growth_factor()

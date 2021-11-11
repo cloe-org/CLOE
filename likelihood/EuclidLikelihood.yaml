@@ -1,7 +1,6 @@
 # This yaml file contains the user specifications 
 # for the Euclid observables computed theoretically
 # in CLOE.
-
 # Name given to the likelihood block
 # Cobaya will print this name
 aliases: [euclid]
@@ -9,7 +8,7 @@ aliases: [euclid]
 speed: 500
 # List of parameters that are
 # only parameters of the likelihood
-params: !defaults [params]
+params: !defaults [../configs/params]
 # Select the Non-Linear flag
 NL_flag: 0
 # Information about where the data

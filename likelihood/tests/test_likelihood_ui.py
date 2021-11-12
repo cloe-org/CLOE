@@ -94,16 +94,10 @@ class LikelihoodUI_test(TestCase):
            '.update_cobaya_dict_from_model_yaml')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
            '.update_cobaya_dict_with_halofit_version')
-    @patch('likelihood.auxiliary.likelihood_yaml_handler'
-           '.write_params_yaml_from_model_yaml')
-    @patch('likelihood.auxiliary.likelihood_yaml_handler'
-           '.write_data_yaml_from_data_dict')
     @patch('cobaya.run')
     def test_run_backend_cobaya(
             self,
             cobaya_run_mock,
-            data_gen_mock,
-            params_write_mock,
             halofit_update_mock,
             dict_update_mock,
             yaml_read_mock
@@ -112,8 +106,6 @@ class LikelihoodUI_test(TestCase):
         ui = LikelihoodUI(user_config_file=self.file_name)
         ui.run()
         self.assertEqual(yaml_read_mock.call_count, 2)
-        self.assertEqual(data_gen_mock.call_count, 1)
-        self.assertEqual(params_write_mock.call_count, 1)
         self.assertEqual(dict_update_mock.call_count, 1)
         self.assertEqual(halofit_update_mock.call_count, 1)
         self.assertEqual(cobaya_run_mock.call_count, 1)
@@ -125,16 +117,10 @@ class LikelihoodUI_test(TestCase):
            '.update_cobaya_dict_from_model_yaml')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
            '.update_cobaya_dict_with_halofit_version')
-    @patch('likelihood.auxiliary.likelihood_yaml_handler'
-           '.write_params_yaml_from_model_yaml')
-    @patch('likelihood.auxiliary.likelihood_yaml_handler'
-           '.write_data_yaml_from_data_dict')
     @patch('cobaya.run')
     def test_init_no_args(
             self,
             cobaya_run_mock,
-            data_gen_mock,
-            params_write_mock,
             halofit_update_mock,
             dict_update_mock,
             yaml_read_mock
@@ -143,8 +129,6 @@ class LikelihoodUI_test(TestCase):
         ui = LikelihoodUI()
         ui.run()
         self.assertEqual(yaml_read_mock.call_count, 1)
-        self.assertEqual(data_gen_mock.call_count, 1)
-        self.assertEqual(params_write_mock.call_count, 1)
         self.assertEqual(dict_update_mock.call_count, 1)
         self.assertEqual(halofit_update_mock.call_count, 1)
         self.assertEqual(cobaya_run_mock.call_count, 1)
@@ -174,13 +158,10 @@ class LikelihoodUI_test(TestCase):
            '.update_cobaya_dict_from_model_yaml')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
            '.update_cobaya_dict_with_halofit_version')
-    @patch('likelihood.auxiliary'
-           '.likelihood_yaml_handler.write_params_yaml_from_model_yaml')
     @patch('cobaya.run')
     def test_run_cobaya_success(
             self,
             cobaya_run_mock,
-            params_write_mock,
             halofit_update_mock,
             dict_update_mock,
             yaml_read_mock
@@ -189,7 +170,6 @@ class LikelihoodUI_test(TestCase):
         dict_update_mock.return_value = self.config_good['Cobaya']
         ui = LikelihoodUI(user_config_file=self.file_name)
         ui._run_cobaya()
-        self.assertEqual(params_write_mock.call_count, 1)
         self.assertEqual(dict_update_mock.call_count, 1)
         self.assertEqual(halofit_update_mock.call_count, 1)
         self.assertEqual(cobaya_run_mock.call_count, 1)

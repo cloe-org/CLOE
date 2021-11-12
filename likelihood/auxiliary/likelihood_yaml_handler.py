@@ -336,33 +336,22 @@ def write_data_yaml_from_data_dict(data: dict):
     print('Written data file: {}'.format(data_file))
 
 
-def update_cobaya_dict_with_halofit_version(cobaya_dict: dict, file_name):
+def update_cobaya_dict_with_halofit_version(cobaya_dict: dict):
     """Updates the main cobaya dictionary with the halofit version to use
 
     The choice of the halofit_version key can be done only outside of the
-    EuclidLikelihood class. This function reads a model dictionary from file,
-    reads the value of the non-linear flag, and updates the cobaya dictionary
+    EuclidLikelihood class. This function reads the value
+    of the non-linear flag, and updates the cobaya dictionary
     accordingly.
 
     Parameters
     ----------
     cobaya_dict: dict
         The Cobaya dictionary
-    file_name: Path or str
-        The name of the user model yaml file.
     """
-    model_dict = load_model_dict_from_yaml(file_name)
 
-    if model_dict is None:
-        raise ValueError('Empty model dictionary')
-
-    model_path = get_default_models_path()
-
-    model = model_dict['user_models']
-    full_filepath = (model_path / Path(model['likelihood_flags'])).resolve()
-    likelihood_flags_dict = yaml_handler.yaml_read(full_filepath)
-
-    set_halofit_version(cobaya_dict, likelihood_flags_dict['NL_flag'])
+    NL_flag = cobaya_dict['likelihood']['Euclid']['NL_flag']
+    set_halofit_version(cobaya_dict, NL_flag)
 
 
 def set_halofit_version(cobaya_dict: dict, NL_flag: int):
@@ -376,7 +365,7 @@ def set_halofit_version(cobaya_dict: dict, NL_flag: int):
         The non-linear flag
     """
 
-    def switch_halofit_version(flag):
+    def switch_halofit_version(flag: int) -> str:
         switcher = {
             1: 'takahashi',
             2: 'mead2020'

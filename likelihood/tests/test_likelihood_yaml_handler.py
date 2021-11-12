@@ -12,8 +12,6 @@ class yaml_handler_test(TestCase):
                 'cosmology': self.file_name,
                 'foo': self.file_name
             }, 'user_options': {
-                'model_path': '/',
-                'out_params_filename': self.file_name,
                 'overwrite': False}
             }
         self.cobaya_dict = {'force': None, 'likelihood': None,

@@ -197,7 +197,7 @@ class Euclike:
         # Obtain the theory for XC-Phot
         if self.data_handler_ins.use_xc_phot:
             xc_phot_array = np.array(
-                [phot_ins.Cl_cross(ell, element[0], element[1])
+                [phot_ins.Cl_cross(ell, element[1], element[0])
                  for ell in self.data_ins.data_dict['XC-Phot']['ells']
                  for element in self.indices_all]
             )

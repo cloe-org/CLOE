@@ -1,10 +1,8 @@
 # File paths in user_models are relative to the configs/models/ directory
 user_models:
   cosmology: cosmology.yaml
-  likelihood_flags: likelihood_flags.yaml
   nuisance_bias: nuisance_bias.yaml
   nuisance_ia: nuisance_ia.yaml
-  spectro: spectro.yaml
 # The params file will be automatically written as likelihood/params.yaml
 user_options:
   overwrite: true

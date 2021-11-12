@@ -6,6 +6,7 @@ In this module we include functions needed for photometric observables
 
 """
 
-__all__ = ['photo']  # list submodules
+__all__ = ['photo',
+           'redshift_distribution']  # list submodules
 
 from . import *

@@ -4,6 +4,8 @@
 # General imports
 import numpy as np
 from scipy import integrate
+from likelihood.photometric_survey.redshift_distribution \
+    import RedshiftDistribution
 
 # General error class
 
@@ -36,8 +38,9 @@ class Photo:
             Dictionary containing n(z)s for GC-phot probe.
         """
         self.theory = cosmo_dic
-        self.nz_dic_WL = nz_dic_WL
-        self.nz_dic_GC = nz_dic_GC
+        nuisance_dict = self.theory['nuisance_parameters']
+        self.nz_GC = RedshiftDistribution('GCphot', nz_dic_GC, nuisance_dict)
+        self.nz_WL = RedshiftDistribution('WL', nz_dic_WL, nuisance_dict)
         if self.theory['r_z_func'] is None:
             raise Exception('No interpolated function for comoving distance '
                             'exists in cosmo_dic.')
@@ -56,12 +59,10 @@ class Photo:
         self.z_winterp[1] = z_wmin2
         self.z_winterp[2] = z_wmin3
         # Number of bins should be generalized, hard-coded for now
-        # z_wtomo is the number of tomographic bins + 1
 
-        z_wtomo_wl = len(self.nz_dic_WL)
-        z_wtomo_gc = len(self.nz_dic_GC)
-        z_wtom_wl = z_wtomo_wl + 1
-        z_wtom_gc = z_wtomo_gc + 1
+        # z_wtom is the number of tomographic bins + 1
+        z_wtom_wl = 1 + self.nz_WL.get_num_tomographic_bins()
+        z_wtom_gc = 1 + self.nz_GC.get_num_tomographic_bins()
         self.interpwin = np.zeros(shape=(z_wsamp, z_wtom_wl))
         self.interpwingal = np.zeros(shape=(z_wsamp, z_wtom_gc))
         self.interpwinia = np.zeros(shape=(z_wsamp, z_wtom_wl))
@@ -85,7 +86,7 @@ class Photo:
 
         Parameters
         ----------
-        z: float
+        z: numpy.ndarray of float or float
            Redshift at which to evaluate distribution.
         bin_i: int
            index of desired tomographic bin. Tomographic bin
@@ -97,9 +98,8 @@ class Photo:
            Window function for galaxy clustering photometric
         """
 
-        n_z_normalized = self.nz_dic_GC[''.join(['n', str(bin_i)])]
-
-        W_i_G = (n_z_normalized(z) * self.theory['H_z_func_Mpc'](z))
+        n_z_normalized = self.nz_GC.evaluates_n_i_z(bin_i, z)
+        W_i_G = n_z_normalized * self.theory['H_z_func_Mpc'](z)
 
         return W_i_G
 
@@ -118,7 +118,7 @@ class Photo:
             redshift parameter that will be integrated over.
         z: float
             Redshift at which kernel is being evaluated.
-        nz: function
+        nz: InterpolatedUnivariateSpline, or function
             Galaxy distribution function for the tomographic bin for
             which the kernel is currently being evaluated.
 
@@ -166,7 +166,7 @@ class Photo:
         H0_Mpc = self.theory['H0_Mpc']
         O_m = self.theory['Omm']
 
-        n_z_normalized = self.nz_dic_WL[''.join(['n', str(bin_i)])]
+        n_z_normalized = self.nz_WL.interpolates_n_i(bin_i, self.z_winterp)
 
         intg_mat = np.array([self.WL_window_integrand(zint_mat[zii],
                             zint_mat[zii, 0], n_z_normalized)
@@ -212,7 +212,7 @@ class Photo:
         H0_Mpc = self.theory['H0_Mpc']
         O_m = self.theory['Omm']
 
-        n_z_normalized = self.nz_dic_WL[''.join(['n', str(bin_i)])]
+        n_z_normalized = self.nz_WL.interpolates_n_i(bin_i, self.z_winterp)
 
         W_val = ((1.5 * H0_Mpc * O_m * (1.0 + z) *
                   self.theory['MG_sigma'](z, k) * (
@@ -234,7 +234,7 @@ class Photo:
 
         Parameters
         ----------
-        z: float
+        z: numpy.ndarray of float or float
             Redshift at which weight is evaluated.
         bin_i: int
            index of desired tomographic bin. Tomographic bin
@@ -246,9 +246,9 @@ class Photo:
            Value of IA kernel for specified bin at specified redshift.
         """
 
-        n_z_normalized = self.nz_dic_WL[''.join(['n', str(bin_i)])]
+        n_z_normalized = self.nz_WL.evaluates_n_i_z(bin_i, z)
 
-        W_IA = (n_z_normalized(z) * self.theory['H_z_func_Mpc'](z))
+        W_IA = n_z_normalized * self.theory['H_z_func_Mpc'](z)
 
         return W_IA
 
@@ -328,7 +328,6 @@ class Photo:
 
         zs_arr = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
-        c_int_arr = np.empty(len(zs_arr))
         P_dd = self.theory['Pmm_phot']
         P_ii = self.theory['Pii']
         P_di = self.theory['Pdeltai']
@@ -391,7 +390,6 @@ class Photo:
 
         zs_arr = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
-        c_int_arr = np.empty(len(zs_arr))
         P_gg = self.theory['Pgg_phot']
 
         ks_arr = (ell + 0.5) / self.theory['r_z_func'](zs_arr)
@@ -445,7 +443,6 @@ class Photo:
 
         zs_arr = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
 
-        c_int_arr = np.empty(len(zs_arr))
         P_gd = self.theory['Pgdelta_phot']
         P_gi = self.theory['Pgi_phot']
 

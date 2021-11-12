@@ -3,7 +3,11 @@ Cobaya:
   debug: true
   force: true
   likelihood:
-    Euclid: !!python/name:likelihood.cobaya_interface.EuclidLikelihood ''
+    Euclid:
+      aliases:
+      - euclid
+      NL_flag: 0
+      external: !!python/name:likelihood.cobaya_interface.EuclidLikelihood ''
   output: chains/my_euclid_experiment
   params: ./model_test.yaml
   sampler:

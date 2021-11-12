@@ -81,7 +81,13 @@ if runoption == 0:
             # Intrinsic alignment parameters
             'aia': 1.72,
             'nia': -0.41,
-            'bia': 0.0},
+            'bia': 0.0,
+            # Redshift distributions nuisance parameters: shifts
+            'dz_1_GCphot': 0., 'dz_1_WL': 0., 'dz_2_GCphot': 0., 'dz_2_WL': 0.,
+            'dz_3_GCphot': 0., 'dz_3_WL': 0., 'dz_4_GCphot': 0., 'dz_4_WL': 0.,
+            'dz_5_GCphot': 0., 'dz_5_WL': 0., 'dz_6_GCphot': 0., 'dz_6_WL': 0.,
+            'dz_7_GCphot': 0., 'dz_7_WL': 0., 'dz_8_GCphot': 0., 'dz_8_WL': 0.,
+            'dz_9_GCphot': 0., 'dz_9_WL': 0., 'dz_10_GCphot': 0., 'dz_10_WL': 0.},
         # 'theory': Cobaya's protected key of the input dictionary.
         # Cobaya needs to ask some minimum theoretical requirements to a Boltzman Solver
         # You can choose between CAMB or CLASS
@@ -278,6 +284,10 @@ if runoption == 1:
                                   'bia': 0.0}
                               }
 
+            for i in range(10):
+                mock_cosmo_dic['nuisance_parameters'][f'dz_{i + 1}_GCphot'] = 0
+                mock_cosmo_dic['nuisance_parameters'][f'dz_{i + 1}_WL'] = 0
+
             mock_cosmo_dic['H0_Mpc'] = \
                 mock_cosmo_dic['H0'] / const.c.to('km/s').value
             mock_cosmo_dic['Omb'] = \
@@ -362,7 +372,17 @@ if runoption == 1:
                                 'b4_spectro': 1.8988660,
                                 'aia': 1.72,
                                 'nia': -0.41,
-                                'bia': 0.0}
+                                'bia': 0.0,
+                                'dz_1_GCphot': 0., 'dz_1_WL': 0.,
+                                'dz_2_GCphot': 0., 'dz_2_WL': 0.,
+                                'dz_3_GCphot': 0., 'dz_3_WL': 0.,
+                                'dz_4_GCphot': 0., 'dz_4_WL': 0.,
+                                'dz_5_GCphot': 0., 'dz_5_WL': 0.,
+                                'dz_6_GCphot': 0., 'dz_6_WL': 0.,
+                                'dz_7_GCphot': 0., 'dz_7_WL': 0.,
+                                'dz_8_GCphot': 0., 'dz_8_WL': 0.,
+                                'dz_9_GCphot': 0., 'dz_9_WL': 0.,
+                                'dz_10_GCphot': 0., 'dz_10_WL': 0.}
                             }
 
             self.fiducial_dict = fid_mock_dic

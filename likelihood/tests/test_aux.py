@@ -133,7 +133,17 @@ class plotterTestCase(TestCase):
                               'b4_spectro': 1.8988660,
                               'aia': 1.72,
                               'nia': -0.41,
-                              'bia': 0.0}
+                              'bia': 0.0,
+                              'dz_1_GCphot': 0., 'dz_1_WL': 0.,
+                              'dz_2_GCphot': 0., 'dz_2_WL': 0.,
+                              'dz_3_GCphot': 0., 'dz_3_WL': 0.,
+                              'dz_4_GCphot': 0., 'dz_4_WL': 0.,
+                              'dz_5_GCphot': 0., 'dz_5_WL': 0.,
+                              'dz_6_GCphot': 0., 'dz_6_WL': 0.,
+                              'dz_7_GCphot': 0., 'dz_7_WL': 0.,
+                              'dz_8_GCphot': 0., 'dz_8_WL': 0.,
+                              'dz_9_GCphot': 0., 'dz_9_WL': 0.,
+                              'dz_10_GCphot': 0., 'dz_10_WL': 0.}
                           }
 
         # precomputed parameters

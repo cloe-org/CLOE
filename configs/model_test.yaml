@@ -3,6 +3,7 @@ user_models:
   cosmology: cosmology_only_ns_free.yaml
   nuisance_bias: nuisance_bias.yaml
   nuisance_ia: nuisance_ia.yaml
+  nuisance_nz: nuisance_nz.yaml
 # The params file will be automatically written as likelihood/params.yaml
 user_options:
   overwrite: true

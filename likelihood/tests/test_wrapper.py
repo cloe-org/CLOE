@@ -43,7 +43,6 @@ class CobayaModel:
             'omeganu': None,
             'omegac': None,
             'omk': cosmo_inst.cosmo_dic['Omk'],
-            'mnu': 0.06,
             'H0': cosmo_inst.cosmo_dic['H0'],
             'tau': cosmo_inst.cosmo_dic['tau'],
             'mnu': cosmo_inst.cosmo_dic['mnu'],

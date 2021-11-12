@@ -4,6 +4,7 @@ user_models:
   likelihood_flags: likelihood_flags.yaml
   nuisance_bias: nuisance_bias.yaml
   nuisance_ia: nuisance_ia.yaml
+  nuisance_nz: nuisance_nz.yaml
   spectro: spectro.yaml
 # The params file will be automatically written as likelihood/params.yaml
 user_options:

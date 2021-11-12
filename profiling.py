@@ -95,6 +95,12 @@ if runoption == 0:
             'aia': 1.72,
             'nia': -0.41,
             'bia': 0.0,
+            # Redshift distributions nuisance parameters: shifts
+            'dz_1_GCphot': 0., 'dz_1_WL': 0., 'dz_2_GCphot': 0., 'dz_2_WL': 0.,
+            'dz_3_GCphot': 0., 'dz_3_WL': 0., 'dz_4_GCphot': 0., 'dz_4_WL': 0.,
+            'dz_5_GCphot': 0., 'dz_5_WL': 0., 'dz_6_GCphot': 0., 'dz_6_WL': 0.,
+            'dz_7_GCphot': 0., 'dz_7_WL': 0., 'dz_8_GCphot': 0., 'dz_8_WL': 0.,
+            'dz_9_GCphot': 0., 'dz_9_WL': 0., 'dz_10_GCphot': 0., 'dz_10_WL': 0.,
             # GC-Spectro Multipole parameters
             'multipole_0': 0,
             'multipole_2': 2,
@@ -300,6 +306,10 @@ if runoption == 1:
                                   'multipole_4': 4}
                               }
 
+            for i in range(10):
+                mock_cosmo_dic['nuisance_parameters'][f'dz_{i + 1}_GCphot'] = 0
+                mock_cosmo_dic['nuisance_parameters'][f'dz_{i + 1}_WL'] = 0
+
             mock_cosmo_dic['H0_Mpc'] = \
                 mock_cosmo_dic['H0'] / const.c.to('km/s').value
             mock_cosmo_dic['Omb'] = \
@@ -387,6 +397,16 @@ if runoption == 1:
                                 'aia': 1.72,
                                 'nia': -0.41,
                                 'bia': 0.0,
+                                'dz_1_GCphot': 0., 'dz_1_WL': 0.,
+                                'dz_2_GCphot': 0., 'dz_2_WL': 0.,
+                                'dz_3_GCphot': 0., 'dz_3_WL': 0.,
+                                'dz_4_GCphot': 0., 'dz_4_WL': 0.,
+                                'dz_5_GCphot': 0., 'dz_5_WL': 0.,
+                                'dz_6_GCphot': 0., 'dz_6_WL': 0.,
+                                'dz_7_GCphot': 0., 'dz_7_WL': 0.,
+                                'dz_8_GCphot': 0., 'dz_8_WL': 0.,
+                                'dz_9_GCphot': 0., 'dz_9_WL': 0.,
+                                'dz_10_GCphot': 0., 'dz_10_WL': 0.,
                                 'multipole_0': 0,
                                 'multipole_2': 2,
                                 'multipole_4': 4}

@@ -41,7 +41,8 @@ class mock_P_obj:
 
 class photoinitTestCase(TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls) -> None:
         cur_dir = Path(__file__).resolve().parents[0]
         cmov_file = np.loadtxt(str(cur_dir) +
                                '/test_input/ComDist-LCDM-Lin-zNLA.dat')
@@ -105,7 +106,8 @@ class photoinitTestCase(TestCase):
                           'H_z_func': Hz_interp,
                           'z_win': np.linspace(0.0, 4.0, 100),
                           'k_win': np.linspace(0.001, 10.0, 100),
-                          'MG_sigma': MG_interp, 'c': const.c.to('km/s').value}
+                          'MG_sigma': MG_interp, 'c': const.c.to('km/s').value,
+                          'nuisance_parameters': {}}
 
         # precomputed parameters
         mock_cosmo_dic['H0_Mpc'] = \
@@ -124,42 +126,31 @@ class photoinitTestCase(TestCase):
         # mock_cosmo_dic['nuisance_parameters']['aia'] = 0
         # mock_cosmo_dic['nuisance_parameters']['bia'] = 0
         # mock_cosmo_dic['nuisance_parameters']['nia'] = 0
+        for i in range(10):
+            mock_cosmo_dic['nuisance_parameters'][f'dz_{i+1}_GCphot'] = 0
+            mock_cosmo_dic['nuisance_parameters'][f'dz_{i+1}_WL'] = 0
 
         mock_cosmo_dic['Pmm_phot'] = \
-            interpolate.RectBivariateSpline(zs_base,
-                                            ks_base,
-                                            pdd,
-                                            kx=1, ky=1)
+            interpolate.RectBivariateSpline(zs_base, ks_base,
+                                            pdd, kx=1, ky=1)
         mock_cosmo_dic['Pgg_phot'] = \
-            interpolate.RectBivariateSpline(zs_base,
-                                            ks_base,
-                                            pgg,
-                                            kx=1, ky=1)
+            interpolate.RectBivariateSpline(zs_base, ks_base,
+                                            pgg, kx=1, ky=1)
         mock_cosmo_dic['Pgdelta_phot'] = \
-            interpolate.RectBivariateSpline(zs_base,
-                                            ks_base,
-                                            pgd,
-                                            kx=1, ky=1)
+            interpolate.RectBivariateSpline(zs_base, ks_base,
+                                            pgd, kx=1, ky=1)
         mock_cosmo_dic['Pii'] = \
-            interpolate.RectBivariateSpline(zs_base,
-                                            ks_base,
-                                            pii,
-                                            kx=1, ky=1)
+            interpolate.RectBivariateSpline(zs_base, ks_base,
+                                            pii, kx=1, ky=1)
         mock_cosmo_dic['Pdeltai'] = \
-            interpolate.RectBivariateSpline(zs_base,
-                                            ks_base,
-                                            pdi,
-                                            kx=1, ky=1)
+            interpolate.RectBivariateSpline(zs_base, ks_base,
+                                            pdi, kx=1, ky=1)
         mock_cosmo_dic['Pgi_phot'] = \
-            interpolate.RectBivariateSpline(zs_base,
-                                            ks_base,
-                                            pgi_phot,
-                                            kx=1, ky=1)
+            interpolate.RectBivariateSpline(zs_base, ks_base,
+                                            pgi_phot, kx=1, ky=1)
         mock_cosmo_dic['Pgi_spectro'] = \
-            interpolate.RectBivariateSpline(zs_base,
-                                            ks_base,
-                                            pgi_spectro,
-                                            kx=1, ky=1)
+            interpolate.RectBivariateSpline(zs_base, ks_base,
+                                            pgi_spectro, kx=1, ky=1)
 
         nz_dic_WL = np.load(str(cur_dir) +
                             '/test_input/nz_dict_WL.npy',
@@ -167,7 +158,11 @@ class photoinitTestCase(TestCase):
         nz_dic_GC = np.load(str(cur_dir) +
                             '/test_input/nz_dict_GC_phot.npy',
                             allow_pickle=True).item()
-        self.cosmo_dict = mock_cosmo_dic
+        cls.phot = photo.Photo(mock_cosmo_dic, nz_dic_WL, nz_dic_GC)
+        cls.flatnz = interpolate.InterpolatedUnivariateSpline(
+            np.linspace(0.0, 4.6, 20), np.ones(20), ext=2)
+
+    def setUp(self) -> None:
         self.win_tol = 1e-03
         self.cl_tol = 1e-03
         self.integrand_check = -0.948932
@@ -176,16 +171,12 @@ class photoinitTestCase(TestCase):
         self.c = const.c.to('km/s').value
         self.omch2 = 0.12
         self.ombh2 = 0.022
-        self.phot = photo.Photo(mock_cosmo_dic,
-                                nz_dic_WL, nz_dic_GC)
         self.W_i_Gcheck = 5.241556e-09
         self.W_IA_check = 0.0001049580
         self.cl_integrand_check = 0.000718
         self.cl_WL_check = 7.06884e-09
         self.cl_GC_check = 2.89485e-05
         self.cl_cross_check = 1.130265e-07
-        self.flatnz = interpolate.InterpolatedUnivariateSpline(
-            np.linspace(0.0, 4.6, 20), np.ones(20), ext=2)
 
     def tearDown(self):
         self.integrand_check = None
@@ -196,7 +187,6 @@ class photoinitTestCase(TestCase):
         self.cl_WL_check = None
         self.cl_GC_check = None
         self.cl_cross_check = None
-        self.flatnz = None
 
     def test_GC_window(self):
         npt.assert_allclose(self.phot.GC_window(0.001, 1),
@@ -227,9 +217,9 @@ class photoinitTestCase(TestCase):
 
     # wab here refers to the product of the two window functions.
     def test_power_exception(self):
-        pow = float("NaN")
+        pow_ = float("NaN")
         wab = 1.0 * 2.0
-        pandw = wab * np.atleast_1d(pow)[0]
+        pandw = wab * np.atleast_1d(pow_)[0]
         npt.assert_raises(Exception, self.phot.Cl_generic_integrand,
                           10.0, pandw)
 

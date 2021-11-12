@@ -26,6 +26,7 @@ class cosmoinitTestCase(TestCase):
         cosmo.cosmo_dic['nnu'] = 3.046
         cosmo.cosmo_dic['ns'] = 0.9674
         cosmo.cosmo_dic['As'] = 2.1e-9
+        cosmo.cosmo_dic['Omk'] = 0.0
         cosmo.cosmo_dic['H0_Mpc'] = \
             cosmo.cosmo_dic['H0'] / const.c.to('km/s').value,
         cosmo.cosmo_dic['NL_flag'] = 0
@@ -39,6 +40,7 @@ class cosmoinitTestCase(TestCase):
         self.Dcheck = 1.0
         self.fcheck = 0.525454
         self.Hcheck = 74.349422
+        self.fKcheck = 3415.832866
         self.Pgg_phot_test = 58392.759202
         self.Pgg_phot_test_interpolation = 58332.02434
         self.Pgdelta_phot_test = 41294.412017
@@ -57,6 +59,7 @@ class cosmoinitTestCase(TestCase):
         self.Dcheck = None
         self.fcheck = None
         self.Hcheck = None
+        self.fKcheck = None
         self.Pgg_phot_test = None
         self.Pgdelta_phot_test = None
         self.Pgdelta_phot_test_interpolation = None
@@ -122,6 +125,13 @@ class cosmoinitTestCase(TestCase):
         npt.assert_allclose(f(0), self.fcheck,
                             rtol=1e-3,
                             err_msg='Error in f_z_k calculation ')
+
+    def test_transverse_comoving_dist(self):
+        f_K = self.model_test.cosmology.cosmo_dic['f_K_z_func'](1.0)
+        npt.assert_allclose(f_K, self.fKcheck,
+                            rtol=1e-3,
+                            err_msg='Error in transverse comoving distance'
+                                    'interpolation')
 
     def test_update_cosmo_dic(self):
         self.model_test.cosmology.update_cosmo_dic(

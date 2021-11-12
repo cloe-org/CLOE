@@ -82,8 +82,7 @@ def generate_params_yaml(models=None):
     models_path = get_default_models_path()
 
     if models is None:
-        models = ['nuisance_bias', 'nuisance_ia', 'nuisance_nz',
-                  'spectro', 'likelihood_flags']
+        models = ['nuisance_bias', 'nuisance_ia', 'nuisance_nz']
     likelihood_params = {}
 
     for model in models:
@@ -177,8 +176,8 @@ def get_params_dict_without_cosmo_params(params_dict: dict):
     new_params_dict = deepcopy(params_dict)
 
     cosmo_params = ['As', 'logA', 'H0', 'N_eff', 'mnu', 'mnu', 'ns', 'sigma8',
-                    'ombh2', 'omch2', 'omnuh2', 'omegam',
-                    'omegab', 'omegac', 'omeganu', 'omk', 'tau', 'w', 'wa']
+                    'ombh2', 'omch2', 'omnuh2', 'omk',
+                    'omegab', 'omegac', 'omeganu', 'omegam', 'tau', 'w', 'wa']
 
     for cosmo_param in cosmo_params:
         new_params_dict.pop(cosmo_param, None)

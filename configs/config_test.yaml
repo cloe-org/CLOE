@@ -25,6 +25,7 @@ Cobaya:
           cov_WL: CovMat-ShearShear-{:s}-20Bins.dat
           cov_3x2: CovMat-3x2pt-{:s}-20Bins.dat
           cov_model: Gauss
+      observables_selection: observables_selection.yaml
   output: chains/my_euclid_experiment
   params: ./model_test.yaml
   sampler:

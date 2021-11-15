@@ -8,7 +8,7 @@ import logging
 import pprint
 
 
-def open_logger(filename):
+def open_logger(filename='CLOE'):
     """Open an instance of logging.Logger
 
     Parameters
@@ -51,7 +51,7 @@ def log_info(message):
     """
     log = logging.getLogger('CLOE')
     if type(message) is dict:
-        message = pprint.pformat(message)
+        message = '\n' + pprint.pformat(message)
     log.info(message)
 
 

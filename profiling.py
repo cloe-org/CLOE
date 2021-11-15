@@ -51,17 +51,11 @@ if runoption == 0:
             'wa': 0,  # Dark energy fluid model
             'omk': 0.0,  # curvature density
             'omegam': None,  # DERIVED parameter: Omega matter density
-            'omegab': None,  # DERIVED parameter: Omega barion density
+            'omegab': None,  # DERIVED parameter: Omega baryon density
             'omeganu': None,  # DERIVED parameter: Omega neutrino density
             'omnuh2': None,  # DERIVED parameter: Omega neutrino density times de reduced Hubble parameter squared
             'omegac': None,  # DERIVED parameter: Omega cold dark matter density
             'N_eff': None,
-            'NL_flag': 2,
-            # Galaxy bias parameters:
-            # The bias parameters below are currently fixed to the
-            # values used by the Inter Science Taskforce: Forecast (IST:F)
-            # and presented in the corresponding IST:F paper (arXiv: 1910.09273).
-            # However, they can be changed by the user and even sample over them by putting a prior
             # Photometric bias parameters
             'b1_photo': 1.0997727037892875,
             'b2_photo': 1.220245876862528,
@@ -88,80 +82,43 @@ if runoption == 0:
             'dz_5_GCphot': 0., 'dz_5_WL': 0., 'dz_6_GCphot': 0., 'dz_6_WL': 0.,
             'dz_7_GCphot': 0., 'dz_7_WL': 0., 'dz_8_GCphot': 0., 'dz_8_WL': 0.,
             'dz_9_GCphot': 0., 'dz_9_WL': 0., 'dz_10_GCphot': 0., 'dz_10_WL': 0.},
-        # 'theory': Cobaya's protected key of the input dictionary.
-        # Cobaya needs to ask some minimum theoretical requirements to a Boltzman Solver
-        # You can choose between CAMB or CLASS
-        # In this DEMO, we use CAMB and specify some CAMB arguments
-        # such as the number of massive neutrinos
-        # and the dark energy model
-        #
-        # Attention: If you have CAMB/CLASS already installed and
-        # you are not using the likelihood conda environment
-        # or option (2) in cell (3) (Cobaya modules), you can add an extra key called 'path' within the camb dictionary
-        # to point to your already installed CAMB code
         'theory': {'camb':
                    {'stop_at_error': True,
                     'extra_args': {'num_massive_neutrinos': 1,
                                    'dark_energy_model': 'ppf',
                                    'halofit_version': 'mead2020'}}},
-        # 'sampler': Cobaya's protected key of the input dictionary.
-        # You can choose the sampler you want to use.
-        # Check Cobaya's documentation to see the list of available samplers
-        # In this DEMO, we use the 'evaluate' sampler to make a single computation of the posterior distributions
-        # Note: at the moment, the only sampler that works is 'evaluate'
         'sampler': {'evaluate': None},
-        # 'output': Cobaya's protected key of the input dictionary.
-        # Where are the results going to be stored, in case that the sampler produce output files?
-        #  For example: chains...
-        # Modify the path below within 'output' to choose a name and a directory for those files
         'output': 'chains/my_euclid_experiment',
-        # 'likelihood': Cobaya's protected key of the input dictionary.
-        # The user can select which data wants to use for the analysis.
-        # Check Cobaya's documentation to see the list of the current available data experiments
-        # In this DEMO, we load the Euclid-Likelihood as an external function, and name it 'Euclid'
-        'likelihood': {'Euclid': EuclidLikelihood},
-        # 'debug': Cobaya's protected key of the input dictionary.
-        # How much information you want Cobaya to print. If debug: True, it prints every detail
-        # executed internally in Cobaya
         'debug': True,
-        # 'timing': Cobaya's protected key of the input dictionary.
-        # If timing: True, Cobaya returns how much time it took it to make a computation of the posterior
-        # and how much time take each of the modules to perform their tasks
         'timing': True,
-        # 'force': Cobaya's protected key of the input dictionary.
-        # If 'force': True, Cobaya forces deleting the previous output files, if found, with the same name
         'force': True,
-        'data': {
-            # 'sample' specifies the first folder below the main data folder
-            'sample': 'ExternalBenchmark',
-            # 'spectro' and 'photo' specify paths to data files.
-            'spectro': {
-                # GC Spectro root name should contain z{:s} string
-                # to enable iteration over bins
-                'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
-                'redshifts': ["1.", "1.2", "1.4", "1.65"]
-                },
-            'photo': {
-                'ndens_GC': 'niTab-EP10-RB00.dat',
-                'ndens_WL': 'niTab-EP10-RB00.dat',
-                # Photometric root names should contain z{:s} string
-                # to specify IA model
-                'root_GC': 'Cls_{:s}_PosPos.dat',
-                'root_WL': 'Cls_{:s}_ShearShear.dat',
-                'root_XC': 'Cls_{:s}_PosShear.dat',
-                'IA_model': 'zNLA',
-                # Photometric covariances root names should contain z{:s} string
-                # to specify how the covariance was calculated
-                'cov_GC': 'CovMat-PosPos-{:s}-20Bins.dat',
-                'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.dat',
-                'cov_3x2': 'CovMat-3x2pt-{:s}-20Bins.dat',
-                'cov_model': 'Gauss'
-                }
-            }
-        }
-
-    write_data_yaml_from_data_dict(info['data'])
-    write_params_yaml_from_cobaya_dict(info)
+        'likelihood': {'Euclid': {
+            'external': EuclidLikelihood,  # Likelihood Class to be read as external
+            'observables_selection': {
+                'WL': {'WL': True, 'GCphot': False, 'GCspectro': False},
+                'GCphot': {'GCphot': True, 'GCspectro': False},
+                'GCspectro': {'GCspectro': True}},
+            'plot_observables_selection': False,
+            'NL_flag': 2,
+            'data': {
+                'sample': 'ExternalBenchmark',
+                'spectro': {
+                    'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
+                    'redshifts': ["1.", "1.2", "1.4", "1.65"]},
+                'photo': {
+                    'ndens_GC': 'niTab-EP10-RB00.dat',
+                    'ndens_WL': 'niTab-EP10-RB00.dat',
+                    'root_GC': 'Cls_{:s}_PosPos.dat',
+                    'root_WL': 'Cls_{:s}_ShearShear.dat',
+                    'root_XC': 'Cls_{:s}_PosShear.dat',
+                    'IA_model': 'zNLA',
+                    'cov_GC': 'CovMat-PosPos-{:s}-20Bins.dat',
+                    'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.dat',
+                    'cov_3x2': 'CovMat-3x2pt-{:s}-20Bins.dat',
+                    'cov_model': 'Gauss'}
+                    }
+        }}
+    }
 
     # This is just a call to the likelihood
     # Full calculation photo + spectro

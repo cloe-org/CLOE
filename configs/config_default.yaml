@@ -6,8 +6,7 @@ Cobaya:
     Euclid:
       aliases:
       - euclid
-      speed: 500
-      type: []
+      NL_flag: 0
       external: !!python/name:likelihood.cobaya_interface.EuclidLikelihood ''
   output: chains/my_euclid_experiment
   params: ./model_default.yaml

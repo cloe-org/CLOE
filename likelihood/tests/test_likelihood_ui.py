@@ -5,6 +5,7 @@ from likelihood.user_interface.likelihood_ui import LikelihoodUI
 
 class LikelihoodUI_test(TestCase):
 
+    @classmethod
     def setUp(self):
         self.file_name = '/dev/null'
         # does not have a key named backend
@@ -48,6 +49,7 @@ class LikelihoodUI_test(TestCase):
             'key3': 'val3'
         }
 
+    @classmethod
     def tearDown(self):
         self.file_name = None
         self.config_no_backend_key = None
@@ -61,34 +63,41 @@ class LikelihoodUI_test(TestCase):
 
     # test init when the key specifying the backend is not present in
     # the input configuration
+    @patch('likelihood.auxiliary.logger.log_info')
     @patch('likelihood.auxiliary.yaml_handler.yaml_read_and_check_dict')
-    def test_init_no_backend_key(self, yaml_read_mock):
+    def test_init_no_backend_key(self, yaml_read_mock, log_mock):
         yaml_read_mock.return_value = self.config_no_backend_key
         self.assertRaises(KeyError,
                           LikelihoodUI,
                           user_config_file=self.file_name)
         self.assertEqual(yaml_read_mock.call_count, 2)
+        self.assertEqual(log_mock.call_count, 0)
 
     # test initialization when the requested backend is not valid
+    @patch('likelihood.auxiliary.logger.log_info')
     @patch('likelihood.auxiliary.yaml_handler.yaml_read_and_check_dict')
-    def test_init_backend_invalid(self, yaml_read_mock):
+    def test_init_backend_invalid(self, yaml_read_mock, log_mock):
         yaml_read_mock.return_value = self.config_backend_invalid
         self.assertRaises(ValueError,
                           LikelihoodUI,
                           user_config_file=self.file_name)
         self.assertEqual(yaml_read_mock.call_count, 2)
+        self.assertEqual(log_mock.call_count, 0)
 
     # test init when the requested backend is cosmosis (supported but not
     # implemented)
+    @patch('likelihood.auxiliary.logger.log_info')
     @patch('likelihood.auxiliary.yaml_handler.yaml_read_and_check_dict')
-    def test_init_backend_cosmosis(self, yaml_read_mock):
+    def test_init_backend_cosmosis(self, yaml_read_mock, log_mock):
         yaml_read_mock.return_value = self.config_backend_cosmosis
         self.assertRaises(NotImplementedError,
                           LikelihoodUI,
                           user_config_file=self.file_name)
         self.assertEqual(yaml_read_mock.call_count, 2)
+        self.assertEqual(log_mock.call_count, 0)
 
     # test behavior when the requested backend is cobaya
+    @patch('likelihood.auxiliary.logger.log_info')
     @patch('likelihood.auxiliary.yaml_handler.yaml_read')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
            '.update_cobaya_dict_from_model_yaml')
@@ -100,7 +109,8 @@ class LikelihoodUI_test(TestCase):
             cobaya_run_mock,
             halofit_update_mock,
             dict_update_mock,
-            yaml_read_mock
+            yaml_read_mock,
+            log_mock
     ):
         yaml_read_mock.return_value = self.config_good
         ui = LikelihoodUI(user_config_file=self.file_name)
@@ -112,6 +122,7 @@ class LikelihoodUI_test(TestCase):
 
     # test behavior of __init__() when the LikelihoodUI object is
     # instantiated with no arguments
+    @patch('likelihood.auxiliary.logger.log_info')
     @patch('likelihood.auxiliary.yaml_handler.yaml_read')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
            '.update_cobaya_dict_from_model_yaml')
@@ -123,7 +134,8 @@ class LikelihoodUI_test(TestCase):
             cobaya_run_mock,
             halofit_update_mock,
             dict_update_mock,
-            yaml_read_mock
+            yaml_read_mock,
+            log_mock
     ):
         yaml_read_mock.return_value = self.config_good
         ui = LikelihoodUI()
@@ -136,6 +148,7 @@ class LikelihoodUI_test(TestCase):
     # test behavior of the run_cobaya() private method when the input
     # configuration does not contain a key named 'Cobaya'.
     # Verify that an exception is thrown in this case
+    @patch('likelihood.auxiliary.logger.log_info')
     @patch('likelihood.auxiliary.yaml_handler.yaml_read_and_check_dict')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
            '.write_params_yaml_from_model_yaml')
@@ -144,7 +157,8 @@ class LikelihoodUI_test(TestCase):
             self,
             cobaya_run_mock,
             params_gen_mock,
-            yaml_read_mock):
+            yaml_read_mock,
+            log_mock):
         yaml_read_mock.return_value = self.config_no_cobaya_key
         ui = LikelihoodUI(user_config_file=self.file_name)
         self.assertRaises(KeyError, ui._run_cobaya)
@@ -153,6 +167,7 @@ class LikelihoodUI_test(TestCase):
 
     # test run_cobaya private method: verify that the proper external calls
     # are performed and with the proper arguments
+    @patch('likelihood.auxiliary.logger.log_info')
     @patch('likelihood.auxiliary.yaml_handler.yaml_read')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
            '.update_cobaya_dict_from_model_yaml')
@@ -164,7 +179,8 @@ class LikelihoodUI_test(TestCase):
             cobaya_run_mock,
             halofit_update_mock,
             dict_update_mock,
-            yaml_read_mock
+            yaml_read_mock,
+            log_mock
     ):
         yaml_read_mock.return_value = self.config_good
         dict_update_mock.return_value = self.config_good['Cobaya']

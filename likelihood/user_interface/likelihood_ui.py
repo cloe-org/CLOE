@@ -7,12 +7,13 @@ Top level user interface class for running CLOE
 from likelihood.auxiliary import yaml_handler
 from likelihood.auxiliary import likelihood_yaml_handler as lyh
 from likelihood.cobaya_interface import EuclidLikelihood
+from likelihood.auxiliary.plotter import Plotter
+from likelihood.auxiliary.getdist_routines import triangle_plot_cobaya
+from likelihood.auxiliary.logger import log_info
 import cobaya.run
 from cobaya.model import get_model
 from pathlib import Path
 import collections.abc
-from likelihood.auxiliary.plotter import Plotter
-from likelihood.auxiliary.getdist_routines import triangle_plot_cobaya
 
 
 class LikelihoodUI:
@@ -61,6 +62,8 @@ class LikelihoodUI:
                                                   needed_keys)
 
         if user_config_file is not None:
+            log_info(f'Opening user config file: {self._config_path}')
+
             user_config = \
                 yaml_handler.yaml_read_and_check_dict(user_config_file,
                                                       needed_keys)
@@ -74,8 +77,11 @@ class LikelihoodUI:
                 orig_config=self._config,
                 update_config=user_dict
             )
+        log_info('Selected configuration:')
+        log_info(self._config)
 
         self._backend = self._get_and_check_backend(self._config)
+        log_info(f'Selected backend: {self._backend}')
 
     def run(self):
         r"""Main method to run CLOE
@@ -108,10 +114,13 @@ class LikelihoodUI:
         """
         cobaya_dict = self._config['Cobaya']
         model_path = self._get_model_path_from_cobaya_dict(cobaya_dict)
+        log_info(f'Selected model path: {model_path}')
 
         cobaya_dict = \
             lyh.update_cobaya_dict_from_model_yaml(cobaya_dict, model_path)
         lyh.update_cobaya_dict_with_halofit_version(cobaya_dict)
+        log_info('Updated Cobaya info dictionary:')
+        log_info(cobaya_dict)
 
         return cobaya.run(cobaya_dict)
 

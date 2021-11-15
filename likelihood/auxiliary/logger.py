@@ -5,6 +5,7 @@ This module contains routines to handle loggers
 
 import sys
 import logging
+import pprint
 
 
 def open_logger(filename):
@@ -37,6 +38,21 @@ def open_logger(filename):
     warnings_log.addHandler(fh)
 
     return log
+
+
+def log_info(message):
+    """
+    Logs an info
+
+    Parameters
+    ----------
+    message: str or dict
+        Message to be logged
+    """
+    log = logging.getLogger('CLOE')
+    if type(message) is dict:
+        message = pprint.pformat(message)
+    log.info(message)
 
 
 def close_logger(log):

@@ -1,21 +1,19 @@
 # This yaml file contains the user specifications 
 # for the Euclid observables computed theoretically
 # in CLOE.
-# Name given to the likelihood block
-# Cobaya will print this name
+# Name given to the likelihood block (Cobaya will print this name)
 aliases: [euclid]
 # Speed in evaluations/second
 speed: 500
 # List of parameters that are
 # only parameters of the likelihood
 params: !defaults [../configs/params]
-# Select the Non-Linear flag
+# Non-Linear flag selector
 NL_flag: 0
-# Information about where the data
-# is stored
+# Information about where the data is stored
 data: !defaults [../configs/data]
 # Selection of the observables to be computed
-observables_selection: !defaults [../configs/observables]
+observables_selection: !defaults [../configs/observables_selection]
 # Specifications for each of the observables
 observables_specifications:
   WL: !defaults [../configs/WL]
@@ -26,7 +24,5 @@ observables_specifications:
   # therefore it will load empty dictionaries
   GCphot-GCspectro: !defaults [../configs/GCphot-GCspectro]
   WL-GCspectro: !defaults [../configs/WL-GCspectro]
-# Plot during the initialization of
-# the likelihood the selected
-# of the observables based on the observables_selection
+# Plot the selected observables during the initialization of the likelihood
 plot_observables_selection: False

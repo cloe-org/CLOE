@@ -55,7 +55,7 @@ class LikelihoodUI:
             defaults_path = defaults_path.joinpath(defaults_dir)
             defaults_config_file = defaults_path.joinpath(defaults_name)
 
-        needed_keys = ['backend', 'Cobaya', 'data']
+        needed_keys = ['backend', 'Cobaya']
         self._config_path = defaults_config_file
         self._config =\
             yaml_handler.yaml_read_and_check_dict(self._config_path,
@@ -147,11 +147,9 @@ class LikelihoodUI:
         settings: str
            Name of the yaml configuration file for the plotting routines
         """
-        lyh.write_data_yaml_from_data_dict(self._config['data'])
 
         cobaya_dict = self._config['Cobaya']
         model_path = str(self._get_model_path_from_cobaya_dict(cobaya_dict))
-        lyh.write_params_yaml_from_model_yaml(model_path)
         cobaya_dict = \
             lyh.update_cobaya_dict_from_model_yaml(cobaya_dict, model_path)
         lyh.update_cobaya_dict_with_halofit_version(cobaya_dict)

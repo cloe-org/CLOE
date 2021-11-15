@@ -7,6 +7,7 @@ in CLOE.
 from pathlib import Path
 from copy import deepcopy
 from likelihood.auxiliary import yaml_handler
+from likelihood.auxiliary.logger import log_info
 
 
 def get_default_configs_path():
@@ -315,6 +316,40 @@ def update_cobaya_dict_from_model_yaml(cobaya_dict: dict, file_name):
     params_dict = generate_params_dict_from_model_yaml(file_name)
     cobaya_dict['params'] = params_dict
     return cobaya_dict
+
+
+def check_likelihood_fields(likelihood_euclid_dict):
+    """
+    Checks the field in the Likelihood Euclid dictionary
+
+    Params
+    ------
+    likelihood_euclid_dict: the Likelihood Euclid sub-dictionary
+    """
+
+    fields = ['data', 'observables_selection',
+              'observables_specifications']
+
+    for field in fields:
+        if field not in likelihood_euclid_dict:
+            log_info(f'\'Likelihood\' \'Euclid\' \'{field}\' not found')
+            log_info(f'\'{field}\' will be initialized as specified '
+                     'in EuclidLikelihood.yaml')
+        else:
+            field_value = likelihood_euclid_dict[field]
+            if type(field_value) is str:
+                log_info(f'\'Likelihood\' \'Euclid\' \'{field}\' is a string')
+                log_info(f'\'{field}\' will be initialized as specified'
+                         ' in the file {field_value}')
+                configs_path = get_default_configs_path()
+                field_path = configs_path / Path(field_value)
+                field_dict = yaml_handler.yaml_read(field_path)
+                log_info(field_dict)
+                likelihood_euclid_dict[field] = field_dict
+            elif type(field_value) is dict:
+                log_info(f'\'Likelihood\' \'Euclid\' \'{field}\' is a dict')
+                log_info(f'\'{field}\' will be set as:')
+                log_info(field_value)
 
 
 def write_data_yaml_from_data_dict(data: dict):

@@ -62,7 +62,7 @@ class LikelihoodUI:
                                                   needed_keys)
 
         if user_config_file is not None:
-            log_info(f'Opening user config file: {self._config_path}')
+            log_info(f'Opening user config file: {user_config_file}')
 
             user_config = \
                 yaml_handler.yaml_read_and_check_dict(user_config_file,
@@ -77,6 +77,7 @@ class LikelihoodUI:
                 orig_config=self._config,
                 update_config=user_dict
             )
+
         log_info('Selected configuration:')
         log_info(self._config)
 
@@ -113,6 +114,10 @@ class LikelihoodUI:
           Cobaya.
         """
         cobaya_dict = self._config['Cobaya']
+        likelihood_euclid_dict = cobaya_dict['likelihood']['Euclid']
+
+        lyh.check_likelihood_fields(likelihood_euclid_dict)
+
         model_path = self._get_model_path_from_cobaya_dict(cobaya_dict)
         log_info(f'Selected model path: {model_path}')
 

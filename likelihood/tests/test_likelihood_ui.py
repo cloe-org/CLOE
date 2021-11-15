@@ -10,26 +10,26 @@ class LikelihoodUI_test(TestCase):
         self.file_name = '/dev/null'
         # does not have a key named backend
         self.config_no_backend_key = {
-            'name': 'anything', 'type': 'first', 'data': 'any'
+            'name': 'anything', 'type': 'first'
         }
         # the backend is invalid
         self.config_backend_invalid = {
-            'backend': 'invalid', 'type': 'first', 'data': 'any'
+            'backend': 'invalid', 'type': 'first'
         }
         # the backend is Cosmosis
         self.config_backend_cosmosis = {
-            'backend': 'Cosmosis', 'type': 'first', 'data': 'any'
+            'backend': 'Cosmosis', 'type': 'first'
         }
         # has a key/value pair that is backend/Cobaya, but misses a key named
         # Cobaya
         self.config_no_cobaya_key = {
-            'backend': 'Cobaya', 'NotCobaya': 'any', 'data': 'any'
+            'backend': 'Cobaya', 'NotCobaya': 'any',
         }
         # has a key/value pair that is backend/Cobaya, and a key named Cobaya
         self.config_good = {
             'backend': 'Cobaya',
-            'Cobaya': {'params': 'file.yaml'},
-            'data': 'any'
+            'Cobaya': {'params': 'file.yaml',
+                       'likelihood': {'Euclid': {'NL_flag': 0}}},
         }
         # for testing _update_config(), since it contains a nested dictionary
         # and a plain key/value pair, this should be sufficient to achieve
@@ -119,6 +119,7 @@ class LikelihoodUI_test(TestCase):
         self.assertEqual(dict_update_mock.call_count, 1)
         self.assertEqual(halofit_update_mock.call_count, 1)
         self.assertEqual(cobaya_run_mock.call_count, 1)
+        self.assertEqual(log_mock.call_count, 0)
 
     # test behavior of __init__() when the LikelihoodUI object is
     # instantiated with no arguments
@@ -144,6 +145,7 @@ class LikelihoodUI_test(TestCase):
         self.assertEqual(dict_update_mock.call_count, 1)
         self.assertEqual(halofit_update_mock.call_count, 1)
         self.assertEqual(cobaya_run_mock.call_count, 1)
+        self.assertEqual(log_mock.call_count, 0)
 
     # test behavior of the run_cobaya() private method when the input
     # configuration does not contain a key named 'Cobaya'.
@@ -164,6 +166,7 @@ class LikelihoodUI_test(TestCase):
         self.assertRaises(KeyError, ui._run_cobaya)
         self.assertEqual(params_gen_mock.call_count, 0)
         self.assertEqual(cobaya_run_mock.call_count, 0)
+        self.assertEqual(log_mock.call_count, 0)
 
     # test run_cobaya private method: verify that the proper external calls
     # are performed and with the proper arguments
@@ -189,6 +192,7 @@ class LikelihoodUI_test(TestCase):
         self.assertEqual(dict_update_mock.call_count, 1)
         self.assertEqual(halofit_update_mock.call_count, 1)
         self.assertEqual(cobaya_run_mock.call_count, 1)
+        self.assertEqual(log_mock.call_count, 0)
         cobaya_run_mock.assert_called_with(self.config_good['Cobaya'])
 
     # update a dictionary containing a nested dictionary and a plain key/value

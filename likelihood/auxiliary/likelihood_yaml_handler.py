@@ -52,48 +52,7 @@ def get_default_params_yaml_path():
     params_yaml_path: Path
         the default path of params.yaml.
     """
-    return Path(__file__).resolve().parents[1] / 'params.yaml'
-
-
-def generate_params_yaml(models=None):
-    """Generates params.yaml from a model list.
-
-    Cobaya requests parameters defined in the theory
-    code (i.e: CAMB/CLASS and the LCDM parameters)
-    and also parameters defined by the likelihood
-    (i.e: CLOE and nuisance parameters).
-
-    When invoking Cobaya with CLOE, CLOE will
-    understand cosmology parameters but not any
-    extra parameter (such as nuisance or flags)
-    unless they are defined either in the `cobaya_interface.py`
-    or in a 'params.yaml' file.
-
-    This function creates the 'params.yaml' file so that
-    Cobaya understands that CLOE requests some
-    extra parameters.
-
-    Parameters
-    ----------
-    models: list of strings
-        Strings corresponding to a model.
-        Possible strings: 'nuisance_bias', 'nuisance_ia', 'nuisance_nz'
-    """
-
-    models_path = get_default_models_path()
-
-    if models is None:
-        models = ['nuisance_bias', 'nuisance_ia', 'nuisance_nz']
-    likelihood_params = {}
-
-    for model in models:
-        model_path = str(models_path / model) + '.yaml'
-        model_params = yaml_handler.yaml_read(model_path)
-        likelihood_params.update(model_params)
-
-    params_path = get_default_params_yaml_path()
-    yaml_handler.yaml_write(params_path, likelihood_params, True)
-    print('{} written'.format(params_path))
+    return get_default_configs_path() / 'params.yaml'
 
 
 def load_model_dict_from_yaml(file_name):
@@ -352,25 +311,6 @@ def check_likelihood_fields(likelihood_euclid_dict):
                 log_info(field_value)
 
 
-def write_data_yaml_from_data_dict(data: dict):
-    """Writes data.yaml from the data dictionary.
-
-    The Cobaya interface requires a data dictionary storing paths
-    to data files. This function saves the data dictionary to a yaml file,
-    i.e. data.yaml, which is subsequently called inside EuclidLikelihood.yaml
-
-    Parameters
-    ----------
-    data: dict
-        Dictionary containing specifications for data loading and handling.
-    """
-
-    parent_path = Path(__file__).resolve().parents[1]
-    data_file = parent_path / 'data.yaml'
-    yaml_handler.yaml_write(data_file, data, overwrite=True)
-    print('Written data file: {}'.format(data_file))
-
-
 def update_cobaya_dict_with_halofit_version(cobaya_dict: dict):
     """Updates the main cobaya dictionary with the halofit version to use
 
@@ -410,3 +350,48 @@ def set_halofit_version(cobaya_dict: dict, NL_flag: int):
     if NL_flag > 0:
         cobaya_dict['theory']['camb']['extra_args'][
             'halofit_version'] = switch_halofit_version(NL_flag)
+
+
+def generate_params_yaml(models=None):
+    """Generates params.yaml from a model list.
+
+    Cobaya requests parameters defined in the theory
+    code (i.e: CAMB/CLASS and the LCDM parameters)
+    and also parameters defined by the likelihood
+    (i.e: CLOE and nuisance parameters).
+
+    When invoking Cobaya with CLOE, CLOE will
+    understand cosmology parameters but not any
+    extra parameter (such as nuisance or flags)
+    unless they are defined either in the `cobaya_interface.py`
+    or in a 'params.yaml' file.
+
+    This function creates the 'params.yaml' file so that
+    Cobaya understands that CLOE requests some
+    extra parameters.
+
+    Parameters
+    ----------
+    models: list of strings
+        Strings corresponding to a model.
+        Possible strings: 'nuisance_bias', 'nuisance_ia', 'nuisance_nz'
+
+    Notes
+    -----
+    This function is deprecated.
+    """
+
+    models_path = get_default_models_path()
+
+    if models is None:
+        models = ['nuisance_bias', 'nuisance_ia', 'nuisance_nz']
+    likelihood_params = {}
+
+    for model in models:
+        model_path = str(models_path / model) + '.yaml'
+        model_params = yaml_handler.yaml_read(model_path)
+        likelihood_params.update(model_params)
+
+    params_path = get_default_params_yaml_path()
+    yaml_handler.yaml_write(params_path, likelihood_params, True)
+    print('{} written'.format(params_path))

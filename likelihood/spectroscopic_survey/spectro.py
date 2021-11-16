@@ -34,9 +34,6 @@ class Spectro:
         mu_max = 1.0
         mu_samp = 2001
         self.mu_grid = np.linspace(mu_min, mu_max, mu_samp)
-        self.ms = [v for k, v in cosmo_dic['nuisance_parameters'].items()
-                   if k.startswith('multipole_')]
-        self.ms = sorted(set(self.ms))
         leg_m_max = 10
         self.dict_m_legendrepol = \
             {m: legendre(m)(self.mu_grid) for m in range(leg_m_max)}
@@ -211,7 +208,7 @@ class Spectro:
         """
 
         if ms is None:
-            ms = self.ms
+            ms = [0, 2, 4]
 
         constant = 1.0 / self.scaling_factor_parall(z) / \
             self.scaling_factor_perp(z) ** 2.0 / 2.0

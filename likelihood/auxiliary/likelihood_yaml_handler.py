@@ -240,7 +240,15 @@ def update_cobaya_dict_with_halofit_version(cobaya_dict):
 
 
 def set_halofit_version(cobaya_dict: dict, NL_flag: int):
-    """Sets the halofit version of a cobaya dictionary according to a flag
+    """Sets the Halofit version of a cobaya dictionary according to a flag
+
+    | The flag/Halofit relation is as follows:
+    | NL_flag=0: not set (no request for Halofit to the Boltzman solver)
+    | NL_flag=1: takahashi \
+        (Ref: https://arxiv.org/abs/1208.2701)
+    | NL_flag=2: mead2020 \
+        (Ref: https://arxiv.org/abs/2009.01858)
+    | NL_flag>2: mead2020 (current default version)
 
     Parameters
     ----------

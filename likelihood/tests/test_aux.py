@@ -115,6 +115,7 @@ class plotterTestCase(TestCase):
                           'z_win': zs_base,
                           'k_win': ks_base,
                           'MG_sigma': MG_interp, 'c': const.c.to('km/s').value,
+                          'NL_flag': 1,
                           'nuisance_parameters': {
                               'b1_photo': 1.0997727037892875,
                               'b2_photo': 1.220245876862528,

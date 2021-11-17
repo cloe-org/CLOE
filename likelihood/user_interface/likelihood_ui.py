@@ -154,7 +154,7 @@ class LikelihoodUI:
         """
 
         cobaya_dict = self._config['Cobaya']
-        model_path = str(self._get_model_path_from_cobaya_dict(cobaya_dict))
+        model_path = self._get_model_path_from_cobaya_dict(cobaya_dict)
         cobaya_dict = \
             lyh.update_cobaya_dict_from_model_yaml(cobaya_dict, model_path)
         lyh.update_cobaya_dict_with_halofit_version(cobaya_dict)

@@ -33,15 +33,6 @@ class yaml_handler_test(TestCase):
         load_model_dict_from_yaml(self.file_name)
         self.assertEqual(load_mock.call_count, 1)
 
-    @patch('likelihood.auxiliary.yaml_handler.yaml_write')
-    def test_write_params_yaml_from_cobaya_dict(self, write_mock):
-        original_dict = deepcopy(self.cobaya_dict)
-        write_params_yaml_from_cobaya_dict(self.cobaya_dict)
-        # check write_params_yaml_from_cobaya_dict
-        # does not modify the input dictionary
-        self.assertDictEqual(original_dict, self.cobaya_dict)
-        self.assertEqual(write_mock.call_count, 1)
-
     def test_get_params_dict_without_cosmo_params(self):
         original_dict = deepcopy(self.deep_dict)
         new_dict = get_params_dict_without_cosmo_params(self.deep_dict)

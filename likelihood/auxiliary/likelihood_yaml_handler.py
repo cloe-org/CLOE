@@ -79,6 +79,27 @@ def load_model_dict_from_yaml(file_name):
     return model_dict
 
 
+def update_cobaya_dict_from_model_yaml(cobaya_dict: dict, file_name):
+    """Updates a Cobaya dictionary starting from the model yaml file
+
+    Parameters
+    ----------
+    cobaya_dict: dict
+        The Cobaya dictionary
+    file_name: Path or str
+        The name of the user model yaml file.
+
+    Returns
+    -------
+    cobaya_dict: dict
+        The updated Cobaya dictionary.
+    """
+
+    params_dict = generate_params_dict_from_model_yaml(file_name)
+    cobaya_dict['params'] = params_dict
+    return cobaya_dict
+
+
 def write_params_yaml_from_cobaya_dict(cobaya_dict: dict, file_path=None):
     """Writes the params yaml file from the Cobaya dictionary
 
@@ -239,42 +260,6 @@ def write_params_yaml_from_model_dict(model_dict: dict):
 
     param_dict = generate_params_dict_from_model_dict(model_dict, False)
     yaml_handler.yaml_write(params_filepath, param_dict, overwrite)
-
-
-def write_params_yaml_from_model_yaml(file_name):
-    """Writes the params yaml file from the model yaml file.
-
-    The cosmological parameters are *excluded* in params.yaml.
-
-    Parameters
-    ----------
-    file_name: Path or str
-        The name of the user model yaml file.
-    """
-
-    model_dict = load_model_dict_from_yaml(file_name)
-    write_params_yaml_from_model_dict(model_dict)
-
-
-def update_cobaya_dict_from_model_yaml(cobaya_dict: dict, file_name):
-    """Updates a Cobaya dictionary starting from the model yaml file
-
-    Parameters
-    ----------
-    cobaya_dict: dict
-        The Cobaya dictionary
-    file_name: Path or str
-        The name of the user model yaml file.
-
-    Returns
-    -------
-    cobaya_dict: dict
-        The updated Cobaya dictionary.
-    """
-
-    params_dict = generate_params_dict_from_model_yaml(file_name)
-    cobaya_dict['params'] = params_dict
-    return cobaya_dict
 
 
 def check_likelihood_fields(likelihood_euclid_dict):

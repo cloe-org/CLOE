@@ -145,19 +145,15 @@ class LikelihoodUI_test(TestCase):
     # Verify that an exception is thrown in this case
     @patch('likelihood.auxiliary.logger.log_info')
     @patch('likelihood.auxiliary.yaml_handler.yaml_read_and_check_dict')
-    @patch('likelihood.auxiliary.likelihood_yaml_handler'
-           '.write_params_yaml_from_model_yaml')
     @patch('cobaya.run')
     def test_run_cobaya_no_cobaya_key(
             self,
             cobaya_run_mock,
-            params_gen_mock,
             yaml_read_mock,
             log_mock):
         yaml_read_mock.return_value = self.config_no_cobaya_key
         ui = LikelihoodUI(user_config_file=self.file_name)
         self.assertRaises(KeyError, ui._run_cobaya)
-        self.assertEqual(params_gen_mock.call_count, 0)
         self.assertEqual(cobaya_run_mock.call_count, 0)
 
     # test run_cobaya private method: verify that the proper external calls

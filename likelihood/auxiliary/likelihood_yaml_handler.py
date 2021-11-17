@@ -99,19 +99,20 @@ def update_cobaya_params_from_model_yaml(cobaya_dict, file_name):
     """
 
     model_dict = load_model_dict_from_yaml(file_name)
-    params_dict = generate_params_dict_from_model_dict(model_dict, False)
+    params_dict = generate_params_dict_from_model_dict(model_dict, True)
     cobaya_dict['params'] = params_dict
 
     overwrite_params_yaml = model_dict['user_options']['overwrite']
     if overwrite_params_yaml is True:
         params_filepath = get_default_params_yaml_path()
-        yaml_handler.yaml_write(params_filepath, params_dict, True)
+        params_no_cosmo = get_params_dict_without_cosmo_params(params_dict)
+        yaml_handler.yaml_write(params_filepath, params_no_cosmo, True)
 
     return cobaya_dict
 
 
 def generate_params_dict_from_model_dict(model_dict,
-                                         include_cosmology=False):
+                                         include_cosmology=True):
     """Generates the params dictionary from a user model dictionary
 
     Cobaya requests parameters defined in the theory
@@ -119,7 +120,7 @@ def generate_params_dict_from_model_dict(model_dict,
     and also parameters defined by the likelihood
     (i.e: CLOE and nuisance parameters).
 
-    The function can also generate a params dictionary with
+    The function can also generate a params dictionary without
     the cosmological parameters.
 
     Parameters

@@ -245,12 +245,11 @@ class likecalcTestCase(TestCase):
         self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic
         # init Euclike
-        mock_obs = {}
-        mock_obs['selection'] = {
+        mock_obs = {'selection': {
             'WL': {
                 'WL': False, 'GCphot': False, 'GCspectro': False}, 'GCphot': {
                 'GCphot': False, 'GCspectro': False}, 'GCspectro': {
-                'GCspectro': True}}
+                'GCspectro': True}}}
         self.like_tt = Euclike(mock_data, mock_obs)
 
         # The correct check value, using the h scaling for the h from
@@ -319,7 +318,7 @@ class likecalcTestCase(TestCase):
         k_scale: float
             k-mode at which to evaluate the power spectrum.
         mu_rsd: float
-            cosinus of the angle between the pair separation and
+            cosine of the angle between the pair separation and
             the line of sight
 
         Returns
@@ -327,7 +326,7 @@ class likecalcTestCase(TestCase):
         pval: float
             Value of galaxy-galaxy power spectrum
             at a given redshift, k-mode and :math:`\mu_{k}`
-            for galaxy cclustering spectroscopic
+            for galaxy clustering spectroscopic
         """
         bias = self.istf_spectro_galbias(redshift)
         growth = self.test_dict['f_z'](redshift)

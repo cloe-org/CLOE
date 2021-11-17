@@ -9,6 +9,10 @@ Cobaya:
       external: !!python/name:likelihood.cobaya_interface.EuclidLikelihood ''
       NL_flag: 0
       plot_observables_selection: False
+      # The fields 'data', 'observables_selection', and 'observables_specifications'
+      # are by default the ones in ../likelihood/EuclidLikelihood.yaml
+      # The user can overwrite here their values.
+      # For 'data' and 'observables_selection', the user can also specify here an external yaml file.
       data:
         sample: 'ExternalBenchmark'
         spectro:

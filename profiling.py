@@ -12,9 +12,6 @@ from unittest import TestCase
 import cobaya
 # Import external loglike from the Likelihood Package within cobaya interface module
 from likelihood.cobaya_interface import EuclidLikelihood
-# Generate likelihood params yaml file
-from likelihood.auxiliary.likelihood_yaml_handler import write_params_yaml_from_cobaya_dict
-from likelihood.auxiliary.likelihood_yaml_handler import write_data_yaml_from_data_dict
 
 print("Running script: ", sys.argv[0])
 
@@ -31,14 +28,7 @@ print('runoption = ', runoption)
 if runoption == 0:
     print('Full likelihood evaluation!')
     info = {
-        # 'params': Cobaya's protected key of the input dictionary.
-        # Includes the parameters that the user would like to sample over:
         'params': {
-            # Each parameter below (which is a 'key' of another sub-dictionary) can contain a dictionary
-            # with the key 'prior', 'latex', etc.
-            # If the prior dictionary is not passed to a parameter, this parameter is fixed.
-            # In this example, we are sampling the parameter ns
-            #  For more information see: https://cobaya.readthedocs.io/en/latest/example.html
             'ombh2': 0.022445,  # Omega density of baryons times the reduced Hubble parameter squared
             'omch2': 0.1205579307,  # Omega density of cold dark matter times the reduced Hubble parameter squared
             'H0': 67,  # Hubble parameter evaluated today (z=0) in km/s/Mpc
@@ -130,7 +120,7 @@ if runoption == 0:
 #########################
 
 if runoption == 1:
-    print('Computation of photometric and spectrscopic observables only!')
+    print('Computation of photometric and spectroscopic observables only!')
     print("Initializing the photometric calculation.")
 
     cur_dir = Path(__file__).resolve().parents[0]

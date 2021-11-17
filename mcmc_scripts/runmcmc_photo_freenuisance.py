@@ -2,7 +2,6 @@ import sys
 import os
 from cobaya.run import run
 from likelihood.cobaya_interface import EuclidLikelihood
-from likelihood.auxiliary.likelihood_yaml_handler import write_params_yaml_from_cobaya_dict
 
 script_path = os.path.realpath(os.getcwd())
 if script_path.endswith('mcmc_scripts'):
@@ -96,7 +95,12 @@ info = {
                 'ref': {'dist': 'norm', 'loc': -0.41, 'scale': 0.01},
                 'proposal': 0.1,
                 'latex': '\eta^{\rm IA}'},
-        'bia': 0.0}, 
+        'bia': 0.0,
+        'dz_1_GCphot': 0., 'dz_1_WL': 0., 'dz_2_GCphot': 0., 'dz_2_WL': 0.,
+        'dz_3_GCphot': 0., 'dz_3_WL': 0., 'dz_4_GCphot': 0., 'dz_4_WL': 0.,
+        'dz_5_GCphot': 0., 'dz_5_WL': 0., 'dz_6_GCphot': 0., 'dz_6_WL': 0.,
+        'dz_7_GCphot': 0., 'dz_7_WL': 0., 'dz_8_GCphot': 0., 'dz_8_WL': 0.,
+        'dz_9_GCphot': 0., 'dz_9_WL': 0., 'dz_10_GCphot': 0., 'dz_10_WL': 0.},
     'theory': {'camb':
                {'stop_at_error': True,
                 'extra_args': {'num_massive_neutrinos': 1,
@@ -107,5 +111,4 @@ info = {
     'output': 'chains/photometric_freenuisance'
     }
 
-write_params_yaml_from_cobaya_dict(info)
 updated_info, sampler = run(info)

@@ -122,7 +122,7 @@ class LikelihoodUI:
         log_info(f'Selected model path: {model_path}')
 
         cobaya_dict = \
-            lyh.update_cobaya_dict_from_model_yaml(cobaya_dict, model_path)
+            lyh.update_cobaya_params_from_model_yaml(cobaya_dict, model_path)
         lyh.update_cobaya_dict_with_halofit_version(cobaya_dict)
         log_info('Updated Cobaya info dictionary:')
         log_info(cobaya_dict)
@@ -156,7 +156,7 @@ class LikelihoodUI:
         cobaya_dict = self._config['Cobaya']
         model_path = self._get_model_path_from_cobaya_dict(cobaya_dict)
         cobaya_dict = \
-            lyh.update_cobaya_dict_from_model_yaml(cobaya_dict, model_path)
+            lyh.update_cobaya_params_from_model_yaml(cobaya_dict, model_path)
         lyh.update_cobaya_dict_with_halofit_version(cobaya_dict)
         model = get_model(cobaya_dict)
 

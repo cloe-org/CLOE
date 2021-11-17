@@ -4,6 +4,6 @@ user_models:
   nuisance_bias: nuisance_bias.yaml
   nuisance_ia: nuisance_ia.yaml
   nuisance_nz: nuisance_nz.yaml
-# The params file will be automatically written as likelihood/params.yaml
 user_options:
-  overwrite: true
+  # Overwrite configs/params.yaml ?
+  overwrite: False

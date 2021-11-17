@@ -95,7 +95,7 @@ class LikelihoodUI_test(TestCase):
     @patch('likelihood.auxiliary.logger.log_info')
     @patch('likelihood.auxiliary.yaml_handler.yaml_read')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
-           '.update_cobaya_dict_from_model_yaml')
+           '.update_cobaya_params_from_model_yaml')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
            '.update_cobaya_dict_with_halofit_version')
     @patch('cobaya.run')
@@ -120,7 +120,7 @@ class LikelihoodUI_test(TestCase):
     @patch('likelihood.auxiliary.logger.log_info')
     @patch('likelihood.auxiliary.yaml_handler.yaml_read')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
-           '.update_cobaya_dict_from_model_yaml')
+           '.update_cobaya_params_from_model_yaml')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
            '.update_cobaya_dict_with_halofit_version')
     @patch('cobaya.run')
@@ -161,7 +161,7 @@ class LikelihoodUI_test(TestCase):
     @patch('likelihood.auxiliary.logger.log_info')
     @patch('likelihood.auxiliary.yaml_handler.yaml_read')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
-           '.update_cobaya_dict_from_model_yaml')
+           '.update_cobaya_params_from_model_yaml')
     @patch('likelihood.auxiliary.likelihood_yaml_handler'
            '.update_cobaya_dict_with_halofit_version')
     @patch('cobaya.run')

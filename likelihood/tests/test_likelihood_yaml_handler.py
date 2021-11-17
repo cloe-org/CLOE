@@ -14,6 +14,13 @@ class yaml_handler_test(TestCase):
             }, 'user_options': {
                 'overwrite': False}
             }
+        self.model_dict_overwrite = \
+            {'user_models': {
+                'cosmology': self.file_name,
+                'foo': self.file_name
+            }, 'user_options': {
+                'overwrite': True}
+            }
         self.cobaya_dict = {'force': None, 'likelihood': None,
                             'output': None,
                             'params': {'ns': 1, 'p0': 0},
@@ -57,15 +64,6 @@ class yaml_handler_test(TestCase):
         # (for the only non-cosmology file in self.model_dict)
         self.assertEqual(read_mock.call_count, 1)
 
-    @patch('likelihood.auxiliary.yaml_handler.yaml_read')
-    @patch('likelihood.auxiliary.yaml_handler.yaml_read_and_check_dict')
-    def test_generate_params_dict_from_model_yaml(self, rc_mock, r_mock):
-        rc_mock.return_value = self.model_dict
-        r_mock.return_value = {}
-        generate_params_dict_from_model_yaml(self.file_name)
-        self.assertEqual(rc_mock.call_count, 1)
-        self.assertEqual(r_mock.call_count, 2)
-
     @patch('likelihood.auxiliary.yaml_handler.yaml_write')
     @patch('likelihood.auxiliary.yaml_handler.yaml_read')
     def test_write_params_yaml_from_model_dict(self, r_mock, w_mock):
@@ -76,29 +74,35 @@ class yaml_handler_test(TestCase):
         self.assertEqual(r_mock.call_count, 1)
         self.assertEqual(w_mock.call_count, 1)
 
-    @patch('likelihood.auxiliary.yaml_handler.yaml_write')
-    @patch('likelihood.auxiliary.yaml_handler.yaml_read')
-    @patch('likelihood.auxiliary.yaml_handler.yaml_read_and_check_dict')
-    def test_write_params_yaml_from_model_yaml(self, rc_mock,
-                                               r_mock, w_mock):
-        rc_mock.return_value = self.model_dict
-        r_mock.return_value = self.deep_dict
-        write_params_yaml_from_model_yaml(self.file_name)
-        self.assertEqual(rc_mock.call_count, 1)
-        self.assertEqual(r_mock.call_count, 1)
-        self.assertEqual(w_mock.call_count, 1)
-
-    @patch('likelihood.auxiliary.likelihood_yaml_handler.'
-           'generate_params_dict_from_model_dict')
     @patch('likelihood.auxiliary.likelihood_yaml_handler.'
            'load_model_dict_from_yaml')
-    def test_update_cobaya_dict_from_model_yaml(self, lm_mock, gp_mock):
-        lm_mock.return_value = self.model_dict
-        gp_mock.return_value = self.deep_dict
+    @patch('likelihood.auxiliary.likelihood_yaml_handler.'
+           'generate_params_dict_from_model_dict')
+    def test_update_cobaya_params_from_model_yaml(self, g_mock, l_mock):
+        l_mock.return_value = self.model_dict
+        g_mock.return_value = self.deep_dict
         cobaya_dict = \
-            update_cobaya_dict_from_model_yaml(self.cobaya_dict,
-                                               self.file_name)
+            update_cobaya_params_from_model_yaml(self.cobaya_dict,
+                                                 self.file_name)
         params_dict = cobaya_dict['params']
         self.assertIsNotNone(params_dict)
         self.assertDictEqual(params_dict, self.deep_dict)
-        self.assertEqual(lm_mock.call_count, 1)
+        self.assertEqual(l_mock.call_count, 1)
+
+    @patch('likelihood.auxiliary.likelihood_yaml_handler.'
+           'load_model_dict_from_yaml')
+    @patch('likelihood.auxiliary.likelihood_yaml_handler.'
+           'generate_params_dict_from_model_dict')
+    @patch('likelihood.auxiliary.yaml_handler.yaml_write')
+    def test_update_cobaya_params_from_model_yaml_overwrite(self, w_mock,
+                                                            g_mock, l_mock):
+        l_mock.return_value = self.model_dict_overwrite
+        g_mock.return_value = self.deep_dict
+        cobaya_dict = \
+            update_cobaya_params_from_model_yaml(self.cobaya_dict,
+                                                 self.file_name)
+        params_dict = cobaya_dict['params']
+        self.assertIsNotNone(params_dict)
+        self.assertDictEqual(params_dict, self.deep_dict)
+        self.assertEqual(l_mock.call_count, 1)
+        self.assertEqual(w_mock.call_count, 1)

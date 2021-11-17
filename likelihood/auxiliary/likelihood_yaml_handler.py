@@ -79,8 +79,11 @@ def load_model_dict_from_yaml(file_name):
     return model_dict
 
 
-def update_cobaya_dict_from_model_yaml(cobaya_dict: dict, file_name):
-    """Updates a Cobaya dictionary starting from the model yaml file
+def update_cobaya_params_from_model_yaml(cobaya_dict, file_name):
+    """Updates Cobaya dictionary and params.yaml starting from a model yaml
+
+    Notes: params.yaml will be updated only if the
+    'overwrite' key in the model yaml is set to True.
 
     Parameters
     ----------
@@ -95,79 +98,20 @@ def update_cobaya_dict_from_model_yaml(cobaya_dict: dict, file_name):
         The updated Cobaya dictionary.
     """
 
-    params_dict = generate_params_dict_from_model_yaml(file_name)
+    model_dict = load_model_dict_from_yaml(file_name)
+    params_dict = generate_params_dict_from_model_dict(model_dict, False)
     cobaya_dict['params'] = params_dict
+
+    overwrite_params_yaml = model_dict['user_options']['overwrite']
+    if overwrite_params_yaml is True:
+        params_filepath = get_default_params_yaml_path()
+        yaml_handler.yaml_write(params_filepath, params_dict, True)
+
     return cobaya_dict
 
 
-def write_params_yaml_from_cobaya_dict(cobaya_dict: dict, file_path=None):
-    """Writes the params yaml file from the Cobaya dictionary
-
-    The cosmological parameters are *excluded* in params.yaml.
-    Note: the input Cobaya dictionary is NOT modified
-
-    When invoking Cobaya with CLOE, CLOE can
-    understand non-cosmology parameters
-    only if they are defined in this params.yaml file.
-
-    Parameters
-    ----------
-    cobaya_dict: dict
-        The Cobaya dictionary (it is not modified)
-    file_path: Path or str
-        The output file path (default: likelihood/params.yaml)
-    """
-    params_dict = cobaya_dict['params']
-    params_without_cosmo = get_params_dict_without_cosmo_params(params_dict)
-
-    if file_path is None:
-        file_path = get_default_params_yaml_path()
-    yaml_handler.yaml_write(file_path, params_without_cosmo, True)
-
-
-def get_params_dict_without_cosmo_params(params_dict: dict):
-    """Returns params dict without the cosmological parameters.
-
-    Note: the input params dictionary is NOT modified.
-
-    Parameters
-    ----------
-    params_dict: dict
-        The params dictionary (it is not modified).
-
-    Returns
-    -------
-    new_params_dict: dict
-       A deep copy of the input params_dict,
-       stripped of cosmological parameters
-
-    Raises
-    ------
-    ValueError
-        if params_dict is None
-    TypeError
-        if params_dict is not a dict
-    """
-
-    if params_dict is None:
-        raise ValueError('Empty params dictionary')
-    elif type(params_dict) is not dict:
-        raise TypeError('Params dictionary is not a dict')
-
-    new_params_dict = deepcopy(params_dict)
-
-    cosmo_params = ['As', 'logA', 'H0', 'N_eff', 'mnu', 'mnu', 'ns', 'sigma8',
-                    'ombh2', 'omch2', 'omnuh2', 'omk',
-                    'omegab', 'omegac', 'omeganu', 'omegam', 'tau', 'w', 'wa']
-
-    for cosmo_param in cosmo_params:
-        new_params_dict.pop(cosmo_param, None)
-
-    return new_params_dict
-
-
-def generate_params_dict_from_model_dict(model_dict: dict,
-                                         include_cosmology=True):
+def generate_params_dict_from_model_dict(model_dict,
+                                         include_cosmology=False):
     """Generates the params dictionary from a user model dictionary
 
     Cobaya requests parameters defined in the theory
@@ -175,7 +119,7 @@ def generate_params_dict_from_model_dict(model_dict: dict,
     and also parameters defined by the likelihood
     (i.e: CLOE and nuisance parameters).
 
-    The function can also generate a params dictionary without
+    The function can also generate a params dictionary with
     the cosmological parameters.
 
     Parameters
@@ -215,27 +159,7 @@ def generate_params_dict_from_model_dict(model_dict: dict,
     return params_dict
 
 
-def generate_params_dict_from_model_yaml(file_name):
-    """Generates the params dictionary from the model yaml file.
-
-    The cosmological parameters are *included* in the dictionary.
-
-    Parameters
-    ----------
-    file_name: Path or str
-        The name of the user model yaml file.
-
-    Returns
-    -------
-    params_dict: dict
-        The params dictionary (including cosmological parameters)
-    """
-
-    model_dict = load_model_dict_from_yaml(file_name)
-    return generate_params_dict_from_model_dict(model_dict, True)
-
-
-def write_params_yaml_from_model_dict(model_dict: dict):
+def write_params_yaml_from_model_dict(model_dict):
     """Writes the params yaml file from the model dictionary.
 
     The cosmological parameters are *excluded* in params.yaml.
@@ -296,7 +220,7 @@ def check_likelihood_fields(likelihood_euclid_dict):
                 log_info(field_value)
 
 
-def update_cobaya_dict_with_halofit_version(cobaya_dict: dict):
+def update_cobaya_dict_with_halofit_version(cobaya_dict):
     """Updates the main cobaya dictionary with the halofit version to use
 
     The choice of the halofit_version key can be done only outside of the
@@ -335,6 +259,47 @@ def set_halofit_version(cobaya_dict: dict, NL_flag: int):
     if NL_flag > 0:
         cobaya_dict['theory']['camb']['extra_args'][
             'halofit_version'] = switch_halofit_version(NL_flag)
+
+
+def get_params_dict_without_cosmo_params(params_dict):
+    """Returns params dict without the cosmological parameters.
+
+    Note: the input params dictionary is NOT modified.
+
+    Parameters
+    ----------
+    params_dict: dict
+        The params dictionary (it is not modified).
+
+    Returns
+    -------
+    new_params_dict: dict
+       A deep copy of the input params_dict,
+       stripped of cosmological parameters
+
+    Raises
+    ------
+    ValueError
+        if params_dict is None
+    TypeError
+        if params_dict is not a dict
+    """
+
+    if params_dict is None:
+        raise ValueError('Empty params dictionary')
+    elif type(params_dict) is not dict:
+        raise TypeError('Params dictionary is not a dict')
+
+    new_params_dict = deepcopy(params_dict)
+
+    cosmo_params = ['As', 'logA', 'H0', 'N_eff', 'mnu', 'mnu', 'ns', 'sigma8',
+                    'ombh2', 'omch2', 'omnuh2', 'omk',
+                    'omegab', 'omegac', 'omeganu', 'omegam', 'tau', 'w', 'wa']
+
+    for cosmo_param in cosmo_params:
+        new_params_dict.pop(cosmo_param, None)
+
+    return new_params_dict
 
 
 def generate_params_yaml(models=None):

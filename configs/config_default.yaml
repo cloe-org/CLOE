@@ -11,23 +11,9 @@ Cobaya:
       # The fields 'data', 'observables_selection', and 'observables_specifications'
       # are by default the ones in ../likelihood/EuclidLikelihood.yaml
       # The user can overwrite here their values.
-      # For 'data' and 'observables_selection', the user can also specify here an external yaml file
-      data:
-        sample: 'ExternalBenchmark'
-        spectro:
-          root: cov_power_galaxies_dk0p004_z{:s}.fits
-          redshifts: [ "1.", "1.2", "1.4", "1.65" ]
-        photo:
-          ndens_GC: niTab-EP10-RB00.dat
-          ndens_WL: niTab-EP10-RB00.dat
-          root_GC: Cls_{:s}_PosPos.dat
-          root_WL: Cls_{:s}_ShearShear.dat
-          root_XC: Cls_{:s}_PosShear.dat
-          IA_model: zNLA
-          cov_GC: CovMat-PosPos-{:s}-20Bins.dat
-          cov_WL: CovMat-ShearShear-{:s}-20Bins.dat
-          cov_3x2: CovMat-3x2pt-{:s}-20Bins.dat
-          cov_model: Gauss
+      # - by specifying a yaml file
+      # - by specifying a dictionary (in yaml format)
+      # Please note that if specifying a dictionary, all the fields must be present
   output: chains/my_euclid_experiment
   params: ./model_default.yaml
   sampler:

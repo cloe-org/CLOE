@@ -187,36 +187,43 @@ def write_params_yaml_from_model_dict(model_dict):
     yaml_handler.yaml_write(params_filepath, param_dict, overwrite)
 
 
-def check_likelihood_fields(likelihood_euclid_dict):
+def check_likelihood_fields(likelihood_sub_dict, fields=None):
     """
-    Checks the field in the Likelihood Euclid dictionary
+    Checks the field in the Likelihood Euclid sub dictionary
 
     Params
     ------
-    likelihood_euclid_dict: the Likelihood Euclid sub-dictionary
+    likelihood_sub_dict: a sub dictionary of Likelihood Euclid
     """
 
-    fields = ['data', 'observables_selection',
-              'observables_specifications']
+    if fields is None:
+        fields = ['data', 'observables_selection',
+                  'observables_specifications']
 
     for field in fields:
-        if field not in likelihood_euclid_dict:
-            log_info(f'\'Likelihood\' \'Euclid\' \'{field}\' not found')
+        if field not in likelihood_sub_dict:
+            log_info(f'Sub-field \'{field}\' not found')
             log_info(f'\'{field}\' will be initialized as specified '
                      'in EuclidLikelihood.yaml')
         else:
-            field_value = likelihood_euclid_dict[field]
+            field_value = likelihood_sub_dict[field]
             if type(field_value) is str:
-                log_info(f'\'Likelihood\' \'Euclid\' \'{field}\' is a string')
+                log_info(f'Field \'{field}\' is a string')
                 log_info(f'\'{field}\' will be initialized as specified'
-                         ' in the file {field_value}')
+                         f' in the file {field_value}')
                 configs_path = get_default_configs_path()
                 field_path = configs_path / Path(field_value)
                 field_dict = yaml_handler.yaml_read(field_path)
                 log_info(field_dict)
-                likelihood_euclid_dict[field] = field_dict
+                likelihood_sub_dict[field] = field_dict
             elif type(field_value) is dict:
-                log_info(f'\'Likelihood\' \'Euclid\' \'{field}\' is a dict')
+                log_info(f'Field \'{field}\' is a dict')
+                if field == 'observables_specifications':
+                    obspec_dic = field_value
+                    fields = ['GCphot', 'GCspectro', 'WL',
+                              'GCphot-GCspectro', 'WL-GCphot', 'WL-GCspectro']
+                    check_likelihood_fields(obspec_dic, fields)
+
                 log_info(f'\'{field}\' will be set as:')
                 log_info(field_value)
 

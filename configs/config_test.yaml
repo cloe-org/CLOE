@@ -11,25 +11,27 @@ Cobaya:
       plot_observables_selection: False
       # The fields 'data', 'observables_selection', and 'observables_specifications'
       # are by default the ones in ../likelihood/EuclidLikelihood.yaml
-      # The user can overwrite here their values.
-      # For 'data' and 'observables_selection', the user can also specify here an external yaml file.
-      data:
-        sample: 'ExternalBenchmark'
-        spectro:
-          root: cov_power_galaxies_dk0p004_z{:s}.fits
-          redshifts: [ "1.", "1.2", "1.4", "1.65" ]
-        photo:
-          ndens_GC: niTab-EP10-RB00.dat
-          ndens_WL: niTab-EP10-RB00.dat
-          root_GC: Cls_{:s}_PosPos.dat
-          root_WL: Cls_{:s}_ShearShear.dat
-          root_XC: Cls_{:s}_PosShear.dat
-          IA_model: zNLA
-          cov_GC: CovMat-PosPos-{:s}-20Bins.dat
-          cov_WL: CovMat-ShearShear-{:s}-20Bins.dat
-          cov_3x2: CovMat-3x2pt-{:s}-20Bins.dat
-          cov_model: Gauss
-      observables_selection: observables_selection.yaml
+      # The user can overwrite here their values:
+      # - by specifying a yaml file (as here in the case of data, and the probe files)
+      # - by specifying a dictionary, in yaml format (as here in the case of observables_selection)
+      data: data.yaml
+      observables_selection:
+        WL:
+          WL: True
+          GCphot: False
+          GCspectro: False
+        GCphot:
+          GCphot: True
+          GCspectro: False
+        GCspectro:
+          GCspectro: True
+      observables_specifications:
+        GCphot: GCphot.yaml
+        GCspectro: GCspectro.yaml
+        WL: WL.yaml
+        GCphot-GCspectro: GCphot-GCspectro.yaml
+        WL-GCphot: WL-GCphot.yaml
+        WL-GCspectro: WL-GCspectro.yaml
   output: chains/my_euclid_experiment
   params: ./model_test.yaml
   sampler:

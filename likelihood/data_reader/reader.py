@@ -239,9 +239,18 @@ class Reader:
 
         full_path = Path(self.dat_dir_main, file_dest)
 
-        GC_file = ascii.read(Path(full_path, root_GC.format(IA_model)))
-        WL_file = ascii.read(Path(full_path, root_WL.format(IA_model)))
-        XC_file = ascii.read(Path(full_path, root_XC.format(IA_model)))
+        GC_file = ascii.read(
+            Path(full_path, root_GC.format(IA_model)),
+            encoding='utf-8',
+        )
+        WL_file = ascii.read(
+            Path(full_path, root_WL.format(IA_model)),
+            encoding='utf-8',
+        )
+        XC_file = ascii.read(
+            Path(full_path, root_XC.format(IA_model)),
+            encoding='utf-8',
+        )
 
         self.numtomo_wl = len(self.nz_dict_WL)
         self.numtomo_gcphot = len(self.nz_dict_GC_Phot)

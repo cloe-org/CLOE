@@ -109,5 +109,7 @@ def yaml_write(file_name, config, overwrite=False):
     elif file_exists and overwrite:
         warn(f'Overwriting file {file_name}.')
 
-    with open(file_name, 'w') as file:
-        file.write(yaml.dump(config, default_flow_style=False))
+    with open(file_name, 'w', encoding='utf8') as file:
+        file.write(
+            yaml.dump(config, default_flow_style=False),
+        )

@@ -96,7 +96,8 @@ class Euclike:
 
         self.data_handler_ins = Data_handler(datafinal,
                                              covfinal,
-                                             observables)
+                                             observables,
+                                             self.data_ins)
         self.data_vector, self.invcov_matrix, self.masking_vector = \
             self.data_handler_ins.get_data_and_masking_vector()
 
@@ -286,9 +287,13 @@ class Euclike:
 
         datavec = []
         for z_ins in self.zkeys:
-            for m_ins in [0, 2, 4]:
+            multipoles = (
+                [k for k in
+                 self.data_ins.data_dict['GC-Spectro'][z_ins].keys()
+                 if k.startswith('pk')])
+            for m_ins in multipoles:
                 datavec = np.append(datavec, self.data_ins.data_dict[
-                              'GC-Spectro'][z_ins]['pk' + str(m_ins)])
+                              'GC-Spectro'][z_ins][m_ins])
         return datavec
 
     def create_spectro_cov(self):
@@ -305,8 +310,13 @@ class Euclike:
         # covnumk generalizes so that each z can have different k binning
         covnumk = [0]
         for z_ins in self.zkeys:
+            num_multipoles = len(
+                [k for k in
+                 self.data_ins.data_dict['GC-Spectro'][z_ins].keys()
+                 if k.startswith('pk')])
             covnumk.append(
-                3 * len(self.data_ins.data_dict['GC-Spectro'][z_ins]['k_pk']))
+                num_multipoles *
+                len(self.data_ins.data_dict['GC-Spectro'][z_ins]['k_pk']))
 
         # Put all covariances into a single/larger covariance.
         # As no cross-covariances, this takes on a block-form

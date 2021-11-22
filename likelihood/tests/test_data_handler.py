@@ -2,11 +2,15 @@ from unittest import TestCase
 from likelihood.masking.data_handler import Data_handler
 import numpy.testing as npt
 import numpy as np
+from likelihood.tests.test_input.mock_observables import build_mock_observables
+from likelihood.tests.test_input.data import mock_data
+from likelihood.data_reader.reader import Reader
 
 
 class datahandlerTestCase(TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.wl_size = 1100
         self.xc_phot_size = 2000
         self.gc_phot_size = 1100
@@ -38,16 +42,37 @@ class datahandlerTestCase(TestCase):
                'XC-Phot': self.xc_phot_cov,
                'GC-Phot': self.gc_phot_cov,
                'GC-Spectro': self.gc_spectro_cov}
-        obs = {'WL': {'WL': True, 'GCphot': False, 'GCspectro': False},
-               'GCphot': {'GCphot': True, 'GCspectro': False},
-               'GCspectro': {'GCspectro': True}}
+        self.data_reader = Reader(mock_data)
+        self.data_reader.compute_nz()
+        self.data_reader.read_GC_spectro()
+        self.data_reader.read_phot()
 
-        self.data_handler = Data_handler(data, cov, obs)
+        self.observables = build_mock_observables(self.data_reader)
+        self.data_handler = Data_handler(
+            data, cov, self.observables, self.data_reader)
         self.masking_vector = np.ones(self.datavec_shape[0]).astype(int)
-        self.masking_vector[self.wl_size:(self.wl_size +
-                                          self.xc_phot_size)] = 0
 
-    def tearDown(self):
+        if not self.observables['selection']['WL']['WL']:
+            self.masking_vector[0:self.wl_size] = 0
+        if not self.observables['selection']['WL']['GCphot']:
+            self.masking_vector[self.wl_size:
+                                (self.wl_size + self.xc_phot_size)] = 0
+        if not self.observables['selection']['GCphot']['GCphot']:
+            self.masking_vector[(self.wl_size + self.xc_phot_size):
+                                (self.wl_size +
+                                 self.xc_phot_size +
+                                 self.gc_phot_size)] = 0
+        if not self.observables['selection']['GCspectro']['GCspectro']:
+            self.masking_vector[(self.wl_size +
+                                 self.xc_phot_size +
+                                 self.gc_phot_size):
+                                (self.wl_size +
+                                 self.xc_phot_size +
+                                 self.gc_phot_size +
+                                 self.gc_spectro_size)] = 0
+
+    @classmethod
+    def tearDownClass(self):
         self.wl_size = None
         self.xc_phot_size = None
         self.gc_phot_size = None
@@ -76,17 +101,17 @@ class datahandlerTestCase(TestCase):
                          f' does not match the expected shape.')
 
     def test_create_masking_vector(self):
-        self.data_handler._create_masking_vector()
+        self.data_handler._create_masking_vector(self.data_reader)
 
         npt.assert_equal(self.data_handler._masking_vector,
                          self.masking_vector,
                          err_msg=f'Values of masking vector do not match'
                          f' expected values.')
 
-    # test whether the observables are read correctly from the input
+    # test whether the observables selection is read correctly from the input
     # dictionary: assing random values to the input flags and check whether
     # the same values are obtained by calling the corresponding getters
-    def test_observables(self):
+    def test_observables_selection(self):
         data = {'WL': self.wl_vec,
                 'XC-Phot': self.xc_phot_vec,
                 'GC-Phot': self.gc_phot_vec,
@@ -102,7 +127,9 @@ class datahandlerTestCase(TestCase):
         obs = {'WL': {'WL': use_wl, 'GCphot': use_xc_phot, 'GCspectro': False},
                'GCphot': {'GCphot': use_gc_phot, 'GCspectro': False},
                'GCspectro': {'GCspectro': use_gc_spectro}}
-        data_handler = Data_handler(data, cov, obs)
+        observables = self.observables
+        observables['selection'] = obs
+        data_handler = Data_handler(data, cov, observables, self.data_reader)
         npt.assert_equal(data_handler.use_wl, use_wl,
                          err_msg=f'Unexpected value of use_wl flag:'
                          f' {data_handler.use_wl} instead of {use_wl}')

@@ -13,6 +13,7 @@ from astropy import constants as const
 from pathlib import Path
 from scipy import interpolate
 from likelihood.tests.test_input.data import mock_data
+from likelihood.tests.test_input.mock_observables import build_mock_observables
 
 
 def mock_MG_func(z, k):
@@ -245,11 +246,7 @@ class likecalcTestCase(TestCase):
         self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic
         # init Euclike
-        mock_obs = {'selection': {
-            'WL': {
-                'WL': False, 'GCphot': False, 'GCspectro': False}, 'GCphot': {
-                'GCphot': False, 'GCspectro': False}, 'GCspectro': {
-                'GCspectro': True}}}
+        mock_obs = build_mock_observables()
         self.like_tt = Euclike(mock_data, mock_obs)
 
         # The correct check value, using the h scaling for the h from

@@ -90,8 +90,6 @@ class EuclidLikelihood(Likelihood):
         else:
             self.use_NL = False
         # Initialize Euclike module
-        # To Sergio: pass to Euclike self.observables, which is the merged dict
-        # if I do it now, the code will complain
         self.likefinal = Euclike(self.data, self.observables)
 
         # Initialize Cosmology class for sampling

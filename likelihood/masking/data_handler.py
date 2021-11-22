@@ -8,39 +8,38 @@ form, and for obtaining the masking vector
 import numpy as np
 from likelihood.auxiliary.matrix_manipulator import merge_matrices
 from warnings import warn
+from likelihood.data_reader import reader
 
 
 class Data_handler:
-    r"""Reshape data and covariances vectors and define masking vector
+    r"""Reshape data and covariances vectors and define masking vector.
 
-    This class interprets the content of the masking vector to tell whether a
-    given probe is enabled.
-    It assumes that the masking vector is obtained as the concatenation of
-    the following probes (from lower to higher array indices)
-    - WL: Photometric Weak Lensing
-    - XC-Phot: (Weak Lensing) x (Photometric Galaxy Clustering) cross
-      correlation
-    - GC-Phot: Photometric Galaxy Clustering
-    - GC-Spectro: Spectroscopic Galaxy Clustering
+    Build the data vector, the inverse covariance matrix and the masking
+    vector starting from an initialized instance of a Reader object, and from
+    a dictionary containing the user's specifications about the probes to be
+    included in the likelihood evaluation.
+    The data vector, inverse covariance matrix and masking vector have the
+    same structure and dimension, as it should be in order to use them
+    consistently in the likelihood evaluation.
+    They are built as the concatenation of the following probes (in this
+    order, from lower indices to higher indices):
+     - WL: Weak Lensing
+     - XC-Phot: (Weak Lensing) x (Photometric Galaxy Clustering) cross
+       correlation
+     - GC-Phot: Photometric Galaxy Clustering
+     - GC-Spectro: Spectroscopic Galaxy Clustering
 
-    For the fiducial benchmark, each probe corresponds to:
-    -  WL: 1100 elements (55 bins combination X 20 ells),
-           from index 0 to index 1100-1
-    -  XC-Phot: 2000 elements (100 bins combination X 20 ells),
-           from index 1100 to index 3100-1
-    -  GC-Phot: 1100 elements (55 bins combination X 20 ells),
-           from index 3100 to index 4200-1
-    -  GC-Spectro: 1500 elements (4 redshifts X 3 multipoles X 125 scales),
-           from index 4200 to index 5700-1
+    The size of the data vector, inverse covariance matrix and masking vector
+    is inferred from the input Reader object.
     """
 
-    def __init__(self, data_dict, cov_dict, obs_dict):
+    def __init__(self, data_dict, cov_dict, obs_dict, data_reader):
         r"""Constructor.
 
-        Constructor of the class Data_handler. Data vectors and covariance
-        matrices are rearranged into their final format, and the masking vector
-        is defined based on the size of the data vectors and on the choice
-        of observables selected by the user.
+        Constructor of the class Data_handler.
+        The data vector, inverse covariance matrix and masking vector are
+        built starting from the data_reader, and from the observables
+        dictionary.
 
         Parameters
         ----------
@@ -50,6 +49,8 @@ class Data_handler:
             Dictionary containing the covariance matrices.
         obs_dict: dict
             Dictionary containing the user-selected probes.
+        data_reader: class
+            Instance of an already initialized Reader object
         """
 
         self._data = data_dict
@@ -62,28 +63,16 @@ class Data_handler:
         self._gc_phot_size = len(self._data['GC-Phot'])
         self._gc_spectro_size = len(self._data['GC-Spectro'])
 
-        self._tot_size = (
-            self._wl_size +
-            self._xc_phot_size +
-            self._gc_phot_size +
-            self._gc_spectro_size
-        )
-
-        # indices representing the first entry of each probe
-        self._wl_start = 0
-        self._xc_phot_start = self._wl_start + self._wl_size
-        self._gc_phot_start = self._xc_phot_start + self._xc_phot_size
-        self._gc_spectro_start = self._gc_phot_start + self._gc_phot_size
-
         # boolean representing whether a given probe has been selected
-        self._use_wl = self._obs['WL']['WL']
-        self._use_gc_phot = self._obs['GCphot']['GCphot']
-        self._use_gc_spectro = self._obs['GCspectro']['GCspectro']
+        self._use_wl = self._obs['selection']['WL']['WL']
+        self._use_gc_phot = self._obs['selection']['GCphot']['GCphot']
+        self._use_gc_spectro = (
+            self._obs['selection']['GCspectro']['GCspectro'])
         try:
-            self._use_xc_phot = self._obs['WL']['GCphot']
+            self._use_xc_phot = self._obs['selection']['WL']['GCphot']
         except KeyError:
             try:
-                self._use_xc_phot = self._obs['GCphot']['WL']
+                self._use_xc_phot = self._obs['selection']['GCphot']['WL']
                 warn('WL X GCPhot cross-correlation selection has not been '
                      'found in WL dictionary. Using the value defined in '
                      'GCPhot dictionary.')
@@ -95,7 +84,7 @@ class Data_handler:
 
         self._create_data_vector()
         self._create_invcov_matrix()
-        self._create_masking_vector()
+        self._create_masking_vector(data_reader)
 
     def get_data_and_masking_vector(self):
         r"""Getter.
@@ -172,19 +161,123 @@ class Data_handler:
 
         self._invcov_matrix = invcov_matrix
 
-    def _create_masking_vector(self):
-        r"""Creates the masking vector.
+    def _create_masking_vector(self, data):
+        r"""Build the masking vector from the observables specification
 
-        Creates the masking vector based on the size of the data vectors and
-        on the choice of observables of the user.
+        Build a masking vector made of 1's and 0's, used to mask the data and
+        theory vectors, starting from the user specifications contained in the
+        self._obs dictionary.
+
+        Parameters
+        ----------
+        data: class
+          an instance of the Reader class specifying the structure and
+          organization of the data
+
+        Notes
+        -----
+        The created array contains 1's and 0's and has the same size of the
+        data and theory vector, with 1's in correspondence of the data/theory
+        elements to be included in the likelihood, and 0's in correspondence
+        of the elements that are not to be included.
+        The size of the masking vectors is inferred from the input data.
         """
-        masking_vector = np.concatenate(
-            (
-                np.full(self._wl_size, self._use_wl, dtype=int),
-                np.full(self._xc_phot_size, self._use_xc_phot, dtype=int),
-                np.full(self._gc_phot_size, self._use_gc_phot, dtype=int),
-                np.full(self._gc_spectro_size, self._use_gc_spectro, dtype=int)
-            )
-        )
+        wl_vec = []
+        if self._use_wl:
+            ells = data.data_dict['WL']['ells']
+            for i in range(1, data.numtomo_wl + 1):
+                for j in range(i, data.numtomo_wl + 1):
+                    accepted_ells = np.array(
+                        self._obs['specifications']['WL']['bins']
+                        [f'n{i}'][f'n{j}']['ell_range'])
+                    wl_vec = np.concatenate(
+                        (wl_vec, self._get_masking(ells, accepted_ells)),
+                        axis=None)
+        else:
+            wl_vec = np.full(self._wl_size, self._use_wl, dtype=int)
 
-        self._masking_vector = masking_vector
+        xc_phot_vec = []
+        if self._use_xc_phot:
+            ells = data.data_dict['XC-Phot']['ells']
+            for i in range(1, data.numtomo_wl + 1):
+                for j in range(1, data.numtomo_gcphot + 1):
+                    accepted_ells = np.array(
+                        self._obs['specifications']['WL-GCphot']['bins']
+                        [f'n{i}'][f'n{j}']['ell_range'])
+                    xc_phot_vec = np.concatenate(
+                        (xc_phot_vec, self._get_masking(ells, accepted_ells)),
+                        axis=None)
+        else:
+            xc_phot_vec = (
+                np.full(self._xc_phot_size, self._use_xc_phot, dtype=int))
+
+        gc_phot_vec = []
+        if self._use_gc_phot:
+            ells = data.data_dict['GC-Phot']['ells']
+            for i in range(1, data.numtomo_gcphot + 1):
+                for j in range(i, data.numtomo_gcphot + 1):
+                    accepted_ells = np.array(
+                        self._obs['specifications']['GCphot']['bins']
+                        [f'n{i}'][f'n{j}']['ell_range'])
+                    gc_phot_vec = np.concatenate(
+                        (gc_phot_vec, self._get_masking(ells, accepted_ells)),
+                        axis=None)
+        else:
+            gc_phot_vec = (
+                np.full(self._gc_phot_size, self._use_gc_phot, dtype=int))
+
+        gc_spectro_vec = []
+        if self._use_gc_spectro:
+            redshifts = data.data_dict['GC-Spectro'].keys()
+            for redshift_index, redshift in enumerate(redshifts):
+                k_pk = data.data_dict['GC-Spectro'][f'{redshift}']['k_pk']
+                multipoles = (
+                    [key for key in
+                     data.data_dict['GC-Spectro'][f'{redshift}'].keys()
+                     if key.startswith('pk')])
+                for multipole in multipoles:
+                    accepted_k_pk = np.array(
+                        self._obs['specifications']['GCspectro']['bins']
+                        [f'n{redshift_index+1}'][f'n{redshift_index+1}']
+                        ['multipoles'][int(multipole[2:])]
+                        ['k_range'])
+                    gc_spectro_vec = np.concatenate(
+                        (gc_spectro_vec,
+                         self._get_masking(k_pk, accepted_k_pk)),
+                        axis=None)
+        else:
+            gc_spectro_vec = (
+                np.full(
+                    self._gc_spectro_size,
+                    self._use_gc_spectro,
+                    dtype=int))
+
+        self._masking_vector = np.concatenate(
+            (wl_vec, xc_phot_vec, gc_phot_vec, gc_spectro_vec),
+            axis=None)
+
+    def _get_masking(self, arr, acceptance_intervals):
+        r"""Get a 1/0 mask for arr elements contained in acceptance_intervals
+
+        Get an array of 1's and 0's indicating which elements of the input
+        array are contained in the specified acceptance intervals
+
+        Parameters
+        ----------
+        arr: numpy.ndarray
+          The array of values for which the mask is to be evaluated
+        acceptance_intervals: ndarray
+          An array of 2-element arrays, each defining an interval of values
+          to be kept in arr
+
+        Returns
+        -------
+        numpy.ndarray:
+          An array of 0's and 1's of the same size of the input arr, with 1's
+          in correspondence of the arr elements contained in the acceptance
+          intervals, and 0's in correspondence of the arr elements not
+          contained in the acceptance intervals.
+        """
+        return np.any((arr[:, None] >= acceptance_intervals[:, 0]) &
+                      (arr[:, None] <= acceptance_intervals[:, 1]),
+                      axis=1).astype(int)

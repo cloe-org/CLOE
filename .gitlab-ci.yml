@@ -1,24 +1,34 @@
+default:
+  image: gitlab.euclid-sgs.uk:4567/pf-ist-likelihood/likelihood-implementation
+
+# Caches
+cache:
+  key: $CI_COMMIT_REF_SLUG
+  paths:
+    - .pytest_cache
+
 # Install dependencies
 before_script:
-  - apt-get update
-  - apt-get upgrade -y
-  - apt-get install software-properties-common -y
-  - add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe restricted multiverse"
-  - apt-get install gfortran -y
-  - apt-get install texlive dvipng texlive-latex-extra texlive-fonts-recommended cm-super -y
-  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b -p $HOME/miniconda
-  - export PATH=$HOME/miniconda/bin:$PATH
-  - conda env create -f environment.yml
-  - source activate likelihood
-  - pip install coverage nose pytest pytest-cov
+  - source activate cloe
+  - conda list
+  - ls -a
+  - echo $CI_PIPELINE_SOURCE
 
 # Install package
 Install:
-  script: python setup.py test
+  script:
+    - python setup.py test
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - likelihood/*
+      - configs/*
+      - data/ExternalBenchmark/*
+      - environment.yml
+      - .gitlab-ci.yml
+      - setup.cfg
   artifacts:
-    when: always
     reports:
       junit: pytest.xml
       cobertura: coverage.xml
@@ -26,24 +36,23 @@ Install:
 # Build temporary API docs for reviewer
 Check_HTML:
   script:
-    - &build_script |
-      source activate likelihood
-      pip install sphinx sphinx-rtd-theme numpydoc
+    - &apidoc_build_script |
       mkdir docs/build
       sphinx-apidoc -feo docs/source likelihood
       sphinx-build docs/source docs/build
     - mv docs/build html_build
+  when: manual
   artifacts:
     paths:
       - html_build/
     expose_as: 'API HTML Build'
-  except:
-      - master
+  only:
+    - merge_requests
 
 # Build API docs for deployment
 pages:
   script:
-    - *build_script
+    - *apidoc_build_script
     - mv docs/build public/
   artifacts:
     paths:
@@ -53,12 +62,16 @@ pages:
 
 # Get Profiling Report
 Profiling:
-  script: 
+  script:
     - python profiling.py 1
     - python -m cProfile -o profiling.pstats profiling.py
     - mkdir products
     - mv profiling.pstats products/
+  when: manual
   artifacts:
     paths:
       - products/
     expose_as: 'Profiling Report'
+  only:
+    - merge_requests
+    - master

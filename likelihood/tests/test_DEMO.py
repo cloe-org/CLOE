@@ -5,13 +5,14 @@ This module contains unit tests for the DEMO jupyter notebook
 
 """
 
-from unittest import TestCase
+from unittest import TestCase, skip
 import numpy.testing as npt
 import subprocess
 import os
 import shlex
 
 
+@skip('Skipping DEMO test case')
 class DEMOTestCase(TestCase):
 
     def setUp(self):

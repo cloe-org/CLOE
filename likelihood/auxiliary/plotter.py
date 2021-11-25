@@ -233,19 +233,29 @@ class Plotter:
         # Note:As covariance format is not set in stone, if the format
         # changes, the following code will need to be reviewed to correct the
         # error bar calculation.
-        cov_diags = np.sqrt(np.diagonal(self.read_data.data_dict[probe][
-                                        'cov']))
+        cov_diags = np.sqrt(np.diagonal(self.read_data.data_dict['cov_3x2']))
+
+        num_WL_bins = self.read_data.numtomo_wl
+        num_GC_bins = self.read_data.numtomo_gcphot
+        tot_WL_bins = int(num_WL_bins * (num_WL_bins + 1) / 2)
+        tot_GC_bins = int(num_GC_bins * (num_GC_bins + 1) / 2)
+        tot_XC_bins = num_WL_bins * num_GC_bins
+        tot_3x2_bins = tot_WL_bins + tot_XC_bins + tot_GC_bins
+
         counter = 0
         for i in range(1, no_bins + 1):
             for j in range(i, no_bins + 1):
                 if i == bin_i and j == bin_j:
                     cur_index = counter
-                counter += 1
+                    break
+        if probe == 'GC-Phot':
+            cur_index += (tot_WL_bins + tot_XC_bins)
         err_arr = []
         for mult in range(len(ells)):
-            cur_err = cov_diags[(counter * mult) + cur_index]
+            cur_err = cov_diags[(tot_3x2_bins * mult) + cur_index]
             err_arr.append(cur_err)
         err_arr = np.array(err_arr)
+
         pl_ax.plot(ells, ext_cs + err_arr, color=pl_colour,
                    linestyle=pl_linestyle)
         pl_ax.plot(ells, ext_cs - err_arr, color=pl_colour,
@@ -346,7 +356,7 @@ class Plotter:
         # Note: As the covariance format is not set in stone, if the format
         # changes, the following code will need to be reviewed to correct the
         # error bar calculation.
-        cov_full = self.read_data.data_dict['XC-Phot']['cov']
+        cov_full = self.read_data.data_dict['cov_3x2']
         err_arr = []
         for mult in range(len(ells)):
             k = int(no_bins_WL * bin_WL + bin_GC + no_bins_WL *
@@ -355,6 +365,7 @@ class Plotter:
             cur_err = np.sqrt(cov_full[k, k])
             err_arr.append(cur_err)
         err_arr = np.array(err_arr)
+
         pl_ax.plot(ells, ext_cs + err_arr, color=pl_colour,
                    linestyle=pl_linestyle)
         pl_ax.plot(ells, ext_cs - err_arr, color=pl_colour,

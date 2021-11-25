@@ -14,12 +14,13 @@ class datahandlerTestCase(TestCase):
         self.wl_size = 1100
         self.xc_phot_size = 2000
         self.gc_phot_size = 1100
+        self.tx2_size = self.wl_size + self.xc_phot_size + self.gc_phot_size
         self.gc_spectro_size = 1500
         self.datavec_shape = (self.wl_size +
                               self.xc_phot_size +
                               self.gc_phot_size +
                               self.gc_spectro_size,)
-        self.invcov_shape = (self.datavec_shape[0], self.datavec_shape[0])
+        self.cov_shape = (self.datavec_shape[0], self.datavec_shape[0])
 
         self.wl_vec = np.random.randn(self.wl_size)
         self.xc_phot_vec = np.random.randn(self.xc_phot_size)
@@ -31,6 +32,7 @@ class datahandlerTestCase(TestCase):
                                            self.xc_phot_size)
         self.gc_phot_cov = np.random.randn(self.gc_phot_size,
                                            self.gc_phot_size)
+        self.tx2_cov = np.random.randn(self.tx2_size, self.tx2_size)
         self.gc_spectro_cov = np.random.randn(self.gc_spectro_size,
                                               self.gc_spectro_size)
 
@@ -38,9 +40,7 @@ class datahandlerTestCase(TestCase):
                 'XC-Phot': self.xc_phot_vec,
                 'GC-Phot': self.gc_phot_vec,
                 'GC-Spectro': self.gc_spectro_vec}
-        cov = {'WL': self.wl_cov,
-               'XC-Phot': self.xc_phot_cov,
-               'GC-Phot': self.gc_phot_cov,
+        cov = {'3x2': self.tx2_cov,
                'GC-Spectro': self.gc_spectro_cov}
         self.data_reader = Reader(mock_data)
         self.data_reader.compute_nz()
@@ -76,6 +76,7 @@ class datahandlerTestCase(TestCase):
         self.wl_size = None
         self.xc_phot_size = None
         self.gc_phot_size = None
+        self.tx2_size = None
         self.gc_spectro_size = None
         self.datavec_size = None
         self.wl_vec = None
@@ -92,12 +93,12 @@ class datahandlerTestCase(TestCase):
                          err_msg=f'Shape of full data vector does not match'
                          f' the expected shape.')
 
-    def test_create_invcov_matrix(self):
-        self.data_handler._create_invcov_matrix()
+    def test_create_cov_matrix(self):
+        self.data_handler._create_cov_matrix()
 
-        npt.assert_equal(self.data_handler._invcov_matrix.shape,
-                         self.invcov_shape,
-                         err_msg=f'Shape of full inverse covariance matrix'
+        npt.assert_equal(self.data_handler._cov_matrix.shape,
+                         self.cov_shape,
+                         err_msg=f'Shape of full covariance matrix'
                          f' does not match the expected shape.')
 
     def test_create_masking_vector(self):
@@ -116,9 +117,7 @@ class datahandlerTestCase(TestCase):
                 'XC-Phot': self.xc_phot_vec,
                 'GC-Phot': self.gc_phot_vec,
                 'GC-Spectro': self.gc_spectro_vec}
-        cov = {'WL': self.wl_cov,
-               'XC-Phot': self.xc_phot_cov,
-               'GC-Phot': self.gc_phot_cov,
+        cov = {'3x2': self.tx2_cov,
                'GC-Spectro': self.gc_spectro_cov}
 
         use_wl, use_xc_phot, use_gc_phot, use_gc_spectro = (

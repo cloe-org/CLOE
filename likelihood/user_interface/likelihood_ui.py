@@ -117,13 +117,9 @@ class LikelihoodUI:
         likelihood_euclid_dict = cobaya_dict['likelihood']['Euclid']
 
         self._check_and_update_likelihood_fields(likelihood_euclid_dict)
-
-        model_path = self._get_model_path_from_cobaya_dict(cobaya_dict)
-        log_info(f'Selected model path: {model_path}')
-
-        cobaya_dict = \
-            lyh.update_cobaya_params_from_model_yaml(cobaya_dict, model_path)
+        self._check_and_update_params_field(cobaya_dict)
         lyh.update_cobaya_dict_with_halofit_version(cobaya_dict)
+
         log_info('Updated Cobaya info dictionary:')
         log_info(cobaya_dict)
 
@@ -155,8 +151,7 @@ class LikelihoodUI:
 
         cobaya_dict = self._config['Cobaya']
         model_path = self._get_model_path_from_cobaya_dict(cobaya_dict)
-        cobaya_dict = \
-            lyh.update_cobaya_params_from_model_yaml(cobaya_dict, model_path)
+        lyh.update_cobaya_params_from_model_yaml(cobaya_dict, model_path)
         lyh.update_cobaya_dict_with_halofit_version(cobaya_dict)
         model = get_model(cobaya_dict)
 
@@ -243,6 +238,39 @@ class LikelihoodUI:
                     log_info(f'\'{field}\' will be set as:')
                     log_info(field_value)
 
+    def _check_and_update_params_field(self, cobaya_dict):
+        """
+        Checks and updates the fields in the params sub dictionary
+
+        Parameters
+        ----------
+        cobaya_dict: dict
+            the Cobaya info dictionary
+
+        Raises
+        ------
+        ValueError
+            if the value of the key 'params' in cobaya_dict
+            is neither a string nor a dictionary
+        """
+
+        params = cobaya_dict['params']
+        if type(params) is str:
+            log_info(f'Field \'params\' is a string: the model path')
+            model_path = self._get_model_path_from_cobaya_dict(cobaya_dict)
+            log_info(f'Selected model path: {model_path}')
+
+            log_info(f'Updating \'params\' in the Cobaya info dictionary')
+            lyh.update_cobaya_params_from_model_yaml(cobaya_dict, model_path)
+        elif type(params) is dict:
+            log_info(f'Field \'params\' is a dict')
+            log_info(f'\'params\' will be set as:')
+            log_info(field_value)
+        else:
+            raise ValueError('key \'params\' in the input yaml configuration '
+                             'must be a either a string (the model yaml path)'
+                             'or a dict (the params dictionary)')
+
     def _get_model_path_from_cobaya_dict(self, cobaya_dict):
         """Get the full model path from the Cobaya dictionary
 
@@ -261,7 +289,7 @@ class LikelihoodUI:
         Raises
         ------
         ValueError
-            if the value of the key 'param' in cobaya_dict
+            if the value of the key 'params' in cobaya_dict
             is not a string
         """
 

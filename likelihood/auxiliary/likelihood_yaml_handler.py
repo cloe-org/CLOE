@@ -91,11 +91,6 @@ def update_cobaya_params_from_model_yaml(cobaya_dict, file_name):
         The Cobaya dictionary
     file_name: Path or str
         The name of the user model yaml file.
-
-    Returns
-    -------
-    cobaya_dict: dict
-        The updated Cobaya dictionary.
     """
 
     model_dict = load_model_dict_from_yaml(file_name)
@@ -107,8 +102,6 @@ def update_cobaya_params_from_model_yaml(cobaya_dict, file_name):
         params_filepath = get_default_params_yaml_path()
         params_no_cosmo = get_params_dict_without_cosmo_params(params_dict)
         yaml_handler.yaml_write(params_filepath, params_no_cosmo, True)
-
-    return cobaya_dict
 
 
 def generate_params_dict_from_model_dict(model_dict,

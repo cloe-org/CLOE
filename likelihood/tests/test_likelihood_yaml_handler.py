@@ -81,10 +81,8 @@ class yaml_handler_test(TestCase):
     def test_update_cobaya_params_from_model_yaml(self, g_mock, l_mock):
         l_mock.return_value = self.model_dict
         g_mock.return_value = self.deep_dict
-        cobaya_dict = \
-            update_cobaya_params_from_model_yaml(self.cobaya_dict,
-                                                 self.file_name)
-        params_dict = cobaya_dict['params']
+        update_cobaya_params_from_model_yaml(self.cobaya_dict, self.file_name)
+        params_dict = self.cobaya_dict['params']
         self.assertIsNotNone(params_dict)
         self.assertDictEqual(params_dict, self.deep_dict)
         self.assertEqual(l_mock.call_count, 1)
@@ -98,10 +96,8 @@ class yaml_handler_test(TestCase):
                                                             g_mock, l_mock):
         l_mock.return_value = self.model_dict_overwrite
         g_mock.return_value = self.deep_dict
-        cobaya_dict = \
-            update_cobaya_params_from_model_yaml(self.cobaya_dict,
-                                                 self.file_name)
-        params_dict = cobaya_dict['params']
+        update_cobaya_params_from_model_yaml(self.cobaya_dict, self.file_name)
+        params_dict = self.cobaya_dict['params']
         self.assertIsNotNone(params_dict)
         self.assertDictEqual(params_dict, self.deep_dict)
         self.assertEqual(l_mock.call_count, 1)

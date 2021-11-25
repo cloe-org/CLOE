@@ -1,3 +1,5 @@
+# This is a default input file used by the Cobaya interface.
+# Users should never edit this file.
 aia: 1.72
 b10_photo: 1.7429859437184225
 b1_photo: 1.0997727037892875

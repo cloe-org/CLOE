@@ -5,5 +5,5 @@ user_models:
   nuisance_ia: nuisance_ia.yaml
   nuisance_nz: nuisance_nz.yaml
 user_options:
-  # Overwrite configs/params.yaml ?
+  # Flag for advanced users to let CLOE overwrite the configs/params.yaml file
   overwrite: False

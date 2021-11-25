@@ -9,13 +9,13 @@
 
 - Uploaded files - 
 
-1. CovMat-PosPos-Gauss-20bins.dat: position - position (GCph) covariance matrix with Gaussian contribution only
-2. CovMat-ShearShear-Gauss-20bins.dat: shear - shear (WL) covariance matrix with Gaussian contribution only
-3. CovMat-3x2pt-Gauss-20bins.dat: 3x2pt (WL + XC + GCph) covariance matrix with Gaussian contribution only
+1. CovMat-PosPos-Gauss-20bins.npy: position - position (GCph) covariance matrix with Gaussian contribution only
+2. CovMat-ShearShear-Gauss-20bins.npy: shear - shear (WL) covariance matrix with Gaussian contribution only
+3. CovMat-3x2pt-Gauss-20bins.npy: 3x2pt (WL + XC + GCph) covariance matrix with Gaussian contribution only
 
-4. CovMat-PosPos-GaussSSC-20bins.dat: same as 1 but including super sample covariance contribution
-5. CovMat-ShearShear-GaussSSC-20bins.dat: same as 2 but including super sample covariance contribution
-6. CovMat-3x2pt-GaussSSC-20bins.dat: same as 3 but including super sample covariance contribution
+4. CovMat-PosPos-GaussSSC-20bins.npy: same as 1 but including super sample covariance contribution
+5. CovMat-ShearShear-GaussSSC-20bins.npy: same as 2 but including super sample covariance contribution
+6. CovMat-3x2pt-GaussSSC-20bins.npy: same as 3 but including super sample covariance contribution
 
 ----------------------------------------------------------------
 

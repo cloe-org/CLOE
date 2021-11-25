@@ -267,45 +267,14 @@ class Reader:
         for i in range(len(header_XC)):
             XC_phot_dict[header_XC[i]] = XC_file[header_XC[i]].data
 
-        GC_cov_str = self.data['photo']['cov_GC'].format(self.data[
-            'photo']['cov_model'])
-        WL_cov_str = self.data['photo']['cov_WL'].format(self.data[
-            'photo']['cov_model'])
         tx2_cov_str = self.data['photo']['cov_3x2'].format(self.data[
             'photo']['cov_model'])
-
-        GC_cov = np.load(Path(full_path, GC_cov_str))
-        WL_cov = np.load(Path(full_path, WL_cov_str))
         tx2_cov = np.load(Path(full_path, tx2_cov_str))
-
-        tot_XC_bins = self.numtomo_wl * self.numtomo_gcphot
-        tot_GC_bins = len(GC_cov) / len(GC_phot_dict['ells'])
-        tot_WL_bins = len(WL_cov) / len(WL_dict['ells'])
-        total_bins = tot_WL_bins + tot_XC_bins + tot_GC_bins
-        XC_side = tot_XC_bins * len(XC_phot_dict['ells'])
-        XC_cov = np.zeros((XC_side, XC_side))
-
-        for i in range(len(XC_phot_dict['ells'])):
-            cur_i = int(i * tot_XC_bins)
-            next_i = int((i + 1) * tot_XC_bins)
-            XC_i_low = int((i * total_bins) + tot_WL_bins)
-            XC_i_hi = int(XC_i_low + tot_XC_bins)
-            for j in range(len(XC_phot_dict['ells'])):
-                cur_j = int(j * tot_XC_bins)
-                next_j = int((j + 1) * tot_XC_bins)
-                XC_j_low = int((j * total_bins) + tot_WL_bins)
-                XC_j_hi = int(XC_j_low + tot_XC_bins)
-                main_extract = tx2_cov[XC_i_low:XC_i_hi, XC_j_low:XC_j_hi]
-                XC_cov[cur_i:next_i, cur_j:next_j] = main_extract
-
-        GC_phot_dict['cov'] = GC_cov
-        WL_dict['cov'] = WL_cov
-        XC_phot_dict['cov'] = tx2_cov
-        XC_phot_dict['cov_XC_only'] = XC_cov
 
         self.data_dict['GC-Phot'] = GC_phot_dict
         self.data_dict['WL'] = WL_dict
         self.data_dict['XC-Phot'] = XC_phot_dict
+        self.data_dict['cov_3x2'] = tx2_cov
 
         del(GC_file)
         del(WL_file)

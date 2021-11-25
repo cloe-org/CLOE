@@ -14,11 +14,11 @@ from likelihood.data_reader import reader
 class Data_handler:
     r"""Reshape data and covariances vectors and define masking vector.
 
-    Build the data vector, the inverse covariance matrix and the masking
+    Build the data vector, the total covariance matrix and the masking
     vector starting from an initialized instance of a Reader object, and from
     a dictionary containing the user's specifications about the probes to be
     included in the likelihood evaluation.
-    The data vector, inverse covariance matrix and masking vector have the
+    The data vector, covariance matrix and masking vector have the
     same structure and dimension, as it should be in order to use them
     consistently in the likelihood evaluation.
     They are built as the concatenation of the following probes (in this
@@ -29,7 +29,7 @@ class Data_handler:
      - GC-Phot: Photometric Galaxy Clustering
      - GC-Spectro: Spectroscopic Galaxy Clustering
 
-    The size of the data vector, inverse covariance matrix and masking vector
+    The size of the data vector, covariance matrix and masking vector
     is inferred from the input Reader object.
     """
 
@@ -37,7 +37,7 @@ class Data_handler:
         r"""Constructor.
 
         Constructor of the class Data_handler.
-        The data vector, inverse covariance matrix and masking vector are
+        The data vector, covariance matrix and masking vector are
         built starting from the data_reader, and from the observables
         dictionary.
 
@@ -83,26 +83,26 @@ class Data_handler:
                      'to False.')
 
         self._create_data_vector()
-        self._create_invcov_matrix()
+        self._create_cov_matrix()
         self._create_masking_vector(data_reader)
 
     def get_data_and_masking_vector(self):
         r"""Getter.
 
-        Returns the final unmasked data vector, unmasked inverse
+        Returns the final unmasked data vector, unmasked
         covariance matrix, and the masking vector.
 
         Returns
         -------
         self._data_vector: np.ndarray
             Final unmasked data vector
-        self._invcov: np.ndarray
-            Final unmasked inverse covariance matrix
-        self._data_vector: np.ndarray
+        self._cov_matrix: np.ndarray
+            Final unmasked covariance matrix
+        self._masking_vector: np.ndarray
             Masking vector
         """
         return (self._data_vector,
-                self._invcov_matrix,
+                self._cov_matrix,
                 self._masking_vector)
 
     @property
@@ -143,23 +143,15 @@ class Data_handler:
 
         self._data_vector = data_vector
 
-    def _create_invcov_matrix(self):
-        r"""Creates the final unmasked inverse covariance matrix.
+    def _create_cov_matrix(self):
+        r"""Creates the final unmasked covariance matrix.
 
-        Computes the inevrse covariance matrix for the four individual probes,
-        merges them into a single matrix (with zero cross-terms),
-        and assigns the result to the internal attribute self._invcov_matrix.
+        Merges the individual covariance matrices for the four individual
+        probes into a single matrix (with zero cross-terms),
+        and assigns the result to the internal attribute self._cov_matrix.
         """
-        invcov_wl = np.linalg.inv(self._cov['WL'])
-        invcov_xc_phot = np.linalg.inv(self._cov['XC-Phot'])
-        invcov_gc_phot = np.linalg.inv(self._cov['GC-Phot'])
-        invcov_gc_spectro = np.linalg.inv(self._cov['GC-Spectro'])
-
-        invcov_matrix = merge_matrices(invcov_wl, invcov_xc_phot)
-        invcov_matrix = merge_matrices(invcov_matrix, invcov_gc_phot)
-        invcov_matrix = merge_matrices(invcov_matrix, invcov_gc_spectro)
-
-        self._invcov_matrix = invcov_matrix
+        cov_matrix = merge_matrices(self._cov['3x2'], self._cov['GC-Spectro'])
+        self._cov_matrix = cov_matrix
 
     def _create_masking_vector(self, data):
         r"""Build the masking vector from the observables specification

@@ -35,10 +35,9 @@ dz_8_GCphot: 0.0
 dz_8_WL: 0.0
 dz_9_GCphot: 0.0
 dz_9_WL: 0.0
-full_photo: false
-like_selection: 2
+full_photo: true
+like_selection: 1
 multipole_0: 0
 multipole_2: 2
 multipole_4: 4
 nia: -0.41
-nnu: 3.046

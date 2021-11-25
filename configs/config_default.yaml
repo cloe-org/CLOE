@@ -8,12 +8,31 @@ Cobaya:
       - euclid
       external: !!python/name:likelihood.cobaya_interface.EuclidLikelihood ''
       NL_flag: 0
-      # The fields 'data', 'observables_selection', and 'observables_specifications'
-      # are by default the ones in ../likelihood/EuclidLikelihood.yaml
-      # The user can overwrite here their values.
+      plot_observables_selection: False
+      speed: 500
+      # The user can overwrite here the values of
+      # the fields 'data', 'observables_selection', and 'observables_specifications':
       # - by specifying a yaml file
       # - by specifying a dictionary (in yaml format)
       # Please note that if specifying a dictionary, all the fields must be present
+      data: data.yaml
+      observables_selection:
+        WL:
+          WL: True
+          GCphot: False
+          GCspectro: False
+        GCphot:
+          GCphot: True
+          GCspectro: False
+        GCspectro:
+          GCspectro: True
+      observables_specifications:
+        GCphot: GCphot.yaml
+        GCspectro: GCspectro.yaml
+        WL: WL.yaml
+        GCphot-GCspectro: GCphot-GCspectro.yaml
+        WL-GCphot: WL-GCphot.yaml
+        WL-GCspectro: WL-GCspectro.yaml
   output: chains/my_euclid_experiment
   params: ./model_default.yaml
   sampler:

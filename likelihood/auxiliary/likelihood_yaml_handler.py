@@ -7,7 +7,6 @@ in CLOE.
 from pathlib import Path
 from copy import deepcopy
 from likelihood.auxiliary import yaml_handler
-from likelihood.auxiliary.logger import log_info
 
 
 def get_default_configs_path():

@@ -169,9 +169,9 @@ if runoption == 0:
                 'IA_model': 'zNLA',
                 # Photometric covariances root names should contain z{:s} string
                 # to specify how the covariance was calculated
-                'cov_GC': 'CovMat-PosPos-{:s}-20Bins.dat',
-                'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.dat',
-                'cov_3x2': 'CovMat-3x2pt-{:s}-20Bins.dat',
+                'cov_GC': 'CovMat-PosPos-{:s}-20Bins.npy',
+                'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.npy',
+                'cov_3x2': 'CovMat-3x2pt-{:s}-20Bins.npy',
                 'cov_model': 'Gauss'
                 }
             }

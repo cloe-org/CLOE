@@ -22,9 +22,7 @@ class datareaderTestCase(TestCase):
                                    'ns', 'sigma8_0', 'w',
                                    'omkh2', 'omnuh2', 'Omnu']
         self.cov_check_GC_spectro = 1.217193e+08
-        self.cov_check_WL = 2.654605e-09
-        self.cov_check_GC_phot = 1.693992e-05
-        self.cov_check_XC = 4.403701e-04
+        self.cov_check_3x2 = 4.403701e-04
         self.cl_phot_WL_check = 7.144612e-05
         self.cl_phot_GC_check = 2.239632e-03
         self.cl_phot_XC_check = 2.535458e-04
@@ -93,32 +91,25 @@ class datareaderTestCase(TestCase):
 
     def test_bench_phot_cov_check(self):
         self.data_tester.read_phot()
-        shape_WL = self.data_tester.data_dict['WL']['cov'].shape
-        shape_GC = self.data_tester.data_dict['GC-Phot']['cov'].shape
-        shape_XC = self.data_tester.data_dict['XC-Phot']['cov'].shape
+        num_ells = len(self.data_tester.data_dict['WL']['ells'])
+        num_WL_bins = self.data_tester.numtomo_wl
+        num_GC_bins = self.data_tester.numtomo_gcphot
+        shape_WL = int(num_WL_bins * (num_WL_bins + 1) / 2) * num_ells
+        shape_XC = int(num_WL_bins * num_GC_bins) * num_ells
+        shape_GC = int(num_GC_bins * (num_GC_bins + 1) / 2) * num_ells
+        shape_3x2 = shape_WL + shape_XC + shape_GC
 
-        test_cov_WL = 0.0
-        test_cov_GC = 0.0
-        test_cov_XC = 0.0
+        test_cov_3x2 = 0.0
 
-        for i in range(shape_WL[0]):
-            for j in range(shape_WL[1]):
-                test_cov_WL += (i * j * self.data_tester.data_dict['WL'][
-                                'cov'][i, j])
+        for i in range(shape_3x2):
+            for j in range(shape_3x2):
+                bin_i = i
+                bin_j = j
+                test_cov_3x2 += (i * j * self.data_tester.data_dict['cov_3x2']
+                                 [bin_i, bin_j])
 
-        for i in range(shape_GC[0]):
-            for j in range(shape_GC[1]):
-                test_cov_GC += (i * j * self.data_tester.data_dict['GC-Phot'][
-                                'cov'][i, j])
-
-        for i in range(shape_XC[0]):
-            for j in range(shape_XC[1]):
-                test_cov_XC += (i * j * self.data_tester.data_dict['XC-Phot'][
-                                'cov'][i, j])
-
-        npt.assert_allclose([test_cov_WL, test_cov_GC, test_cov_XC],
-                            [self.cov_check_WL, self.cov_check_GC_phot,
-                             self.cov_check_XC], rtol=1e-3,
+        npt.assert_allclose(test_cov_3x2,
+                            [self.cov_check_3x2], rtol=1e-3,
                             err_msg='Error in loading external photometric'
                                     ' test covariance data.')
 

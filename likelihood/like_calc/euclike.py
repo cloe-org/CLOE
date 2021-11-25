@@ -88,26 +88,24 @@ class Euclike:
         # into dictionaries to be passed to the data_handler class
         datafinal = {**photodata,
                      'GC-Spectro': spectrodata}
-        covfinal = {'WL': self.data_ins.data_dict['WL']['cov'],
-                    'XC-Phot': self.data_ins.data_dict['XC-Phot'][
-                        'cov_XC_only'],
-                    'GC-Phot': self.data_ins.data_dict['GC-Phot']['cov'],
+        covfinal = {'3x2': self.data_ins.data_dict['cov_3x2'],
                     'GC-Spectro': spectrocov}
 
         self.data_handler_ins = Data_handler(datafinal,
                                              covfinal,
                                              observables,
                                              self.data_ins)
-        self.data_vector, self.invcov_matrix, self.masking_vector = \
+        self.data_vector, self.cov_matrix, self.masking_vector = \
             self.data_handler_ins.get_data_and_masking_vector()
 
         self.mask_ins = Masking()
         self.mask_ins.set_data_vector(self.data_vector)
-        self.mask_ins.set_inverse_covariance_matrix(self.invcov_matrix)
+        self.mask_ins.set_covariance_matrix(self.cov_matrix)
         self.mask_ins.set_masking_vector(self.masking_vector)
         self.masked_data_vector = self.mask_ins.get_masked_data_vector()
-        self.masked_invcov_matrix = (
-            self.mask_ins.get_masked_inverse_covariance_matrix())
+        self.masked_cov_matrix = (
+            self.mask_ins.get_masked_covariance_matrix())
+        self.masked_invcov_matrix = np.linalg.inv(self.masked_cov_matrix)
 
     def create_photo_data(self):
         """Create Photo Data
@@ -128,26 +126,26 @@ class Euclike:
             if 'B' in index:
                 del(self.data_ins.data_dict['XC-Phot'][index])
         # Transform GC-Phot
-        # We ignore the first value (ells) and last (cov matrix)
+        # We ignore the first value (ells)
         datavec_dict['GC-Phot'] = np.array(
                 [self.data_ins.data_dict['GC-Phot'][key][ind]
                  for ind
                  in range(len(self.data_ins.data_dict['GC-Phot']['ells']))
                  for key, v
-                 in list(self.data_ins.data_dict['GC-Phot'].items())[1:-1]])
+                 in list(self.data_ins.data_dict['GC-Phot'].items())[1:]])
 
         datavec_dict['WL'] = np.array(
                 [self.data_ins.data_dict['WL'][key][ind]
                  for ind in range(len(self.data_ins.data_dict['WL']['ells']))
                  for key, v
-                 in list(self.data_ins.data_dict['WL'].items())[1:-1]])
+                 in list(self.data_ins.data_dict['WL'].items())[1:]])
 
         datavec_dict['XC-Phot'] = np.array(
                 [self.data_ins.data_dict['XC-Phot'][key][ind]
                  for ind
                  in range(len(self.data_ins.data_dict['XC-Phot']['ells']))
                  for key, v
-                 in list(self.data_ins.data_dict['XC-Phot'].items())[1:-2]])
+                 in list(self.data_ins.data_dict['XC-Phot'].items())[1:]])
 
         datavec_dict['all'] = np.concatenate((datavec_dict['WL'],
                                               datavec_dict['XC-Phot'],

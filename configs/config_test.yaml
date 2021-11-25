@@ -43,4 +43,3 @@ Cobaya:
         num_massive_neutrinos: 1
       stop_at_error: true
   timing: true
-

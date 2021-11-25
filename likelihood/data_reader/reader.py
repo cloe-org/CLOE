@@ -274,9 +274,9 @@ class Reader:
         tx2_cov_str = self.data['photo']['cov_3x2'].format(self.data[
             'photo']['cov_model'])
 
-        GC_cov = np.loadtxt(Path(full_path, GC_cov_str))
-        WL_cov = np.loadtxt(Path(full_path, WL_cov_str))
-        tx2_cov = np.loadtxt(Path(full_path, tx2_cov_str))
+        GC_cov = np.load(Path(full_path, GC_cov_str))
+        WL_cov = np.load(Path(full_path, WL_cov_str))
+        tx2_cov = np.load(Path(full_path, tx2_cov_str))
 
         tot_XC_bins = self.numtomo_wl * self.numtomo_gcphot
         tot_GC_bins = len(GC_cov) / len(GC_phot_dict['ells'])

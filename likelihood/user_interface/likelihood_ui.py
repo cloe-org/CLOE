@@ -116,7 +116,7 @@ class LikelihoodUI:
         cobaya_dict = self._config['Cobaya']
         likelihood_euclid_dict = cobaya_dict['likelihood']['Euclid']
 
-        lyh.check_likelihood_fields(likelihood_euclid_dict)
+        self._check_and_update_likelihood_fields(likelihood_euclid_dict)
 
         model_path = self._get_model_path_from_cobaya_dict(cobaya_dict)
         log_info(f'Selected model path: {model_path}')
@@ -197,7 +197,53 @@ class LikelihoodUI:
             chain_path = parent_path / self._config[self._backend]['output']
             triangle_plot_cobaya(str(chain_path))
 
-    def _get_model_path_from_cobaya_dict(self, cobaya_dict: dict):
+    def _check_and_update_likelihood_fields(self, likelihood_sub_dict,
+                                            fields=None):
+        """
+        Checks and updates the fields in the Likelihood Euclid sub dictionary
+
+        Parameters
+        ----------
+        likelihood_sub_dict: dict
+            a sub dictionary of Likelihood Euclid
+        fields: list of str
+            the sub fields of the dictionary
+        """
+
+        if fields is None:
+            fields = ['data', 'observables_selection',
+                      'observables_specifications']
+
+        for field in fields:
+            if field not in likelihood_sub_dict:
+                log_info(f'Sub-field \'{field}\' not found')
+                log_info(f'\'{field}\' will be initialized as specified '
+                         'in EuclidLikelihood.yaml')
+            else:
+                field_value = likelihood_sub_dict[field]
+                if type(field_value) is str:
+                    log_info(f'Field \'{field}\' is a string')
+                    log_info(f'\'{field}\' will be initialized as specified'
+                             f' in the file {field_value}')
+                    configs_path = lyh.get_default_configs_path()
+                    field_path = configs_path / Path(field_value)
+                    field_dict = yaml_handler.yaml_read(field_path)
+                    log_info(field_dict)
+                    likelihood_sub_dict[field] = field_dict
+                elif type(field_value) is dict:
+                    log_info(f'Field \'{field}\' is a dict')
+                    if field == 'observables_specifications':
+                        obs_spec_dic = field_value
+                        sub_fields = ['GCphot', 'GCspectro', 'WL',
+                                      'GCphot-GCspectro',
+                                      'WL-GCphot', 'WL-GCspectro']
+                        self._check_and_update_likelihood_fields(obs_spec_dic,
+                                                                 sub_fields)
+
+                    log_info(f'\'{field}\' will be set as:')
+                    log_info(field_value)
+
+    def _get_model_path_from_cobaya_dict(self, cobaya_dict):
         """Get the full model path from the Cobaya dictionary
 
         Returns the full path of the model file
@@ -227,7 +273,7 @@ class LikelihoodUI:
         return self._config_path.parents[0].joinpath(model_file)
 
     @staticmethod
-    def _get_and_check_backend(config: dict):
+    def _get_and_check_backend(config):
         """Get and check the backend key
 
         Returns the value of the keyword 'backend'

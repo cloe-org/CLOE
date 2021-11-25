@@ -28,7 +28,11 @@ class LikelihoodUI_test(TestCase):
         self.config_good = {
             'backend': 'Cobaya',
             'Cobaya': {'params': 'file.yaml',
-                       'likelihood': {'Euclid': {'NL_flag': 0}}},
+                       'likelihood': {'Euclid': {'NL_flag': 0,
+                                                 'observables_selection': {},
+                                                 'observables_specification':
+                                                     {},
+                                                 'data': '/dev/null'}}},
         }
         # for testing _update_config(), since it contains a nested dictionary
         # and a plain key/value pair, this should be sufficient to achieve
@@ -110,7 +114,7 @@ class LikelihoodUI_test(TestCase):
         yaml_read_mock.return_value = self.config_good
         ui = LikelihoodUI(user_config_file=self.file_name)
         ui.run()
-        self.assertEqual(yaml_read_mock.call_count, 2)
+        self.assertEqual(yaml_read_mock.call_count, 3)
         self.assertEqual(dict_update_mock.call_count, 1)
         self.assertEqual(halofit_update_mock.call_count, 1)
         self.assertEqual(cobaya_run_mock.call_count, 1)
@@ -135,7 +139,7 @@ class LikelihoodUI_test(TestCase):
         yaml_read_mock.return_value = self.config_good
         ui = LikelihoodUI()
         ui.run()
-        self.assertEqual(yaml_read_mock.call_count, 1)
+        self.assertEqual(yaml_read_mock.call_count, 2)
         self.assertEqual(dict_update_mock.call_count, 1)
         self.assertEqual(halofit_update_mock.call_count, 1)
         self.assertEqual(cobaya_run_mock.call_count, 1)

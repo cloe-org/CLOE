@@ -1,5 +1,7 @@
 backend: Cobaya
 Cobaya:
+  # Documentation about Cobaya keys can be found at:
+  # https://cobaya.readthedocs.io/en/latest/cosmo_basic_runs.html
   debug: true
   force: false
   likelihood:
@@ -7,9 +9,9 @@ Cobaya:
       aliases:
       - euclid
       external: !!python/name:likelihood.cobaya_interface.EuclidLikelihood ''
+      speed: 500
       NL_flag: 0
       plot_observables_selection: False
-      speed: 500
       # The user can overwrite here the values of
       # the fields 'data', 'observables_selection', and 'observables_specifications':
       # - by specifying a yaml file

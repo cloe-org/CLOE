@@ -28,7 +28,14 @@ print('runoption = ', runoption)
 if runoption == 0:
     print('Full likelihood evaluation!')
     info = {
+        # 'params': Cobaya's protected key of the input dictionary.
+        # Includes the parameters that the user would like to sample over:
         'params': {
+            # Each parameter below (which is a 'key' of another sub-dictionary) can contain a dictionary
+            # with the key 'prior', 'latex', etc.
+            # If the prior dictionary is not passed to a parameter, this parameter is fixed.
+            # In this example, we are sampling the parameter ns
+            #  For more information see: https://cobaya.readthedocs.io/en/latest/example.html
             'ombh2': 0.022445,  # Omega density of baryons times the reduced Hubble parameter squared
             'omch2': 0.1205579307,  # Omega density of cold dark matter times the reduced Hubble parameter squared
             'H0': 67,  # Hubble parameter evaluated today (z=0) in km/s/Mpc
@@ -72,20 +79,52 @@ if runoption == 0:
             'dz_5_GCphot': 0., 'dz_5_WL': 0., 'dz_6_GCphot': 0., 'dz_6_WL': 0.,
             'dz_7_GCphot': 0., 'dz_7_WL': 0., 'dz_8_GCphot': 0., 'dz_8_WL': 0.,
             'dz_9_GCphot': 0., 'dz_9_WL': 0., 'dz_10_GCphot': 0., 'dz_10_WL': 0.},
+        # 'theory': Cobaya's protected key of the input dictionary.
+        # Cobaya needs to ask some minimum theoretical requirements to a Boltzman Solver
+        # You can choose between CAMB or CLASS
+        # In this DEMO, we use CAMB and specify some CAMB arguments
+        # such as the number of massive neutrinos
+        # and the dark energy model
+        #
+        # Attention: If you have CAMB/CLASS already installed and
+        # you are not using the likelihood conda environment
+        # or option (2) in cell (3) (Cobaya modules), you can add an extra key called 'path' within the camb dictionary
+        # to point to your already installed CAMB code
         'theory': {'camb':
                    {'stop_at_error': True,
                     'extra_args': {'num_massive_neutrinos': 1,
                                    'dark_energy_model': 'ppf',
                                    'halofit_version': 'mead2020'}}},
+        # 'sampler': Cobaya's protected key of the input dictionary.
+        # You can choose the sampler you want to use.
+        # Check Cobaya's documentation to see the list of available samplers
+        # In this DEMO, we use the 'evaluate' sampler to make a single computation of the posterior distributions
+        # Note: at the moment, the only sampler that works is 'evaluate'
         'sampler': {'evaluate': None},
+        # 'output': Cobaya's protected key of the input dictionary.
+        # Where are the results going to be stored, in case that the sampler produce output files?
+        #  For example: chains...
+        # Modify the path below within 'output' to choose a name and a directory for those files
         'output': 'chains/my_euclid_experiment',
+        # 'debug': Cobaya's protected key of the input dictionary.
+        # How much information you want Cobaya to print. If debug: True, it prints every detail
+        # executed internally in Cobaya
         'debug': True,
+        # 'timing': Cobaya's protected key of the input dictionary.
+        # If timing: True, Cobaya returns how much time it took it to make a computation of the posterior
+        # and how much time take each of the modules to perform their tasks
         'timing': True,
+        # 'force': Cobaya's protected key of the input dictionary.
+        # If 'force': True, Cobaya forces deleting the previous output files, if found, with the same name
         'force': True,
+        # 'likelihood': Cobaya's protected key of the input dictionary.
+        # The user can select which data wants to use for the analysis.
+        # Check Cobaya's documentation to see the list of the current available data experiments
+        # In this DEMO, we load the Euclid-Likelihood as an external function, and name it 'Euclid'
         'likelihood': {'Euclid': {
             'external': EuclidLikelihood,  # Likelihood Class to be read as external
             'observables_selection': {
-                'WL': {'WL': True, 'GCphot': False, 'GCspectro': False},
+                'WL': {'WL': True, 'GCphot': True, 'GCspectro': False},
                 'GCphot': {'GCphot': True, 'GCspectro': False},
                 'GCspectro': {'GCspectro': True}},
             'plot_observables_selection': False,

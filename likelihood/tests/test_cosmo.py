@@ -29,7 +29,7 @@ class cosmoinitTestCase(TestCase):
         cosmo.cosmo_dic['Omk'] = 0.0
         cosmo.cosmo_dic['H0_Mpc'] = \
             cosmo.cosmo_dic['H0'] / const.c.to('km/s').value,
-        cosmo.cosmo_dic['nuisance_parameters']['NL_flag'] = 0
+        cosmo.cosmo_dic['NL_flag'] = 0
         # Create wrapper model
         cls.model_test = CobayaModel(cosmo)
         cls.model_test.update_cosmo()
@@ -103,8 +103,7 @@ class cosmoinitTestCase(TestCase):
         # from pk_source is not a Cosmology object. Otherwise we should
         # import the Nonlinear class, going against the independency among
         # different modules in the unit tests
-        self.model_test.cosmology.cosmo_dic[
-            'nuisance_parameters']['NL_flag'] = 1
+        self.model_test.cosmology.cosmo_dic['NL_flag'] = 1
         source = self.model_test.cosmology.pk_source
         type_check = isinstance(source, Cosmology)
         assert not type_check, 'Error in returned data type of pk_source'

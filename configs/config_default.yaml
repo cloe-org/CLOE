@@ -1,9 +1,41 @@
 backend: Cobaya
 Cobaya:
+  # Documentation about Cobaya keys can be found at:
+  # https://cobaya.readthedocs.io/en/latest/cosmo_basic_runs.html
   debug: true
   force: true
   likelihood:
-    Euclid: !!python/name:likelihood.cobaya_interface.EuclidLikelihood ''
+    Euclid:
+      aliases:
+      - euclid
+      external: !!python/name:likelihood.cobaya_interface.EuclidLikelihood ''
+      # Speed in evaluations/second
+      speed: 500
+      # Non-Linear flag selector
+      NL_flag: 0
+      # Plot the selected observables during the initialization of the likelihood
+      plot_observables_selection: False
+      ##
+      # The user can overwrite here the values of
+      # the fields 'data', 'observables_selection', and 'observables_specifications':
+      # - by specifying a yaml file
+      # - by specifying a dictionary (in yaml format)
+      # Please note that if specifying a dictionary, all the fields must be present
+      ##
+      # Information about where the data is stored
+      data: data.yaml
+      # Selection of the observables to be computed
+      observables_selection: observables_selection.yaml
+      # Specifications for each of the observables
+      observables_specifications:
+        GCphot: GCphot.yaml
+        GCspectro: GCspectro.yaml
+        WL: WL.yaml
+        WL-GCphot: WL-GCphot.yaml
+        # Note: This is not yet provided by CLOE
+        # therefore it will load empty dictionaries
+        GCphot-GCspectro: GCphot-GCspectro.yaml
+        WL-GCspectro: WL-GCspectro.yaml
   output: chains/my_euclid_experiment
   params: ./model_default.yaml
   sampler:
@@ -16,19 +48,3 @@ Cobaya:
         num_massive_neutrinos: 1
       stop_at_error: true
   timing: true
-data:
-  sample: 'ExternalBenchmark'
-  spectro:
-    root: cov_power_galaxies_dk0p004_z{:s}.fits
-    redshifts: ["1.", "1.2", "1.4", "1.65"]
-  photo:
-    ndens_GC: niTab-EP10-RB00.dat
-    ndens_WL: niTab-EP10-RB00.dat
-    root_GC: Cls_{:s}_PosPos.dat
-    root_WL: Cls_{:s}_ShearShear.dat
-    root_XC: Cls_{:s}_PosShear.dat
-    IA_model: zNLA
-    cov_GC: CovMat-PosPos-{:s}-20Bins.npy
-    cov_WL: CovMat-ShearShear-{:s}-20Bins.npy
-    cov_3x2: CovMat-3x2pt-{:s}-20Bins.npy
-    cov_model: Gauss

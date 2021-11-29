@@ -115,9 +115,6 @@ class likecalcTestCase(TestCase):
                           'k_win': ks_base,
                           'MG_sigma': MG_interp, 'c': const.c.to('km/s').value,
                           'nuisance_parameters': {
-                              'like_selection': 2,
-                              'full_photo': True,
-                              'NL_flag': 1,
                               'b1_photo': 1.0997727037892875,
                               'b2_photo': 1.220245876862528,
                               'b3_photo': 1.2723993083933989,
@@ -144,10 +141,7 @@ class likecalcTestCase(TestCase):
                               'dz_7_GCphot': 0., 'dz_7_WL': 0.,
                               'dz_8_GCphot': 0., 'dz_8_WL': 0.,
                               'dz_9_GCphot': 0., 'dz_9_WL': 0.,
-                              'dz_10_GCphot': 0., 'dz_10_WL': 0.,
-                              'multipole_0': 0,
-                              'multipole_2': 2,
-                              'multipole_4': 4}}
+                              'dz_10_GCphot': 0., 'dz_10_WL': 0.}}
 
         # precomputed parameters
         mock_cosmo_dic['H0_Mpc'] = \
@@ -219,10 +213,8 @@ class likecalcTestCase(TestCase):
                         'z_win': zs_base,
                         'k_win': ks_base,
                         'MG_sigma': MG_interp,
+                        'NL_flag': 1,
                         'nuisance_parameters': {
-                            'like_selection': 2,
-                            'full_photo': True,
-                            'NL_flag': 1,
                             'b1_photo': 1.0997727037892875,
                             'b2_photo': 1.220245876862528,
                             'b3_photo': 1.2723993083933989,
@@ -249,15 +241,11 @@ class likecalcTestCase(TestCase):
                             'dz_7_GC': 0., 'dz_7_WL': 0.,
                             'dz_8_GC': 0., 'dz_8_WL': 0.,
                             'dz_9_GC': 0., 'dz_9_WL': 0.,
-                            'dz_10_GC': 0., 'dz_10_WL': 0.,
-                            'multipole_0': 0,
-                            'multipole_2': 2,
-                            'multipole_4': 4}}
+                            'dz_10_GC': 0., 'dz_10_WL': 0.}}
 
         self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic
         # init Euclike
-
         mock_obs = build_mock_observables()
         self.like_tt = Euclike(mock_data, mock_obs)
 
@@ -327,7 +315,7 @@ class likecalcTestCase(TestCase):
         k_scale: float
             k-mode at which to evaluate the power spectrum.
         mu_rsd: float
-            cosinus of the angle between the pair separation and
+            cosine of the angle between the pair separation and
             the line of sight
 
         Returns
@@ -335,7 +323,7 @@ class likecalcTestCase(TestCase):
         pval: float
             Value of galaxy-galaxy power spectrum
             at a given redshift, k-mode and :math:`\mu_{k}`
-            for galaxy cclustering spectroscopic
+            for galaxy clustering spectroscopic
         """
         bias = self.istf_spectro_galbias(redshift)
         growth = self.test_dict['f_z'](redshift)

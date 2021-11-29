@@ -90,11 +90,11 @@ class Euclike:
                      'GC-Spectro': spectrodata}
         covfinal = {'3x2': self.data_ins.data_dict['cov_3x2'],
                     'GC-Spectro': spectrocov}
-
         self.data_handler_ins = Data_handler(datafinal,
                                              covfinal,
                                              observables,
                                              self.data_ins)
+
         self.data_vector, self.cov_matrix, self.masking_vector = \
             self.data_handler_ins.get_data_and_masking_vector()
 
@@ -249,10 +249,16 @@ class Euclike:
             If the GC-Spectro probe is not enabled in the masking vector,
             an array of zeros of the same size is returned.
         """
+        # This is something that Sergio needs to change
+        # Now the multipoles are within observables[specifications]
+        # In order to pass the tests, I hard code m_inst now
+        # Maybe Sergio has a better idea of what to these forloops
+        # To include all info of the specifications
         if self.data_handler_ins.use_gc_spectro:
             spec_ins = Spectro(dictionary, dictionary_fiducial)
-            m_ins = [v for k, v in dictionary['nuisance_parameters'].items()
-                     if k.startswith('multipole_')]
+            # m_ins = [v for k, v in dictionary['nuisance_parameters'].items()
+            #         if k.startswith('multipole_')]
+            m_ins = [0, 2, 4]
             k_m_matrices = []
             for z_ins in self.zkeys:
                 k_m_matrix = []

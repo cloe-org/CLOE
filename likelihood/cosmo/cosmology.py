@@ -147,6 +147,8 @@ class Cosmology:
             sigma function from Modified Gravity parametrization
         NL_boost: float
             Non-linear boost factor
+        NL_flag: int
+            Non-linear flag
         nuisance_parameters: dict
             Contains all nuisance bias parameters
             and IA parameters which are sampled over.
@@ -227,10 +229,9 @@ class Cosmology:
                           'f_z': None,
                           # NL_boost
                           'NL_boost': None,
+                          # NL flag
+                          'NL_flag': 0,
                           'nuisance_parameters': {
-                             'like_selection': 12,
-                             'full_photo': True,
-                             'NL_flag': 0,
                              'b1_photo': 1.0997727037892875,
                              'b2_photo': 1.220245876862528,
                              'b3_photo': 1.2723993083933989,
@@ -247,10 +248,7 @@ class Cosmology:
                              'b4_spectro': 1.8988660,
                              'aia': 1.72,
                              'nia': -0.41,
-                             'bia': 0.0,
-                             'multipole_0': 0,
-                             'multipole_2': 2,
-                             'multipole_4': 4}}
+                             'bia': 0.0}}
 
         self.cosmo_dic['H0_Mpc'] = (self.cosmo_dic['H0'] /
                                     const.c.to('km/s').value)
@@ -265,7 +263,7 @@ class Cosmology:
         based on the value of the nonlinear flag
 
         """
-        if self.cosmo_dic['nuisance_parameters']['NL_flag'] == 0:
+        if self.cosmo_dic['NL_flag'] == 0:
             return self
         else:
             return self.nonlinear

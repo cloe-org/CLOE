@@ -7,12 +7,13 @@ Top level user interface class for running CLOE
 from likelihood.auxiliary import yaml_handler
 from likelihood.auxiliary import likelihood_yaml_handler as lyh
 from likelihood.cobaya_interface import EuclidLikelihood
+from likelihood.auxiliary.plotter import Plotter
+from likelihood.auxiliary.getdist_routines import triangle_plot_cobaya
+from likelihood.auxiliary.logger import log_info
 import cobaya.run
 from cobaya.model import get_model
 from pathlib import Path
 import collections.abc
-from likelihood.auxiliary.plotter import Plotter
-from likelihood.auxiliary.getdist_routines import triangle_plot_cobaya
 
 
 class LikelihoodUI:
@@ -54,13 +55,15 @@ class LikelihoodUI:
             defaults_path = defaults_path.joinpath(defaults_dir)
             defaults_config_file = defaults_path.joinpath(defaults_name)
 
-        needed_keys = ['backend', 'Cobaya', 'data']
+        needed_keys = ['backend', 'Cobaya']
         self._config_path = defaults_config_file
         self._config =\
             yaml_handler.yaml_read_and_check_dict(self._config_path,
                                                   needed_keys)
 
         if user_config_file is not None:
+            log_info(f'Opening user config file: {user_config_file}')
+
             user_config = \
                 yaml_handler.yaml_read_and_check_dict(user_config_file,
                                                       needed_keys)
@@ -75,7 +78,11 @@ class LikelihoodUI:
                 update_config=user_dict
             )
 
+        log_info('Selected configuration:')
+        log_info(self._config)
+
         self._backend = self._get_and_check_backend(self._config)
+        log_info(f'Selected backend: {self._backend}')
 
     def run(self):
         r"""Main method to run CLOE
@@ -92,8 +99,6 @@ class LikelihoodUI:
            method of Cobaya, because Cobaya is the only implemented backend.
         """
 
-        lyh.write_data_yaml_from_data_dict(self._config['data'])
-
         if self._backend == 'Cobaya':
             return self._run_cobaya()
 
@@ -109,12 +114,14 @@ class LikelihoodUI:
           Cobaya.
         """
         cobaya_dict = self._config['Cobaya']
-        model_path = str(self._get_model_path_from_cobaya_dict(cobaya_dict))
+        likelihood_euclid_dict = cobaya_dict['likelihood']['Euclid']
 
-        lyh.write_params_yaml_from_model_yaml(model_path)
-        cobaya_dict = \
-            lyh.update_cobaya_dict_from_model_yaml(cobaya_dict, model_path)
-        lyh.update_cobaya_dict_with_halofit_version(cobaya_dict, model_path)
+        self._check_and_update_likelihood_fields(likelihood_euclid_dict)
+        self._check_and_update_params_field(cobaya_dict)
+        lyh.update_cobaya_dict_with_halofit_version(cobaya_dict)
+
+        log_info('Updated Cobaya info dictionary:')
+        log_info(cobaya_dict)
 
         return cobaya.run(cobaya_dict)
 
@@ -141,14 +148,11 @@ class LikelihoodUI:
         settings: str
            Name of the yaml configuration file for the plotting routines
         """
-        lyh.write_data_yaml_from_data_dict(self._config['data'])
 
         cobaya_dict = self._config['Cobaya']
-        model_path = str(self._get_model_path_from_cobaya_dict(cobaya_dict))
-        lyh.write_params_yaml_from_model_yaml(model_path)
-        cobaya_dict = \
-            lyh.update_cobaya_dict_from_model_yaml(cobaya_dict, model_path)
-        lyh.update_cobaya_dict_with_halofit_version(cobaya_dict, model_path)
+        model_path = self._get_model_path_from_cobaya_dict(cobaya_dict)
+        lyh.update_cobaya_params_from_model_yaml(cobaya_dict, model_path)
+        lyh.update_cobaya_dict_with_halofit_version(cobaya_dict)
         model = get_model(cobaya_dict)
 
         logposterior = model.logposterior({})
@@ -188,7 +192,86 @@ class LikelihoodUI:
             chain_path = parent_path / self._config[self._backend]['output']
             triangle_plot_cobaya(str(chain_path))
 
-    def _get_model_path_from_cobaya_dict(self, cobaya_dict: dict):
+    def _check_and_update_likelihood_fields(self, likelihood_sub_dict,
+                                            fields=None):
+        """
+        Checks and updates the fields in the Likelihood Euclid sub dictionary
+
+        Parameters
+        ----------
+        likelihood_sub_dict: dict
+            a sub dictionary of Likelihood Euclid
+        fields: list of str
+            the sub fields of the dictionary
+        """
+
+        if fields is None:
+            fields = ['data', 'observables_selection',
+                      'observables_specifications']
+
+        for field in fields:
+            if field not in likelihood_sub_dict:
+                log_info(f'Sub-field \'{field}\' not found')
+                log_info(f'\'{field}\' will be initialized as specified '
+                         'in EuclidLikelihood.yaml')
+            else:
+                field_value = likelihood_sub_dict[field]
+                if type(field_value) is str:
+                    log_info(f'Field \'{field}\' is a string')
+                    log_info(f'\'{field}\' will be initialized as specified'
+                             f' in the file {field_value}')
+                    configs_path = lyh.get_default_configs_path()
+                    field_path = configs_path / Path(field_value)
+                    field_dict = yaml_handler.yaml_read(field_path)
+                    log_info(field_dict)
+                    likelihood_sub_dict[field] = field_dict
+                elif type(field_value) is dict:
+                    log_info(f'Field \'{field}\' is a dict')
+                    if field == 'observables_specifications':
+                        obs_spec_dic = field_value
+                        sub_fields = ['GCphot', 'GCspectro', 'WL',
+                                      'GCphot-GCspectro',
+                                      'WL-GCphot', 'WL-GCspectro']
+                        self._check_and_update_likelihood_fields(obs_spec_dic,
+                                                                 sub_fields)
+
+                    log_info(f'\'{field}\' will be set as:')
+                    log_info(field_value)
+
+    def _check_and_update_params_field(self, cobaya_dict):
+        """
+        Checks and updates the fields in the params sub dictionary
+
+        Parameters
+        ----------
+        cobaya_dict: dict
+            the Cobaya info dictionary
+
+        Raises
+        ------
+        ValueError
+            if the value of the key 'params' in cobaya_dict
+            is neither a string nor a dictionary
+        """
+
+        params = cobaya_dict['params']
+        if type(params) is str:
+            log_info(f'Field \'params\' is a string: the model path')
+            model_path = self._get_model_path_from_cobaya_dict(cobaya_dict)
+            log_info(f'Selected model path: {model_path}')
+
+            log_info(f'Updating \'params\' in the Cobaya info dictionary')
+            lyh.update_cobaya_params_from_model_yaml(cobaya_dict, model_path)
+        elif type(params) is dict:
+            log_info(f'Field \'params\' is a dict')
+            log_info(f'\'params\' will be set as:')
+            log_info(field_value)
+        else:
+            raise ValueError('key \'params\' in the input yaml configuration '
+                             'must be a either a string (the model yaml path)'
+                             'or a dict (the params dictionary)')
+
+    def _get_model_path_from_cobaya_dict(self, cobaya_dict):
         """Get the full model path from the Cobaya dictionary
 
         Returns the full path of the model file
@@ -206,7 +289,7 @@ class LikelihoodUI:
         Raises
         ------
         ValueError
-            if the value of the key 'param' in cobaya_dict
+            if the value of the key 'params' in cobaya_dict
             is not a string
         """
 
@@ -218,7 +301,7 @@ class LikelihoodUI:
         return self._config_path.parents[0].joinpath(model_file)
 
     @staticmethod
-    def _get_and_check_backend(config: dict):
+    def _get_and_check_backend(config):
         """Get and check the backend key
 
         Returns the value of the keyword 'backend'
@@ -259,7 +342,7 @@ class LikelihoodUI:
         ----------
         orig_config: dict
            The dictionary to be updated
-        update_config: dict
+        update_config: dict or Mapping
            The dictionary with the updates to be applied
 
         Returns

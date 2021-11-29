@@ -249,8 +249,8 @@ if runoption == 1:
                               'z_win': zs_base,
                               'k_win': ks_base,
                               'MG_sigma': MG_interp, 'c': const.c.to('km/s').value,
+                              'NL_flag': 1,
                               'nuisance_parameters': {
-                                  'NL_flag': 1,
                                   'b1_photo': 1.0997727037892875,
                                   'b2_photo': 1.220245876862528,
                                   'b3_photo': 1.2723993083933989,

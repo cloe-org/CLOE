@@ -53,6 +53,7 @@ class cosmoinitTestCase(TestCase):
         self.Pgi_spectro_test = -388.28625
         self.MG_mu_test = 1.0
         self.MG_sigma_test = 1.0
+        self.matter_density = 0.317763
 
     def tearDown(self):
         self.H0check = None
@@ -69,6 +70,7 @@ class cosmoinitTestCase(TestCase):
         self.Pdeltai_test = None
         self.Pgi_phot_test = None
         self.Pgi_spectro_test = None
+        self.omega_density = None
 
     def test_cosmo_init(self):
         emptflag = bool(self.model_test.cosmology.cosmo_dic)
@@ -305,3 +307,27 @@ class cosmoinitTestCase(TestCase):
         test_sigma = self.model_test.cosmology.cosmo_dic['MG_sigma'](1.0, 0.01)
         npt.assert_equal(test_sigma, self.MG_sigma_test,
                          err_msg='Error in MG sigma calculation')
+
+    def test_matter_density(self):
+        test_matter_density = self.model_test.cosmology.matter_density(
+            self.model_test.cosmology.cosmo_dic['z_win'])
+        npt.assert_allclose(test_matter_density[0], self.matter_density,
+                            rtol=1e-3,
+                            err_msg='Error in the omega density calculation')
+
+    def test_growth_rate_MG(self):
+        self.model_test.cosmology.growth_rate_MG(
+            self.model_test.cosmology.cosmo_dic['z_win'])
+        npt.assert_allclose(self.model_test.cosmology.cosmo_dic['f_z'](0),
+                            self.fcheck,
+                            rtol=1e-1,
+                            err_msg='Error in the omega density calculation')
+
+    def test_growth_factor_MG(self):
+        self.model_test.cosmology.growth_rate_MG(
+            self.model_test.cosmology.cosmo_dic['z_win'])
+        test_growth_factor_MG = self.model_test.cosmology.growth_factor_MG()
+        npt.assert_allclose(test_growth_factor_MG[0],
+                            self.Dcheck,
+                            rtol=1e-1,
+                            err_msg='Error in the omega density calculation')

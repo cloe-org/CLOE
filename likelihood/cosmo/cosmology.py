@@ -9,6 +9,7 @@ from scipy import interpolate
 from astropy import constants as const
 from likelihood.non_linear.nonlinear import Nonlinear
 from likelihood.auxiliary import redshift_bins as rb
+from scipy.integrate import quad
 
 
 class CosmologyError(Exception):
@@ -63,6 +64,8 @@ class Cosmology:
            Dark energy equation of state
         wa: float
            Dark energy equation of state
+        gamma_MG: float
+           Modified Gravity gamma parameter
         omnuh2: float
             Present-day massive neutrinos energy density
             Omega_neutrinos * (H0/100)**2
@@ -186,6 +189,7 @@ class Cosmology:
                           'Omb': 0.05,
                           'w': -1.0,
                           'wa': 0.0,
+                          'gamma_MG': 0.55,
                           'mnu': 0.06,
                           'tau': 0.07,
                           'nnu': 3.046,
@@ -231,6 +235,8 @@ class Cosmology:
                           'NL_boost': None,
                           # NL flag
                           'NL_flag': 0,
+                          # Use Modified Gravity gamma
+                          'use_gamma_MG': 0,
                           'nuisance_parameters': {
                              'b1_photo': 1.0997727037892875,
                              'b2_photo': 1.220245876862528,
@@ -268,6 +274,27 @@ class Cosmology:
         else:
             return self.nonlinear
 
+    def matter_density(self, zs):
+        r"""
+        Computes the matter density as,
+
+        .. math::
+            \Omega_m(z) &= \Omega_{{m},0}(1+z)^3H_0^2/H^2(z)
+
+        Parameters
+        ----------
+        zs: numpy.ndarray
+            redshifts for the matter density
+
+        Returns
+        -------
+        Omm_z: numpy.ndarray
+            Matter density as a function of redshift
+
+        """
+        H_frac = (self.cosmo_dic['H0'] / self.cosmo_dic['H'])**2
+        return self.cosmo_dic['Omm'] * (1 + zs)**3 * H_frac
+
     def growth_factor(self, zs, ks):
         r"""
         Computes growth factor according to
@@ -297,7 +324,7 @@ class Cosmology:
             D_z_k = np.sqrt(P_z_k / self.cosmo_dic['Pk_delta'].P(0.0, ks))
             return D_z_k
         except CosmologyError:
-            print('Computation error in D(z, k)')
+            w('Computation error in D(z, k)')
 
     # This function is deprecated
     def growth_rate(self, zs, ks):
@@ -347,6 +374,7 @@ class Cosmology:
         Updates 'key' in the cosmo_dic attribute of the class
         by adding an interpolator object
         which interpolates f(z)
+
         """
         fs8 = self.cosmo_dic['fsigma8_z_func'](self.cosmo_dic['z_win'])
         s8 = self.cosmo_dic['sigma8_z_func'](self.cosmo_dic['z_win'])
@@ -356,6 +384,62 @@ class Cosmology:
                 x=self.cosmo_dic['z_win'],
                 y=growth, ext=2)
 
+    def growth_rate_MG(self, zs):
+        r"""
+        Computes the growth rate using $\gamma_{MG}$ as
+
+        .. math::
+            f(z;\gamma_{MG})=\left[\Omega_{m}(z)\right]^{\gamma_{MG}}
+
+        Updates 'key' in the cosmo_dic attribute of the class
+        by adding an interpolator object
+        which interpolates f(z)
+
+        Parameters
+        ----------
+        zs: list
+            list of redshift for the power spectrum
+
+        """
+        f_MG = self.matter_density(zs)**self.cosmo_dic['gamma_MG']
+        self.cosmo_dic['f_z'] = \
+            interpolate.InterpolatedUnivariateSpline(
+                x=self.cosmo_dic['z_win'],
+                y=f_MG, ext=2)
+
+    def _integrand_function(self, x):
+        r"""
+        Integrand function for the growth_factor_MG
+
+        .. math::
+              \frac{f(x;\gamma_{MG})}{1+x}
+
+        Parameters
+        ----------
+        x: double
+           integrand variable
+        """
+        return self.cosmo_dic['f_z'](x) / (1. + x)
+
+    def growth_factor_MG(self):
+        r"""
+        Computes the growth factor using the $\gamma_{MG}$ as
+
+        .. math::
+           D(z;\gamma_{MG}) &= {\rm exp}\left[\int_z^\infty{\rm d}x \
+               \frac{f(x;\gamma_{MG})}{1+x}\right]
+
+        Returns
+        -------
+        D_MG: numpy.ndarray
+            values of the growth factor using the modified
+            gravity parameter $\gamma_{MG}$
+        """
+        integral = [quad(self._integrand_function, z,
+                         self.cosmo_dic['z_win'][-1])[0] for z in
+                    self.cosmo_dic['z_win']]
+        return np.exp(integral) / np.exp(integral[0])
+
     def interp_growth_factor(self):
         """Interpolates the growth factor
 
@@ -364,12 +448,17 @@ class Cosmology:
         """
         z_win = self.cosmo_dic['z_win']
         k_win = self.cosmo_dic['k_win']
-        growth_grid = self.growth_factor(z_win, k_win)
-        self.cosmo_dic['D_z_k_func'] = \
-            interpolate.RectBivariateSpline(z_win,
-                                            k_win,
-                                            growth_grid,
-                                            kx=3, ky=3)
+
+        if self.cosmo_dic['use_gamma_MG']:
+            self.cosmo_dic['D_z_k_func'] = \
+                interpolate.UnivariateSpline(z_win, self.growth_factor_MG())
+        else:
+            growth_grid = self.growth_factor(z_win, k_win)
+            self.cosmo_dic['D_z_k_func'] = \
+                interpolate.RectBivariateSpline(z_win,
+                                                k_win,
+                                                growth_grid,
+                                                kx=3, ky=3)
 
     def interp_comoving_dist(self):
         """Interp Comoving Dist
@@ -593,7 +682,7 @@ class Cosmology:
         try:
             z_bin = rb.find_bin(redshift, bin_edges, False)
             bi_val = np.array([nuisance_src[f'b{i}_spectro']
-                              for i in np.nditer(z_bin)])
+                               for i in np.nditer(z_bin)])
             return bi_val[0] if np.isscalar(redshift) else bi_val
         except (ValueError, KeyError):
             raise ValueError('Spectroscopic galaxy bias cannot be obtained. '
@@ -768,13 +857,19 @@ class Cosmology:
             Value(s) of intrinsic alignment function at
             given redshift(s) and k-mode(s)
         """
-        growth = self.cosmo_dic['D_z_k_func'](redshift, k_scale)
-        z_is_array = isinstance(redshift, np.ndarray)
-        k_is_array = isinstance(k_scale, np.ndarray)
-        if not z_is_array and not k_is_array:
-            growth = growth[0, 0]
-        elif z_is_array ^ k_is_array:
-            growth = growth[0]
+        if self.cosmo_dic['use_gamma_MG']:
+            # if gamma_MG parametrization is used
+            # the k-dependency in the growth_factor
+            # and growth_rate is dropped
+            growth = self.cosmo_dic['D_z_k_func'](redshift)
+        else:
+            growth = self.cosmo_dic['D_z_k_func'](redshift, k_scale)
+            z_is_array = isinstance(redshift, np.ndarray)
+            k_is_array = isinstance(k_scale, np.ndarray)
+            if not z_is_array and not k_is_array:
+                growth = growth[0, 0]
+            elif z_is_array ^ k_is_array:
+                growth = growth[0]
 
         c1 = 0.0134
         aia = self.cosmo_dic['nuisance_parameters']['aia']
@@ -927,7 +1022,7 @@ class Cosmology:
         pgi_phot = np.array([pksrc.Pgi_phot_def(zz, k_win)
                              for zz in z_win])
         pgi_spectro = np.array([pksrc.Pgi_spectro_def(zz, k_win)
-                               for zz in z_win_spectro])
+                                for zz in z_win_spectro])
 
         self.cosmo_dic['Pgg_spectro'] = pksrc.Pgg_spectro_def
         self.cosmo_dic['Pgdelta_spectro'] = pksrc.Pgdelta_spectro_def
@@ -1054,8 +1149,11 @@ class Cosmology:
         self.interp_transverse_comoving_dist()
         self.interp_fsigma8()
         self.interp_sigma8()
+        if self.cosmo_dic['use_gamma_MG']:
+            self.growth_rate_MG(zs)
+        else:
+            self.growth_rate_cobaya()
         self.interp_growth_factor()
-        self.growth_rate_cobaya()
         self.interp_angular_dist()
         # For the moment we use our own definition
         # of the growth factor

@@ -269,6 +269,7 @@ class EuclidLikelihood(Likelihood):
 
         try:
             self.cosmo.cosmo_dic['NL_flag'] = self.NL_flag
+            self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
             self.cosmo.cosmo_dic['H0'] = self.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
@@ -285,6 +286,8 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Omnu'] = self.provider.get_param('omeganu')
             self.cosmo.cosmo_dic['w'] = self.provider.get_param('w')
             self.cosmo.cosmo_dic['wa'] = self.provider.get_param('wa')
+            self.cosmo.cosmo_dic['gamma_MG'] = \
+                self.provider.get_param('gamma_MG')
             self.cosmo.cosmo_dic['nnu'] = self.provider.get_param('nnu')
             self.cosmo.cosmo_dic['tau'] = self.provider.get_param('tau')
             self.cosmo.cosmo_dic['comov_dist'] = \
@@ -319,6 +322,7 @@ class EuclidLikelihood(Likelihood):
 
         except (TypeError, AttributeError):
             self.cosmo.cosmo_dic['NL_flag'] = self.NL_flag
+            self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
             self.cosmo.cosmo_dic['H0'] = model.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
@@ -336,6 +340,8 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Omnu'] = model.provider.get_param('omeganu')
             self.cosmo.cosmo_dic['w'] = model.provider.get_param('w')
             self.cosmo.cosmo_dic['wa'] = model.provider.get_param('wa')
+            self.cosmo.cosmo_dic['gamma_MG'] = \
+                model.provider.get_param('gamma_MG')
             self.cosmo.cosmo_dic['nnu'] = model.provider.get_param('nnu')
             self.cosmo.cosmo_dic['tau'] = model.provider.get_param('tau')
             self.cosmo.cosmo_dic['comov_dist'] = \

@@ -421,7 +421,7 @@ class Cosmology:
         z_prime: double
            integrand variable (redshift)
         """
-        return self.cosmo_dic['f_z'](x) / (1. + x)
+        return self.cosmo_dic['f_z'](z_prime) / (1. + z_prime)
 
     def growth_factor_MG(self):
         r"""

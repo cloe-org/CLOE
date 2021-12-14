@@ -409,17 +409,17 @@ class Cosmology:
                 x=self.cosmo_dic['z_win'],
                 y=f_MG, ext=2)
 
-    def _growth_integrand_MG(self, x):
+    def _growth_integrand_MG(self, z_prime):
         r"""
         Integrand function for the growth_factor_MG
 
         .. math::
-              \frac{f(x;\gamma_{MG})}{1+x}
+              \frac{f(z;\gamma_{MG})}{1+z}
 
         Parameters
         ----------
-        x: double
-           integrand variable
+        z_prime: double
+           integrand variable (redshift)
         """
         return self.cosmo_dic['f_z'](x) / (1. + x)
 

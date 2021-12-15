@@ -84,6 +84,18 @@ class Euclike:
             for j in range(0, len(x)):
                 self.indices_all.append([i + 1, j + 1])
 
+        # Definining the prefactors for WL and XC
+        ells_WL = self.data_ins.data_dict['WL']['ells']
+        ells_XC = self.data_ins.data_dict['XC-Phot']['ells']
+        prfcsq = (ells_WL + 2.) * (ells_WL + 1.) * ells_WL \
+            * (ells_WL - 1.) / (ells_WL + 0.5)**4
+        prfc = np.sqrt((ells_XC + 2.) * (ells_XC + 1.) * ells_XC *
+                       (ells_XC - 1.)) / (ells_XC + 0.5)**2
+        ncomb_WL = int(numtomo_wl * (numtomo_wl + 1) / 2)
+        ncomb_XC = numtomo_wl * numtomo_gcphot
+        self.prefactor_WL = np.tile(prfcsq, ncomb_WL)
+        self.prefactor_XC = np.tile(prfc, ncomb_XC)
+
         # Reshaping the data vectors and covariance matrices
         # into dictionaries to be passed to the data_handler class
         datafinal = {**photodata,
@@ -184,10 +196,11 @@ class Euclike:
         # Obtain the theory for WL
         if self.data_handler_ins.use_wl:
             wl_array = np.array(
-                [phot_ins.Cl_WL(ell, element[0], element[1])
+                [phot_ins.Cl_WL_noprefac(ell, element[0], element[1])
                  for ell in self.data_ins.data_dict['WL']['ells']
                  for element in self.indices_diagonal_wl]
             )
+            wl_array = self.prefactor_WL * wl_array
         else:
             wl_array = np.zeros(
                  len(self.data_ins.data_dict['WL']['ells']) *
@@ -197,10 +210,11 @@ class Euclike:
         # Obtain the theory for XC-Phot
         if self.data_handler_ins.use_xc_phot:
             xc_phot_array = np.array(
-                [phot_ins.Cl_cross(ell, element[1], element[0])
+                [phot_ins.Cl_cross_noprefac(ell, element[1], element[0])
                  for ell in self.data_ins.data_dict['XC-Phot']['ells']
                  for element in self.indices_all]
             )
+            xc_phot_array = self.prefactor_XC * xc_phot_array
         else:
             xc_phot_array = np.zeros(
                  len(self.data_ins.data_dict['XC-Phot']['ells']) *

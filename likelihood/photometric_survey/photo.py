@@ -289,14 +289,14 @@ class Photo:
                             ' spectrum interpolation range.')
         return kern_mult_power
 
-    def Cl_WL(self, ell, bin_i, bin_j, int_step=0.01):
+    def Cl_WL_noprefac(self, ell, bin_i, bin_j, int_step=0.01):
         r"""Cl WL
 
         Calculates angular power spectrum for weak lensing,
         for the supplied bins. Includes intrinsic alignments.
 
         .. math::
-            C_{ij}^{\rm LL}(\ell)= c \int \frac{dz}{H(z)r^2(z)}\
+            C_{ij}^{\rm LL, no prefac}(\ell)= c \int \frac{dz}{H(z)r^2(z)}\
             \bigg\lbrace W_{i}^{\rm \gamma}\left[ k_{\ell}(z), z \right]\
             W_{j}^{\rm \gamma}\left[ k_{\ell}(z), z \right ]\
             P_{\rm \delta \delta}\left[ k_{\ell}(z), z \right] +\\
@@ -406,7 +406,7 @@ class Photo:
 
         return c_final
 
-    def Cl_cross(self, ell, bin_i, bin_j, int_step=0.02):
+    def Cl_cross_noprefac(self, ell, bin_i, bin_j, int_step=0.02):
         r"""Cl Cross
 
         Calculates angular power spectrum for cross-correlation
@@ -414,12 +414,12 @@ class Photo:
         Includes intrinsic alignments.
 
         .. math::
-            C_{ij}^{\rm LG}(\ell) = c \int \frac{dz}{H(z)r^2(z)}\
-            \left\lbrace W_{i}^{\gamma}\left[ k_{\ell}(z), z \right ]\
+            C_{ij}^{\rm LG, no prefac}(\ell) = c \int \frac{dz}{H(z)r^2(z)}\
+            \bigg\lbrace W_{i}^{\gamma}\left[ k_{\ell}(z), z \right ]\
             W_{j}^{\rm{G}}(z)P^{\rm{photo}}_{\rm g\delta}\
             \left[ k_{\ell}(z), z \right]\\
             +\,W_{i}^{\rm{IA}}(z)W_{j}^{\rm{G}}(z)P^{\rm{photo}}_{\rm g\rm{I}}\
-            \left[ k_{\ell}(z), z \right] \right\rbrace \\
+            \left[ k_{\ell}(z), z \right] \bigg\rbrace \\
 
         Parameters
         ----------
@@ -464,3 +464,97 @@ class Photo:
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, zs_arr)
 
         return c_final
+
+    def Cl_WL(self, ell, bin_i, bin_j, int_step=0.01):
+        r"""Cl WL
+
+        Calculates angular power spectrum for weak lensing,
+        for the supplied bins. Includes intrinsic alignments.
+        Includes prefactor for extended Limber approximation and curved sky.
+
+        .. math::
+            C_{ij}^{\rm LL}(\ell)= (\ell+2)(\ell+1)\ell(\ell-1)\
+            (\ell+1/2)^{-4} C_{ij}^{\rm LL, no prefac}(\ell) \\
+
+        Parameters
+        ----------
+        ell: float
+            :math:`\ell`-mode at which :math:`C_{\ell}` is evaluated.
+        bin_i: int
+           Index of first tomographic bin. Tomographic bin
+           indices start from 1.
+        bin_j: int
+           Index of second tomographic bin. Tomographic bin
+           indices start from 1.
+        int_step: float
+            Size of step for numerical integral over redshift.
+
+        Returns
+        -------
+        c_final: float
+           Value of the angular shear power spectrum.
+        """
+
+        c_final = self.Cl_WL_noprefac(ell, bin_i, bin_j, int_step)
+        c_final *= self.prefactor(ell)**2
+
+        return c_final
+
+    def Cl_cross(self, ell, bin_i, bin_j, int_step=0.02):
+        r"""Cl Cross
+
+        Calculates angular power spectrum for cross-correlation
+        between weak lensing and galaxy clustering, for the supplied bins.
+        Includes intrinsic alignments. Includes prefactor for extended
+        Limber approximation and curved sky.
+
+        .. math::
+            C_{ij}^{\rm LG}(\ell) = \sqrt{(\ell+2)(\ell+1)\ell(\ell-1)}\
+            (\ell+1/2)^{-2}C_{ij}^{\rm LG, no prefac}(\ell) \\
+
+        Parameters
+        ----------
+        ell: float
+            :math:`\ell`-mode at which :math:`C_{\ell}` is evaluated.
+        bin_i: int
+           Index of first tomographic bin. Tomographic bin
+           indices start from 1.
+        bin_j: int
+           Index of second tomographic bin. Tomographic bin
+           indices start from 1.
+        int_step: float
+            Size of step for numerical integral over redshift.
+
+        Returns
+        -------
+        c_final: float
+           Value of cross-correlation between weak lensing and
+           galaxy clustering photometric angular power spectrum.
+        """
+
+        c_final = self.Cl_cross_noprefac(ell, bin_i, bin_j, int_step)
+        c_final *= self.prefactor(ell)
+
+        return c_final
+
+    def prefactor(self, ell):
+        r"""Prefactor for photometric probes
+
+        Calculates the prefactors for extended Limber and curved sky.
+
+        .. math::
+            \sqrt{(\ell+2)(\ell+1)\ell(\ell-1)}(\ell+1/2)^{-2} \\
+
+        Parameters
+        ----------
+        ell: float
+            :math:`\ell`-mode at which the prefactor is evaluated.
+
+        Returns
+        -------
+        prefactor: float
+           Value of the prefactor at the given :math:`\ell`.
+        """
+        prefactor = np.sqrt((ell + 2.) * (ell + 1.) * ell * (ell - 1.)) / \
+            (ell + 0.5)**2
+        return prefactor

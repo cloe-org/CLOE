@@ -414,7 +414,7 @@ class Cosmology:
         Integrand function for the growth_factor_MG
 
         .. math::
-              \frac{f(z;\gamma_{MG})}{1+z}
+              \frac{f(z';\gamma_{MG})}{1+z'}
 
         Parameters
         ----------
@@ -428,8 +428,8 @@ class Cosmology:
         Computes the growth factor using the :math:`\gamma_{MG}` as
 
         .. math::
-           D(z;\gamma_{MG}) = {\rm exp}\left[\int_z^\infty{\rm d}x \
-               \frac{f(x;\gamma_{MG})}{1+x}\right]
+           D(z;\gamma_{MG}) = {\rm exp}\left[\int_z^\infty{\rm d}z' \
+               \frac{f(z';\gamma_{MG})}{1+z'}\right]
 
         and normalizes as for :math:`D(z)/D(0)`
 

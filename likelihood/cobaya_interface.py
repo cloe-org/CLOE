@@ -255,7 +255,7 @@ class EuclidLikelihood(Likelihood):
                 'sigma8_z': {'z': self.z_win},
                 'fsigma8': {'z': self.z_win, 'units': None}}
 
-    def passing_requirements(self, model, **params_dic):
+    def passing_requirements(self, model, info, **params_dic):
         r"""Passing Requirements
 
         Gets cosmological quantities from the theory code
@@ -321,7 +321,8 @@ class EuclidLikelihood(Likelihood):
                 **only_nuisance_params)
 
         except (TypeError, AttributeError):
-            self.cosmo.cosmo_dic['NL_flag'] = self.NL_flag
+            self.cosmo.cosmo_dic['NL_flag'] = \
+                info['likelihood']['Euclid']['NL_flag']
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
             self.cosmo.cosmo_dic['H0'] = model.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
@@ -354,7 +355,7 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 model.provider.get_Pk_interpolator(
                 ('delta_tot', 'delta_tot'), nonlinear=False)
-            if self.NL_flag > 0:
+            if info['likelihood']['Euclid']['NL_flag'] > 0:
                 self.cosmo.cosmo_dic['Pk_halofit'] = \
                     model.provider.get_Pk_interpolator(
                     ('delta_tot', 'delta_tot'), nonlinear=True)
@@ -391,7 +392,8 @@ class EuclidLikelihood(Likelihood):
             value of the function log_likelihood
         """
         model = None
-        self.passing_requirements(model, **params_values)
+        info = None
+        self.passing_requirements(model, info, **params_values)
         # Update cosmo_dic to interpolators
         self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.05)
         loglike = self.likefinal.loglike(self.cosmo.cosmo_dic,

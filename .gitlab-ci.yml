@@ -23,6 +23,7 @@ Install:
       - merge_requests
     changes:
       - likelihood/*
+      - likelihood/**/*
       - configs/*
       - data/ExternalBenchmark/*
       - environment.yml

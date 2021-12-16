@@ -279,7 +279,7 @@ class Cosmology:
         Computes the matter density as,
 
         .. math::
-            \Omega_m(z) &= \Omega_{{m},0}(1+z)^3H_0^2/H^2(z)
+            \Omega_m(z) = \Omega_{{m},0}(1+z)^3H_0^2/H^2(z)
 
         Parameters
         ----------
@@ -300,8 +300,10 @@ class Cosmology:
         Computes growth factor according to
 
         .. math::
-            D(z, k) &=\sqrt{P_{\rm \delta\delta}(z, k)\
+            D(z, k) =\sqrt{P_{\rm \delta\delta}(z, k)\
             /P_{\rm \delta\delta}(z=0, k)}\\
+
+        and normalizes as for :math:`D(z)/D(0)`
 
         Parameters
         ----------
@@ -386,7 +388,7 @@ class Cosmology:
 
     def growth_rate_MG(self, zs):
         r"""
-        Computes the growth rate using $\gamma_{MG}$ as
+        Computes the growth rate using :math:`\gamma_{MG}` as
 
         .. math::
             f(z;\gamma_{MG})=\left[\Omega_{m}(z)\right]^{\gamma_{MG}}
@@ -407,35 +409,37 @@ class Cosmology:
                 x=self.cosmo_dic['z_win'],
                 y=f_MG, ext=2)
 
-    def _integrand_function(self, x):
+    def _growth_integrand_MG(self, z_prime):
         r"""
         Integrand function for the growth_factor_MG
 
         .. math::
-              \frac{f(x;\gamma_{MG})}{1+x}
+              \frac{f(z';\gamma_{MG})}{1+z'}
 
         Parameters
         ----------
-        x: double
-           integrand variable
+        z_prime: double
+           integrand variable (redshift)
         """
-        return self.cosmo_dic['f_z'](x) / (1. + x)
+        return self.cosmo_dic['f_z'](z_prime) / (1. + z_prime)
 
     def growth_factor_MG(self):
         r"""
-        Computes the growth factor using the $\gamma_{MG}$ as
+        Computes the growth factor using the :math:`\gamma_{MG}` as
 
         .. math::
-           D(z;\gamma_{MG}) &= {\rm exp}\left[\int_z^\infty{\rm d}x \
-               \frac{f(x;\gamma_{MG})}{1+x}\right]
+           D(z;\gamma_{MG}) = {\rm exp}\left[\int_z^\infty{\rm d}z' \
+               \frac{f(z';\gamma_{MG})}{1+z'}\right]
+
+        and normalizes as for :math:`D(z)/D(0)`
 
         Returns
         -------
         D_MG: numpy.ndarray
             values of the growth factor using the modified
-            gravity parameter $\gamma_{MG}$
+            gravity parameter :math:`\gamma_{MG}`
         """
-        integral = [quad(self._integrand_function, z,
+        integral = [quad(self._growth_integrand_MG, z,
                          self.cosmo_dic['z_win'][-1])[0] for z in
                     self.cosmo_dic['z_win']]
         return np.exp(integral) / np.exp(integral[0])

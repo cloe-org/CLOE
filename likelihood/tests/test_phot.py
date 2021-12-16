@@ -174,9 +174,12 @@ class photoinitTestCase(TestCase):
         self.W_i_Gcheck = 5.241556e-09
         self.W_IA_check = 0.0001049580
         self.cl_integrand_check = 0.000718
-        self.cl_WL_check = 7.06884e-09
+        self.cl_WL_check = 6.908876e-09
+        self.cl_WL_noprefac_check = 7.06884e-09
         self.cl_GC_check = 2.89485e-05
-        self.cl_cross_check = 1.130265e-07
+        self.cl_cross_check = 1.117403e-07
+        self.cl_cross_noprefac_check = 1.130265e-07
+        self.prefac_check = 0.988620523
 
     def tearDown(self):
         self.integrand_check = None
@@ -185,8 +188,11 @@ class photoinitTestCase(TestCase):
         self.W_IA_check = None
         self.cl_integrand_check = None
         self.cl_WL_check = None
+        self.cl_WL_prefac_check = None
         self.cl_GC_check = None
         self.cl_cross_check = None
+        self.cl_cross_prefac_check = None
+        self.prefac_check = None
 
     def test_GC_window(self):
         npt.assert_allclose(self.phot.GC_window(0.001, 1),
@@ -228,6 +234,12 @@ class photoinitTestCase(TestCase):
         npt.assert_allclose(cl_int, self.cl_WL_check, rtol=self.cl_tol,
                             err_msg='Cl WL test failed')
 
+    def test_cl_WL_noprefac(self):
+        cl_int = self.phot.Cl_WL_noprefac(10.0, 1, 1)
+        npt.assert_allclose(cl_int, self.cl_WL_noprefac_check,
+                            rtol=self.cl_tol,
+                            err_msg='Cl WL noprefac test failed')
+
     def test_cl_GC(self):
         cl_int = self.phot.Cl_GC_phot(10.0, 1, 1)
         npt.assert_allclose(cl_int, self.cl_GC_check, rtol=self.cl_tol,
@@ -235,5 +247,18 @@ class photoinitTestCase(TestCase):
 
     def test_cl_cross(self):
         cl_int = self.phot.Cl_cross(10.0, 1, 1)
-        npt.assert_allclose(cl_int, self.cl_cross_check, rtol=self.cl_tol,
-                            err_msg='Cl photometric cross test failed')
+        npt.assert_allclose(cl_int, self.cl_cross_check,
+                            rtol=self.cl_tol,
+                            err_msg='Cl XC cross test failed')
+
+    def test_cl_cross_noprefac(self):
+        cl_int = self.phot.Cl_cross_noprefac(10.0, 1, 1)
+        npt.assert_allclose(cl_int, self.cl_cross_noprefac_check,
+                            rtol=self.cl_tol,
+                            err_msg='Cl XC cross no prefac test failed')
+
+    def test_prefactor(self):
+        prefac = self.phot.prefactor(10.0)
+        npt.assert_allclose(prefac, self.prefac_check,
+                            rtol=self.cl_tol,
+                            err_msg='Cl prefactor test failed')

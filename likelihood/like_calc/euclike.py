@@ -100,7 +100,7 @@ class Euclike:
         # into dictionaries to be passed to the data_handler class
         datafinal = {**photodata,
                      'GC-Spectro': spectrodata}
-        covfinal = {'3x2': self.data_ins.data_dict['cov_3x2'],
+        covfinal = {'3x2pt': self.data_ins.data_dict['3x2pt_cov'],
                     'GC-Spectro': spectrocov}
         self.data_handler_ins = Data_handler(datafinal,
                                              covfinal,
@@ -139,25 +139,26 @@ class Euclike:
                 del(self.data_ins.data_dict['XC-Phot'][index])
         # Transform GC-Phot
         # We ignore the first value (ells)
+
         datavec_dict['GC-Phot'] = np.array(
                 [self.data_ins.data_dict['GC-Phot'][key][ind]
-                 for ind
-                 in range(len(self.data_ins.data_dict['GC-Phot']['ells']))
                  for key, v
-                 in list(self.data_ins.data_dict['GC-Phot'].items())[1:]])
+                 in list(self.data_ins.data_dict['GC-Phot'].items())[1:]
+                 for ind
+                 in range(len(self.data_ins.data_dict['GC-Phot']['ells']))])
 
         datavec_dict['WL'] = np.array(
                 [self.data_ins.data_dict['WL'][key][ind]
-                 for ind in range(len(self.data_ins.data_dict['WL']['ells']))
                  for key, v
-                 in list(self.data_ins.data_dict['WL'].items())[1:]])
+                 in list(self.data_ins.data_dict['WL'].items())[1:]
+                 for ind in range(len(self.data_ins.data_dict['WL']['ells']))])
 
         datavec_dict['XC-Phot'] = np.array(
                 [self.data_ins.data_dict['XC-Phot'][key][ind]
-                 for ind
-                 in range(len(self.data_ins.data_dict['XC-Phot']['ells']))
                  for key, v
-                 in list(self.data_ins.data_dict['XC-Phot'].items())[1:]])
+                 in list(self.data_ins.data_dict['XC-Phot'].items())[1:]
+                 for ind
+                 in range(len(self.data_ins.data_dict['XC-Phot']['ells']))])
 
         datavec_dict['all'] = np.concatenate((datavec_dict['WL'],
                                               datavec_dict['XC-Phot'],
@@ -197,8 +198,8 @@ class Euclike:
         if self.data_handler_ins.use_wl:
             wl_array = np.array(
                 [phot_ins.Cl_WL_noprefac(ell, element[0], element[1])
-                 for ell in self.data_ins.data_dict['WL']['ells']
-                 for element in self.indices_diagonal_wl]
+                 for element in self.indices_diagonal_wl
+                 for ell in self.data_ins.data_dict['WL']['ells']]
             )
             wl_array = self.prefactor_WL * wl_array
         else:
@@ -211,8 +212,8 @@ class Euclike:
         if self.data_handler_ins.use_xc_phot:
             xc_phot_array = np.array(
                 [phot_ins.Cl_cross_noprefac(ell, element[1], element[0])
-                 for ell in self.data_ins.data_dict['XC-Phot']['ells']
-                 for element in self.indices_all]
+                 for element in self.indices_all
+                 for ell in self.data_ins.data_dict['XC-Phot']['ells']]
             )
             xc_phot_array = self.prefactor_XC * xc_phot_array
         else:
@@ -225,8 +226,8 @@ class Euclike:
         if self.data_handler_ins.use_gc_phot:
             gc_phot_array = np.array(
                 [phot_ins.Cl_GC_phot(ell, element[0], element[1])
-                 for ell in self.data_ins.data_dict['GC-Phot']['ells']
-                 for element in self.indices_diagonal_gcphot]
+                 for element in self.indices_diagonal_gcphot
+                 for ell in self.data_ins.data_dict['GC-Phot']['ells']]
             )
         else:
             gc_phot_array = np.zeros(

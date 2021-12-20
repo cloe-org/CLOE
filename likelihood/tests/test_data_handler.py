@@ -40,7 +40,7 @@ class datahandlerTestCase(TestCase):
                 'XC-Phot': self.xc_phot_vec,
                 'GC-Phot': self.gc_phot_vec,
                 'GC-Spectro': self.gc_spectro_vec}
-        cov = {'3x2': self.tx2_cov,
+        cov = {'3x2pt': self.tx2_cov,
                'GC-Spectro': self.gc_spectro_cov}
         self.data_reader = Reader(mock_data)
         self.data_reader.compute_nz()
@@ -117,7 +117,7 @@ class datahandlerTestCase(TestCase):
                 'XC-Phot': self.xc_phot_vec,
                 'GC-Phot': self.gc_phot_vec,
                 'GC-Spectro': self.gc_spectro_vec}
-        cov = {'3x2': self.tx2_cov,
+        cov = {'3x2pt': self.tx2_cov,
                'GC-Spectro': self.gc_spectro_cov}
 
         use_wl, use_xc_phot, use_gc_phot, use_gc_spectro = (

@@ -22,7 +22,7 @@ class datareaderTestCase(TestCase):
                                    'ns', 'sigma8_0', 'w',
                                    'omkh2', 'omnuh2', 'Omnu']
         self.cov_check_GC_spectro = 1.217193e+08
-        self.cov_check_3x2 = 4.403701e-04
+        self.cov_check_3x2 = 0.019484
         self.cl_phot_WL_check = 7.144612e-05
         self.cl_phot_GC_check = 2.239632e-03
         self.cl_phot_XC_check = 2.535458e-04
@@ -105,8 +105,8 @@ class datareaderTestCase(TestCase):
             for j in range(shape_3x2):
                 bin_i = i
                 bin_j = j
-                test_cov_3x2 += (i * j * self.data_tester.data_dict['cov_3x2']
-                                 [bin_i, bin_j])
+                test_cov_3x2 += i * j * \
+                    self.data_tester.data_dict['3x2pt_cov'][bin_i, bin_j]
 
         npt.assert_allclose(test_cov_3x2,
                             [self.cov_check_3x2], rtol=1e-3,

@@ -252,9 +252,6 @@ class Reader:
             encoding='utf-8',
         )
 
-        self.numtomo_wl = len(self.nz_dict_WL)
-        self.numtomo_gcphot = len(self.nz_dict_GC_Phot)
-
         header_GC = GC_file.colnames
         for i in range(len(header_GC)):
             GC_phot_dict[header_GC[i]] = GC_file[header_GC[i]].data
@@ -267,16 +264,119 @@ class Reader:
         for i in range(len(header_XC)):
             XC_phot_dict[header_XC[i]] = XC_file[header_XC[i]].data
 
+        self.numtomo_wl = len(self.nz_dict_WL)
+        self.numtomo_gcphot = len(self.nz_dict_GC_Phot)
+        self.num_bins_wl = int(self.numtomo_wl * (self.numtomo_wl + 1) / 2)
+        self.num_bins_xcphot = self.numtomo_wl * self.numtomo_gcphot
+        self.num_bins_gcphot = int(self.numtomo_gcphot *
+                                   (self.numtomo_gcphot + 1) / 2)
+        self.num_ells_wl = len(WL_dict['ells'])
+        self.num_ells_xcphot = len(XC_phot_dict['ells'])
+        self.num_ells_gcphot = len(GC_phot_dict['ells'])
+
         tx2_cov_str = self.data['photo']['cov_3x2'].format(self.data[
             'photo']['cov_model'])
         tx2_cov = np.load(Path(full_path, tx2_cov_str))
+        new_tx2_cov = self._unpack_3x2pt_cov(tx2_cov)
 
-        self.data_dict['GC-Phot'] = GC_phot_dict
         self.data_dict['WL'] = WL_dict
         self.data_dict['XC-Phot'] = XC_phot_dict
-        self.data_dict['cov_3x2'] = tx2_cov
+        self.data_dict['GC-Phot'] = GC_phot_dict
+        self.data_dict['3x2pt_cov'] = new_tx2_cov
 
         del(GC_file)
         del(WL_file)
         del(XC_file)
         return
+
+    def _unpack_3x2pt_cov(self, tx2_cov):
+        """Unpack 3x2pt covariance matrix
+
+        Unpacks the full 3x2pt covariance matrix and reshapes it in order to
+        have the different probes as the outermost variable, the
+        tomographic bin combination as the intermediate variable, and the
+        multipole as innermost variable.
+
+        Parameters
+        ----------
+        tx2_cov: numpy.ndarray
+            2-dimensional array containing the 3x2pt covariance matrix.
+
+        Returns
+        -------
+        new_tx2_cov: numpy.ndarray
+            2-dimensional array containing the reshaped 3x2pt covariance
+            matrix.
+        """
+        nbins_wl = self.num_bins_wl
+        nbins_xc = self.num_bins_xcphot
+        nbins_gc = self.num_bins_gcphot
+        nbins_tot = nbins_wl + nbins_xc + nbins_gc
+
+        wl_side = nbins_wl * self.num_ells_wl
+        xc_side = nbins_xc * self.num_ells_xcphot
+        gc_side = nbins_gc * self.num_ells_gcphot
+
+        new_tx2_cov = np.zeros((tx2_cov.shape[0], tx2_cov.shape[1]))
+
+        for i in range(nbins_wl):
+            cur_i = int(i * self.num_ells_wl)
+            next_i = int((i + 1) * self.num_ells_wl)
+            for j in range(nbins_wl):
+                cur_j = int(j * self.num_ells_wl)
+                next_j = int((j + 1) * self.num_ells_wl)
+                new_tx2_cov[cur_i:next_i, cur_j:next_j] = \
+                    tx2_cov[i::nbins_tot, j::nbins_tot]
+            for j in range(nbins_xc):
+                cur_j = int(wl_side + j * self.num_ells_xcphot)
+                next_j = int(wl_side + (j + 1) * self.num_ells_xcphot)
+                new_tx2_cov[cur_i:next_i, cur_j:next_j] = \
+                    tx2_cov[i::nbins_tot, (nbins_wl + j)::nbins_tot]
+            for j in range(nbins_gc):
+                cur_j = int(wl_side + xc_side + j * self.num_ells_gcphot)
+                next_j = int(wl_side + xc_side +
+                             (j + 1) * self.num_ells_gcphot)
+                new_tx2_cov[cur_i:next_i, cur_j:next_j] = \
+                    tx2_cov[i::nbins_tot,
+                            (nbins_wl + nbins_xc + j)::nbins_tot]
+
+        for i in range(nbins_xc):
+            cur_i = int(wl_side + i * self.num_ells_xcphot)
+            next_i = int(wl_side + (i + 1) * self.num_ells_xcphot)
+            for j in range(nbins_xc):
+                cur_j = int(wl_side + j * self.num_ells_xcphot)
+                next_j = int(wl_side + (j + 1) * self.num_ells_xcphot)
+                new_tx2_cov[cur_i:next_i, cur_j:next_j] = \
+                    tx2_cov[(nbins_wl + i)::nbins_tot,
+                            (nbins_wl + j)::nbins_tot]
+            for j in range(nbins_gc):
+                cur_j = int(wl_side + xc_side + j * self.num_ells_gcphot)
+                next_j = int(wl_side + xc_side +
+                             (j + 1) * self.num_ells_gcphot)
+                new_tx2_cov[cur_i:next_i, cur_j:next_j] = \
+                    tx2_cov[(nbins_wl + i)::nbins_tot,
+                            (nbins_wl + nbins_xc + j)::nbins_tot]
+
+        for i in range(nbins_gc):
+            cur_i = int(wl_side + xc_side + i * self.num_ells_gcphot)
+            next_i = int(wl_side + xc_side + (i + 1) * self.num_ells_gcphot)
+            for j in range(nbins_gc):
+                cur_j = int(wl_side + xc_side + j * self.num_ells_gcphot)
+                next_j = int(wl_side + xc_side +
+                             (j + 1) * self.num_ells_gcphot)
+                new_tx2_cov[cur_i:next_i, cur_j:next_j] = \
+                    tx2_cov[(nbins_wl + nbins_xc + i)::nbins_tot,
+                            (nbins_wl + nbins_xc + j)::nbins_tot]
+
+        new_tx2_cov[wl_side:(wl_side + xc_side), :wl_side] = \
+            new_tx2_cov[:wl_side, wl_side:(wl_side + xc_side)].T
+        new_tx2_cov[(wl_side + xc_side):(wl_side + xc_side + gc_side),
+                    :wl_side] = \
+            new_tx2_cov[:wl_side,
+                        (wl_side + xc_side):(wl_side + xc_side + gc_side)].T
+        new_tx2_cov[(wl_side + xc_side):(wl_side + xc_side + gc_side),
+                    wl_side:(wl_side + xc_side)] = \
+            new_tx2_cov[wl_side:(wl_side + xc_side),
+                        (wl_side + xc_side):(wl_side + xc_side + gc_side)].T
+
+        return new_tx2_cov

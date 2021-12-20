@@ -233,28 +233,28 @@ class Plotter:
         # Note:As covariance format is not set in stone, if the format
         # changes, the following code will need to be reviewed to correct the
         # error bar calculation.
-        cov_diags = np.sqrt(np.diagonal(self.read_data.data_dict['cov_3x2']))
+        nbins_wl = self.read_data.num_bins_wl
+        nbins_xc = self.read_data.num_bins_xcphot
+        nells_wl = self.read_data.num_ells_wl
+        nells_xc = self.read_data.num_ells_xcphot
+        nells_gc = self.read_data.num_ells_gcphot
 
-        num_WL_bins = self.read_data.numtomo_wl
-        num_GC_bins = self.read_data.numtomo_gcphot
-        tot_WL_bins = int(num_WL_bins * (num_WL_bins + 1) / 2)
-        tot_GC_bins = int(num_GC_bins * (num_GC_bins + 1) / 2)
-        tot_XC_bins = num_WL_bins * num_GC_bins
-        tot_3x2_bins = tot_WL_bins + tot_XC_bins + tot_GC_bins
-
+        cov_diags = np.sqrt(np.diagonal(self.read_data.data_dict['3x2pt_cov']))
         counter = 0
         for i in range(1, no_bins + 1):
             for j in range(i, no_bins + 1):
                 if i == bin_i and j == bin_j:
                     cur_index = counter
-                    break
-        if probe == 'GC-Phot':
-            cur_index += (tot_WL_bins + tot_XC_bins)
-        err_arr = []
-        for mult in range(len(ells)):
-            cur_err = cov_diags[(tot_3x2_bins * mult) + cur_index]
-            err_arr.append(cur_err)
-        err_arr = np.array(err_arr)
+                counter += 1
+        if probe == 'WL':
+            i_low = cur_index * nells_wl
+            i_high = (cur_index + 1) * nells_wl
+        else:
+            i_low = nbins_wl * nells_wl + nbins_xc * nells_xc + \
+                cur_index * nells_gc
+            i_high = nbins_wl * nells_wl + nbins_xc * nells_xc + \
+                (cur_index + 1) * nells_gc
+        err_arr = cov_diags[i_low:i_high]
 
         pl_ax.plot(ells, ext_cs + err_arr, color=pl_colour,
                    linestyle=pl_linestyle)
@@ -356,15 +356,20 @@ class Plotter:
         # Note: As the covariance format is not set in stone, if the format
         # changes, the following code will need to be reviewed to correct the
         # error bar calculation.
-        cov_full = self.read_data.data_dict['cov_3x2']
-        err_arr = []
-        for mult in range(len(ells)):
-            k = int(no_bins_WL * bin_WL + bin_GC + no_bins_WL *
-                    (2.0 * no_bins_GC + 1.0) * (mult + 1.0) - (3.0 / 2.0) *
-                    no_bins_WL * (no_bins_GC + 1.0))
-            cur_err = np.sqrt(cov_full[k, k])
-            err_arr.append(cur_err)
-        err_arr = np.array(err_arr)
+        nbins_wl = self.read_data.num_bins_wl
+        nells_wl = self.read_data.num_ells_wl
+        nells_xc = self.read_data.num_ells_xcphot
+
+        cov_diags = np.sqrt(np.diagonal(self.read_data.data_dict['3x2pt_cov']))
+        counter = 0
+        for i in range(1, no_bins_WL + 1):
+            for j in range(1, no_bins_GC + 1):
+                if i == bin_WL and j == bin_GC:
+                    cur_index = counter
+                counter += 1
+        i_low = nbins_wl * nells_wl + cur_index * nells_xc
+        i_high = nbins_wl * nells_wl + (cur_index + 1) * nells_xc
+        err_arr = cov_diags[i_low:i_high]
 
         pl_ax.plot(ells, ext_cs + err_arr, color=pl_colour,
                    linestyle=pl_linestyle)

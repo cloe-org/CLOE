@@ -150,7 +150,8 @@ class Data_handler:
         probes into a single matrix (with zero cross-terms),
         and assigns the result to the internal attribute self._cov_matrix.
         """
-        cov_matrix = merge_matrices(self._cov['3x2'], self._cov['GC-Spectro'])
+        cov_matrix = merge_matrices(self._cov['3x2pt'],
+                                    self._cov['GC-Spectro'])
         self._cov_matrix = cov_matrix
 
     def _create_masking_vector(self, data):

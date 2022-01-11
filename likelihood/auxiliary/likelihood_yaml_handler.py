@@ -291,7 +291,8 @@ def generate_params_yaml(models=None):
     ----------
     models: list of strings
         Strings corresponding to a model.
-        Possible strings: 'nuisance_bias', 'nuisance_ia', 'nuisance_nz'
+        Possible strings: 'nuisance_bias', 'nuisance_ia', 'nuisance_nz',
+        'nuisance_shear_calibration'
 
     Notes
     -----
@@ -301,7 +302,8 @@ def generate_params_yaml(models=None):
     models_path = get_default_models_path()
 
     if models is None:
-        models = ['nuisance_bias', 'nuisance_ia', 'nuisance_nz']
+        models = ['nuisance_bias', 'nuisance_ia', 'nuisance_nz',
+                  'nuisance_shear_calibration']
     likelihood_params = {}
 
     for model in models:

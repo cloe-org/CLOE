@@ -139,6 +139,47 @@ class nonlinearinitTestCase(TestCase):
                             rtol=self.rtol,
                             err_msg='Error in value returned by fia')
 
+    def test_fia_k_array(self):
+        k_array = np.array([self.k1, self.k2, self.k3])
+        fia = self.nl.misc.fia(self.z1, k_array)
+        type_check = isinstance(fia, np.ndarray)
+        npt.assert_equal(type_check, True,
+                         err_msg='Error in type returned by fia '
+                                 'when z is scalar and k is array')
+        size_check = np.size(fia)
+        npt.assert_equal(size_check, np.size(k_array),
+                         err_msg='Error in size returned by fia '
+                         'when z is scalar and k is array')
+
+    def test_fia_z_array(self):
+        z_array = np.array([self.z1, self.z1])
+        fia = self.nl.misc.fia(z_array, self.k1)
+        type_check = isinstance(fia, np.ndarray)
+        npt.assert_equal(type_check, True,
+                         err_msg='Error in type returned by fia '
+                         'when z is array and k is scalar')
+        size_check = np.size(fia)
+        npt.assert_equal(size_check, np.size(z_array),
+                         err_msg='Error in size returned by fia '
+                         'when z is array and k is scalar')
+
+    def test_fia_zk_array(self):
+        z_array = np.array([self.z1, self.z1])
+        k_array = np.array([self.k1, self.k2, self.k3])
+        fia = self.nl.misc.fia(z_array, k_array)
+        type_check = isinstance(fia, np.ndarray)
+        npt.assert_equal(type_check, True,
+                         err_msg='Error in type returned by fia '
+                                 'when z is array and k is array')
+        size_check = np.size(fia)
+        npt.assert_equal(size_check, np.size(z_array) * np.size(k_array),
+                         err_msg='Error in size returned by fia '
+                                 'when z is array and k is array')
+        shape_check = np.shape(fia)
+        npt.assert_array_equal(shape_check, (2, 3),
+                               err_msg='Error in size returned by fia '
+                                       'when z is array and k is array')
+
     def test_istf_spectro_galbias(self):
         b = self.nl.misc.istf_spectro_galbias(self.z1)
         npt.assert_allclose(b, self.bspec,

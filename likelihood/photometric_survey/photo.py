@@ -48,7 +48,7 @@ class Photo:
         self.cl_int_z_max = self.theory['z_win'][-1]
         # The size of z_winterp sufficient for now, could be tuned later
         z_wlogmin = -2
-        z_wmin1 = 0
+        z_wmin1 = 1e-5
         z_wmin2 = 1e-4
         z_wmin3 = 1e-3
         z_wmax = 4.0

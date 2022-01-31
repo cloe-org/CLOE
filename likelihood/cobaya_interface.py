@@ -305,13 +305,16 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 self.provider.get_Pk_interpolator(
                 ('delta_tot', 'delta_tot'), nonlinear=False)
+            self.cosmo.cosmo_dic['Pk_weyl'] = \
+                self.provider.get_Pk_interpolator(
+                ('Weyl', 'Weyl'), nonlinear=False)
             if self.NL_flag > 0:
                 self.cosmo.cosmo_dic['Pk_halofit'] = \
                     self.provider.get_Pk_interpolator(
                     ('delta_tot', 'delta_tot'), nonlinear=True)
-            self.cosmo.cosmo_dic['Pk_weyl'] = \
-                self.provider.get_Pk_interpolator(
-                ('Weyl', 'Weyl'), nonlinear=False)
+                self.cosmo.cosmo_dic['Pk_weyl_NL'] = \
+                    self.provider.get_Pk_interpolator(
+                    ('Weyl', 'Weyl'), nonlinear=True)
             self.cosmo.cosmo_dic['z_win'] = self.z_win
             self.cosmo.cosmo_dic['k_win'] = self.k_win
             self.cosmo.cosmo_dic['sigma8'] = self.provider.get_sigma8_z(
@@ -360,13 +363,16 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 model.provider.get_Pk_interpolator(
                 ('delta_tot', 'delta_tot'), nonlinear=False)
+            self.cosmo.cosmo_dic['Pk_weyl'] = \
+                model.provider.get_Pk_interpolator(
+                ('Weyl', 'Weyl'), nonlinear=False)
             if info['likelihood']['Euclid']['NL_flag'] > 0:
                 self.cosmo.cosmo_dic['Pk_halofit'] = \
                     model.provider.get_Pk_interpolator(
                     ('delta_tot', 'delta_tot'), nonlinear=True)
-            self.cosmo.cosmo_dic['Pk_weyl'] = \
-                model.provider.get_Pk_interpolator(
-                ('Weyl', 'Weyl'), nonlinear=False)
+                self.cosmo.cosmo_dic['Pk_weyl_NL'] = \
+                    model.provider.get_Pk_interpolator(
+                    ('Weyl', 'Weyl'), nonlinear=True)
             self.cosmo.cosmo_dic['z_win'] = self.z_win
             self.cosmo.cosmo_dic['k_win'] = self.k_win
             self.cosmo.cosmo_dic['sigma8'] = model.provider.get_sigma8_z(

@@ -253,7 +253,9 @@ class EuclidLikelihood(Likelihood):
                 'angular_diameter_distance': {'z': self.z_win},
                 'Hubble': {'z': self.z_win, 'units': 'km/s/Mpc'},
                 'sigma8_z': {'z': self.z_win},
-                'fsigma8': {'z': self.z_win, 'units': None}}
+                'fsigma8': {'z': self.z_win, 'units': None},
+                # temporary, see #767
+                'CAMBdata': None}
 
     def passing_requirements(self, model, info, **params_dic):
         r"""Passing Requirements
@@ -268,6 +270,9 @@ class EuclidLikelihood(Likelihood):
         """
 
         try:
+            # TEMPORARY (UNTIL JESUS GIVES US THE REQUIREMENTS), see #767
+            self.cosmo.cosmo_dic['CAMBdata'] = self.provider.get_CAMBdata()
+            # ------------------------------------------------
             self.cosmo.cosmo_dic['NL_flag'] = self.NL_flag
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
             self.cosmo.cosmo_dic['H0'] = self.provider.get_param('H0')

@@ -175,6 +175,14 @@ if runoption == 1:
 
     cur_dir = Path(__file__).resolve().parents[0]
 
+    # temporary fix, see #767
+    class mock_CAMB_data:
+        def __init__(self, rz_interp):
+            self.rz_interp = rz_interp
+
+        def angular_diameter_distance2(self, z1, z2):
+            return self.rz_interp(z1) - self.rz_interp(z2)
+
     def mock_MG_func(z, k):
         return 1.0
 
@@ -255,6 +263,7 @@ if runoption == 1:
                               'fsigma8_z_func': f_sig_8_interp,
                               'f_z': f_z_interp,
                               'r_z_func': rz_interp, 'd_z_func': dz_interp,
+                              'f_K_z_func': rz_interp,
                               'H_z_func_Mpc': Hmpc_interp,
                               'H_z_func': Hz_interp,
                               'z_win': zs_base,
@@ -334,6 +343,9 @@ if runoption == 1:
                                                 pgi_spectro.T, kx=1, ky=1)
 
             mock_cosmo_dic['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
+
+            # temporary fix, see #767
+            mock_cosmo_dic['CAMBdata'] = mock_CAMB_data(rz_interp)
 
             fid_H_arr = np.load(str(cur_dir) + '/likelihood/tests/test_input/spectro_fid_HZ.npy')
             fid_d_A_arr = np.load(str(cur_dir) + '/likelihood/tests/test_input/spectro_fid_d_A.npy')

@@ -15,6 +15,15 @@ from astropy import constants as const
 from pathlib import Path
 
 
+# temporary fix, see #767
+class mock_CAMB_data:
+    def __init__(self, rz_interp):
+        self.rz_interp = rz_interp
+
+    def angular_diameter_distance2(self, z1, z2):
+        return self.rz_interp(z1) - self.rz_interp(z2)
+
+
 def mock_MG_func(z, k):
     """
     Test MG function that simply returns 1.
@@ -102,6 +111,10 @@ class photoinitTestCase(TestCase):
                           'As': 2.115e-9, 'sigma8_z_func': sig_8_interp,
                           'fsigma8_z_func': f_sig_8_interp,
                           'r_z_func': rz_interp, 'd_z_func': dz_interp,
+                          # pretend that f_K_z_func behaves as r_z_func.
+                          # This is not realistic but it is fine for the
+                          # purposes of the unit tests
+                          'f_K_z_func': rz_interp,
                           'H_z_func_Mpc': Hmpc_interp,
                           'H_z_func': Hz_interp,
                           'z_win': np.linspace(0.0, 4.0, 100),
@@ -151,6 +164,8 @@ class photoinitTestCase(TestCase):
         mock_cosmo_dic['Pgi_spectro'] = \
             interpolate.RectBivariateSpline(zs_base, ks_base,
                                             pgi_spectro, kx=1, ky=1)
+        # temporary fix, see #767
+        mock_cosmo_dic['CAMBdata'] = mock_CAMB_data(rz_interp)
 
         nz_dic_WL = np.load(str(cur_dir) +
                             '/test_input/nz_dict_WL.npy',
@@ -161,6 +176,8 @@ class photoinitTestCase(TestCase):
         cls.phot = photo.Photo(mock_cosmo_dic, nz_dic_WL, nz_dic_GC)
         cls.flatnz = interpolate.InterpolatedUnivariateSpline(
             np.linspace(0.0, 4.6, 20), np.ones(20), ext=2)
+        cls.nz_dic_WL = nz_dic_WL
+        cls.nz_dic_GC = nz_dic_GC
 
     def setUp(self) -> None:
         self.win_tol = 1e-03
@@ -214,12 +231,11 @@ class photoinitTestCase(TestCase):
         npt.assert_allclose(int_comp, self.wbincheck, rtol=self.win_tol,
                             err_msg='WL_window failed')
 
-    def test_rzfunc_exception(self):
-        npt.assert_raises(Exception, self.phot,
-                          {'H0': self.H0,
-                           'c': self.c,
-                           'omch2': self.omch2,
-                           'ombh2': self.ombh2})
+    def test_WL_window_slow(self):
+        int_comp = self.phot.WL_window_slow(
+            z=self.phot.z_winterp[10], bin_i=1, k=0.1)
+        npt.assert_allclose(int_comp, self.wbincheck, rtol=self.win_tol,
+                            err_msg='WL_window_slow failed')
 
     # wab here refers to the product of the two window functions.
     def test_power_exception(self):
@@ -262,3 +278,22 @@ class photoinitTestCase(TestCase):
         npt.assert_allclose(prefac, self.prefac_check,
                             rtol=self.cl_tol,
                             err_msg='Cl prefactor test failed')
+
+    def test_f_K_z_func_is_None(self):
+        temp_cosmo_dic = self.phot.theory.copy()
+        temp_cosmo_dic['f_K_z_func'] = None
+        npt.assert_raises(KeyError,
+                          photo.Photo,
+                          temp_cosmo_dic,
+                          self.nz_dic_WL,
+                          self.nz_dic_GC)
+
+    # this function tests a temporary part of code, see #767
+    def test_CAMBdata_is_None(self):
+        temp_cosmo_dic = self.phot.theory.copy()
+        temp_cosmo_dic['CAMBdata'] = None
+        npt.assert_raises(KeyError,
+                          photo.Photo,
+                          temp_cosmo_dic,
+                          self.nz_dic_WL,
+                          self.nz_dic_GC)

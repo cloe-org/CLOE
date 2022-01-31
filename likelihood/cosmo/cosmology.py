@@ -94,11 +94,13 @@ class Cosmology:
             Hubble function evaluated at redshifts z_win in units
             of :math:`Mpc^{-1}`
         Pk_delta: function
-            Interpolator function for delta from Boltzmann code
+            Interpolator function for linear matter Pk from Boltzmann code
         Pk_halofit: function
-            Interpolator function for non-linear Pk from Boltzmann code
+            Interpolator function for non-linear matter Pk from Boltzmann code
         Pk_weyl: function
-            Interpolator function for Weyl from Boltzmann code
+            Interpolator function for linear Weyl Pk from Boltzmann code
+        Pk_weyl_NL: function
+            Interpolator function for non-linear Weyl Pk from Boltzmann code
         fsigma8: list
             fsigma8 function evaluated at z
         sigma8: list
@@ -213,6 +215,7 @@ class Cosmology:
                           'Pk_delta': None,
                           'Pk_halofit': None,
                           'Pk_weyl': None,
+                          'Pk_weyl_NL': None,
                           'Pmm_phot': None,
                           'Pgg_phot': None,
                           'Pgdelta_phot': None,

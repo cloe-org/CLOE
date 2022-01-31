@@ -16,6 +16,15 @@ from pathlib import Path
 from likelihood.tests.test_input.data import mock_data
 
 
+# temporary fix, see #767
+class mock_CAMB_data:
+    def __init__(self, rz_interp):
+        self.rz_interp = rz_interp
+
+    def angular_diameter_distance2(self, z1, z2):
+        return self.rz_interp(z1) - self.rz_interp(z2)
+
+
 def mock_MG_func(z, k):
     """
     Test MG function that simply returns 1.
@@ -110,6 +119,10 @@ class plotterTestCase(TestCase):
                           'fsigma8_z_func': f_sig_8_interp,
                           'f_z': f_z_interp,
                           'r_z_func': rz_interp, 'd_z_func': dz_interp,
+                          # pretend that f_K_z_func behaves as r_z_func.
+                          # This is not realistic but it is fine for the
+                          # purposes of the unit tests
+                          'f_K_z_func': rz_interp,
                           'H_z_func_Mpc': Hmpc_interp,
                           'H_z_func': Hz_interp,
                           'z_win': zs_base,
@@ -180,6 +193,9 @@ class plotterTestCase(TestCase):
         mock_cosmo_dic['Pgi_spectro'] = interpolate.interp2d(zs_base, ks_base,
                                                              pgi_spectro.T,
                                                              fill_value=0.0)
+        # temporary fix, see #767
+        mock_cosmo_dic['CAMBdata'] = mock_CAMB_data(rz_interp)
+
         fig1 = plt.figure()
         cls.ax1 = fig1.add_subplot(1, 1, 1)
 

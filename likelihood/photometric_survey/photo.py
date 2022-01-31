@@ -41,9 +41,12 @@ class Photo:
         nuisance_dict = self.theory['nuisance_parameters']
         self.nz_GC = RedshiftDistribution('GCphot', nz_dic_GC, nuisance_dict)
         self.nz_WL = RedshiftDistribution('WL', nz_dic_WL, nuisance_dict)
-        if self.theory['r_z_func'] is None:
-            raise Exception('No interpolated function for comoving distance '
-                            'exists in cosmo_dic.')
+        if self.theory['f_K_z_func'] is None:
+            raise KeyError('No interpolated function for transverse comoving '
+                           'distance exists in cosmo_dic.')
+        # temporary fix, see #767
+        if self.theory['CAMBdata'] is None:
+            raise KeyError('CAMBdata is not available in cosmo_dic.')
         self.cl_int_z_min = 0.001
         self.cl_int_z_max = self.theory['z_win'][-1]
         # The size of z_winterp sufficient for now, could be tuned later
@@ -110,7 +113,9 @@ class Photo:
 
         .. math::
             \int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm L}(z^{\prime})
-            \left [ 1 - \frac{\tilde{r}(z)}{\tilde{r}(z^{\prime})} \right ]}
+            \frac{f_{K}\left[\tilde{r}(z^{\prime}) - \tilde{r}(z)\right]}
+            {f_K\left[\tilde{r}(z^{\prime})\right]}
+            }
 
         Parameters
         ----------
@@ -127,8 +132,12 @@ class Photo:
         wint: float
            Weak-lensing kernel integrand
         """
-        wint = nz(zprime) * (1.0 - (self.theory['r_z_func'](z) /
-                                    self.theory['r_z_func'](zprime)))
+        # temporary fix, see #767
+        wint = (
+            nz(zprime) *
+            self.theory['CAMBdata'].angular_diameter_distance2(zprime, z) /
+            self.theory['CAMBdata'].angular_diameter_distance2(zprime, 0)
+        )
         return wint
 
     def WL_window(self, bin_i, k=0.0001):
@@ -139,10 +148,13 @@ class Photo:
         integrate.trapz on the array along one axis.
 
         .. math::
-            W_{i}^{\gamma}(z, k) = \frac{3}{2}\left ( \frac{H_0}{c}\right )^2
-            \Omega_{{\rm m},0} (1 + z) \Sigma(z, k) r(z)
+            W_{i}^{\gamma}(\ell, z, k) =
+            \frac{3}{2}\left ( \frac{H_0}{c}\right )^2
+            \Omega_{{\rm m},0} (1 + z) \Sigma(z, k)
+            f_K\left[\tilde{r}(z)\right]
             \int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm L}(z^{\prime})
-            \left [ 1 -\frac{\tilde{r}(z)}{\tilde{r}(z^{\prime})} \right ]}\\
+            \frac{f_K\left[\tilde{r}(z^{\prime}) - \tilde{r}(z)\right]}
+            {f_K\left[\tilde{r}(z^{\prime})\right]}}\\
 
         Parameters
         ----------
@@ -176,7 +188,7 @@ class Photo:
 
         W_val = (1.5 * H0_Mpc * O_m * (1.0 + self.z_winterp) *
                  self.theory['MG_sigma'](self.z_winterp, k) *
-                 (self.theory['r_z_func'](self.z_winterp) /
+                 (self.theory['f_K_z_func'](self.z_winterp) /
                  (1 / H0_Mpc)) * integral_arr)
 
         return W_val
@@ -187,10 +199,13 @@ class Photo:
         Calculates the weak lensing shear kernel for a given tomographic bin.
 
         .. math::
-            W_{i}^{\gamma}(z, k) = \frac{3}{2}\left ( \frac{H_0}{c}\right )^2
-            \Omega_{{\rm m},0} (1 + z) \Sigma(z, k) r(z)
+            W_{i}^{\gamma}(z, k) =
+            \frac{3}{2}\left ( \frac{H_0}{c}\right )^2
+            \Omega_{{\rm m},0} (1 + z) \Sigma(z, k)
+            f_K\left[\tilde{r}(z)\right]
             \int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm L}(z^{\prime})
-            \left [ 1 -\frac{\tilde{r}(z)}{\tilde{r}(z^{\prime})} \right ]}\\
+            \frac{f_K\left[\tilde{r}(z^{\prime}) - \tilde{r}(z)\right]}
+            {f_K\left[\tilde{r}(z^{\prime})\right]}}\\
 
         Parameters
         ----------
@@ -216,7 +231,7 @@ class Photo:
 
         W_val = ((1.5 * H0_Mpc * O_m * (1.0 + z) *
                   self.theory['MG_sigma'](z, k) * (
-                  self.theory['r_z_func'](z) /
+                  self.theory['f_K_z_func'](z) /
                   (1 / H0_Mpc)) * integrate.quad(self.WL_window_integrand,
                                                  a=z, b=self.cl_int_z_max,
                                                  args=(z, n_z_normalized))[0]))
@@ -263,8 +278,11 @@ class Photo:
         with {A, B} in {G, L}
 
         .. math::
-            \frac{W_{i}^{\rm A}(z)W_{j}^{\rm B}(z)}{H(z)r^2(z)}\
-            P_{\rm AB}\left(k_{\ell}=\frac{{\rm\ell} + 1/2}{r(z)}, z\right)\\
+            \frac{W_{i}^{\rm A}(z)W_{j}^{\rm B}(z)}
+            {H(z)f_K^2\left[\tilde{r}(z)\right]}\
+            P_{\rm AB}\left(k_{\ell}=\
+            \frac{{\rm\ell} + 1/2}
+            {f_K\left[\tilde{r}(z)\right]}, z\right)\\
 
         Parameters
         ----------
@@ -282,7 +300,7 @@ class Photo:
         """
         kern_mult_power = (PandW_i_j_z_k /
                            (self.theory['H_z_func'](z) *
-                            (self.theory['r_z_func'](z)) ** 2.0))
+                            (self.theory['f_K_z_func'](z)) ** 2.0))
 
         if np.isnan(PandW_i_j_z_k).any():
             raise Exception('Requested k, z values are outside of power'
@@ -296,7 +314,8 @@ class Photo:
         for the supplied bins. Includes intrinsic alignments.
 
         .. math::
-            C_{ij}^{\rm LL, no prefac}(\ell)= c \int \frac{dz}{H(z)r^2(z)}\
+            C_{ij}^{\rm LL, no prefac}(\ell)= c \int \frac{dz}
+            {H(z)f_K^2\left[\tilde{r}(z)\right]}\
             \bigg\lbrace W_{i}^{\rm \gamma}\left[ k_{\ell}(z), z \right]\
             W_{j}^{\rm \gamma}\left[ k_{\ell}(z), z \right ]\
             P_{\rm \delta \delta}\left[ k_{\ell}(z), z \right] +\\
@@ -332,7 +351,7 @@ class Photo:
         P_ii = self.theory['Pii']
         P_di = self.theory['Pdeltai']
 
-        ks_arr = (ell + 0.5) / self.theory['r_z_func'](zs_arr)
+        ks_arr = (ell + 0.5) / self.theory['f_K_z_func'](zs_arr)
         pow_dd = P_dd(zs_arr, ks_arr, grid=False)
         pow_ii = P_ii(zs_arr, ks_arr, grid=False)
         pow_di = P_di(zs_arr, ks_arr, grid=False)
@@ -364,7 +383,8 @@ class Photo:
 
         .. math::
             C_{ij}^{\rm GG}(\ell) = c \int {\rm d}z
-            \frac{W_{i}^{\rm G}(z)W_{j}^{\rm G}(z)}{H(z)r^2(z)}\
+            \frac{W_{i}^{\rm G}(z)W_{j}^{\rm G}(z)}
+            {H(z)f_K^2\left[\tilde{r}(z)\right]}\
             P^{\rm{photo}}_{\rm gg}\
             \left[ k_{\ell}(z), z \right]\\
 
@@ -392,7 +412,7 @@ class Photo:
 
         P_gg = self.theory['Pgg_phot']
 
-        ks_arr = (ell + 0.5) / self.theory['r_z_func'](zs_arr)
+        ks_arr = (ell + 0.5) / self.theory['f_K_z_func'](zs_arr)
         power = P_gg(zs_arr, ks_arr, grid=False)
 
         kern_i = np.interp(zs_arr, self.interpwingal[:, 0],
@@ -414,7 +434,8 @@ class Photo:
         Includes intrinsic alignments.
 
         .. math::
-            C_{ij}^{\rm LG, no prefac}(\ell) = c \int \frac{dz}{H(z)r^2(z)}\
+            C_{ij}^{\rm LG, no prefac}(\ell) = c \int \frac{dz}
+            {H(z)f_K^2\left[\tilde{r}(z)\right]}\
             \bigg\lbrace W_{i}^{\gamma}\left[ k_{\ell}(z), z \right ]\
             W_{j}^{\rm{G}}(z)P^{\rm{photo}}_{\rm g\delta}\
             \left[ k_{\ell}(z), z \right]\\
@@ -446,7 +467,7 @@ class Photo:
         P_gd = self.theory['Pgdelta_phot']
         P_gi = self.theory['Pgi_phot']
 
-        ks_arr = (ell + 0.5) / self.theory['r_z_func'](zs_arr)
+        ks_arr = (ell + 0.5) / self.theory['f_K_z_func'](zs_arr)
         pow_gd = P_gd(zs_arr, ks_arr, grid=False)
         pow_gi = P_gi(zs_arr, ks_arr, grid=False)
 

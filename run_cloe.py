@@ -8,7 +8,8 @@ import json
 import sys
 from warnings import warn
 from likelihood.user_interface.likelihood_ui import LikelihoodUI
-from likelihood.auxiliary.logger import open_logger, close_logger, catch_error
+from likelihood.auxiliary.logger import open_logger, close_logger, \
+    catch_error, set_logging_level
 
 
 def run_script(log):
@@ -43,7 +44,14 @@ def run_script(log):
                         type=str,
                         default='{}',
                         help='specify additional arguments')
+    parser.add_argument('-v', '--verbose',
+                        type=str,
+                        default='info',
+                        help='specify logging verbosity level '
+                             '{debug, info, warning, error, critical}')
     args = parser.parse_args()
+
+    set_logging_level(log, args.verbose)
 
     user_dict = json.loads(args.dict)
 

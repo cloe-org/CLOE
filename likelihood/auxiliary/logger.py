@@ -6,15 +6,17 @@ This module contains routines to handle loggers
 import sys
 import logging
 import pprint
+from datetime import datetime
 
 
-def open_logger(filename='CLOE'):
+def open_logger(name='CLOE'):
     """Open an instance of logging.Logger
 
     Parameters
     ----------
-    filename : str
-        Log file name
+    name : str
+        Log name. The filename is the concatenation of the name
+        and the timestamp.
 
     Returns
     -------
@@ -23,21 +25,54 @@ def open_logger(filename='CLOE'):
     """
     logging.captureWarnings(True)
 
-    formatter = logging.Formatter(fmt='%(asctime)s [%(name)s] %(message)s',
-                                  datefmt='%d/%m/%Y %H:%M:%S',)
+    formatter = logging.Formatter(fmt='%(asctime)s [%(name)s] '
+                                      '%(levelname)s - %(message)s',
+                                  datefmt='%Y-%m-%d %H:%M:%S',)
 
-    fh = logging.FileHandler(filename='{0}.log'.format(filename), mode='w')
-    fh.setLevel(logging.DEBUG)
+    date_time = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
+    filename = '{0}-{1}.log'.format(name, date_time)
+    fh = logging.FileHandler(filename=filename, mode='w')
+    fh.setLevel(logging.INFO)
     fh.setFormatter(formatter)
 
-    log = logging.getLogger(filename)
-    log.setLevel(logging.DEBUG)
+    log = logging.getLogger(name)
+    log.setLevel(logging.INFO)
     log.addHandler(fh)
 
     warnings_log = logging.getLogger('py.warnings')
     warnings_log.addHandler(fh)
 
     return log
+
+
+def set_logging_level(log, level):
+    """
+    Sets the logging level
+
+    Parameters
+    ----------
+    log : logging.Logger
+        Logging instance
+    level: str
+        Logging level {debug, info, warning, error, critical}
+    """
+    level = level.lower()
+    if level == "debug":
+        log.setLevel(logging.DEBUG)
+    elif level == "info":
+        log.setLevel(logging.INFO)
+    elif level == "warning":
+        log.setLevel(logging.WARNING)
+    elif level == "error":
+        log.setLevel(logging.ERROR)
+    elif level == "critical":
+        log.setlevel(logging.CRITICAL)
+    else:
+        log.setLevel(logging.INFO)
+        log.warning("Unknown logging verbose level: {}".format(level))
+
+    log.info("Logging verbose level: {}".format(
+        logging.getLevelName(log.getEffectiveLevel())))
 
 
 def log_info(message):

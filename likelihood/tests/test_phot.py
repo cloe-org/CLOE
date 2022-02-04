@@ -135,13 +135,15 @@ class photoinitTestCase(TestCase):
                                  mock_cosmo_dic['Omc'] +
                                  mock_cosmo_dic['Omb'])
 
+        nuisance_dic = mock_cosmo_dic['nuisance_parameters']
         # by setting below to zero, obtain previous non-IA results
         # mock_cosmo_dic['nuisance_parameters']['aia'] = 0
         # mock_cosmo_dic['nuisance_parameters']['bia'] = 0
         # mock_cosmo_dic['nuisance_parameters']['nia'] = 0
         for i in range(10):
-            mock_cosmo_dic['nuisance_parameters'][f'dz_{i+1}_GCphot'] = 0
-            mock_cosmo_dic['nuisance_parameters'][f'dz_{i+1}_WL'] = 0
+            nuisance_dic[f'dz_{i+1}_GCphot'] = 0
+            nuisance_dic[f'dz_{i+1}_WL'] = 0
+            nuisance_dic[f'multiplicative_bias_{i+1}'] = 0
 
         mock_cosmo_dic['Pmm_phot'] = \
             interpolate.RectBivariateSpline(zs_base, ks_base,

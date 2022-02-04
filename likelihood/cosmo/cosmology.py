@@ -257,7 +257,17 @@ class Cosmology:
                              'b4_spectro': 1.8988660,
                              'aia': 1.72,
                              'nia': -0.41,
-                             'bia': 0.0}}
+                             'bia': 0.0,
+                             'multiplicative_bias_1': 0.,
+                             'multiplicative_bias_2': 0.,
+                             'multiplicative_bias_3': 0.,
+                             'multiplicative_bias_4': 0.,
+                             'multiplicative_bias_5': 0.,
+                             'multiplicative_bias_6': 0.,
+                             'multiplicative_bias_7': 0.,
+                             'multiplicative_bias_8': 0.,
+                             'multiplicative_bias_9': 0.,
+                             'multiplicative_bias_10': 0.}}
 
         self.cosmo_dic['H0_Mpc'] = (self.cosmo_dic['H0'] /
                                     const.c.to('km/s').value)

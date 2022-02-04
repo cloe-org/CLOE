@@ -41,6 +41,11 @@ class Photo:
         nuisance_dict = self.theory['nuisance_parameters']
         self.nz_GC = RedshiftDistribution('GCphot', nz_dic_GC, nuisance_dict)
         self.nz_WL = RedshiftDistribution('WL', nz_dic_WL, nuisance_dict)
+        self.multbias = [nuisance_dict[f'multiplicative_bias_{i}'] for i in
+                         sorted(
+                         [int(k.replace('multiplicative_bias_', '')) for k in
+                          nuisance_dict.keys()
+                          if k.startswith('multiplicative_bias_')])]
         if self.theory['f_K_z_func'] is None:
             raise KeyError('No interpolated function for transverse comoving '
                            'distance exists in cosmo_dic.')
@@ -181,15 +186,16 @@ class Photo:
         n_z_normalized = self.nz_WL.interpolates_n_i(bin_i, self.z_winterp)
 
         intg_mat = np.array([self.WL_window_integrand(zint_mat[zii],
-                            zint_mat[zii, 0], n_z_normalized)
-                            for zii in range(len(zint_mat))])
+                                                      zint_mat[zii, 0],
+                                                      n_z_normalized)
+                             for zii in range(len(zint_mat))])
 
         integral_arr = integrate.trapz(intg_mat, dx=diffz, axis=1)
 
         W_val = (1.5 * H0_Mpc * O_m * (1.0 + self.z_winterp) *
                  self.theory['MG_sigma'](self.z_winterp, k) *
                  (self.theory['f_K_z_func'](self.z_winterp) /
-                 (1 / H0_Mpc)) * integral_arr)
+                  (1 / H0_Mpc)) * integral_arr)
 
         return W_val
 
@@ -372,7 +378,8 @@ class Photo:
 
         c_int_arr = self.Cl_generic_integrand(zs_arr, pandwijk)
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, zs_arr)
-
+        c_final = c_final * (1 + self.multbias[bin_i - 1]) * \
+            (1 + self.multbias[bin_j - 1])
         return c_final
 
     def Cl_GC_phot(self, ell, bin_i, bin_j, int_step=0.05):
@@ -447,10 +454,10 @@ class Photo:
         ell: float
             :math:`\ell`-mode at which :math:`C_{\ell}` is evaluated.
         bin_i: int
-           Index of first tomographic bin. Tomographic bin
+           Index of source tomographic bin. Tomographic bin
            indices start from 1.
         bin_j: int
-           Index of second tomographic bin. Tomographic bin
+           Index of lens tomographic bin. Tomographic bin
            indices start from 1.
         int_step: float
             Size of step for numerical integral over redshift.
@@ -483,6 +490,7 @@ class Photo:
 
         c_int_arr = self.Cl_generic_integrand(zs_arr, pandwijk)
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, zs_arr)
+        c_final = c_final * (1 + self.multbias[bin_i - 1])
 
         return c_final
 

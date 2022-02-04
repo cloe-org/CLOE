@@ -58,3 +58,13 @@ dz_9_WL: 0.
 dz_10_GCphot: 0.
 dz_10_WL: 0.
 gamma_MG: 0.55
+multiplicative_bias_1: 0.
+multiplicative_bias_2: 0.
+multiplicative_bias_3: 0.
+multiplicative_bias_4: 0.
+multiplicative_bias_5: 0.
+multiplicative_bias_6: 0.
+multiplicative_bias_7: 0.
+multiplicative_bias_8: 0.
+multiplicative_bias_9: 0.
+multiplicative_bias_10: 0.

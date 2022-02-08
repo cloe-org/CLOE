@@ -44,7 +44,7 @@ class Masking:
         TypeError
           if the matrix is not a square matrix
         """
-        if len(matrix.shape) is not 2:
+        if len(matrix.shape) != 2:
             raise TypeError(f'The size of the input array is'
                             f' {len(matrix.shape)}, while a 2-d array was'
                             f' expected')

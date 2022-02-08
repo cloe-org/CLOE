@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.6
+  - python=3.9
   - astropy>=4.0
   - camb==1.3.0
   - fast-pt>=3.1

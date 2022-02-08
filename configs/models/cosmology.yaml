@@ -64,5 +64,4 @@ sigma8:
 tau: 0.0925
 w: -1.0
 wa: 0.0
-gamma_MG: 0.55 
-  latex: \gamma_{MG}
+gamma_MG: 0.55

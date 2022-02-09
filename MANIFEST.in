@@ -3,5 +3,6 @@ include data/ExternalBenchmark/Photometric/*
 include data/ExternalBenchmark/Photometric/data/*
 include data/ExternalBenchmark/Spectroscopic/*
 include data/ExternalBenchmark/Spectroscopic/data/*
-include data/ExternalBenchmark/Spectroscopic/data/Sefusatti_multipoles_pk/*
+include configs/*
+include configs/models/*
 recursive-include likelihood *.yaml

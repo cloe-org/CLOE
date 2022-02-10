@@ -1,0 +1,20 @@
+## MR Description
+
+Closes #`<ISSUE NUMBER>`
+
+## MR Checklist for Reviewers
+
+Reviewers, please check the following points before merging.
+
+- [ ] MR targets the correct branch
+- [ ] CI tests have run and passed for the latest commit on the source branch
+- [ ] Coverage percentage is retained or increased
+- [ ] Quality of new/changed code is acceptable
+- [ ] Quality of new/changed unit tests is acceptable
+- [ ] Manual `Check_HTML` job run and API documentation looks good
+- [ ] Manual `Profiling` job run and no unexpected performances issues found
+- [ ] Implementation follows the agreed task description point by point
+- [ ] At least one expert has verified the documentation
+- [ ] Final comments by leads, if any, are correctly taken into account (minor ones within the task; major ones in a new task)
+
+> Refer to [reviwer guidelines](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/wikis/Guidelines-for-Reviewers) for more information.

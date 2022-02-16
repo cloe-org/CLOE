@@ -883,10 +883,14 @@ class Cosmology:
             growth = self.cosmo_dic['D_z_k_func'](redshift, k_scale)
             z_is_array = isinstance(redshift, np.ndarray)
             k_is_array = isinstance(k_scale, np.ndarray)
-            if not z_is_array and not k_is_array:
-                growth = growth[0, 0]
-            elif z_is_array ^ k_is_array:
+            if k_is_array and not z_is_array:
                 growth = growth[0]
+            elif z_is_array and not k_is_array:
+                growth = growth[:, 0]
+            elif not z_is_array and not k_is_array:
+                growth = growth[0, 0]
+            else:
+                redshift = redshift.reshape(-1, 1)
 
         c1 = 0.0134
         aia = self.cosmo_dic['nuisance_parameters']['aia']

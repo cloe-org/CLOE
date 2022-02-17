@@ -10,7 +10,6 @@ from astropy import constants as const
 from likelihood.non_linear.nonlinear import Nonlinear
 from likelihood.auxiliary import redshift_bins as rb
 from scipy.integrate import quad
-from likelihood.auxiliary.logger import log_debug, log_info, log_error
 
 
 class CosmologyError(Exception):
@@ -376,8 +375,8 @@ class Cosmology:
             return interpolate.InterpolatedUnivariateSpline(
                 x=zs, y=f_z_k, ext=2)
         except CosmologyError:
-            log_error('Computation error in f(z, k)')
-            log_debug('Check k is a scalar, not a list')
+            print('Computation error in f(z, k)')
+            print('ATTENTION: Check k is a value, not a list')
 
     def growth_rate_cobaya(self):
         r"""Growth Rate Cobaya

@@ -7,7 +7,6 @@ in CLOE.
 from pathlib import Path
 from copy import deepcopy
 from likelihood.auxiliary import yaml_handler
-from likelihood.auxiliary.logger import log_info
 
 
 def get_default_configs_path():
@@ -314,4 +313,4 @@ def generate_params_yaml(models=None):
 
     params_path = get_default_params_yaml_path()
     yaml_handler.yaml_write(params_path, likelihood_params, True)
-    log_info('{} written'.format(params_path))
+    print('{} written'.format(params_path))

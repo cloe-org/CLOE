@@ -9,7 +9,6 @@ from astropy.io import fits, ascii
 from pathlib import Path
 from scipy import interpolate
 from scipy import integrate
-from likelihood.auxiliary.logger import log_critical
 
 
 class ReaderError(Exception):
@@ -171,8 +170,8 @@ class Reader:
             fid_cosmo_file.close()
 
         except ReaderError:
-            log_critical('There was an error when reading the fiducial '
-                         'data from OU-level3 files in read_GC_spectro')
+            print('There was an error when reading the fiducial '
+                  'data from OU-level3 files')
 
         k_fac = (self.data_spectro_fiducial_cosmo['H0'] / 100.0)
         p_fac = 1.0 / ((self.data_spectro_fiducial_cosmo['H0'] / 100.0) ** 3.0)

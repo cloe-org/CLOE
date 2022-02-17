@@ -75,22 +75,9 @@ def set_logging_level(log, level):
         logging.getLevelName(log.getEffectiveLevel())))
 
 
-def log_debug(message):
-    """
-    Logs a message with verbose level debug.
-
-    Parameters
-    ----------
-    message: str
-        Message to be logged
-    """
-    log = logging.getLogger('CLOE')
-    log.debug(message)
-
-
 def log_info(message):
     """
-    Logs a message with verbose level info.
+    Logs an info
 
     Parameters
     ----------
@@ -101,32 +88,6 @@ def log_info(message):
     if type(message) is dict:
         message = '\n' + pprint.pformat(message)
     log.info(message)
-
-
-def log_error(message):
-    """
-    Logs a message with verbose level error.
-
-    Parameters
-    ----------
-    message: str
-        Message to be logged
-    """
-    log = logging.getLogger('CLOE')
-    log.error(message)
-
-
-def log_critical(message):
-    """
-    Logs a message with verbose level critical.
-
-    Parameters
-    ----------
-    message: str
-        Message to be logged
-    """
-    log = logging.getLogger('CLOE')
-    log.critical(message)
 
 
 def close_logger(log):

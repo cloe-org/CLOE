@@ -9,7 +9,7 @@ from likelihood.auxiliary import likelihood_yaml_handler as lyh
 from likelihood.cobaya_interface import EuclidLikelihood
 from likelihood.auxiliary.plotter import Plotter
 from likelihood.auxiliary.getdist_routines import triangle_plot_cobaya
-from likelihood.auxiliary.logger import log_debug, log_info
+from likelihood.auxiliary.logger import log_info
 import cobaya.run
 from cobaya.model import get_model
 from pathlib import Path
@@ -217,7 +217,7 @@ class LikelihoodUI:
             else:
                 field_value = likelihood_sub_dict[field]
                 if type(field_value) is str:
-                    log_debug(f'Field \'{field}\' is a string')
+                    log_info(f'Field \'{field}\' is a string')
                     log_info(f'\'{field}\' will be initialized as specified'
                              f' in the file {field_value}')
                     configs_path = lyh.get_default_configs_path()
@@ -226,7 +226,7 @@ class LikelihoodUI:
                     log_info(field_dict)
                     likelihood_sub_dict[field] = field_dict
                 elif type(field_value) is dict:
-                    log_debug(f'Field \'{field}\' is a dict')
+                    log_info(f'Field \'{field}\' is a dict')
                     if field == 'observables_specifications':
                         obs_spec_dic = field_value
                         sub_fields = ['GCphot', 'GCspectro', 'WL',
@@ -256,14 +256,14 @@ class LikelihoodUI:
 
         params = cobaya_dict['params']
         if type(params) is str:
-            log_debug(f'Field \'params\' is a string: the model path')
+            log_info(f'Field \'params\' is a string: the model path')
             model_path = self._get_model_path_from_cobaya_dict(cobaya_dict)
             log_info(f'Selected model path: {model_path}')
 
             log_info(f'Updating \'params\' in the Cobaya info dictionary')
             lyh.update_cobaya_params_from_model_yaml(cobaya_dict, model_path)
         elif type(params) is dict:
-            log_debug(f'Field \'params\' is a dict')
+            log_info(f'Field \'params\' is a dict')
             log_info(f'\'params\' will be set as:')
             log_info(field_value)
         else:

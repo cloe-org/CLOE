@@ -178,7 +178,10 @@ class Spectro:
             self.theory['Pgg_spectro'](z, self.get_k(k, mu_rsd, z),
                                        self.get_mu(mu_rsd, z))
 
-        return galspec * np.array([self.dict_m_legendrepol[m] for m in ms])
+        if np.array_equal(mu_rsd, self.mu_grid):
+            return galspec * np.array([self.dict_m_legendrepol[m] for m in ms])
+        else:
+            return galspec * np.array([legendre(m)(mu_rsd) for m in ms])
 
     def multipole_spectra(self, z, k, ms=None):
         r"""Multipole Spectra

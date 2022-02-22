@@ -9,6 +9,7 @@ from scipy import interpolate
 from astropy import constants as const
 from likelihood.non_linear.nonlinear import Nonlinear
 from likelihood.auxiliary import redshift_bins as rb
+from likelihood.auxiliary.logger import log_debug, log_error
 from scipy.integrate import quad
 
 
@@ -355,8 +356,8 @@ class Cosmology:
         ----------
         zs: list
             list of redshift for the power spectrum
-        ks: list
-            list of modes for the power spectrum
+        ks: float
+            mode for the power spectrum
 
         Returns
         -------
@@ -375,8 +376,8 @@ class Cosmology:
             return interpolate.InterpolatedUnivariateSpline(
                 x=zs, y=f_z_k, ext=2)
         except CosmologyError:
-            print('Computation error in f(z, k)')
-            print('ATTENTION: Check k is a value, not a list')
+            log_error('Computation error in f(z, k)')
+            log_debug('Check k is a scalar, not an array')
 
     def growth_rate_cobaya(self):
         r"""Growth Rate Cobaya

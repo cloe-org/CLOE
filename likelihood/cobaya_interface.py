@@ -329,6 +329,7 @@ class EuclidLikelihood(Likelihood):
                 **only_nuisance_params)
 
         except (TypeError, AttributeError):
+            self.cosmo.cosmo_dic['CAMBdata'] = model.provider.get_CAMBdata()
             self.cosmo.cosmo_dic['NL_flag'] = \
                 info['likelihood']['Euclid']['NL_flag']
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG

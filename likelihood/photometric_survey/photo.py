@@ -39,6 +39,8 @@ class Photo:
         """
         self.theory = cosmo_dic
         nuisance_dict = self.theory['nuisance_parameters']
+        self.vadd2 = np.vectorize(
+                self.theory['CAMBdata'].angular_diameter_distance2)
         self.nz_GC = RedshiftDistribution('GCphot', nz_dic_GC, nuisance_dict)
         self.nz_WL = RedshiftDistribution('WL', nz_dic_WL, nuisance_dict)
         self.multbias = [nuisance_dict[f'multiplicative_bias_{i}'] for i in
@@ -124,7 +126,7 @@ class Photo:
 
         Parameters
         ----------
-        zprime: float
+        zprime: float or numpy.array
             redshift parameter that will be integrated over.
         z: float
             Redshift at which kernel is being evaluated.
@@ -138,11 +140,13 @@ class Photo:
            Weak-lensing kernel integrand
         """
         # temporary fix, see #767
+        # if not isinstance(zprime, float):
         wint = (
             nz(zprime) *
-            self.theory['CAMBdata'].angular_diameter_distance2(zprime, z) /
-            self.theory['CAMBdata'].angular_diameter_distance2(zprime, 0)
-        )
+            self.vadd2(
+                z,
+                zprime) /
+            self.theory['d_z_func'](zprime))
         return wint
 
     def WL_window(self, bin_i, k=0.0001):

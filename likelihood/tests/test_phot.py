@@ -184,8 +184,8 @@ class photoinitTestCase(TestCase):
     def setUp(self) -> None:
         self.win_tol = 1e-03
         self.cl_tol = 1e-03
-        self.integrand_check = -0.948932
-        self.wbincheck = 1.102535e-06
+        self.integrand_check = 1.043825
+        self.wbincheck = -1.47437e-06
         self.H0 = 67.0
         self.c = const.c.to('km/s').value
         self.omch2 = 0.12
@@ -193,11 +193,11 @@ class photoinitTestCase(TestCase):
         self.W_i_Gcheck = 5.241556e-09
         self.W_IA_check = 0.0001049580
         self.cl_integrand_check = 0.000718
-        self.cl_WL_check = 6.908876e-09
-        self.cl_WL_noprefac_check = 7.06884e-09
+        self.cl_WL_check = 2.572589e-08
+        self.cl_WL_noprefac_check = 2.632154e-08
         self.cl_GC_check = 2.89485e-05
-        self.cl_cross_check = 1.117403e-07
-        self.cl_cross_noprefac_check = 1.130265e-07
+        self.cl_cross_check = -6.379221e-07
+        self.cl_cross_noprefac_check = -6.452649e-07
         self.prefac_check = 0.988620523
 
     def tearDown(self):
@@ -224,7 +224,7 @@ class photoinitTestCase(TestCase):
                             err_msg='IA_window failed')
 
     def test_w_integrand(self):
-        int_comp = self.phot.WL_window_integrand(0.1, 0.2, self.flatnz)
+        int_comp = self.phot.WL_window_integrand([0.1], 0.2, self.flatnz)
         npt.assert_allclose(int_comp, self.integrand_check, rtol=self.win_tol,
                             err_msg='Integrand of WL kernel failed')
 
@@ -291,11 +291,11 @@ class photoinitTestCase(TestCase):
                           self.nz_dic_GC)
 
     # this function tests a temporary part of code, see #767
-    def test_CAMBdata_is_None(self):
-        temp_cosmo_dic = self.phot.theory.copy()
-        temp_cosmo_dic['CAMBdata'] = None
-        npt.assert_raises(KeyError,
-                          photo.Photo,
-                          temp_cosmo_dic,
-                          self.nz_dic_WL,
-                          self.nz_dic_GC)
+    # def test_CAMBdata_is_None(self):
+    #    temp_cosmo_dic = self.phot.theory.copy()
+    #    temp_cosmo_dic['CAMBdata'] = None
+    #    npt.assert_raises(KeyError,
+    #                      photo.Photo,
+    #                      temp_cosmo_dic,
+    #                      self.nz_dic_WL,
+    #                      self.nz_dic_GC)

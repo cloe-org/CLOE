@@ -187,6 +187,11 @@ In this issue, the developers should clearly specify if they:
 a. Plan to open a Merge Request to fix the bug themselves. If so, they can self-assign the issue and link any corresponding Merge Request to the issue.
 b. Leave the issue for someone else to resolve. In this case the IST:L leads should assign the task to another developer.
 
+### Newline warnings
+
+Before merging, please ensure that there are no `\No newline at end of file` warnings.
+
+
 ## IST:NL Development Guidelines
 
 This section provides guidelines on how the [IST:NL repository](https://gitlab.euclid-sgs.uk/pf-ist-nonlinear/likelihood-implementation) should be managed as a *fork* (or *downstream repository*) of the IST:L repository (or *upstream repository*). These guidelines are designed to avoid issues with IST:L.

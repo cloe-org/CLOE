@@ -15,17 +15,16 @@ from likelihood.auxiliary.logger import open_logger, close_logger, \
 def run_script(log):
     """Method to run the script
 
-    Parse command line arguments, instantiate a likelihood_ui object and invoke
-    the method based on the action parameter.
+    Parses command line arguments, opens a logger,
+    instantiates a likelihood_ui object,
+    and invokes the method based on the action parameter.
 
     Parameters
     ----------
     log: logging.Logger
-       Instance of logging.Logger, specifying the logger of the run.
+       Reference for logging.Logger, specifying the logger of the run.
     """
-    log.info('Starting CLOE')
 
-    log.info('Parsing the arguments')
     parser = argparse.ArgumentParser()
     parser.add_argument('config',
                         type=str,
@@ -51,6 +50,8 @@ def run_script(log):
                              '{debug, info, warning, error, critical}')
     args = parser.parse_args()
 
+    log = open_logger('CLOE')
+    log.info('Starting CLOE')
     set_logging_level(log, args.verbose)
 
     user_dict = json.loads(args.dict)
@@ -71,17 +72,16 @@ def run_script(log):
 
     log.info('Exiting CLOE')
     close_logger(log)
-    
+
 
 def main():
     """Main function.
 
-    Opens a logger and calls run_script
+    Calls run_script
     """
 
     log = None
     try:
-        log = open_logger('CLOE')
         run_script(log)
         return 0
     except Exception as err:

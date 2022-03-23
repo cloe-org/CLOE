@@ -55,6 +55,7 @@ class RedshiftDistributionTestCase(TestCase):
     def test_init_success(self):
         nz = RedshiftDistribution('GC', self.gauss_nz_dic,
                                   self.good_nuisance_dic)
+        npt.assert_array_equal(nz.get_tomographic_bins(), [1, 2, 3])
         npt.assert_equal(nz.get_num_tomographic_bins(), 3)
         npt.assert_equal(len(nz.dz_dict), 3)
 
@@ -90,6 +91,8 @@ class RedshiftDistributionTestCase(TestCase):
         # The values should be equal to 1/sqrt(2pi) * norm(0.1)
         norm_at_0_1 = 0.9950124791926823
         desired = norm_at_0_1 * np.array(self.peak_values)
+        # n(z-shifted) is zero below the first bin midpoint
+        desired[0] = 0
         npt.assert_allclose(evaluated, desired, rtol=1e-3)
 
     def test_interpolates_n_i_z_only_shift(self):

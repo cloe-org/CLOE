@@ -55,7 +55,11 @@ class Photo:
         if self.theory['CAMBdata'] is None:
             raise KeyError('CAMBdata is not available in cosmo_dic.')
         self.cl_int_z_min = 0.001
-        self.cl_int_z_max = self.theory['z_win'][-1]
+        z_wmax = self.theory['z_win'][-1]
+        self.wl_int_z_max = {i: z_wmax + nuisance_dict[f'dz_{i}_WL']
+                             for i in self.nz_WL.get_tomographic_bins()}
+        self.gc_int_z_max = {i: z_wmax + nuisance_dict[f'dz_{i}_GCphot']
+                             for i in self.nz_GC.get_tomographic_bins()}
         # The size of z_winterp sufficient for now, could be tuned later
         z_wlogmin = -2
         z_wmin1 = 1e-5
@@ -180,7 +184,8 @@ class Photo:
            1-D Numpy array of shear kernel values for specified bin
            at specified scale for the redshifts defined in self.z_winterp
         """
-        zint_mat = np.linspace(self.z_winterp, self.z_winterp[-1],
+        dz_i = self.theory['nuisance_parameters'][f'dz_{bin_i}_WL']
+        zint_mat = np.linspace(self.z_winterp, self.z_winterp[-1] + dz_i,
                                self.z_trapz_sampling)
         zint_mat = zint_mat.T
         diffz = np.diff(zint_mat)
@@ -243,7 +248,8 @@ class Photo:
                   self.theory['MG_sigma'](z, k) * (
                   self.theory['f_K_z_func'](z) /
                   (1 / H0_Mpc)) * integrate.quad(self.WL_window_integrand,
-                                                 a=z, b=self.cl_int_z_max,
+                                                 a=z,
+                                                 b=self.wl_int_z_max[bin_i],
                                                  args=(z, n_z_normalized))[0]))
         return W_val
 
@@ -355,7 +361,8 @@ class Photo:
            Value of the angular shear power spectrum.
         """
 
-        zs_arr = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
+        cl_int_z_max = min(self.wl_int_z_max[bin_i], self.wl_int_z_max[bin_j])
+        zs_arr = np.arange(self.cl_int_z_min, cl_int_z_max, int_step)
 
         P_dd = self.theory['Pmm_phot']
         P_ii = self.theory['Pii']
@@ -419,7 +426,8 @@ class Photo:
            galaxy clustering photometric.
         """
 
-        zs_arr = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
+        cl_int_z_max = min(self.gc_int_z_max[bin_i], self.gc_int_z_max[bin_j])
+        zs_arr = np.arange(self.cl_int_z_min, cl_int_z_max, int_step)
 
         P_gg = self.theory['Pgg_phot']
 
@@ -473,7 +481,8 @@ class Photo:
            galaxy clustering photometric angular power spectrum.
         """
 
-        zs_arr = np.arange(self.cl_int_z_min, self.cl_int_z_max, int_step)
+        cl_int_z_max = min(self.wl_int_z_max[bin_i], self.gc_int_z_max[bin_j])
+        zs_arr = np.arange(self.cl_int_z_min, cl_int_z_max, int_step)
 
         P_gd = self.theory['Pgdelta_phot']
         P_gi = self.theory['Pgi_phot']

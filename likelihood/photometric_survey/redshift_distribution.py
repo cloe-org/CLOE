@@ -2,6 +2,7 @@
 """
 
 from scipy.interpolate import InterpolatedUnivariateSpline
+from numpy import where
 
 
 class RedshiftDistribution:
@@ -34,11 +35,13 @@ class RedshiftDistribution:
             # set extrapolation mode ext=1 to return 0 outside boundaries
             interp_n.ext = 1
 
-        bins = [i + 1 for i in range(len(nz_dict))]
-        self.dz_dict = {i: nuisance_dict[f'dz_{i}_{probe}'] for i in bins}
+        self.bins = [i + 1 for i in range(len(nz_dict))]
+        self.dz_dict = {i: nuisance_dict[f'dz_{i}_{probe}'] for i in self.bins}
         # The uncertainties due to blending can be included
         # in future devel, by for example following MacCrann et al. (2021)
         # self.F_dict = {i: nuisance_dict[f'F_{i}_{probe}'] for i in bins}
+
+        self.z_min = 0.001
 
     def evaluates_n_i_z(self, bin_i, zs):
         r"""Evaluates the redshift distribution at bin i.
@@ -73,7 +76,9 @@ class RedshiftDistribution:
         dz_i = self.dz_dict[bin_i]
         # Task 734: check the difference in this implementation
         # vs explicitly returning zero if (zs - dz_i) is out of bounds
-        return ni(zs - dz_i)
+        shifted_zs = zs - dz_i
+        n_i_z = where(shifted_zs < self.z_min, 0, ni(shifted_zs))
+        return n_i_z
 
     def interpolates_n_i(self, bin_i, zs):
         """Returns an interpolator for the redshift distribution at bin i.
@@ -93,12 +98,22 @@ class RedshiftDistribution:
         values = self.evaluates_n_i_z(bin_i, zs)
         return InterpolatedUnivariateSpline(zs, values, ext='zeros')
 
+    def get_tomographic_bins(self):
+        """Gets the list of tomographic bins.
+
+        Returns
+        -------
+        tomographic_bins: list of int
+            The list of tomographic bins.
+        """
+        return self.bins
+
     def get_num_tomographic_bins(self):
-        """Get the number of tomographic bins.
+        """Gets the number of tomographic bins.
 
         Returns
         -------
         num_tomographic_bins: int
             The number of tomographic bins.
         """
-        return len(self.nz_dict)
+        return len(self.bins)

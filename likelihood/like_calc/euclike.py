@@ -119,6 +119,11 @@ class Euclike:
             self.mask_ins.get_masked_covariance_matrix())
         self.masked_invcov_matrix = np.linalg.inv(self.masked_cov_matrix)
 
+        # Photo class instance
+        self.phot_ins = Photo(None,
+                              self.data_ins.nz_dict_WL,
+                              self.data_ins.nz_dict_GC_Phot)
+
     def create_photo_data(self):
         """Create Photo Data
 
@@ -188,16 +193,12 @@ class Euclike:
             theory is not evaluated, are set to zero.
         """
 
-        # Photo class instance
-        phot_ins = Photo(
-            dictionary,
-            self.data_ins.nz_dict_WL,
-            self.data_ins.nz_dict_GC_Phot)
+        self.phot_ins.update(dictionary)
 
         # Obtain the theory for WL
         if self.data_handler_ins.use_wl:
             wl_array = np.array(
-                [phot_ins.Cl_WL_noprefac(ell, element[0], element[1])
+                [self.phot_ins.Cl_WL_noprefac(ell, element[0], element[1])
                  for element in self.indices_diagonal_wl
                  for ell in self.data_ins.data_dict['WL']['ells']]
             )
@@ -211,7 +212,7 @@ class Euclike:
         # Obtain the theory for XC-Phot
         if self.data_handler_ins.use_xc_phot:
             xc_phot_array = np.array(
-                [phot_ins.Cl_cross_noprefac(ell, element[1], element[0])
+                [self.phot_ins.Cl_cross_noprefac(ell, element[1], element[0])
                  for element in self.indices_all
                  for ell in self.data_ins.data_dict['XC-Phot']['ells']]
             )
@@ -225,7 +226,7 @@ class Euclike:
         # Obtain the theory for GC-Phot
         if self.data_handler_ins.use_gc_phot:
             gc_phot_array = np.array(
-                [phot_ins.Cl_GC_phot(ell, element[0], element[1])
+                [self.phot_ins.Cl_GC_phot(ell, element[0], element[1])
                  for element in self.indices_diagonal_gcphot
                  for ell in self.data_ins.data_dict['GC-Phot']['ells']]
             )

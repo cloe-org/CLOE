@@ -31,55 +31,87 @@ class Photo:
         Parameters
         ----------
         cosmo_dic: dict
-           cosmological dictionary from cosmo
+            Cosmological dictionary from Cosmology class.
         nz_dic_WL: dict
             Dictionary containing n(z)s for WL probe.
         nz_dic_GC: dict
             Dictionary containing n(z)s for GC-phot probe.
         """
-        self.theory = cosmo_dic
-        nuisance_dict = self.theory['nuisance_parameters']
-        self.vadd2 = np.vectorize(
-                self.theory['CAMBdata'].angular_diameter_distance2)
-        self.nz_GC = RedshiftDistribution('GCphot', nz_dic_GC, nuisance_dict)
-        self.nz_WL = RedshiftDistribution('WL', nz_dic_WL, nuisance_dict)
-        self.multbias = [nuisance_dict[f'multiplicative_bias_{i}'] for i in
-                         sorted(
-                         [int(k.replace('multiplicative_bias_', '')) for k in
-                          nuisance_dict.keys()
-                          if k.startswith('multiplicative_bias_')])]
-        if self.theory['f_K_z_func'] is None:
-            raise KeyError('No interpolated function for transverse comoving '
-                           'distance exists in cosmo_dic.')
-        # temporary fix, see #767
-        if self.theory['CAMBdata'] is None:
-            raise KeyError('CAMBdata is not available in cosmo_dic.')
+
+        self.nz_dic_WL = nz_dic_WL
+        self.nz_dic_GC = nz_dic_GC
+
         self.cl_int_z_min = 0.001
-        z_wmax = self.theory['z_win'][-1]
-        self.wl_int_z_max = {i: z_wmax + nuisance_dict[f'dz_{i}_WL']
-                             for i in self.nz_WL.get_tomographic_bins()}
-        self.gc_int_z_max = {i: z_wmax + nuisance_dict[f'dz_{i}_GCphot']
-                             for i in self.nz_GC.get_tomographic_bins()}
+
         # The size of z_winterp sufficient for now, could be tuned later
         z_wlogmin = -2
         z_wmin1 = 1e-5
         z_wmin2 = 1e-4
         z_wmin3 = 1e-3
         z_wmax = 4.0
-        z_wsamp = 1000
+        self.z_wsamp = 1000
         self.z_trapz_sampling = 500
-        self.z_winterp = np.logspace(z_wlogmin, np.log10(z_wmax), z_wsamp)
+        self.z_winterp = np.logspace(z_wlogmin,
+                                     np.log10(z_wmax),
+                                     self.z_wsamp)
         self.z_winterp[0] = z_wmin1
         self.z_winterp[1] = z_wmin2
         self.z_winterp[2] = z_wmin3
         # Number of bins should be generalized, hard-coded for now
 
+        # The class might be initialized with no cosmo dictionary, as it is
+        # currently done when instanciating Photo from Euclike, for running
+        # the likelihood of CLOE
+        if cosmo_dic is not None:
+            self.update(cosmo_dic)
+
+    def update(self, cosmo_dic):
+        r"""Update method
+
+        Method to update the theory class attribute to the passed cosmo
+        dictionary, and recompute all cosmology-dependent quantities.
+
+        Parameters
+        ----------
+        cosmo_dic: dict
+            Cosmological dictionary from Cosmology class.
+        """
+        self.theory = cosmo_dic
+        nuisance_dict = self.theory['nuisance_parameters']
+
+        self.vadd2 = np.vectorize(
+                self.theory['CAMBdata'].angular_diameter_distance2)
+
+        self.nz_GC = RedshiftDistribution('GCphot', self.nz_dic_GC,
+                                          nuisance_dict)
+        self.nz_WL = RedshiftDistribution('WL', self.nz_dic_WL,
+                                          nuisance_dict)
+
+        self.multbias = [nuisance_dict[f'multiplicative_bias_{i}'] for i in
+                         sorted(
+                         [int(k.replace('multiplicative_bias_', '')) for k in
+                          nuisance_dict.keys()
+                          if k.startswith('multiplicative_bias_')])]
+
+        if self.theory['f_K_z_func'] is None:
+            raise KeyError('No interpolated function for transverse comoving '
+                           'distance exists in cosmo_dic.')
+        # temporary fix, see #767
+        if self.theory['CAMBdata'] is None:
+            raise KeyError('CAMBdata is not available in cosmo_dic.')
+
+        z_wmax = self.theory['z_win'][-1]
+        self.wl_int_z_max = {i: z_wmax + nuisance_dict[f'dz_{i}_WL']
+                             for i in self.nz_WL.get_tomographic_bins()}
+        self.gc_int_z_max = {i: z_wmax + nuisance_dict[f'dz_{i}_GCphot']
+                             for i in self.nz_GC.get_tomographic_bins()}
+
         # z_wtom is the number of tomographic bins + 1
         z_wtom_wl = 1 + self.nz_WL.get_num_tomographic_bins()
         z_wtom_gc = 1 + self.nz_GC.get_num_tomographic_bins()
-        self.interpwin = np.zeros(shape=(z_wsamp, z_wtom_wl))
-        self.interpwingal = np.zeros(shape=(z_wsamp, z_wtom_gc))
-        self.interpwinia = np.zeros(shape=(z_wsamp, z_wtom_wl))
+        self.interpwin = np.zeros(shape=(self.z_wsamp, z_wtom_wl))
+        self.interpwingal = np.zeros(shape=(self.z_wsamp, z_wtom_gc))
+        self.interpwinia = np.zeros(shape=(self.z_wsamp, z_wtom_wl))
         self.interpwin[:, 0] = self.z_winterp
         self.interpwingal[:, 0] = self.z_winterp
         self.interpwinia[:, 0] = self.z_winterp

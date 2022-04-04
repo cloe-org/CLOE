@@ -22,7 +22,7 @@ class datareaderTestCase(TestCase):
                                    'ns', 'sigma8_0', 'w',
                                    'omkh2', 'omnuh2', 'Omnu']
         self.cov_check_GC_spectro = 1.217193e+08
-        self.cov_check_3x2 = 0.019484
+        self.cov_check_3x2pt = 0.019484
         self.cl_phot_WL_check = 7.144612e-05
         self.cl_phot_GC_check = 2.239632e-03
         self.cl_phot_XC_check = 2.535458e-04
@@ -97,19 +97,19 @@ class datareaderTestCase(TestCase):
         shape_WL = int(num_WL_bins * (num_WL_bins + 1) / 2) * num_ells
         shape_XC = int(num_WL_bins * num_GC_bins) * num_ells
         shape_GC = int(num_GC_bins * (num_GC_bins + 1) / 2) * num_ells
-        shape_3x2 = shape_WL + shape_XC + shape_GC
+        shape_3x2pt = shape_WL + shape_XC + shape_GC
 
-        test_cov_3x2 = 0.0
+        test_cov_3x2pt = 0.0
 
-        for i in range(shape_3x2):
-            for j in range(shape_3x2):
+        for i in range(shape_3x2pt):
+            for j in range(shape_3x2pt):
                 bin_i = i
                 bin_j = j
-                test_cov_3x2 += i * j * \
+                test_cov_3x2pt += i * j * \
                     self.data_tester.data_dict['3x2pt_cov'][bin_i, bin_j]
 
-        npt.assert_allclose(test_cov_3x2,
-                            [self.cov_check_3x2], rtol=1e-3,
+        npt.assert_allclose(test_cov_3x2pt,
+                            [self.cov_check_3x2pt], rtol=1e-3,
                             err_msg='Error in loading external photometric'
                                     ' test covariance data.')
 

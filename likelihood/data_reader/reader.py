@@ -275,7 +275,7 @@ class Reader:
         self.num_ells_xcphot = len(XC_phot_dict['ells'])
         self.num_ells_gcphot = len(GC_phot_dict['ells'])
 
-        tx2_cov_str = self.data['photo']['cov_3x2'].format(self.data[
+        tx2_cov_str = self.data['photo']['cov_3x2pt'].format(self.data[
             'photo']['cov_model'])
         tx2_cov = np.load(Path(full_path, tx2_cov_str))
         new_tx2_cov = self._unpack_3x2pt_cov(tx2_cov)

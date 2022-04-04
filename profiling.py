@@ -165,7 +165,7 @@ if runoption == 0:
                     'IA_model': 'zNLA',
                     'cov_GC': 'CovMat-PosPos-{:s}-20Bins.npy',
                     'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.npy',
-                    'cov_3x2': 'CovMat-3x2pt-{:s}-20Bins.npy',
+                    'cov_3x2pt': 'CovMat-3x2pt-{:s}-20Bins.npy',
                     'cov_model': 'Gauss'}
                     }
         }}

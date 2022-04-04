@@ -14,7 +14,8 @@ Reviewers, please check the following points before merging.
 - [ ] Manual `Check_HTML` job run and API documentation looks good
 - [ ] Manual `Profiling` job run and no unexpected performances issues found
 - [ ] Implementation follows the agreed task description point by point
+- [ ] Check that there are no '\No newline at the end of file' warnings
 - [ ] At least one expert has verified the documentation
 - [ ] Final comments by leads, if any, are correctly taken into account (minor ones within the task; major ones in a new task)
 
-> Refer to [reviwer guidelines](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/wikis/Guidelines-for-Reviewers) for more information.
+> Refer to [reviewer guidelines](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/wikis/Guidelines-for-Reviewers) for more information.

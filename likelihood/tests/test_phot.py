@@ -144,7 +144,7 @@ class photoinitTestCase(TestCase):
             nuisance_dic[f'dz_{i+1}_GCphot'] = 0
             nuisance_dic[f'dz_{i+1}_WL'] = 0
             nuisance_dic[f'multiplicative_bias_{i+1}'] = 0
-
+            nuisance_dic[f'magnification_bias_{i+1}'] = 0
         mock_cosmo_dic['Pmm_phot'] = \
             interpolate.RectBivariateSpline(zs_base, ks_base,
                                             pdd, kx=1, ky=1)
@@ -186,6 +186,7 @@ class photoinitTestCase(TestCase):
         self.cl_tol = 1e-03
         self.integrand_check = 1.043825
         self.wbincheck = -1.47437e-06
+        self.wbincheck_mag = 0.0
         self.H0 = 67.0
         self.c = const.c.to('km/s').value
         self.omch2 = 0.12
@@ -203,6 +204,7 @@ class photoinitTestCase(TestCase):
     def tearDown(self):
         self.integrand_check = None
         self.wbincheck = None
+        self.wbincheck_mag = None
         self.W_i_Gcheck = None
         self.W_IA_check = None
         self.cl_integrand_check = None
@@ -224,7 +226,7 @@ class photoinitTestCase(TestCase):
                             err_msg='IA_window failed')
 
     def test_w_integrand(self):
-        int_comp = self.phot.WL_window_integrand([0.1], 0.2, self.flatnz)
+        int_comp = self.phot.window_integrand([0.1], 0.2, self.flatnz)
         npt.assert_allclose(int_comp, self.integrand_check, rtol=self.win_tol,
                             err_msg='Integrand of WL kernel failed')
 
@@ -232,6 +234,11 @@ class photoinitTestCase(TestCase):
         int_comp = self.phot.WL_window(1, 0.1)[10]
         npt.assert_allclose(int_comp, self.wbincheck, rtol=self.win_tol,
                             err_msg='WL_window failed')
+
+    def test_magnification_window(self):
+        int_comp = self.phot.magnification_window(1, 0.1)[10]
+        npt.assert_allclose(int_comp, self.wbincheck_mag, rtol=self.win_tol,
+                            err_msg='magnification_window failed')
 
     def test_WL_window_slow(self):
         int_comp = self.phot.WL_window_slow(

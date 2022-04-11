@@ -156,6 +156,14 @@ class likecalcTestCase(TestCase):
                               'dz_9_GCphot': 0., 'dz_9_WL': 0.,
                               'dz_10_GCphot': 0., 'dz_10_WL': 0.}}
 
+        nuisance_dic = mock_cosmo_dic['nuisance_parameters']
+        # by setting below to zero, obtain previous non-IA results
+        # mock_cosmo_dic['nuisance_parameters']['aia'] = 0
+        # mock_cosmo_dic['nuisance_parameters']['bia'] = 0
+        # mock_cosmo_dic['nuisance_parameters']['nia'] = 0
+        for i in range(10):
+            nuisance_dic[f'multiplicative_bias_{i+1}'] = 0
+            nuisance_dic[f'magnification_bias_{i+1}'] = 0
         # precomputed parameters
         mock_cosmo_dic['H0_Mpc'] = \
             mock_cosmo_dic['H0'] / const.c.to('km/s').value

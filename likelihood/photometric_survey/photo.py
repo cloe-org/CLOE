@@ -86,13 +86,10 @@ class Photo:
                                           nuisance_dict)
         self.nz_WL = RedshiftDistribution('WL', self.nz_dic_WL,
                                           nuisance_dict)
-
-        self.multbias = [nuisance_dict[f'multiplicative_bias_{i}'] for i in
-                         sorted(
-                         [int(k.replace('multiplicative_bias_', '')) for k in
-                          nuisance_dict.keys()
-                          if k.startswith('multiplicative_bias_')])]
-
+        self.multbias = [nuisance_dict[f'multiplicative_bias_{i}']
+                         for i in self.nz_WL.get_tomographic_bins()]
+        self.magbias = [nuisance_dict[f'magnification_bias_{i}']
+                        for i in self.nz_GC.get_tomographic_bins()]
         if self.theory['f_K_z_func'] is None:
             raise KeyError('No interpolated function for transverse comoving '
                            'distance exists in cosmo_dic.')
@@ -149,13 +146,15 @@ class Photo:
 
         return W_i_G
 
-    def WL_window_integrand(self, zprime, z, nz):
-        r"""WL Window Integrand
+    def window_integrand(self, zprime, z, nz):
+        r"""Window Integrand
 
-        Calculates the Weak-lensing (WL) kernel integrand as
+        Calculates the Weak-lensing (WL) kernel
+        or the Magnification bias kernel integrands
+        with A = {L, G}, as
 
         .. math::
-            \int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm L}(z^{\prime})
+            \int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm A}(z^{\prime})
             \frac{f_{K}\left[\tilde{r}(z^{\prime}) - \tilde{r}(z)\right]}
             {f_K\left[\tilde{r}(z^{\prime})\right]}
             }
@@ -173,7 +172,7 @@ class Photo:
         Returns
         -------
         wint: float
-           Weak-lensing kernel integrand
+           kernel integrand
         """
         # temporary fix, see #767
         # if not isinstance(zprime, float):
@@ -226,9 +225,9 @@ class Photo:
 
         n_z_normalized = self.nz_WL.interpolates_n_i(bin_i, self.z_winterp)
 
-        intg_mat = np.array([self.WL_window_integrand(zint_mat[zii],
-                                                      zint_mat[zii, 0],
-                                                      n_z_normalized)
+        intg_mat = np.array([self.window_integrand(zint_mat[zii],
+                                                   zint_mat[zii, 0],
+                                                   n_z_normalized)
                              for zii in range(len(zint_mat))])
 
         integral_arr = integrate.trapz(intg_mat, dx=diffz, axis=1)
@@ -238,6 +237,62 @@ class Photo:
                  (self.theory['f_K_z_func'](self.z_winterp) /
                   (1 / H0_Mpc)) * integral_arr)
 
+        return W_val
+
+    def magnification_window(self, bin_i, k=0.0001):
+        r"""Magnification Bias Window
+
+        Calculates the magnification bias kernel for a given tomographic bin.
+        Uses broadcasting to compute a 2D-array of integrands and then applies
+        integrate.trapz on the array along one axis.
+
+        .. math::
+            W_{i}^{\mu}(\ell, z, k) =
+            \frac{3}{2}\left ( \frac{H_0}{c}\right )^2
+            \Omega_{{\rm m},0} b_{\rm mag, i}(1 + z) \Sigma(z, k)
+            f_K\left[\tilde{r}(z)\right]
+            \int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm G}(z^{\prime})
+            \frac{f_K\left[\tilde{r}(z^{\prime}) - \tilde{r}(z)\right]}
+            {f_K\left[\tilde{r}(z^{\prime})\right]}}\\
+
+        Parameters
+        ----------
+        bin_i: int
+           index of desired tomographic bin. Tomographic bin
+           indices start from 1.
+        k: float
+            k-mode at which to evaluate the Modified Gravity
+            :math:`\Sigma(z,k)` function
+
+        Returns
+        -------
+        W_val: numpy.ndarray
+           1-D Numpy array of magnification bias kernel
+           values for specified bin
+           at specified scale for the redshifts defined in self.z_winterp
+        """
+        dz_i = self.theory['nuisance_parameters'][f'dz_{bin_i}_GCphot']
+        zint_mat = np.linspace(self.z_winterp, self.z_winterp[-1] + dz_i,
+                               self.z_trapz_sampling)
+        zint_mat = zint_mat.T
+        diffz = np.diff(zint_mat)
+        H0_Mpc = self.theory['H0_Mpc']
+        O_m = self.theory['Omm']
+
+        n_z_normalized = self.nz_GC.interpolates_n_i(bin_i, self.z_winterp)
+
+        intg_mat = np.array([self.window_integrand(zint_mat[zii],
+                                                   zint_mat[zii, 0],
+                                                   n_z_normalized)
+                             for zii in range(len(zint_mat))])
+
+        integral_arr = integrate.trapz(intg_mat, dx=diffz, axis=1)
+
+        W_val = (1.5 * H0_Mpc * O_m * self.magbias[bin_i - 1] *
+                 (1.0 + self.z_winterp) *
+                 self.theory['MG_sigma'](self.z_winterp, k) *
+                 (self.theory['f_K_z_func'](self.z_winterp) /
+                  (1 / H0_Mpc)) * integral_arr)
         return W_val
 
     def WL_window_slow(self, z, bin_i, k=0.0001):
@@ -279,7 +334,7 @@ class Photo:
         W_val = ((1.5 * H0_Mpc * O_m * (1.0 + z) *
                   self.theory['MG_sigma'](z, k) * (
                   self.theory['f_K_z_func'](z) /
-                  (1 / H0_Mpc)) * integrate.quad(self.WL_window_integrand,
+                  (1 / H0_Mpc)) * integrate.quad(self.window_integrand,
                                                  a=z,
                                                  b=self.wl_int_z_max[bin_i],
                                                  args=(z, n_z_normalized))[0]))

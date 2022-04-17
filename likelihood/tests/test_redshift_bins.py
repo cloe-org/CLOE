@@ -15,7 +15,7 @@ import likelihood.auxiliary.redshift_bins as rb
 class RedshiftBinsTestCase(TestCase):
 
     def setUp(self):
-        self.edges = np.array([1, 2, 4, 8], dtype=float)
+        self.edges = np.array([1.0, 2.0, 4.0, 8.0], dtype=float)
         self.z_list = [0.9, 1.5, 3.2, 8.1]
         self.z_ndarray = np.array(self.z_list)
         self.z_in_1 = 1.5
@@ -41,7 +41,7 @@ class RedshiftBinsTestCase(TestCase):
                          err_msg='Error in coerce (> range)')
 
     def test_coerce_vector(self):
-        desired_array = np.array([1, 1.5, 3.2, 8], dtype=float)
+        desired_array = np.array([1.0, 1.5, 3.2, 8.0], dtype=float)
         npt.assert_array_equal(rb.coerce(self.z_ndarray, self.edges),
                                desired_array,
                                err_msg='Error in coerce (zs ndarray)')
@@ -113,7 +113,7 @@ class RedshiftBinsTestCase(TestCase):
                           check_bounds=True)
 
     def test_compute_means_of_consecutive(self):
-        desired_means = np.array([1.5, 3., 6.], dtype=float)
+        desired_means = np.array([1.5, 3.0, 6.0], dtype=float)
         actual_means = rb.compute_means_of_consecutive(self.edges)
         npt.assert_allclose(actual=actual_means,
                             desired=desired_means,
@@ -121,6 +121,6 @@ class RedshiftBinsTestCase(TestCase):
                             err_msg='Error in compute_means_of_consecutive')
 
     def test_reduce(self):
-        desired_reduced = np.array([2, 4], dtype=float)
+        desired_reduced = np.array([2.0, 4.0], dtype=float)
         npt.assert_equal(rb.reduce(self.edges, 2, 5.0), desired_reduced,
                          err_msg='Error in reduce')

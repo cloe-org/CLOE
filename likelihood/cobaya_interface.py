@@ -67,7 +67,7 @@ class EuclidLikelihood(Likelihood):
         # self.z_min1 = 0.0
         # self.z_min2 = 1e-4
         # self.z_min3 = 1e-3
-        # self.z_minlog = -2
+        # self.z_minlog = -2.0
         # self.z_max = 4.0
         # self.z_samp = 140
         # self.z_win = np.logspace(self.z_minlog, np.log10(self.z_max),
@@ -119,7 +119,7 @@ class EuclidLikelihood(Likelihood):
                 'H0_Mpc': (self.cosmo.cosmo_dic['H0'] /
                            const.c.to('km/s').value),
                 'Omnu': (self.fiducial_cosmology.cosmo_dic['omnuh2'] /
-                         (self.cosmo.cosmo_dic['H0'] / 100.)**2.),
+                         (self.cosmo.cosmo_dic['H0'] / 100.0)**2.0),
                 'tau': self.fiducial_cosmology.cosmo_dic['tau'],
                 'mnu': self.fiducial_cosmology.cosmo_dic['mnu'],
                 'nnu': self.fiducial_cosmology.cosmo_dic['nnu'],

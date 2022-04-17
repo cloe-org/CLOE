@@ -38,14 +38,14 @@ if runoption == 0:
             #  For more information see: https://cobaya.readthedocs.io/en/latest/example.html
             'ombh2': 0.022445,  # Omega density of baryons times the reduced Hubble parameter squared
             'omch2': 0.1205579307,  # Omega density of cold dark matter times the reduced Hubble parameter squared
-            'H0': 67,  # Hubble parameter evaluated today (z=0) in km/s/Mpc
+            'H0': 67.0,  # Hubble parameter evaluated today (z=0) in km/s/Mpc
             'tau': 0.0925,  # optical depth
             'mnu': 0.06,  # sum of the mass of neutrinos in eV
             'nnu': 3.046,  # N_eff of relativistic species
             'As': 2.12605e-9,  # Amplitude of the primordial scalar power spectrum
             'ns': 0.9674,  # primordial power spectrum tilt
-            'w': -1,  # Dark energy fluid model
-            'wa': 0,  # Dark energy fluid model
+            'w': -1.0,  # Dark energy fluid model
+            'wa': 0.0,  # Dark energy fluid model
             'omk': 0.0,  # curvature density
             'omegam': None,  # DERIVED parameter: Omega matter density
             'omegab': None,  # DERIVED parameter: Omega baryon density
@@ -76,16 +76,16 @@ if runoption == 0:
             'magnification_bias_9': 0.0,
             'magnification_bias_10': 0.0,
             # Shear calibration multiplicative bias parameters
-            'multiplicative_bias_1': 0.,
-            'multiplicative_bias_2': 0.,
-            'multiplicative_bias_3': 0.,
-            'multiplicative_bias_4': 0.,
-            'multiplicative_bias_5': 0.,
-            'multiplicative_bias_6': 0.,
-            'multiplicative_bias_7': 0.,
-            'multiplicative_bias_8': 0.,
-            'multiplicative_bias_9': 0.,
-            'multiplicative_bias_10': 0.,
+            'multiplicative_bias_1': 0.0,
+            'multiplicative_bias_2': 0.0,
+            'multiplicative_bias_3': 0.0,
+            'multiplicative_bias_4': 0.0,
+            'multiplicative_bias_5': 0.0,
+            'multiplicative_bias_6': 0.0,
+            'multiplicative_bias_7': 0.0,
+            'multiplicative_bias_8': 0.0,
+            'multiplicative_bias_9': 0.0,
+            'multiplicative_bias_10': 0.0,
             # Spectroscopic bias parameters
             'b1_spectro': 1.46,
             'b2_spectro': 1.61,
@@ -96,11 +96,11 @@ if runoption == 0:
             'nia': -0.41,
             'bia': 0.0,
             # Redshift distributions nuisance parameters: shifts
-            'dz_1_GCphot': 0., 'dz_1_WL': 0., 'dz_2_GCphot': 0., 'dz_2_WL': 0.,
-            'dz_3_GCphot': 0., 'dz_3_WL': 0., 'dz_4_GCphot': 0., 'dz_4_WL': 0.,
-            'dz_5_GCphot': 0., 'dz_5_WL': 0., 'dz_6_GCphot': 0., 'dz_6_WL': 0.,
-            'dz_7_GCphot': 0., 'dz_7_WL': 0., 'dz_8_GCphot': 0., 'dz_8_WL': 0.,
-            'dz_9_GCphot': 0., 'dz_9_WL': 0., 'dz_10_GCphot': 0., 'dz_10_WL': 0.},
+            'dz_1_GCphot': 0.0, 'dz_1_WL': 0.0, 'dz_2_GCphot': 0.0, 'dz_2_WL': 0.0,
+            'dz_3_GCphot': 0.0, 'dz_3_WL': 0.0, 'dz_4_GCphot': 0.0, 'dz_4_WL': 0.0,
+            'dz_5_GCphot': 0.0, 'dz_5_WL': 0.0, 'dz_6_GCphot': 0.0, 'dz_6_WL': 0.0,
+            'dz_7_GCphot': 0.0, 'dz_7_WL': 0.0, 'dz_8_GCphot': 0.0, 'dz_8_WL': 0.0,
+            'dz_9_GCphot': 0.0, 'dz_9_WL': 0.0, 'dz_10_GCphot': 0.0, 'dz_10_WL': 0.0},
         # 'theory': Cobaya's protected key of the input dictionary.
         # Cobaya needs to ask some minimum theoretical requirements to a Boltzman Solver
         # You can choose between CAMB or CLASS
@@ -302,16 +302,16 @@ if runoption == 1:
                                   'magnification_bias_8': 0.0,
                                   'magnification_bias_9': 0.0,
                                   'magnification_bias_10': 0.0,
-                                  'multiplicative_bias_1': 0.,
-                                  'multiplicative_bias_2': 0.,
-                                  'multiplicative_bias_3': 0.,
-                                  'multiplicative_bias_4': 0.,
-                                  'multiplicative_bias_5': 0.,
-                                  'multiplicative_bias_6': 0.,
-                                  'multiplicative_bias_7': 0.,
-                                  'multiplicative_bias_8': 0.,
-                                  'multiplicative_bias_9': 0.,
-                                  'multiplicative_bias_10': 0.,
+                                  'multiplicative_bias_1': 0.0,
+                                  'multiplicative_bias_2': 0.0,
+                                  'multiplicative_bias_3': 0.0,
+                                  'multiplicative_bias_4': 0.0,
+                                  'multiplicative_bias_5': 0.0,
+                                  'multiplicative_bias_6': 0.0,
+                                  'multiplicative_bias_7': 0.0,
+                                  'multiplicative_bias_8': 0.0,
+                                  'multiplicative_bias_9': 0.0,
+                                  'multiplicative_bias_10': 0.0,
                                   'b1_spectro': 1.4614804,
                                   'b2_spectro': 1.6060949,
                                   'b3_spectro': 1.7464790,
@@ -328,11 +328,11 @@ if runoption == 1:
             mock_cosmo_dic['H0_Mpc'] = \
                 mock_cosmo_dic['H0'] / const.c.to('km/s').value
             mock_cosmo_dic['Omb'] = \
-                mock_cosmo_dic['ombh2'] / (mock_cosmo_dic['H0'] / 100.) ** 2.
+                mock_cosmo_dic['ombh2'] / (mock_cosmo_dic['H0'] / 100.0) ** 2.0
             mock_cosmo_dic['Omc'] = \
-                mock_cosmo_dic['omch2'] / (mock_cosmo_dic['H0'] / 100.) ** 2.
+                mock_cosmo_dic['omch2'] / (mock_cosmo_dic['H0'] / 100.0) ** 2.0
             mock_cosmo_dic['Omnu'] = \
-                mock_cosmo_dic['omnuh2'] / (mock_cosmo_dic['H0'] / 100.) ** 2.
+                mock_cosmo_dic['omnuh2'] / (mock_cosmo_dic['H0'] / 100.0) ** 2.0
             mock_cosmo_dic['Omm'] = (mock_cosmo_dic['Omnu'] +
                                      mock_cosmo_dic['Omc'] +
                                      mock_cosmo_dic['Omb'])
@@ -416,16 +416,16 @@ if runoption == 1:
                                 'magnification_bias_8': 0.0,
                                 'magnification_bias_9': 0.0,
                                 'magnification_bias_10': 0.0,
-                                'multiplicative_bias_1': 0.,
-                                'multiplicative_bias_2': 0.,
-                                'multiplicative_bias_3': 0.,
-                                'multiplicative_bias_4': 0.,
-                                'multiplicative_bias_5': 0.,
-                                'multiplicative_bias_6': 0.,
-                                'multiplicative_bias_7': 0.,
-                                'multiplicative_bias_8': 0.,
-                                'multiplicative_bias_9': 0.,
-                                'multiplicative_bias_10': 0.,
+                                'multiplicative_bias_1': 0.0,
+                                'multiplicative_bias_2': 0.0,
+                                'multiplicative_bias_3': 0.0,
+                                'multiplicative_bias_4': 0.0,
+                                'multiplicative_bias_5': 0.0,
+                                'multiplicative_bias_6': 0.0,
+                                'multiplicative_bias_7': 0.0,
+                                'multiplicative_bias_8': 0.0,
+                                'multiplicative_bias_9': 0.0,
+                                'multiplicative_bias_10': 0.0,
                                 'b1_spectro': 1.4614804,
                                 'b2_spectro': 1.6060949,
                                 'b3_spectro': 1.7464790,
@@ -433,16 +433,16 @@ if runoption == 1:
                                 'aia': 1.72,
                                 'nia': -0.41,
                                 'bia': 0.0,
-                                'dz_1_GCphot': 0., 'dz_1_WL': 0.,
-                                'dz_2_GCphot': 0., 'dz_2_WL': 0.,
-                                'dz_3_GCphot': 0., 'dz_3_WL': 0.,
-                                'dz_4_GCphot': 0., 'dz_4_WL': 0.,
-                                'dz_5_GCphot': 0., 'dz_5_WL': 0.,
-                                'dz_6_GCphot': 0., 'dz_6_WL': 0.,
-                                'dz_7_GCphot': 0., 'dz_7_WL': 0.,
-                                'dz_8_GCphot': 0., 'dz_8_WL': 0.,
-                                'dz_9_GCphot': 0., 'dz_9_WL': 0.,
-                                'dz_10_GCphot': 0., 'dz_10_WL': 0.}
+                                'dz_1_GCphot': 0.0, 'dz_1_WL': 0.0,
+                                'dz_2_GCphot': 0.0, 'dz_2_WL': 0.0,
+                                'dz_3_GCphot': 0.0, 'dz_3_WL': 0.0,
+                                'dz_4_GCphot': 0.0, 'dz_4_WL': 0.0,
+                                'dz_5_GCphot': 0.0, 'dz_5_WL': 0.0,
+                                'dz_6_GCphot': 0.0, 'dz_6_WL': 0.0,
+                                'dz_7_GCphot': 0.0, 'dz_7_WL': 0.0,
+                                'dz_8_GCphot': 0.0, 'dz_8_WL': 0.0,
+                                'dz_9_GCphot': 0.0, 'dz_9_WL': 0.0,
+                                'dz_10_GCphot': 0.0, 'dz_10_WL': 0.0}
                             }
 
             self.fiducial_dict = fid_mock_dic

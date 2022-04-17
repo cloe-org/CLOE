@@ -48,16 +48,16 @@ info = {
         'magnification_bias_8': 0.0,
         'magnification_bias_9': 0.0,
         'magnification_bias_10': 0.0,
-        'multiplicative_bias_1': 0.,
-        'multiplicative_bias_2': 0.,
-        'multiplicative_bias_3': 0.,
-        'multiplicative_bias_4': 0.,
-        'multiplicative_bias_5': 0.,
-        'multiplicative_bias_6': 0.,
-        'multiplicative_bias_7': 0.,
-        'multiplicative_bias_8': 0.,
-        'multiplicative_bias_9': 0.,
-        'multiplicative_bias_10': 0.,
+        'multiplicative_bias_1': 0.0,
+        'multiplicative_bias_2': 0.0,
+        'multiplicative_bias_3': 0.0,
+        'multiplicative_bias_4': 0.0,
+        'multiplicative_bias_5': 0.0,
+        'multiplicative_bias_6': 0.0,
+        'multiplicative_bias_7': 0.0,
+        'multiplicative_bias_8': 0.0,
+        'multiplicative_bias_9': 0.0,
+        'multiplicative_bias_10': 0.0,
         'b1_spectro': 1.4614804,
         'b2_spectro': 1.6060949,
         'b3_spectro': 1.7464790,
@@ -65,16 +65,16 @@ info = {
         'aia': 1.72,
         'nia': -0.41,
         'bia': 0.0,
-        'dz_1_GCphot': 0., 'dz_1_WL': 0.,
-        'dz_2_GCphot': 0., 'dz_2_WL': 0.,
-        'dz_3_GCphot': 0., 'dz_3_WL': 0.,
-        'dz_4_GCphot': 0., 'dz_4_WL': 0.,
-        'dz_5_GCphot': 0., 'dz_5_WL': 0.,
-        'dz_6_GCphot': 0., 'dz_6_WL': 0.,
-        'dz_7_GCphot': 0., 'dz_7_WL': 0.,
-        'dz_8_GCphot': 0., 'dz_8_WL': 0.,
-        'dz_9_GCphot': 0., 'dz_9_WL': 0.,
-        'dz_10_GCphot': 0., 'dz_10_WL': 0.},
+        'dz_1_GCphot': 0.0, 'dz_1_WL': 0.0,
+        'dz_2_GCphot': 0.0, 'dz_2_WL': 0.0,
+        'dz_3_GCphot': 0.0, 'dz_3_WL': 0.0,
+        'dz_4_GCphot': 0.0, 'dz_4_WL': 0.0,
+        'dz_5_GCphot': 0.0, 'dz_5_WL': 0.0,
+        'dz_6_GCphot': 0.0, 'dz_6_WL': 0.0,
+        'dz_7_GCphot': 0.0, 'dz_7_WL': 0.0,
+        'dz_8_GCphot': 0.0, 'dz_8_WL': 0.0,
+        'dz_9_GCphot': 0.0, 'dz_9_WL': 0.0,
+        'dz_10_GCphot': 0.0, 'dz_10_WL': 0.0},
     'theory': {'camb':
                {'stop_at_error': True,
                 'extra_args':{'num_massive_neutrinos': 1,
@@ -130,8 +130,8 @@ photo = Photo(like.cosmo.cosmo_dic,
               like.likefinal.data_ins.nz_dict_GC_Phot)
 
 
-ell_bins = np.linspace(np.log(10.),np.log(5000.),21)
-ells = (ell_bins[:-1]+ell_bins[1:])/2.
+ell_bins = np.linspace(np.log(10.0),np.log(5000.0),21)
+ells = (ell_bins[:-1]+ell_bins[1:])/2.0
 ells = np.exp(ells)
 
 nbin = 10

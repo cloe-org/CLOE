@@ -145,16 +145,16 @@ class likecalcTestCase(TestCase):
                               'aia': 1.72,
                               'nia': -0.41,
                               'bia': 0.0,
-                              'dz_1_GCphot': 0., 'dz_1_WL': 0.,
-                              'dz_2_GCphot': 0., 'dz_2_WL': 0.,
-                              'dz_3_GCphot': 0., 'dz_3_WL': 0.,
-                              'dz_4_GCphot': 0., 'dz_4_WL': 0.,
-                              'dz_5_GCphot': 0., 'dz_5_WL': 0.,
-                              'dz_6_GCphot': 0., 'dz_6_WL': 0.,
-                              'dz_7_GCphot': 0., 'dz_7_WL': 0.,
-                              'dz_8_GCphot': 0., 'dz_8_WL': 0.,
-                              'dz_9_GCphot': 0., 'dz_9_WL': 0.,
-                              'dz_10_GCphot': 0., 'dz_10_WL': 0.}}
+                              'dz_1_GCphot': 0.0, 'dz_1_WL': 0.0,
+                              'dz_2_GCphot': 0.0, 'dz_2_WL': 0.0,
+                              'dz_3_GCphot': 0.0, 'dz_3_WL': 0.0,
+                              'dz_4_GCphot': 0.0, 'dz_4_WL': 0.0,
+                              'dz_5_GCphot': 0.0, 'dz_5_WL': 0.0,
+                              'dz_6_GCphot': 0.0, 'dz_6_WL': 0.0,
+                              'dz_7_GCphot': 0.0, 'dz_7_WL': 0.0,
+                              'dz_8_GCphot': 0.0, 'dz_8_WL': 0.0,
+                              'dz_9_GCphot': 0.0, 'dz_9_WL': 0.0,
+                              'dz_10_GCphot': 0.0, 'dz_10_WL': 0.0}}
 
         nuisance_dic = mock_cosmo_dic['nuisance_parameters']
         # by setting below to zero, obtain previous non-IA results
@@ -168,11 +168,11 @@ class likecalcTestCase(TestCase):
         mock_cosmo_dic['H0_Mpc'] = \
             mock_cosmo_dic['H0'] / const.c.to('km/s').value
         mock_cosmo_dic['Omb'] = \
-            mock_cosmo_dic['ombh2'] / (mock_cosmo_dic['H0'] / 100.) ** 2.
+            mock_cosmo_dic['ombh2'] / (mock_cosmo_dic['H0'] / 100.0) ** 2.0
         mock_cosmo_dic['Omc'] = \
-            mock_cosmo_dic['omch2'] / (mock_cosmo_dic['H0'] / 100.) ** 2.
+            mock_cosmo_dic['omch2'] / (mock_cosmo_dic['H0'] / 100.0) ** 2.0
         mock_cosmo_dic['Omnu'] = \
-            mock_cosmo_dic['omnuh2'] / (mock_cosmo_dic['H0'] / 100.) ** 2.
+            mock_cosmo_dic['omnuh2'] / (mock_cosmo_dic['H0'] / 100.0) ** 2.0
         mock_cosmo_dic['Omm'] = (mock_cosmo_dic['Omnu'] +
                                  mock_cosmo_dic['Omc'] +
                                  mock_cosmo_dic['Omb'])
@@ -279,16 +279,16 @@ class likecalcTestCase(TestCase):
                             'aia': 1.72,
                             'nia': -0.41,
                             'bia': 0.0,
-                            'dz_1_GC': 0., 'dz_1_WL': 0.,
-                            'dz_2_GC': 0., 'dz_2_WL': 0.,
-                            'dz_3_GC': 0., 'dz_3_WL': 0.,
-                            'dz_4_GC': 0., 'dz_4_WL': 0.,
-                            'dz_5_GC': 0., 'dz_5_WL': 0.,
-                            'dz_6_GC': 0., 'dz_6_WL': 0.,
-                            'dz_7_GC': 0., 'dz_7_WL': 0.,
-                            'dz_8_GC': 0., 'dz_8_WL': 0.,
-                            'dz_9_GC': 0., 'dz_9_WL': 0.,
-                            'dz_10_GC': 0., 'dz_10_WL': 0.}}
+                            'dz_1_GC': 0.0, 'dz_1_WL': 0.0,
+                            'dz_2_GC': 0.0, 'dz_2_WL': 0.0,
+                            'dz_3_GC': 0.0, 'dz_3_WL': 0.0,
+                            'dz_4_GC': 0.0, 'dz_4_WL': 0.0,
+                            'dz_5_GC': 0.0, 'dz_5_WL': 0.0,
+                            'dz_6_GC': 0.0, 'dz_6_WL': 0.0,
+                            'dz_7_GC': 0.0, 'dz_7_WL': 0.0,
+                            'dz_8_GC': 0.0, 'dz_8_WL': 0.0,
+                            'dz_9_GC': 0.0, 'dz_9_WL': 0.0,
+                            'dz_10_GC': 0.0, 'dz_10_WL': 0.0}}
 
         self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic

@@ -87,10 +87,10 @@ class Euclike:
         # Definining the prefactors for WL and XC
         ells_WL = self.data_ins.data_dict['WL']['ells']
         ells_XC = self.data_ins.data_dict['XC-Phot']['ells']
-        prfcsq = (ells_WL + 2.) * (ells_WL + 1.) * ells_WL \
-            * (ells_WL - 1.) / (ells_WL + 0.5)**4
-        prfc = np.sqrt((ells_XC + 2.) * (ells_XC + 1.) * ells_XC *
-                       (ells_XC - 1.)) / (ells_XC + 0.5)**2
+        prfcsq = (ells_WL + 2.0) * (ells_WL + 1.0) * ells_WL \
+            * (ells_WL - 1.0) / (ells_WL + 0.5)**4
+        prfc = np.sqrt((ells_XC + 2.0) * (ells_XC + 1.0) * ells_XC *
+                       (ells_XC - 1.0)) / (ells_XC + 0.5)**2
         ncomb_WL = int(numtomo_wl * (numtomo_wl + 1) / 2)
         ncomb_XC = numtomo_wl * numtomo_gcphot
         self.prefactor_WL = np.tile(prfcsq, ncomb_WL)

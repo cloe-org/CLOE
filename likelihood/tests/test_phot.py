@@ -126,11 +126,11 @@ class photoinitTestCase(TestCase):
         mock_cosmo_dic['H0_Mpc'] = \
             mock_cosmo_dic['H0'] / const.c.to('km/s').value
         mock_cosmo_dic['Omb'] = \
-            mock_cosmo_dic['ombh2'] / (mock_cosmo_dic['H0'] / 100.)**2.
+            mock_cosmo_dic['ombh2'] / (mock_cosmo_dic['H0'] / 100.0)**2.0
         mock_cosmo_dic['Omc'] = \
-            mock_cosmo_dic['omch2'] / (mock_cosmo_dic['H0'] / 100.)**2.
+            mock_cosmo_dic['omch2'] / (mock_cosmo_dic['H0'] / 100.0)**2.0
         mock_cosmo_dic['Omnu'] = \
-            mock_cosmo_dic['omnuh2'] / (mock_cosmo_dic['H0'] / 100.)**2.
+            mock_cosmo_dic['omnuh2'] / (mock_cosmo_dic['H0'] / 100.0)**2.0
         mock_cosmo_dic['Omm'] = (mock_cosmo_dic['Omnu'] +
                                  mock_cosmo_dic['Omc'] +
                                  mock_cosmo_dic['Omb'])
@@ -141,10 +141,10 @@ class photoinitTestCase(TestCase):
         # mock_cosmo_dic['nuisance_parameters']['bia'] = 0
         # mock_cosmo_dic['nuisance_parameters']['nia'] = 0
         for i in range(10):
-            nuisance_dic[f'dz_{i+1}_GCphot'] = 0
-            nuisance_dic[f'dz_{i+1}_WL'] = 0
-            nuisance_dic[f'multiplicative_bias_{i+1}'] = 0
-            nuisance_dic[f'magnification_bias_{i+1}'] = 0
+            nuisance_dic[f'dz_{i+1}_GCphot'] = 0.0
+            nuisance_dic[f'dz_{i+1}_WL'] = 0.0
+            nuisance_dic[f'multiplicative_bias_{i+1}'] = 0.0
+            nuisance_dic[f'magnification_bias_{i+1}'] = 0.0
         mock_cosmo_dic['Pmm_phot'] = \
             interpolate.RectBivariateSpline(zs_base, ks_base,
                                             pdd, kx=1, ky=1)

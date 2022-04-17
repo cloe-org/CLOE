@@ -147,26 +147,26 @@ class cosmoinitTestCase(TestCase):
     def test_istf_phot_galbias(self):
         # interpolate a straight-line (b, z) grid to ease the checks
         nuipar = self.model_test.cosmology.cosmo_dic['nuisance_parameters']
-        zs_means = [1., 2., 3.]
-        nuipar['b1_photo'] = 2.
-        nuipar['b2_photo'] = 4.
-        nuipar['b3_photo'] = 6.
+        zs_means = [1.0, 2.0, 3.0]
+        nuipar['b1_photo'] = 2.0
+        nuipar['b2_photo'] = 4.0
+        nuipar['b3_photo'] = 6.0
         self.model_test.cosmology.istf_phot_galbias_interpolator(zs_means)
         # check scalar redshift input
         bi_val_actual = self.model_test.cosmology.istf_phot_galbias(1.5)
-        npt.assert_almost_equal(bi_val_actual, desired=3.,
+        npt.assert_almost_equal(bi_val_actual, desired=3.0,
                                 decimal=3,
                                 err_msg='Error in istf_phot_galbias')
         # check redshift input below zs edges: returns b(z at edge)
         bi_val_actual = \
-            self.model_test.cosmology.istf_phot_galbias(0.98, [1., 2.])
-        npt.assert_almost_equal(bi_val_actual, desired=2.,
+            self.model_test.cosmology.istf_phot_galbias(0.98, [1.0, 2.0])
+        npt.assert_almost_equal(bi_val_actual, desired=2.0,
                                 decimal=3,
                                 err_msg='Error in istf_phot_galbias (z<)')
         # check redshift input above zs edges: returns b(z at edge)
         bi_val_actual = \
-            self.model_test.cosmology.istf_phot_galbias(2.04, [1., 2.])
-        npt.assert_almost_equal(bi_val_actual, desired=4.,
+            self.model_test.cosmology.istf_phot_galbias(2.04, [1.0, 2.0])
+        npt.assert_almost_equal(bi_val_actual, desired=4.0,
                                 decimal=3,
                                 err_msg='Error in istf_phot_galbias (z>)')
         # check vector redshift input: output size and values
@@ -175,7 +175,7 @@ class cosmoinitTestCase(TestCase):
         npt.assert_equal(len(bi_val_actual), len(zs_vec),
                          err_msg='Output size of istf_phot_galbias'
                                  '(vec) does not match with input')
-        npt.assert_allclose(bi_val_actual, desired=[3., 5.],
+        npt.assert_allclose(bi_val_actual, desired=[3.0, 5.0],
                             rtol=1e-3,
                             err_msg='Array output istf_phot_galbias')
 
@@ -186,7 +186,7 @@ class cosmoinitTestCase(TestCase):
         nuipar['b2_spectro'] = 4.56
         # check scalar redshift input: z in 1st bin returns b1_spectro
         bi_val_actual = \
-            self.model_test.cosmology.istf_spectro_galbias(1.5, [1., 2.])
+            self.model_test.cosmology.istf_spectro_galbias(1.5, [1.0, 2.0])
         bi_val_desired = nuipar['b1_spectro']
         npt.assert_equal(bi_val_actual, bi_val_desired,
                          err_msg='Error in istf_spectro_galbias: b1_spectro')

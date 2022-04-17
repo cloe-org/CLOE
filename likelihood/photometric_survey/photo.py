@@ -44,7 +44,7 @@ class Photo:
         self.cl_int_z_min = 0.001
 
         # The size of z_winterp sufficient for now, could be tuned later
-        z_wlogmin = -2
+        z_wlogmin = -2.0
         z_wmin1 = 1e-5
         z_wmin2 = 1e-4
         z_wmin3 = 1e-3
@@ -684,6 +684,6 @@ class Photo:
         prefactor: float
            Value of the prefactor at the given :math:`\ell`.
         """
-        prefactor = np.sqrt((ell + 2.) * (ell + 1.) * ell * (ell - 1.)) / \
+        prefactor = np.sqrt((ell + 2.0) * (ell + 1.0) * ell * (ell - 1.0)) / \
             (ell + 0.5)**2
         return prefactor

@@ -3,12 +3,12 @@
 # of the Euclid data to include 
 # in the likelihood analysis.
 #
-# Probe: WL-GCspectro cross-corrrelation 
+# Probe: WL-GCspectro cross-correlation
 # power spectrum
 #
 # WL: Weak Lensing
 # GCspectro: Number density fluctuations of 
 # the spectroscopic galaxy sample 
-# in redshfit space
+# in redshift space
 # 
 # Note: this is not yet provided by CLOE

@@ -22,8 +22,8 @@ class RedshiftDistributionTestCase(TestCase):
         self.bins = [1, 2, 3]
         # Cases of interest to build the test nuisance dictionaries
         good_dz_dic = {'dz_1_GC': 0.1, 'dz_2_GC': 0.1, 'dz_3_GC': 0.1}
-        zero_dz_dic = {'dz_1_GC': 0., 'dz_2_GC': 0., 'dz_3_GC': 0.}
-        bad_dz_dic = {'dz_0_GC': 0., 'dz_2_GC': 0., 'dz_3_GC': 0.}
+        zero_dz_dic = {'dz_1_GC': 0.0, 'dz_2_GC': 0.0, 'dz_3_GC': 0.0}
+        bad_dz_dic = {'dz_0_GC': 0.0, 'dz_2_GC': 0.0, 'dz_3_GC': 0.0}
         # nuisance dictionary to test initialization
         self.good_nuisance_dic = {}
         self.good_nuisance_dic.update(good_dz_dic)
@@ -39,7 +39,7 @@ class RedshiftDistributionTestCase(TestCase):
         # Three Gaussian distributions for test purposes
         # The three means are in [0.1, 0.2, 0.3], and sigma=1 (for all)
         gauss_list = [norm(loc=0.1 * i) for i in self.bins]
-        self.zs = np.linspace(0, 1.5, num=1000)
+        self.zs = np.linspace(0.0, 1.5, num=1000)
         gauss_interp = \
             [InterpolatedUnivariateSpline(self.zs, gauss.pdf(self.zs))
              for gauss in gauss_list]
@@ -47,7 +47,7 @@ class RedshiftDistributionTestCase(TestCase):
         self.gauss_nz_dic = {'n1': gauss_interp[0], 'n2': gauss_interp[1],
                              'n3': gauss_interp[2]}
         # The peak values should equal 1/sqrt(2pi)
-        self.peak_values = [1. / np.sqrt(2 * np.pi)] * len(self.bins)
+        self.peak_values = [1.0 / np.sqrt(2.0 * np.pi)] * len(self.bins)
 
     def tearDown(self) -> None:
         pass

@@ -16,7 +16,7 @@ def build_mock_observables(reader=None):
         reader.read_phot()
 
     ell_range = [5, 10000]
-    k_range = [0.001, 2]
+    k_range = [0.001, 2.0]
     wl_bins = {}
     for i in range(1, reader.numtomo_wl + 1):
         inner_bins = {}

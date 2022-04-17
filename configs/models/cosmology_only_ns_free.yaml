@@ -1,5 +1,5 @@
 As: 2.12605e-09
-H0: 67
+H0: 67.0
 N_eff: null
 mnu: 0.06
 nnu: 3.046
@@ -16,5 +16,5 @@ omeganu: null
 omk: 0.0
 omnuh2: null
 tau: 0.0925
-w: -1
-wa: 0
+w: -1.0
+wa: 0.0

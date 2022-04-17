@@ -259,16 +259,26 @@ class Cosmology:
                              'aia': 1.72,
                              'nia': -0.41,
                              'bia': 0.0,
-                             'multiplicative_bias_1': 0.,
-                             'multiplicative_bias_2': 0.,
-                             'multiplicative_bias_3': 0.,
-                             'multiplicative_bias_4': 0.,
-                             'multiplicative_bias_5': 0.,
-                             'multiplicative_bias_6': 0.,
-                             'multiplicative_bias_7': 0.,
-                             'multiplicative_bias_8': 0.,
-                             'multiplicative_bias_9': 0.,
-                             'multiplicative_bias_10': 0.}}
+                             'multiplicative_bias_1': 0.0,
+                             'multiplicative_bias_2': 0.0,
+                             'multiplicative_bias_3': 0.0,
+                             'multiplicative_bias_4': 0.0,
+                             'multiplicative_bias_5': 0.0,
+                             'multiplicative_bias_6': 0.0,
+                             'multiplicative_bias_7': 0.0,
+                             'multiplicative_bias_8': 0.0,
+                             'multiplicative_bias_9': 0.0,
+                             'multiplicative_bias_10': 0.0,
+                             'magnification_bias_1': 0.0,
+                             'magnification_bias_2': 0.0,
+                             'magnification_bias_3': 0.0,
+                             'magnification_bias_4': 0.0,
+                             'magnification_bias_5': 0.0,
+                             'magnification_bias_6': 0.0,
+                             'magnification_bias_7': 0.0,
+                             'magnification_bias_8': 0.0,
+                             'magnification_bias_9': 0.0,
+                             'magnification_bias_10': 0.0}}
 
         self.cosmo_dic['H0_Mpc'] = (self.cosmo_dic['H0'] /
                                     const.c.to('km/s').value)
@@ -435,7 +445,7 @@ class Cosmology:
         z_prime: double
            integrand variable (redshift)
         """
-        return self.cosmo_dic['f_z'](z_prime) / (1. + z_prime)
+        return self.cosmo_dic['f_z'](z_prime) / (1.0 + z_prime)
 
     def growth_factor_MG(self):
         r"""

@@ -139,11 +139,11 @@ class specinitTestCase(TestCase):
         mock_cosmo_dic['H0_Mpc'] = \
             mock_cosmo_dic['H0'] / const.c.to('km/s').value
         mock_cosmo_dic['Omb'] = \
-            mock_cosmo_dic['ombh2'] / (mock_cosmo_dic['H0'] / 100.) ** 2.
+            mock_cosmo_dic['ombh2'] / (mock_cosmo_dic['H0'] / 100.0) ** 2.0
         mock_cosmo_dic['Omc'] = \
-            mock_cosmo_dic['omch2'] / (mock_cosmo_dic['H0'] / 100.) ** 2.
+            mock_cosmo_dic['omch2'] / (mock_cosmo_dic['H0'] / 100.0) ** 2.0
         mock_cosmo_dic['Omnu'] = \
-            mock_cosmo_dic['omnuh2'] / (mock_cosmo_dic['H0'] / 100.) ** 2.
+            mock_cosmo_dic['omnuh2'] / (mock_cosmo_dic['H0'] / 100.0) ** 2.0
         mock_cosmo_dic['Omm'] = (mock_cosmo_dic['Omnu'] +
                                  mock_cosmo_dic['Omc'] +
                                  mock_cosmo_dic['Omb'])
@@ -230,9 +230,9 @@ class specinitTestCase(TestCase):
     def setUp(self):
         self.test_dict['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
         self.check_multipole_spectra_m0 = 12292.778742
-        self.check_multipole_spectra_m1 = 0.
+        self.check_multipole_spectra_m1 = 0.0
         self.check_multipole_spectra_m2 = 8408.473137
-        self.check_multipole_spectra_m3 = 0.
+        self.check_multipole_spectra_m3 = 0.0
         self.check_multipole_spectra_m4 = 678.085174
         self.check_multipole_spectra_integrand = 3343.949991
         self.check_scaling_factor_perp = 1.007444

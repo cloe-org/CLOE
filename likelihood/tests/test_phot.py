@@ -184,6 +184,7 @@ class photoinitTestCase(TestCase):
     def setUp(self) -> None:
         self.win_tol = 1e-03
         self.cl_tol = 1e-03
+        self.xi_tol = 1e-03
         self.integrand_check = 1.043825
         self.wbincheck = -1.47437e-06
         self.wbincheck_mag = 0.0
@@ -200,6 +201,10 @@ class photoinitTestCase(TestCase):
         self.cl_cross_check = -6.379221e-07
         self.cl_cross_noprefac_check = -6.452649e-07
         self.prefac_check = 0.988620523
+        self.xi_ssp_check = [2.908933e-06, 1.883681e-06]
+        self.xi_ssm_check = 8.993205e-07
+        self.xi_sp_check = -6.925195e-05
+        self.xi_pp_check = 0.005249
 
     def tearDown(self):
         self.integrand_check = None
@@ -214,6 +219,10 @@ class photoinitTestCase(TestCase):
         self.cl_cross_check = None
         self.cl_cross_prefac_check = None
         self.prefac_check = None
+        self.xi_ssp_check = None
+        self.xi_ssm_check = None
+        self.xi_sp_check = None
+        self.xi_pp_check = None
 
     def test_GC_window(self):
         npt.assert_allclose(self.phot.GC_window(0.001, 1),
@@ -306,3 +315,32 @@ class photoinitTestCase(TestCase):
     #                      temp_cosmo_dic,
     #                      self.nz_dic_WL,
     #                      self.nz_dic_GC)
+
+    def test_corr_func_ssp(self):
+        xi_ssp = self.phot.corr_func_3x2pt('Shear-Shear_plus', [1.0, 1.5],
+                                           1, 1)
+        npt.assert_allclose(xi_ssp, self.xi_ssp_check, rtol=self.xi_tol,
+                            err_msg='CF Shear-Shear plus test failed')
+
+    def test_corr_func_ssm(self):
+        xi_ssm = self.phot.corr_func_3x2pt('Shear-Shear_minus', 1.0, 1, 1)
+        npt.assert_allclose(xi_ssm, self.xi_ssm_check, rtol=self.xi_tol,
+                            err_msg='CF Shear-Shear minus test failed')
+
+    def test_corr_func_sp(self):
+        xi_sp = self.phot.corr_func_3x2pt('Shear-Position', 1.0, 1, 1)
+        npt.assert_allclose(xi_sp, self.xi_sp_check, rtol=self.xi_tol,
+                            err_msg='CF Shear-Position test failed')
+
+    def test_corr_func_pp(self):
+        xi_pp = self.phot.corr_func_3x2pt('Position-Position', 1.0, 1, 1)
+        npt.assert_allclose(xi_pp, self.xi_pp_check, rtol=self.xi_tol,
+                            err_msg='CF Position-Position plus test failed')
+
+    def test_corr_func_invalid_obs(self):
+        npt.assert_raises(ValueError, self.phot.corr_func_3x2pt,
+                          'Invalid string', 1.0, 1, 1)
+
+    def test_corr_func_invalid_type(self):
+        npt.assert_raises(TypeError, self.phot.corr_func_3x2pt,
+                          'Shear-Shear_plus', (1.0, 1.5), 1, 1)

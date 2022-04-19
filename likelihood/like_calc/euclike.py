@@ -124,6 +124,20 @@ class Euclike:
                               self.data_ins.nz_dict_WL,
                               self.data_ins.nz_dict_GC_Phot)
 
+        # Temporary placeholder for theta vector
+        # (will be read from file eventually)
+        theta_min = 0.005
+        theta_max = 20.0
+        nbins_theta = 30
+        theta_deg = np.logspace(np.log10(theta_min),
+                                np.log10(theta_max),
+                                nbins_theta)
+        theta_rad = theta_deg * np.pi / 180.0
+
+        # Sets the precomputed Bessel functions as an attribute of the
+        # Photo class
+        self.phot_ins._set_bessel_tables(theta_rad)
+
     def create_photo_data(self):
         """Create Photo Data
 

@@ -3,9 +3,11 @@
 
 # General imports
 import numpy as np
-from scipy import integrate
+from scipy import integrate, interpolate
+from scipy.special import jv
 from likelihood.photometric_survey.redshift_distribution \
     import RedshiftDistribution
+from likelihood.auxiliary.logger import log_warning
 
 # General error class
 
@@ -60,10 +62,20 @@ class Photo:
         # Number of bins should be generalized, hard-coded for now
 
         # The class might be initialized with no cosmo dictionary, as it is
-        # currently done when instanciating Photo from Euclike, for running
+        # currently done when instantiating Photo from Euclike, for running
         # the likelihood of CLOE
         if cosmo_dic is not None:
             self.update(cosmo_dic)
+
+        # ell grid integrated over to obtain the 3x2pt correlation functions
+        self.ell_max = 1e5
+        self.nint = 128
+        self.ells_int = np.append(np.linspace(2.0, 9.0, 8),
+                                  np.logspace(1.0, np.log10(self.ell_max + 1),
+                                  int(self.nint - 8)))
+        self.ells_dense = np.linspace(2.0, self.ell_max, int(self.ell_max - 1))
+
+        self.bessel_dict = {}
 
     def update(self, cosmo_dic):
         r"""Update method
@@ -118,6 +130,31 @@ class Photo:
             self.interpwinia[:, tomi] = self.IA_window(self.z_winterp, tomi)
         for tomi in range(1, z_wtom_gc):
             self.interpwingal[:, tomi] = self.GC_window(self.z_winterp, tomi)
+
+    def _set_bessel_tables(self, theta_rad):
+        r"""Set tables for Bessel functions
+
+        Method to set the dictionary containing the precomputed tables of the
+        Bessel functions of order 0,2,4.
+
+        Parameters
+        ----------
+        theta_rad: list, numpy.ndarray
+            Values of the angular separation (in radians) at which the Bessel
+            functions have to be evaluated.
+        """
+        bessel0_grid = np.array([jv(0, self.ells_dense * th)
+                                 for th in theta_rad])
+        bessel2_grid = np.array([jv(2, self.ells_dense * th)
+                                 for th in theta_rad])
+        bessel4_grid = np.array([jv(4, self.ells_dense * th)
+                                 for th in theta_rad])
+        self.bessel_dict[0] = bessel0_grid
+        self.bessel_dict[2] = bessel2_grid
+        self.bessel_dict[4] = bessel4_grid
+        log_warning('Bessel tables have been set with the specified angular '
+                    'separations. Computing 3x2pt correlation functions at '
+                    'different angles will lead to unexpected outputs.')
 
     def GC_window(self, z, bin_i):
         r"""GC Window
@@ -687,3 +724,91 @@ class Photo:
         prefactor = np.sqrt((ell + 2.0) * (ell + 1.0) * ell * (ell - 1.0)) / \
             (ell + 0.5)**2
         return prefactor
+
+    def corr_func_3x2pt(self, obs, theta_deg, bin_i, bin_j):
+        r"""Generic 3x2pt correlation function
+
+        Computes the specified 3x2pt configuration space correlation function,
+        for the specified list of angular separations, and for the specified
+        combination of tomographic bins.
+
+        .. math::
+            \xi_{ij}^\mathrm{AB}(\theta) = \frac{1}{2\pi} \
+            \sum_{\ell=0}^{+\infty} \ell C_{ij}^\mathrm{AB}(\ell) \
+            J_n(\ell\theta) \\
+
+        where :math:`\mathrm{AB}` is to be selected from the list [LL, LG, GG]
+        (the LL option has two different cases, :math:`\xi^\mathrm{LL,+}` and
+        :math:`\xi^\mathrm{LL,-}`), and :math:`i,j` correspond to the indexes
+        of the selected photometric bins.
+
+        Parameters
+        ----------
+        obs: str
+            Type of correlation function. It must be selected from the list
+            ["Shear-Shear_plus", "Shear-Shear_minus", "Shear-Position",
+            "Position-Position"].
+        theta_deg: float, numpy.ndarray
+            :math:`\theta` values at which the correlation function
+            is computed. To be specified in degrees.
+        bin_i: int
+            Index of first tomographic bin.
+        bin_j: int
+            Index of second tomographic bin.
+
+        Returns
+        -------
+        xi_arr: numpy.ndarray
+           Correlation function for the specified observable,
+           angular separations, and bin combination.
+        """
+        if obs == 'Shear-Shear_plus':
+            cells_func = self.Cl_WL
+            bessel_order = 0
+        elif obs == 'Shear-Shear_minus':
+            cells_func = self.Cl_WL
+            bessel_order = 4
+        elif obs == 'Shear-Position':
+            cells_func = self.Cl_cross
+            bessel_order = 2
+        elif obs == 'Position-Position':
+            cells_func = self.Cl_GC_phot
+            bessel_order = 0
+        else:
+            raise ValueError('obs parameter must be selected from the '
+                             'following list: ["Shear-Shear_plus", '
+                             '"Shear-Shear_minus", "Shear-Position", '
+                             '"Position-Position"]')
+
+        if isinstance(theta_deg, np.ndarray):
+            pass
+        elif isinstance(theta_deg, list):
+            theta_deg = np.array(theta_deg)
+        elif isinstance(theta_deg, (float, int)):
+            theta_deg = np.array([theta_deg])
+        else:
+            raise TypeError('theta_deg argument must be a int, float, list or '
+                            'numpy.ndarray')
+
+        theta_rad = theta_deg * np.pi / 180.0
+        xi_arr = np.empty(theta_deg.size)
+
+        cells_int = np.array([cells_func(ell, bin_i, bin_j)
+                              for ell in self.ells_int])
+        cells_interp = interpolate.interp1d(self.ells_int, cells_int,
+                                            kind='cubic')
+
+        cells_dense = cells_interp(self.ells_dense)
+
+        if not self.bessel_dict:
+            bessel = np.array([jv(bessel_order, self.ells_dense * th)
+                               for th in theta_rad])
+        else:
+            bessel = self.bessel_dict[bessel_order]
+
+        for i in range(len(xi_arr)):
+            xi_arr[i] = np.sum(self.ells_dense * cells_dense * bessel[i])
+
+        xi_arr /= (2.0 * np.pi)
+
+        return xi_arr

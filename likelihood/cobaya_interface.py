@@ -51,6 +51,7 @@ class EuclidLikelihood(Likelihood):
         # This needs to be changed.
 
         self.k_max_Boltzmannn = 50.0
+        self.k_max_extrap = 500.0
         self.k_min_GC_phot_interp = 0.001
         self.k_max_GC_phot_interp = 1000.0
         self.k_samp_GC = 1000
@@ -207,10 +208,12 @@ class EuclidLikelihood(Likelihood):
             self.z_win, units='1/Mpc'),
         self.fiducial_cosmology.cosmo_dic['Pk_delta'] = \
             model_fiducial.provider.get_Pk_interpolator(
-            ('delta_tot', 'delta_tot'), nonlinear=False)
+            ('delta_tot', 'delta_tot'), nonlinear=False,
+            extrap_kmax=self.k_max_extrap)
         self.fiducial_cosmology.cosmo_dic['Pk_weyl'] = \
             model_fiducial.provider.get_Pk_interpolator(
-            ('Weyl', 'Weyl'), nonlinear=False),
+            ('Weyl', 'Weyl'), nonlinear=False,
+            extrap_kmax=self.k_max_extrap),
         self.fiducial_cosmology.cosmo_dic['fsigma8'] = \
             model_fiducial.provider.get_fsigma8(
             self.z_win)
@@ -304,17 +307,21 @@ class EuclidLikelihood(Likelihood):
                 self.provider.get_Hubble(self.z_win, units='1/Mpc')
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 self.provider.get_Pk_interpolator(
-                ('delta_tot', 'delta_tot'), nonlinear=False)
+                ('delta_tot', 'delta_tot'), nonlinear=False,
+                extrap_kmax=self.k_max_extrap)
             self.cosmo.cosmo_dic['Pk_weyl'] = \
                 self.provider.get_Pk_interpolator(
-                ('Weyl', 'Weyl'), nonlinear=False)
+                ('Weyl', 'Weyl'), nonlinear=False,
+                extrap_kmax=self.k_max_extrap)
             if self.NL_flag > 0:
                 self.cosmo.cosmo_dic['Pk_halofit'] = \
                     self.provider.get_Pk_interpolator(
-                    ('delta_tot', 'delta_tot'), nonlinear=True)
+                    ('delta_tot', 'delta_tot'), nonlinear=True,
+                    extrap_kmax=self.k_max_extrap)
                 self.cosmo.cosmo_dic['Pk_weyl_NL'] = \
                     self.provider.get_Pk_interpolator(
-                    ('Weyl', 'Weyl'), nonlinear=True)
+                    ('Weyl', 'Weyl'), nonlinear=True,
+                    extrap_kmax=self.k_max_extrap)
             self.cosmo.cosmo_dic['z_win'] = self.z_win
             self.cosmo.cosmo_dic['k_win'] = self.k_win
             self.cosmo.cosmo_dic['sigma8'] = self.provider.get_sigma8_z(
@@ -363,17 +370,21 @@ class EuclidLikelihood(Likelihood):
                 model.provider.get_Hubble(self.z_win, units='1/Mpc')
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 model.provider.get_Pk_interpolator(
-                ('delta_tot', 'delta_tot'), nonlinear=False)
+                ('delta_tot', 'delta_tot'), nonlinear=False,
+                extrap_kmax=self.k_max_extrap)
             self.cosmo.cosmo_dic['Pk_weyl'] = \
                 model.provider.get_Pk_interpolator(
-                ('Weyl', 'Weyl'), nonlinear=False)
+                ('Weyl', 'Weyl'), nonlinear=False,
+                extrap_kmax=self.k_max_extrap)
             if info['likelihood']['Euclid']['NL_flag'] > 0:
                 self.cosmo.cosmo_dic['Pk_halofit'] = \
                     model.provider.get_Pk_interpolator(
-                    ('delta_tot', 'delta_tot'), nonlinear=True)
+                    ('delta_tot', 'delta_tot'), nonlinear=True,
+                    extrap_kmax=self.k_max_extrap)
                 self.cosmo.cosmo_dic['Pk_weyl_NL'] = \
                     model.provider.get_Pk_interpolator(
-                    ('Weyl', 'Weyl'), nonlinear=True)
+                    ('Weyl', 'Weyl'), nonlinear=True,
+                    extrap_kmax=self.k_max_extrap)
             self.cosmo.cosmo_dic['z_win'] = self.z_win
             self.cosmo.cosmo_dic['k_win'] = self.k_win
             self.cosmo.cosmo_dic['sigma8'] = model.provider.get_sigma8_z(

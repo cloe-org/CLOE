@@ -34,5 +34,5 @@ def triangle_plot_cobaya(chain_file):
     if run_is_interactive():
         plt.show()
     else:
-        output_file = chain_file + '.png'
+        output_file = chain_file + '.pdf'
         plt.savefig(output_file, dpi=300)

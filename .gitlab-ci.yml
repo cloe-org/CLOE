@@ -64,10 +64,10 @@ pages:
 # Get Profiling Report
 Profiling:
   script:
-    - python profiling.py 1
-    - python -m cProfile -o profiling.pstats profiling.py
+    - python -m cProfile -o evaluate_likelihood.pstats run_cloe.py configs/config_profiling_evaluate_likelihood.yaml
+    - python -m cProfile -o mcmc.pstats run_cloe.py configs/config_profiling_mcmc.yaml
     - mkdir products
-    - mv profiling.pstats products/
+    - mv *.pstats products/
   when: manual
   artifacts:
     paths:

@@ -7,7 +7,7 @@ from scipy import integrate, interpolate
 from scipy.special import jv
 from likelihood.photometric_survey.redshift_distribution \
     import RedshiftDistribution
-from likelihood.auxiliary.logger import log_warning
+import warnings
 
 # General error class
 
@@ -68,12 +68,13 @@ class Photo:
             self.update(cosmo_dic)
 
         # ell grid integrated over to obtain the 3x2pt correlation functions
-        self.ell_max = 1e5
+        self.ell_max = int(1e5)
         self.nint = 128
-        self.ells_int = np.append(np.linspace(2.0, 9.0, 8),
-                                  np.logspace(1.0, np.log10(self.ell_max + 1),
-                                  int(self.nint - 8)))
-        self.ells_dense = np.linspace(2.0, self.ell_max, int(self.ell_max - 1))
+        self.ells_int = np.append(
+            np.linspace(2.0, 9.0, 8),
+            np.logspace(1.0, np.log10(self.ell_max + 1), self.nint - 8))
+        self.ells_dense = \
+            np.linspace(2, self.ell_max, self.ell_max - 1).astype(int)
 
         self.bessel_dict = {}
 
@@ -152,9 +153,9 @@ class Photo:
         self.bessel_dict[0] = bessel0_grid
         self.bessel_dict[2] = bessel2_grid
         self.bessel_dict[4] = bessel4_grid
-        log_warning('Bessel tables have been set with the specified angular '
-                    'separations. Computing 3x2pt correlation functions at '
-                    'different angles will lead to unexpected outputs.')
+        warnings.warn('Bessel tables have been set with the specified angular '
+                      'separations. Computing 3x2pt correlation functions at '
+                      'different angles will lead to unexpected outputs.')
 
     def GC_window(self, z, bin_i):
         r"""GC Window

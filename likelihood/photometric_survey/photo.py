@@ -748,8 +748,8 @@ class Photo:
         obs: str
             Type of correlation function. It must be selected from the list
             ["Shear-Shear_plus", "Shear-Shear_minus", "Shear-Position",
-            "Position-Position"].
-        theta_deg: float, numpy.ndarray
+            "Position-Position"]. The match is case-insensitive.
+        theta_deg: float or numpy.ndarray of float
             :math:`\theta` values at which the correlation function
             is computed. To be specified in degrees.
         bin_i: int
@@ -759,20 +759,21 @@ class Photo:
 
         Returns
         -------
-        xi_arr: numpy.ndarray
+        xi_arr: numpy.ndarray of float
            Correlation function for the specified observable,
            angular separations, and bin combination.
         """
-        if obs == 'Shear-Shear_plus':
+        obs = obs.casefold()
+        if obs == 'shear-shear_plus':
             cells_func = self.Cl_WL
             bessel_order = 0
-        elif obs == 'Shear-Shear_minus':
+        elif obs == 'shear-shear_minus':
             cells_func = self.Cl_WL
             bessel_order = 4
-        elif obs == 'Shear-Position':
+        elif obs == 'shear-position':
             cells_func = self.Cl_cross
             bessel_order = 2
-        elif obs == 'Position-Position':
+        elif obs == 'position-position':
             cells_func = self.Cl_GC_phot
             bessel_order = 0
         else:

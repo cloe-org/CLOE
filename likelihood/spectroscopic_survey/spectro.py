@@ -23,12 +23,12 @@ class Spectro:
         Parameters
         ----------
         cosmo_dic: dict
-            cosmological dictionary from cosmo
+            Cosmology dictionary containing the current cosmology.
         fiducial_dic: dict
-            fiducial dictionary
+            Cosmology dictionary containing the fiducial cosmology.
         """
-        self.theory = cosmo_dic
-        self.fiducial = fiducial_dic
+        if cosmo_dic is not None and fiducial_dic is not None:
+            self.update(cosmo_dic, fiducial_dic)
 
         mu_min = -1.0
         mu_max = 1.0
@@ -37,6 +37,23 @@ class Spectro:
         leg_m_max = 10
         self.dict_m_legendrepol = \
             {m: legendre(m)(self.mu_grid) for m in range(leg_m_max)}
+
+    def update(self, cosmo_dic, fiducial_dic):
+        r"""Update method
+
+        Method to update the `theory` and `fiducial` class attributes to the
+        dictionaries passed as input.
+
+        Parameters
+        ----------
+        cosmo_dic: dict
+            Cosmology dictionary containing the current cosmology.
+        fiducial_dic: dict
+            Cosmology dictionary containing the fiducial cosmology.
+
+        """
+        self.theory = cosmo_dic
+        self.fiducial = fiducial_dic
 
     def scaling_factor_perp(self, z):
         r"""Scaling Factor Perp

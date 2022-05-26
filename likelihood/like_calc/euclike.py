@@ -138,6 +138,9 @@ class Euclike:
         # Photo class
         self.phot_ins._set_bessel_tables(theta_rad)
 
+        # Spectro class instance
+        self.spec_ins = Spectro(None, None)
+
     def create_photo_data(self):
         """Create Photo Data
 
@@ -285,7 +288,7 @@ class Euclike:
         # Maybe Sergio has a better idea of what to these forloops
         # To include all info of the specifications
         if self.data_handler_ins.use_gc_spectro:
-            spec_ins = Spectro(dictionary, dictionary_fiducial)
+            self.spec_ins.update(dictionary, dictionary_fiducial)
             # m_ins = [v for k, v in dictionary['nuisance_parameters'].items()
             #         if k.startswith('multipole_')]
             m_ins = [0, 2, 4]
@@ -295,7 +298,7 @@ class Euclike:
                 for k_ins in (
                         self.data_ins.data_dict['GC-Spectro'][z_ins]['k_pk']):
                     k_m_matrix.append(
-                        spec_ins.multipole_spectra(
+                        self.spec_ins.multipole_spectra(
                             float(z_ins),
                             k_ins,
                             ms=m_ins)

@@ -32,8 +32,9 @@ def run_script(log):
                         help='specify input yaml config file')
     parser.add_argument('-a', '--action',
                         type=str,
-                        default='run',
-                        help='specify action to be performed')
+                        default=None,
+                        help='specify action to be performed '
+                             '{run, process, plot}')
     parser.add_argument('-ps', '--plot-settings',
                         dest='settings',
                         type=str,
@@ -58,13 +59,15 @@ def run_script(log):
 
     log.info('Instantiating user interface')
     ui = LikelihoodUI(user_config_file=args.config, user_dict=user_dict)
-    if args.action == 'run':
+    action = (args.action if args.action is not None
+              else ui.get_and_check_action())
+    if action == 'run':
         log.info('Selected RUN mode')
         ui.run()
-    elif args.action == 'process':
+    elif action == 'process':
         log.info('Selected PROCESS mode')
         ui.process_chain()
-    elif args.action == 'plot':
+    elif action == 'plot':
         log.info('Selected PLOT mode')
         ui.plot(args.settings)
     else:

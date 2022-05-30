@@ -148,17 +148,19 @@ class LikelihoodUI:
         settings: str
            Name of the yaml configuration file for the plotting routines
         """
-
         cobaya_dict = self._config['Cobaya']
-        model_path = self._get_model_path_from_cobaya_dict(cobaya_dict)
-        lyh.update_cobaya_params_from_model_yaml(cobaya_dict, model_path)
+        likelihood_euclid_dict = cobaya_dict['likelihood']['Euclid']
+
+        self._check_and_update_likelihood_fields(likelihood_euclid_dict)
+        self._check_and_update_params_field(cobaya_dict)
         lyh.update_cobaya_dict_with_halofit_version(cobaya_dict)
+
         model = get_model(cobaya_dict)
 
         logposterior = model.logposterior({})
         like = EuclidLikelihood()
         like.initialize()
-        like.passing_requirements(model, **model.provider.params)
+        like.passing_requirements(model, cobaya_dict, **model.provider.params)
         like.cosmo.update_cosmo_dic(like.cosmo.cosmo_dic['z_win'], 0.05)
 
         if settings is None:
@@ -333,6 +335,39 @@ class LikelihoodUI:
         else:
             raise ValueError(f'The requested backend is not supported: '
                              f'{backend}')
+
+    def get_and_check_action(self):
+        """Get and check the action key.
+
+        Returns the value of the keyword 'action' from the input
+        configuration dictionary. The currently available actions are
+        ['run', 'plot', 'process'].
+
+        Parameters
+        ----------
+        config: dict
+            The input configuration dictionary.
+
+        Returns
+        -------
+        action: str
+            The specified action.
+
+        Raises
+        ------
+        ValueError
+            If the specified action is not within the list of currently
+            available actions.
+        """
+        available_actions = ['run', 'process', 'plot']
+
+        action = self._config['action']
+        if action in available_actions:
+            return action
+        else:
+            raise ValueError(f'The specified action is not supported: '
+                             f'{action}. The supported actions are: '
+                             f'{available_actions}.')
 
     @staticmethod
     def _update_config(orig_config, update_config):

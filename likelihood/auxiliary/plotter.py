@@ -607,14 +607,15 @@ class Plotter:
             plt.savefig(f'{filename}.png', dpi=300)
 
         pk0 = np.array([self.spec_ins.multipole_spectra(self.redshift, k_val,
-                                                        0)
+                                                        [0])
                         for k_val in self.ks])
         pk2 = np.array([self.spec_ins.multipole_spectra(self.redshift, k_val,
-                                                        2)
+                                                        [2])
                         for k_val in self.ks])
         pk4 = np.array([self.spec_ins.multipole_spectra(self.redshift, k_val,
-                                                        4)
+                                                        [4])
                         for k_val in self.ks])
+
         np.savetxt(f'{filename}.dat', list(zip(self.ks, pk0, pk2, pk4)),
                    fmt='%.12e', delimiter='\t', newline='\n',
                    header=(

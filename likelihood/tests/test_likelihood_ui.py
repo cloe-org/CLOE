@@ -33,7 +33,17 @@ class LikelihoodUI_test(TestCase):
                                                  'observables_specification':
                                                      {},
                                                  'data': '/dev/null'}}},
+            'action': 'run'
         }
+        self.config_action_invalid = {
+            'backend': 'Cobaya',
+            'Cobaya': {'params': 'file.yaml',
+                       'likelihood': {'Euclid': {'NL_flag': 0,
+                                                 'observables_selection': {},
+                                                 'observables_specification':
+                                                     {},
+                                                 'data': '/dev/null'}}},
+            'action': 'invalid'}
         # for testing _update_config(), since it contains a nested dictionary
         # and a plain key/value pair, this should be sufficient to achieve
         # full coverage
@@ -215,3 +225,34 @@ class LikelihoodUI_test(TestCase):
         self.assertRaises(ValueError,
                           LikelihoodUI._get_and_check_backend,
                           self.config_backend_invalid)
+
+    @patch('likelihood.auxiliary.logger.log_info')
+    @patch('likelihood.auxiliary.yaml_handler.yaml_read')
+    @patch('likelihood.auxiliary.likelihood_yaml_handler'
+           '.update_cobaya_params_from_model_yaml')
+    def test_get_and_check_valid_action(
+            self,
+            dict_update_mock,
+            yaml_read_mock,
+            log_mock
+    ):
+        yaml_read_mock.return_value = self.config_good
+        dict_update_mock.return_value = self.config_good['Cobaya']
+        ui = LikelihoodUI(user_config_file=self.file_name)
+        action = ui.get_and_check_action()
+        self.assertEqual(action, 'run')
+
+    @patch('likelihood.auxiliary.logger.log_info')
+    @patch('likelihood.auxiliary.yaml_handler.yaml_read')
+    @patch('likelihood.auxiliary.likelihood_yaml_handler'
+           '.update_cobaya_params_from_model_yaml')
+    def test_get_and_check_invalid_action(
+            self,
+            dict_update_mock,
+            yaml_read_mock,
+            log_mock
+    ):
+        yaml_read_mock.return_value = self.config_action_invalid
+        dict_update_mock.return_value = self.config_action_invalid['Cobaya']
+        ui = LikelihoodUI(user_config_file=self.file_name)
+        self.assertRaises(ValueError, ui.get_and_check_action)

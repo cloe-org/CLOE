@@ -227,6 +227,7 @@ class Cosmology:
                           'Pgi_phot': None,
                           'Pgi_spectro': None,
                           'r_z_func': None,
+                          'z_r_func': None,
                           'f_K_z_func': None,
                           'd_z_func': None,
                           'H_z_func': None,
@@ -492,7 +493,7 @@ class Cosmology:
         """Interp Comoving Dist
 
         Adds an interpolator for comoving distance to the dictionary so that
-        it can be evaluated at redshifts not explictly supplied to cobaya.
+        it can be evaluated at redshifts not explicitly supplied to cobaya.
 
         Updates 'key' in the cosmo_dic attribute of the class
         by adding an interpolator object
@@ -504,11 +505,32 @@ class Cosmology:
         self.cosmo_dic['r_z_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['comov_dist'], ext=2)
 
+    def interp_z_of_r(self):
+        """Interp z(r)
+
+        Adds an interpolator for the redshift as a function of the
+        comoving distance to the dictionary.
+
+        Updates 'key' in the cosmo_dic attribute of the class
+        by adding an interpolator object
+        which interpolates redshift as a function of comoving distance.
+
+        Note: The interpolator is used in in photo.py member functions
+        z_plus1 and z_minus1. There the values are extrapolated for values
+        larger than :math:r_{max} since the corresponding multipole factor is
+        larger than unity. Therefore, we set here the extrapolation mode to
+        return zeros and not raise a ValueError as everywhere else in the code,
+        so that the code runs smoothly with RSD.
+        """
+        self.cosmo_dic['z_r_func'] = interpolate.InterpolatedUnivariateSpline(
+            x=self.cosmo_dic['comov_dist'],
+            y=self.cosmo_dic['z_win'], ext='zeros')
+
     def interp_transverse_comoving_dist(self):
         """Interp Transverse Comoving Dist
 
         Adds an interpolator for the transverse comoving distance to the
-        dictionary so that it can be evaluated at redshifts not explictly
+        dictionary so that it can be evaluated at redshifts not explicitly
         supplied to cobaya.
 
         Updates 'key' in the cosmo_dic attribute of the class
@@ -529,7 +551,7 @@ class Cosmology:
         """Interp Angular Dist
 
         Adds an interpolator for angular distance to the dictionary so that
-        it can be evaluated at redshifts not explictly supplied to cobaya.
+        it can be evaluated at redshifts not explicitly supplied to cobaya.
 
         Updates 'key' in the cosmo_dic attribute of the class by adding an
         interpolator object of angular diameter distance
@@ -545,7 +567,7 @@ class Cosmology:
         """Interp H
 
         Adds an interpolator for the Hubble parameter to the dictionary so that
-        it can be evaluated at redshifts not explictly supplied to Cobaya.
+        it can be evaluated at redshifts not explicitly supplied to Cobaya.
 
         Updates 'key' in the cosmo_dic attribute of the class
         by adding an interpolator object
@@ -1178,6 +1200,7 @@ class Cosmology:
         self.interp_H()
         self.interp_H_Mpc()
         self.interp_comoving_dist()
+        self.interp_z_of_r()
         self.interp_transverse_comoving_dist()
         self.interp_fsigma8()
         self.interp_sigma8()

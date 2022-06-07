@@ -863,6 +863,56 @@ class Photo:
             (ell + 0.5)**2
         return prefactor
 
+    def z_minus1(self, ell, r):
+        r""":math: `z_{-1}(r)`
+
+        Calculates the :math: `z_{-1}(r)` function needed for RSD.
+
+        .. math::
+            z_{-1}(r) = z \left[\frac{2 \ell -3}{ 2 \ell + 1}
+            r \right] \\
+
+        Parameters
+        ----------
+        ell: int
+            :math:`\ell`-mode at which the function is evaluated.
+        r: float
+            Comoving distance at which the redshift is evaluated.
+
+        Returns
+        -------
+        z_minus1: float
+            The redshift corresponding to the transverse comoving distance
+        """
+        z_r_interp = self.theory['z_r_func']
+        ell_factor = (2 * ell - 3) / (2 * ell + 1)
+        return z_r_interp(ell_factor * r)
+
+    def z_plus1(self, ell, r):
+        r""":math: `z_{+1}(r)`
+
+        Calculates the :math: `z_{+1}(r)` function needed for RSD.
+
+        .. math::
+            z_{+1}(r) = z \left[\frac{2 \ell +5}{ 2 \ell + 1}
+            r \right] \\
+
+        Parameters
+        ----------
+        ell: int
+            :math:`\ell`-mode at which the function is evaluated.
+        r: float
+            Comoving distance at which the redshift is evaluated.
+
+        Returns
+        -------
+        z_plus1: float
+            The redshift corresponding to the transverse comoving distance
+        """
+        z_r_interp = self.theory['z_r_func']
+        ell_factor = (2 * ell + 5) / (2 * ell + 1)
+        return z_r_interp(ell_factor * r)
+
     def corr_func_3x2pt(self, obs, theta_deg, bin_i, bin_j):
         r"""Generic 3x2pt correlation function
 

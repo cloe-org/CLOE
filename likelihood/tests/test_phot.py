@@ -62,6 +62,8 @@ class photoinitTestCase(TestCase):
 
         rz_interp = interpolate.InterpolatedUnivariateSpline(x=zs_r, y=rs,
                                                              ext=0)
+        zr_interp = interpolate.InterpolatedUnivariateSpline(x=rs, y=zs_r,
+                                                             ext=0)
         dz_interp = interpolate.InterpolatedUnivariateSpline(x=zs_r,
                                                              y=ang_dists,
                                                              ext=0)
@@ -111,7 +113,9 @@ class photoinitTestCase(TestCase):
                           'w': -1.0, 'sigma8_0': 0.816,
                           'As': 2.115e-9, 'sigma8_z_func': sig_8_interp,
                           'fsigma8_z_func': f_sig_8_interp,
-                          'r_z_func': rz_interp, 'd_z_func': dz_interp,
+                          'r_z_func': rz_interp,
+                          'z_r_func': zr_interp,
+                          'd_z_func': dz_interp,
                           # pretend that f_K_z_func behaves as r_z_func.
                           # This is not realistic but it is fine for the
                           # purposes of the unit tests
@@ -511,3 +515,21 @@ class photoinitTestCase(TestCase):
     def test_corr_func_invalid_type(self):
         npt.assert_raises(TypeError, self.phot.corr_func_3x2pt,
                           'Shear-Shear_plus', (1.0, 1.5), 1, 1)
+
+    def test_z_minus1(self):
+        ell_test = 2
+        r_test = 100.
+        r_check = r_test / 5  # (2 ell - 3) / (2 ell + 1)
+        z_of_r_check = self.phot.theory['z_r_func'](r_check)
+        z_out = self.phot.z_minus1(ell=ell_test, r=r_test)
+        npt.assert_allclose(z_out, z_of_r_check, rtol=1e-3,
+                            err_msg='z_minus1 test failed')
+
+    def test_z_plus1(self):
+        ell_test = 2
+        r_test = 100.
+        r_check = 9 * r_test / 5  # (2 ell + 5) / (2 ell + 1)
+        z_of_r_check = self.phot.theory['z_r_func'](r_check)
+        z_out = self.phot.z_plus1(ell=ell_test, r=r_test)
+        npt.assert_allclose(z_out, z_of_r_check, rtol=1e-3,
+                            err_msg='z_plus1 test failed')

@@ -331,3 +331,12 @@ class cosmoinitTestCase(TestCase):
                             self.Dcheck,
                             rtol=1e-1,
                             err_msg='Error in the omega density calculation')
+
+    def test_z_of_r_inverse(self):
+        # test that z_r_func is really the inverse of r_z_func
+        z_in = [0.5, 0.7, 1.]
+        r_out = self.model_test.cosmology.cosmo_dic['r_z_func'](z_in)
+        z_out = self.model_test.cosmology.cosmo_dic['z_r_func'](r_out)
+        npt.assert_allclose(z_out, z_in, rtol=1e-3,
+                            err_msg='z_r_func is not the inverse '
+                                    'of r_z_func')

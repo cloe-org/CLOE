@@ -84,17 +84,9 @@ class Euclike:
             for j in range(0, len(x)):
                 self.indices_all.append([i + 1, j + 1])
 
-        # Definining the prefactors for WL and XC
         ells_WL = self.data_ins.data_dict['WL']['ells']
         ells_XC = self.data_ins.data_dict['XC-Phot']['ells']
-        prfcsq = (ells_WL + 2.0) * (ells_WL + 1.0) * ells_WL \
-            * (ells_WL - 1.0) / (ells_WL + 0.5)**4
-        prfc = np.sqrt((ells_XC + 2.0) * (ells_XC + 1.0) * ells_XC *
-                       (ells_XC - 1.0)) / (ells_XC + 0.5)**2
-        ncomb_WL = int(numtomo_wl * (numtomo_wl + 1) / 2)
-        ncomb_XC = numtomo_wl * numtomo_gcphot
-        self.prefactor_WL = np.tile(prfcsq, ncomb_WL)
-        self.prefactor_XC = np.tile(prfc, ncomb_XC)
+        ells_GC_phot = self.data_ins.data_dict['GC-Phot']['ells']
 
         # Reshaping the data vectors and covariance matrices
         # into dictionaries to be passed to the data_handler class
@@ -137,6 +129,11 @@ class Euclike:
         # Sets the precomputed Bessel functions as an attribute of the
         # Photo class
         self.phot_ins._set_bessel_tables(theta_rad)
+
+        # set the precomputed prefactors for the WL, XC and GCphot Cl's
+        self.phot_ins.set_prefactor(ells_WL=ells_WL,
+                                    ells_XC=ells_XC,
+                                    ells_GC_phot=ells_GC_phot)
 
         # Spectro class instance
         self.spec_ins = Spectro(None, None)
@@ -215,11 +212,10 @@ class Euclike:
         # Obtain the theory for WL
         if self.data_handler_ins.use_wl:
             wl_array = np.array(
-                [self.phot_ins.Cl_WL_noprefac(ell, element[0], element[1])
+                [self.phot_ins.Cl_WL(ell, element[0], element[1])
                  for element in self.indices_diagonal_wl
                  for ell in self.data_ins.data_dict['WL']['ells']]
             )
-            wl_array = self.prefactor_WL * wl_array
         else:
             wl_array = np.zeros(
                  len(self.data_ins.data_dict['WL']['ells']) *
@@ -229,11 +225,10 @@ class Euclike:
         # Obtain the theory for XC-Phot
         if self.data_handler_ins.use_xc_phot:
             xc_phot_array = np.array(
-                [self.phot_ins.Cl_cross_noprefac(ell, element[1], element[0])
+                [self.phot_ins.Cl_cross(ell, element[1], element[0])
                  for element in self.indices_all
                  for ell in self.data_ins.data_dict['XC-Phot']['ells']]
             )
-            xc_phot_array = self.prefactor_XC * xc_phot_array
         else:
             xc_phot_array = np.zeros(
                  len(self.data_ins.data_dict['XC-Phot']['ells']) *

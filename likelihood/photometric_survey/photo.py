@@ -77,6 +77,7 @@ class Photo:
             np.linspace(2, self.ell_max, self.ell_max - 1).astype(int)
 
         self.bessel_dict = {}
+        self._prefactor_dict = {}
 
     def update(self, cosmo_dic):
         r"""Update method
@@ -122,15 +123,19 @@ class Photo:
         self.interpwin = np.zeros(shape=(self.z_wsamp, z_wtom_wl))
         self.interpwingal = np.zeros(shape=(self.z_wsamp, z_wtom_gc))
         self.interpwinia = np.zeros(shape=(self.z_wsamp, z_wtom_wl))
+        self.interpwinmag = np.zeros(shape=(self.z_wsamp, z_wtom_gc))
+
         self.interpwin[:, 0] = self.z_winterp
         self.interpwingal[:, 0] = self.z_winterp
         self.interpwinia[:, 0] = self.z_winterp
+        self.interpwinmag[:, 0] = self.z_winterp
 
         for tomi in range(1, z_wtom_wl):
             self.interpwin[:, tomi] = self.WL_window(tomi)
             self.interpwinia[:, tomi] = self.IA_window(self.z_winterp, tomi)
         for tomi in range(1, z_wtom_gc):
             self.interpwingal[:, tomi] = self.GC_window(self.z_winterp, tomi)
+            self.interpwinmag[:, tomi] = self.magnification_window(tomi)
 
     def _set_bessel_tables(self, theta_rad):
         r"""Set tables for Bessel functions
@@ -156,6 +161,50 @@ class Photo:
         warnings.warn('Bessel tables have been set with the specified angular '
                       'separations. Computing 3x2pt correlation functions at '
                       'different angles will lead to unexpected outputs.')
+
+    def set_prefactor(self, ells_WL, ells_XC, ells_GC_phot):
+        r"""Compute the prefactors for the WL XC and GCphot :math:`C(\ell)`'s
+
+        The following prefactors are evaluated
+
+        * shearIA_WL (from the ells_WL input array): \
+          :math:`\left[(\ell+2)!/(\ell-2)!\right]/(\ell+1/2)^4`
+        * shearIA_XC (from the ells_XC input array): \
+          :math:`\sqrt{(\ell+2)!/(\ell-2)!}/(\ell+1/2)^2`
+        * mag_XC (from the ells_XC input array): \
+          :math:`\ell(\ell+1)/(\ell+1/2)^2`
+        * mag_GCphot (from the ells_GCphot input array): \
+          :math:`\ell(\ell+1)/(\ell+1/2)^2`
+
+        The prefactors are evaluated using the :meth:`_eval_prefactor_mag()`
+        and :meth:`_eval_prefactor_shearia()` functions
+
+        Parameters
+        ----------
+        ells_WL: numpy.ndarray
+           array of :math:`\ell` values for the WL probe
+        ells_XC: numpy.ndarray
+           array of :math:`\ell` values for the XC probe
+        ells_GC_phot: numpy.ndarray
+           array of :math:`\ell` values for the GCphot probe
+        """
+        self._prefactor_dict = {}
+
+        # WL
+        for ell in ells_WL:
+            self._prefactor_dict['shearIA_WL', ell] = \
+                (self._eval_prefactor_shearia(ell))**2
+
+        # XC
+        for ell in ells_XC:
+            self._prefactor_dict['shearIA_XC', ell] = \
+                self._eval_prefactor_shearia(ell)
+            self._prefactor_dict['mag_XC', ell] = self._eval_prefactor_mag(ell)
+
+        # GCphot
+        for ell in ells_GC_phot:
+            self._prefactor_dict['mag_GCphot', ell] = \
+                self._eval_prefactor_mag(ell)
 
     def GC_window(self, z, bin_i):
         r"""GC Window
@@ -448,29 +497,54 @@ class Photo:
                             ' spectrum interpolation range.')
         return kern_mult_power
 
-    def Cl_WL_noprefac(self, ell, bin_i, bin_j, int_step=0.01):
+    def Cl_WL(self, ell, bin_i, bin_j, int_step=0.01):
         r"""Cl WL
 
         Calculates angular power spectrum for weak lensing,
-        for the supplied bins. Includes intrinsic alignments.
+        for the supplied bins:
 
         .. math::
-            C_{ij}^{\rm LL, no prefac}(\ell)= c \int \frac{dz}
-            {H(z)f_K^2\left[\tilde{r}(z)\right]}\
-            \bigg\lbrace W_{i}^{\rm \gamma}\left[ k_{\ell}(z), z \right]\
-            W_{j}^{\rm \gamma}\left[ k_{\ell}(z), z \right ]\
-            P_{\rm \delta \delta}\left[ k_{\ell}(z), z \right] +\\
-            \left[ W_{i}^{\rm IA}(z)W_{j}^{\rm \gamma}\
-            \left[ k_{\ell}(z), z \right ]+W_{i}^{\rm \gamma}\
-            \left[ k_{\ell}(z), z \right]W_{j}^{\rm IA}(z)\right]\
-            P_{\rm \delta I}\left[ k_{\ell}(z), z \right]+\\
-            W_{i}^{\rm IA}(z)W_{j}^{\rm IA}(z)\
-            P_{\rm II}\left[k_{\ell}(z), z\right] \bigg\rbrace \\
+            C_{ij}^{LL} = C_{ij}^{\gamma \gamma}(\ell) +
+            C_{ij}^{I\gamma}(\ell) + C_{ij}^{II}(\ell)
+
+        where :math:`\gamma` stands for gravitational shear and I for
+        intrinsic shear.
+
+        .. math::
+            C_{ij}^{\rm \gamma \gamma}(\ell) =
+            \frac{(\ell+2)!}{(\ell-2)!}
+            \left(\frac{2}{2\ell+1}\right)^4
+            \int {\rm d}z
+            \frac{W_{i}^{\rm \gamma}(z)W_{j}^{\rm \gamma}(z)}
+            {H(z)f_K^2\left[\tilde{r}(z)\right]}
+            P^{\rm{photo}}_{\rm mm}
+            \left[ k_{\ell}(z), z \right]
+
+        .. math::
+            C_{ij}^{\rm I\gamma}(\ell) =
+            \frac{(\ell+2)!}{(\ell-2)!}
+            \left(\frac{2}{2\ell+1}\right)^4
+            \int {\rm d}z
+            \frac{W_{i}^{\rm \gamma}(z)W_{j}^{\rm I}(z) +
+                  W_{i}^{\rm I}(z)W_{j}^{\rm \gamma}(z)}
+            {H(z)f_K^2\left[\tilde{r}(z)\right]}
+            P^{\rm{photo}}_{\rm mI}
+            \left[ k_{\ell}(z), z \right]
+
+        .. math::
+            C_{ij}^{\rm II}(\ell) =
+            \frac{(\ell+2)!}{(\ell-2)!}
+            \left(\frac{2}{2\ell+1}\right)^4
+            \int {\rm d}z
+            \frac{W_{i}^{\rm I}(z)W_{j}^{\rm I}(z)}
+            {H(z)f_K^2\left[\tilde{r}(z)\right]}
+            P^{\rm{photo}}_{\rm II}
+            \left[ k_{\ell}(z), z \right]
 
         Parameters
         ----------
         ell: float
-            :math:`\ell`-mode at which :math:`C_{\ell}` is evaluated.
+            :math:`\ell`-mode at which :math:`C(\ell)` is evaluated.
         bin_i: int
            Index of first tomographic bin. Tomographic bin
            indices start from 1.
@@ -507,13 +581,19 @@ class Photo:
         kernia_j = np.interp(zs_arr, self.interpwinia[:, 0],
                              self.interpwinia[:, bin_j])
 
+        if ('shearIA_WL', ell) in self._prefactor_dict.keys():
+            prefactor_wl = self._prefactor_dict['shearIA_WL', ell]
+        else:
+            prefactor_wl = (self._eval_prefactor_shearia(ell))**2
+
         pandw_dd = kern_i * kern_j * pow_dd
         pandw_ii = kernia_i * kernia_j * pow_ii
         pandw_di = (kern_i * kernia_j + kernia_i * kern_j) * pow_di
         pandwijk = pandw_dd + pandw_ii + pandw_di
 
         c_int_arr = self.Cl_generic_integrand(zs_arr, pandwijk)
-        c_final = self.theory['c'] * integrate.trapz(c_int_arr, zs_arr)
+        c_final = prefactor_wl * self.theory['c'] * \
+            integrate.trapz(c_int_arr, zs_arr)
         c_final = c_final * (1 + self.multbias[bin_i - 1]) * \
             (1 + self.multbias[bin_j - 1])
         return c_final
@@ -525,16 +605,43 @@ class Photo:
         for the supplied bins.
 
         .. math::
-            C_{ij}^{\rm GG}(\ell) = c \int {\rm d}z
-            \frac{W_{i}^{\rm G}(z)W_{j}^{\rm G}(z)}
-            {H(z)f_K^2\left[\tilde{r}(z)\right]}\
-            P^{\rm{photo}}_{\rm gg}\
-            \left[ k_{\ell}(z), z \right]\\
+            C_{ij}^{GG}(\ell) = C_{ij}^{gg}(\ell) + C_{ij}^{g\mu}(\ell) +
+            C_{ij}^{\mu\mu}(\ell)
+
+        where g stands for intrinsic number density fluctuations and \mu
+        stands for lensing magnification. So
+
+        .. math::
+            C_{ij}^{\rm gg}(\ell) =
+            \int {\rm d}z
+            \frac{W_{i}^{\rm g}(z)W_{j}^{\rm g}(z)}
+            {H(z)f_K^2\left[\tilde{r}(z)\right]}
+            P^{\rm{photo}}_{\rm gg}
+            \left[ k_{\ell}(z), z \right]
+
+        .. math::
+            C_{ij}^{\rm g\mu}(\ell) =
+            \frac{\ell(\ell+1)}{(\ell+1/2)^2}
+            \int {\rm d}z
+            \frac{W_{i}^{\rm \mu}(z)W_{j}^{\rm g}(z) +
+                  W_{i}^{\rm g}(z)W_{j}^{\rm \mu}(z)}
+            {H(z)f_K^2\left[\tilde{r}(z)\right]}
+            P^{\rm{photo}}_{\rm gm}
+            \left[ k_{\ell}(z), z \right]
+
+        .. math::
+            C_{ij}^{\rm \mu\mu}(\ell) =
+            \left(\frac{\ell(\ell+1)}{(\ell+1/2)^2} \right)^2
+            \int {\rm d}z
+            \frac{W_{i}^{\rm \mu}(z)W_{j}^{\rm \mu}(z)}
+            {H(z)f_K^2\left[\tilde{r}(z)\right]}
+            P^{\rm{photo}}_{\rm mm}
+            \left[ k_{\ell}(z), z \right]
 
         Parameters
         ----------
         ell: float
-            :math:`\ell`-mode at which :math:`C_{\ell}` is evaluated.
+            :math:`\ell`-mode at which :math:`C(\ell)` is evaluated.
         bin_i: int
            Index of first tomographic bin. Tomographic bin
            indices start from 1.
@@ -555,41 +662,101 @@ class Photo:
         zs_arr = np.arange(self.cl_int_z_min, cl_int_z_max, int_step)
 
         P_gg = self.theory['Pgg_phot']
+        P_dd = self.theory['Pmm_phot']
+        P_gd = self.theory['Pgdelta_phot']
 
         ks_arr = (ell + 0.5) / self.theory['f_K_z_func'](zs_arr)
-        power = P_gg(zs_arr, ks_arr, grid=False)
+        pow_gg = P_gg(zs_arr, ks_arr, grid=False)
+        pow_dd = P_dd(zs_arr, ks_arr, grid=False)
+        pow_gd = P_gd(zs_arr, ks_arr, grid=False)
 
-        kern_i = np.interp(zs_arr, self.interpwingal[:, 0],
-                           self.interpwingal[:, bin_i])
-        kern_j = np.interp(zs_arr, self.interpwingal[:, 0],
-                           self.interpwingal[:, bin_j])
-        pandwijk = kern_i * kern_j * power
+        if ('mag_GCphot', ell) in self._prefactor_dict.keys():
+            prefactor_mag = self._prefactor_dict['mag_GCphot', ell]
+        else:
+            prefactor_mag = self._eval_prefactor_mag(ell)
+
+        kerngal_i = np.interp(zs_arr, self.interpwingal[:, 0],
+                              self.interpwingal[:, bin_i])
+        kerngal_j = np.interp(zs_arr, self.interpwingal[:, 0],
+                              self.interpwingal[:, bin_j])
+
+        kernmag_i = prefactor_mag * np.interp(zs_arr, self.interpwinmag[:, 0],
+                                              self.interpwinmag[:, bin_i])
+        kernmag_j = prefactor_mag * np.interp(zs_arr, self.interpwinmag[:, 0],
+                                              self.interpwinmag[:, bin_j])
+
+        pandw_galgal = kerngal_i * kerngal_j * pow_gg
+        pandw_magmag = kernmag_i * kernmag_j * pow_dd
+        pandw_galmag = (kernmag_i * kerngal_j + kernmag_j * kerngal_i) * pow_gd
+
+        pandwijk = pandw_magmag + pandw_galgal + pandw_galmag
 
         c_int_arr = self.Cl_generic_integrand(zs_arr, pandwijk)
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, zs_arr)
 
         return c_final
 
-    def Cl_cross_noprefac(self, ell, bin_i, bin_j, int_step=0.02):
+    def Cl_cross(self, ell, bin_i, bin_j, int_step=0.02):
         r"""Cl Cross
 
         Calculates angular power spectrum for cross-correlation
-        between weak lensing and galaxy clustering, for the supplied bins.
-        Includes intrinsic alignments.
+        between weak lensing and galaxy clustering, for the supplied bins:
 
         .. math::
-            C_{ij}^{\rm LG, no prefac}(\ell) = c \int \frac{dz}
-            {H(z)f_K^2\left[\tilde{r}(z)\right]}\
-            \bigg\lbrace W_{i}^{\gamma}\left[ k_{\ell}(z), z \right ]\
-            W_{j}^{\rm{G}}(z)P^{\rm{photo}}_{\rm g\delta}\
-            \left[ k_{\ell}(z), z \right]\\
-            +\,W_{i}^{\rm{IA}}(z)W_{j}^{\rm{G}}(z)P^{\rm{photo}}_{\rm g\rm{I}}\
-            \left[ k_{\ell}(z), z \right] \bigg\rbrace \\
+            C_{ij}^{GL} = C_{ij}^{\gamma g}(\ell) + C_{ij}^{Ig}(\ell) +
+                                 C_{ij}^{\gamma \mu}(\ell) +
+                                 C_{ij}^{I\mu}(\ell)
+
+        where :math:`\gamma` stands for gravitational shear, g for intrinsic
+        number density fluctuations, :math:`\mu` for lensing magnification and
+        I for intrinsic shear.
+
+        .. math::
+            C_{ij}^{\rm \gamma g}(\ell) =
+            \left(\frac{(\ell+2)!}{(\ell-2)!}\right)^{1/2}
+            \left(\frac{2}{2\ell+1}\right)^2
+            \int {\rm d}z
+            \frac{W_{i}^{\rm \gamma}(z)W_{j}^{\rm g}(z)}
+            {H(z)f_K^2\left[\tilde{r}(z)\right]}
+            P^{\rm{photo}}_{\rm gm}
+            \left[ k_{\ell}(z), z \right]
+
+        .. math::
+            C_{ij}^{\rm Ig}(\ell) =
+            \left(\frac{(\ell+2)!}{(\ell-2)!}\right)^{1/2}
+            \left(\frac{2}{2\ell+1}\right)^2
+            \int {\rm d}z
+            \frac{W_{i}^{\rm I}(z)W_{j}^{\rm g}(z)}
+            {H(z)f_K^2\left[\tilde{r}(z)\right]}
+            P^{\rm{photo}}_{\rm gI}
+            \left[ k_{\ell}(z), z \right]
+
+        .. math::
+            C_{ij}^{\rm \gamma \mu}(\ell) =
+            \left(\frac{(\ell+2)!}{(\ell-2)!}\right)^{1/2}
+            \left(\frac{2}{2\ell+1}\right)^2
+            \frac{\ell(\ell+1)}{(\ell + 1/2)^2}
+            \int {\rm d}z
+            \frac{W_{i}^{\rm \gamma}(z)W_{j}^{\rm \mu}(z)}
+            {H(z)f_K^2\left[\tilde{r}(z)\right]}
+            P^{\rm{photo}}_{\rm mm}
+            \left[ k_{\ell}(z), z \right]
+
+        .. math::
+            C_{ij}^{\rm I\mu}(\ell) =
+            \left(\frac{(\ell+2)!}{(\ell-2)!}\right)^{1/2}
+            \left(\frac{2}{2\ell+1}\right)^2
+            \frac{\ell(\ell+1)}{(\ell + 1/2)^2}
+            \int {\rm d}z
+            \frac{W_{i}^{\rm I}(z)W_{j}^{\rm \mu}(z)}
+            {H(z)f_K^2\left[\tilde{r}(z)\right]}
+            P^{\rm{photo}}_{\rm mI}
+            \left[ k_{\ell}(z), z \right]
 
         Parameters
         ----------
         ell: float
-            :math:`\ell`-mode at which :math:`C_{\ell}` is evaluated.
+            :math:`\ell`-mode at which :math:`C(\ell)` is evaluated.
         bin_i: int
            Index of source tomographic bin. Tomographic bin
            indices start from 1.
@@ -611,20 +778,40 @@ class Photo:
 
         P_gd = self.theory['Pgdelta_phot']
         P_gi = self.theory['Pgi_phot']
+        P_dd = self.theory['Pmm_phot']
+        P_di = self.theory['Pdeltai']
 
         ks_arr = (ell + 0.5) / self.theory['f_K_z_func'](zs_arr)
         pow_gd = P_gd(zs_arr, ks_arr, grid=False)
         pow_gi = P_gi(zs_arr, ks_arr, grid=False)
+        pow_dd = P_dd(zs_arr, ks_arr, grid=False)
+        pow_di = P_di(zs_arr, ks_arr, grid=False)
 
-        kern_i = np.interp(zs_arr, self.interpwin[:, 0],
-                           self.interpwin[:, bin_i])
-        kernia_i = np.interp(zs_arr, self.interpwinia[:, 0],
-                             self.interpwinia[:, bin_i])
-        kern_j = np.interp(zs_arr, self.interpwingal[:, 0],
-                           self.interpwingal[:, bin_j])
-        pandw_gd = kern_i * kern_j * pow_gd
-        pandw_gi = kernia_i * kern_j * pow_gi
-        pandwijk = pandw_gd + pandw_gi
+        if ('shearIA_XC', ell) in self._prefactor_dict.keys():
+            prefactor_shearia = self._prefactor_dict['shearIA_XC', ell]
+        else:
+            prefactor_shearia = self._eval_prefactor_shearia(ell)
+        if ('mag_XC', ell) in self._prefactor_dict.keys():
+            prefactor_mag = self._prefactor_dict['mag_XC', ell]
+        else:
+            prefactor_mag = self._eval_prefactor_mag(ell)
+
+        kern_i = prefactor_shearia * np.interp(zs_arr, self.interpwin[:, 0],
+                                               self.interpwin[:, bin_i])
+        kernia_i = prefactor_shearia * \
+            np.interp(zs_arr, self.interpwinia[:, 0],
+                      self.interpwinia[:, bin_i])
+        kerngal_j = np.interp(zs_arr, self.interpwingal[:, 0],
+                              self.interpwingal[:, bin_j])
+        kernmag_j = prefactor_mag * np.interp(zs_arr, self.interpwinmag[:, 0],
+                                              self.interpwinmag[:, bin_j])
+
+        pandw_gd = kern_i * kerngal_j * pow_gd
+        pandw_gi = kernia_i * kerngal_j * pow_gi
+        pandw_dmag = kern_i * kernmag_j * pow_dd
+        pandw_imag = kernia_i * kernmag_j * pow_di
+
+        pandwijk = pandw_gd + pandw_gi + pandw_dmag + pandw_imag
 
         c_int_arr = self.Cl_generic_integrand(zs_arr, pandwijk)
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, zs_arr)
@@ -632,90 +819,40 @@ class Photo:
 
         return c_final
 
-    def Cl_WL(self, ell, bin_i, bin_j, int_step=0.01):
-        r"""Cl WL
+    @staticmethod
+    def _eval_prefactor_mag(ell):
+        r"""Compute the magnification prefactor in Limber approximation
 
-        Calculates angular power spectrum for weak lensing,
-        for the supplied bins. Includes intrinsic alignments.
-        Includes prefactor for extended Limber approximation and curved sky.
+        The prefactor is computed as follows
 
         .. math::
-            C_{ij}^{\rm LL}(\ell)= (\ell+2)(\ell+1)\ell(\ell-1)\
-            (\ell+1/2)^{-4} C_{ij}^{\rm LL, no prefac}(\ell) \\
+             \ell (\ell + 1) / (\ell + 1/2)^2
 
         Parameters
         ----------
         ell: float
-            :math:`\ell`-mode at which :math:`C_{\ell}` is evaluated.
-        bin_i: int
-           Index of first tomographic bin. Tomographic bin
-           indices start from 1.
-        bin_j: int
-           Index of second tomographic bin. Tomographic bin
-           indices start from 1.
-        int_step: float
-            Size of step for numerical integral over redshift.
+           :math:`\ell`-mode at which the prefactor is evaluated.
 
         Returns
         -------
-        c_final: float
-           Value of the angular shear power spectrum.
+        prefactor: float
+           Value of the prefactor at the given :math:`\ell`.
         """
+        return ell * (ell + 1) / (ell + 0.5)**2
 
-        c_final = self.Cl_WL_noprefac(ell, bin_i, bin_j, int_step)
-        c_final *= self.prefactor(ell)**2
+    @staticmethod
+    def _eval_prefactor_shearia(ell):
+        r"""Compute the shearIA prefactor in Limber approximation
 
-        return c_final
-
-    def Cl_cross(self, ell, bin_i, bin_j, int_step=0.02):
-        r"""Cl Cross
-
-        Calculates angular power spectrum for cross-correlation
-        between weak lensing and galaxy clustering, for the supplied bins.
-        Includes intrinsic alignments. Includes prefactor for extended
-        Limber approximation and curved sky.
+        The prefactor is computed as follows
 
         .. math::
-            C_{ij}^{\rm LG}(\ell) = \sqrt{(\ell+2)(\ell+1)\ell(\ell-1)}\
-            (\ell+1/2)^{-2}C_{ij}^{\rm LG, no prefac}(\ell) \\
+            \sqrt{(\ell + 2)!/(\ell - 2)!} / (\ell + 1/2)^2
 
         Parameters
         ----------
         ell: float
-            :math:`\ell`-mode at which :math:`C_{\ell}` is evaluated.
-        bin_i: int
-           Index of first tomographic bin. Tomographic bin
-           indices start from 1.
-        bin_j: int
-           Index of second tomographic bin. Tomographic bin
-           indices start from 1.
-        int_step: float
-            Size of step for numerical integral over redshift.
-
-        Returns
-        -------
-        c_final: float
-           Value of cross-correlation between weak lensing and
-           galaxy clustering photometric angular power spectrum.
-        """
-
-        c_final = self.Cl_cross_noprefac(ell, bin_i, bin_j, int_step)
-        c_final *= self.prefactor(ell)
-
-        return c_final
-
-    def prefactor(self, ell):
-        r"""Prefactor for photometric probes
-
-        Calculates the prefactors for extended Limber and curved sky.
-
-        .. math::
-            \sqrt{(\ell+2)(\ell+1)\ell(\ell-1)}(\ell+1/2)^{-2} \\
-
-        Parameters
-        ----------
-        ell: float
-            :math:`\ell`-mode at which the prefactor is evaluated.
+           :math:`\ell`-mode at which the prefactor is evaluated.
 
         Returns
         -------

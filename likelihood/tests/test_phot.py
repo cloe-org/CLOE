@@ -7,6 +7,7 @@ photometric survey module.
 """
 
 from unittest import TestCase
+from unittest.mock import patch
 import numpy as np
 import numpy.testing as npt
 from scipy import interpolate
@@ -181,6 +182,13 @@ class photoinitTestCase(TestCase):
         cls.nz_dic_WL = nz_dic_WL
         cls.nz_dic_GC = nz_dic_GC
 
+        ells_WL = range(2, 1000)
+        ells_XC = range(2, 2000)
+        ells_GC_phot = range(2, 3000)
+        cls.phot.set_prefactor(ells_WL=ells_WL,
+                               ells_XC=ells_XC,
+                               ells_GC_phot=ells_GC_phot)
+
     def setUp(self) -> None:
         self.win_tol = 1e-03
         self.cl_tol = 1e-03
@@ -188,19 +196,36 @@ class photoinitTestCase(TestCase):
         self.integrand_check = 1.043825
         self.wbincheck = -1.47437e-06
         self.wbincheck_mag = 0.0
-        self.H0 = 67.0
-        self.c = const.c.to('km/s').value
-        self.omch2 = 0.12
-        self.ombh2 = 0.022
+
+        self.test_prefactor_rtol = 1e-04
+        self.test_prefactor_input_ells_WL = range(2, 4)
+        self.test_prefactor_input_ells_XC = range(2, 5)
+        self.test_prefactor_input_ells_GC_phot = range(2, 6)
+        self.test_prefactor_num_check = 4
+        self.test_prefactor_len_check = {}
+        self.test_prefactor_len_check['shearIA_WL'] = len(
+            self.test_prefactor_input_ells_WL)
+        self.test_prefactor_len_check['shearIA_XC'] = len(
+            self.test_prefactor_input_ells_XC)
+        self.test_prefactor_len_check['mag_XC'] = len(
+            self.test_prefactor_input_ells_XC)
+        self.test_prefactor_len_check['mag_GCphot'] = len(
+            self.test_prefactor_input_ells_GC_phot)
+        # the following prefactors are evaluated for input ell = 3
+        self.test_prefactor_input_ell_val = 3
+        self.test_prefactor_val_check = {}
+        self.test_prefactor_val_check['shearIA_WL'] = 0.799666805
+        self.test_prefactor_val_check['shearIA_XC'] = 0.894240910
+        self.test_prefactor_val_check['mag_XC'] = 0.979591837
+        self.test_prefactor_val_check['mag_GCphot'] = 0.979591837
+
         self.W_i_Gcheck = 5.241556e-09
         self.W_IA_check = 0.0001049580
-        self.cl_integrand_check = 0.000718
         self.cl_WL_check = 2.572589e-08
-        self.cl_WL_noprefac_check = 2.632154e-08
         self.cl_GC_check = 2.89485e-05
         self.cl_cross_check = -6.379221e-07
-        self.cl_cross_noprefac_check = -6.452649e-07
-        self.prefac_check = 0.988620523
+        self.prefac_shearia_check = 0.988620523  # expected value for ell=10
+        self.prefac_mag_check = 0.997732426  # expected value for ell=10
         self.xi_ssp_check = [2.908933e-06, 1.883681e-06]
         self.xi_ssm_check = 8.993205e-07
         self.xi_sp_check = -6.925195e-05
@@ -212,17 +237,23 @@ class photoinitTestCase(TestCase):
         self.wbincheck_mag = None
         self.W_i_Gcheck = None
         self.W_IA_check = None
-        self.cl_integrand_check = None
         self.cl_WL_check = None
-        self.cl_WL_prefac_check = None
         self.cl_GC_check = None
         self.cl_cross_check = None
-        self.cl_cross_prefac_check = None
-        self.prefac_check = None
         self.xi_ssp_check = None
         self.xi_ssm_check = None
         self.xi_sp_check = None
         self.xi_pp_check = None
+        self.prefac_shearia_check = None
+        self.prefac_mag_check = None
+        self.test_prefactor_rtol = None
+        self.test_prefactor_input_ells_WL = None
+        self.test_prefactor_input_ells_XC = None
+        self.test_prefactor_input_ells_GC_phot = None
+        self.test_prefactor_num_check = None
+        self.test_prefactor_len_check = None
+        self.test_prefactor_input_ell_val = None
+        self.test_prefactor_val_check = None
 
     def test_GC_window(self):
         npt.assert_allclose(self.phot.GC_window(0.001, 1),
@@ -268,11 +299,109 @@ class photoinitTestCase(TestCase):
         npt.assert_allclose(cl_int, self.cl_WL_check, rtol=self.cl_tol,
                             err_msg='Cl WL test failed')
 
-    def test_cl_WL_noprefac(self):
-        cl_int = self.phot.Cl_WL_noprefac(10.0, 1, 1)
-        npt.assert_allclose(cl_int, self.cl_WL_noprefac_check,
-                            rtol=self.cl_tol,
-                            err_msg='Cl WL noprefac test failed')
+    # verify that _eval_prefactor_shearia() is called when the input ell is not
+    # available in the precomputed dictionary, and that it is not called if
+    # instead the input ell is available in the precomputed dictionary.
+    # In any case, _eval_prefactor_mag() should never be called within Cl_WL()
+    @patch('likelihood.photometric_survey.photo.Photo._eval_prefactor_mag')
+    @patch('likelihood.photometric_survey.photo.Photo._eval_prefactor_shearia')
+    def test_Cl_WL_precomputed(self, shearia_mock, mag_mock):
+        # pass a value of ell with non-precomputed prefactor
+        shearia_mock.return_value = 1
+        mag_mock.return_value = 1
+        self.phot.Cl_WL(2.5, 1, 1)
+        npt.assert_equal(shearia_mock.call_count, 1,
+                         err_msg=f'unsxpected number of calls of '
+                         f'_eval_prefactor_shearia():'
+                         f' {shearia_mock.call_count} instead of 1')
+        npt.assert_equal(mag_mock.call_count, 0,
+                         err_msg=f'unsxpected number of calls of '
+                         f'_eval_prefactor_mag(): {mag_mock.call_count}'
+                         f' instead of 0')
+        # pass a value of ell with precomputed prefactor
+        shearia_mock.reset_mock()
+        mag_mock.reset_mock()
+        shearia_mock.return_value = 1
+        mag_mock.return_value = 1
+        self.phot.Cl_WL(2, 1, 1)
+        npt.assert_equal(shearia_mock.call_count, 0,
+                         err_msg=f'unsxpected number of calls of '
+                         f'_eval_prefactor_shearia():'
+                         f' {shearia_mock.call_count} instead of 0')
+        npt.assert_equal(mag_mock.call_count, 0,
+                         err_msg=f'unsxpected number of calls of '
+                         f'_eval_prefactor_mag(): {mag_mock.call_count}'
+                         f' instead of 0')
+
+    # verify that _eval_prefactor_shearia() and _eval_prefactor_mag() are
+    # called the expected number of times when the input ell is not available
+    # in the precomputed dictionary, and that they are not called if instead
+    # the input ell is available in the precomputed dictionary.
+    @patch('likelihood.photometric_survey.photo.Photo._eval_prefactor_mag')
+    @patch('likelihood.photometric_survey.photo.Photo._eval_prefactor_shearia')
+    def test_Cl_cross_precomputed(self, shearia_mock, mag_mock):
+        # pass a value of ell with non-precomputed prefactor
+        shearia_mock.return_value = 1
+        mag_mock.return_value = 1
+        self.phot.Cl_cross(2.5, 1, 1)
+        npt.assert_equal(shearia_mock.call_count, 1,
+                         err_msg=f'unsxpected number of calls of '
+                         f'_eval_prefactor_shearia():'
+                         f' {shearia_mock.call_count} instead of 1')
+        npt.assert_equal(mag_mock.call_count, 1,
+                         err_msg=f'unsxpected number of calls of '
+                         f'_eval_prefactor_mag(): {mag_mock.call_count}'
+                         f' instead of 1')
+        # pass a value of ell with precomputed prefactor
+        shearia_mock.reset_mock()
+        mag_mock.reset_mock()
+        shearia_mock.return_value = 1
+        mag_mock.return_value = 1
+        self.phot.Cl_cross(2, 1, 1)
+        npt.assert_equal(shearia_mock.call_count, 0,
+                         err_msg=f'unsxpected number of calls of '
+                         f'_eval_prefactor_shearia():'
+                         f' {shearia_mock.call_count} instead of 0')
+        npt.assert_equal(mag_mock.call_count, 0,
+                         err_msg=f'unsxpected number of calls of '
+                         f'_eval_prefactor_mag(): {mag_mock.call_count}'
+                         f' instead of 0')
+
+    # verify that _eval_prefactor_mag() is called the expected number of
+    # times when the input ell is not available in the precomputed dictionary,
+    # and that it is not called if instead the input ell is available in the
+    # precomputed dictionary.
+    # In any case, _eval_prefactor_shearia() should never be called within
+    # Cl_GC_phot()
+    @patch('likelihood.photometric_survey.photo.Photo._eval_prefactor_mag')
+    @patch('likelihood.photometric_survey.photo.Photo._eval_prefactor_shearia')
+    def test_Cl_GC_phot_precomputed(self, shearia_mock, mag_mock):
+        # pass a value of ell with non-precomputed prefactor
+        shearia_mock.return_value = 1
+        mag_mock.return_value = 1
+        self.phot.Cl_GC_phot(2.5, 1, 1)
+        npt.assert_equal(shearia_mock.call_count, 0,
+                         err_msg=f'unsxpected number of calls of '
+                         f'_eval_prefactor_shearia():'
+                         f' {shearia_mock.call_count} instead of 0')
+        npt.assert_equal(mag_mock.call_count, 1,
+                         err_msg=f'unsxpected number of calls of '
+                         f'_eval_prefactor_mag(): {mag_mock.call_count}'
+                         f' instead of 1')
+        # pass a value of ell with precomputed prefactor
+        shearia_mock.reset_mock()
+        mag_mock.reset_mock()
+        shearia_mock.return_value = 1
+        mag_mock.return_value = 1
+        self.phot.Cl_GC_phot(2, 1, 1)
+        npt.assert_equal(shearia_mock.call_count, 0,
+                         err_msg=f'unsxpected number of calls of '
+                         f'_eval_prefactor_shearia():'
+                         f' {shearia_mock.call_count} instead of 0')
+        npt.assert_equal(mag_mock.call_count, 0,
+                         err_msg=f'unsxpected number of calls of '
+                         f'_eval_prefactor_mag(): {mag_mock.call_count}'
+                         f' instead of 0')
 
     def test_cl_GC(self):
         cl_int = self.phot.Cl_GC_phot(10.0, 1, 1)
@@ -285,17 +414,55 @@ class photoinitTestCase(TestCase):
                             rtol=self.cl_tol,
                             err_msg='Cl XC cross test failed')
 
-    def test_cl_cross_noprefac(self):
-        cl_int = self.phot.Cl_cross_noprefac(10.0, 1, 1)
-        npt.assert_allclose(cl_int, self.cl_cross_noprefac_check,
+    def test_eval_prefactor_shearia(self):
+        prefac = self.phot._eval_prefactor_shearia(10.0)
+        npt.assert_allclose(prefac, self.prefac_shearia_check,
                             rtol=self.cl_tol,
-                            err_msg='Cl XC cross no prefac test failed')
+                            err_msg='_eval_prefactor_shearia() test failed')
 
-    def test_prefactor(self):
-        prefac = self.phot.prefactor(10.0)
-        npt.assert_allclose(prefac, self.prefac_check,
+    def test_eval_prefactor_mag(self):
+        prefac = self.phot._eval_prefactor_mag(10.0)
+        npt.assert_allclose(prefac, self.prefac_mag_check,
                             rtol=self.cl_tol,
-                            err_msg='Cl prefactor test failed')
+                            err_msg='_eval_prefactor_mag() test failed')
+
+    def test_set_prefactor(self):
+        self.phot.set_prefactor(ells_WL=self.test_prefactor_input_ells_WL,
+                                ells_XC=self.test_prefactor_input_ells_XC,
+                                ells_GC_phot=(
+                                    self.test_prefactor_input_ells_GC_phot))
+
+        prefac_types = set(key[0] for key in self.phot._prefactor_dict.keys())
+        input_ell_val = self.test_prefactor_input_ell_val
+
+        # test that the prefactors exist for five quantities: shearIA_WL,
+        # shearIA_XC, mag_XC and mag_GCphot
+        npt.assert_equal(len(prefac_types), self.test_prefactor_num_check,
+                         err_msg=f'unexpected number of prefactor types,'
+                         f' {len(prefac_types)} instead of'
+                         f' {self.test_prefactor_num_check}: {prefac_types}')
+
+        # test that, for each prefactor type, the prefactor is evaluated
+        # for the correct number of ells, and that the calculation is correct
+        # for one specific ell value
+        for prefac in prefac_types:
+            num_entries = len([key[0]
+                               for key in self.phot._prefactor_dict.keys()
+                               if key[0] == prefac])
+            npt.assert_equal(num_entries,
+                             self.test_prefactor_len_check[prefac],
+                             err_msg=f'unexpected number of entries for'
+                             f' prefactor of type {prefac}: {num_entries}'
+                             f' instead of'
+                             f' {self.test_prefactor_len_check[prefac]}')
+            npt.assert_allclose(
+                self.phot._prefactor_dict[prefac, input_ell_val],
+                self.test_prefactor_val_check[prefac],
+                rtol=self.test_prefactor_rtol,
+                err_msg='Unexpected value of prefactor for type={prefac},'
+                f' ell={input_ell_val}:'
+                f' {self.phot._prefactor_dict[prefac, input_ell_val]} instead'
+                f' of {self.test_prefactor_val_check[prefac]}')
 
     def test_f_K_z_func_is_None(self):
         temp_cosmo_dic = self.phot.theory.copy()

@@ -290,6 +290,8 @@ class Photo:
 
         Parameters
         ----------
+        z: numpy.ndarray of float or float
+            Redshift at which weight is evaluated.
         bin_i: int
            index of desired tomographic bin. Tomographic bin
            indices start from 1.
@@ -345,6 +347,8 @@ class Photo:
 
         Parameters
         ----------
+        z: numpy.ndarray of float or float
+            Redshift at which weight is evaluated.
         bin_i: int
            index of desired tomographic bin. Tomographic bin
            indices start from 1.

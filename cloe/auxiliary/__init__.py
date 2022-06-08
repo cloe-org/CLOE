@@ -1,0 +1,16 @@
+# -*- coding: utf-8 -*-
+
+"""Auxiliary functionality module
+
+This module contains various auxiliary functions not directly tied to any
+other part of the CLOE code. It contains plotting routines.
+
+"""
+
+__all__ = ['plotter_default',
+           'run_method',
+           'plotter',
+           'getdist_routines',
+           'redshift_bins']  # list submodules
+
+from . import *

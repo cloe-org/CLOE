@@ -11,7 +11,7 @@
 
 ## Introduction
 
-These guidelines aim to help you contribute to the development of the the Euclid IST:L package. Before attempting to make any changes to the code please do the following:
+These guidelines aim to help you contribute to the development of the CLOE IST:L package. Before attempting to make any changes to the code please do the following:
 
 - Get authorisation from the IST:L leads to implement the changes you have in mind.
 - Read and adhere to the guidelines provided in this document.

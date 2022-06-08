@@ -5,4 +5,4 @@ include data/ExternalBenchmark/Spectroscopic/*
 include data/ExternalBenchmark/Spectroscopic/data/*
 include configs/*
 include configs/models/*
-recursive-include likelihood *.yaml
+recursive-include cloe *.yaml

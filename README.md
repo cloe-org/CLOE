@@ -2,7 +2,7 @@
 
 # CLOE: Cosmology Likelihood for Observables in Euclid
 
-This repository contains the theoretical computation of Euclid observables as well as the computation of the likelihood given some fiducial data. The likelihood is designed to work as an external likelihood for the Bayesian Analysis Code `Cobaya`.
+This repository contains the theoretical computation of Euclid observables as well as the computation of the likelihood given some fiducial data. CLOE is designed to work as an external likelihood for the Bayesian Analysis Code `Cobaya`.
 
 Check [documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/index.html)
 
@@ -19,7 +19,7 @@ To build the package in a dedicated Conda environment with development tools run
 
 ```bash
 conda env create -f environment.yml
-conda activate likelihood
+conda activate cloe
 python setup.py install
 ```
 
@@ -49,7 +49,7 @@ To run CLOE, execute:
 python run_cloe.py configs/config_default.yaml
 ```
 
-### How do I import the likelihood as an external likelihood for `Cobaya`?
+### How do I import CLOE as an external likelihood for `Cobaya`?
 Open and play with ```DEMO.ipynb```
 
 ## Structure of the repository
@@ -58,7 +58,7 @@ Open and play with ```DEMO.ipynb```
 *  **docs**: automatically generated documentation
 *  **notebooks**: folder containing example notebooks
 *  **scripts**: folder containing example scripts
-*  **likelihood**: likelihood code
+*  **cloe**: CLOE code
      *  ```cobaya_interface.py```: interface with COBAYA, pass theory needed to other classes, returns loglike
      * like_calc: code that calculates the likelihood given the data and the theory prediction
         * ```euclike.py```: class with the calculation of the likelihood and construction of the covariance matrices in the way it is needed by the calculation ([documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/likelihood.like_calc.euclike.html))
@@ -74,7 +74,7 @@ Open and play with ```DEMO.ipynb```
         * ```spec.py```: class with the theoretical prediction of the spectroscopy GC observables  ([documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/likelihood.spectroscopic_survey.spec.html))       
     * auxiliary: code for auxiliary functions
         * ```plotter.py```: class with plotting functions  ([documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/likelihood.auxiliary.plotter.html))
-    * test: unit tests to check likelihood code
+    * test: unit tests to check CLOE code
         *   ```test_cosmo.py```: class with unit tests for cosmology class cosmology.py
         *   ```test_shear.py```: class with unit tests for shear class shear.py
         *   ```test_spec.py```: class with unit tests for spec class spec.py

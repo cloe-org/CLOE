@@ -8,7 +8,7 @@ Cobaya:
     Euclid:
       aliases:
       - euclid
-      external: !!python/name:likelihood.cobaya_interface.EuclidLikelihood ''
+      external: !!python/name:cloe.cobaya_interface.EuclidLikelihood ''
       # Speed in evaluations/second
       speed: 500
       # Non-Linear flag selector

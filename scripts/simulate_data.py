@@ -1,10 +1,10 @@
 import numpy as np
 import os, sys
 from pathlib import Path
-from likelihood.cobaya_interface import EuclidLikelihood
-from likelihood.auxiliary.likelihood_yaml_handler import set_halofit_version
+from cloe.cobaya_interface import EuclidLikelihood
+from cloe.auxiliary.likelihood_yaml_handler import set_halofit_version
 from cobaya.model import get_model
-from likelihood.photometric_survey.photo import Photo
+from cloe.photometric_survey.photo import Photo
 
 parent_path = str(Path(Path(__file__).resolve().parents[1]))
 data_path = parent_path + '/data/ExternalBenchmark/Photometric/data/'

@@ -1,0 +1,161 @@
+theory:
+  camb:
+    version: 1.3.2
+    path: null
+    speed: 0.3
+    stop_at_error: true
+    extra_args:
+      num_massive_neutrinos: 1
+      dark_energy_model: ppf
+    use_renames: false
+    external_primordial_pk: false
+    renames:
+      omegabh2: ombh2
+      omegach2: omch2
+      omegal: omega_de
+      omegak: omk
+      yhe: YHe
+      yheused: YHe
+      YpBBN: Y_p
+    input_params:
+    - As
+    - ns
+    - ombh2
+    - omch2
+    - H0
+    - tau
+    - mnu
+    - nnu
+    - w
+    - wa
+    - omk
+    output_params:
+    - omegam
+    - omegab
+    - omeganu
+    - omnuh2
+    - omegac
+    - N_eff
+likelihood:
+  Euclid:
+    aliases:
+    - euclid
+    speed: 500
+    type: []
+    stop_at_error: false
+    version: null
+    external: !!python/name:cloe.cobaya_interface.EuclidLikelihood ''
+    input_params:
+    - like_selection
+    - full_photo
+    - b1_photo
+    - b2_photo
+    - b3_photo
+    - b4_photo
+    - b5_photo
+    - b6_photo
+    - b7_photo
+    - b8_photo
+    - b9_photo
+    - b10_photo
+    - b1_spec
+    - b2_spec
+    - b3_spec
+    - b4_spec
+    - NL_flag
+    - aia
+    - nia
+    - bia
+    output_params: []
+params:
+  ombh2:
+    value: 0.022445
+    renames:
+    - omegabh2
+  omch2:
+    value: 0.1205579307
+    renames:
+    - omegach2
+  H0:
+    value: 67
+  tau:
+    value: 0.0925
+  mnu:
+    value: 0.06
+  nnu:
+    value: 3.046
+  As:
+    value: 2.12605e-09
+  ns:
+    prior:
+      min: 0.8
+      max: 1.2
+  w:
+    value: -1
+  wa:
+    value: 0
+  omk:
+    value: 0.0
+    renames:
+    - omegak
+  omegam:
+    derived: true
+  omegab:
+    derived: true
+  omeganu:
+    derived: true
+  omnuh2:
+    derived: true
+  omegac:
+    derived: true
+  N_eff:
+    derived: true
+  like_selection:
+    value: 12
+  full_photo:
+    value: false
+  b1_photo:
+    value: 1.0997727037892875
+  b2_photo:
+    value: 1.220245876862528
+  b3_photo:
+    value: 1.2723993083933989
+  b4_photo:
+    value: 1.316624471897739
+  b5_photo:
+    value: 1.35812370570578
+  b6_photo:
+    value: 1.3998214171814918
+  b7_photo:
+    value: 1.4446452851824907
+  b8_photo:
+    value: 1.4964959071110084
+  b9_photo:
+    value: 1.5652475842498528
+  b10_photo:
+    value: 1.7429859437184225
+  b1_spec:
+    value: 1.46
+  b2_spec:
+    value: 1.61
+  b3_spec:
+    value: 1.75
+  b4_spec:
+    value: 1.9
+  NL_flag:
+    value: false
+  aia:
+    value: 1.72
+  nia:
+    value: -0.41
+  bia:
+    value: 0.0
+sampler:
+  evaluate:
+    N: 1
+    override: null
+    seed: null
+    version: null
+output: my_euclid_experiment
+timing: true
+version: 3.1.1

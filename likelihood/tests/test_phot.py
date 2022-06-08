@@ -192,7 +192,7 @@ class photoinitTestCase(TestCase):
         cls.phot.set_prefactor(ells_WL=ells_WL,
                                ells_XC=ells_XC,
                                ells_GC_phot=ells_GC_phot)
-        
+
     def setUp(self) -> None:
         self.win_tol = 1e-03
         self.cl_tol = 1e-03

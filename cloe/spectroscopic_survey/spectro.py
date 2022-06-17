@@ -15,7 +15,7 @@ class Spectro:
     Class for Galaxy clustering spectroscopic observable
     """
 
-    def __init__(self, cosmo_dic, fiducial_dic):
+    def __init__(self, cosmo_dic):
         """Initialize
 
         Constructor of the class Spectro
@@ -24,11 +24,9 @@ class Spectro:
         ----------
         cosmo_dic: dict
             Cosmology dictionary containing the current cosmology.
-        fiducial_dic: dict
-            Cosmology dictionary containing the fiducial cosmology.
         """
-        if cosmo_dic is not None and fiducial_dic is not None:
-            self.update(cosmo_dic, fiducial_dic)
+        if cosmo_dic is not None:
+            self.update(cosmo_dic)
 
         mu_min = -1.0
         mu_max = 1.0
@@ -38,22 +36,18 @@ class Spectro:
         self.dict_m_legendrepol = \
             {m: legendre(m)(self.mu_grid) for m in range(leg_m_max)}
 
-    def update(self, cosmo_dic, fiducial_dic):
+    def update(self, cosmo_dic):
         r"""Update method
 
-        Method to update the `theory` and `fiducial` class attributes to the
+        Method to update the `theory` class attribute to the
         dictionaries passed as input.
 
         Parameters
         ----------
         cosmo_dic: dict
             Cosmology dictionary containing the current cosmology.
-        fiducial_dic: dict
-            Cosmology dictionary containing the fiducial cosmology.
-
         """
         self.theory = cosmo_dic
-        self.fiducial = fiducial_dic
 
     def scaling_factor_perp(self, z):
         r"""Scaling Factor Perp
@@ -73,8 +67,7 @@ class Spectro:
         scaling_factor_perp: float
            Value of the perpendicular scaling factor at given redshift
         """
-
-        return self.theory['d_z_func'](z) / self.fiducial['d_z_func'](z)
+        return self.theory['d_z_func'](z) / self.theory['fid_d_z_func'](z)
 
     def scaling_factor_parall(self, z):
         r"""Scaling Factor Parall
@@ -94,7 +87,7 @@ class Spectro:
         scaling_factor_parall: float
            Value of the the parallel scaling factor at a given redshift
         """
-        return self.fiducial['H_z_func'](z) / self.theory['H_z_func'](z)
+        return self.theory['fid_H_z_func'](z) / self.theory['H_z_func'](z)
 
     def get_k(self, k_prime, mu_prime, z):
         r"""Get k

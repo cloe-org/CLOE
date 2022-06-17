@@ -182,50 +182,13 @@ class specinitTestCase(TestCase):
             interpolate.InterpolatedUnivariateSpline(x=zs_H, y=fid_d_A_arr,
                                                      ext=0)
 
-        # Note: the 'fiducial' cosmology declared here is purely for the
-        # purposes of testing the spectro module. It is not representative
-        # of our fiducial model nor does it correspond to the fiducial
-        # model used by OU-LE3 to compute distances.
-
-        fid_mock_dic = {'H0': 67.5,
-                        'omch2': 0.122,
-                        'ombh2': 0.022,
-                        'omnuh2': 0.00028,
-                        'omkh2': 0.0,
-                        'w': -1.0,
-                        'mnu': 0.06,
-                        'tau': 0.07,
-                        'nnu': 3.046,
-                        'ns': 0.9674,
-                        'As': 2.1e-9,
-                        'c': const.c.to('km/s').value,
-                        'd_z_func': fid_dA_interp,
-                        'H_z_func': fid_H_interp,
-                        'z_win': zs_base,
-                        'k_win': ks_base,
-                        'MG_sigma': MG_interp,
-                        'nuisance_parameters': {
-                            'b1_photo': 1.0997727037892875,
-                            'b2_photo': 1.220245876862528,
-                            'b3_photo': 1.2723993083933989,
-                            'b4_photo': 1.316624471897739,
-                            'b5_photo': 1.35812370570578,
-                            'b6_photo': 1.3998214171814918,
-                            'b7_photo': 1.4446452851824907,
-                            'b8_photo': 1.4964959071110084,
-                            'b9_photo': 1.5652475842498528,
-                            'b10_photo': 1.7429859437184225,
-                            'b1_spectro': 1.4614804,
-                            'b2_spectro': 1.6060949,
-                            'b3_spectro': 1.7464790,
-                            'b4_spectro': 1.8988660,
-                            'aia': 1.72,
-                            'nia': -0.41,
-                            'bia': 0.0}
-                        }
+        # We only need the angular diameter distance and the Hubble factor
+        # from the fiducial cosmology
+        mock_cosmo_dic['fid_d_z_func'] = fid_dA_interp
+        mock_cosmo_dic['fid_H_z_func'] = fid_H_interp
 
         cls.test_dict = mock_cosmo_dic
-        cls.spectro = Spectro(cls.test_dict, fid_mock_dic)
+        cls.spectro = Spectro(cls.test_dict)
 
     def setUp(self):
         self.test_dict['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)

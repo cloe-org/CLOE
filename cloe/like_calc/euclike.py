@@ -136,7 +136,7 @@ class Euclike:
                                     ells_GC_phot=ells_GC_phot)
 
         # Spectro class instance
-        self.spec_ins = Spectro(None, None)
+        self.spec_ins = Spectro(None)
 
     def create_photo_data(self):
         """Create Photo Data
@@ -253,7 +253,7 @@ class Euclike:
 
         return photo_theory_vec
 
-    def create_spectro_theory(self, dictionary, dictionary_fiducial):
+    def create_spectro_theory(self, dictionary):
         """Create Spectro Theory
 
         Obtains the theory for the likelihood.
@@ -265,10 +265,6 @@ class Euclike:
         dictionary: dict
             cosmology dictionary from the Cosmology class
             which is updated at each sampling step
-
-        dictionary_fiducial: dict
-            cosmology dictionary from the Cosmology class
-            at the fiducial cosmology
 
         Returns
         -------
@@ -283,7 +279,7 @@ class Euclike:
         # Maybe Sergio has a better idea of what to these forloops
         # To include all info of the specifications
         if self.data_handler_ins.use_gc_spectro:
-            self.spec_ins.update(dictionary, dictionary_fiducial)
+            self.spec_ins.update(dictionary)
             # m_ins = [v for k, v in dictionary['nuisance_parameters'].items()
             #         if k.startswith('multipole_')]
             m_ins = [0, 2, 4]
@@ -366,7 +362,7 @@ class Euclike:
 
         return covfull
 
-    def loglike(self, dictionary, dictionary_fiducial):
+    def loglike(self, dictionary):
         """Loglike
 
         Calculates the log-likelihood for a given model
@@ -377,18 +373,13 @@ class Euclike:
             cosmology dictionary from the Cosmology class
             which is updated at each sampling step
 
-        dictionary_fiducial: dict
-            cosmology dictionary from the Cosmology class
-            at the fiducial cosmology
-
         Returns
         -------
         loglike_tot: float
             loglike = Ln(likelihood) for the Euclid observables
         """
         photo_theory_vec = self.create_photo_theory(dictionary)
-        spectro_theory_vec = self.create_spectro_theory(dictionary,
-                                                        dictionary_fiducial)
+        spectro_theory_vec = self.create_spectro_theory(dictionary)
 
         theory_vec = np.concatenate(
             (photo_theory_vec, spectro_theory_vec), axis=0)

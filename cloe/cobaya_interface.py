@@ -99,6 +99,14 @@ class EuclidLikelihood(Likelihood):
         # Initialize the fiducial model
         self.set_fiducial_cosmology()
 
+        # Here we add the fiducial angular diameter distance and Hubble factor
+        # to the cosmo dictionary. In this way we can avoid passing the whole
+        # fiducial dictionary
+        self.cosmo.cosmo_dic['fid_d_z_func'] = \
+            self.fiducial_cosmology.cosmo_dic['d_z_func']
+        self.cosmo.cosmo_dic['fid_H_z_func'] = \
+            self.fiducial_cosmology.cosmo_dic['H_z_func']
+
     def set_fiducial_cosmology(self):
         r"""Sets the fiducial cosmology class
 
@@ -419,6 +427,5 @@ class EuclidLikelihood(Likelihood):
         self.passing_requirements(model, info, **params_values)
         # Update cosmo_dic to interpolators
         self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.05)
-        loglike = self.likefinal.loglike(self.cosmo.cosmo_dic,
-                                         self.fiducial_cosmology.cosmo_dic)
+        loglike = self.likefinal.loglike(self.cosmo.cosmo_dic)
         return loglike

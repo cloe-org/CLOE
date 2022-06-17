@@ -49,16 +49,10 @@ class Plotter:
         self.read_data.compute_nz()
         self.read_data.read_GC_spectro()
         self.read_data.read_phot()
-        # As we currently don't have a way to load fiducial r(z), d(z) and
-        # H(z)s, these are currently set to match the ones from the cosmo_dic.
-        # This will need to be fixed once this is decided.
-        fid_dict = self.read_data.data_spectro_fiducial_cosmo
-        fid_dict['d_z_func'] = self.cosmo_dic['d_z_func']
-        fid_dict['r_z_func'] = self.cosmo_dic['r_z_func']
-        fid_dict['H_z_func'] = self.cosmo_dic['H_z_func']
+
         self.phot_ins = Photo(cosmo_dic, self.read_data.nz_dict_WL,
                               self.read_data.nz_dict_GC_Phot)
-        self.spec_ins = Spectro(cosmo_dic, fid_dict)
+        self.spec_ins = Spectro(cosmo_dic)
 
         self.binX = settings['binX']
         self.binY = settings['binY']

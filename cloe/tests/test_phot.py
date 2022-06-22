@@ -205,7 +205,7 @@ class photoinitTestCase(TestCase):
         self.test_prefactor_input_ells_WL = range(2, 4)
         self.test_prefactor_input_ells_XC = range(2, 5)
         self.test_prefactor_input_ells_GC_phot = range(2, 6)
-        self.test_prefactor_num_check = 4
+        self.test_prefactor_num_check = 7
         self.test_prefactor_len_check = {}
         self.test_prefactor_len_check['shearIA_WL'] = len(
             self.test_prefactor_input_ells_WL)
@@ -215,6 +215,12 @@ class photoinitTestCase(TestCase):
             self.test_prefactor_input_ells_XC)
         self.test_prefactor_len_check['mag_GCphot'] = len(
             self.test_prefactor_input_ells_GC_phot)
+        self.test_prefactor_len_check['L0_GCphot'] = len(
+            self.test_prefactor_input_ells_GC_phot)
+        self.test_prefactor_len_check['L+1_GCphot'] = len(
+            self.test_prefactor_input_ells_GC_phot)
+        self.test_prefactor_len_check['L-1_GCphot'] = len(
+            self.test_prefactor_input_ells_GC_phot)
         # the following prefactors are evaluated for input ell = 3
         self.test_prefactor_input_ell_val = 3
         self.test_prefactor_val_check = {}
@@ -222,6 +228,9 @@ class photoinitTestCase(TestCase):
         self.test_prefactor_val_check['shearIA_XC'] = 0.894240910
         self.test_prefactor_val_check['mag_XC'] = 0.979591837
         self.test_prefactor_val_check['mag_GCphot'] = 0.979591837
+        self.test_prefactor_val_check['L0_GCphot'] = 0.51111111111
+        self.test_prefactor_val_check['L-1_GCphot'] = -0.26186146828
+        self.test_prefactor_val_check['L+1_GCphot'] = -0.253245725465
 
         self.W_i_Gcheck = 5.241556e-09
         self.W_IA_check = 0.0001049580
@@ -315,11 +324,11 @@ class photoinitTestCase(TestCase):
         mag_mock.return_value = 1
         self.phot.Cl_WL(2.5, 1, 1)
         npt.assert_equal(shearia_mock.call_count, 1,
-                         err_msg=f'unsxpected number of calls of '
+                         err_msg=f'unexpected number of calls of '
                          f'_eval_prefactor_shearia():'
                          f' {shearia_mock.call_count} instead of 1')
         npt.assert_equal(mag_mock.call_count, 0,
-                         err_msg=f'unsxpected number of calls of '
+                         err_msg=f'unexpected number of calls of '
                          f'_eval_prefactor_mag(): {mag_mock.call_count}'
                          f' instead of 0')
         # pass a value of ell with precomputed prefactor
@@ -329,11 +338,11 @@ class photoinitTestCase(TestCase):
         mag_mock.return_value = 1
         self.phot.Cl_WL(2, 1, 1)
         npt.assert_equal(shearia_mock.call_count, 0,
-                         err_msg=f'unsxpected number of calls of '
+                         err_msg=f'unexpected number of calls of '
                          f'_eval_prefactor_shearia():'
                          f' {shearia_mock.call_count} instead of 0')
         npt.assert_equal(mag_mock.call_count, 0,
-                         err_msg=f'unsxpected number of calls of '
+                         err_msg=f'unexpected number of calls of '
                          f'_eval_prefactor_mag(): {mag_mock.call_count}'
                          f' instead of 0')
 
@@ -349,11 +358,11 @@ class photoinitTestCase(TestCase):
         mag_mock.return_value = 1
         self.phot.Cl_cross(2.5, 1, 1)
         npt.assert_equal(shearia_mock.call_count, 1,
-                         err_msg=f'unsxpected number of calls of '
+                         err_msg=f'unexpected number of calls of '
                          f'_eval_prefactor_shearia():'
                          f' {shearia_mock.call_count} instead of 1')
         npt.assert_equal(mag_mock.call_count, 1,
-                         err_msg=f'unsxpected number of calls of '
+                         err_msg=f'unexpected number of calls of '
                          f'_eval_prefactor_mag(): {mag_mock.call_count}'
                          f' instead of 1')
         # pass a value of ell with precomputed prefactor
@@ -363,11 +372,11 @@ class photoinitTestCase(TestCase):
         mag_mock.return_value = 1
         self.phot.Cl_cross(2, 1, 1)
         npt.assert_equal(shearia_mock.call_count, 0,
-                         err_msg=f'unsxpected number of calls of '
+                         err_msg=f'unexpected number of calls of '
                          f'_eval_prefactor_shearia():'
                          f' {shearia_mock.call_count} instead of 0')
         npt.assert_equal(mag_mock.call_count, 0,
-                         err_msg=f'unsxpected number of calls of '
+                         err_msg=f'unexpected number of calls of '
                          f'_eval_prefactor_mag(): {mag_mock.call_count}'
                          f' instead of 0')
 
@@ -385,11 +394,11 @@ class photoinitTestCase(TestCase):
         mag_mock.return_value = 1
         self.phot.Cl_GC_phot(2.5, 1, 1)
         npt.assert_equal(shearia_mock.call_count, 0,
-                         err_msg=f'unsxpected number of calls of '
+                         err_msg=f'unexpected number of calls of '
                          f'_eval_prefactor_shearia():'
                          f' {shearia_mock.call_count} instead of 0')
         npt.assert_equal(mag_mock.call_count, 1,
-                         err_msg=f'unsxpected number of calls of '
+                         err_msg=f'unexpected number of calls of '
                          f'_eval_prefactor_mag(): {mag_mock.call_count}'
                          f' instead of 1')
         # pass a value of ell with precomputed prefactor
@@ -399,11 +408,11 @@ class photoinitTestCase(TestCase):
         mag_mock.return_value = 1
         self.phot.Cl_GC_phot(2, 1, 1)
         npt.assert_equal(shearia_mock.call_count, 0,
-                         err_msg=f'unsxpected number of calls of '
+                         err_msg=f'unexpected number of calls of '
                          f'_eval_prefactor_shearia():'
                          f' {shearia_mock.call_count} instead of 0')
         npt.assert_equal(mag_mock.call_count, 0,
-                         err_msg=f'unsxpected number of calls of '
+                         err_msg=f'unexpected number of calls of '
                          f'_eval_prefactor_mag(): {mag_mock.call_count}'
                          f' instead of 0')
 
@@ -439,8 +448,8 @@ class photoinitTestCase(TestCase):
         prefac_types = set(key[0] for key in self.phot._prefactor_dict.keys())
         input_ell_val = self.test_prefactor_input_ell_val
 
-        # test that the prefactors exist for five quantities: shearIA_WL,
-        # shearIA_XC, mag_XC and mag_GCphot
+        # test that the prefactors exist for seven quantities: shearIA_WL,
+        # shearIA_XC, mag_XC, mag_GCphot, L0_GCphot, L+1_GCphot and L-1GCphot
         npt.assert_equal(len(prefac_types), self.test_prefactor_num_check,
                          err_msg=f'unexpected number of prefactor types,'
                          f' {len(prefac_types)} instead of'
@@ -533,3 +542,18 @@ class photoinitTestCase(TestCase):
         z_out = self.phot.z_plus1(ell=ell_test, r=r_test)
         npt.assert_allclose(z_out, z_of_r_check, rtol=1e-3,
                             err_msg='z_plus1 test failed')
+
+    def test_eval_prefactor_l_0(self):
+        npt.assert_allclose(self.phot._eval_prefactor_l_0(ell=1),
+                            3 / 5, rtol=1e-6,
+                            err_msg='L0 prefactor test failed')
+
+    def test_eval_prefactor_l_minus1(self):
+        npt.assert_allclose(self.phot._eval_prefactor_l_minus1(ell=2),
+                            -2 / (3 * np.sqrt(5)), rtol=1e-6,
+                            err_msg='L-1 prefactor test failed')
+
+    def test_eval_prefactor_l_plus1(self):
+        npt.assert_allclose(self.phot._eval_prefactor_l_plus1(ell=2),
+                            -12 / (7 * np.sqrt(45)), rtol=1e-6,
+                            err_msg='L+1 prefactor test failed')

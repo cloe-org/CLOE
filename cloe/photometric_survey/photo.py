@@ -175,9 +175,24 @@ class Photo:
           :math:`\ell(\ell+1)/(\ell+1/2)^2`
         * mag_GCphot (from the ells_GCphot input array): \
           :math:`\ell(\ell+1)/(\ell+1/2)^2`
+        * L0_GCphot (from the ells_GCphot input array): \
+          :math:`\frac{2 \ell^2 + 2 \ell -1}{(2 \ell - 1)(2 \ell + 3)}`
+        * L+1_GCphot (from the ells_GCphot input array):
 
-        The prefactors are evaluated using the :meth:`_eval_prefactor_mag()`
-        and :meth:`_eval_prefactor_shearia()` functions
+          .. math::
+              -\frac{(\ell + 1)(\ell + 2)}
+              {(2\ell + 3)\sqrt{(2\ell + 1)(2 \ell + 5)}}
+
+        * L-1_GCphot (from the ells_GCphot input array):
+
+          .. math::
+              -\frac{\ell(\ell - 1)}
+              {(2 \ell -1)\sqrt{(2 \ell - 3)(2 \ell + 1)}}\\
+
+        The prefactors are evaluated using the functions
+        :meth:`_eval_prefactor_mag()`, :meth:`_eval_prefactor_shearia()`,
+        :meth:`_eval_prefactor_l_0()`, :meth:`_eval_prefactor_l_plus1()`,
+        and :meth:`_eval_prefactor_l_minus1()`.
 
         Parameters
         ----------
@@ -205,6 +220,12 @@ class Photo:
         for ell in ells_GC_phot:
             self._prefactor_dict['mag_GCphot', ell] = \
                 self._eval_prefactor_mag(ell)
+            self._prefactor_dict['L0_GCphot', ell] = \
+                self._eval_prefactor_l_0(ell)
+            self._prefactor_dict['L+1_GCphot', ell] = \
+                self._eval_prefactor_l_plus1(ell)
+            self._prefactor_dict['L-1_GCphot', ell] = \
+                self._eval_prefactor_l_minus1(ell)
 
     def GC_window(self, z, bin_i):
         r"""GC Window
@@ -863,10 +884,84 @@ class Photo:
             (ell + 0.5)**2
         return prefactor
 
-    def z_minus1(self, ell, r):
-        r""":math: `z_{-1}(r)`
+    @staticmethod
+    def _eval_prefactor_l_0(ell):
+        r"""RSD prefactor :math:`L_{0}` in Limber approximation
 
-        Calculates the :math: `z_{-1}(r)` function needed for RSD.
+        Calculates the :math:`L_{0}` RSD prefactor in the
+        harmonic-space power spectrum of galaxy clustering.
+
+        .. math::
+            L_{0} = \frac{2 \ell^2 + 2 \ell -1}
+            {(2 \ell - 1)(2 \ell + 3)}\\
+
+        Parameters
+        ----------
+        ell: int
+            :math:`\ell`-mode at which the prefactor is evaluated.
+
+        Returns
+        -------
+        L_0: float
+           Value of the :math:`L_{0}` prefactor at the given :math:`\ell`.
+        """
+        l_0 = (2 * ell ** 2 + 2 * ell - 1) / ((2 * ell - 1) * (2 * ell + 3))
+        return l_0
+
+    @staticmethod
+    def _eval_prefactor_l_minus1(ell):
+        r"""RSD prefactor :math:`L_{-1}` in Limber approximation
+
+        Calculates the :math:`L_{-1}` RSD prefactor in the
+        harmonic-space power spectrum of galaxy clustering.
+
+        .. math::
+            L_{-1} = -\frac{\ell(\ell - 1)}
+            {(2 \ell -1)\sqrt{(2 \ell - 3)(2 \ell + 1)}}\\
+
+        Parameters
+        ----------
+        ell: int
+            :math:`\ell`-mode at which the prefactor is evaluated.
+
+        Returns
+        -------
+        L_minus1: float
+           Value of the :math:`L_{-1}` prefactor at the given :math:`\ell`.
+        """
+        l_minus1 = -ell * (ell - 1) / \
+            ((2 * ell - 1) * np.sqrt((2 * ell - 3) * (2 * ell + 1)))
+        return l_minus1
+
+    @staticmethod
+    def _eval_prefactor_l_plus1(ell):
+        r"""RSD prefactor :math:`L_{+1}` in Limber approximation
+
+        Calculates the :math:`L_{+1}` RSD prefactor in the
+        harmonic-space power spectrum of galaxy clustering.
+
+        .. math::
+            L_{+1} = -\frac{(\ell + 1)(\ell + 2)}
+            {(2\ell + 3)\sqrt{(2\ell + 1)(2 \ell + 5)}}\\
+
+        Parameters
+        ----------
+        ell: int
+            :math:`\ell`-mode at which the prefactor is evaluated.
+
+        Returns
+        -------
+        L_plus1: float
+           Value of the :math:`L_{+1}` prefactor at the given :math:`\ell`.
+        """
+        l_plus1 = -(ell + 1) * (ell + 2) / \
+            ((2 * ell + 3) * np.sqrt((2 * ell + 1) * (2 * ell + 5)))
+        return l_plus1
+
+    def z_minus1(self, ell, r):
+        r""":math:`z_{-1}(r)`
+
+        Calculates the :math:`z_{-1}(r)` function needed for RSD.
 
         .. math::
             z_{-1}(r) = z \left[\frac{2 \ell -3}{ 2 \ell + 1}
@@ -889,9 +984,9 @@ class Photo:
         return z_r_interp(ell_factor * r)
 
     def z_plus1(self, ell, r):
-        r""":math: `z_{+1}(r)`
+        r""":math:`z_{+1}(r)`
 
-        Calculates the :math: `z_{+1}(r)` function needed for RSD.
+        Calculates the :math:`z_{+1}(r)` function needed for RSD.
 
         .. math::
             z_{+1}(r) = z \left[\frac{2 \ell +5}{ 2 \ell + 1}

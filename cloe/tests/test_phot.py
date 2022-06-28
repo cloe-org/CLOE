@@ -284,12 +284,12 @@ class photoinitTestCase(TestCase):
                             err_msg='Integrand of WL kernel failed')
 
     def test_WL_window(self):
-        int_comp = self.phot.WL_window(1, 0.1)[10]
+        int_comp = self.phot.WL_window(self.phot.z_winterp, 1)[10]
         npt.assert_allclose(int_comp, self.wbincheck, rtol=self.win_tol,
                             err_msg='WL_window failed')
 
     def test_magnification_window(self):
-        int_comp = self.phot.magnification_window(1, 0.1)[10]
+        int_comp = self.phot.magnification_window(self.phot.z_winterp, 1)[10]
         npt.assert_allclose(int_comp, self.wbincheck_mag, rtol=self.win_tol,
                             err_msg='magnification_window failed')
 

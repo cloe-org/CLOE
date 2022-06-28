@@ -131,11 +131,12 @@ class Photo:
         self.interpwinmag[:, 0] = self.z_winterp
 
         for tomi in range(1, z_wtom_wl):
-            self.interpwin[:, tomi] = self.WL_window(tomi)
+            self.interpwin[:, tomi] = self.WL_window(self.z_winterp, tomi)
             self.interpwinia[:, tomi] = self.IA_window(self.z_winterp, tomi)
         for tomi in range(1, z_wtom_gc):
             self.interpwingal[:, tomi] = self.GC_window(self.z_winterp, tomi)
-            self.interpwinmag[:, tomi] = self.magnification_window(tomi)
+            self.interpwinmag[:, tomi] = self.magnification_window(
+                self.z_winterp, tomi)
 
     def _set_bessel_tables(self, theta_rad):
         r"""Set tables for Bessel functions
@@ -292,7 +293,7 @@ class Photo:
             self.theory['d_z_func'](zprime))
         return wint
 
-    def WL_window(self, bin_i, k=0.0001):
+    def WL_window(self, z, bin_i, k=0.0001):
         r"""WL Window
 
         Calculates the weak lensing shear kernel for a given tomographic bin.
@@ -310,6 +311,8 @@ class Photo:
 
         Parameters
         ----------
+        z: numpy.ndarray of float
+            Redshift at which weight is evaluated.
         bin_i: int
            index of desired tomographic bin. Tomographic bin
            indices start from 1.
@@ -321,17 +324,17 @@ class Photo:
         -------
         W_val: numpy.ndarray
            1-D Numpy array of shear kernel values for specified bin
-           at specified scale for the redshifts defined in self.z_winterp
+           at specified scale for the redshifts defined in z
         """
         dz_i = self.theory['nuisance_parameters'][f'dz_{bin_i}_WL']
-        zint_mat = np.linspace(self.z_winterp, self.z_winterp[-1] + dz_i,
+        zint_mat = np.linspace(z, z[-1] + dz_i,
                                self.z_trapz_sampling)
         zint_mat = zint_mat.T
         diffz = np.diff(zint_mat)
         H0_Mpc = self.theory['H0_Mpc']
         O_m = self.theory['Omm']
 
-        n_z_normalized = self.nz_WL.interpolates_n_i(bin_i, self.z_winterp)
+        n_z_normalized = self.nz_WL.interpolates_n_i(bin_i, z)
 
         intg_mat = np.array([self.window_integrand(zint_mat[zii],
                                                    zint_mat[zii, 0],
@@ -340,14 +343,14 @@ class Photo:
 
         integral_arr = integrate.trapz(intg_mat, dx=diffz, axis=1)
 
-        W_val = (1.5 * H0_Mpc * O_m * (1.0 + self.z_winterp) *
-                 self.theory['MG_sigma'](self.z_winterp, k) *
-                 (self.theory['f_K_z_func'](self.z_winterp) /
+        W_val = (1.5 * H0_Mpc * O_m * (1.0 + z) *
+                 self.theory['MG_sigma'](z, k) *
+                 (self.theory['f_K_z_func'](z) /
                   (1 / H0_Mpc)) * integral_arr)
 
         return W_val
 
-    def magnification_window(self, bin_i, k=0.0001):
+    def magnification_window(self, z, bin_i, k=0.0001):
         r"""Magnification Bias Window
 
         Calculates the magnification bias kernel for a given tomographic bin.
@@ -365,6 +368,8 @@ class Photo:
 
         Parameters
         ----------
+        z: numpy.ndarray of float
+            Redshift at which weight is evaluated.
         bin_i: int
            index of desired tomographic bin. Tomographic bin
            indices start from 1.
@@ -377,17 +382,17 @@ class Photo:
         W_val: numpy.ndarray
            1-D Numpy array of magnification bias kernel
            values for specified bin
-           at specified scale for the redshifts defined in self.z_winterp
+           at specified scale for the redshifts defined in z
         """
         dz_i = self.theory['nuisance_parameters'][f'dz_{bin_i}_GCphot']
-        zint_mat = np.linspace(self.z_winterp, self.z_winterp[-1] + dz_i,
+        zint_mat = np.linspace(z, z[-1] + dz_i,
                                self.z_trapz_sampling)
         zint_mat = zint_mat.T
         diffz = np.diff(zint_mat)
         H0_Mpc = self.theory['H0_Mpc']
         O_m = self.theory['Omm']
 
-        n_z_normalized = self.nz_GC.interpolates_n_i(bin_i, self.z_winterp)
+        n_z_normalized = self.nz_GC.interpolates_n_i(bin_i, z)
 
         intg_mat = np.array([self.window_integrand(zint_mat[zii],
                                                    zint_mat[zii, 0],
@@ -397,9 +402,9 @@ class Photo:
         integral_arr = integrate.trapz(intg_mat, dx=diffz, axis=1)
 
         W_val = (1.5 * H0_Mpc * O_m * self.magbias[bin_i - 1] *
-                 (1.0 + self.z_winterp) *
-                 self.theory['MG_sigma'](self.z_winterp, k) *
-                 (self.theory['f_K_z_func'](self.z_winterp) /
+                 (1.0 + z) *
+                 self.theory['MG_sigma'](z, k) *
+                 (self.theory['f_K_z_func'](z) /
                   (1 / H0_Mpc)) * integral_arr)
         return W_val
 

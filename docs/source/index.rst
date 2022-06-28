@@ -11,4 +11,4 @@ Package Contents
    :maxdepth: 3
 
    example
-   likelihood
+   cloe

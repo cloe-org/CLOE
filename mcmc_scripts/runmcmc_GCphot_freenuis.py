@@ -8,7 +8,7 @@ else:
     sys.path.append(script_path)
 
 from cobaya.run import run
-from likelihood.cobaya_interface import EuclidLikelihood
+from cloe.cobaya_interface import EuclidLikelihood
 
 
 info = {

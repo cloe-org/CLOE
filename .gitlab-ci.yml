@@ -23,8 +23,8 @@ Install:
     refs:
       - merge_requests
     changes:
-      - likelihood/*
-      - likelihood/**/*
+      - cloe/*
+      - cloe/**/*
       - configs/*
       - data/ExternalBenchmark/*
       - environment.yml
@@ -42,7 +42,7 @@ Check_HTML:
   script:
     - &apidoc_build_script |
       mkdir docs/build
-      sphinx-apidoc -feo docs/source likelihood
+      sphinx-apidoc -feo docs/source cloe
       sphinx-build docs/source docs/build
     - mv docs/build html_build
   when: manual

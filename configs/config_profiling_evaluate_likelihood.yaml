@@ -6,7 +6,7 @@ Cobaya:
     Euclid:
       aliases:
       - euclid
-      external: !!python/name:likelihood.cobaya_interface.EuclidLikelihood ''
+      external: !!python/name:cloe.cobaya_interface.EuclidLikelihood ''
       NL_flag: 0
       plot_observables_selection: False
       # The user can overwrite here the values of

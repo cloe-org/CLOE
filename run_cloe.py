@@ -7,8 +7,8 @@ import argparse
 import json
 import sys
 from warnings import warn
-from likelihood.user_interface.likelihood_ui import LikelihoodUI
-from likelihood.auxiliary.logger import open_logger, close_logger, \
+from cloe.user_interface.likelihood_ui import LikelihoodUI
+from cloe.auxiliary.logger import open_logger, close_logger, \
     catch_error, set_logging_level
 
 

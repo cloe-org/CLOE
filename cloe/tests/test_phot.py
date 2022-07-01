@@ -217,9 +217,9 @@ class photoinitTestCase(TestCase):
             self.test_prefactor_input_ells_GC_phot)
         self.test_prefactor_len_check['L0_GCphot'] = len(
             self.test_prefactor_input_ells_GC_phot)
-        self.test_prefactor_len_check['L+1_GCphot'] = len(
+        self.test_prefactor_len_check['Lplus1_GCphot'] = len(
             self.test_prefactor_input_ells_GC_phot)
-        self.test_prefactor_len_check['L-1_GCphot'] = len(
+        self.test_prefactor_len_check['Lminus1_GCphot'] = len(
             self.test_prefactor_input_ells_GC_phot)
         # the following prefactors are evaluated for input ell = 3
         self.test_prefactor_input_ell_val = 3
@@ -229,8 +229,8 @@ class photoinitTestCase(TestCase):
         self.test_prefactor_val_check['mag_XC'] = 0.979591837
         self.test_prefactor_val_check['mag_GCphot'] = 0.979591837
         self.test_prefactor_val_check['L0_GCphot'] = 0.51111111111
-        self.test_prefactor_val_check['L-1_GCphot'] = -0.26186146828
-        self.test_prefactor_val_check['L+1_GCphot'] = -0.253245725465
+        self.test_prefactor_val_check['Lminus1_GCphot'] = -0.26186146828
+        self.test_prefactor_val_check['Lplus1_GCphot'] = -0.253245725465
 
         self.W_i_Gcheck = 5.241556e-09
         self.W_IA_check = 0.0001049580
@@ -449,7 +449,8 @@ class photoinitTestCase(TestCase):
         input_ell_val = self.test_prefactor_input_ell_val
 
         # test that the prefactors exist for seven quantities: shearIA_WL,
-        # shearIA_XC, mag_XC, mag_GCphot, L0_GCphot, L+1_GCphot and L-1GCphot
+        # shearIA_XC, mag_XC, mag_GCphot, L0_GCphot, Lplus1_GCphot and
+        # Lminus1GCphot
         npt.assert_equal(len(prefac_types), self.test_prefactor_num_check,
                          err_msg=f'unexpected number of prefactor types,'
                          f' {len(prefac_types)} instead of'
@@ -556,4 +557,4 @@ class photoinitTestCase(TestCase):
     def test_eval_prefactor_l_plus1(self):
         npt.assert_allclose(self.phot._eval_prefactor_l_plus1(ell=2),
                             -12 / (7 * np.sqrt(45)), rtol=1e-6,
-                            err_msg='L+1 prefactor test failed')
+                            err_msg='Lplus1 prefactor test failed')

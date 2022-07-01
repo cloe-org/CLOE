@@ -178,13 +178,13 @@ class Photo:
           :math:`\ell(\ell+1)/(\ell+1/2)^2`
         * L0_GCphot (from the ells_GCphot input array): \
           :math:`\frac{2 \ell^2 + 2 \ell -1}{(2 \ell - 1)(2 \ell + 3)}`
-        * L+1_GCphot (from the ells_GCphot input array):
+        * Lplus1_GCphot (from the ells_GCphot input array):
 
           .. math::
               -\frac{(\ell + 1)(\ell + 2)}
               {(2\ell + 3)\sqrt{(2\ell + 1)(2 \ell + 5)}}
 
-        * L-1_GCphot (from the ells_GCphot input array):
+        * Lminus1_GCphot (from the ells_GCphot input array):
 
           .. math::
               -\frac{\ell(\ell - 1)}
@@ -223,9 +223,9 @@ class Photo:
                 self._eval_prefactor_mag(ell)
             self._prefactor_dict['L0_GCphot', ell] = \
                 self._eval_prefactor_l_0(ell)
-            self._prefactor_dict['L+1_GCphot', ell] = \
+            self._prefactor_dict['Lplus1_GCphot', ell] = \
                 self._eval_prefactor_l_plus1(ell)
-            self._prefactor_dict['L-1_GCphot', ell] = \
+            self._prefactor_dict['Lminus1_GCphot', ell] = \
                 self._eval_prefactor_l_minus1(ell)
 
     def GC_window(self, z, bin_i):

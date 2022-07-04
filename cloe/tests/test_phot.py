@@ -22,7 +22,9 @@ class mock_CAMB_data:
         self.rz_interp = rz_interp
 
     def angular_diameter_distance2(self, z1, z2):
-        return self.rz_interp(z1) - self.rz_interp(z2)
+        add2 = (self.rz_interp(z2) / (1.0 + z2) -
+                self.rz_interp(z1) / (1.0 + z2))
+        return add2
 
 
 def mock_MG_func(z, k):
@@ -120,6 +122,8 @@ class photoinitTestCase(TestCase):
                           # This is not realistic but it is fine for the
                           # purposes of the unit tests
                           'f_K_z_func': rz_interp,
+                          'f_K_z12_func': (lambda x, y: \
+                                           self.f_K_z12_func(rz_interp, x, y)),
                           'H_z_func_Mpc': Hmpc_interp,
                           'H_z_func': Hz_interp,
                           'z_win': np.linspace(0.0, 4.0, 100),
@@ -139,6 +143,8 @@ class photoinitTestCase(TestCase):
         mock_cosmo_dic['Omm'] = (mock_cosmo_dic['Omnu'] +
                                  mock_cosmo_dic['Omc'] +
                                  mock_cosmo_dic['Omb'])
+        mock_cosmo_dic['Omk'] = \
+            mock_cosmo_dic['omkh2'] / (mock_cosmo_dic['H0'] / 100.0)**2.0
 
         nuisance_dic = mock_cosmo_dic['nuisance_parameters']
         # by setting below to zero, obtain previous non-IA results
@@ -193,12 +199,15 @@ class photoinitTestCase(TestCase):
                                ells_XC=ells_XC,
                                ells_GC_phot=ells_GC_phot)
 
+    def f_K_z12_func(self, rz_func, z1, z2):
+        return rz_func(z2) - rz_func(z1)
+
     def setUp(self) -> None:
         self.win_tol = 1e-03
         self.cl_tol = 1e-03
         self.xi_tol = 1e-03
-        self.integrand_check = 1.043825
-        self.wbincheck = -1.47437e-06
+        self.integrand_check = -0.948932
+        self.wbincheck = 1.102535e-06
         self.wbincheck_mag = 0.0
 
         self.test_prefactor_rtol = 1e-04
@@ -234,14 +243,14 @@ class photoinitTestCase(TestCase):
 
         self.W_i_Gcheck = 5.241556e-09
         self.W_IA_check = 0.0001049580
-        self.cl_WL_check = 2.572589e-08
+        self.cl_WL_check = 6.908876e-09
         self.cl_GC_check = 2.89485e-05
-        self.cl_cross_check = -6.379221e-07
+        self.cl_cross_check = 1.117403e-07
         self.prefac_shearia_check = 0.988620523  # expected value for ell=10
         self.prefac_mag_check = 0.997732426  # expected value for ell=10
-        self.xi_ssp_check = [2.908933e-06, 1.883681e-06]
-        self.xi_ssm_check = 8.993205e-07
-        self.xi_sp_check = -6.925195e-05
+        self.xi_ssp_check = [6.326380e-07, 4.395978e-07]
+        self.xi_ssm_check = 1.476032e-07
+        self.xi_sp_check = -3.455842e-06
         self.xi_pp_check = 0.005249
 
     def tearDown(self):

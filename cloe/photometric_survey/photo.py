@@ -93,8 +93,11 @@ class Photo:
         self.theory = cosmo_dic
         nuisance_dict = self.theory['nuisance_parameters']
 
-        self.vadd2 = np.vectorize(
-                self.theory['CAMBdata'].angular_diameter_distance2)
+        # Commenting this part out as we are temporarily not using the
+        # angular diameter distance obtained from CAMB, but we are coding
+        # it up ourselves
+        # self.vadd2 = np.vectorize(
+        #         self.theory['CAMBdata'].angular_diameter_distance2)
 
         self.nz_GC = RedshiftDistribution('GCphot', self.nz_dic_GC,
                                           nuisance_dict)
@@ -283,14 +286,23 @@ class Photo:
         wint: float
            kernel integrand
         """
-        # temporary fix, see #767
-        # if not isinstance(zprime, float):
-        wint = (
-            nz(zprime) *
-            self.vadd2(
-                z,
-                zprime) /
-            self.theory['d_z_func'](zprime))
+        # Commenting out this piece of code, as we are not using the
+        # angular diameter distance function obtained from CAMB for now
+        # wint = (
+        #     nz(zprime) *
+        #     self.vadd2(
+        #         z,
+        #         zprime) /
+        #     self.theory['d_z_func'](zprime))
+        curv = self.theory['Omk']
+
+        if curv == 0.0:
+            wint = nz(zprime) * (1.0 - (self.theory['r_z_func'](z) /
+                                 self.theory['r_z_func'](zprime)))
+        else:
+            wint = (nz(zprime) * self.theory['f_K_z12_func'](
+                z, zprime) / (1.0 + zprime) / self.theory['d_z_func'](zprime))
+
         return wint
 
     def WL_window(self, z, bin_i, k=0.0001):

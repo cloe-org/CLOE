@@ -229,6 +229,8 @@ class Cosmology:
                           'r_z_func': None,
                           'z_r_func': None,
                           'f_K_z_func': None,
+                          '_f_K_z12_func': None,
+                          'f_K_z12_func': None,
                           'd_z_func': None,
                           'H_z_func': None,
                           'H_z_func_Mpc': None,
@@ -546,6 +548,78 @@ class Cosmology:
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'],
                 y=transverse_comoving_dist, ext=2)
+
+    def interp_transverse_comoving_dist_z12(self):
+        """Interp Transverse Comoving Dist from z1 to z2
+
+        Adds an interpolator for the transverse comoving distance from
+        :math:`z_1` to :math:`z_2` to the dictionary so that it can be
+        evaluated at redshifts not explicitly supplied from the Boltzmann
+        solver.
+
+        Updates 'key' in the cosmo_dic attribute of the current class
+        by adding an interpolator object which interpolates the
+        transverse comoving distance as a function of the specified
+        redshifts
+        """
+        if self.cosmo_dic['z_win'] is None:
+            raise Exception('Boltzmann code redshift binning has not been '
+                            'supplied to cosmo_dic.')
+
+        x_int = self.cosmo_dic['z_win']
+
+        if isinstance(self.cosmo_dic['comov_dist'], tuple):
+            comov_dist = np.array(self.cosmo_dic['comov_dist'][0])
+        elif isinstance(self.cosmo_dic['comov_dist'], np.ndarray):
+            comov_dist = np.array(self.cosmo_dic['comov_dist'])
+
+        int_z1z2 = ((comov_dist[None, :] - comov_dist[:, None]) *
+                    self.cosmo_dic['H0'] / self.cosmo_dic['c'])
+        if self.cosmo_dic['Omk'] == 0.0:
+            y_int = int_z1z2
+        elif self.cosmo_dic['Omk'] > 0.0:
+            y_int = (np.sinh(np.sqrt(self.cosmo_dic['Omk']) * int_z1z2) /
+                     np.sqrt(self.cosmo_dic['Omk']))
+        else:
+            y_int = (np.sin(np.sqrt(-self.cosmo_dic['Omk']) * int_z1z2) /
+                     np.sqrt(-self.cosmo_dic['Omk']))
+        y_int *= (self.cosmo_dic['c'] / self.cosmo_dic['H0'])
+
+        self.cosmo_dic['_f_K_z12_func'] = \
+            interpolate.RectBivariateSpline(x_int, x_int, y_int, kx=3, ky=3)
+
+    def f_K_z12_wrapper(self, z1, z2):
+        """Wrapper for the transverse comoving distance from z1 to z2
+
+        Does type checking, calls the method stored in
+        self.cosmo_dic['_f_K_z12_func'], and returns the output variable
+        according to the type of the input variables. The output distance
+        is positive-defined, and the function is symmetric in :math:`z_1`
+        and :math:`z_2`, except for the shape of the return value.
+
+        Parameters
+        ----------
+        z1: float or int or numpy.ndarray
+            Lower redshift :math:`z_1`
+        z2: float or int or numpy.ndarray
+            Upper redshift :math:`z_2`
+
+        Returns
+        -------
+        f_K_z12: float or numpy.ndarray
+            Transverse comoving distance between :math:`z_1` and :math:`z_2`
+        """
+        if (isinstance(z1, (int, float)) and isinstance(z2,
+                                                        (int, float))):
+            f_K_z12 = self.cosmo_dic['_f_K_z12_func'](z1, z2)[0][0]
+        elif (isinstance(z1, (int, float)) and isinstance(z2, np.ndarray)):
+            f_K_z12 = self.cosmo_dic['_f_K_z12_func'](z1, z2)[0]
+        elif (isinstance(z1, np.ndarray) and isinstance(z2, (int, float))):
+            f_K_z12 = self.cosmo_dic['_f_K_z12_func'](z1, z2)[:, 0]
+        else:
+            f_K_z12 = self.cosmo_dic['_f_K_z12_func'](z1, z2)
+
+        return abs(f_K_z12)
 
     def interp_angular_dist(self):
         """Interp Angular Dist
@@ -1202,6 +1276,8 @@ class Cosmology:
         self.interp_comoving_dist()
         self.interp_z_of_r()
         self.interp_transverse_comoving_dist()
+        self.interp_transverse_comoving_dist_z12()
+        self.cosmo_dic['f_K_z12_func'] = self.f_K_z12_wrapper
         self.interp_fsigma8()
         self.interp_sigma8()
         if self.cosmo_dic['use_gamma_MG']:

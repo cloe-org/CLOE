@@ -124,7 +124,7 @@ class Euclike:
         theta_deg = np.logspace(np.log10(theta_min),
                                 np.log10(theta_max),
                                 nbins_theta)
-        theta_rad = theta_deg * np.pi / 180.0
+        theta_rad = np.deg2rad(theta_deg)
 
         # Sets the precomputed Bessel functions as an attribute of the
         # Photo class

@@ -1091,7 +1091,7 @@ class Photo:
             raise TypeError('theta_deg argument must be a int, float, list or '
                             'numpy.ndarray')
 
-        theta_rad = theta_deg * np.pi / 180.0
+        theta_rad = np.deg2rad(theta_deg)
         xi_arr = np.empty(theta_deg.size)
 
         cells_int = np.array([cells_func(ell, bin_i, bin_j)

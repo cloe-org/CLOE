@@ -1137,14 +1137,13 @@ class Cosmology:
         z_win_spectro = rb.reduce(z_win, spe_bin_edges[0], spe_bin_edges[-1])
 
         # I am a comment, just to fakely change something and trigger the CI
+        z_win_transpose = z_win.reshape(-1, 1)
 
         pksrc = self.pk_source
-        pmm_phot = np.array([pksrc.Pmm_phot_def(zz, k_win)
-                             for zz in z_win])
-        pgg_phot = np.array([pksrc.Pgg_phot_def(zz, k_win)
-                             for zz in z_win])
-        pgdelta_phot = np.array([pksrc.Pgdelta_phot_def(zz, k_win)
-                                 for zz in z_win])
+        pmm_phot = pksrc.Pmm_phot_def(z_win_transpose, k_win)
+        pgg_phot = pksrc.Pgg_phot_def(z_win_transpose, k_win)
+        pgdelta_phot = pksrc.Pgdelta_phot_def(z_win_transpose, k_win)
+
         pii = np.array([pksrc.Pii_def(zz, k_win)
                         for zz in z_win])
         pdeltai = np.array([pksrc.Pdeltai_def(zz, k_win)

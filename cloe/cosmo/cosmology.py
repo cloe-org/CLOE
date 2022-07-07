@@ -1136,6 +1136,8 @@ class Cosmology:
         spe_bin_edges = np.array([0.90, 1.10, 1.30, 1.50, 1.80])
         z_win_spectro = rb.reduce(z_win, spe_bin_edges[0], spe_bin_edges[-1])
 
+        # I am a comment, just to fakely change something and trigger the CI
+
         pksrc = self.pk_source
         pmm_phot = np.array([pksrc.Pmm_phot_def(zz, k_win)
                              for zz in z_win])

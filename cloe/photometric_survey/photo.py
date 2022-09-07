@@ -103,6 +103,8 @@ class Photo:
                                           nuisance_dict)
         self.nz_WL = RedshiftDistribution('WL', self.nz_dic_WL,
                                           nuisance_dict)
+        self.photobias = [nuisance_dict[f'b{i}_photo']
+                          for i in self.nz_GC.get_tomographic_bins()]
         self.multbias = [nuisance_dict[f'multiplicative_bias_{i}']
                          for i in self.nz_WL.get_tomographic_bins()]
         self.magbias = [nuisance_dict[f'magnification_bias_{i}']
@@ -244,19 +246,59 @@ class Photo:
         z: numpy.ndarray of float or float
            Redshift at which to evaluate distribution.
         bin_i: int
-           index of desired tomographic bin. Tomographic bin
+           Index of desired tomographic bin. Tomographic bin
            indices start from 1.
 
         Returns
         -------
-        W_i_G: float
-           Window function for galaxy clustering photometric
+        window_GC: float
+           Window function for photometric galaxy clustering.
         """
 
         n_z_normalized = self.nz_GC.evaluates_n_i_z(bin_i, z)
-        W_i_G = n_z_normalized * self.theory['H_z_func_Mpc'](z)
+        window_GC = n_z_normalized * self.theory['H_z_func_Mpc'](z)
 
-        return W_i_G
+        return window_GC
+
+    def GC_window_RSD(self, z, ell, bin_i):
+        r"""GC Window RSD
+
+        Implements the RSD correction to the galaxy clustering photometric
+        window function in an array-like format, modulo the Limber and
+        full sky prefactor,
+
+        .. math::
+            W_i^{\rm{G,RSD}}(z,\ell) =
+            \frac{1}{c \,b_{\mathrm{g},i}^\mathrm{photo}} \
+            \left[H(z_m)f(z_m)\frac{n_i(z)}{\bar{n_i}}\right]_m
+
+        where :math:`m` assumes the values (-1,0,+1).
+
+        Parameters
+        ----------
+        z: float
+           Redshift at which to evaluate distribution.
+        ell: numpy.ndarray of float or float
+            Multipole at which to evaluate the window function.
+        bin_i: int
+           Index of desired tomographic bin. Tomographic bin
+           indices start from 1.
+
+        Returns
+        -------
+        window_GC_RSD: numpy.ndarray of float or float
+           Window function for RSD component of photometric galaxy clustering.
+        """
+        tdist = self.theory['f_K_z_func'](z)
+        z_zero = z if isinstance(ell, (int, float)) else np.full(len(ell), z)
+        zm_arr = np.array([self.z_minus1(ell, tdist),
+                           z_zero,
+                           self.z_plus1(ell, tdist)])
+        Hzm_arr = self.theory['H_z_func_Mpc'](zm_arr)
+        fzm_arr = self.theory['f_z'](zm_arr)
+        nzm_arr = self.nz_GC.evaluates_n_i_z(bin_i, zm_arr)
+        bias = self.photobias[bin_i - 1]
+        return Hzm_arr * fzm_arr * nzm_arr / bias
 
     def window_integrand(self, zprime, z, nz):
         r"""Window Integrand

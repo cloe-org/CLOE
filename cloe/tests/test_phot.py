@@ -96,6 +96,9 @@ class photoinitTestCase(TestCase):
                          x=np.linspace(0.0, 5.0, 50),
                          y=f_sig_8_arr[::-1], ext=0)
 
+        def f_interp(z):
+            return f_sig_8_interp(z) / sig_8_interp(z)
+
         MG_interp = mock_MG_func
 
         pdd = np.load(str(cur_dir) + '/test_input/pdd.npy')
@@ -115,6 +118,7 @@ class photoinitTestCase(TestCase):
                           'w': -1.0, 'sigma8_0': 0.816,
                           'As': 2.115e-9, 'sigma8_z_func': sig_8_interp,
                           'fsigma8_z_func': f_sig_8_interp,
+                          'f_z': f_interp,
                           'r_z_func': rz_interp,
                           'z_r_func': zr_interp,
                           'd_z_func': dz_interp,
@@ -154,6 +158,7 @@ class photoinitTestCase(TestCase):
         for i in range(10):
             nuisance_dic[f'dz_{i+1}_GCphot'] = 0.0
             nuisance_dic[f'dz_{i+1}_WL'] = 0.0
+            nuisance_dic[f'b{i+1}_photo'] = 1.0
             nuisance_dic[f'multiplicative_bias_{i+1}'] = 0.0
             nuisance_dic[f'magnification_bias_{i+1}'] = 0.0
         mock_cosmo_dic['Pmm_phot'] = \
@@ -242,6 +247,10 @@ class photoinitTestCase(TestCase):
         self.test_prefactor_val_check['Lplus1_GCphot'] = -0.253245725465
 
         self.W_i_Gcheck = 5.241556e-09
+        self.W_i_GRSDcheck = \
+            np.array([[8.623982e-07, 1.392808e-09, 5.172771e-10],
+                      [1.840731e-10, 1.840731e-10, 1.840731e-10],
+                      [2.069768e-15, 2.141887e-11, 6.343029e-11]])
         self.W_IA_check = 0.0001049580
         self.cl_WL_check = 6.908876e-09
         self.cl_GC_check = 2.89485e-05
@@ -258,6 +267,7 @@ class photoinitTestCase(TestCase):
         self.wbincheck = None
         self.wbincheck_mag = None
         self.W_i_Gcheck = None
+        self.W_i_GRSDcheck = None
         self.W_IA_check = None
         self.cl_WL_check = None
         self.cl_GC_check = None
@@ -281,6 +291,12 @@ class photoinitTestCase(TestCase):
         npt.assert_allclose(self.phot.GC_window(0.001, 1),
                             self.W_i_Gcheck, rtol=self.win_tol,
                             err_msg='GC_window failed')
+
+    def test_GC_window_RSD(self):
+        npt.assert_allclose(
+            self.phot.GC_window_RSD(1.0, np.array([10.0, 50.0, 100.0]), 1),
+            self.W_i_GRSDcheck, rtol=self.win_tol,
+            err_msg='GC_window_RSD failed')
 
     def test_IA_window(self):
         npt.assert_allclose(self.phot.IA_window(0.1, 1),

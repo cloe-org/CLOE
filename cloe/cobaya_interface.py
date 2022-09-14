@@ -53,7 +53,7 @@ class EuclidLikelihood(Likelihood):
         self.k_max_Boltzmannn = 50.0
         self.k_max_extrap = 500.0
         self.k_min_GC_phot_interp = 0.001
-        self.k_max_GC_phot_interp = 1000.0
+        self.k_max_GC_phot_interp = 500.0
         self.k_samp_GC = 1000
         self.k_win = np.logspace(np.log10(self.k_min_GC_phot_interp),
                                  np.log10(self.k_max_GC_phot_interp),

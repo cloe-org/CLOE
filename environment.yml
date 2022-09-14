@@ -5,7 +5,7 @@ channels:
 dependencies:
   - python=3.9
   - astropy>=4.0
-  - camb==1.3.0
+  - camb
   - fast-pt>=3.1
   - jupyter>=1.0
   - matplotlib>=3.1
@@ -16,7 +16,7 @@ dependencies:
   - seaborn>=0.11.2
   - pip:
     #- git+https://github.com/CobayaSampler/cobaya
-    - cobaya==3.1.0
+    - cobaya
     # baccoemu needs to be commented out in order to build the conda
     # environment layer in the Docker image
     # - baccoemu>=1.1

@@ -55,7 +55,7 @@ class fftlog(object):
         self.N = self.x.size  # length of the array after manipulations
 
         # zero-padding
-        if(N_pad):
+        if (N_pad):
             pad = np.zeros(N_pad)
             self.x = utils._log_extrap(self.x, N_pad, N_pad)
             self.fx = np.hstack((pad, self.fx, pad))
@@ -63,11 +63,11 @@ class fftlog(object):
             self.N_extrap_end += N_pad
             self.N_extrap_begin += N_pad  # update after padding
 
-        if(self.N % 2 == 1):  # force they array size to be even, as
+        if (self.N % 2 == 1):  # force they array size to be even, as
             self.x = self.x[:-1]  # required by the algorithm
             self.fx = self.fx[:-1]
             self.N -= 1
-            if(N_extrap_end):
+            if (N_extrap_end):
                 self.N_extrap_end -= 1
 
         self.m, self.c_m = self._get_c_m()

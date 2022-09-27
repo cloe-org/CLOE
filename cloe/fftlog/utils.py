@@ -37,10 +37,10 @@ def _log_extrap(x, N_extrap_begin, N_extrap_end):
     """
 
     low_x = high_x = []
-    if(N_extrap_begin):
+    if (N_extrap_begin):
         dlnx_low = np.log(x[1] / x[0])
         low_x = x[0] * np.exp(dlnx_low * np.arange(-N_extrap_end, 0))
-    if(N_extrap_end):
+    if (N_extrap_end):
         dlnx_high = np.log(x[-1] / x[-2])
         high_x = x[-1] * np.exp(dlnx_high * np.arange(1, N_extrap_end + 1))
 
@@ -113,7 +113,7 @@ def _g_m_vals(mu, q):
     g_m: array
         array containing the evaluated function
     """
-    if(mu + 1 + q.real[0] == 0):
+    if (mu + 1 + q.real[0] == 0):
         print("gamma(0) encountered. Please change another nu value!")
         exit()
     imag_q = np.imag(q)

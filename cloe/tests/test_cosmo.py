@@ -382,3 +382,11 @@ class cosmoinitTestCase(TestCase):
         npt.assert_allclose(z_out, z_in, rtol=1e-3,
                             err_msg='z_r_func is not the inverse '
                                     'of r_z_func')
+
+    def test_z_win_exception(self):
+        z_win = self.model_test.cosmology.cosmo_dic['z_win']
+        self.model_test.cosmology.cosmo_dic['z_win'] = None
+        npt.assert_raises(Exception,
+                          self.model_test.cosmology.update_cosmo_dic,
+                          None, 0.002)
+        self.model_test.cosmology.cosmo_dic['z_win'] = z_win

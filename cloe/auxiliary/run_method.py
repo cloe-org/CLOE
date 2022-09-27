@@ -18,4 +18,4 @@ def run_is_interactive():
         Returns True if the code runs with an interactive interface
         (e.g. Python shell, jupyter notebook, etc.), False otherwise
     """
-    return not(hasattr(main, '__file__'))
+    return not (hasattr(main, '__file__'))

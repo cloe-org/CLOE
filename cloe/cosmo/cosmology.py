@@ -501,9 +501,7 @@ class Cosmology:
         by adding an interpolator object
         which interpolates comoving distance as a function of redshift
         """
-        if self.cosmo_dic['z_win'] is None:
-            raise Exception('Boltzmann code redshift binning has not been '
-                            'supplied to cosmo_dic.')
+
         self.cosmo_dic['r_z_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['comov_dist'], ext=2)
 
@@ -539,9 +537,6 @@ class Cosmology:
         by adding an interpolator object which interpolates
         transverse comoving distance as a function of redshift
         """
-        if self.cosmo_dic['z_win'] is None:
-            raise Exception('Boltzmann code redshift binning has not been '
-                            'supplied to cosmo_dic.')
         transverse_comoving_dist = (self.cosmo_dic['angular_dist'] *
                                     (1.0 + self.cosmo_dic['z_win']))
         self.cosmo_dic['f_K_z_func'] = \
@@ -562,10 +557,6 @@ class Cosmology:
         transverse comoving distance as a function of the specified
         redshifts
         """
-        if self.cosmo_dic['z_win'] is None:
-            raise Exception('Boltzmann code redshift binning has not been '
-                            'supplied to cosmo_dic.')
-
         x_int = self.cosmo_dic['z_win']
 
         if isinstance(self.cosmo_dic['comov_dist'], tuple):
@@ -631,9 +622,6 @@ class Cosmology:
         interpolator object of angular diameter distance
         as a function of redshift
         """
-        if self.cosmo_dic['z_win'] is None:
-            raise Exception('Boltzmann code redshift binning has not been '
-                            'supplied to cosmo_dic.')
         self.cosmo_dic['d_z_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['angular_dist'], ext=2)
 
@@ -648,9 +636,6 @@ class Cosmology:
         which interpolates the Hubble parameter
         H(z) as a function of redshift
         """
-        if self.cosmo_dic['z_win'] is None:
-            raise Exception('Boltzmann code redshift binning has not been '
-                            'supplied to cosmo_dic.')
         self.cosmo_dic['H_z_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['H'], ext=2)
 
@@ -666,9 +651,6 @@ class Cosmology:
         which interpolates the Hubble parameter
         H(z) in Mpc as a function of redshift
         """
-        if self.cosmo_dic['z_win'] is None:
-            raise Exception('Boltzmann code redshift binning has not been '
-                            'supplied to cosmo_dic.')
         self.cosmo_dic['H_z_func_Mpc'] = \
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['H_Mpc'], ext=2)
@@ -684,9 +666,6 @@ class Cosmology:
         by adding an interpolator object
         which interpolates :math:`\sigma_8` as a function of redshift
         """
-        if self.cosmo_dic['z_win'] is None:
-            raise Exception('Boltzmann code redshift binning has not been '
-                            'supplied to cosmo_dic.')
         self.cosmo_dic['sigma8_z_func'] = \
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['sigma8'], ext=2)
@@ -703,9 +682,6 @@ class Cosmology:
         which interpolates :math:`f\sigma_8` as a
         function of redshift
         """
-        if self.cosmo_dic['z_win'] is None:
-            raise Exception('Boltzmann code redshift binning has not been '
-                            'supplied to cosmo_dic.')
         self.cosmo_dic['fsigma8_z_func'] = \
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['fsigma8'], ext=2)
@@ -1271,6 +1247,9 @@ class Cosmology:
         """
         # Update dictionary with H(z),
         # r(z), fsigma8, sigma8, f(z), D_A(z)
+        if self.cosmo_dic['z_win'] is None:
+            raise Exception('Boltzmann code redshift binning has not been '
+                            'supplied to cosmo_dic.')
         self.interp_H()
         self.interp_H_Mpc()
         self.interp_comoving_dist()

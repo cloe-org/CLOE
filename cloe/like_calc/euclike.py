@@ -152,10 +152,10 @@ class Euclike:
         datavec_dict = {'GC-Phot': [], 'WL': [], 'XC-Phot': [], 'all': []}
         for index in list(self.data_ins.data_dict['WL'].keys()):
             if 'B' in index:
-                del(self.data_ins.data_dict['WL'][index])
+                del (self.data_ins.data_dict['WL'][index])
         for index in list(self.data_ins.data_dict['XC-Phot'].keys()):
             if 'B' in index:
-                del(self.data_ins.data_dict['XC-Phot'][index])
+                del (self.data_ins.data_dict['XC-Phot'][index])
         # Transform GC-Phot
         # We ignore the first value (ells)
 

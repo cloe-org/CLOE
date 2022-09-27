@@ -285,9 +285,9 @@ class Reader:
         self.data_dict['GC-Phot'] = GC_phot_dict
         self.data_dict['3x2pt_cov'] = new_tx2_cov
 
-        del(GC_file)
-        del(WL_file)
-        del(XC_file)
+        del (GC_file)
+        del (WL_file)
+        del (XC_file)
         return
 
     def _unpack_3x2pt_cov(self, tx2_cov):

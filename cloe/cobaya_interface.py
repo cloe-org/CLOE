@@ -107,6 +107,8 @@ class EuclidLikelihood(Likelihood):
         self.cosmo.cosmo_dic['fid_H_z_func'] = \
             self.fiducial_cosmology.cosmo_dic['H_z_func']
 
+        self.cosmo.cosmo_dic['redshift_bins'] = self.data['spectro']['edges']
+
     def set_fiducial_cosmology(self):
         r"""Sets the fiducial cosmology class
 

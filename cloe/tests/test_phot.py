@@ -106,7 +106,6 @@ class photoinitTestCase(TestCase):
         pgd = np.load(str(cur_dir) + '/test_input/pgd.npy')
         pgg = np.load(str(cur_dir) + '/test_input/pgg.npy')
         pgi_phot = np.load(str(cur_dir) + '/test_input/pgi_phot.npy')
-        pgi_spectro = np.load(str(cur_dir) + '/test_input/pgi_spectro.npy')
         pii = np.load(str(cur_dir) + '/test_input/pii.npy')
 
         zs_base = np.linspace(0.0, 4.0, 100)
@@ -179,9 +178,6 @@ class photoinitTestCase(TestCase):
         mock_cosmo_dic['Pgi_phot'] = \
             interpolate.RectBivariateSpline(zs_base, ks_base,
                                             pgi_phot, kx=1, ky=1)
-        mock_cosmo_dic['Pgi_spectro'] = \
-            interpolate.RectBivariateSpline(zs_base, ks_base,
-                                            pgi_spectro, kx=1, ky=1)
         # temporary fix, see #767
         mock_cosmo_dic['CAMBdata'] = mock_CAMB_data(rz_interp)
 

@@ -136,7 +136,7 @@ class Euclike:
                                     ells_GC_phot=ells_GC_phot)
 
         # Spectro class instance
-        self.spec_ins = Spectro(None)
+        self.spec_ins = Spectro(None, list(self.zkeys))
 
     def create_photo_data(self):
         """Create Photo Data

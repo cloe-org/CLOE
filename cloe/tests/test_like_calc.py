@@ -127,6 +127,7 @@ class likecalcTestCase(TestCase):
                           'z_win': zs_base,
                           'k_win': ks_base,
                           'MG_sigma': MG_interp, 'c': const.c.to('km/s').value,
+                          'f_out_z_dep': False,
                           'nuisance_parameters': {
                               'b1_photo': 1.0997727037892875,
                               'b2_photo': 1.220245876862528,
@@ -154,7 +155,12 @@ class likecalcTestCase(TestCase):
                               'dz_7_GCphot': 0.0, 'dz_7_WL': 0.0,
                               'dz_8_GCphot': 0.0, 'dz_8_WL': 0.0,
                               'dz_9_GCphot': 0.0, 'dz_9_WL': 0.0,
-                              'dz_10_GCphot': 0.0, 'dz_10_WL': 0.0}}
+                              'dz_10_GCphot': 0.0, 'dz_10_WL': 0.0,
+                              'f_out': 0.0,
+                              'f_out_1': 0.0,
+                              'f_out_2': 0.0,
+                              'f_out_3': 0.0,
+                              'f_out_4': 0.0}}
 
         nuisance_dic = mock_cosmo_dic['nuisance_parameters']
         # by setting below to zero, obtain previous non-IA results

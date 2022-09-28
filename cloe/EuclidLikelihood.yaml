@@ -1,4 +1,4 @@
-# This yaml file contains the user specifications 
+# This yaml file contains the user specifications
 # for the Euclid observables computed theoretically
 # in CLOE.
 # Name given to the likelihood block (Cobaya will print this name)
@@ -12,6 +12,8 @@ params: !defaults [../configs/params]
 NL_flag: 0
 # Use MG gamma
 use_gamma_MG: False
+# Redshift dependent purity correction
+f_out_z_dep: False
 # Information about where the data is stored
 data: !defaults [../configs/data]
 # Selection of the observables to be computed

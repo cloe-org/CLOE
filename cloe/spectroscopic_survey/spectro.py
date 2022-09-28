@@ -15,7 +15,7 @@ class Spectro:
     Class for Galaxy clustering spectroscopic observable
     """
 
-    def __init__(self, cosmo_dic):
+    def __init__(self, cosmo_dic, z_str):
         """Initialize
 
         Constructor of the class Spectro
@@ -24,6 +24,8 @@ class Spectro:
         ----------
         cosmo_dic: dict
             Cosmology dictionary containing the current cosmology.
+        z_str: list of strings
+            List of the redshift bin centers.
         """
         if cosmo_dic is not None:
             self.update(cosmo_dic)
@@ -35,6 +37,7 @@ class Spectro:
         leg_m_max = 10
         self.dict_m_legendrepol = \
             {m: legendre(m)(self.mu_grid) for m in range(leg_m_max)}
+        self.z_arr = np.array(z_str).astype("float")
 
     def update(self, cosmo_dic):
         r"""Update method
@@ -200,8 +203,8 @@ class Spectro:
         Note: we name :math:`\ell = m` in the code.
 
         .. math::
-            P_{{\rm obs},\ell}(k';z)=\frac{1}{[q_\perp(z)]^2 q_\parallel(z)} \
-            \frac{2\ell+1}{2}\int^1_{-1} L_\ell(\mu_k') \
+            P_{{\rm obs},\ell}(k';z)=(1-f_{out})^2\frac{1}{[q_\perp(z)]^2 \
+            q_\parallel(z)} \frac{2\ell+1}{2}\int^1_{-1} L_\ell(\mu_k') \
             P_{\rm gg}^{\rm spectro}\left[k(k',\mu_k'),\mu_k(\mu_k') \
             {;z}\right]\,{\rm d}\mu_k'\\
 
@@ -233,6 +236,21 @@ class Spectro:
                                                              z, k, ms),
                             self.mu_grid)
 
-        spectra = prefactors * integrals
+        # Find the outlier fraction value in the nuisance_parameters dictionary
+        if self.theory['f_out_z_dep']:
+            if np.where(np.isclose(self.z_arr, z))[0].size == 1:
+                iz = int(np.where(np.isclose(self.z_arr, z))[0])
+            else:
+                raise Exception('Problem matching redshift to bin center in'
+                                'multipole_spectra')
+            # redshift dependent case
+            f_out = self.theory['nuisance_parameters']['f_out_' + str(iz + 1)]
+        else:
+            # redshift independent case
+            f_out = self.theory['nuisance_parameters']['f_out']
+
+        outlier_factor = (1.0 - f_out) ** 2.0
+
+        spectra = outlier_factor * prefactors * integrals
 
         return np.asarray(spectra)

@@ -115,6 +115,7 @@ class specinitTestCase(TestCase):
                           'k_win': ks_base,
                           'MG_sigma': MG_interp, 'c': const.c.to('km/s').value,
                           'NL_flag': 1,
+                          'f_out_z_dep': False,
                           'nuisance_parameters': {
                               'b1_photo': 1.0997727037892875,
                               'b2_photo': 1.220245876862528,
@@ -132,7 +133,12 @@ class specinitTestCase(TestCase):
                               'b4_spectro': 1.8988660,
                               'aia': 1.72,
                               'nia': -0.41,
-                              'bia': 0.0}
+                              'bia': 0.0,
+                              'f_out': 0.0,
+                              'f_out_1': 0.0,
+                              'f_out_2': 0.0,
+                              'f_out_3': 0.0,
+                              'f_out_4': 0.0}
                           }
 
         # precomputed parameters
@@ -188,7 +194,7 @@ class specinitTestCase(TestCase):
         mock_cosmo_dic['fid_H_z_func'] = fid_H_interp
 
         cls.test_dict = mock_cosmo_dic
-        cls.spectro = Spectro(cls.test_dict)
+        cls.spectro = Spectro(cls.test_dict, ["1.", "1.2", "1.4", "1.65"])
 
     def setUp(self):
         self.test_dict['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
@@ -353,3 +359,27 @@ class specinitTestCase(TestCase):
                             self.check_get_mu,
                             rtol=1e-03,
                             err_msg='get_mu failed')
+
+    def test_f_out(self):
+        self.test_dict['nuisance_parameters']['f_out'] = 1.0
+        npt.assert_allclose(self.spectro.multipole_spectra(1.0, 0.1, ms=[1]),
+                            0.0,
+                            atol=1e-10,
+                            err_msg='Test redshift independent f_out failed')
+        self.test_dict['nuisance_parameters']['f_out'] = 0.0
+
+    def test_f_out_z_dep(self):
+        self.test_dict['f_out_z_dep'] = True
+        self.test_dict['nuisance_parameters']['f_out_1'] = 1.0
+        npt.assert_allclose(self.spectro.multipole_spectra(1.0, 0.1, ms=[1]),
+                            0.0,
+                            atol=1e-10,
+                            err_msg='Test redshift dependent f_out failed')
+        self.test_dict['f_out_z_dep'] = False
+        self.test_dict['nuisance_parameters']['f_out_1'] = 0.0
+
+    def test_f_out_z_exception(self):
+        self.test_dict['f_out_z_dep'] = True
+        npt.assert_raises(Exception, self.spectro.multipole_spectra,
+                          20., 0.1, ms=[1])
+        self.test_dict['f_out_z_dep'] = False

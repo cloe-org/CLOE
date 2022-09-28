@@ -244,6 +244,8 @@ class Cosmology:
                           'NL_flag': 0,
                           # Use Modified Gravity gamma
                           'use_gamma_MG': 0,
+                          # Redshift dependent purity correction
+                          'f_out_z_dep': False,
                           'nuisance_parameters': {
                              'b1_photo': 1.0997727037892875,
                              'b2_photo': 1.220245876862528,
@@ -281,7 +283,12 @@ class Cosmology:
                              'magnification_bias_7': 0.0,
                              'magnification_bias_8': 0.0,
                              'magnification_bias_9': 0.0,
-                             'magnification_bias_10': 0.0}}
+                             'magnification_bias_10': 0.0,
+                             'f_out': 0.0,
+                             'f_out_1': 0.0,
+                             'f_out_2': 0.0,
+                             'f_out_3': 0.0,
+                             'f_out_4': 0.0}}
 
         self.cosmo_dic['H0_Mpc'] = (self.cosmo_dic['H0'] /
                                     const.c.to('km/s').value)

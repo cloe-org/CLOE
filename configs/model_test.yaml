@@ -6,6 +6,7 @@ user_models:
   nuisance_nz: nuisance_nz.yaml
   nuisance_magnification_bias: nuisance_magnification_bias.yaml
   nuisance_shear_calibration: nuisance_shear_calibration.yaml
+  nuisance_purity: nuisance_purity.yaml
 user_options:
   # Flag for advanced users to let CLOE overwrite the configs/params.yaml file
   overwrite: False

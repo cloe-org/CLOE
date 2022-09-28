@@ -406,6 +406,13 @@ class EuclidLikelihood(Likelihood):
                                     for your_key in new_keys}
             self.cosmo.cosmo_dic['nuisance_parameters'].update(
                 **only_nuisance_params)
+            if 'observables_specifications' in info['likelihood']['Euclid']:
+                self.observables_specifications = \
+                    info['likelihood']['Euclid']['observables_specifications']
+            self.observables = \
+                observables_selection_specifications_checker(
+                    info['likelihood']['Euclid']['observables_selection'],
+                    self.observables_specifications)
 
     def logp(self, **params_values):
         r"""Logp

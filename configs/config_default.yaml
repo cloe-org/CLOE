@@ -13,6 +13,8 @@ Cobaya:
       speed: 500
       # Non-Linear flag selector
       NL_flag: 0
+      # Add RSD to photometric probes
+      add_phot_RSD: False
       # Use MG gamma
       use_gamma_MG: False
       # Redshift dependent purity correction

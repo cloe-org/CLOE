@@ -187,18 +187,28 @@ class photoinitTestCase(TestCase):
         nz_dic_GC = np.load(str(cur_dir) +
                             '/test_input/nz_dict_GC_phot.npy',
                             allow_pickle=True).item()
-        cls.phot = photo.Photo(mock_cosmo_dic, nz_dic_WL, nz_dic_GC)
+        cls.phot = photo.Photo(None, nz_dic_WL, nz_dic_GC,
+                               add_RSD=False)
         cls.flatnz = interpolate.InterpolatedUnivariateSpline(
             np.linspace(0.0, 4.6, 20), np.ones(20), ext=2)
         cls.nz_dic_WL = nz_dic_WL
         cls.nz_dic_GC = nz_dic_GC
 
-        ells_WL = range(2, 1000)
-        ells_XC = range(2, 2000)
-        ells_GC_phot = range(2, 3000)
+        ells_WL = np.arange(2, 1000, 1)
+        ells_XC = np.arange(2, 2000, 1)
+        ells_GC_phot = np.arange(2, 3000, 1)
         cls.phot.set_prefactor(ells_WL=ells_WL,
                                ells_XC=ells_XC,
                                ells_GC_phot=ells_GC_phot)
+
+        cls.phot.update(mock_cosmo_dic)
+
+        cls.phot_rsd = photo.Photo(None, nz_dic_WL, nz_dic_GC,
+                                   add_RSD=True)
+        cls.phot_rsd.set_prefactor(ells_WL=ells_WL,
+                                   ells_XC=ells_XC,
+                                   ells_GC_phot=ells_GC_phot)
+        cls.phot_rsd.update(mock_cosmo_dic)
 
     def f_K_z12_func(self, rz_func, z1, z2):
         return rz_func(z2) - rz_func(z1)
@@ -244,13 +254,19 @@ class photoinitTestCase(TestCase):
 
         self.W_i_Gcheck = 5.241556e-09
         self.W_i_GRSDcheck = \
-            np.array([[8.623982e-07, 1.392808e-09, 5.172771e-10],
-                      [1.840731e-10, 1.840731e-10, 1.840731e-10],
-                      [2.069768e-15, 2.141887e-11, 6.343029e-11]])
+            np.array([[[8.623982e-07], [1.392808e-09], [5.172771e-10]],
+                      [[1.840731e-10], [1.840731e-10], [1.840731e-10]],
+                      [[2.069768e-15], [2.141887e-11], [6.343029e-11]]])
+        # the following array corresponds to the RSD kernel at the 500th
+        # position of the z_winterp array
+        self.unpacked_RSD_kernel_check = \
+            [-5.389817e-06, -2.110740e-07, -1.601407e-11]
         self.W_IA_check = 0.0001049580
         self.cl_WL_check = 6.908876e-09
         self.cl_GC_check = 2.89485e-05
+        self.cl_GC_RSD_check = 3.056115e-05
         self.cl_cross_check = 1.117403e-07
+        self.cl_cross_RSD_check = 1.059756e-07
         self.prefac_shearia_check = 0.988620523  # expected value for ell=10
         self.prefac_mag_check = 0.997732426  # expected value for ell=10
         self.xi_ssp_check = [6.326380e-07, 4.395978e-07]
@@ -267,7 +283,10 @@ class photoinitTestCase(TestCase):
         self.W_IA_check = None
         self.cl_WL_check = None
         self.cl_GC_check = None
+        self.cl_GC_RSD_check = None
+        self.unpacked_RSD_kernel_check = None
         self.cl_cross_check = None
+        self.cl_cross_RSD = None
         self.xi_ssp_check = None
         self.xi_ssm_check = None
         self.xi_sp_check = None
@@ -437,16 +456,38 @@ class photoinitTestCase(TestCase):
                          f'_eval_prefactor_mag(): {mag_mock.call_count}'
                          f' instead of 0')
 
+    def test_unpack_RSD_kernel(self):
+        rsd_kern = self.phot_rsd._unpack_RSD_kernel(10.0, 1)
+        npt.assert_equal(rsd_kern.shape, (1, 1000),
+                         err_msg='unpack RSD kernel failed')
+        rsd_kern = self.phot_rsd._unpack_RSD_kernel(10.0, 1, 2, 3)
+        npt.assert_equal(rsd_kern.shape, (3, 1000),
+                         err_msg='unpack RSD kernel failed')
+        npt.assert_allclose(rsd_kern[:, 500], self.unpacked_RSD_kernel_check,
+                            rtol=self.cl_tol,
+                            err_msg='unpack RSD kernel failed')
+
     def test_cl_GC(self):
         cl_int = self.phot.Cl_GC_phot(10.0, 1, 1)
         npt.assert_allclose(cl_int, self.cl_GC_check, rtol=self.cl_tol,
                             err_msg='Cl GC photometric test failed')
+
+    def test_cl_GC_RSD(self):
+        cl_int = self.phot_rsd.Cl_GC_phot(10.0, 1, 1)
+        npt.assert_allclose(cl_int, self.cl_GC_RSD_check, rtol=self.cl_tol,
+                            err_msg='Cl GC RSD photometric test failed')
 
     def test_cl_cross(self):
         cl_int = self.phot.Cl_cross(10.0, 1, 1)
         npt.assert_allclose(cl_int, self.cl_cross_check,
                             rtol=self.cl_tol,
                             err_msg='Cl XC cross test failed')
+
+    def test_cl_cross_RSD(self):
+        cl_int = self.phot_rsd.Cl_cross(10.0, 1, 1)
+        npt.assert_allclose(cl_int, self.cl_cross_RSD_check,
+                            rtol=self.cl_tol,
+                            err_msg='Cl XC cross RSD test failed')
 
     def test_eval_prefactor_shearia(self):
         prefac = self.phot._eval_prefactor_shearia(10.0)

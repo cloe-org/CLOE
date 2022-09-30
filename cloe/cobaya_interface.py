@@ -85,6 +85,7 @@ class EuclidLikelihood(Likelihood):
         if self.plot_observables_selection:
             self.observables_pf = observables_visualization(
              self.observables['selection'])
+        self.observables['selection']['add_phot_RSD'] = self.add_phot_RSD
         # Select which power spectra to require from the Boltzmann solver
         if self.NL_flag > 0:
             self.use_NL = [False, True]

@@ -8,6 +8,7 @@ Cobaya:
       - euclid
       external: !!python/name:cloe.cobaya_interface.EuclidLikelihood ''
       NL_flag: 0
+      add_phot_RSD: False
       plot_observables_selection: False
       # The user can overwrite here the values of
       # the fields 'data', 'observables_selection', and 'observables_specifications'

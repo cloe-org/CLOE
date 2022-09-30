@@ -111,10 +111,14 @@ class Euclike:
             self.mask_ins.get_masked_covariance_matrix())
         self.masked_invcov_matrix = np.linalg.inv(self.masked_cov_matrix)
 
+        # Flag to select cases with or without RSD for photometric probes
+        add_RSD = observables['selection']['add_phot_RSD']
+
         # Photo class instance
         self.phot_ins = Photo(None,
                               self.data_ins.nz_dict_WL,
-                              self.data_ins.nz_dict_GC_Phot)
+                              self.data_ins.nz_dict_GC_Phot,
+                              add_RSD=add_RSD)
 
         # Temporary placeholder for theta vector
         # (will be read from file eventually)

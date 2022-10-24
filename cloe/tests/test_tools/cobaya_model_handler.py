@@ -1,5 +1,4 @@
 """General class for COBAYA wrapper
-=======
 
 """
 
@@ -12,6 +11,7 @@ from cloe.tests.test_input.data import mock_data
 
 
 class CobayaModel:
+    """Cobaya Model"""
 
     def __init__(self, cosmo):
         self.cosmology = cosmo
@@ -34,6 +34,7 @@ class CobayaModel:
                                  self.k_samp_GC)
 
     def define_info(self, cosmo_inst):
+        """Define Information"""
         self.info = {'params': {
             'ombh2': cosmo_inst.cosmo_dic['ombh2'],
             'omch2': cosmo_inst.cosmo_dic['omch2'],
@@ -62,11 +63,13 @@ class CobayaModel:
         self.info['data'] = mock_data
 
     def get_cobaya_model(self):
+        """Get Cobaya Model"""
         self.define_info(self.cosmology)
         self.model = get_model(self.info)
         self.model.logposterior({})
 
     def update_cosmo(self):
+        """Update Cosmology"""
         self.get_cobaya_model()
         self.cosmology.cosmo_dic['H0'] = self.model.provider.get_param('H0')
         self.cosmology.cosmo_dic['omch2'] = self.model.provider.get_param(

@@ -8,6 +8,7 @@ Reviewers, please check the following points before merging.
 
 - [ ] MR targets the correct branch
 - [ ] CI tests have run and passed for the latest commit on the source branch
+- [ ] If necessary, the notebooks in `cloe/tests/test_tools/notebooks` have been run to generate the pickle files required for the unit tests
 - [ ] Coverage percentage is retained or increased
 - [ ] Quality of new/changed code is acceptable
 - [ ] Quality of new/changed unit tests is acceptable

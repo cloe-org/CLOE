@@ -1,50 +1,33 @@
 """UNIT TESTS FOR COSMO
 
 This module contains unit tests for the cosmo module.
-=======
 
 """
 
 from unittest import TestCase
 import numpy as np
 import numpy.testing as npt
-import copy
-from astropy import constants as const
 from cloe.cosmo.cosmology import Cosmology
-from cloe.tests.test_wrapper import CobayaModel
+from cloe.tests.test_tools.test_data_handler import load_test_pickle
 
 
 class cosmoinitTestCase(TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cosmo = Cosmology()
-        # Define cosmology values in Cosmology dict
-        cosmo.cosmo_dic['ombh2'] = 0.022
-        cosmo.cosmo_dic['omch2'] = 0.12
-        cosmo.cosmo_dic['H0'] = 67.0
-        cosmo.cosmo_dic['tau'] = 0.07
-        cosmo.cosmo_dic['mnu'] = 0.06
-        cosmo.cosmo_dic['nnu'] = 3.046
-        cosmo.cosmo_dic['ns'] = 0.9674
-        cosmo.cosmo_dic['As'] = 2.1e-9
-        cosmo.cosmo_dic['Omk'] = 0.0
-        cosmo.cosmo_dic['H0_Mpc'] = \
-            cosmo.cosmo_dic['H0'] / const.c.to('km/s').value,
-        cosmo.cosmo_dic['NL_flag'] = 0
-        # Create wrapper model
-        cls.model_test = CobayaModel(cosmo)
-        cls.model_test.update_cosmo()
-        # Create deep copies of the Cosmology class, where the value of
-        # the curvature is differrent from zero
-        cosmo_curv_neg = copy.deepcopy(cosmo)
-        cosmo_curv_neg.cosmo_dic['Omk'] = 0.5
-        cls.model_test_curv_neg = CobayaModel(cosmo_curv_neg)
-        cls.model_test_curv_neg.update_cosmo()
-        cosmo_curv_pos = copy.deepcopy(cosmo)
-        cosmo_curv_pos.cosmo_dic['Omk'] = -0.5
-        cls.model_test_curv_pos = CobayaModel(cosmo_curv_pos)
-        cls.model_test_curv_pos.update_cosmo()
+        # Define standard test case
+        cls.cosmo = Cosmology()
+        cls.cosmo.cosmo_dic = load_test_pickle('cosmo_test_dic.pickle')
+        # Define test case for negative curvature
+        cls.cosmo_curv_neg = Cosmology()
+        cls.cosmo_curv_neg.cosmo_dic = (
+            load_test_pickle('cosmo_test_curv_neg_dic.pickle')
+        )
+        # Define test case for positive curvature
+        cls.cosmo_curv_pos = Cosmology()
+        cls.cosmo_curv_pos.cosmo_dic = (
+            load_test_pickle('cosmo_test_curv_pos_dic.pickle')
+        )
 
     def setUp(self) -> None:
         # Check values
@@ -91,302 +74,412 @@ class cosmoinitTestCase(TestCase):
         self.omega_density = None
 
     def test_cosmo_init(self):
-        emptflag = bool(self.model_test.cosmology.cosmo_dic)
-        npt.assert_equal(emptflag, True,
-                         err_msg='Cosmology dictionary not initialised '
-                                 'correctly.')
+        emptflag = bool(self.cosmo.cosmo_dic)
+        npt.assert_equal(
+            emptflag,
+            True,
+            err_msg='Cosmology dictionary not initialised correctly.',
+        )
 
     def test_cosmo_nuisance_init(self):
-        emptflag = bool(
-            self.model_test.cosmology.cosmo_dic['nuisance_parameters'])
-        npt.assert_equal(emptflag, True,
-                         err_msg='nuisance parameters '
-                         'not initialized within '
-                         'cosmology dictionary')
+        emptflag = bool(self.cosmo.cosmo_dic['nuisance_parameters'])
+        npt.assert_equal(
+            emptflag,
+            True,
+            err_msg=(
+                'nuisance parameters not initialized within cosmology ' +
+                'dictionary'
+            ),
+        )
 
     def test_cosmo_asign(self):
-        npt.assert_allclose(self.model_test.cosmology.cosmo_dic['H0'],
-                            self.H0check,
-                            err_msg='Cosmology dictionary assignment '
-                                    'failed')
         npt.assert_allclose(
-            self.model_test.cosmology.cosmo_dic['H_z_func'](0.2),
+            self.cosmo.cosmo_dic['H0'],
+            self.H0check,
+            err_msg='Cosmology dictionary assignment failed',
+        )
+        npt.assert_allclose(
+            self.cosmo.cosmo_dic['H_z_func'](0.2),
             self.Hcheck,
-            err_msg='Cosmology dictionary assignment '
-            'failed')
+            err_msg='Cosmology dictionary assignment failed',
+        )
 
     def test_pk_source(self):
-        source = self.model_test.cosmology.pk_source
+        source = self.cosmo.pk_source
         type_check = isinstance(source, Cosmology)
         assert type_check, 'Error in returned data type of pk_source'
         # To test the nonlinear case we simply check if the object returned
         # from pk_source is not a Cosmology object. Otherwise we should
         # import the Nonlinear class, going against the independency among
         # different modules in the unit tests
-        self.model_test.cosmology.cosmo_dic['NL_flag'] = 1
-        source = self.model_test.cosmology.pk_source
+        self.cosmo.cosmo_dic['NL_flag'] = 1
+        source = self.cosmo.pk_source
         type_check = isinstance(source, Cosmology)
         assert not type_check, 'Error in returned data type of pk_source'
 
     def test_cosmo_growth_factor(self):
-        D = self.model_test.cosmology.growth_factor(0.0, 0.002)
-        npt.assert_equal(D, self.Dcheck,
-                         err_msg='Error in D_z_k calculation ')
+        npt.assert_equal(
+            self.cosmo.growth_factor(0.0, 0.002),
+            self.Dcheck,
+            err_msg='Error in D_z_k calculation',
+        )
 
     def test_cosmo_growth_factor_interp(self):
-        D = self.model_test.cosmology.cosmo_dic['D_z_k_func'](0.0, 0.002)
-        npt.assert_allclose(D, self.Dcheck,
-                            rtol=1e-3,
-                            err_msg='Error in growth factor interpolation')
+        npt.assert_allclose(
+            self.cosmo.cosmo_dic['D_z_k_func'](0.0, 0.002),
+            self.Dcheck,
+            rtol=1e-3,
+            err_msg='Error in growth factor interpolation',
+        )
 
     def test_cosmo_growth_rate(self):
-        f = self.model_test.cosmology.growth_rate(
-            self.model_test.cosmology.cosmo_dic['z_win'], 0.002)
-        npt.assert_allclose(f(0), self.fcheck,
-                            rtol=1e-3,
-                            err_msg='Error in f_z_k calculation ')
+        f = self.cosmo.growth_rate(self.cosmo.cosmo_dic['z_win'], 0.002)
+        npt.assert_allclose(
+            f(0),
+            self.fcheck,
+            rtol=1e-3,
+            err_msg='Error in f_z_k calculation',
+        )
 
     def test_transverse_comoving_dist(self):
-        f_K = self.model_test.cosmology.cosmo_dic['f_K_z_func'](1.0)
-        npt.assert_allclose(f_K, self.fKcheck,
-                            rtol=1e-3,
-                            err_msg='Error in transverse comoving distance'
-                                    'interpolation')
+        npt.assert_allclose(
+            self.cosmo.cosmo_dic['f_K_z_func'](1.0),
+            self.fKcheck,
+            rtol=1e-3,
+            err_msg='Error in transverse comoving distance interpolation',
+        )
 
     def test_transverse_comoving_dist_z12(self):
-        f_K = (self.model_test.cosmology.cosmo_dic['f_K_z12_func']
-               (0.5, np.array([1.0, 1.5, 2.0])))
-        npt.assert_allclose(f_K, self.fK12check,
-                            rtol=1e-3,
-                            err_msg='Error in transverse comoving distance'
-                                    '(z1/z2) interpolation (K=0)')
+        f_K = self.cosmo.cosmo_dic['f_K_z12_func'](
+            0.5,
+            np.array([1.0, 1.5, 2.0]),
+        )
+        npt.assert_allclose(
+            f_K,
+            self.fK12check,
+            rtol=1e-3,
+            err_msg=(
+                'Error in transverse comoving distance (z1/z2) ' +
+                'interpolation (K=0)'
+            )
+        )
 
     def test_transverse_comoving_dist_z12_curv_neg(self):
-        f_K = (self.model_test_curv_neg.cosmology.cosmo_dic['f_K_z12_func']
-               (np.array([0.5, 1.0, 1.5]), 2.0))
-        npt.assert_allclose(f_K, self.fK12check_curv_neg,
-                            rtol=1e-3,
-                            err_msg='Error in transverse comoving distance'
-                                    '(z1/z2) interpolation (K<0)')
+        f_K = self.cosmo_curv_neg.cosmo_dic['f_K_z12_func'](
+            np.array([0.5, 1.0, 1.5]),
+            2.0,
+        )
+        npt.assert_allclose(
+            f_K,
+            self.fK12check_curv_neg,
+            rtol=1e-3,
+            err_msg=(
+                'Error in transverse comoving distance (z1/z2) ' +
+                'interpolation (K<0)'
+            ),
+        )
 
     def test_transverse_comoving_dist_z12_curv_pos(self):
-        f_K = (self.model_test_curv_pos.cosmology.cosmo_dic['f_K_z12_func']
-               (0.5, 1.0))
-        npt.assert_allclose(f_K, self.fK12check_curv_pos,
-                            rtol=1e-3,
-                            err_msg='Error in transverse comoving distance'
-                                    '(z1/z2) interpolation (K>0)')
+        f_K = self.cosmo_curv_pos.cosmo_dic['f_K_z12_func'](0.5, 1.0)
+        npt.assert_allclose(
+            f_K,
+            self.fK12check_curv_pos,
+            rtol=1e-3,
+            err_msg=(
+                'Error in transverse comoving distance (z1/z2) ' +
+                'interpolation (K>0)'
+            ),
+        )
 
     def test_update_cosmo_dic(self):
-        self.model_test.cosmology.update_cosmo_dic(
-            self.model_test.cosmology.cosmo_dic['z_win'], 0.002)
-        keyDfound = False
-        if 'D_z_k' in self.model_test.cosmology.cosmo_dic:
-            keyDfound = True
-        npt.assert_equal(keyDfound, True,
-                         err_msg='D_z_k not calculated ')
+        self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.002)
+        keyDfound = 'D_z_k' in self.cosmo.cosmo_dic
+        npt.assert_equal(keyDfound, True, err_msg='D_z_k not calculated')
 
     def test_istf_phot_galbias(self):
         # interpolate a straight-line (b, z) grid to ease the checks
-        nuipar = self.model_test.cosmology.cosmo_dic['nuisance_parameters']
+        nuipar = self.cosmo.cosmo_dic['nuisance_parameters']
         zs_means = [1.0, 2.0, 3.0]
         nuipar['b1_photo'] = 2.0
         nuipar['b2_photo'] = 4.0
         nuipar['b3_photo'] = 6.0
-        self.model_test.cosmology.istf_phot_galbias_interpolator(zs_means)
+        self.cosmo.istf_phot_galbias_interpolator(zs_means)
         # check scalar redshift input
-        bi_val_actual = self.model_test.cosmology.istf_phot_galbias(1.5)
-        npt.assert_almost_equal(bi_val_actual, desired=3.0,
-                                decimal=3,
-                                err_msg='Error in istf_phot_galbias')
+        bi_val_actual = self.cosmo.istf_phot_galbias(1.5)
+        npt.assert_almost_equal(
+            bi_val_actual,
+            desired=3.0,
+            decimal=3,
+            err_msg='Error in istf_phot_galbias',
+        )
         # check redshift input below zs edges: returns b(z at edge)
-        bi_val_actual = \
-            self.model_test.cosmology.istf_phot_galbias(0.98, [1.0, 2.0])
-        npt.assert_almost_equal(bi_val_actual, desired=2.0,
-                                decimal=3,
-                                err_msg='Error in istf_phot_galbias (z<)')
+        bi_val_actual = self.cosmo.istf_phot_galbias(0.98, [1.0, 2.0])
+        npt.assert_almost_equal(
+            bi_val_actual,
+            desired=2.0,
+            decimal=3,
+            err_msg='Error in istf_phot_galbias (z<)',
+        )
         # check redshift input above zs edges: returns b(z at edge)
-        bi_val_actual = \
-            self.model_test.cosmology.istf_phot_galbias(2.04, [1.0, 2.0])
-        npt.assert_almost_equal(bi_val_actual, desired=4.0,
-                                decimal=3,
-                                err_msg='Error in istf_phot_galbias (z>)')
+        bi_val_actual = self.cosmo.istf_phot_galbias(2.04, [1.0, 2.0])
+        npt.assert_almost_equal(
+            bi_val_actual,
+            desired=4.0,
+            decimal=3,
+            err_msg='Error in istf_phot_galbias (z>)',
+        )
         # check vector redshift input: output size and values
         zs_vec = [1.5, 2.5]
-        bi_val_actual = self.model_test.cosmology.istf_phot_galbias(zs_vec)
-        npt.assert_equal(len(bi_val_actual), len(zs_vec),
-                         err_msg='Output size of istf_phot_galbias'
-                                 '(vec) does not match with input')
-        npt.assert_allclose(bi_val_actual, desired=[3.0, 5.0],
-                            rtol=1e-3,
-                            err_msg='Array output istf_phot_galbias')
+        bi_val_actual = self.cosmo.istf_phot_galbias(zs_vec)
+        npt.assert_equal(
+            len(bi_val_actual),
+            len(zs_vec),
+            err_msg=(
+                'Output size of istf_phot_galbias (vec) does not match with ' +
+                'input'
+            ),
+        )
+        npt.assert_allclose(
+            bi_val_actual,
+            desired=[3.0, 5.0],
+            rtol=1e-3,
+            err_msg='Array output istf_phot_galbias',
+        )
 
     def test_istf_spectro_galbias(self):
         # assign custom b1_spectro and b2_spectro for maintainability
-        nuipar = self.model_test.cosmology.cosmo_dic['nuisance_parameters']
+        nuipar = self.cosmo.cosmo_dic['nuisance_parameters']
         nuipar['b1_spectro'] = 1.23
         nuipar['b2_spectro'] = 4.56
         # check scalar redshift input: z in 1st bin returns b1_spectro
-        bi_val_actual = \
-            self.model_test.cosmology.istf_spectro_galbias(1.5, [1.0, 2.0])
+        bi_val_actual = self.cosmo.istf_spectro_galbias(1.5, [1.0, 2.0])
         bi_val_desired = nuipar['b1_spectro']
-        npt.assert_equal(bi_val_actual, bi_val_desired,
-                         err_msg='Error in istf_spectro_galbias: b1_spectro')
+        npt.assert_equal(
+            bi_val_actual,
+            bi_val_desired,
+            err_msg='Error in istf_spectro_galbias: b1_spectro',
+        )
         # check redshift outside bounds, with z=0 and z=10
-        npt.assert_raises(ValueError,
-                          self.model_test.cosmology.istf_spectro_galbias,
-                          redshift=0)
-        npt.assert_raises(ValueError,
-                          self.model_test.cosmology.istf_spectro_galbias,
-                          redshift=10)
+        npt.assert_raises(
+            ValueError,
+            self.cosmo.istf_spectro_galbias,
+            redshift=0,
+        )
+        npt.assert_raises(
+            ValueError,
+            self.cosmo.istf_spectro_galbias,
+            redshift=10,
+        )
         # check vector redshift input: output size and values
         zs_vec = [1.5, 2.5]
         z_edge = [1.0, 2.0, 3.0]
-        bi_val_actual = \
-            self.model_test.cosmology.istf_spectro_galbias(zs_vec, z_edge)
+        bi_val_actual = self.cosmo.istf_spectro_galbias(zs_vec, z_edge)
         bi_val_desired = [nuipar['b1_spectro'], nuipar['b2_spectro']]
-        npt.assert_equal(len(bi_val_actual), len(zs_vec),
-                         err_msg='Output size of istf_spectro_galbias'
-                                 '(vec) does not match with input')
-        npt.assert_array_equal(bi_val_actual, bi_val_desired,
-                               err_msg='Array output istf_spectro_galbias')
+        npt.assert_equal(
+            len(bi_val_actual),
+            len(zs_vec),
+            err_msg=(
+                'Output size of istf_spectro_galbias (vec) does not match ' +
+                'with input'
+            ),
+        )
+        npt.assert_array_equal(
+            bi_val_actual,
+            bi_val_desired,
+            err_msg='Array output istf_spectro_galbias',
+        )
 
     def test_Pgg_phot(self):
-        test_p = self.model_test.cosmology.Pgg_phot_def(1.0, 0.01)
-        npt.assert_allclose(test_p, self.Pgg_phot_test,
-                            rtol=1e-3,
-                            err_msg='Error in GC-phot Pgg calculation')
+        test_p = self.cosmo.Pgg_phot_def(1.0, 0.01)
+        npt.assert_allclose(
+            test_p,
+            self.Pgg_phot_test,
+            rtol=1e-3,
+            err_msg='Error in GC-phot Pgg calculation',
+        )
 
     def test_Pgdelta_phot(self):
-        test_p = self.model_test.cosmology.Pgdelta_phot_def(1.0, 0.01)
-        npt.assert_allclose(test_p, self.Pgdelta_phot_test,
-                            rtol=1e-3,
-                            err_msg='Error in GC-phot Pgdelta calculation')
+        test_p = self.cosmo.Pgdelta_phot_def(1.0, 0.01)
+        npt.assert_allclose(
+            test_p,
+            self.Pgdelta_phot_test,
+            rtol=1e-3,
+            err_msg='Error in GC-phot Pgdelta calculation',
+        )
 
     def test_Pgg_spectro(self):
-        test_p = self.model_test.cosmology.Pgg_spectro_def(1.0, 0.01, 0.5)
-        npt.assert_allclose(test_p, self.Pgg_spectro_test,
-                            rtol=1e-3,
-                            err_msg='Error in GC-spectro Pgg calculation')
+        test_p = self.cosmo.Pgg_spectro_def(1.0, 0.01, 0.5)
+        npt.assert_allclose(
+            test_p,
+            self.Pgg_spectro_test,
+            rtol=1e-3,
+            err_msg='Error in GC-spectro Pgg calculation',
+        )
 
     def test_Pgdelta_spectro(self):
-        test_p = self.model_test.cosmology.Pgdelta_spectro_def(1.0, 0.01, 0.5)
-        npt.assert_allclose(test_p, self.Pgdelta_spectro_test,
-                            rtol=1e-3,
-                            err_msg='Error in GC-spectro Pgdelta calculation')
+        test_p = self.cosmo.Pgdelta_spectro_def(1.0, 0.01, 0.5)
+        npt.assert_allclose(
+            test_p,
+            self.Pgdelta_spectro_test,
+            rtol=1e-3,
+            err_msg='Error in GC-spectro Pgdelta calculation',
+        )
 
     def test_Pgg_phot_interp(self):
-        test_p = self.model_test.cosmology.cosmo_dic['Pgg_phot'](1.0, 0.01)
-        npt.assert_allclose(test_p, self.Pgg_phot_test_interpolation,
-                            rtol=1e-3,
-                            err_msg='Error in GC-phot Pgg interpolation')
+        test_p = self.cosmo.cosmo_dic['Pgg_phot'](1.0, 0.01)
+        npt.assert_allclose(
+            test_p,
+            self.Pgg_phot_test_interpolation,
+            rtol=1e-3,
+            err_msg='Error in GC-phot Pgg interpolation',
+        )
 
     def test_Pgdelta_phot_interp(self):
-        test_p = self.model_test.cosmology.cosmo_dic['Pgdelta_phot'](1.0,
-                                                                     0.01)
-        npt.assert_allclose(test_p, self.Pgdelta_phot_test_interpolation,
-                            rtol=1e-3,
-                            err_msg='Error in GC-phot Pgdelta interpolation')
+        test_p = self.cosmo.cosmo_dic['Pgdelta_phot'](1.0, 0.01)
+        npt.assert_allclose(
+            test_p,
+            self.Pgdelta_phot_test_interpolation,
+            rtol=1e-3,
+            err_msg='Error in GC-phot Pgdelta interpolation',
+        )
 
     def test_Pgg_spectro_interp(self):
-        test_p = self.model_test.cosmology.cosmo_dic['Pgg_spectro'](1.0,
-                                                                    0.01,
-                                                                    0.5)
-        npt.assert_allclose(test_p, self.Pgg_spectro_test,
-                            rtol=1e-3,
-                            err_msg='Error in GC-spectro Pgg (cosmo-dic)')
+        test_p = self.cosmo.cosmo_dic['Pgg_spectro'](1.0, 0.01, 0.5)
+        npt.assert_allclose(
+            test_p,
+            self.Pgg_spectro_test,
+            rtol=1e-3,
+            err_msg='Error in GC-spectro Pgg (cosmo-dic)',
+        )
 
     def test_Pgdelta_spectro_interp(self):
-        pgd = self.model_test.cosmology.cosmo_dic['Pgdelta_spectro'](1.0,
-                                                                     0.01,
-                                                                     0.5)
-        npt.assert_allclose(pgd, self.Pgdelta_spectro_test,
-                            rtol=1e-3,
-                            err_msg='Error in GC-spectro Pgdelta (cosmo-dic)')
+        pgd = self.cosmo.cosmo_dic['Pgdelta_spectro'](1.0, 0.01, 0.5)
+        npt.assert_allclose(
+            pgd,
+            self.Pgdelta_spectro_test,
+            rtol=1e-3,
+            err_msg='Error in GC-spectro Pgdelta (cosmo-dic)',
+        )
 
     def test_Pii(self):
-        test_p = self.model_test.cosmology.Pii_def(1.0, 0.01)
-        npt.assert_allclose(test_p, self.Pii_test,
-                            rtol=1e-3,
-                            err_msg='Error in Pii calculation')
+        test_p = self.cosmo.Pii_def(1.0, 0.01)
+        npt.assert_allclose(
+            test_p,
+            self.Pii_test,
+            rtol=1e-3,
+            err_msg='Error in Pii calculation',
+        )
 
     def test_Pdeltai(self):
-        test_p = self.model_test.cosmology.Pdeltai_def(1.0, 0.01)
-        npt.assert_allclose(test_p, self.Pdeltai_test,
-                            rtol=1e-3,
-                            err_msg='Error in Pdeltai calculation')
+        test_p = self.cosmo.Pdeltai_def(1.0, 0.01)
+        npt.assert_allclose(
+            test_p,
+            self.Pdeltai_test,
+            rtol=1e-3,
+            err_msg='Error in Pdeltai calculation',
+        )
 
     def test_Pgi_phot(self):
-        test_p = self.model_test.cosmology.Pgi_phot_def(1.0, 0.01)
-        npt.assert_allclose(test_p, self.Pgi_phot_test,
-                            rtol=1e-3,
-                            err_msg='Error in GC-phot Pgi calculation')
+        test_p = self.cosmo.Pgi_phot_def(1.0, 0.01)
+        npt.assert_allclose(
+            test_p,
+            self.Pgi_phot_test,
+            rtol=1e-3,
+            err_msg='Error in GC-phot Pgi calculation',
+        )
 
     def test_Pgi_spectro(self):
-        test_p = self.model_test.cosmology.Pgi_spectro_def(1.0, 0.01)
-        npt.assert_allclose(test_p, self.Pgi_spectro_test,
-                            rtol=1e-3,
-                            err_msg='Error in GC-spectro Pgi calculation')
+        test_p = self.cosmo.Pgi_spectro_def(1.0, 0.01)
+        npt.assert_allclose(
+            test_p,
+            self.Pgi_spectro_test,
+            rtol=1e-3,
+            err_msg='Error in GC-spectro Pgi calculation',
+        )
 
     def test_MG_mu_def(self):
-        test_mu = self.model_test.cosmology.MG_mu_def(1.0, 0.01,
-                                                      self.MG_mu_test)
-        npt.assert_equal(test_mu, self.MG_mu_test,
-                         err_msg='Error in MG mu calculation')
+        test_mu = self.cosmo.MG_mu_def(1.0, 0.01, self.MG_mu_test)
+        npt.assert_equal(
+            test_mu,
+            self.MG_mu_test,
+            err_msg='Error in MG mu calculation',
+        )
 
     def test_MG_sigma_def(self):
-        test_sigma = self.model_test.cosmology.MG_sigma_def(1.0, 0.01,
-                                                            self.MG_sigma_test)
-        npt.assert_equal(test_sigma, self.MG_sigma_test,
-                         err_msg='Error in MG sigma calculation')
+        test_sigma = (
+            self.cosmo.MG_sigma_def(1.0, 0.01, self.MG_sigma_test)
+        )
+        npt.assert_equal(
+            test_sigma,
+            self.MG_sigma_test,
+            err_msg='Error in MG sigma calculation',
+        )
 
     def test_MG_mu(self):
-        test_mu = self.model_test.cosmology.cosmo_dic['MG_mu'](1.0, 0.01)
-        npt.assert_equal(test_mu, self.MG_mu_test,
-                         err_msg='Error in MG mu calculation')
+        test_mu = self.cosmo.cosmo_dic['MG_mu'](1.0, 0.01)
+        npt.assert_equal(
+            test_mu,
+            self.MG_mu_test,
+            err_msg='Error in MG mu calculation',
+        )
 
     def test_MG_sigma(self):
-        test_sigma = self.model_test.cosmology.cosmo_dic['MG_sigma'](1.0, 0.01)
-        npt.assert_equal(test_sigma, self.MG_sigma_test,
-                         err_msg='Error in MG sigma calculation')
+        test_sigma = self.cosmo.cosmo_dic['MG_sigma'](1.0, 0.01)
+        npt.assert_equal(
+            test_sigma,
+            self.MG_sigma_test,
+            err_msg='Error in MG sigma calculation',
+        )
 
     def test_matter_density(self):
-        test_matter_density = self.model_test.cosmology.matter_density(
-            self.model_test.cosmology.cosmo_dic['z_win'])
-        npt.assert_allclose(test_matter_density[0], self.matter_density,
-                            rtol=1e-3,
-                            err_msg='Error in the omega density calculation')
+        test_matter_density = (
+            self.cosmo.matter_density(self.cosmo.cosmo_dic['z_win'])
+        )
+        npt.assert_allclose(
+            test_matter_density[0],
+            self.matter_density,
+            rtol=1e-3,
+            err_msg='Error in the omega density calculation',
+        )
 
     def test_growth_rate_MG(self):
-        self.model_test.cosmology.growth_rate_MG(
-            self.model_test.cosmology.cosmo_dic['z_win'])
-        npt.assert_allclose(self.model_test.cosmology.cosmo_dic['f_z'](0),
-                            self.fcheck,
-                            rtol=1e-1,
-                            err_msg='Error in the omega density calculation')
+        self.cosmo.growth_rate_MG(self.cosmo.cosmo_dic['z_win'])
+        npt.assert_allclose(
+            self.cosmo.cosmo_dic['f_z'](0),
+            self.fcheck,
+            rtol=1e-1,
+            err_msg='Error in the omega density calculation',
+        )
 
     def test_growth_factor_MG(self):
-        self.model_test.cosmology.growth_rate_MG(
-            self.model_test.cosmology.cosmo_dic['z_win'])
-        test_growth_factor_MG = self.model_test.cosmology.growth_factor_MG()
-        npt.assert_allclose(test_growth_factor_MG[0],
-                            self.Dcheck,
-                            rtol=1e-1,
-                            err_msg='Error in the omega density calculation')
+        self.cosmo.growth_rate_MG(self.cosmo.cosmo_dic['z_win'])
+        test_growth_factor_MG = self.cosmo.growth_factor_MG()
+        npt.assert_allclose(
+            test_growth_factor_MG[0],
+            self.Dcheck,
+            rtol=1e-1,
+            err_msg='Error in the omega density calculation',
+        )
 
     def test_z_of_r_inverse(self):
         # test that z_r_func is really the inverse of r_z_func
         z_in = [0.5, 0.7, 1.]
-        r_out = self.model_test.cosmology.cosmo_dic['r_z_func'](z_in)
-        z_out = self.model_test.cosmology.cosmo_dic['z_r_func'](r_out)
-        npt.assert_allclose(z_out, z_in, rtol=1e-3,
-                            err_msg='z_r_func is not the inverse '
-                                    'of r_z_func')
+        r_out = self.cosmo.cosmo_dic['r_z_func'](z_in)
+        z_out = self.cosmo.cosmo_dic['z_r_func'](r_out)
+        npt.assert_allclose(
+            z_out,
+            z_in,
+            rtol=1e-3,
+            err_msg='z_r_func is not the inverse of r_z_func',
+        )
 
     def test_z_win_exception(self):
-        z_win = self.model_test.cosmology.cosmo_dic['z_win']
-        self.model_test.cosmology.cosmo_dic['z_win'] = None
-        npt.assert_raises(Exception,
-                          self.model_test.cosmology.update_cosmo_dic,
-                          None, 0.002)
-        self.model_test.cosmology.cosmo_dic['z_win'] = z_win
+        z_win = self.cosmo.cosmo_dic['z_win']
+        self.cosmo.cosmo_dic['z_win'] = None
+        npt.assert_raises(
+            Exception,
+            self.cosmo.update_cosmo_dic,
+            None,
+            0.002,
+        )
+        self.cosmo.cosmo_dic['z_win'] = z_win

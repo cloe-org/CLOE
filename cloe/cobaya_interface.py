@@ -5,6 +5,7 @@
 # General import
 import numpy as np
 from astropy import constants as const
+import warnings
 
 # Cobaya import of general Likelihood class
 from cobaya.likelihood import Likelihood
@@ -43,39 +44,16 @@ class EuclidLikelihood(Likelihood):
 
         """
 
-        # For now, example sampling in wavenumber (k)
-        self.k_min_Boltzmannn = 0.001
-        # Note: k_min is not passed to Cobaya to build
-        # the matter power spectrum interpolator.
-        # The k_min is internally chosen by Cobaya.
-        # This needs to be changed.
-
-        self.k_max_Boltzmannn = 50.0
-        self.k_max_extrap = 500.0
-        self.k_min_GC_phot_interp = 0.001
-        self.k_max_GC_phot_interp = 1000.0
-        self.k_samp_GC = 1000
-        self.k_win = np.logspace(np.log10(self.k_min_GC_phot_interp),
-                                 np.log10(self.k_max_GC_phot_interp),
-                                 self.k_samp_GC)
-
-        # For now, example sampling in redshift (z)
-        self.z_min = 0.0
-        self.z_max = 4.0
-        self.z_samp = 100
+        self.k_max_Boltzmann = 50.0
+        if self.k_min_extrap < 1E-5:
+            warnings.warn(
+                'WARNING: the requested extrapolated k_min is too low. \
+                k_min_extrap changed to 1E-5')
+            self.k_min_extrap = 1E-5
+        self.k_win = np.logspace(np.log10(self.k_min_extrap),
+                                 np.log10(self.k_max_extrap),
+                                 self.k_samp)
         self.z_win = np.linspace(self.z_min, self.z_max, self.z_samp)
-        # Logarithmic sampling below
-        # self.z_min1 = 0.0
-        # self.z_min2 = 1e-4
-        # self.z_min3 = 1e-3
-        # self.z_minlog = -2.0
-        # self.z_max = 4.0
-        # self.z_samp = 140
-        # self.z_win = np.logspace(self.z_minlog, np.log10(self.z_max),
-        #                          self.z_samp)
-        # self.z_win[0] = self.z_min1
-        # self.z_win[1] = self.z_min2
-        # self.z_win[2] = self.z_min3
         # Check the selection and specification requirements
         self.observables = \
             observables_selection_specifications_checker(
@@ -85,6 +63,7 @@ class EuclidLikelihood(Likelihood):
         if self.plot_observables_selection:
             self.observables_pf = observables_visualization(
              self.observables['selection'])
+        self.observables['selection']['add_phot_RSD'] = self.add_phot_RSD
         # Select which power spectra to require from the Boltzmann solver
         if self.NL_flag > 0:
             self.use_NL = [False, True]
@@ -106,6 +85,8 @@ class EuclidLikelihood(Likelihood):
             self.fiducial_cosmology.cosmo_dic['d_z_func']
         self.cosmo.cosmo_dic['fid_H_z_func'] = \
             self.fiducial_cosmology.cosmo_dic['H_z_func']
+
+        self.cosmo.cosmo_dic['redshift_bins'] = self.data['spectro']['edges']
 
     def set_fiducial_cosmology(self):
         r"""Sets the fiducial cosmology class
@@ -166,7 +147,7 @@ class EuclidLikelihood(Likelihood):
             'omeganu': None,
             'Pk_interpolator': {
                 'z': self.z_win,
-                'k_max': self.k_max_Boltzmannn,
+                'k_max': self.k_max_Boltzmann,
                 'nonlinear': False,
                 'vars_pairs': ([['delta_tot', 'delta_tot'],
                                 ['Weyl', 'Weyl']])
@@ -217,6 +198,7 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology.cosmo_dic['Pk_delta'] = \
             model_fiducial.provider.get_Pk_interpolator(
             ('delta_tot', 'delta_tot'), nonlinear=False,
+            extrap_kmin=self.k_min_extrap,
             extrap_kmax=self.k_max_extrap)
         self.fiducial_cosmology.cosmo_dic['Pk_weyl'] = \
             model_fiducial.provider.get_Pk_interpolator(
@@ -254,7 +236,7 @@ class EuclidLikelihood(Likelihood):
                 'omeganu': None,
                 'Pk_interpolator':
                 {'z': self.z_win,
-                 'k_max': self.k_max_Boltzmannn,
+                 'k_max': self.k_max_Boltzmann,
                  'nonlinear': self.use_NL,
                  'vars_pairs': ([['delta_tot',
                                   'delta_tot'],
@@ -316,6 +298,7 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 self.provider.get_Pk_interpolator(
                 ('delta_tot', 'delta_tot'), nonlinear=False,
+                extrap_kmin=self.k_min_extrap,
                 extrap_kmax=self.k_max_extrap)
             self.cosmo.cosmo_dic['Pk_weyl'] = \
                 self.provider.get_Pk_interpolator(
@@ -379,6 +362,7 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 model.provider.get_Pk_interpolator(
                 ('delta_tot', 'delta_tot'), nonlinear=False,
+                extrap_kmin=self.k_min_extrap,
                 extrap_kmax=self.k_max_extrap)
             self.cosmo.cosmo_dic['Pk_weyl'] = \
                 model.provider.get_Pk_interpolator(
@@ -404,6 +388,13 @@ class EuclidLikelihood(Likelihood):
                                     for your_key in new_keys}
             self.cosmo.cosmo_dic['nuisance_parameters'].update(
                 **only_nuisance_params)
+            if 'observables_specifications' in info['likelihood']['Euclid']:
+                self.observables_specifications = \
+                    info['likelihood']['Euclid']['observables_specifications']
+            self.observables = \
+                observables_selection_specifications_checker(
+                    info['likelihood']['Euclid']['observables_selection'],
+                    self.observables_specifications)
 
     def logp(self, **params_values):
         r"""Logp

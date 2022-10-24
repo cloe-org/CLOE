@@ -25,7 +25,7 @@ class Photo:
     Class for photometric observables
     """
 
-    def __init__(self, cosmo_dic, nz_dic_WL, nz_dic_GC):
+    def __init__(self, cosmo_dic, nz_dic_WL, nz_dic_GC, add_RSD=False):
         """Initialize
 
         Constructor of the class Photo
@@ -37,7 +37,10 @@ class Photo:
         nz_dic_WL: dict
             Dictionary containing n(z)s for WL probe.
         nz_dic_GC: dict
-            Dictionary containing n(z)s for GC-phot probe.
+            Dictionary containing n(z)s for GCphot probe.
+        add_RSD: bool
+            Flag to determine whether RSD have to be included in the
+            calculations for GCphot or not.
         """
 
         self.nz_dic_WL = nz_dic_WL
@@ -61,12 +64,6 @@ class Photo:
         self.z_winterp[2] = z_wmin3
         # Number of bins should be generalized, hard-coded for now
 
-        # The class might be initialized with no cosmo dictionary, as it is
-        # currently done when instantiating Photo from Euclike, for running
-        # the likelihood of CLOE
-        if cosmo_dic is not None:
-            self.update(cosmo_dic)
-
         # ell grid integrated over to obtain the 3x2pt correlation functions
         self.ell_max = int(1e5)
         self.nint = 128
@@ -78,6 +75,15 @@ class Photo:
 
         self.bessel_dict = {}
         self._prefactor_dict = {}
+
+        self.add_RSD = add_RSD
+        self._precomp_ells = None
+
+        # The class might be initialized with no cosmo dictionary, as it is
+        # currently done when instantiating Photo from Euclike, for running
+        # the likelihood of CLOE
+        if cosmo_dic is not None:
+            self.update(cosmo_dic)
 
     def update(self, cosmo_dic):
         r"""Update method
@@ -93,13 +99,18 @@ class Photo:
         self.theory = cosmo_dic
         nuisance_dict = self.theory['nuisance_parameters']
 
-        self.vadd2 = np.vectorize(
-                self.theory['CAMBdata'].angular_diameter_distance2)
+        # Commenting this part out as we are temporarily not using the
+        # angular diameter distance obtained from CAMB, but we are coding
+        # it up ourselves
+        # self.vadd2 = np.vectorize(
+        #         self.theory['CAMBdata'].angular_diameter_distance2)
 
         self.nz_GC = RedshiftDistribution('GCphot', self.nz_dic_GC,
                                           nuisance_dict)
         self.nz_WL = RedshiftDistribution('WL', self.nz_dic_WL,
                                           nuisance_dict)
+        self.photobias = [nuisance_dict[f'b{i}_photo']
+                          for i in self.nz_GC.get_tomographic_bins()]
         self.multbias = [nuisance_dict[f'multiplicative_bias_{i}']
                          for i in self.nz_WL.get_tomographic_bins()]
         self.magbias = [nuisance_dict[f'magnification_bias_{i}']
@@ -130,13 +141,22 @@ class Photo:
         self.interpwinia[:, 0] = self.z_winterp
         self.interpwinmag[:, 0] = self.z_winterp
 
-        for tomi in range(1, z_wtom_wl):
-            self.interpwin[:, tomi] = self.WL_window(self.z_winterp, tomi)
-            self.interpwinia[:, tomi] = self.IA_window(self.z_winterp, tomi)
-        for tomi in range(1, z_wtom_gc):
-            self.interpwingal[:, tomi] = self.GC_window(self.z_winterp, tomi)
-            self.interpwinmag[:, tomi] = self.magnification_window(
-                self.z_winterp, tomi)
+        for tom_i in range(1, z_wtom_wl):
+            self.interpwin[:, tom_i] = self.WL_window(self.z_winterp, tom_i)
+            self.interpwinia[:, tom_i] = self.IA_window(self.z_winterp, tom_i)
+        for tom_i in range(1, z_wtom_gc):
+            self.interpwingal[:, tom_i] = self.GC_window(self.z_winterp, tom_i)
+            self.interpwinmag[:, tom_i] = self.magnification_window(
+                self.z_winterp, tom_i)
+
+        if self.add_RSD and self._precomp_ells is not None:
+            self.interpwinrsd = np.zeros(
+                shape=(z_wtom_gc, 3, len(self._precomp_ells), self.z_wsamp))
+            self.interpwinrsd[0, :, :, :] = self.z_winterp
+            for tom_i in range(1, z_wtom_gc):
+                self.interpwinrsd[tom_i, :, :, :] = \
+                    self.GC_window_RSD(self.z_winterp,
+                                       self._precomp_ells, tom_i)
 
     def _set_bessel_tables(self, theta_rad):
         r"""Set tables for Bessel functions
@@ -228,6 +248,8 @@ class Photo:
             self._prefactor_dict['Lminus1_GCphot', ell] = \
                 self._eval_prefactor_l_minus1(ell)
 
+        self._precomp_ells = np.unique(np.concatenate((ells_GC_phot, ells_XC)))
+
     def GC_window(self, z, bin_i):
         r"""GC Window
 
@@ -241,19 +263,110 @@ class Photo:
         z: numpy.ndarray of float or float
            Redshift at which to evaluate distribution.
         bin_i: int
-           index of desired tomographic bin. Tomographic bin
+           Index of desired tomographic bin. Tomographic bin
            indices start from 1.
 
         Returns
         -------
-        W_i_G: float
-           Window function for galaxy clustering photometric
+        window_GC: float
+           Window function for photometric galaxy clustering.
         """
 
         n_z_normalized = self.nz_GC.evaluates_n_i_z(bin_i, z)
-        W_i_G = n_z_normalized * self.theory['H_z_func_Mpc'](z)
+        window_GC = n_z_normalized * self.theory['H_z_func_Mpc'](z)
 
-        return W_i_G
+        return window_GC
+
+    def GC_window_RSD(self, z, ell, bin_i):
+        r"""GC Window RSD
+
+        Implements the RSD correction to the galaxy clustering photometric
+        window function in an array-like format, modulo the Limber and
+        full sky prefactor,
+
+        .. math::
+            W_i^{\rm{G,RSD}}(z,\ell) =
+            \frac{1}{c \,b_{\mathrm{g},i}^\mathrm{photo}} \
+            \left[H(z_m)f(z_m)\frac{n_i(z)}{\bar{n_i}}\right]_m
+
+        where :math:`m` assumes the values (-1,0,+1).
+
+        Parameters
+        ----------
+        z: numpy.ndarray or float
+            Redshift at which to evaluate the window function.
+        ell: numpy.ndarray or float
+            Multipole at which to evaluate the window function.
+        bin_i: int
+            Index of desired tomographic bin. Tomographic bin
+            indices start from 1.
+
+        Returns
+        -------
+        window_GC_RSD: numpy.ndarray
+            Window function for RSD component of photometric galaxy clustering.
+        """
+        if isinstance(ell, (int, float)):
+            ell = [ell]
+        if isinstance(z, (int, float)):
+            z = [z]
+
+        tdist = self.theory['f_K_z_func'](z)
+        zm_arr = np.array([[self.z_minus1(ll, tdist) for ll in ell],
+                           np.full((len(ell), len(z)), z),
+                           [self.z_plus1(ll, tdist) for ll in ell]])
+
+        Hzm_arr = self.theory['H_z_func_Mpc'](zm_arr)
+        fzm_arr = self.theory['f_z'](zm_arr)
+        nzm_arr = self.nz_GC.evaluates_n_i_z(bin_i, zm_arr)
+        bias = self.photobias[bin_i - 1]
+
+        return Hzm_arr * fzm_arr * nzm_arr / bias
+
+    def _unpack_RSD_kernel(self, ell, *args):
+        r"""Obtain the RSD kernel for GCphot or XCphot.
+
+        Checks whether the RSD kernel has been already initialized, and
+        depending on that unpacks the kernel of the corresponding photometric
+        bin or computes it directly.
+
+        Parameters
+        ----------
+        ell: float
+            Multipole at which the RSD kernel has to be computed.
+        *args: list
+            Extra arguments of variable length, corresponding to the indices
+            of the photometric bins for which the RSD kernel has to be
+            computed (2 for GCphot and 1 for XCphot).
+
+        Returns
+        -------
+        kerngalrsd: numpy.ndarray
+            RSD kernel for the specified list of photometric bins.
+        """
+        if np.all([(pref, ell) in self._prefactor_dict.keys() for pref in
+                   ['Lminus1_GCphot', 'L0_GCphot', 'Lplus1_GCphot']]):
+            prefactor_Lminus1 = self._prefactor_dict['Lminus1_GCphot', ell]
+            prefactor_L0 = self._prefactor_dict['L0_GCphot', ell]
+            prefactor_Lplus1 = self._prefactor_dict['Lplus1_GCphot', ell]
+            index = np.where(self._precomp_ells == ell)[0][0]
+            kerngalrsd = \
+                [prefactor_Lminus1 * self.interpwinrsd[bin, 0, index, :] +
+                 prefactor_L0 * self.interpwinrsd[bin, 1, index, :] +
+                 prefactor_Lplus1 * self.interpwinrsd[bin, 2, index, :]
+                 for bin in args]
+        else:
+            prefactor_Lminus1 = self._eval_prefactor_l_minus1(ell)
+            prefactor_L0 = self._eval_prefactor_l_0(ell)
+            prefactor_Lplus1 = self._eval_prefactor_l_plus1(ell)
+            kernrsd = [self.GC_window_RSD(self.z_winterp, ell, bin)
+                       for bin in args]
+            kerngalrsd = [prefactor_Lminus1 * kern[0, 0, :] +
+                          prefactor_L0 * kern[1, 0, :] +
+                          prefactor_Lplus1 * kern[2, 0, :]
+                          for kern in kernrsd]
+
+        return np.array(kerngalrsd)
 
     def window_integrand(self, zprime, z, nz):
         r"""Window Integrand
@@ -283,14 +396,23 @@ class Photo:
         wint: float
            kernel integrand
         """
-        # temporary fix, see #767
-        # if not isinstance(zprime, float):
-        wint = (
-            nz(zprime) *
-            self.vadd2(
-                z,
-                zprime) /
-            self.theory['d_z_func'](zprime))
+        # Commenting out this piece of code, as we are not using the
+        # angular diameter distance function obtained from CAMB for now
+        # wint = (
+        #     nz(zprime) *
+        #     self.vadd2(
+        #         z,
+        #         zprime) /
+        #     self.theory['d_z_func'](zprime))
+        curv = self.theory['Omk']
+
+        if curv == 0.0:
+            wint = nz(zprime) * (1.0 - (self.theory['r_z_func'](z) /
+                                 self.theory['r_z_func'](zprime)))
+        else:
+            wint = (nz(zprime) * self.theory['f_K_z12_func'](
+                z, zprime) / (1.0 + zprime) / self.theory['d_z_func'](zprime))
+
         return wint
 
     def WL_window(self, z, bin_i, k=0.0001):
@@ -701,10 +823,18 @@ class Photo:
         else:
             prefactor_mag = self._eval_prefactor_mag(ell)
 
+        if self.add_RSD:
+            kerngalrsd = self._unpack_RSD_kernel(ell, bin_i, bin_j)
+            kerngalrsd_i = kerngalrsd[0]
+            kerngalrsd_j = kerngalrsd[1]
+        else:
+            kerngalrsd_i = 0.0
+            kerngalrsd_j = 0.0
+
         kerngal_i = np.interp(zs_arr, self.interpwingal[:, 0],
-                              self.interpwingal[:, bin_i])
+                              self.interpwingal[:, bin_i] + kerngalrsd_i)
         kerngal_j = np.interp(zs_arr, self.interpwingal[:, 0],
-                              self.interpwingal[:, bin_j])
+                              self.interpwingal[:, bin_j] + kerngalrsd_j)
 
         kernmag_i = prefactor_mag * np.interp(zs_arr, self.interpwinmag[:, 0],
                                               self.interpwinmag[:, bin_i])
@@ -822,13 +952,18 @@ class Photo:
         else:
             prefactor_mag = self._eval_prefactor_mag(ell)
 
+        if self.add_RSD:
+            kerngalrsd_j = self._unpack_RSD_kernel(ell, bin_j)[0]
+        else:
+            kerngalrsd_j = 0.0
+
         kern_i = prefactor_shearia * np.interp(zs_arr, self.interpwin[:, 0],
                                                self.interpwin[:, bin_i])
         kernia_i = prefactor_shearia * \
             np.interp(zs_arr, self.interpwinia[:, 0],
                       self.interpwinia[:, bin_i])
         kerngal_j = np.interp(zs_arr, self.interpwingal[:, 0],
-                              self.interpwingal[:, bin_j])
+                              self.interpwingal[:, bin_j] + kerngalrsd_j)
         kernmag_j = prefactor_mag * np.interp(zs_arr, self.interpwinmag[:, 0],
                                               self.interpwinmag[:, bin_j])
 
@@ -1079,7 +1214,7 @@ class Photo:
             raise TypeError('theta_deg argument must be a int, float, list or '
                             'numpy.ndarray')
 
-        theta_rad = theta_deg * np.pi / 180.0
+        theta_rad = np.deg2rad(theta_deg)
         xi_arr = np.empty(theta_deg.size)
 
         cells_int = np.array([cells_func(ell, bin_i, bin_j)

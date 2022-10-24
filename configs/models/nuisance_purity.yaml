@@ -1,0 +1,9 @@
+# Depending on the value of the flag f_out_z_dep only the redshift independent
+# or the redshift dependent parameters will be varied
+# Fraction of outliers in the redshift independent case
+f_out: 0.0
+# Fractions of outliers in the redshift dependent case, one per redshift bin
+f_out_1: 0.0
+f_out_2: 0.0
+f_out_3: 0.0
+f_out_4: 0.0

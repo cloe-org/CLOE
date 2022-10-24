@@ -229,6 +229,8 @@ class Cosmology:
                           'r_z_func': None,
                           'z_r_func': None,
                           'f_K_z_func': None,
+                          '_f_K_z12_func': None,
+                          'f_K_z12_func': None,
                           'd_z_func': None,
                           'H_z_func': None,
                           'H_z_func_Mpc': None,
@@ -242,6 +244,8 @@ class Cosmology:
                           'NL_flag': 0,
                           # Use Modified Gravity gamma
                           'use_gamma_MG': 0,
+                          # Redshift dependent purity correction
+                          'f_out_z_dep': False,
                           'nuisance_parameters': {
                              'b1_photo': 1.0997727037892875,
                              'b2_photo': 1.220245876862528,
@@ -279,7 +283,12 @@ class Cosmology:
                              'magnification_bias_7': 0.0,
                              'magnification_bias_8': 0.0,
                              'magnification_bias_9': 0.0,
-                             'magnification_bias_10': 0.0}}
+                             'magnification_bias_10': 0.0,
+                             'f_out': 0.0,
+                             'f_out_1': 0.0,
+                             'f_out_2': 0.0,
+                             'f_out_3': 0.0,
+                             'f_out_4': 0.0}}
 
         self.cosmo_dic['H0_Mpc'] = (self.cosmo_dic['H0'] /
                                     const.c.to('km/s').value)
@@ -499,9 +508,7 @@ class Cosmology:
         by adding an interpolator object
         which interpolates comoving distance as a function of redshift
         """
-        if self.cosmo_dic['z_win'] is None:
-            raise Exception('Boltzmann code redshift binning has not been '
-                            'supplied to cosmo_dic.')
+
         self.cosmo_dic['r_z_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['comov_dist'], ext=2)
 
@@ -537,15 +544,80 @@ class Cosmology:
         by adding an interpolator object which interpolates
         transverse comoving distance as a function of redshift
         """
-        if self.cosmo_dic['z_win'] is None:
-            raise Exception('Boltzmann code redshift binning has not been '
-                            'supplied to cosmo_dic.')
         transverse_comoving_dist = (self.cosmo_dic['angular_dist'] *
                                     (1.0 + self.cosmo_dic['z_win']))
         self.cosmo_dic['f_K_z_func'] = \
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'],
                 y=transverse_comoving_dist, ext=2)
+
+    def interp_transverse_comoving_dist_z12(self):
+        """Interp Transverse Comoving Dist from z1 to z2
+
+        Adds an interpolator for the transverse comoving distance from
+        :math:`z_1` to :math:`z_2` to the dictionary so that it can be
+        evaluated at redshifts not explicitly supplied from the Boltzmann
+        solver.
+
+        Updates 'key' in the cosmo_dic attribute of the current class
+        by adding an interpolator object which interpolates the
+        transverse comoving distance as a function of the specified
+        redshifts
+        """
+        x_int = self.cosmo_dic['z_win']
+
+        if isinstance(self.cosmo_dic['comov_dist'], tuple):
+            comov_dist = np.array(self.cosmo_dic['comov_dist'][0])
+        elif isinstance(self.cosmo_dic['comov_dist'], np.ndarray):
+            comov_dist = np.array(self.cosmo_dic['comov_dist'])
+
+        int_z1z2 = ((comov_dist[None, :] - comov_dist[:, None]) *
+                    self.cosmo_dic['H0'] / self.cosmo_dic['c'])
+        if self.cosmo_dic['Omk'] == 0.0:
+            y_int = int_z1z2
+        elif self.cosmo_dic['Omk'] > 0.0:
+            y_int = (np.sinh(np.sqrt(self.cosmo_dic['Omk']) * int_z1z2) /
+                     np.sqrt(self.cosmo_dic['Omk']))
+        else:
+            y_int = (np.sin(np.sqrt(-self.cosmo_dic['Omk']) * int_z1z2) /
+                     np.sqrt(-self.cosmo_dic['Omk']))
+        y_int *= (self.cosmo_dic['c'] / self.cosmo_dic['H0'])
+
+        self.cosmo_dic['_f_K_z12_func'] = \
+            interpolate.RectBivariateSpline(x_int, x_int, y_int, kx=3, ky=3)
+
+    def f_K_z12_wrapper(self, z1, z2):
+        """Wrapper for the transverse comoving distance from z1 to z2
+
+        Does type checking, calls the method stored in
+        self.cosmo_dic['_f_K_z12_func'], and returns the output variable
+        according to the type of the input variables. The output distance
+        is positive-defined, and the function is symmetric in :math:`z_1`
+        and :math:`z_2`, except for the shape of the return value.
+
+        Parameters
+        ----------
+        z1: float or int or numpy.ndarray
+            Lower redshift :math:`z_1`
+        z2: float or int or numpy.ndarray
+            Upper redshift :math:`z_2`
+
+        Returns
+        -------
+        f_K_z12: float or numpy.ndarray
+            Transverse comoving distance between :math:`z_1` and :math:`z_2`
+        """
+        if (isinstance(z1, (int, float)) and isinstance(z2,
+                                                        (int, float))):
+            f_K_z12 = self.cosmo_dic['_f_K_z12_func'](z1, z2)[0][0]
+        elif (isinstance(z1, (int, float)) and isinstance(z2, np.ndarray)):
+            f_K_z12 = self.cosmo_dic['_f_K_z12_func'](z1, z2)[0]
+        elif (isinstance(z1, np.ndarray) and isinstance(z2, (int, float))):
+            f_K_z12 = self.cosmo_dic['_f_K_z12_func'](z1, z2)[:, 0]
+        else:
+            f_K_z12 = self.cosmo_dic['_f_K_z12_func'](z1, z2)
+
+        return abs(f_K_z12)
 
     def interp_angular_dist(self):
         """Interp Angular Dist
@@ -557,9 +629,6 @@ class Cosmology:
         interpolator object of angular diameter distance
         as a function of redshift
         """
-        if self.cosmo_dic['z_win'] is None:
-            raise Exception('Boltzmann code redshift binning has not been '
-                            'supplied to cosmo_dic.')
         self.cosmo_dic['d_z_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['angular_dist'], ext=2)
 
@@ -574,9 +643,6 @@ class Cosmology:
         which interpolates the Hubble parameter
         H(z) as a function of redshift
         """
-        if self.cosmo_dic['z_win'] is None:
-            raise Exception('Boltzmann code redshift binning has not been '
-                            'supplied to cosmo_dic.')
         self.cosmo_dic['H_z_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['H'], ext=2)
 
@@ -592,9 +658,6 @@ class Cosmology:
         which interpolates the Hubble parameter
         H(z) in Mpc as a function of redshift
         """
-        if self.cosmo_dic['z_win'] is None:
-            raise Exception('Boltzmann code redshift binning has not been '
-                            'supplied to cosmo_dic.')
         self.cosmo_dic['H_z_func_Mpc'] = \
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['H_Mpc'], ext=2)
@@ -610,9 +673,6 @@ class Cosmology:
         by adding an interpolator object
         which interpolates :math:`\sigma_8` as a function of redshift
         """
-        if self.cosmo_dic['z_win'] is None:
-            raise Exception('Boltzmann code redshift binning has not been '
-                            'supplied to cosmo_dic.')
         self.cosmo_dic['sigma8_z_func'] = \
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['sigma8'], ext=2)
@@ -629,9 +689,6 @@ class Cosmology:
         which interpolates :math:`f\sigma_8` as a
         function of redshift
         """
-        if self.cosmo_dic['z_win'] is None:
-            raise Exception('Boltzmann code redshift binning has not been '
-                            'supplied to cosmo_dic.')
         self.cosmo_dic['fsigma8_z_func'] = \
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['fsigma8'], ext=2)
@@ -1197,11 +1254,16 @@ class Cosmology:
         """
         # Update dictionary with H(z),
         # r(z), fsigma8, sigma8, f(z), D_A(z)
+        if self.cosmo_dic['z_win'] is None:
+            raise Exception('Boltzmann code redshift binning has not been '
+                            'supplied to cosmo_dic.')
         self.interp_H()
         self.interp_H_Mpc()
         self.interp_comoving_dist()
         self.interp_z_of_r()
         self.interp_transverse_comoving_dist()
+        self.interp_transverse_comoving_dist_z12()
+        self.cosmo_dic['f_K_z12_func'] = self.f_K_z12_wrapper
         self.interp_fsigma8()
         self.interp_sigma8()
         if self.cosmo_dic['use_gamma_MG']:

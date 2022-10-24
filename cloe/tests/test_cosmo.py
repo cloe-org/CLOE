@@ -6,7 +6,9 @@ This module contains unit tests for the cosmo module.
 """
 
 from unittest import TestCase
+import numpy as np
 import numpy.testing as npt
+import copy
 from astropy import constants as const
 from cloe.cosmo.cosmology import Cosmology
 from cloe.tests.test_wrapper import CobayaModel
@@ -33,6 +35,16 @@ class cosmoinitTestCase(TestCase):
         # Create wrapper model
         cls.model_test = CobayaModel(cosmo)
         cls.model_test.update_cosmo()
+        # Create deep copies of the Cosmology class, where the value of
+        # the curvature is differrent from zero
+        cosmo_curv_neg = copy.deepcopy(cosmo)
+        cosmo_curv_neg.cosmo_dic['Omk'] = 0.5
+        cls.model_test_curv_neg = CobayaModel(cosmo_curv_neg)
+        cls.model_test_curv_neg.update_cosmo()
+        cosmo_curv_pos = copy.deepcopy(cosmo)
+        cosmo_curv_pos.cosmo_dic['Omk'] = -0.5
+        cls.model_test_curv_pos = CobayaModel(cosmo_curv_pos)
+        cls.model_test_curv_pos.update_cosmo()
 
     def setUp(self) -> None:
         # Check values
@@ -41,6 +53,9 @@ class cosmoinitTestCase(TestCase):
         self.fcheck = 0.525454
         self.Hcheck = 74.349422
         self.fKcheck = 3415.832866
+        self.fK12check = [1454.728042, 2538.164745, 3369.714525]
+        self.fK12check_curv_neg = [2897.029977, 1600.91614, 691.969792]
+        self.fK12check_curv_pos = 1886.960791
         self.Pgg_phot_test = 58392.759202
         self.Pgg_phot_test_interpolation = 58332.02434
         self.Pgdelta_phot_test = 41294.412017
@@ -61,6 +76,9 @@ class cosmoinitTestCase(TestCase):
         self.fcheck = None
         self.Hcheck = None
         self.fKcheck = None
+        self.fK12check = None
+        self.fK12check_curv_neg = None
+        self.fK12check_curv_pos = None
         self.Pgg_phot_test = None
         self.Pgdelta_phot_test = None
         self.Pgdelta_phot_test_interpolation = None
@@ -134,6 +152,30 @@ class cosmoinitTestCase(TestCase):
                             rtol=1e-3,
                             err_msg='Error in transverse comoving distance'
                                     'interpolation')
+
+    def test_transverse_comoving_dist_z12(self):
+        f_K = (self.model_test.cosmology.cosmo_dic['f_K_z12_func']
+               (0.5, np.array([1.0, 1.5, 2.0])))
+        npt.assert_allclose(f_K, self.fK12check,
+                            rtol=1e-3,
+                            err_msg='Error in transverse comoving distance'
+                                    '(z1/z2) interpolation (K=0)')
+
+    def test_transverse_comoving_dist_z12_curv_neg(self):
+        f_K = (self.model_test_curv_neg.cosmology.cosmo_dic['f_K_z12_func']
+               (np.array([0.5, 1.0, 1.5]), 2.0))
+        npt.assert_allclose(f_K, self.fK12check_curv_neg,
+                            rtol=1e-3,
+                            err_msg='Error in transverse comoving distance'
+                                    '(z1/z2) interpolation (K<0)')
+
+    def test_transverse_comoving_dist_z12_curv_pos(self):
+        f_K = (self.model_test_curv_pos.cosmology.cosmo_dic['f_K_z12_func']
+               (0.5, 1.0))
+        npt.assert_allclose(f_K, self.fK12check_curv_pos,
+                            rtol=1e-3,
+                            err_msg='Error in transverse comoving distance'
+                                    '(z1/z2) interpolation (K>0)')
 
     def test_update_cosmo_dic(self):
         self.model_test.cosmology.update_cosmo_dic(
@@ -340,3 +382,11 @@ class cosmoinitTestCase(TestCase):
         npt.assert_allclose(z_out, z_in, rtol=1e-3,
                             err_msg='z_r_func is not the inverse '
                                     'of r_z_func')
+
+    def test_z_win_exception(self):
+        z_win = self.model_test.cosmology.cosmo_dic['z_win']
+        self.model_test.cosmology.cosmo_dic['z_win'] = None
+        npt.assert_raises(Exception,
+                          self.model_test.cosmology.update_cosmo_dic,
+                          None, 0.002)
+        self.model_test.cosmology.cosmo_dic['z_win'] = z_win

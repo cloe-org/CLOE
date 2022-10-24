@@ -111,10 +111,14 @@ class Euclike:
             self.mask_ins.get_masked_covariance_matrix())
         self.masked_invcov_matrix = np.linalg.inv(self.masked_cov_matrix)
 
+        # Flag to select cases with or without RSD for photometric probes
+        add_RSD = observables['selection']['add_phot_RSD']
+
         # Photo class instance
         self.phot_ins = Photo(None,
                               self.data_ins.nz_dict_WL,
-                              self.data_ins.nz_dict_GC_Phot)
+                              self.data_ins.nz_dict_GC_Phot,
+                              add_RSD=add_RSD)
 
         # Temporary placeholder for theta vector
         # (will be read from file eventually)
@@ -124,7 +128,7 @@ class Euclike:
         theta_deg = np.logspace(np.log10(theta_min),
                                 np.log10(theta_max),
                                 nbins_theta)
-        theta_rad = theta_deg * np.pi / 180.0
+        theta_rad = np.deg2rad(theta_deg)
 
         # Sets the precomputed Bessel functions as an attribute of the
         # Photo class
@@ -136,7 +140,7 @@ class Euclike:
                                     ells_GC_phot=ells_GC_phot)
 
         # Spectro class instance
-        self.spec_ins = Spectro(None)
+        self.spec_ins = Spectro(None, list(self.zkeys))
 
     def create_photo_data(self):
         """Create Photo Data
@@ -152,10 +156,10 @@ class Euclike:
         datavec_dict = {'GC-Phot': [], 'WL': [], 'XC-Phot': [], 'all': []}
         for index in list(self.data_ins.data_dict['WL'].keys()):
             if 'B' in index:
-                del(self.data_ins.data_dict['WL'][index])
+                del (self.data_ins.data_dict['WL'][index])
         for index in list(self.data_ins.data_dict['XC-Phot'].keys()):
             if 'B' in index:
-                del(self.data_ins.data_dict['XC-Phot'][index])
+                del (self.data_ins.data_dict['XC-Phot'][index])
         # Transform GC-Phot
         # We ignore the first value (ells)
 

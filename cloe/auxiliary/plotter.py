@@ -48,11 +48,12 @@ class Plotter:
         self.read_data = Reader(data)
         self.read_data.compute_nz()
         self.read_data.read_GC_spectro()
+        self.zkeys = self.read_data.data_dict['GC-Spectro'].keys()
         self.read_data.read_phot()
 
         self.phot_ins = Photo(cosmo_dic, self.read_data.nz_dict_WL,
                               self.read_data.nz_dict_GC_Phot)
-        self.spec_ins = Spectro(cosmo_dic)
+        self.spec_ins = Spectro(cosmo_dic, list(self.zkeys))
 
         self.binX = settings['binX']
         self.binY = settings['binY']

@@ -41,9 +41,16 @@ class BNT_transform():
 
 class Theory_vector_transform():
 
-    def __init__(self, cosmo_dict, transform_type='Unity'):
+    def __init__(self, cosmo_dic, nz_dict, transform_type='Unity'):
         
         if transform_type=='BNT':
-            zwin = like.cosmo.cosmo_dic['z_win']
-            chiwin = like.cosmo.cosmo_dic['r_z_func'](zwin)
-            bnt_trf = BNT_transform()
+            zwin = cosmo_dic['z_win']
+            chiwin = cosmo_dic['r_z_func'](zwin)
+            n_bins_list = list(nz_dict.keys())
+            n_bins = len(n_bins_list)
+            ni_list = np.zeros((n_bins, len(zwin)))
+            for ii, ni in enumerate(n_bins_list):
+                ni_list[ii] = nz_dict[ni](zwin)    
+            bnt_trf = BNT_transform(zwin, chiwin, ni_list)
+            self.bnt_mat = bnt_trf.get_matrix()
+            

@@ -18,6 +18,8 @@ build/
 dist/
 *cache*
 *.egg*
+chains/
+notebooks/chains/
 
 # Notebook checkpoints #
 ########################
@@ -26,3 +28,5 @@ dist/
 # Files #
 #########
 notebooks/DEMO.py
+docs/source/cloe.*
+docs/source/modules.rst

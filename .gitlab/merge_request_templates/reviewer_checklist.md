@@ -16,6 +16,7 @@ Reviewers, please check the following points before merging.
 - [ ] Manual `Profiling` job run and no unexpected performances issues found
 - [ ] Implementation follows the agreed task description point by point
 - [ ] Check that there are no '\No newline at the end of file' warnings
+- [ ] Check that the implementation follows the [Contributing guidelines and style choices](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/blob/master/CONTRIBUTING.md)
 - [ ] At least one expert has verified the documentation
 - [ ] Final comments by leads, if any, are correctly taken into account (minor ones within the task; major ones in a new task)
 

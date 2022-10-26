@@ -1,5 +1,5 @@
- cloe
-==========
+cloe
+====
 
 .. toctree::
    :maxdepth: 4

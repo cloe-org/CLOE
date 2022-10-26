@@ -10,5 +10,6 @@ Package Contents
    :numbered:
    :maxdepth: 3
 
+   getting_started
    example
    cloe

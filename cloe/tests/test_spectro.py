@@ -5,6 +5,7 @@ spectroscopy survey module.
 
 """
 
+from unittest.mock import patch
 from unittest import TestCase
 import numpy as np
 import numpy.testing as npt
@@ -178,6 +179,58 @@ class specinitTestCase(TestCase, SpectroTestParent):
             rtol=1e-03,
             err_msg='get_mu failed',
         )
+
+    @patch('cloe.fftlog.fftlog.fftlog.fftlog')
+    @patch('cloe.spectroscopic_survey.spectro.Spectro.multipole_spectra')
+    def test_multipole_correlation_function(self, mock_mul_spe, mock_fftlog):
+        s_array_lin = np.linspace(1, 10, 10)
+        s_array_log = np.logspace(np.log(0.1), np.log(100), 10)
+        pk_array_log = np.logspace(np.log(0.1), np.log(100), 10)
+
+        # test a call with a single value of ell and the default
+        # k_grid parametrization
+        mock_mul_spe.return_value = [0]
+        mock_fftlog.return_value = s_array_log, pk_array_log
+        corr_fun_array = \
+            self.spectro.multipole_correlation_function(s_array_lin, 1.0, 0)
+
+        # test that the shape of the returned array matches the expectations,
+        # i.e. n arrays with the same size of the input s array, where n is
+        # the number of ell values provided as input (1 in this case)
+        npt.assert_equal((1, len(s_array_lin)), corr_fun_array.shape)
+        # test that the multipole_spectra() function was called
+        mock_mul_spe.assert_called()
+        # test that the fftlog() function was called once
+        mock_fftlog.assert_called_once()
+
+        # now use non-default k_grid parametrization, and multiple ell values
+        mock_mul_spe.reset_mock()
+        mock_fftlog.reset_mock()
+        ell_arr = [0, 2, 4]
+        k_min = 5e-5
+        k_max = 50
+        k_num_points = 2**8  # this is non-default
+        mock_mul_spe.return_value = [0, 0, 0]  # must be same size as ell_arr
+        mock_fftlog.return_value = s_array_log, pk_array_log
+        corr_fun_array = \
+            self.spectro.multipole_correlation_function(s_array_lin, 1.0,
+                                                        ell_arr,
+                                                        k_min, k_max,
+                                                        k_num_points)
+        # test that the shape of the returned array matches the expectations,
+        # i.e. n arrays with the same size of the input s array, where n is
+        # the number of ell values provided as input (1 in this case)
+        npt.assert_equal((len(ell_arr), len(s_array_lin)),
+                         corr_fun_array.shape)
+        # verify that multipole_spectra() was called the expected number of
+        # times (i.e. k_num_points)
+        npt.assert_equal(len(mock_mul_spe.call_args_list), k_num_points,
+                         err_msg='Unexpected number of calls to'
+                         f' multipole_spectra()')
+        # verify that fftlog() was called the expected number of times
+        # (i.e. len(ell_arr))
+        npt.assert_equal(len(mock_fftlog.call_args_list), len(ell_arr),
+                         err_msg='Unexpected number of calls to fftlog()')
 
     def test_f_out(self):
         self.test_dict['nuisance_parameters']['f_out'] = 1.0

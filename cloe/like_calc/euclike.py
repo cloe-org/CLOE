@@ -50,13 +50,14 @@ class Euclike:
         self.zkeys = self.data_ins.data_dict['GC-Spectro'].keys()
         self.data_spectro_fiducial_cosmo = \
             self.data_ins.data_spectro_fiducial_cosmo
-        # Transforming data
-        spectrodata = self.create_spectro_data()
-        spectrocov = self.create_spectro_cov()
         # Read photo
         self.data_ins.read_phot()
-        # Tranforming data
-        photodata = self.create_photo_data()
+        # Read observables
+        self.observables = observables
+        # Photo class instance
+        self.phot_ins = Photo(None,
+                              self.data_ins.nz_dict_WL,
+                              self.data_ins.nz_dict_GC_Phot)
 
         # Calculate permutations i,j bins for WL, GC-Phot, XC.
         # This refers to the non-redundant bin combinations for
@@ -96,37 +97,6 @@ class Euclike:
 
         # Reshaping the data vectors and covariance matrices
         # into dictionaries to be passed to the data_handler class
-        datafinal = {**photodata,
-                     'GC-Spectro': spectrodata}
-        covfinal = {'3x2pt': self.data_ins.data_dict['3x2pt_cov'],
-                    'GC-Spectro': spectrocov}
-        self.data_handler_ins = Data_handler(datafinal,
-                                             covfinal,
-                                             observables,
-                                             self.data_ins)
-
-        self.data_vector, self.cov_matrix, self.masking_vector = \
-            self.data_handler_ins.get_data_and_masking_vector()
-
-        self.mask_ins = Masking()
-        self.mask_ins.set_data_vector(self.data_vector)
-        self.mask_ins.set_covariance_matrix(self.cov_matrix)
-        self.mask_ins.set_masking_vector(self.masking_vector)
-        self.masked_data_vector = self.mask_ins.get_masked_data_vector()
-        self.masked_cov_matrix = (
-            self.mask_ins.get_masked_covariance_matrix())
-        self.masked_invcov_matrix = np.linalg.inv(self.masked_cov_matrix)
-
-        # Flag to select cases with or without RSD for photometric probes
-        add_RSD = observables['selection']['add_phot_RSD']
-        # Flag to activate BNT transform
-        self.matrix_transform = observables['selection']['Matrix_transform']
-
-        # Photo class instance
-        self.phot_ins = Photo(None,
-                              self.data_ins.nz_dict_WL,
-                              self.data_ins.nz_dict_GC_Phot,
-                              add_RSD=add_RSD)
 
         # Temporary placeholder for theta vector
         # (will be read from file eventually)
@@ -150,11 +120,46 @@ class Euclike:
         # Spectro class instance
         self.spec_ins = Spectro(None, list(self.zkeys))
 
-    def create_photo_data(self):
+    def create_masked_photo_data(self, dictionary):
+        # Transforming data
+        spectrodata = self.create_spectro_data()
+        spectrocov = self.create_spectro_cov()
+        # Tranforming data
+        self.photodata = self.create_photo_data(dictionary)
+        datafinal = {**self.photodata,
+                     'GC-Spectro': spectrodata}
+        covfinal = {'3x2pt': self.data_ins.data_dict['3x2pt_cov'],
+                    'GC-Spectro': spectrocov}
+        self.data_handler_ins = Data_handler(datafinal,
+                                             covfinal,
+                                             self.observables,
+                                             self.data_ins)
+
+        self.data_vector, self.cov_matrix, self.masking_vector = \
+            self.data_handler_ins.get_data_and_masking_vector()
+
+        self.mask_ins = Masking()
+        self.mask_ins.set_data_vector(self.data_vector)
+        self.mask_ins.set_covariance_matrix(self.cov_matrix)
+        self.mask_ins.set_masking_vector(self.masking_vector)
+        self.masked_data_vector = self.mask_ins.get_masked_data_vector()
+        self.masked_cov_matrix = (
+            self.mask_ins.get_masked_covariance_matrix())
+        self.masked_invcov_matrix = np.linalg.inv(self.masked_cov_matrix)
+        return None
+        
+
+    def create_photo_data(self, dictionary):
         """Create Photo Data
 
         Arranges the photo data vector for the likelihood into its final format
 
+        Parameters
+        ----------
+        dictionary: dict
+            cosmology dictionary from the Cosmology class
+            which is updated at each sampling step
+        
         Returns
         -------
         datavec_dict: dict
@@ -188,9 +193,9 @@ class Euclike:
                  for ell in range(len(self.ells_XC))]
                  for key in self.tomo_ind_XC)
         
-        datavec_dict['WL'] = self.transform_photo_theory_data_vector(datavec_dict['WL'], obs='WL')
-        datavec_dict['XC-Phot'] = self.transform_photo_theory_data_vector(datavec_dict['XC-Phot'], obs='XC-phot')
-        datavec_dict['GC-Phot'] = self.transform_photo_theory_data_vector(datavec_dict['GC-Phot'], obs='GC-phot')
+        datavec_dict['WL'] = self.transform_photo_theory_data_vector(datavec_dict['WL'], dictionary, obs='WL')
+        datavec_dict['XC-Phot'] = self.transform_photo_theory_data_vector(datavec_dict['XC-Phot'], dictionary, obs='XC-phot')
+        datavec_dict['GC-Phot'] = self.transform_photo_theory_data_vector(datavec_dict['GC-Phot'], dictionary, obs='GC-phot')
         
         datavec_dict['all'] = np.concatenate((datavec_dict['WL'],
                                               datavec_dict['XC-Phot'],
@@ -221,7 +226,6 @@ class Euclike:
         """
 
         self.phot_ins.update(dictionary)
-        self.cosmo_dic = dictionary
 
         # Obtain the theory for WL
         if self.data_handler_ins.use_wl:
@@ -254,35 +258,35 @@ class Euclike:
             gc_phot_array = np.array(
                 [self.phot_ins.Cl_GC_phot(ell, element[0], element[1])
                  for ell in self.ells_GC_phot
-                 for element in self.indices_diagonal_gcphot]
+                 for element in self.indices_diagonal_gc]
             )
         else:
             gc_phot_array = np.zeros(
-                len(self.indices_diagonal_gcphot) *
+                len(self.indices_diagonal_gc) *
                 len(self.ells_GC_phot)
             )
         
         ## Apply any matrix transform activated with a switch
-        wl_array = self.transform_photo_theory_data_vector(wl_array, obs='WL')
-        xc_phot_array = self.transform_photo_theory_data_vector(xc_phot_array, obs='XC-phot')
-        gc_phot_array = self.transform_photo_theory_data_vector(gc_phot_array, obs='GC-phot')
+        wl_array = self.transform_photo_theory_data_vector(wl_array, dictionary, obs='WL')
+        xc_phot_array = self.transform_photo_theory_data_vector(xc_phot_array, dictionary, obs='WL')
+        gc_phot_array = self.transform_photo_theory_data_vector(gc_phot_array, dictionary, obs='XC-phot')
 
-        photo_theory_vec = np.concatenate(
+        self.photo_theory_vec = np.concatenate(
             (wl_array, xc_phot_array, gc_phot_array), axis=0)
 
-        return photo_theory_vec
+        return self.photo_theory_vec
 
-    def transform_photo_theory_data_vector(self, obs_array, obs='WL'):
-    
-        dictionary = self.cosmo_dic
-        photoclass = self.phot_ins
+    def transform_photo_theory_data_vector(self, obs_array, dictionary, obs='WL'):
+         
+        self.phot_ins.calc_nz_distributions(dictionary)
+        self.matrix_transform = dictionary['matrix_transform_phot']
         if self.matrix_transform == 'BNT':
             zwin = dictionary['z_win']
             chiwin = dictionary['r_z_func'](zwin)
-            Nz = photoclass.nz_WL.get_num_tomographic_bins()
+            Nz = self.phot_ins.nz_WL.get_num_tomographic_bins()
             ni_list = np.zeros((Nz, len(zwin)))
             for ni in range(1, Nz+1):
-                ni_list[ni] = photoclass.nz_WL.interpolates_n_i(ni, zwin)(zwin)
+                ni_list[ni] = self.phot_ins.nz_WL.interpolates_n_i(ni, zwin)(zwin)
             self.BNT_matrix =  BNT_transform(zwin, chiwin, ni_list)
             self.N_mat_z = np.identity(Nz)
             if obs=='WL': 
@@ -303,6 +307,9 @@ class Euclike:
                 transformed_array = A_slash_mat@obs_array
             if obs=='GC-phot':
                 transformed_array = obs_array
+            else:
+                print("In method:transform_photo_theory_data_vector, observable passed will not be transformed") 
+                transformed_array = obs_array
         elif self.matrix_transform == False:
             transformed_array = obs_array
         else: 
@@ -312,7 +319,7 @@ class Euclike:
 
 
     def create_spectro_theory(self, dictionary):
-        """Create Spectro Theory
+        """Create Spectro Theorycreate_masked_photo_data(self, observables)
 
         Obtains the theory for the likelihood.
         The theory is evaluated only if the GC-Spectro probe is enabled in the
@@ -436,6 +443,7 @@ class Euclike:
         loglike_tot: float
             loglike = Ln(likelihood) for the Euclid observables
         """
+        self.create_masked_photo_data(dictionary)
         photo_theory_vec = self.create_photo_theory(dictionary)
         spectro_theory_vec = self.create_spectro_theory(dictionary)
 

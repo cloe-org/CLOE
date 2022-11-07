@@ -2,199 +2,24 @@
 
 This module contains unit tests for the Spectro sub-module of the
 spectroscopy survey module.
-=======
 
 """
 
+from unittest.mock import patch
 from unittest import TestCase
-from cloe.spectroscopic_survey.spectro import Spectro
 import numpy as np
 import numpy.testing as npt
-from scipy import interpolate
-from astropy import constants as const
-from pathlib import Path
+from cloe.spectroscopic_survey.spectro import Spectro
+from cloe.tests.test_tools.spectro_test_handler import SpectroTestParent
+from cloe.tests.test_tools.test_data_handler import load_test_pickle
 
 
-def mock_MG_func(z, k):
-    """
-    Test MG function that simply returns 1.
-
-    Parameters
-    ----------
-    z: float
-        Redshift.
-    k: float
-        Angular scale.
-
-    Returns
-    -------
-    float
-        Returns 1 for test purposes.
-    """
-    return 1.0
-
-
-class mock_P_obj:
-    def __init__(self, p_interp):
-        self.P = p_interp
-
-
-class specinitTestCase(TestCase):
+class specinitTestCase(TestCase, SpectroTestParent):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cur_dir = Path(__file__).resolve().parents[0]
-        cmov_file = np.loadtxt(str(cur_dir) +
-                               '/test_input/ComDist-LCDM-Lin-zNLA.dat')
-        zs_r = cmov_file[:, 0]
-        rs = cmov_file[:, 1]
-        ang_dists = rs / (1.0 + zs_r)
-
-        rz_interp = interpolate.InterpolatedUnivariateSpline(x=zs_r, y=rs,
-                                                             ext=0)
-        dz_interp = interpolate.InterpolatedUnivariateSpline(x=zs_r,
-                                                             y=ang_dists,
-                                                             ext=0)
-
-        Hz_file = np.loadtxt(str(cur_dir) + '/test_input/Hz.dat')
-        zs_H = Hz_file[:, 0]
-        Hs = Hz_file[:, 1]
-        Hs_mpc = Hz_file[:, 1] / const.c.to('km/s').value
-
-        Hz_interp = interpolate.InterpolatedUnivariateSpline(x=zs_H, y=Hs,
-                                                             ext=0)
-
-        Hmpc_interp = interpolate.InterpolatedUnivariateSpline(x=zs_H,
-                                                               y=Hs_mpc,
-                                                               ext=0)
-
-        f_sig_8_arr = np.load(str(cur_dir) +
-                              '/test_input/f_sig_8_arr.npy',
-                              allow_pickle=True)
-        sig_8_arr = np.load(str(cur_dir) +
-                            '/test_input/sig_8_arr.npy',
-                            allow_pickle=True)
-        f_z_arr = np.load(str(cur_dir) +
-                          '/test_input/f_z_arr.npy',
-                          allow_pickle=True)
-
-        sig_8_interp = interpolate.InterpolatedUnivariateSpline(
-            x=np.linspace(0.0, 5.0, 50),
-            y=sig_8_arr[::-1], ext=0)
-        f_sig_8_interp = interpolate.InterpolatedUnivariateSpline(
-            x=np.linspace(0.0, 5.0, 50),
-            y=f_sig_8_arr[::-1], ext=0)
-        f_z_interp = interpolate.InterpolatedUnivariateSpline(
-            x=np.linspace(0.0, 5.0, 50),
-            y=f_z_arr[::-1], ext=0)
-
-        MG_interp = mock_MG_func
-
-        pdd = np.load(str(cur_dir) + '/test_input/pdd.npy')
-        pdi = np.load(str(cur_dir) + '/test_input/pdi.npy')
-        pgd = np.load(str(cur_dir) + '/test_input/pgd.npy')
-        pgg = np.load(str(cur_dir) + '/test_input/pgg.npy')
-        pgi_phot = np.load(str(cur_dir) + '/test_input/pgi_phot.npy')
-        pgi_spectro = np.load(str(cur_dir) + '/test_input/pgi_spectro.npy')
-        pii = np.load(str(cur_dir) + '/test_input/pii.npy')
-
-        zs_base = np.linspace(0.0, 4.0, 100)
-        ks_base = np.logspace(-3.0, 1.0, 100)
-
-        mock_cosmo_dic = {'ombh2': 0.022445, 'omch2': 0.121203, 'H0': 67.0,
-                          'tau': 0.07, 'mnu': 0.06, 'nnu': 3.046,
-                          'omkh2': 0.0, 'omnuh2': 0.0, 'ns': 0.96,
-                          'w': -1.0, 'sigma8_0': 0.816,
-                          'As': 2.115e-9, 'sigma8_z_func': sig_8_interp,
-                          'fsigma8_z_func': f_sig_8_interp,
-                          'f_z': f_z_interp,
-                          'r_z_func': rz_interp, 'd_z_func': dz_interp,
-                          'H_z_func_Mpc': Hmpc_interp,
-                          'H_z_func': Hz_interp,
-                          'z_win': zs_base,
-                          'k_win': ks_base,
-                          'MG_sigma': MG_interp, 'c': const.c.to('km/s').value,
-                          'NL_flag': 1,
-                          'f_out_z_dep': False,
-                          'nuisance_parameters': {
-                              'b1_photo': 1.0997727037892875,
-                              'b2_photo': 1.220245876862528,
-                              'b3_photo': 1.2723993083933989,
-                              'b4_photo': 1.316624471897739,
-                              'b5_photo': 1.35812370570578,
-                              'b6_photo': 1.3998214171814918,
-                              'b7_photo': 1.4446452851824907,
-                              'b8_photo': 1.4964959071110084,
-                              'b9_photo': 1.5652475842498528,
-                              'b10_photo': 1.7429859437184225,
-                              'b1_spectro': 1.4614804,
-                              'b2_spectro': 1.6060949,
-                              'b3_spectro': 1.7464790,
-                              'b4_spectro': 1.8988660,
-                              'aia': 1.72,
-                              'nia': -0.41,
-                              'bia': 0.0,
-                              'f_out': 0.0,
-                              'f_out_1': 0.0,
-                              'f_out_2': 0.0,
-                              'f_out_3': 0.0,
-                              'f_out_4': 0.0}
-                          }
-
-        # precomputed parameters
-        mock_cosmo_dic['H0_Mpc'] = \
-            mock_cosmo_dic['H0'] / const.c.to('km/s').value
-        mock_cosmo_dic['Omb'] = \
-            mock_cosmo_dic['ombh2'] / (mock_cosmo_dic['H0'] / 100.0) ** 2.0
-        mock_cosmo_dic['Omc'] = \
-            mock_cosmo_dic['omch2'] / (mock_cosmo_dic['H0'] / 100.0) ** 2.0
-        mock_cosmo_dic['Omnu'] = \
-            mock_cosmo_dic['omnuh2'] / (mock_cosmo_dic['H0'] / 100.0) ** 2.0
-        mock_cosmo_dic['Omm'] = (mock_cosmo_dic['Omnu'] +
-                                 mock_cosmo_dic['Omc'] +
-                                 mock_cosmo_dic['Omb'])
-
-        p_matter = mock_P_obj(interpolate.interp2d(zs_base, ks_base, pdd.T,
-                                                   fill_value=0))
-        mock_cosmo_dic['Pk_delta'] = p_matter
-        mock_cosmo_dic['Pgg_phot'] = \
-            interpolate.interp2d(zs_base, ks_base, pgg.T, fill_value=0.0)
-
-        mock_cosmo_dic['Pgdelta_phot'] = \
-            interpolate.interp2d(zs_base, ks_base, pgd.T, fill_value=0.0)
-
-        mock_cosmo_dic['Pii'] = \
-            interpolate.interp2d(zs_base, ks_base, pii.T, fill_value=0.0)
-
-        mock_cosmo_dic['Pdeltai'] = \
-            interpolate.interp2d(zs_base, ks_base, pdi.T, fill_value=0.0)
-
-        mock_cosmo_dic['Pgi_phot'] = \
-            interpolate.interp2d(zs_base, ks_base,
-                                 pgi_phot.T, fill_value=0.0)
-
-        mock_cosmo_dic['Pgi_spectro'] = \
-            interpolate.interp2d(zs_base, ks_base,
-                                 pgi_spectro.T, fill_value=0.0)
-
-        fid_H_arr = np.load(str(cur_dir) + '/test_input/spectro_fid_HZ.npy')
-        fid_d_A_arr = np.load(str(cur_dir) +
-                              '/test_input/spectro_fid_d_A.npy')
-
-        fid_H_interp = \
-            interpolate.InterpolatedUnivariateSpline(x=zs_H, y=fid_H_arr,
-                                                     ext=0)
-        fid_dA_interp =\
-            interpolate.InterpolatedUnivariateSpline(x=zs_H, y=fid_d_A_arr,
-                                                     ext=0)
-
-        # We only need the angular diameter distance and the Hubble factor
-        # from the fiducial cosmology
-        mock_cosmo_dic['fid_d_z_func'] = fid_dA_interp
-        mock_cosmo_dic['fid_H_z_func'] = fid_H_interp
-
-        cls.test_dict = mock_cosmo_dic
-        cls.spectro = Spectro(cls.test_dict, ["1.", "1.2", "1.4", "1.65"])
+        cls.test_dict = load_test_pickle('spectro_test_dic.pickle')
+        cls.spectro = Spectro(cls.test_dict, ['1.', '1.2', '1.4', '1.65'])
 
     def setUp(self):
         self.test_dict['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
@@ -239,147 +64,203 @@ class specinitTestCase(TestCase):
         bi_val: float
             Value of spectroscopic galaxy bias at input redshift
         """
-
         if bin_edge_list is None:
             bin_edge_list = [0.90, 1.10, 1.30, 1.50, 1.80]
 
         nuisance_dic = self.test_dict['nuisance_parameters']
-        istf_bias_list = [nuisance_dic['b1_spectro'],
-                          nuisance_dic['b2_spectro'],
-                          nuisance_dic['b3_spectro'],
-                          nuisance_dic['b4_spectro']]
+        istf_bias_list = [
+            nuisance_dic['b1_spectro'],
+            nuisance_dic['b2_spectro'],
+            nuisance_dic['b3_spectro'],
+            nuisance_dic['b4_spectro']
+        ]
 
         if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
-            for i in range(len(bin_edge_list) - 1):
-                if bin_edge_list[i] <= redshift < bin_edge_list[i + 1]:
-                    bi_val = istf_bias_list[i]
+            for index in range(len(bin_edge_list) - 1):
+                if bin_edge_list[index] <= redshift < bin_edge_list[index + 1]:
+                    bi_val = istf_bias_list[index]
         elif redshift >= bin_edge_list[-1]:
             bi_val = istf_bias_list[-1]
         elif redshift < bin_edge_list[0]:
             bi_val = istf_bias_list[0]
         return bi_val
 
-    def Pgg_spectro_def(self, redshift, k_scale, mu_rsd):
-        r"""
-        Computes the redshift-space galaxy-galaxy power spectrum for the
-        spectroscopic probe.
-
-        .. math::
-            P_{\rm gg}^{\rm spectro}(z, k) &=\
-            [b_{\rm g}^{\rm spectro}(z) + f(z, k)\mu_{k}^2]^2\
-            P_{\rm \delta\delta}(z, k)\\
-
-        Parameters
-        ----------
-        redshift: float
-            Redshift at which to evaluate the power spectrum.
-        k_scale: float
-            k-mode at which to evaluate the power spectrum.
-        mu_rsd: float
-            cosinus of the angle between the pair separation and
-            the line of sight
-
-        Returns
-        -------
-        pval: float
-            Value of galaxy-galaxy power spectrum
-            at a given redshift, k-mode and :math:`\mu_{k}`
-            for galaxy cclustering spectroscopic
-        """
-        bias = self.istf_spectro_galbias(redshift)
-        growth = self.test_dict['f_z'](redshift)
-        power = self.test_dict['Pk_delta'].P(redshift, k_scale)
-        pval = (bias + growth * mu_rsd ** 2.0) ** 2.0 * power
-        return pval
-
     def test_multipole_spectra_m0(self):
-        npt.assert_allclose(self.spectro.multipole_spectra(1.0, 0.1, ms=[0]),
-                            self.check_multipole_spectra_m0,
-                            rtol=1e-05,
-                            err_msg='Multipole spectrum m = 0 failed')
+        npt.assert_allclose(
+            self.spectro.multipole_spectra(1.0, 0.1, ms=[0]),
+            self.check_multipole_spectra_m0,
+            rtol=1e-05,
+            err_msg='Multipole spectrum m = 0 failed',
+        )
 
     def test_multipole_spectra_m1(self):
-        npt.assert_allclose(self.spectro.multipole_spectra(1.0, 0.1, ms=[1]),
-                            self.check_multipole_spectra_m1,
-                            atol=1e-10,
-                            err_msg='Multipole spectrum m = 1 failed')
+        npt.assert_allclose(
+            self.spectro.multipole_spectra(1.0, 0.1, ms=[1]),
+            self.check_multipole_spectra_m1,
+            atol=1e-10,
+            err_msg='Multipole spectrum m = 1 failed',
+        )
 
     def test_multipole_spectra_m2(self):
-        npt.assert_allclose(self.spectro.multipole_spectra(1.0, 0.1, ms=[2]),
-                            self.check_multipole_spectra_m2,
-                            rtol=2e-04,
-                            err_msg='Multipole spectrum m = 2 failed')
+        npt.assert_allclose(
+            self.spectro.multipole_spectra(1.0, 0.1, ms=[2]),
+            self.check_multipole_spectra_m2,
+            rtol=2e-04,
+            err_msg='Multipole spectrum m = 2 failed',
+        )
 
     def test_multipole_spectra_m3(self):
-        npt.assert_allclose(self.spectro.multipole_spectra(1.0, 0.1, ms=[3]),
-                            self.check_multipole_spectra_m3,
-                            atol=1e-10,
-                            err_msg='Multipole spectrum m = 3 failed')
+        npt.assert_allclose(
+            self.spectro.multipole_spectra(1.0, 0.1, ms=[3]),
+            self.check_multipole_spectra_m3,
+            atol=1e-10,
+            err_msg='Multipole spectrum m = 3 failed',
+        )
 
     def test_multipole_spectra_m4(self):
-        npt.assert_allclose(self.spectro.multipole_spectra(1.0, 0.1, ms=[4]),
-                            self.check_multipole_spectra_m4,
-                            rtol=1e-05,
-                            err_msg='Multipole spectrum m = 4 failed')
+        npt.assert_allclose(
+            self.spectro.multipole_spectra(1.0, 0.1, ms=[4]),
+            self.check_multipole_spectra_m4,
+            rtol=1e-05,
+            err_msg='Multipole spectrum m = 4 failed',
+        )
 
     def test_multipole_spectra_m100(self):
-        npt.assert_raises(KeyError, self.spectro.multipole_spectra,
-                          1.0, 0.1, ms=[100])
+        npt.assert_raises(
+            KeyError,
+            self.spectro.multipole_spectra,
+            1.0,
+            0.1,
+            ms=[100],
+        )
 
     def test_multipole_spectra_integrand(self):
         mu_grid = np.linspace(-1, 1, 2001)
-        integrand = \
+        integrand = (
             self.spectro.multipole_spectra_integrand(mu_grid, 1.0, 0.1, [2])
+        )
         idx = np.where(mu_grid == 0.7)
         value = integrand[0][idx]
-        npt.assert_allclose(value, self.check_multipole_spectra_integrand,
-                            rtol=1e-06,
-                            err_msg='Multipole spectra integrand failed')
+        npt.assert_allclose(
+            value,
+            self.check_multipole_spectra_integrand,
+            rtol=1e-06,
+            err_msg='Multipole spectra integrand failed',
+        )
 
     def test_scaling_factor_perp(self):
-        npt.assert_allclose(self.spectro.scaling_factor_perp(0.01),
-                            self.check_scaling_factor_perp,
-                            rtol=1e-03,
-                            err_msg='Scaling Factor Perp failed')
+        npt.assert_allclose(
+            self.spectro.scaling_factor_perp(0.01),
+            self.check_scaling_factor_perp,
+            rtol=1e-03,
+            err_msg='Scaling Factor Perp failed',
+        )
 
     def test_scaling_factor_parall(self):
-        npt.assert_allclose(self.spectro.scaling_factor_parall(0.01),
-                            self.check_scaling_factor_parall,
-                            rtol=1e-03,
-                            err_msg='Scaling Factor Parall failed')
+        npt.assert_allclose(
+            self.spectro.scaling_factor_parall(0.01),
+            self.check_scaling_factor_parall,
+            rtol=1e-03,
+            err_msg='Scaling Factor Parall failed',
+        )
 
     def test_get_k(self):
-        npt.assert_allclose(self.spectro.get_k(0.001, 1, 0.01),
-                            self.check_get_k,
-                            rtol=1e-03,
-                            err_msg='get_k failed')
+        npt.assert_allclose(
+            self.spectro.get_k(0.001, 1, 0.01),
+            self.check_get_k,
+            rtol=1e-03,
+            err_msg='get_k failed',
+        )
 
     def test_get_mu(self):
-        npt.assert_allclose(self.spectro.get_mu(1, 0.01),
-                            self.check_get_mu,
-                            rtol=1e-03,
-                            err_msg='get_mu failed')
+        npt.assert_allclose(
+            self.spectro.get_mu(1, 0.01),
+            self.check_get_mu,
+            rtol=1e-03,
+            err_msg='get_mu failed',
+        )
+
+    @patch('cloe.fftlog.fftlog.fftlog.fftlog')
+    @patch('cloe.spectroscopic_survey.spectro.Spectro.multipole_spectra')
+    def test_multipole_correlation_function(self, mock_mul_spe, mock_fftlog):
+        s_array_lin = np.linspace(1, 10, 10)
+        s_array_log = np.logspace(np.log(0.1), np.log(100), 10)
+        pk_array_log = np.logspace(np.log(0.1), np.log(100), 10)
+
+        # test a call with a single value of ell and the default
+        # k_grid parametrization
+        mock_mul_spe.return_value = [0]
+        mock_fftlog.return_value = s_array_log, pk_array_log
+        corr_fun_array = \
+            self.spectro.multipole_correlation_function(s_array_lin, 1.0, 0)
+
+        # test that the shape of the returned array matches the expectations,
+        # i.e. n arrays with the same size of the input s array, where n is
+        # the number of ell values provided as input (1 in this case)
+        npt.assert_equal((1, len(s_array_lin)), corr_fun_array.shape)
+        # test that the multipole_spectra() function was called
+        mock_mul_spe.assert_called()
+        # test that the fftlog() function was called once
+        mock_fftlog.assert_called_once()
+
+        # now use non-default k_grid parametrization, and multiple ell values
+        mock_mul_spe.reset_mock()
+        mock_fftlog.reset_mock()
+        ell_arr = [0, 2, 4]
+        k_min = 5e-5
+        k_max = 50
+        k_num_points = 2**8  # this is non-default
+        mock_mul_spe.return_value = [0, 0, 0]  # must be same size as ell_arr
+        mock_fftlog.return_value = s_array_log, pk_array_log
+        corr_fun_array = \
+            self.spectro.multipole_correlation_function(s_array_lin, 1.0,
+                                                        ell_arr,
+                                                        k_min, k_max,
+                                                        k_num_points)
+        # test that the shape of the returned array matches the expectations,
+        # i.e. n arrays with the same size of the input s array, where n is
+        # the number of ell values provided as input (1 in this case)
+        npt.assert_equal((len(ell_arr), len(s_array_lin)),
+                         corr_fun_array.shape)
+        # verify that multipole_spectra() was called the expected number of
+        # times (i.e. k_num_points)
+        npt.assert_equal(len(mock_mul_spe.call_args_list), k_num_points,
+                         err_msg='Unexpected number of calls to'
+                         f' multipole_spectra()')
+        # verify that fftlog() was called the expected number of times
+        # (i.e. len(ell_arr))
+        npt.assert_equal(len(mock_fftlog.call_args_list), len(ell_arr),
+                         err_msg='Unexpected number of calls to fftlog()')
 
     def test_f_out(self):
         self.test_dict['nuisance_parameters']['f_out'] = 1.0
-        npt.assert_allclose(self.spectro.multipole_spectra(1.0, 0.1, ms=[1]),
-                            0.0,
-                            atol=1e-10,
-                            err_msg='Test redshift independent f_out failed')
+        npt.assert_allclose(
+            self.spectro.multipole_spectra(1.0, 0.1, ms=[1]),
+            0.0,
+            atol=1e-10,
+            err_msg='Test redshift independent f_out failed',
+        )
         self.test_dict['nuisance_parameters']['f_out'] = 0.0
 
     def test_f_out_z_dep(self):
         self.test_dict['f_out_z_dep'] = True
         self.test_dict['nuisance_parameters']['f_out_1'] = 1.0
-        npt.assert_allclose(self.spectro.multipole_spectra(1.0, 0.1, ms=[1]),
-                            0.0,
-                            atol=1e-10,
-                            err_msg='Test redshift dependent f_out failed')
+        npt.assert_allclose(
+            self.spectro.multipole_spectra(1.0, 0.1, ms=[1]),
+            0.0,
+            atol=1e-10,
+            err_msg='Test redshift dependent f_out failed',
+        )
         self.test_dict['f_out_z_dep'] = False
         self.test_dict['nuisance_parameters']['f_out_1'] = 0.0
 
     def test_f_out_z_exception(self):
         self.test_dict['f_out_z_dep'] = True
-        npt.assert_raises(Exception, self.spectro.multipole_spectra,
-                          20., 0.1, ms=[1])
+        npt.assert_raises(
+            Exception,
+            self.spectro.multipole_spectra,
+            20.0,
+            0.1,
+            ms=[1],
+        )
         self.test_dict['f_out_z_dep'] = False

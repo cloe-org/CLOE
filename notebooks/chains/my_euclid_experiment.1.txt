@@ -1,2 +1,0 @@
-#        weight    minuslogpost              ns          omegam          omegab         omeganu          omnuh2          omegac           N_eff   minuslogprior minuslogprior__0            chi2    chi2__Euclid
-              1       692584.97        1.147654      0.32000015            0.05    0.0014371539    0.0006451384        0.268563           3.046     -0.91629073      -0.91629073       1385171.8       1385171.8

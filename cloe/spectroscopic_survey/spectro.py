@@ -8,6 +8,7 @@ Prototype computation of spectroscopic galaxy clustering likelihood.
 import numpy as np
 from scipy.special import legendre
 from scipy import integrate
+from cloe.fftlog.fftlog import fftlog
 
 
 class Spectro:
@@ -254,3 +255,63 @@ class Spectro:
         spectra = outlier_factor * prefactors * integrals
 
         return np.asarray(spectra)
+
+    def multipole_correlation_function(self, s, z, ell,
+                                       k_min=5e-5,
+                                       k_max=50,
+                                       k_num_points=2048):
+        r"""Evaluate the multipole correlation function
+
+        Evaluate the multipole correlation function for the separation values
+        contained in the :math:`s` array, at the requested values of redshift
+        (:math:`z`) and multipole (:math:`\ell`).
+
+        Parameters
+        ----------
+        s: numpy.array of float
+            array of :math:`s` values in Mpc/h
+        z: float
+            a value of redshift, among {1.00, 1.20, 1.40, 1.65}
+        ell: int or array of int
+            a value or array of values of :math:`\ell` among {0, 2, 4}
+        k_min: float
+           lower bound of the range of wavenumbers used for the evaluation of
+           the multipole power spectra
+        k_max: float
+           upper bound of the range of wavenumbers used for the evaluation of
+           the multipole power spectra
+        k_num_points: int
+           number of points used for the evaluation of the multipole
+           power spectra
+
+        Returns
+        -------
+        multipole_correlation_function: numpy.array of float
+            an array of shape (len(ell), len(s)), containing the values of the
+            multipole correlation function evaluated in correspondence of the
+            :math:`\ell` and :math:`s` values provided as input
+        """
+        # vectorize input ell if it is a scalar
+        if np.isscalar(ell):
+            ell = [ell]
+
+        # define the log-spaced k grid to evaluate the multipole spectra
+        k_grid = np.logspace(np.log10(k_min), np.log10(k_max), k_num_points)
+
+        # evaluate multipole spectra in correspondence of the points in k_grid.
+        # This instruction produces one pk_array for each input ell value
+        pk_arrays = np.transpose([self.multipole_spectra(z, k, ell)
+                                 for k in k_grid])
+
+        # perform the Hankel transform
+        transformed_lin = np.empty((len(ell), len(s)))
+        volume_factor = (k_grid**3) / (2 * (np.pi**2))
+        for id in range(len(ell)):
+            y_array = volume_factor * pk_arrays[id] * np.real(1j**ell[id])
+            transformer = fftlog(k_grid, y_array)
+            s_grid, transformed_log = transformer.fftlog(ell[id])
+            # interpolate to get the linearly-spaced values of the multipole
+            # correlation function from the log-spaced ones.
+            transformed_lin[id] = np.interp(s, s_grid, transformed_log)
+
+        return transformed_lin

@@ -20,6 +20,8 @@ z_max: 4.0
 z_samp: 100
 # Add RSD to photometric probes
 add_phot_RSD: False
+## Apply a generic matrix transformation to the photo observables (available options: 'BNT')
+matrix_transform_phot: False
 # Use MG gamma
 use_gamma_MG: False
 # Redshift dependent purity correction

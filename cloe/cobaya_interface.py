@@ -63,7 +63,6 @@ class EuclidLikelihood(Likelihood):
         if self.plot_observables_selection:
             self.observables_pf = observables_visualization(
              self.observables['selection'])
-        self.observables['selection']['add_phot_RSD'] = self.add_phot_RSD
         # Select which power spectra to require from the Boltzmann solver
         if self.NL_flag > 0:
             self.use_NL = [False, True]
@@ -268,6 +267,8 @@ class EuclidLikelihood(Likelihood):
             # ------------------------------------------------
             self.cosmo.cosmo_dic['NL_flag'] = self.NL_flag
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
+            self.cosmo.cosmo_dic['add_phot_RSD'] = self.add_phot_RSD
+            self.cosmo.cosmo_dic['matrix_transform_phot'] = self.matrix_transform_phot
             self.cosmo.cosmo_dic['H0'] = self.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
@@ -330,6 +331,10 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['CAMBdata'] = model.provider.get_CAMBdata()
             self.cosmo.cosmo_dic['NL_flag'] = \
                 info['likelihood']['Euclid']['NL_flag']
+            self.cosmo.cosmo_dic['add_phot_RSD'] = \
+                info['likelihood']['Euclid']['add_phot_RSD']
+            self.cosmo.cosmo_dic['matrix_transform_phot'] = \
+                info['likelihood']['Euclid']['matrix_transform_phot']
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
             self.cosmo.cosmo_dic['H0'] = model.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \

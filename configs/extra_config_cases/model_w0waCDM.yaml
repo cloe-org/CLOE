@@ -1,0 +1,10 @@
+user_models:
+  cosmology: extra_cosmologies/cosmology_w0waCDM.yaml
+  nuisance_bias: nuisance_bias.yaml
+  nuisance_ia: nuisance_ia.yaml
+  nuisance_magnification_bias: nuisance_magnification_bias.yaml
+  nuisance_nz: nuisance_nz.yaml
+  nuisance_purity: nuisance_purity.yaml
+  nuisance_shear_calibration: nuisance_shear_calibration.yaml
+user_options:
+  overwrite: false

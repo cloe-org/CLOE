@@ -3,23 +3,29 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  # Default Python version for CLOE
   - python=3.9
+  - pip>=19.0
+  # Standard 3rd-party Python packages
   - astropy>=4.0
-  - camb
-  - fast-pt>=3.1
   - jupyter>=1.0
   - matplotlib>=3.1
+  - mpi4py>=3.0.3
   - numpy>=1.17
   - scipy>=1.3
-  - pip>=19.0
-  - mpi4py>=3.0.3
   - seaborn>=0.11.2
+  - tensorflow
+  # Domain-specific 3rd-party Python packages (from Conda)
+  - fast-pt>=3.1
+  # Additional non-Python dependencies
+  - camb
+  - gsl>=2.6
   - pip:
-    #- git+https://github.com/CobayaSampler/cobaya
+    # Domain-specific 3rd-party Python package (from PyPI)
     - cobaya
-    # baccoemu needs to be commented out in order to build the conda
-    # environment layer in the Docker image
-    # - baccoemu>=1.1
+    - baccoemu
+    - euclidemu2
+    # Unit testing and documentation dependencies
     - pytest>=6.2
     - pytest-cov>=2.10
     - pytest-pycodestyle>=2.2.0

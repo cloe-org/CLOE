@@ -42,6 +42,7 @@ class Euclike:
             Dictionary containing specification for the chosen observables by
             the user.
         """
+
         self.data = data
         self.data_ins = reader.Reader(self.data)
         self.data_ins.compute_nz()
@@ -74,23 +75,6 @@ class Euclike:
         self.indices_diagonal_gc = list(zip(x_diagonal_gc[0], x_diagonal_gc[1]))
         x_full_xc = np.indices((numtomo_gcphot, numtomo_wl))
         self.indices_all = tuple(zip(x_full_xc[0].flatten()+1, x_full_xc[1].flatten()+1))
-        
-        #for i in range(0, len(x_diagonal_wl)):
-            #for j in range(0, len(x_diagonal_wl)):
-                #if x_diagonal_wl[i, j] == 1:
-                    #self.indices_diagonal_wl.append([i + 1, j + 1])
-        #x_diagonal_gcphot = np.triu(np.ones((numtomo_gcphot, numtomo_gcphot)))
-        #self.indices_diagonal_gcphot = []
-        #for i in range(0, len(x_diagonal_gcphot)):
-            #for j in range(0, len(x_diagonal_gcphot)):
-                #if x_diagonal_gcphot[i, j] == 1:
-                    #self.indices_diagonal_gcphot.append([i + 1, j + 1])
-        #x = np.ones((numtomo_gcphot, numtomo_wl))
-        #self.indices_all = []
-        #for i in range(0, len(x)):
-            #for j in range(0, len(x)):
-                #self.indices_all.append([i + 1, j + 1])
-
         self.ells_WL = self.data_ins.data_dict['WL']['ells']
         self.ells_XC = self.data_ins.data_dict['XC-Phot']['ells']
         self.ells_GC_phot = self.data_ins.data_dict['GC-Phot']['ells']
@@ -121,6 +105,18 @@ class Euclike:
         self.spec_ins = Spectro(None, list(self.zkeys))
 
     def create_masked_photo_data(self, dictionary):
+        """
+        Create Masked Photo Data
+
+        Computes the masked photometric data vector
+        and masked input covariance matrix
+
+        Parameters
+        ----------
+        dictionary: dict
+            cosmology dictionary from the Cosmology class
+            which is updated at each sampling step    
+        """
         # Transforming data
         spectrodata = self.create_spectro_data()
         spectrocov = self.create_spectro_cov()
@@ -277,7 +273,29 @@ class Euclike:
         return self.photo_theory_vec
 
     def transform_photo_theory_data_vector(self, obs_array, dictionary, obs='WL'):
-         
+        """Transform Photo Theory Data Vector
+
+        Transform the photo theory vector with a generic matrix transformation
+        specified in the 'matrix_transform_phot' key of the cosmology dictionary
+
+        Parameters
+        ----------
+        obs_array: array
+            Array containing the original (untransformed) photo theory/data vector
+        dictionary: dict
+            cosmology dictionary from the Cosmology class which is updated at
+            each sampling step
+        obs: string
+            String specifying the photo observable which will be transformed. 
+            Default: 'WL'
+
+        Returns
+        -------
+        transformed_array: array
+            Returns an array with the transformed photo theory/data vector
+            If the requested transform is unapplicable, returns the original
+            photo theory/data vector
+        """
         self.phot_ins.calc_nz_distributions(dictionary)
         self.matrix_transform = dictionary['matrix_transform_phot']
         if self.matrix_transform == 'BNT':
@@ -316,7 +334,6 @@ class Euclike:
             raise ValueError("Matrix Transform not implemented yet into CLOE")
         
         return transformed_array
-
 
     def create_spectro_theory(self, dictionary):
         """Create Spectro Theorycreate_masked_photo_data(self, observables)

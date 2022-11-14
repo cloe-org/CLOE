@@ -85,10 +85,10 @@ class Photo:
         if cosmo_dic is not None:
             self.update(cosmo_dic)
 
-    def calc_nz_distributions(self, cosmo_dic): 
+    def calc_nz_distributions(self, cosmo_dic):
         r"""calc_nz_distributions method
 
-        Method to compute the n(z) distributions, based on the 
+        Method to compute the n(z) distributions, based on the
         input cosmology and nuisance parameters of the cosmo_dic
 
         Parameters

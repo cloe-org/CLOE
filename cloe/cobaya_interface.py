@@ -268,7 +268,8 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['NL_flag'] = self.NL_flag
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
             self.cosmo.cosmo_dic['add_phot_RSD'] = self.add_phot_RSD
-            self.cosmo.cosmo_dic['matrix_transform_phot'] = self.matrix_transform_phot
+            self.cosmo.cosmo_dic['matrix_transform_phot'] = \
+                self.matrix_transform_phot
             self.cosmo.cosmo_dic['H0'] = self.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value

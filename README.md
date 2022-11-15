@@ -9,7 +9,7 @@ Check [documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-im
 
 ## What's Cobaya?
 
-`Cobaya` (code for Bayesian analysis, and Spanish for Guinea Pig) is a framework for sampling and statistical modelling: it allows you to explore an arbitrary prior or posterior using a range of Monte Carlo samplers.
+`Cobaya` (code for Bayesian analysis) is a framework for sampling and statistical modelling: it allows you to explore an arbitrary prior or posterior using a range of Monte Carlo samplers.
 
 Check [documentation](https://cobaya.readthedocs.io/en/latest/index.html)
 

@@ -59,9 +59,10 @@ def build_mock_observables(reader=None):
                         'bins': gc_spectro_bins}
 
     observables = {}
+    # Note all the probes are set to True
     observables['selection'] = {
-        'WL': {'WL': False, 'GCphot': False, 'GCspectro': False},
-        'GCphot': {'GCphot': False, 'GCspectro': False},
+        'WL': {'WL': True, 'GCphot': True, 'GCspectro': False},
+        'GCphot': {'GCphot': True, 'GCspectro': False},
         'GCspectro': {'GCspectro': True},
         'add_phot_RSD': False
     }

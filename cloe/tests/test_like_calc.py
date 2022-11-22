@@ -28,8 +28,8 @@ class likecalcTestCase(TestCase, SpectroTestParent):
         self.like_tt = Euclike(mock_data, mock_obs)
 
         # The correct check value, using the h scaling for the h from
-        # supplied external file is:
-        self.check_loglike = -88.074928
+        # supplied external file for all the probes together is:
+        self.check_loglike = -1801.491749
 
     def tearDown(self):
         self.check_loglike = None

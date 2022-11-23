@@ -8,6 +8,7 @@ mock_data = {
     'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
     'redshifts': ["1.", "1.2", "1.4", "1.65"]},
   'photo': {
+    'luminosity_ratio': 'luminosity_ratio.dat',
     'ndens_GC': 'niTab-EP10-RB00.dat',
     'ndens_WL': 'niTab-EP10-RB00.dat',
     'root_GC': 'Cls_{:s}_PosPos.dat',

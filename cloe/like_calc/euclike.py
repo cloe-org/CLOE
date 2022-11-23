@@ -44,6 +44,7 @@ class Euclike:
         self.data = data
         self.data_ins = reader.Reader(self.data)
         self.data_ins.compute_nz()
+        self.data_ins.compute_luminosity_ratio()
         # Read spectro
         self.data_ins.read_GC_spectro()
         self.zkeys = self.data_ins.data_dict['GC-Spectro'].keys()

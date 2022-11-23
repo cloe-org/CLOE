@@ -17,7 +17,7 @@ Reviewers, please check the following points before merging.
 - [ ] Implementation follows the agreed task description point by point
 - [ ] Check that there are no '\No newline at the end of file' warnings
 - [ ] Check that any added folder/file has been added to the `README.md` file
-- [ ] Check that the implementation follows the [Contributing guidelines and style choices](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/blob/master/CONTRIBUTING.md)
+- [ ] Check that the implementation follows the [Contributing guidelines and style choices](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/blob/develop/CONTRIBUTING.md)
 - [ ] At least one expert has verified the documentation
 - [ ] Final comments by leads, if any, are correctly taken into account (minor ones within the task; major ones in a new task)
 

@@ -1,7 +1,7 @@
 # Euclid IST:L Contribution Guidelines
 
 > Authors: Samuel Farrens, Dida Markovic  
-> Last Updated: 05/06/2020
+> Last Updated: 25/10/2022
 
 ## Contents
 
@@ -284,3 +284,136 @@ Developers planning to work on both the upstream and the downstream repositories
 - Avoid pushing to either downstream or upstream master branches! This should be disabled for all downstream users and only possible for upstream maintainers, but should be avoided regardless.
 
 - Pulling from either the downstream or the upstream master branches should be equivalent if the mirroring has been activated. When in doubt, however, pull from the upstream to ensure that you have all the latest commits.
+
+
+## Style choices
+
+
+
+#### **General guidelines**
+
+- Existing python packages such as e.g. `numpy`, `scipy` or `astropy` should be used whenever possible.
+- The code should follow [PEP8 rules](https://peps.python.org/pep-0008/) to pass the CI tests.
+- Try to avoid (as much as possible) using hardcoded parameters. If you do so please add them to the list of hardcoded parameters ([link to the list to be created](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/issues/698#note_83137)). Reviewers should always check if there is good reason for it or not.
+- Comments (i.e. lines starting with `#`) may be written in the code only if they are useful for the developers. They should never be targeted at the user and never be printed. Reviewers should check what comments are useful for a given merge request (MR).
+- Comments/docstrings should be written in third person (e.g. `Returns` instead of `Return`)
+- In accordance with the ECEB Style Guide for Euclid Publications, the convention for the language is British English.
+- Do not use all capital letters in comments and printouts.
+- Try to avoid as much as possible excluding code from coverage report with `#pragma: no cover`. It is fine to exclude certain things that cannot easily be included in unit tests (e.g. plotting routines). Reviewers should assess for a given MR if a given exclusion is justified.
+- Try to avoid as much as possible using lambda functions. Developers need to justify why they are included in a piece of code. Reviewers should check that the use is indeed justified.
+- Do not use relative imports and always use absolute imports
+
+   _Example_: 
+   write `import cloe.cosmo.cosmology.py` instead of `import ..cosmo.cosmology.py`
+
+
+#### **Mathematics conventions in the code**
+
+- Use e.g. `1.0` and not `1.` for floats with no decimal part.
+- Square roots: always use the `numpy.sqrt()` function
+- Inverse: `1.0 / x` (explicitly shows that the results is type `float`)
+- Squares: `x ** 2` (space between operators, integer exponents by default)
+- Scientific notation: `1.0e-9`
+
+
+#### **Strings and documentation conventions**
+
+- For string formatting use one of the following options: 
+
+1. using f-strings (**preferred option**), *e.g.*
+
+```python
+my_string = f'My value is {my_value}'
+```
+2. using `.format()`, *e.g.*
+
+```python
+my_string = 'My value is {0}'.format(my_value)
+```
+
+- For string concatenation, do it as follows:                                                              
+```python
+my_long_string = (
+   'this is a very long string ...'
+   + 'that keeps going...'
+   + 'and going etc.'
+)
+```
+
+- External packages (e.g. CLASS, Cobaya ..) should be referred to with the same capitalisation as they appear in their original websites
+
+    _Example_: Use Cobaya as in the [website](https://cobaya.readthedocs.io/en/latest/) and not COBAYA or     
+cobaya.
+- When specifying the variable type in the API docstrings follow the convention of the [PEP8 rules](https://peps.python.org/pep-0008/). 
+
+    _Example_: use `numpy.ndarray` and not `np.ndarray` otherwise the link in the API will not work.
+
+#### **Naming conventions**
+
+##### Variables 
+
+* Keep all variable names lowercase and separate words/terms with a `_` (e.g. `my_var` not `MyVar`).
+* Try to avoid (as much as possible) using single letter variable names. The same applies to the corresponding docstring.
+
+_A few examples for CLOE:_  
+
+    - The wavenumber k has to be indicated as `wavenumber` (i.e. the wavenumber should not be called `k` but `wavenumber`).
+    - The redshift z has to be indicated as `redshift`.
+    - The overdensity $`\rm{\delta}`$ has to be indicated as `delta`.
+
+
+
+* Explicit, human readable variable names are usually easier to maintain that overly condensed names (e.g. `delta_sigma_rho` is easier to understand than `dsr`) but avoid making the names too long (e.g. `this_variable_name_is_certainly_way_too_long`).
+* For variables with short lifespans (i.e. those that only exist in loop) you can prepend a `_` to highlight that this variable has a limited scope. e.g.:
+
+```python
+for _value in object:
+    res += myfunc(_value)
+    ...
+```
+
+##### Function names
+
+* Keep all function names lowercase and separate words/terms (e.g. `my_func` not `MyFunc`, `calculate_likelihood` is better than `clike`).
+* A function starting with a `_` is considered *private* (i.e. this is only used within the module and is not intended to be used outside of this scope). 
+* Longer more explicit names can be used for *internal* functions (i.e. functions used within the code, e.g. `calculate_value_per_bin`) and more easy-to-remember/user-friendly names should be used for *external* functions (i.e. functions that users will need to interact with, e.g. `getlike`).
+
+
+
+##### Convention for naming of the different probe observables
+
+* Weak lensing --> `WL`
+* Photometric galaxy clustering --> `GCphot` 
+* Spectroscopic galaxy clustering --> `GCspectro`
+* Dictionary with redshift distribution for WL --> `nz_dic_WL`
+* Dictionary with redshift distribution for GCphot --> `nz_dic_GCphot`
+* Angular power spectrum for photometric galaxy clustering -->  `Cl_GCphot`
+* Angular power spectrum for weak lensing --> `Cl_WL`
+* Angular power spectrum for galaxy galaxy lensing --> `Cl_GGL`
+* Multipole power spectra --> `Pk_GCspectro`
+* Galaxy clustering photometric window function  --> `window_GCphot_density`
+* Weak lensing window function --> `window_WL_shear`
+* RSD correction to the galaxy clustering photometric window function --> `window_GCphot_RSD`
+* Magnification bias kernel --> `window_GCphot_mag` 
+* Intrinsic alignment (IA) weight function --> `window_WL_IA`
+* Weak lensing correlation functions --> `xi_WL_plus`, `xi_WL_minus`
+* Galaxy galaxy lensing correlation function --> `xi_GGL`
+* Photometric galaxy clustering correlation function --> `xi_GCphot`
+
+
+##### Class names
+
+* The convention is to use CamelCase ( e.g. `MyClass` and not `myClass` or `my_class`).
+
+##### Class instances
+
+* Class instances can generally be written as `my_class_inst = MyClass(...)`.
+
+##### File (module) names/directory (subpackage) names
+
+* Try to keep these simple but descriptive.
+
+#### **Class and functions parameters**
+
+* Generally, all calls to functions should be made with keyword arguments (e.g. `my_func(my_first_val=3, my_second_val=4)`).
+* An exception is any CLOE function/class/method that takes a single argument or that only requires a single argument (i.e. the other keyword arguments have default values) a positional argument can be used. Similarly, for any standard 3rd-party functions positional arguments (e.g. `numpy.sqrt(x=9)` or  `numpy.sqrt(9)`) can be used. 

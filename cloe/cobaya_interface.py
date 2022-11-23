@@ -87,6 +87,8 @@ class EuclidLikelihood(Likelihood):
             self.fiducial_cosmology.cosmo_dic['H_z_func']
 
         self.cosmo.cosmo_dic['redshift_bins'] = self.data['spectro']['edges']
+        self.cosmo.cosmo_dic['luminosity_ratio_z_func'] = \
+            self.likefinal.data_ins.luminosity_ratio_interpolator
 
     def set_fiducial_cosmology(self):
         r"""Sets the fiducial cosmology class
@@ -211,6 +213,8 @@ class EuclidLikelihood(Likelihood):
             model_fiducial.provider.get_sigma8_z(
             self.z_win)
         # Update dictionary with interpolators
+        self.fiducial_cosmology.cosmo_dic['luminosity_ratio_z_func'] = \
+            self.likefinal.data_ins.luminosity_ratio_interpolator
         self.fiducial_cosmology.update_cosmo_dic(
             self.fiducial_cosmology.cosmo_dic['z_win'],
             0.05)

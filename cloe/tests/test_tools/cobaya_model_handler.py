@@ -8,6 +8,7 @@ from cobaya.model import get_model
 from cloe.cobaya_interface import EuclidLikelihood
 import numpy as np
 from cloe.tests.test_input.data import mock_data
+from scipy import interpolate
 
 
 class CobayaModel:
@@ -31,6 +32,10 @@ class CobayaModel:
         self.k_win = np.logspace(np.log10(self.k_min_GC_phot_interp),
                                  np.log10(self.k_max_GC_phot_interp),
                                  self.k_samp_GC)
+        self.cosmology.cosmo_dic['luminosity_ratio_z_func'] = \
+            interpolate.InterpolatedUnivariateSpline(
+                self.z_win,
+                np.linspace(0.001, 1.7, 100))
 
     def define_info(self, cosmo_inst):
         """Define Information"""

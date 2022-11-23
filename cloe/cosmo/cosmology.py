@@ -155,6 +155,8 @@ class Cosmology:
             Non-linear boost factor
         NL_flag: int
             Non-linear flag
+        luminosity_ratio_z_func: function
+            Luminosity ratio interpolator for IA model
         nuisance_parameters: dict
             Contains all nuisance bias parameters
             and IA parameters which are sampled over.
@@ -238,6 +240,7 @@ class Cosmology:
                           'sigma8_z_func': None,
                           'fsigma8_z_func': None,
                           'f_z': None,
+                          'luminosity_ratio_z_func': None,
                           # NL_boost
                           'NL_boost': None,
                           # NL flag
@@ -987,10 +990,9 @@ class Cosmology:
         nia = self.cosmo_dic['nuisance_parameters']['nia']
         bia = self.cosmo_dic['nuisance_parameters']['bia']
         omegam = self.cosmo_dic['Omm']
-        # Temporary lum for now, to be read in from IST:forecast file
-        lum = 1.0
         fia = (-aia * c1 * omegam / growth *
-               (1 + redshift)**nia * lum**bia)
+               (1 + redshift) ** nia *
+               self.cosmo_dic['luminosity_ratio_z_func'](redshift) ** bia)
         return fia
 
     def Pii_def(self, redshift, k_scale):

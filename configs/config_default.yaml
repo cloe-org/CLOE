@@ -11,6 +11,14 @@ Cobaya:
       external: !!python/name:cloe.cobaya_interface.EuclidLikelihood ''
       # Speed in evaluations/second
       speed: 500
+      # k values for extrapolation of the matter power spectrum
+      k_max_extrap: 500.0
+      k_min_extrap: 0.00001
+      k_samp: 1000
+      # z limit values and size for the z-array
+      z_min: 0.0
+      z_max: 4.0
+      z_samp: 100
       # Non-Linear flag selector
       NL_flag: 0
       # Add RSD to photometric probes

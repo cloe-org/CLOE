@@ -117,11 +117,15 @@ class Euclike:
             cosmology dictionary from the Cosmology class
             which is updated at each sampling step    
         """
+        
         # Transforming data
+        print("I am in masked photo data")
         spectrodata = self.create_spectro_data()
         spectrocov = self.create_spectro_cov()
+        print(" 2 I am in masked photo data")
         # Tranforming data
         self.photodata = self.create_photo_data(dictionary)
+        print(" 3 I am in masked photo data")
         datafinal = {**self.photodata,
                      'GC-Spectro': spectrodata}
         covfinal = {'3x2pt': self.data_ins.data_dict['3x2pt_cov'],
@@ -134,6 +138,7 @@ class Euclike:
         self.data_vector, self.cov_matrix, self.masking_vector = \
             self.data_handler_ins.get_data_and_masking_vector()
 
+        print("I am after masking")
         self.mask_ins = Masking()
         self.mask_ins.set_data_vector(self.data_vector)
         self.mask_ins.set_covariance_matrix(self.cov_matrix)
@@ -174,20 +179,20 @@ class Euclike:
         self.tomo_ind_GC_phot = list(self.data_ins.data_dict['GC-Phot'].keys())[1:]
         datavec_dict['GC-Phot'] = np.array(
                 [self.data_ins.data_dict['GC-Phot'][key][ell]
-                 for ell in range(len(self.ells_GC_phot))]
-                 for key in self.tomo_ind_GC_phot)
+                 for ell in range(len(self.ells_GC_phot))
+                 for key in self.tomo_ind_GC_phot])
 
         self.tomo_ind_WL = list(self.data_ins.data_dict['WL'].keys())[1:]
         datavec_dict['WL'] = np.array(
                 [self.data_ins.data_dict['WL'][key][ell]
-                 for ell in range(len(self.ells_WL))]
-                 for key in self.tomo_ind_WL)
+                 for ell in range(len(self.ells_WL))
+                 for key in self.tomo_ind_WL])
 
         self.tomo_ind_XC = list(self.data_ins.data_dict['XC-Phot'].keys())[1:]
         datavec_dict['XC-Phot'] = np.array(
                 [self.data_ins.data_dict['XC-Phot'][key][ell]
-                 for ell in range(len(self.ells_XC))]
-                 for key in self.tomo_ind_XC)
+                 for ell in range(len(self.ells_XC))
+                 for key in self.tomo_ind_XC])
         
         datavec_dict['WL'] = self.transform_photo_theory_data_vector(datavec_dict['WL'], dictionary, obs='WL')
         datavec_dict['XC-Phot'] = self.transform_photo_theory_data_vector(datavec_dict['XC-Phot'], dictionary, obs='XC-phot')
@@ -329,6 +334,7 @@ class Euclike:
                 print("In method:transform_photo_theory_data_vector, observable passed will not be transformed") 
                 transformed_array = obs_array
         elif self.matrix_transform == False:
+            print("not doing any matrix transform")
             transformed_array = obs_array
         else: 
             raise ValueError("Matrix Transform not implemented yet into CLOE")
@@ -460,16 +466,20 @@ class Euclike:
         loglike_tot: float
             loglike = Ln(likelihood) for the Euclid observables
         """
+        print("entering loglike")
         self.create_masked_photo_data(dictionary)
+        print("Created vectors")
         photo_theory_vec = self.create_photo_theory(dictionary)
+        print("Created vectors")
         spectro_theory_vec = self.create_spectro_theory(dictionary)
-
+        print("Created vectors")
         theory_vec = np.concatenate(
             (photo_theory_vec, spectro_theory_vec), axis=0)
         self.mask_ins.set_theory_vector(theory_vec)
         masked_data_minus_theory = (
             self.masked_data_vector - self.mask_ins.get_masked_theory_vector())
-
+        np.save('./masked_data_minus_theory_vector.npy', masked_data_minus_theory)
+        np.save('./inv_covmat.npy', self.masked_invcov_matrix)
         loglike = -0.5 * np.dot(
             np.dot(masked_data_minus_theory, self.masked_invcov_matrix),
             masked_data_minus_theory)

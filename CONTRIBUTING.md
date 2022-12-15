@@ -1,13 +1,14 @@
 # Euclid IST:L Contribution Guidelines
 
 > Authors: Samuel Farrens, Dida Markovic  
-> Last Updated: 25/10/2022
+> Last Updated: 15/12/2022
 
 ## Contents
 
-1. [Introduction](#Introduction)
-1. [Git Development Guidelines](#Git-Development-Guidelines)
-1. [IST:NL Development Guidelines](#IST:NL Development Guidelines)
+1. [Introduction](#introduction)
+1. [Git Development Guidelines](#git-development-guidelines)
+1. [IST:NL Development Guidelines](#istnl-development-guidelines)
+1. [Style choices](#style-choices)
 
 ## Introduction
 

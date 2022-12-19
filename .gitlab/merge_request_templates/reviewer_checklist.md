@@ -14,6 +14,7 @@ Reviewers, please check the following points before merging.
 - [ ] Quality of new/changed unit tests is acceptable
 - [ ] Manual `Check_HTML` job run and API documentation looks good
 - [ ] Manual `Profiling` job run and no unexpected performances issues found
+- [ ] The `internal/Scripts_and_options.ipynb` notebook has been run if the MR includes changes to configuration files (i.e. the `.yaml` files in `configs`)
 - [ ] Implementation follows the agreed task description point by point
 - [ ] Check that there are no '\No newline at the end of file' warnings
 - [ ] Check that any added folder/file has been added to the `README.md` file

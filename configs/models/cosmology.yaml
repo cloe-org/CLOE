@@ -24,6 +24,7 @@ logA:
     scale: 0.001
 mnu: 0.06
 nnu: 3.046
+num_nu_massive: 1
 ns:
   latex: n_\mathrm{s}
   prior:
@@ -54,14 +55,13 @@ omch2:
     dist: norm
     loc: 0.12
     scale: 0.001
-omegab:
-  latex: \Omega_\mathrm{b}
 omegam:
   latex: \Omega_\mathrm{m}
 omk: 0.0
 sigma8:
   latex: \sigma_8
 tau: 0.0925
+use_ppf: True
 w: -1.0
 wa: 0.0
 gamma_MG: 0.55

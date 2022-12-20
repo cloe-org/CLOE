@@ -171,7 +171,6 @@ class Reader:
             Sub-folder of Reader.data_subdirectory within which to find
             the luminosity ratio data.
         """
-        print(self.data)
         file_name_lum = self.data['photo']['luminosity_ratio']
         self.luminosity_ratio = self.reader_luminosity_ratio(
             file_dest, file_name_lum)

@@ -6,6 +6,7 @@ Top level user interface class for running CLOE
 
 from cloe.auxiliary import yaml_handler
 from cloe.auxiliary import likelihood_yaml_handler as lyh
+from cloe.auxiliary import params_converter as parconv
 from cloe.cobaya_interface import EuclidLikelihood
 from cloe.auxiliary.plotter import Plotter
 from cloe.auxiliary.getdist_routines import triangle_plot_cobaya
@@ -244,6 +245,9 @@ class LikelihoodUI:
         """
         Checks and updates the fields in the params sub dictionary
 
+        Includes the conversion of the parameters to the basis understandable
+        by the selected Boltzmann solver.
+
         Parameters
         ----------
         cobaya_dict: dict
@@ -254,6 +258,8 @@ class LikelihoodUI:
         ValueError
             if the value of the key 'params' in cobaya_dict
             is neither a string nor a dictionary
+        KeyError
+            if the selected Boltzmann solver is neither CAMB or CLASS
         """
 
         params = cobaya_dict['params']
@@ -272,6 +278,16 @@ class LikelihoodUI:
             raise ValueError('key \'params\' in the input yaml configuration '
                              'must be a either a string (the model yaml path)'
                              'or a dict (the params dictionary)')
+
+        if 'camb' in cobaya_dict['theory'].keys():
+            solver = 'camb'
+        elif 'classy' in cobaya_dict['theory'].keys():
+            solver = 'classy'
+        else:
+            raise KeyError('Boltzmann solvers must be chosen between '
+                           'CAMB and CLASS')
+        parconv.convert_params(cobaya_dict['params'],
+                               cobaya_dict['theory'][solver], solver)
 
     def _get_model_path_from_cobaya_dict(self, cobaya_dict):
         """Get the full model path from the Cobaya dictionary

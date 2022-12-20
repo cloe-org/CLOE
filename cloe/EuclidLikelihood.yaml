@@ -1,10 +1,15 @@
-# This yaml file contains the user specifications
-# for the Euclid observables computed theoretically
-# in CLOE.
+# This yaml file contains the user specifications for the Euclid observables
+# computed theoretically in CLOE.
+
+# Users should never edit this file. The default values listed here will
+# be overwritten by the ones specified in the configuration files.
+
 # Name given to the likelihood block (Cobaya will print this name)
 aliases: [euclid]
 # Speed in evaluations/second
 speed: 500
+# Selected Boltzmann solver
+solver: camb
 # List of parameters that are
 # only parameters of the likelihood
 params: !defaults [../configs/params]

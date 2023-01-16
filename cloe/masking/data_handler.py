@@ -181,8 +181,6 @@ class Data_handler:
         zpairs_wl = data.numtomo_wl*(data.numtomo_wl+1)//2
         zpairs_xc = data.numtomo_wl * data.numtomo_gcphot
         zpairs_gcphot = data.numtomo_gcphot*(data.numtomo_gcphot+1)//2
-        # flattening_order = data.data_dict['photo']['flattening_order']
-        flattening_order = 'C'
         
         
                 
@@ -201,7 +199,7 @@ class Data_handler:
                     #     axis=None)
                     wl_vec[:, zpair] = self._get_masking(ells, accepted_ells)
                     zpair += 1
-            wl_vec = wl_vec.flatten(order=flattening_order)  
+            wl_vec = wl_vec.flatten()  
             # the default for np.ndarray.flatten() is leftmost axis as outermost for loop
             # in this and in the following, flatten(), or equivalently, flatten(order='C') will flatten the array
             # using the first axis of wl_vec - i.e., the one on the multipoles - as the outermost for loop. 
@@ -226,7 +224,7 @@ class Data_handler:
                     #     axis=None)
                     xc_phot_vec[:, zpair] = self._get_masking(ells, accepted_ells)
                     zpair += 1
-            xc_phot_vec = xc_phot_vec.flatten(order=flattening_order)
+            xc_phot_vec = xc_phot_vec.flatten()
         else:
             xc_phot_vec = (
                 np.full(self._xc_phot_size, self._use_xc_phot, dtype=int))
@@ -246,7 +244,7 @@ class Data_handler:
                     #     axis=None)
                     gc_phot_vec[:, zpair] = self._get_masking(ells, accepted_ells)
                     zpair += 1
-            gc_phot_vec = gc_phot_vec.flatten(order=flattening_order)
+            gc_phot_vec = gc_phot_vec.flatten()
         else:
             gc_phot_vec = (
                 np.full(self._gc_phot_size, self._use_gc_phot, dtype=int))

@@ -21,6 +21,11 @@ dist/
 chains/
 notebooks/chains/
 
+# Test outputs #
+################
+coverage.xml
+pytest.xml 
+
 # Notebook checkpoints #
 ########################
 *.ipynb_checkpoints*

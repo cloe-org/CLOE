@@ -50,6 +50,7 @@ class Reader:
         self.nz_dict_GC_Phot_raw = {}
         self.numtomo_gcphot = {}
         self.numtomo_wl = {}
+        self.luminosity_ratio_interpolator = None
 
         # Added empty dict to fill in fiducial
         # cosmology data from Spectro OU-level3 files
@@ -91,6 +92,37 @@ class Reader:
             raise Exception(
                 'n(z) files not found. Please, check out the files')
 
+    def reader_luminosity_ratio(self, file_dest, file_name):
+        """Reader luminosity ratio file
+
+        General routine to read the the luminosity ratio
+        used to compute the IA as a function of redshift
+        data
+
+        Parameters
+        ----------
+        file_dest: str
+            Sub-folder of Reader.data_subdirectory within which to find
+            the luminosity ratio as a function of redshift.
+        file_name: str
+            Name of the luminosity file
+
+        Return
+        ------
+        luminosity_ratio_dict: dict
+            dictionary containing raw luminosity ratio data
+        """
+        try:
+            path = Path(self.dat_dir_main, Path(file_dest), Path(file_name))
+            luminosity_ratio = np.genfromtxt(path, names=True)
+            luminosity_ratio_dict = {x: luminosity_ratio[x] for x
+                                     in luminosity_ratio.dtype.names}
+
+            return luminosity_ratio_dict
+        except BaseException:
+            raise Exception(
+                'Luminosity ratio file not found. Please, check out the file')
+
     def compute_nz(self, file_dest='Photometric'):
         """Compute Nz
 
@@ -127,6 +159,26 @@ class Reader:
                                     self.nz_dict_WL_raw[x],
                                     self.nz_dict_WL_raw['z']), ext=2) for x in
                                 list(self.nz_dict_WL_raw.keys())[1:]})
+
+    def compute_luminosity_ratio(self, file_dest='Photometric'):
+        """Compute luminosity ratio
+
+        Function to save luminosty ratio dict as attributes of the Reader class
+        It saves the interpolator of the raw data.
+
+        Parameters
+        ----------
+        file_dest: str
+            Sub-folder of Reader.data_subdirectory within which to find
+            the luminosity ratio data.
+        """
+        file_name_lum = self.data['photo']['luminosity_ratio']
+        self.luminosity_ratio = self.reader_luminosity_ratio(
+            file_dest, file_name_lum)
+        self.luminosity_ratio_interpolator = \
+            interpolate.InterpolatedUnivariateSpline(
+                self.luminosity_ratio['z'],
+                self.luminosity_ratio['luminosity'])
 
     def read_GC_spectro(self, file_dest='Spectroscopic/data'):
         """Read GC Spectro

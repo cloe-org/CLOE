@@ -1,3 +1,6 @@
+# Choice of the Boltzmann solver. Allowed values are
+# camb (for CAMB) and classy (for CLASS)
+define: &solver camb
 backend: Cobaya
 Cobaya:
   # Documentation about Cobaya keys can be found at:
@@ -11,6 +14,16 @@ Cobaya:
       external: !!python/name:cloe.cobaya_interface.EuclidLikelihood ''
       # Speed in evaluations/second
       speed: 500
+      # k values for extrapolation of the matter power spectrum
+      k_max_extrap: 500.0
+      k_min_extrap: 0.00001
+      k_samp: 1000
+      # z limit values and size for the z-array
+      z_min: 0.0
+      z_max: 4.0
+      z_samp: 100
+      # Flag to make the choice of the sampler visible to cloe
+      solver: *solver
       # Non-Linear flag selector
       NL_flag: 0
       # Add RSD to photometric probes
@@ -49,10 +62,8 @@ Cobaya:
       # max_tries: 100000  # default
       evaluate
   theory:
-    camb:
-      extra_args:
-        dark_energy_model: ppf
-        num_massive_neutrinos: 1
+    *solver:
+      extra_args: {}
       stop_at_error: true
   timing: true
 action: run

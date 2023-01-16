@@ -132,9 +132,6 @@ class Photo:
         if self.theory['f_K_z_func'] is None:
             raise KeyError('No interpolated function for transverse comoving '
                            'distance exists in cosmo_dic.')
-        # temporary fix, see #767
-        if self.theory['CAMBdata'] is None:
-            raise KeyError('CAMBdata is not available in cosmo_dic.')
 
         z_wmax = self.theory['z_win'][-1]
         self.wl_int_z_max = {i: z_wmax + nuisance_dict[f'dz_{i}_WL']

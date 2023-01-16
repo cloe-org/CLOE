@@ -14,9 +14,11 @@ Reviewers, please check the following points before merging.
 - [ ] Quality of new/changed unit tests is acceptable
 - [ ] Manual `Check_HTML` job run and API documentation looks good
 - [ ] Manual `Profiling` job run and no unexpected performances issues found
+- [ ] The `internal/Scripts_and_options.ipynb` notebook has been run if the MR includes changes to configuration files (i.e. the `.yaml` files in `configs`)
 - [ ] Implementation follows the agreed task description point by point
 - [ ] Check that there are no '\No newline at the end of file' warnings
-- [ ] Check that the implementation follows the [Contributing guidelines and style choices](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/blob/master/CONTRIBUTING.md)
+- [ ] Check that any added folder/file has been added to the `README.md` file
+- [ ] Check that the implementation follows the [Contributing guidelines and style choices](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/blob/develop/CONTRIBUTING.md)
 - [ ] At least one expert has verified the documentation
 - [ ] Final comments by leads, if any, are correctly taken into account (minor ones within the task; major ones in a new task)
 

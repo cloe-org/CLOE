@@ -32,7 +32,8 @@ class LikelihoodUI_test(TestCase):
                                                  'observables_selection': {},
                                                  'observables_specification':
                                                      {},
-                                                 'data': '/dev/null'}}},
+                                                 'data': '/dev/null'}},
+                       'theory': {'camb': {}}},
             'action': 'run'
         }
         self.config_action_invalid = {
@@ -110,6 +111,8 @@ class LikelihoodUI_test(TestCase):
     @patch('cloe.auxiliary.yaml_handler.yaml_read')
     @patch('cloe.auxiliary.likelihood_yaml_handler'
            '.update_cobaya_params_from_model_yaml')
+    @patch('cloe.auxiliary.params_converter'
+           '.convert_params')
     @patch('cloe.auxiliary.likelihood_yaml_handler'
            '.update_cobaya_dict_with_halofit_version')
     @patch('cobaya.run')
@@ -117,6 +120,7 @@ class LikelihoodUI_test(TestCase):
             self,
             cobaya_run_mock,
             halofit_update_mock,
+            convert_params_mock,
             dict_update_mock,
             yaml_read_mock,
             log_mock
@@ -126,6 +130,7 @@ class LikelihoodUI_test(TestCase):
         ui.run()
         self.assertEqual(yaml_read_mock.call_count, 3)
         self.assertEqual(dict_update_mock.call_count, 1)
+        self.assertEqual(convert_params_mock.call_count, 1)
         self.assertEqual(halofit_update_mock.call_count, 1)
         self.assertEqual(cobaya_run_mock.call_count, 1)
 
@@ -135,6 +140,8 @@ class LikelihoodUI_test(TestCase):
     @patch('cloe.auxiliary.yaml_handler.yaml_read')
     @patch('cloe.auxiliary.likelihood_yaml_handler'
            '.update_cobaya_params_from_model_yaml')
+    @patch('cloe.auxiliary.params_converter'
+           '.convert_params')
     @patch('cloe.auxiliary.likelihood_yaml_handler'
            '.update_cobaya_dict_with_halofit_version')
     @patch('cobaya.run')
@@ -142,6 +149,7 @@ class LikelihoodUI_test(TestCase):
             self,
             cobaya_run_mock,
             halofit_update_mock,
+            convert_params_mock,
             dict_update_mock,
             yaml_read_mock,
             log_mock
@@ -151,6 +159,7 @@ class LikelihoodUI_test(TestCase):
         ui.run()
         self.assertEqual(yaml_read_mock.call_count, 2)
         self.assertEqual(dict_update_mock.call_count, 1)
+        self.assertEqual(convert_params_mock.call_count, 1)
         self.assertEqual(halofit_update_mock.call_count, 1)
         self.assertEqual(cobaya_run_mock.call_count, 1)
 
@@ -176,6 +185,8 @@ class LikelihoodUI_test(TestCase):
     @patch('cloe.auxiliary.yaml_handler.yaml_read')
     @patch('cloe.auxiliary.likelihood_yaml_handler'
            '.update_cobaya_params_from_model_yaml')
+    @patch('cloe.auxiliary.params_converter'
+           '.convert_params')
     @patch('cloe.auxiliary.likelihood_yaml_handler'
            '.update_cobaya_dict_with_halofit_version')
     @patch('cobaya.run')
@@ -183,6 +194,7 @@ class LikelihoodUI_test(TestCase):
             self,
             cobaya_run_mock,
             halofit_update_mock,
+            convert_params_mock,
             dict_update_mock,
             yaml_read_mock,
             log_mock
@@ -192,6 +204,7 @@ class LikelihoodUI_test(TestCase):
         ui = LikelihoodUI(user_config_file=self.file_name)
         ui._run_cobaya()
         self.assertEqual(dict_update_mock.call_count, 1)
+        self.assertEqual(convert_params_mock.call_count, 1)
         self.assertEqual(halofit_update_mock.call_count, 1)
         self.assertEqual(cobaya_run_mock.call_count, 1)
         cobaya_run_mock.assert_called_with(self.config_good['Cobaya'])

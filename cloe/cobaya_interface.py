@@ -16,6 +16,7 @@ from cobaya.model import get_model
 from cloe.cosmo.cosmology import Cosmology
 from cloe.like_calc.euclike import Euclike
 from cloe.auxiliary.observables_dealer import *
+from cloe.auxiliary.params_converter import camb_to_classy
 
 # Error classes
 
@@ -71,6 +72,19 @@ class EuclidLikelihood(Likelihood):
         # Initialize Euclike module
         self.likefinal = Euclike(self.data, self.observables)
 
+        # Here we set the naming convention for the cosmological parameters
+        # accepted by the selected Boltzmann solver
+        if not self.solver:
+            warnings.warn('Boltzmann solver not specified at instantiation '
+                          'of EuclidLikelihood class. Default set to CAMB')
+            self.solver = 'camb'
+        if self.solver == 'camb':
+            self.pnames = \
+                dict(zip(camb_to_classy.keys(), camb_to_classy.keys()))
+        elif self.solver == 'classy':
+            self.pnames = \
+                dict(zip(camb_to_classy.keys(), camb_to_classy.values()))
+
         # Initialize Cosmology class for sampling
         self.cosmo = Cosmology()
 
@@ -86,6 +100,8 @@ class EuclidLikelihood(Likelihood):
             self.fiducial_cosmology.cosmo_dic['H_z_func']
 
         self.cosmo.cosmo_dic['redshift_bins'] = self.data['spectro']['edges']
+        self.cosmo.cosmo_dic['luminosity_ratio_z_func'] = \
+            self.likefinal.data_ins.luminosity_ratio_interpolator
 
     def set_fiducial_cosmology(self):
         r"""Sets the fiducial cosmology class
@@ -100,30 +116,25 @@ class EuclidLikelihood(Likelihood):
             self.likefinal.data_spectro_fiducial_cosmo)
         self.info_fiducial = {
             'params': {
-                'ombh2': self.fiducial_cosmology.cosmo_dic['ombh2'],
-                'omch2': self.fiducial_cosmology.cosmo_dic['omch2'],
-                'omnuh2': self.fiducial_cosmology.cosmo_dic['omnuh2'],
-                'omk': self.fiducial_cosmology.cosmo_dic['Omk'],
+                self.pnames['ombh2']:
+                    self.fiducial_cosmology.cosmo_dic['ombh2'],
+                self.pnames['omch2']:
+                    self.fiducial_cosmology.cosmo_dic['omch2'],
+                self.pnames['omnuh2']:
+                    self.fiducial_cosmology.cosmo_dic['omnuh2'],
+                self.pnames['omk']: self.fiducial_cosmology.cosmo_dic['Omk'],
                 'H0': self.fiducial_cosmology.cosmo_dic['H0'],
-                'H0_Mpc': (self.cosmo.cosmo_dic['H0'] /
-                           const.c.to('km/s').value),
-                'Omnu': (self.fiducial_cosmology.cosmo_dic['omnuh2'] /
-                         (self.cosmo.cosmo_dic['H0'] / 100.0)**2.0),
-                'tau': self.fiducial_cosmology.cosmo_dic['tau'],
-                'mnu': self.fiducial_cosmology.cosmo_dic['mnu'],
-                'nnu': self.fiducial_cosmology.cosmo_dic['nnu'],
-                'ns': self.fiducial_cosmology.cosmo_dic['ns'],
-                'As': self.fiducial_cosmology.cosmo_dic['As'],
-                'w': self.fiducial_cosmology.cosmo_dic['w'],
-                'wa': self.fiducial_cosmology.cosmo_dic['wa']
+                self.pnames['tau']: self.fiducial_cosmology.cosmo_dic['tau'],
+                self.pnames['mnu']: self.fiducial_cosmology.cosmo_dic['mnu'],
+                self.pnames['ns']: self.fiducial_cosmology.cosmo_dic['ns'],
+                self.pnames['As']: self.fiducial_cosmology.cosmo_dic['As'],
+                self.pnames['w']: self.fiducial_cosmology.cosmo_dic['w'],
+                self.pnames['wa']: self.fiducial_cosmology.cosmo_dic['wa']
             },
             'theory': {
-                'camb': {
+                self.solver: {
                     'stop_at_error': True,
-                    'extra_args': {
-                        'num_massive_neutrinos': 1,
-                        'dark_energy_model': 'ppf'
-                    }
+                    'extra_args': {}
                 }
             },
             # Likelihood: we load the likelihood as an external function
@@ -131,19 +142,29 @@ class EuclidLikelihood(Likelihood):
                 'one': None
             }
         }
+        if self.solver == 'camb':
+            (self.info_fiducial['theory']['camb']['extra_args']
+             ['num_massive_neutrinos']) = 1
+            self.info_fiducial['params']['nnu'] = \
+                self.fiducial_cosmology.cosmo_dic['nnu']
+        elif self.solver == 'classy':
+            nrad = 4.41e-3
+            self.info_fiducial['params']['N_ncdm'] = 1
+            self.info_fiducial['params']['N_ur'] = \
+                ((self.fiducial_cosmology.cosmo_dic['nnu'] - nrad) *
+                 (3.0 - self.info_fiducial['params']['N_ncdm']) / 3.0 +
+                 nrad)
+            self.info_fiducial['params']['Omega_Lambda'] = 0.0
 
         # Update fiducial cobaya dictionary with the IST-F
         # Fiducial values of biases
-        self.info_fiducial['params'].update(
-            self.fiducial_cosmology.cosmo_dic['nuisance_parameters'])
+        # With classy, this makes the code break
+        # self.info_fiducial['params'].update(
+        #    self.fiducial_cosmology.cosmo_dic['nuisance_parameters'])
         # Use get_model wrapper for fiducial
         model_fiducial = get_model(self.info_fiducial)
         model_fiducial.add_requirements({
             'omegam': None,
-            'omegab': None,
-            'omegac': None,
-            'omnuh2': None,
-            'omeganu': None,
             'Pk_interpolator': {
                 'z': self.z_win,
                 'k_max': self.k_max_Boltzmann,
@@ -174,12 +195,10 @@ class EuclidLikelihood(Likelihood):
         model_fiducial.logposterior({})
 
         # Update fiducial cosmology dictionary
-        self.fiducial_cosmology.cosmo_dic['Omc'] = \
-            model_fiducial.provider.get_param('omegac')
         self.fiducial_cosmology.cosmo_dic['Omm'] = \
             model_fiducial.provider.get_param('omegam')
         self.fiducial_cosmology.cosmo_dic['Omk'] = \
-            model_fiducial.provider.get_param('omk')
+            model_fiducial.provider.get_param(self.pnames['omk'])
         self.fiducial_cosmology.cosmo_dic['z_win'] = self.z_win
         self.fiducial_cosmology.cosmo_dic['k_win'] = self.k_win
         self.fiducial_cosmology.cosmo_dic['comov_dist'] = \
@@ -210,6 +229,8 @@ class EuclidLikelihood(Likelihood):
             model_fiducial.provider.get_sigma8_z(
             self.z_win)
         # Update dictionary with interpolators
+        self.fiducial_cosmology.cosmo_dic['luminosity_ratio_z_func'] = \
+            self.likefinal.data_ins.luminosity_ratio_interpolator
         self.fiducial_cosmology.update_cosmo_dic(
             self.fiducial_cosmology.cosmo_dic['z_win'],
             0.05)
@@ -227,27 +248,26 @@ class EuclidLikelihood(Likelihood):
         calculated by a theory code are needed
 
         """
-
-        return {'omegam': None,
-                'omegab': None,
-                'omegac': None,
-                'omnuh2': None,
-                'omeganu': None,
-                'Pk_interpolator':
+        requirements = \
+            {'omegam': None,
+             'Pk_interpolator':
                 {'z': self.z_win,
                  'k_max': self.k_max_Boltzmann,
                  'nonlinear': self.use_NL,
-                 'vars_pairs': ([['delta_tot',
-                                  'delta_tot'],
-                                 ['Weyl',
-                                  'Weyl']])},
+                 'vars_pairs': ([['delta_tot', 'delta_tot'],
+                                 ['Weyl', 'Weyl']])},
                 'comoving_radial_distance': {'z': self.z_win},
                 'angular_diameter_distance': {'z': self.z_win},
                 'Hubble': {'z': self.z_win, 'units': 'km/s/Mpc'},
                 'sigma8_z': {'z': self.z_win},
-                'fsigma8': {'z': self.z_win, 'units': None},
-                # temporary, see #767
-                'CAMBdata': None}
+                'fsigma8': {'z': self.z_win, 'units': None}}
+        if self.solver == 'camb':
+            derived = {'omegab': None, 'omegac': None,
+                       'omnuh2': None, 'omeganu': None,
+                       'nnu': None}
+            requirements = requirements | derived
+
+        return requirements
 
     def passing_requirements(self, model, info, **params_dic):
         r"""Passing Requirements
@@ -262,9 +282,6 @@ class EuclidLikelihood(Likelihood):
         """
 
         try:
-            # TEMPORARY (UNTIL JESUS GIVES US THE REQUIREMENTS), see #767
-            self.cosmo.cosmo_dic['CAMBdata'] = self.provider.get_CAMBdata()
-            # ------------------------------------------------
             self.cosmo.cosmo_dic['NL_flag'] = self.NL_flag
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
             self.cosmo.cosmo_dic['add_phot_RSD'] = self.add_phot_RSD
@@ -273,23 +290,39 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['H0'] = self.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
-            self.cosmo.cosmo_dic['As'] = self.provider.get_param('As')
-            self.cosmo.cosmo_dic['ns'] = self.provider.get_param('ns')
-            self.cosmo.cosmo_dic['omch2'] = self.provider.get_param('omch2')
-            self.cosmo.cosmo_dic['ombh2'] = self.provider.get_param('ombh2')
-            self.cosmo.cosmo_dic['Omc'] = self.provider.get_param('omegac')
-            self.cosmo.cosmo_dic['Omb'] = self.provider.get_param('omegab')
+            self.cosmo.cosmo_dic['tau'] = \
+                self.provider.get_param(self.pnames['tau'])
+            self.cosmo.cosmo_dic['As'] = \
+                self.provider.get_param(self.pnames['As'])
+            self.cosmo.cosmo_dic['ns'] = \
+                self.provider.get_param(self.pnames['ns'])
+            self.cosmo.cosmo_dic['omch2'] = \
+                self.provider.get_param(self.pnames['omch2'])
+            self.cosmo.cosmo_dic['ombh2'] = \
+                self.provider.get_param(self.pnames['ombh2'])
+            self.cosmo.cosmo_dic['Omk'] = \
+                self.provider.get_param(self.pnames['omk'])
+            try:
+                self.cosmo.cosmo_dic['mnu'] = \
+                    self.provider.get_param(self.pnames['mnu'])
+            except (KeyError):
+                self.cosmo.cosmo_dic['omnuh2'] = \
+                    self.provider.get_param(self.pnames['omnuh2'])
+            self.cosmo.cosmo_dic['w'] = \
+                self.provider.get_param(self.pnames['w'])
+            self.cosmo.cosmo_dic['wa'] = \
+                self.provider.get_param(self.pnames['wa'])
             self.cosmo.cosmo_dic['Omm'] = self.provider.get_param('omegam')
-            self.cosmo.cosmo_dic['Omk'] = self.provider.get_param('omk')
-            self.cosmo.cosmo_dic['mnu'] = self.provider.get_param('mnu')
-            self.cosmo.cosmo_dic['omnuh2'] = self.provider.get_param('omnuh2')
-            self.cosmo.cosmo_dic['Omnu'] = self.provider.get_param('omeganu')
-            self.cosmo.cosmo_dic['w'] = self.provider.get_param('w')
-            self.cosmo.cosmo_dic['wa'] = self.provider.get_param('wa')
+            if self.solver == 'camb':
+                self.cosmo.cosmo_dic['Omc'] = self.provider.get_param('omegac')
+                self.cosmo.cosmo_dic['Omb'] = self.provider.get_param('omegab')
+                self.cosmo.cosmo_dic['omnuh2'] = \
+                    self.provider.get_param('omnuh2')
+                self.cosmo.cosmo_dic['Omnu'] = \
+                    self.provider.get_param('omeganu')
+                self.cosmo.cosmo_dic['nnu'] = self.provider.get_param('nnu')
             self.cosmo.cosmo_dic['gamma_MG'] = \
                 self.provider.get_param('gamma_MG')
-            self.cosmo.cosmo_dic['nnu'] = self.provider.get_param('nnu')
-            self.cosmo.cosmo_dic['tau'] = self.provider.get_param('tau')
             self.cosmo.cosmo_dic['comov_dist'] = \
                 self.provider.get_comoving_radial_distance(self.z_win)
             self.cosmo.cosmo_dic['angular_dist'] = \
@@ -329,7 +362,6 @@ class EuclidLikelihood(Likelihood):
                 **only_nuisance_params)
 
         except (TypeError, AttributeError):
-            self.cosmo.cosmo_dic['CAMBdata'] = model.provider.get_CAMBdata()
             self.cosmo.cosmo_dic['NL_flag'] = \
                 info['likelihood']['Euclid']['NL_flag']
             self.cosmo.cosmo_dic['add_phot_RSD'] = \
@@ -340,24 +372,44 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['H0'] = model.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
-            self.cosmo.cosmo_dic['As'] = model.provider.get_param('As')
-            self.cosmo.cosmo_dic['ns'] = model.provider.get_param('ns')
-            self.cosmo.cosmo_dic['omch2'] = model.provider.get_param('omch2')
-            self.cosmo.cosmo_dic['ombh2'] = model.provider.get_param('ombh2')
-            self.cosmo.cosmo_dic['Omc'] = model.provider.get_param('omegac')
-            self.cosmo.cosmo_dic['Omb'] = model.provider.get_param('omegab')
+            self.cosmo.cosmo_dic['tau'] = \
+                model.provider.get_param(self.pnames['tau'])
+            self.cosmo.cosmo_dic['As'] = \
+                model.provider.get_param(self.pnames['As'])
+            self.cosmo.cosmo_dic['ns'] = \
+                model.provider.get_param(self.pnames['ns'])
+            self.cosmo.cosmo_dic['omch2'] = \
+                model.provider.get_param(self.pnames['omch2'])
+            self.cosmo.cosmo_dic['ombh2'] = \
+                model.provider.get_param(self.pnames['ombh2'])
+            self.cosmo.cosmo_dic['Omk'] = \
+                model.provider.get_param(self.pnames['omk'])
+            try:
+                self.cosmo.cosmo_dic['mnu'] = \
+                    model.provider.get_param(self.pnames['mnu'])
+            except (KeyError):
+                self.cosmo.cosmo_dic['omnuh2'] = \
+                    model.provider.get_param(self.pnames['omnuh2'])
+            self.cosmo.cosmo_dic['mnu'] = \
+                model.provider.get_param(self.pnames['mnu'])
+            self.cosmo.cosmo_dic['w'] = \
+                model.provider.get_param(self.pnames['w'])
+            self.cosmo.cosmo_dic['wa'] = \
+                model.provider.get_param(self.pnames['wa'])
             self.cosmo.cosmo_dic['Omm'] = model.provider.get_param('omegam')
-            self.cosmo.cosmo_dic['Omk'] = model.provider.get_param('omk')
-            self.cosmo.cosmo_dic['mnu'] = model.provider.get_param('mnu')
-            self.cosmo.cosmo_dic['mnu'] = model.provider.get_param('mnu')
-            self.cosmo.cosmo_dic['omnuh2'] = model.provider.get_param('omnuh2')
-            self.cosmo.cosmo_dic['Omnu'] = model.provider.get_param('omeganu')
-            self.cosmo.cosmo_dic['w'] = model.provider.get_param('w')
-            self.cosmo.cosmo_dic['wa'] = model.provider.get_param('wa')
+            if self.solver == 'camb':
+                self.cosmo.cosmo_dic['Omc'] = \
+                    model.provider.get_param('omegac')
+                self.cosmo.cosmo_dic['Omb'] = \
+                    model.provider.get_param('omegab')
+                self.cosmo.cosmo_dic['omnuh2'] = \
+                    model.provider.get_param('omnuh2')
+                self.cosmo.cosmo_dic['Omnu'] = \
+                    model.provider.get_param('omeganu')
+                self.cosmo.cosmo_dic['nnu'] = model.provider.get_param('nnu')
+            self.cosmo.cosmo_dic['Omm'] = model.provider.get_param('omegam')
             self.cosmo.cosmo_dic['gamma_MG'] = \
                 model.provider.get_param('gamma_MG')
-            self.cosmo.cosmo_dic['nnu'] = model.provider.get_param('nnu')
-            self.cosmo.cosmo_dic['tau'] = model.provider.get_param('tau')
             self.cosmo.cosmo_dic['comov_dist'] = \
                 model.provider.get_comoving_radial_distance(self.z_win)
             self.cosmo.cosmo_dic['angular_dist'] = \

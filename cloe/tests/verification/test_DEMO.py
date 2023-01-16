@@ -12,7 +12,6 @@ import os
 import shlex
 
 
-@skip('Skipping DEMO test case')
 class DEMOTestCase(TestCase):
 
     def setUp(self):

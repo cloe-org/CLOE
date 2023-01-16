@@ -14,11 +14,11 @@ before_script:
   - ls -a
   - echo $CI_PIPELINE_SOURCE
 
-# Install package
-Install:
+# Run unit tests
+Tests:
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   script:
-    - python setup.py test
+    - python -m pytest
   only:
     refs:
       - merge_requests
@@ -36,6 +36,17 @@ Install:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
+
+# Run verification tests
+Verification:
+  script:
+    - python -m pytest cloe/tests/verification
+  when: manual
+  artifacts:
+    reports:
+      junit: pytest.xml
+  only:
+    - merge_requests
 
 # Build temporary API docs for reviewer
 Check_HTML:

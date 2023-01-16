@@ -13,12 +13,6 @@ from cloe.masking.masking import Masking
 from cloe.masking.data_handler import Data_handler
 from cloe.auxiliary.matrix_transforms import VectorizeMatrix, BNT_transform
 
-import matplotlib.pyplot as plt
-import sys
-sys.path.append('/Users/davide/Documents/Lavoro/Programmi/common_data/common_lib')
-import my_module_nonumba as mm
-
-
 class EuclikeError(Exception):
     r"""
     Class to define Exception Error
@@ -125,13 +119,10 @@ class Euclike:
         """
         
         # Transforming data
-        print("I am in masked photo data")
         spectrodata = self.create_spectro_data()
         spectrocov = self.create_spectro_cov()
-        print(" 2 I am in masked photo data")
         # Tranforming data
         self.photodata = self.create_photo_data(dictionary)
-        print(" 3 I am in masked photo data")
         datafinal = {**self.photodata,
                      'GC-Spectro': spectrodata}
         covfinal = {'3x2pt': self.data_ins.data_dict['3x2pt_cov'],
@@ -144,21 +135,6 @@ class Euclike:
         self.data_vector, self.cov_matrix, self.masking_vector = \
             self.data_handler_ins.get_data_and_masking_vector()
             
-            
-        # now the ordering is probe_zpair_ell, which is the output of _unpack_3x2pt_cov
-        plt.matshow(np.log10(self.cov_matrix))
-        plt.title('input covariance in euclike; I am not using the unpacking')
-        np.save('./self.cov_matrix_before_davides_reshaping', self.cov_matrix)
-        print('self.cov_matrix.shape', self.cov_matrix.shape)
-        
-        # reshaping, probably no longer necessary
-        # _cov_matrix_4D = mm.cov_2DCLOE_to_4D_3x2pt(self.cov_matrix[:4200, :4200], 20, 10, block_index='ij')
-        # self.cov_matrix[:4200, :4200] = mm.cov_4D_to_2DCLOE_3x2pt(_cov_matrix_4D, 20, 10, block_index='ell')
-        # np.save('./self.cov_matrix_after_davides_reshaping', self.cov_matrix)
-        # plt.matshow(np.log10(self.cov_matrix))
-        # plt.title('after davides reshaping')
-        
-        # masking works now for probe_ell_zpair ordering
         self.mask_ins = Masking()
         self.mask_ins.set_data_vector(self.data_vector)
         self.mask_ins.set_covariance_matrix(self.cov_matrix)
@@ -167,10 +143,6 @@ class Euclike:
         self.masked_cov_matrix = (
             self.mask_ins.get_masked_covariance_matrix())
 
-        # _masked_cov_matrix_4D = mm.cov_2DCLOE_to_4D_3x2pt(self.masked_cov_matrix, 20, 10, block_index='ij')
-        # self.masked_cov_matrix = mm.cov_4D_to_2DCLOE_3x2pt(_masked_cov_matrix_4D, 20, 10, block_index='ell')
-        plt.matshow(np.log10(self.masked_cov_matrix))
-        plt.title('after masking')
         
         self.masked_invcov_matrix = np.linalg.inv(self.masked_cov_matrix)
         
@@ -293,16 +265,11 @@ class Euclike:
                 len(self.indices_diagonal_gc) *
                 len(self.ells_GC_phot)
             )
-        
+                
         ## Apply any matrix transform activated with a switch
         wl_array = self.transform_photo_theory_data_vector(wl_array, dictionary, obs='WL')
-        xc_phot_array = self.transform_photo_theory_data_vector(xc_phot_array, dictionary, obs='WL')
-        gc_phot_array = self.transform_photo_theory_data_vector(gc_phot_array, dictionary, obs='XC-phot')
-        
-        ## Apply any matrix transform activated with a switch
-        # wl_array = self.transform_photo_theory_data_vector(wl_array, dictionary, obs='WL')
-        # xc_phot_array = self.transform_photo_theory_data_vector(xc_phot_array, dictionary, obs='XC-phot')
-        # gc_phot_array = self.transform_photo_theory_data_vector(gc_phot_array, dictionary, obs='GC-phot')
+        xc_phot_array = self.transform_photo_theory_data_vector(xc_phot_array, dictionary, obs='XC-phot')
+        gc_phot_array = self.transform_photo_theory_data_vector(gc_phot_array, dictionary, obs='GC-phot')
 
         self.photo_theory_vec = np.concatenate(
             (wl_array, xc_phot_array, gc_phot_array), axis=0)
@@ -508,19 +475,8 @@ class Euclike:
         masked_data_minus_theory = (
             self.masked_data_vector - self.mask_ins.get_masked_theory_vector())
         
-        print('saving arrays')
-        np.save('./masked_data_minus_theory_vector.npy', masked_data_minus_theory)
-        np.save('./self.masked_data_vector.npy', self.masked_data_vector)
-        np.save('./self.photo_theory_vec.npy', self.photo_theory_vec)
-        np.save('./self.mask_ins.get_masked_theory_vector.npy', self.mask_ins.get_masked_theory_vector())
-        np.save('./self.masked_cov_matrix.npy', self.masked_cov_matrix)
-        np.save('./self.cov_matrix.npy', self.cov_matrix)
-        
-        
         loglike = -0.5 * np.dot(
             np.dot(masked_data_minus_theory, self.masked_invcov_matrix),
             masked_data_minus_theory)
         
-        np.save('./loglike.npy', loglike)
-
         return loglike

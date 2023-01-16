@@ -4,7 +4,6 @@
 Contains class to read external data
 """
 
-from matplotlib import pyplot as plt
 import numpy as np
 from astropy.io import fits, ascii
 from pathlib import Path
@@ -332,22 +331,10 @@ class Reader:
             'photo']['cov_model'])
         tx2_cov = np.load(Path(full_path, tx2_cov_str))
         
-        plt.matshow(np.log10(tx2_cov))
-        plt.title('imported tx2_cov, before unpacking and masking')
-        
-        # new_tx2_cov = self._unpack_3x2pt_cov(tx2_cov)
-        new_tx2_cov = tx2_cov  # if you want to leave it the same
-        
-        plt.matshow(np.log10(new_tx2_cov))
-        plt.title('new_tx2_cov, after unpacking before masking')
-        rand = np.random.randint(0, 100000)
-        np.save(f'/Users/davide/Desktop/cloe_outputs_9jan23/new_tx2_cov_{rand}.npy', new_tx2_cov)
-        
-
         self.data_dict['WL'] = WL_dict
         self.data_dict['XC-Phot'] = XC_phot_dict
         self.data_dict['GC-Phot'] = GC_phot_dict
-        self.data_dict['3x2pt_cov'] = new_tx2_cov
+        self.data_dict['3x2pt_cov'] = tx2_cov
 
         del (GC_file)
         del (WL_file)

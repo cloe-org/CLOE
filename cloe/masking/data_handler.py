@@ -9,7 +9,6 @@ import numpy as np
 from cloe.auxiliary.matrix_manipulator import merge_matrices
 from warnings import warn
 from cloe.data_reader import reader
-import matplotlib.pyplot as plt
 
 
 
@@ -182,8 +181,9 @@ class Data_handler:
         zpairs_wl = data.numtomo_wl*(data.numtomo_wl+1)//2
         zpairs_xc = data.numtomo_wl * data.numtomo_gcphot
         zpairs_gcphot = data.numtomo_gcphot*(data.numtomo_gcphot+1)//2
+        # flattening_order = data.data_dict['photo']['flattening_order']
+        flattening_order = 'C'
         
-        print('redshifts for spectro:', data.data_dict['GC-Spectro'].keys())
         
                 
         # wl_vec = []
@@ -201,13 +201,12 @@ class Data_handler:
                     #     axis=None)
                     wl_vec[:, zpair] = self._get_masking(ells, accepted_ells)
                     zpair += 1
-            wl_vec = wl_vec.flatten()  # default is leftmost axis as outermost for loop
+            wl_vec = wl_vec.flatten(order=flattening_order)  
+            # the default for np.ndarray.flatten() is leftmost axis as outermost for loop
             # in this and in the following, flatten(), or equivalently, flatten(order='C') will flatten the array
             # using the first axis of wl_vec - i.e., the one on the multipoles - as the outermost for loop. 
             # Setting flatten(order='F') will flatten the array using the second axis 
-            # - i.e., the one on the redshift pairs - as the outermost for loop
-            
-            
+            # - i.e., the one on the redshift pairs - as the outermost for loop.
         else:
             wl_vec = np.full(self._wl_size, self._use_wl, dtype=int)
         
@@ -227,7 +226,7 @@ class Data_handler:
                     #     axis=None)
                     xc_phot_vec[:, zpair] = self._get_masking(ells, accepted_ells)
                     zpair += 1
-            xc_phot_vec = xc_phot_vec.flatten()
+            xc_phot_vec = xc_phot_vec.flatten(order=flattening_order)
         else:
             xc_phot_vec = (
                 np.full(self._xc_phot_size, self._use_xc_phot, dtype=int))
@@ -247,16 +246,14 @@ class Data_handler:
                     #     axis=None)
                     gc_phot_vec[:, zpair] = self._get_masking(ells, accepted_ells)
                     zpair += 1
-            gc_phot_vec = gc_phot_vec.flatten()
+            gc_phot_vec = gc_phot_vec.flatten(order=flattening_order)
         else:
             gc_phot_vec = (
                 np.full(self._gc_phot_size, self._use_gc_phot, dtype=int))
             
-        # TODO update this as well
         gc_spectro_vec = []
         if self._use_gc_spectro:
             redshifts = data.data_dict['GC-Spectro'].keys()
-            # gc_spectro_vec = np.zeros((len(ells), zpairs_gcphot))
             for redshift_index, redshift in enumerate(redshifts):
                 k_pk = data.data_dict['GC-Spectro'][f'{redshift}']['k_pk']
                 multipoles = (
@@ -273,8 +270,6 @@ class Data_handler:
                         (gc_spectro_vec,
                          self._get_masking(k_pk, accepted_k_pk)),
                         axis=None)
-                    # gc_spectro_vec[:, redshift_index] = self._get_masking(k_pk, accepted_k_pk)
-            # gc_phot_vec = gc_phot_vec.flatten()
 
         else:
             gc_spectro_vec = (

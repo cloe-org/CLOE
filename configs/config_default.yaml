@@ -46,7 +46,8 @@ Cobaya:
   params: ./model_default.yaml
   sampler:
     mcmc:
-      max_tries: 100000
+      # max_tries: 100000  # default
+      evaluate
   theory:
     camb:
       extra_args:

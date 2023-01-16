@@ -9,12 +9,24 @@
 # WL: Weak Lensing
 # GCphot: Galaxy Clustering photometric
 # GCspectro: Galaxy Clustering spectroscopic
+
+# default
+# WL:
+#   WL: True
+#   GCphot: True
+#   GCspectro: True
+# GCphot:
+#   GCphot: True
+#   GCspectro: False
+# GCspectro:
+#   GCspectro: True
+
 WL:
   WL: True
   GCphot: True
-  GCspectro: True
+  GCspectro: False
 GCphot:
   GCphot: True
   GCspectro: False
 GCspectro:
-  GCspectro: True
+  GCspectro: False

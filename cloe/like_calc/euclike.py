@@ -333,7 +333,7 @@ class Euclike:
                 print("In method:transform_photo_theory_data_vector, observable passed will not be transformed") 
                 transformed_array = obs_array
         elif self.matrix_transform == False:
-            print("not doing any matrix transform")
+            #Not doing any matrix transform
             transformed_array = obs_array
         else: 
             raise ValueError("Matrix Transform not implemented yet into CLOE")

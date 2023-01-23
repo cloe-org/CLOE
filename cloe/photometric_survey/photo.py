@@ -116,7 +116,6 @@ class Photo:
         """
         self.theory = cosmo_dic
         nuisance_dict = self.theory['nuisance_parameters']
-        self.add_RSD = self.theory['add_phot_RSD']
         # Commenting this part out as we are temporarily not using the
         # angular diameter distance obtained from CAMB, but we are coding
         # it up ourselves

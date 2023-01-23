@@ -11,7 +11,6 @@ from warnings import warn
 from cloe.data_reader import reader
 
 
-
 class Data_handler:
     r"""Reshape data and covariances vectors and define masking vector.
 
@@ -176,15 +175,13 @@ class Data_handler:
         of the elements that are not to be included.
         The size of the masking vectors is inferred from the input data.
         """
-        
+
         # define variables for better readability
-        zpairs_wl = data.numtomo_wl*(data.numtomo_wl+1)//2
+        zpairs_wl = data.numtomo_wl * (data.numtomo_wl + 1) // 2
         zpairs_xc = data.numtomo_wl * data.numtomo_gcphot
-        zpairs_gcphot = data.numtomo_gcphot*(data.numtomo_gcphot+1)//2
-        
-        
-                
-        # wl_vec = []
+        zpairs_gcphot = data.numtomo_gcphot * \
+            (data.numtomo_gcphot + 1) // 2
+
         if self._use_wl:
             zpair = 0
             ells = data.data_dict['WL']['ells']
@@ -194,22 +191,22 @@ class Data_handler:
                     accepted_ells = np.array(
                         self._obs['specifications']['WL']['bins']
                         [f'n{i}'][f'n{j}']['ell_range'])
-                    # wl_vec = np.concatenate(
-                    #     (wl_vec, self._get_masking(ells, accepted_ells)),
-                    #     axis=None)
                     wl_vec[:, zpair] = self._get_masking(ells, accepted_ells)
                     zpair += 1
-            wl_vec = wl_vec.flatten()  
-            # the default for np.ndarray.flatten() is leftmost axis as outermost for loop
-            # in this and in the following, flatten(), or equivalently, flatten(order='C') will flatten the array
-            # using the first axis of wl_vec - i.e., the one on the multipoles - as the outermost for loop. 
-            # Setting flatten(order='F') will flatten the array using the second axis 
-            # - i.e., the one on the redshift pairs - as the outermost for loop.
+            wl_vec = wl_vec.flatten()
+            # the default for np.ndarray.flatten()
+            # is leftmost axis as outermost for loop
+            # in this and in the following, flatten(),
+            # or equivalently, flatten(order='C') will flatten the array
+            # using the first axis of wl_vec - i.e.,
+            # the one on the multipoles - as the outermost for loop.
+            # Setting flatten(order='F') will flatten the array
+            # using the second axis
+            # - i.e., the one on the redshift pairs -
+            # as the outermost for loop.
         else:
             wl_vec = np.full(self._wl_size, self._use_wl, dtype=int)
-        
 
-        # xc_phot_vec = []
         if self._use_xc_phot:
             zpair = 0
             ells = data.data_dict['XC-Phot']['ells']
@@ -219,10 +216,8 @@ class Data_handler:
                     accepted_ells = np.array(
                         self._obs['specifications']['WL-GCphot']['bins']
                         [f'n{i}'][f'n{j}']['ell_range'])
-                    # xc_phot_vec = np.concatenate(
-                    #     (xc_phot_vec, self._get_masking(ells, accepted_ells)),
-                    #     axis=None)
-                    xc_phot_vec[:, zpair] = self._get_masking(ells, accepted_ells)
+                    xc_phot_vec[:, zpair] = \
+                        self._get_masking(ells, accepted_ells)
                     zpair += 1
             xc_phot_vec = xc_phot_vec.flatten()
         else:
@@ -239,16 +234,14 @@ class Data_handler:
                     accepted_ells = np.array(
                         self._obs['specifications']['GCphot']['bins']
                         [f'n{i}'][f'n{j}']['ell_range'])
-                    # gc_phot_vec = np.concatenate(
-                    #     (gc_phot_vec, self._get_masking(ells, accepted_ells)),
-                    #     axis=None)
-                    gc_phot_vec[:, zpair] = self._get_masking(ells, accepted_ells)
+                    gc_phot_vec[:, zpair] = \
+                        self._get_masking(ells, accepted_ells)
                     zpair += 1
             gc_phot_vec = gc_phot_vec.flatten()
         else:
             gc_phot_vec = (
                 np.full(self._gc_phot_size, self._use_gc_phot, dtype=int))
-            
+
         gc_spectro_vec = []
         if self._use_gc_spectro:
             redshifts = data.data_dict['GC-Spectro'].keys()

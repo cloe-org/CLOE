@@ -69,7 +69,7 @@ def observables_selection_checker(observables_dict):
             'Attention: CLOE only computes cross-correlations '
             'for the photometric survey!')
         warnings.warn(
-            "Entries ['WL']['GCphot'] and ['GCphot']['GCspec'] "
+            "Entries ['WL']['GCspec'] and ['GCphot']['GCspec'] "
             "are changed to False.")
     return observables_dict
 

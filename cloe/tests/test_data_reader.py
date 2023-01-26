@@ -81,6 +81,46 @@ class datareaderTestCase(TestCase):
         npt.assert_raises(Exception, self.data_tester.read_GC_spectro,
                           file_names='cov_power_galaxies_dk0p004.fits')
 
+    def test_gc_spec_cov_num_check_cov_nsim_exists(self):
+        mock_data['spectro']['cov_is_num'] = True
+        if 'cov_nsim' in mock_data['spectro'].keys():
+            mock_data['spectro'].pop('cov_nsim')
+        npt.assert_raises(Exception, self.data_tester.read_GC_spectro)
+        mock_data['spectro']['cov_is_num'] = False
+
+    def test_gc_spec_cov_num_check_cov_nsim_is_number(self):
+        mock_data['spectro']['cov_is_num'] = True
+        mock_data['spectro']['cov_nsim'] = None
+        npt.assert_raises(TypeError, self.data_tester.read_GC_spectro)
+        mock_data['spectro']['cov_is_num'] = False
+        mock_data['spectro'].pop('cov_nsim')
+
+    def test_gc_spec_cov_num_check_cov_nsim_is_positive(self):
+        mock_data['spectro']['cov_is_num'] = True
+        mock_data['spectro']['cov_nsim'] = -10
+        npt.assert_raises(ValueError, self.data_tester.read_GC_spectro)
+        mock_data['spectro']['cov_is_num'] = False
+        mock_data['spectro'].pop('cov_nsim')
+
+    def test_phot_cov_num_check_cov_nsim_exists(self):
+        mock_data['photo']['cov_is_num'] = True
+        npt.assert_raises(Exception, self.data_tester.read_phot)
+        mock_data['photo']['cov_is_num'] = False
+
+    def test_phot_cov_num_check_cov_nsim_is_number(self):
+        mock_data['photo']['cov_is_num'] = True
+        mock_data['photo']['cov_nsim'] = None
+        npt.assert_raises(TypeError, self.data_tester.read_phot)
+        mock_data['photo']['cov_is_num'] = False
+        mock_data['photo'].pop('cov_nsim')
+
+    def test_photo_cov_num_check_cov_nsim_is_positive(self):
+        mock_data['photo']['cov_is_num'] = True
+        mock_data['photo']['cov_nsim'] = -10
+        npt.assert_raises(ValueError, self.data_tester.read_phot)
+        mock_data['photo']['cov_is_num'] = False
+        mock_data['photo'].pop('cov_nsim')
+
     def test_bench_gc_cov_check(self):
         self.data_tester.read_GC_spectro()
         test_cov = self.data_tester.data_dict['GC-Spectro']['1.2']['cov'][1, 1]

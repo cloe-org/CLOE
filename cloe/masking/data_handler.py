@@ -84,9 +84,9 @@ class Data_handler:
 
         self._create_data_vector()
         self._create_cov_matrix()
-        self._create_masking_vector(data_reader)
+        self._create_masking_vectors(data_reader)
 
-    def get_data_and_masking_vector(self):
+    def get_data_and_masking_vectors(self):
         r"""Getter.
 
         Returns the final unmasked data vector, unmasked
@@ -100,10 +100,16 @@ class Data_handler:
             Final unmasked covariance matrix
         self._masking_vector: np.ndarray
             Masking vector
+        self._masking_vector_phot: np.ndarray
+            Masking vector for the photo part
+        self._masking_vector_spectro: np.ndarray
+            Masking vector for the spectro part
         """
         return (self._data_vector,
                 self._cov_matrix,
-                self._masking_vector)
+                self._masking_vector,
+                self._masking_vector_phot,
+                self._masking_vector_spectro)
 
     @property
     def use_wl(self):
@@ -154,7 +160,7 @@ class Data_handler:
                                     self._cov['GC-Spectro'])
         self._cov_matrix = cov_matrix
 
-    def _create_masking_vector(self, data):
+    def _create_masking_vectors(self, data):
         r"""Build the masking vector from the observables specification
 
         Build a masking vector made of 1's and 0's, used to mask the data and
@@ -247,6 +253,13 @@ class Data_handler:
 
         self._masking_vector = np.concatenate(
             (wl_vec, xc_phot_vec, gc_phot_vec, gc_spectro_vec),
+            axis=None)
+        self._masking_vector_spectro = np.concatenate(
+                (np.zeros_like(wl_vec), np.zeros_like(xc_phot_vec),
+                 np.zeros_like(gc_phot_vec), gc_spectro_vec),
+                axis=None)
+        self._masking_vector_phot = np.concatenate(
+            (wl_vec, xc_phot_vec, gc_phot_vec, np.zeros_like(gc_spectro_vec)),
             axis=None)
 
     def _get_masking(self, arr, acceptance_intervals):

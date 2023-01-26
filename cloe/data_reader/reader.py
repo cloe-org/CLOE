@@ -195,6 +195,21 @@ class Reader:
         root = self.data['spectro']['root']
         redshifts = self.data['spectro']['redshifts']
 
+        if 'cov_is_num' not in self.data['spectro'].keys():
+            self.data['spectro']['cov_is_num'] = False
+
+        if self.data['spectro']['cov_is_num']:
+            if 'cov_nsim' not in self.data['spectro'].keys():
+                raise Exception('The parameter cov_nsim for spectro data '
+                                'must be set when cov_is_num = True')
+            if not isinstance(self.data['spectro']['cov_nsim'], int):
+                raise TypeError('The parameter cov_nsim for spectro data must '
+                                'be set to an integer number when '
+                                'cov_is_num = True')
+            if self.data['spectro']['cov_nsim'] <= 0:
+                raise ValueError('The parameter cov_nsim for spectro data '
+                                 'must be strictly positive')
+
         if 'z{:s}' not in root:
             raise ValueError('GC Spectro file names should contain z{:s} '
                              'string to enable iteration over bins.')
@@ -285,6 +300,21 @@ class Reader:
         root_WL = self.data['photo']['root_WL']
         root_XC = self.data['photo']['root_XC']
         IA_model = self.data['photo']['IA_model']
+
+        if 'cov_is_num' not in self.data['photo'].keys():
+            self.data['photo']['cov_is_num'] = False
+
+        if self.data['photo']['cov_is_num']:
+            if 'cov_nsim' not in self.data['photo'].keys():
+                raise Exception('The parameter cov_nsim for photo data '
+                                'must be set when cov_is_num = True')
+            if not isinstance(self.data['photo']['cov_nsim'], int):
+                raise TypeError('The parameter cov_nsim for photo data must '
+                                'be set to an integer number when '
+                                'cov_is_num=True')
+            if self.data['photo']['cov_nsim'] <= 0:
+                raise ValueError('The parameter cov_nsim for photo data '
+                                 'must be positive')
 
         GC_phot_dict = {}
         WL_dict = {}

@@ -6,7 +6,8 @@ mock_data = {
   'sample': 'ExternalBenchmark',
   'spectro': {
     'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
-    'redshifts': ["1.", "1.2", "1.4", "1.65"]},
+    'redshifts': ["1.", "1.2", "1.4", "1.65"],
+    'cov_is_num': False},
   'photo': {
     'luminosity_ratio': 'luminosity_ratio.dat',
     'ndens_GC': 'niTab-EP10-RB00.dat',
@@ -18,5 +19,6 @@ mock_data = {
     'cov_GC': 'CovMat-PosPos-{:s}-20Bins.npy',
     'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.npy',
     'cov_3x2pt': 'CovMat-3x2pt-{:s}-20Bins.npy',
-    'cov_model': 'Gauss'}
+    'cov_model': 'Gauss',
+    'cov_is_num': False}
 }

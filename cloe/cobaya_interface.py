@@ -470,5 +470,13 @@ class EuclidLikelihood(Likelihood):
         self.passing_requirements(model, info, **params_values)
         # Update cosmo_dic to interpolators
         self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.05)
-        loglike = self.likefinal.loglike(self.cosmo.cosmo_dic)
+        # Compute number of sampled parameters
+        npar = 0
+        for key in self.provider.model.sampled_dependence.keys():
+            if any(isinstance(
+                    self.provider.model.sampled_dependence[key][i],
+                    EuclidLikelihood) for i in
+                    range(len(self.provider.model.sampled_dependence[key]))):
+                npar += 1
+        loglike = self.likefinal.loglike(self.cosmo.cosmo_dic, npar)
         return loglike

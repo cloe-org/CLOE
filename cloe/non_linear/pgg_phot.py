@@ -12,7 +12,7 @@ class Pgg_phot_model(PowerSpectrum):
     Class for computation of photometric galaxy x galaxy power spectrum
     """
 
-    def Pgg_phot_def(self, redshift, k_scale):
+    def Pgg_phot_def(self, redshift, wavenumber):
         r"""Pgg Phot Def
 
         Computes the galaxy-galaxy power spectrum for the photometric probe.
@@ -25,16 +25,76 @@ class Pgg_phot_model(PowerSpectrum):
         ----------
         redshift: float
             Redshift at which to evaluate the power spectrum.
-        k_scale: float or list or numpy.ndarray
-            k-mode at which to evaluate the  power spectrum.
+        wavenumber: float or list or numpy.ndarray
+            wavenumber at which to evaluate the  power spectrum.
 
         Returns
         -------
         pval:  float or numpy.ndarray
             Value of galaxy-galaxy power spectrum
-            at a given redshift and k-mode for galaxy
+            at a given redshift and wavenumber for galaxy
             clustering photometric
         """
         pval = ((self.misc.istf_phot_galbias(redshift) ** 2.0) *
-                self.theory['Pk_delta'].P(redshift, k_scale))
+                self.theory['Pk_delta'].P(redshift, wavenumber))
+        return pval
+
+    def Pgg_phot_halo(self, redshift, wavenumber):
+        r"""Pgg Phot Def
+
+        Computes the galaxy-galaxy power spectrum for the photometric probe
+        assuming a linear bias model. Uses halo model based codes for the
+        matter power spectrum.
+
+        .. math::
+            P_{\rm gg}^{\rm photo}(z, k) &=\
+            [b_{\rm g}^{\rm photo}(z)]^2 P_{\rm \delta\delta}^{\rm NL}(z, k)\\
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum.
+        wavenumber: float or list or numpy.ndarray
+            wavenumber at which to evaluate the  power spectrum.
+
+        Returns
+        -------
+        pval:  float or numpy.ndarray
+            Value of galaxy-galaxy power spectrum
+            at a given redshift and wavenumber for galaxy
+            clustering photometric
+        """
+        pval = ((self.misc.istf_phot_galbias(redshift) ** 2.0) *
+                self.theory['Pk_halomodel_recipe'].P(redshift, wavenumber))
+        return pval
+
+    def Pgg_phot_emu(self, redshift, wavenumber):
+        r"""Pgg Phot emu
+
+        Computes the galaxy-galaxy power spectrum for the photometric probe
+        assuming a linear bias model. Uses the EuclidEmu2 or the BACCO
+        emulator for the nonlinear boost to the matter power spectrum.
+
+        .. math::
+            P_{\rm gg}^{\rm photo}(z, k) &=\
+            [b_{\rm g}^{\rm photo}(z)]^2 P_{\rm \delta\delta}^{\rm NL}(z, k)\\
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum.
+        wavenumber: float or list or numpy.ndarray
+            wavenumber at which to evaluate the  power spectrum.
+
+        Returns
+        -------
+        pval:  float or numpy.ndarray
+            Value of galaxy-galaxy power spectrum
+            at a given redshift and wavenumber for galaxy
+            clustering photometric
+        """
+        pval = ((self.misc.istf_phot_galbias(redshift) ** 2.0) *
+                self.theory['Pk_delta'].P(redshift, wavenumber) *
+                self.nonlinear_dic['NL_boost'](redshift, wavenumber)[0])
+
         return pval

@@ -185,7 +185,7 @@ def update_cobaya_dict_with_halofit_version(cobaya_dict):
 
     The choice of the halofit_version key can be done only outside of the
     EuclidLikelihood class. This function reads the value
-    of the non-linear flag, and updates the cobaya dictionary
+    of the nonlinear flag, and updates the cobaya dictionary
     accordingly.
 
     Parameters
@@ -214,7 +214,7 @@ def set_halofit_version(cobaya_dict: dict, NL_flag: int):
     cobaya_dict: dict
         The Cobaya dictionary
     NL_flag: int
-        The non-linear flag
+        The nonlinear flag
     """
 
     def switch_halofit_version(flag: int) -> str:

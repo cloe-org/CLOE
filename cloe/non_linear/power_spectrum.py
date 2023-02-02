@@ -14,7 +14,7 @@ class PowerSpectrum:
     which are shared by the four child classes
     """
 
-    def __init__(self, cosmo_dic, misc):
+    def __init__(self, cosmo_dic, nonlinear_dic, misc):
         """Initialize
 
         Constructor of the class PowerSpectrum
@@ -23,15 +23,19 @@ class PowerSpectrum:
         ----------
         cosmo_dic: dict
             cosmological dictionary from nonlinear module
+        nonlinear_dic: dict
+            nonlinear dictionary from nonlinear module
         misc: Misc
             class containing information needed by linear recipe
         """
         self.theory = cosmo_dic
+        self.nonlinear_dic = nonlinear_dic
         self.misc = misc
 
-    def update_dic(self, cosmo_dic, misc):
+    def update_dic(self, cosmo_dic, nonlinear_dic, misc):
         """
         Update theory with an external cosmo dictionary
         """
         self.theory = cosmo_dic
+        self.nonlinear_dic = nonlinear_dic
         self.misc = misc

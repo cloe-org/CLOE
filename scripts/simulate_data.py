@@ -1,13 +1,19 @@
 import numpy as np
 import os, sys
 from pathlib import Path
+
+parent_path = str(Path(Path(__file__).resolve().parents[1]))
+data_path = parent_path + '/data/ExternalBenchmark/Photometric/data/'
+sys.path.insert(0,parent_path)
+
 from cloe.cobaya_interface import EuclidLikelihood
 from cloe.auxiliary.likelihood_yaml_handler import set_halofit_version
 from cobaya.model import get_model
 from cloe.photometric_survey.photo import Photo
 
-parent_path = str(Path(Path(__file__).resolve().parents[1]))
-data_path = parent_path + '/data/ExternalBenchmark/Photometric/data/'
+#sys.exit()
+
+nlflag=4
 
 info = {
     'params': {
@@ -87,22 +93,24 @@ info = {
     }
 
 info['likelihood'] = {'Euclid':
-                        {'external': EuclidLikelihood,
-                        'observables_selection': {
-                            'WL': {'WL': True, 'GCphot': False, 'GCspectro': False},
-                            'GCphot': {'GCphot': True, 'GCspectro': False},
-                            'GCspectro': {'GCspectro': True}
-                        },
-                     'plot_observables_selection': True,
-                     'NL_flag': 0,
+                     {'external': EuclidLikelihood,
+                     'observables_selection': {
+                         'WL': {'WL': True, 'GCphot': False, 'GCspectro': False},
+                         'GCphot': {'GCphot': True, 'GCspectro': False},
+                         'GCspectro': {'GCspectro': True}
+                     },
+                     'plot_observables_selection': False,
+                     'NL_flag': nlflag,
                      'data': {
                         'sample': 'ExternalBenchmark',
                         'spectro': {
                             'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
-                            'redshifts': ["1.", "1.2", "1.4", "1.65"]},
+                            'redshifts': ["1.", "1.2", "1.4", "1.65"],
+                            'edges': [0.9, 1.1, 1.3, 1.5, 1.8]},
                         'photo': {
                             'ndens_GC': 'niTab-EP10-RB00.dat',
                             'ndens_WL': 'niTab-EP10-RB00.dat',
+                            'luminosity_ratio': 'luminosity_ratio.dat',
                             'root_GC': 'Cls_{:s}_PosPos.dat',
                             'root_WL': 'Cls_{:s}_ShearShear.dat',
                             'root_XC': 'Cls_{:s}_PosShear.dat',
@@ -111,8 +119,8 @@ info['likelihood'] = {'Euclid':
                             'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.npy',
                             'cov_3x2pt': 'CovMat-3x2pt-{:s}-20Bins.npy',
                             'cov_model': 'Gauss'}},
-                        }
-                    }
+
+                    }}
 
 set_halofit_version(info, info['likelihood']['Euclid']['NL_flag'])
 
@@ -129,9 +137,8 @@ photo = Photo(like.cosmo.cosmo_dic,
               like.likefinal.data_ins.nz_dict_WL,
               like.likefinal.data_ins.nz_dict_GC_Phot)
 
-
-ell_bins = np.linspace(np.log(10.0),np.log(5000.0),21)
-ells = (ell_bins[:-1]+ell_bins[1:])/2.0
+ell_bins = np.linspace(np.log(10.0), np.log(5000.0), 21)
+ells = (ell_bins[:-1] + ell_bins[1:]) / 2.0
 ells = np.exp(ells)
 
 nbin = 10
@@ -167,16 +174,20 @@ header_XC = 'ells'
 for i in range(1, nbin + 1):
     for j in range(1, nbin + 1):
         if (j >= i):
-            header_GC = header_GC + '\tP%s-P%s'%(i,j)
-            header_WL = header_WL + '\tE%s-E%s'%(i,j)
-        header_XC = header_XC + '\tP%s-E%s'%(i,j)
+            header_GC = header_GC + '\tP%s-P%s'%(i, j)
+            header_WL = header_WL + '\tE%s-E%s'%(i, j)
+        header_XC = header_XC + '\tP%s-E%s'%(i, j)
 
-np.savetxt(data_path + 'Cls_zNLA_PosPos_new.dat',
+txtstr='NL_flag_{:d}'.format(info['likelihood']['Euclid']['NL_flag'])
+
+np.savetxt(data_path + 'Cls_zNLA_PosPos_'+txtstr+'.dat',
            matGC, fmt='%.12e', delimiter='\t',
            newline='\n', header=header_GC)
-np.savetxt(data_path + 'Cls_zNLA_ShearShear_new.dat',
+
+np.savetxt(data_path + 'Cls_zNLA_ShearShear_'+txtstr+'.dat',
            matWL, fmt='%.12e', delimiter='\t',
            newline='\n', header=header_WL)
-np.savetxt(data_path + 'Cls_zNLA_PosShear_new.dat',
+
+np.savetxt(data_path + 'Cls_zNLA_PosShear_'+txtstr+'.dat',
            matXC, fmt='%.12e', delimiter='\t',
            newline='\n', header=header_XC)

@@ -13,7 +13,7 @@ solver: camb
 # List of parameters that are
 # only parameters of the likelihood
 params: !defaults [../configs/params]
-# Non-Linear flag selector
+# Nonlinear flag selector
 NL_flag: 0
 # k values for extrapolation of the matter power spectrum
 k_max_extrap: 500.0

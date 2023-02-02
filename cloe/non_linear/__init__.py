@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-"""Non-linear Module
+"""Nonlinear Module
 
-In this module IST:NL will code up different non-linear recipes
+In this module IST:NL will code up different nonlinear recipes
 
 """
 

@@ -116,6 +116,7 @@ class cosmoinitTestCase(TestCase):
         source = self.cosmo.pk_source
         type_check = isinstance(source, Cosmology)
         assert not type_check, 'Error in returned data type of pk_source'
+        self.cosmo.cosmo_dic['NL_flag'] = 0
 
     def test_cosmo_growth_factor(self):
         npt.assert_equal(

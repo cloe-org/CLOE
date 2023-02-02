@@ -96,12 +96,12 @@ class Cosmology:
             of :math:`Mpc^{-1}`
         Pk_delta: function
             Interpolator function for linear matter Pk from Boltzmann code
-        Pk_halofit: function
-            Interpolator function for non-linear matter Pk from Boltzmann code
+        Pk_halomodel_recipe: function
+            Interpolator function for nonlinear matter Pk from Boltzmann code
         Pk_weyl: function
             Interpolator function for linear Weyl Pk from Boltzmann code
         Pk_weyl_NL: function
-            Interpolator function for non-linear Weyl Pk from Boltzmann code
+            Interpolator function for nonlinear Weyl Pk from Boltzmann code
         fsigma8: list
             fsigma8 function evaluated at z
         sigma8: list
@@ -152,9 +152,9 @@ class Cosmology:
         MG_sigma: function
             sigma function from Modified Gravity parametrization
         NL_boost: float
-            Non-linear boost factor
+            nonlinear boost factor
         NL_flag: int
-            Non-linear flag
+            nonlinear flag
         luminosity_ratio_z_func: function
             Luminosity ratio interpolator for IA model
         nuisance_parameters: dict
@@ -216,7 +216,7 @@ class Cosmology:
                           'D_z_k': None,
                           # Interpolators
                           'Pk_delta': None,
-                          'Pk_halofit': None,
+                          'Pk_halomodel_recipe': None,
                           'Pk_weyl': None,
                           'Pk_weyl_NL': None,
                           'Pmm_phot': None,
@@ -299,7 +299,7 @@ class Cosmology:
 
     @property
     def pk_source(self):
-        r"""Identifier for linear vs non-linear class
+        r"""Identifier for linear vs nonlinear class
 
         Selects either the same Cosmology class from which it is called
         or the attribute corresponding to the instance of a Nonlinear class,
@@ -1103,13 +1103,13 @@ class Cosmology:
         Creates interpolators (functions of redshift and scale) for the
         photometric galaxy power spectra (galaxy-galaxy and galaxy-matter)
         and the IA-related power spectra, based on the recipe defined by
-        the value of the non-linear flag, and assigns them to the corresponding
+        the value of the nonlinear flag, and assigns them to the corresponding
         keys of the cosmo dictionary.
 
         Assigns the direct function (functions of redshift, scale and angle
         with the line of sight) for the spectroscopic galaxy power spectra
         (galaxy-galaxy and galaxy-matter) based on the recipe defined by the
-        value of the non-linear flag, to the corresponding keys of the cosmo
+        value of the nonlinear flag, to the corresponding keys of the cosmo
         dictionary.
 
         Note: the interpolators for v1.0 span the range :math:`k=[0.001,100.0]`

@@ -66,7 +66,7 @@ def set_logging_level(log, level):
     elif level == "error":
         log.setLevel(logging.ERROR)
     elif level == "critical":
-        log.setlevel(logging.CRITICAL)
+        log.setLevel(logging.CRITICAL)
     else:
         log.setLevel(logging.INFO)
         log.warning("Unknown logging verbose level: {}".format(level))

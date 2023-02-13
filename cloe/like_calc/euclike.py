@@ -121,18 +121,14 @@ class Euclike:
         ----------
         dictionary: dict
             cosmology dictionary from the Cosmology class
-            which is updated at each sampling step
         """
 
-        # Transforming data
-        spectrodata = self.create_spectro_data()
-        spectrocov = self.create_spectro_cov()
         # Tranforming data
         self.photodata = self.create_photo_data(dictionary)
         datafinal = {**self.photodata,
-                     'GC-Spectro': spectrodata}
+                     'GC-Spectro': self.spectrodata}
         covfinal = {'3x2pt': self.data_ins.data_dict['3x2pt_cov'],
-                    'GC-Spectro': spectrocov}
+                    'GC-Spectro': self.spectrocov}
         self.data_handler_ins = Data_handler(datafinal,
                                              covfinal,
                                              self.observables,
@@ -161,7 +157,6 @@ class Euclike:
         ----------
         dictionary: dict
             cosmology dictionary from the Cosmology class
-            which is updated at each sampling step
 
         Returns
         -------
@@ -222,8 +217,8 @@ class Euclike:
         Parameters
         ----------
         dictionary: dict
-            cosmology dictionary from the Cosmology class which is updated at
-            each sampling step
+            cosmology dictionary from the Cosmology class 
+            which is updated at each sampling step
 
         Returns
         -------
@@ -304,8 +299,7 @@ class Euclike:
             Array containing the original (untransformed)
             photo theory/data vector
         dictionary: dict
-            cosmology dictionary from the Cosmology class which is updated at
-            each sampling step
+            cosmology dictionary from the Cosmology class 
         obs: string
             String specifying the photo observable which will be transformed.
             Default: 'WL'
@@ -327,28 +321,22 @@ class Euclike:
             for ni in range(1, Nz + 1):
                 ni_list[ni] = \
                     self.phot_ins.nz_WL.interpolates_n_i(ni, zwin)(zwin)
-            self.BNT_matrix = BNT_transform(zwin, chiwin, ni_list)
-            self.N_mat_z = np.identity(Nz)
+            BNT_transformation = BNT_transform(zwin, chiwin, ni_list)
             if obs == 'WL':
                 N_ells = len(self.ells_WL)
-                self.N_mat_ell = np.identity(N_ells)
-                Vec = VectorizeMatrix(Nz)
-                D_mat = Vec.D_mat()
-                E_mat = Vec.E_mat()
-                C_slash_mat = (np.kron(self.N_mat_ell, D_mat) @ obs_array)
-                B_kron = np.kron(self.BNT_matrix, self.BNT_matrix)
-                B_kron_Ell = np.kron(self.N_mat_ell, B_kron)
-                Ell_mat = np.kron(self.N_mat_ell, E_mat)
-                transformed_array = (Ell_mat @ B_kron_Ell @ C_slash_mat)
-            if obs == 'XC-phot':
+                transformed_array = \
+                    BNT_transformation.apply_vectorized_symmetric_BNT(self, 
+                                                                Nz, 
+                                                                N_ells, 
+                                                                obs_array)
+            elif obs == 'XC-phot':
                 N_ells = len(self.ells_XC)
-                self.N_mat_ell = np.identity(N_ells)
-                A_slash_mat = \
-                    np.kron(self.N_mat_ell,
-                            np.kron(self.N_mat_z, self.BNT_matrix)
-                            )
-                transformed_array = A_slash_mat @ obs_array
-            if obs == 'GC-phot':
+                transformed_array = \
+                    BNT_transformation.apply_vectorized_asymmetric_BNT(self, 
+                                                                Nz, 
+                                                                N_ells, 
+                                                                obs_array)
+            elif obs == 'GC-phot':
                 transformed_array = obs_array
             else:
                 print("In method:transform_photo_theory_data_vector,  \
@@ -362,7 +350,7 @@ class Euclike:
         return transformed_array
 
     def create_spectro_theory(self, dictionary):
-        """Create Spectro Theorycreate_masked_photo_data(self, observables)
+        """Create Spectro Theory
 
         Obtains the theory for the likelihood.
         The theory is evaluated only if the GC-Spectro probe is enabled in the
@@ -485,7 +473,8 @@ class Euclike:
         loglike_tot: float
             loglike = Ln(likelihood) for the Euclid observables
         """
-
+        self.spectrodata = self.create_spectro_data()
+        self.spectrocov = self.create_spectro_cov()
         self.create_masked_photo_data(dictionary)
         photo_theory_vec = self.create_photo_theory(dictionary)
         spectro_theory_vec = self.create_spectro_theory(dictionary)

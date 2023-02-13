@@ -3,15 +3,14 @@
 
 Set of transforms for data and theory matrices in CLOE
 
-The class VectorizeMatrix computes linear operators that allow to 
+The class VectorizeMatrix computes linear operators that allow to
 vectorize 2D-matrices into 1D-vectors.
 See Appendix B of the CLOE v2 release documentation.
 
 The class BNT_transform computes the BNT matrix, given a fiducial cosmology.
-This matrix can be used to modify the photometric C_ells to localize 
+This matrix can be used to modify the photometric C_ells to localize
 their Kernels and allow for optimal scale-redshift cuts.
 See Section 7 of the CLOE v2 release documentation.
-
 
 """
 
@@ -21,7 +20,8 @@ import numpy as np
 class VectorizeMatrix(object):
     """
     Class VectorizeMatrix
-    The class VectorizeMatrix computes linear operators that allow to 
+    
+    The class VectorizeMatrix computes linear operators that allow to
     vectorize 2D-matrices into 1D-vectors.
     See Appendix B of the CLOE v2 release documentation.
     """
@@ -84,7 +84,8 @@ class VectorizeMatrix(object):
              elimination matrix
         """
 
-        return np.sum([np.dot(self._u_vector_operator(i, j), self._e_vector_operator(i, j).T)
+        return np.sum([np.dot(self._u_vector_operator(i, j),
+                      self._e_vector_operator(i, j).T)
                       for j in range(self.N)
                       for i in range(j, self.N)], axis=0)
 
@@ -92,8 +93,10 @@ class VectorizeMatrix(object):
 class BNT_transform():
     """
     Class BNT_transform
-    The class BNT_transform computes the BNT matrix, given a fiducial cosmology.
-    This matrix can be used to modify the photometric C_ells to localize 
+    
+    The class BNT_transform computes the BNT matrix,
+    given a fiducial cosmology.
+    This matrix can be used to modify the photometric C_ells to localize
     their Kernels and allow for optimal scale-redshift cuts.
     See Section 7 of the CLOE v2 release documentation for a description
     of the BNT matrix.
@@ -155,11 +158,11 @@ class BNT_transform():
             BNT_matrix[i, i - 2] = soln[1]
         return BNT_matrix
 
-    def apply_vectorized_symmetric_BNT(self, N_z_bins, 
+    def apply_vectorized_symmetric_BNT(self, N_z_bins,
                                        N_ell_bins, observed_array):
         """
         apply_vectorized_symmetric_BNT
-        
+
         Apply vectorized BNT transformed for symmetric array in z-indices
 
         Parameters
@@ -169,14 +172,14 @@ class BNT_transform():
         N_ell_bins: int
             Number of photometric multipole bins
         observed_array: array
-            Stacked array containing the 
+            Stacked array containing the
             angular spectra C_ells to be transformed
-        
+
         Returns
         -------
         transformed_array: array
-            Stacked array containing the 
-            BNT-transformed angular spectra C_ells 
+            Stacked array containing the
+            BNT-transformed angular spectra C_ells
         """
         BNT_matrix = self.get_BNT_matrix()
         self.N_mat_ell = np.identity(N_ell_bins)
@@ -190,11 +193,11 @@ class BNT_transform():
         transformed_array = (Ell_mat @ B_kron_Ell @ C_slash_mat)
         return transformed_array
 
-    def apply_vectorized_nonsymmetric_BNT(self, N_z_bins, 
-                                        N_ell_bins, observed_array):
+    def apply_vectorized_nonsymmetric_BNT(self, N_z_bins,
+                                          N_ell_bins, observed_array):
         """
         apply_vectorized_symmetric_BNT
-        
+
         Apply vectorized BNT transformed for symmetric array in z-indices
 
         Parameters
@@ -204,14 +207,14 @@ class BNT_transform():
         N_ell_bins: int
             Number of photometric multipole bins
         observed_array: array
-            Stacked array containing the 
+            Stacked array containing the
             angular spectra C_ells to be transformed
-        
+
         Returns
         -------
         transformed_array: array
-            Stacked array containing the 
-            BNT-transformed angular spectra C_ells 
+            Stacked array containing the
+            BNT-transformed angular spectra C_ells
         """
         BNT_matrix = self.get_BNT_matrix()
         self.N_mat_ell = np.identity(N_ell_bins)

@@ -217,7 +217,7 @@ class Euclike:
         Parameters
         ----------
         dictionary: dict
-            cosmology dictionary from the Cosmology class 
+            cosmology dictionary from the Cosmology class
             which is updated at each sampling step
 
         Returns
@@ -299,7 +299,7 @@ class Euclike:
             Array containing the original (untransformed)
             photo theory/data vector
         dictionary: dict
-            cosmology dictionary from the Cosmology class 
+            cosmology dictionary from the Cosmology class
         obs: string
             String specifying the photo observable which will be transformed.
             Default: 'WL'
@@ -325,17 +325,19 @@ class Euclike:
             if obs == 'WL':
                 N_ells = len(self.ells_WL)
                 transformed_array = \
-                    BNT_transformation.apply_vectorized_symmetric_BNT(self, 
-                                                                Nz, 
-                                                                N_ells, 
-                                                                obs_array)
+                    BNT_transformation\
+                    .apply_vectorized_symmetric_BNT(self,
+                                                    Nz,
+                                                    N_ells,
+                                                    obs_array)
             elif obs == 'XC-phot':
                 N_ells = len(self.ells_XC)
                 transformed_array = \
-                    BNT_transformation.apply_vectorized_asymmetric_BNT(self, 
-                                                                Nz, 
-                                                                N_ells, 
-                                                                obs_array)
+                    BNT_transformation\
+                    .apply_vectorized_asymmetric_BNT(self,
+                                                     Nz,
+                                                     N_ells,
+                                                     obs_array)
             elif obs == 'GC-phot':
                 transformed_array = obs_array
             else:

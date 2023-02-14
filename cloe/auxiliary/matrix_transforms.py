@@ -20,7 +20,7 @@ import numpy as np
 class VectorizeMatrix(object):
     """
     Class VectorizeMatrix
-    
+
     The class VectorizeMatrix computes linear operators that allow to
     vectorize 2D-matrices into 1D-vectors.
     See Appendix B of the CLOE v2 release documentation.
@@ -93,7 +93,7 @@ class VectorizeMatrix(object):
 class BNT_transform():
     """
     Class BNT_transform
-    
+
     The class BNT_transform computes the BNT matrix,
     given a fiducial cosmology.
     This matrix can be used to modify the photometric C_ells to localize

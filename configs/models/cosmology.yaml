@@ -57,6 +57,9 @@ omch2:
     scale: 0.001
 omegam:
   latex: \Omega_\mathrm{m}
+omegab:
+  latex: \Omega_\mathrm{b}
+  derived: 'lambda ombh2, H0: ombh2 * (100.0/H0)**2'
 omk: 0.0
 sigma8:
   latex: \sigma_8

@@ -1,6 +1,7 @@
 # File paths in user_models are relative to the configs/models/ directory
 user_models:
   cosmology: cosmology.yaml
+  modified_gravity: modified_gravity.yaml
   nuisance_bias: nuisance_bias.yaml
   nuisance_ia: nuisance_ia.yaml
   nuisance_nz: nuisance_nz.yaml
@@ -9,4 +10,4 @@ user_models:
   nuisance_purity: nuisance_purity.yaml
 user_options:
   # Flag for advanced users to let CLOE overwrite the configs/params.yaml file
-  overwrite: False
+  overwrite: True

@@ -263,8 +263,7 @@ class EuclidLikelihood(Likelihood):
                 'sigma8_z': {'z': self.z_win},
                 'fsigma8': {'z': self.z_win, 'units': None}}
         if self.solver == 'camb':
-            derived = {'omegab': None, 'omegac': None,
-                       'omnuh2': None, 'omeganu': None,
+            derived = {'omegac': None, 'omnuh2': None, 'omeganu': None,
                        'nnu': None}
             requirements = requirements | derived
 
@@ -313,7 +312,6 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Omm'] = self.provider.get_param('omegam')
             if self.solver == 'camb':
                 self.cosmo.cosmo_dic['Omc'] = self.provider.get_param('omegac')
-                self.cosmo.cosmo_dic['Omb'] = self.provider.get_param('omegab')
                 self.cosmo.cosmo_dic['omnuh2'] = \
                     self.provider.get_param('omnuh2')
                 self.cosmo.cosmo_dic['Omnu'] = \
@@ -396,8 +394,6 @@ class EuclidLikelihood(Likelihood):
             if self.solver == 'camb':
                 self.cosmo.cosmo_dic['Omc'] = \
                     model.provider.get_param('omegac')
-                self.cosmo.cosmo_dic['Omb'] = \
-                    model.provider.get_param('omegab')
                 self.cosmo.cosmo_dic['omnuh2'] = \
                     model.provider.get_param('omnuh2')
                 self.cosmo.cosmo_dic['Omnu'] = \

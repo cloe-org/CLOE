@@ -180,6 +180,29 @@ def write_params_yaml_from_model_dict(model_dict):
     yaml_handler.yaml_write(params_filepath, param_dict, overwrite)
 
 
+def write_params_yaml_from_info_dict(info_dict):
+    """Writes the params yaml file from the info dictionary.
+
+    The cosmological parameters are *excluded* in params.yaml.
+
+    When invoking Cobaya with CLOE, CLOE can
+    understand non-cosmology parameters
+    only if they are defined in this params.yaml file.
+
+    Parameters
+    ----------
+    info_dict: dict
+        The user model dictionary.
+    """
+    if 'params' not in info_dict.keys():
+        raise KeyError('No params subdictionary found in info dictionary.')
+
+    params_filepath = get_default_params_yaml_path()
+    params_dict = info_dict['params']
+    params_no_cosmo = get_params_dict_without_cosmo_params(params_dict)
+    yaml_handler.yaml_write(params_filepath, params_no_cosmo, True)
+
+
 def update_cobaya_dict_with_halofit_version(cobaya_dict):
     """Updates the main cobaya dictionary with the halofit version to use
 
@@ -260,9 +283,14 @@ def get_params_dict_without_cosmo_params(params_dict):
 
     new_params_dict = deepcopy(params_dict)
 
-    cosmo_params = ['As', 'logA', 'H0', 'N_eff', 'mnu', 'mnu', 'ns', 'sigma8',
-                    'ombh2', 'omch2', 'omnuh2', 'omk',
-                    'omegab', 'omegac', 'omeganu', 'omegam', 'tau', 'w', 'wa']
+    cosmo_params = ['H0', 'tau', 'tau_reio', 'omk', 'Omega_k',
+                    'ombh2', 'omega_b', 'omch2', 'omega_cdm',
+                    'omnuh2', 'omega_ncdm', 'mnu', 'm_ncdm',
+                    'nnu', 'N_eff',
+                    'num_nu_massless', 'num_nu_massive', 'N_ur', 'N_ncdm',
+                    'As', 'logA', 'A_s', 'ns', 'n_s',
+                    'w', 'wa', 'w0_fld', 'wa_fld',
+                    'sigma8', 'omegab', 'omegac', 'omeganu', 'omegam']
 
     for cosmo_param in cosmo_params:
         new_params_dict.pop(cosmo_param, None)

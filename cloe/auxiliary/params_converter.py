@@ -71,6 +71,11 @@ def classy_set_params(params, theory):
         theory['extra_args']['use_ppf'] = 'yes' if use_ppf else 'no'
     if 'Omega_Lambda' not in params.keys():
         params['Omega_Lambda'] = 0.0
+    if 'omegab' in params.keys():
+        if isinstance(params['omegab'], dict):
+            if 'derived' in params['omegab']:
+                params['omegab']['derived'] = \
+                    params['omegab']['derived'].replace('ombh2', 'omega_b')
 
 
 def camb_set_params(params, theory):
@@ -97,3 +102,8 @@ def camb_set_params(params, theory):
         use_ppf = params.pop('use_ppf')
         theory['extra_args']['dark_energy_model'] = (
             'ppf' if use_ppf else 'fluid')
+    if 'omegab' in params.keys():
+        if isinstance(params['omegab'], dict):
+            if 'derived' in params['omegab']:
+                params['omegab']['derived'] = \
+                    params['omegab']['derived'].replace('omega_b', 'ombh2')

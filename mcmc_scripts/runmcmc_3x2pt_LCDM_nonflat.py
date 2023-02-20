@@ -1,5 +1,7 @@
 import sys
 import os
+from cloe.auxiliary.likelihood_yaml_handler \
+	import write_params_yaml_from_info_dict
 
 script_path = os.path.realpath(os.getcwd())
 if script_path.endswith('mcmc_scripts'):
@@ -20,6 +22,13 @@ info = {
                 'aliases': ['euclid'],
                 'external': EuclidLikelihood,
                 'speed': 500,
+                'k_max_extrap': 500.0,
+                'k_min_extrap': 1e-05,
+                'k_samp': 1000,
+                'z_min': 0.0,
+                'z_max': 4.0,
+                'z_samp': 100,
+                'solver': 'camb',
                 'NL_flag': 0,
                 'add_phot_RSD': False,
                 'use_gamma_MG': False,
@@ -29,6 +38,7 @@ info = {
                 {
                     'photo':
                     {
+                        'luminosity_ratio': 'luminosity_ratio.dat',
                         'IA_model': 'zNLA',
                         'cov_3x2pt': 'CovMat-3x2pt-{:s}-20Bins.npy',
                         'cov_GC': 'CovMat-PosPos-{:s}-20Bins.npy',
@@ -1206,10 +1216,6 @@ info = {
                     'scale': 0.001,
                 },
             },
-            'omegab':
-            {
-                'latex': '\Omega_\mathrm{b}',
-            },
             'omegam':
             {
                 'latex': '\Omega_\mathrm{m}',
@@ -1314,13 +1320,15 @@ info = {
             {
                 'extra_args':
                 {
+                    'num_nu_massive': 1,
                     'dark_energy_model': 'ppf',
-                    'num_massive_neutrinos': 1,
                 },
                 'stop_at_error': True,
             },
         },
         'timing': True,
 }
+
+write_params_yaml_from_info_dict(info)
 
 updated_info, sampler = run(info)

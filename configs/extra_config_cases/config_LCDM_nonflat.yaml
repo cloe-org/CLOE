@@ -10,6 +10,9 @@ Cobaya:
       data: data.yaml
       external: !!python/name:cloe.cobaya_interface.EuclidLikelihood ''
       f_out_z_dep: false
+      k_max_extrap: 500.0
+      k_min_extrap: 1.0e-05
+      k_samp: 1000
       observables_selection: observables_selection.yaml
       observables_specifications:
         GCphot: GCphot.yaml
@@ -19,8 +22,12 @@ Cobaya:
         WL-GCphot: WL-GCphot.yaml
         WL-GCspectro: WL-GCspectro.yaml
       plot_observables_selection: false
+      solver: camb
       speed: 500
       use_gamma_MG: false
+      z_max: 4.0
+      z_min: 0.0
+      z_samp: 100
   output: chains/my_euclid_experiment_LCDM_nonflat
   params: ./extra_config_cases/model_LCDM_nonflat.yaml
   sampler:
@@ -28,9 +35,7 @@ Cobaya:
       max_tries: 100000
   theory:
     camb:
-      extra_args:
-        dark_energy_model: ppf
-        num_massive_neutrinos: 1
+      extra_args: {}
       stop_at_error: true
   timing: true
 action: run

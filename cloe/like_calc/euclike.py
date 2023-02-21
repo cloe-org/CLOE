@@ -118,8 +118,10 @@ class Euclike:
                            np.eye(self.masked_cov_matrix.shape[0])):
             raise ValueError("Problem with the inversion of the covariance")
 
-        # Split photo and spectro if one of the two covariances is numerical.
-        # NB this assumes no cross-covariance between the two probes
+        # Split photometric and spectroscopic probes
+        # if one of the two covariances is numerical.
+        # NB this assumes no cross-covariance and no unified simulation suite
+        # for the photometric and spectroscopic probes
         if (self.data['photo']['cov_is_num'] or
                 self.data['spectro']['cov_is_num']):
             self.split_data()
@@ -160,7 +162,7 @@ class Euclike:
 
         Separates photo and spectro data
         """
-        # Only photo data and covariance
+        # Only photometric data and covariance
         self.mask_ins_phot = Masking()
         self.mask_ins_phot.set_data_vector(self.data_vector)
         self.mask_ins_phot.set_covariance_matrix(self.cov_matrix)
@@ -188,7 +190,7 @@ class Euclike:
                            np.eye(self.masked_cov_matrix_phot.shape[0])):
             raise ValueError("Problem with the inversion of the "
                              "photo covariance")
-        # Only spectro data and covariance
+        # Only spectroscopic data and covariance
         self.mask_ins_spectro = Masking()
         self.mask_ins_spectro.set_data_vector(self.data_vector)
         self.mask_ins_spectro.set_covariance_matrix(self.cov_matrix)
@@ -467,8 +469,8 @@ class Euclike:
             (photo_theory_vec, spectro_theory_vec), axis=0)
 
         # If any of the two covariances is numerical we need to split
-        # photo and spectro likelihoods to use non-Gaussian likelihood
-        # from Percival et al. 2022 Eq. 52
+        # photometric and spectroscopic likelihoods
+        # to use non-Gaussian likelihood from Percival et al. 2022 Eq. 52
         if (self.data['photo']['cov_is_num'] or
                 self.data['spectro']['cov_is_num']):
             self.mask_ins_phot.set_theory_vector(theory_vec)
@@ -489,7 +491,7 @@ class Euclike:
                         masked_data_minus_theory_spectro,
                         self.masked_invcov_matrix_spectro),
                     masked_data_minus_theory_spectro)
-            # Photo likelihood
+            # Photometric likelihood
             if self.data['photo']['cov_is_num']:
                 B_phot = (self.nsim_phot - self.ndata_phot - 2.0) / \
                     ((self.nsim_phot - self.ndata_phot - 1.0) *
@@ -501,7 +503,7 @@ class Euclike:
                         1.0 + chi2_phot / (self.nsim_phot - 1.0))
             else:
                 loglike_phot = -0.5 * chi2_phot
-            # Spectro likelihood
+            # Spectroscopic likelihood
             if self.data['spectro']['cov_is_num']:
                 B_spectro = (self.nsim_spectro - self.ndata_spectro - 2.0) / \
                     ((self.nsim_spectro - self.ndata_spectro - 1.0) *

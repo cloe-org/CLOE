@@ -11,7 +11,7 @@ from cloe.spectroscopic_survey.spectro import Spectro
 from cloe.data_reader import reader
 from cloe.masking.masking import Masking
 from cloe.masking.data_handler import Data_handler
-from cloe.auxiliary.matrix_transforms import VectorizeMatrix, BNT_transform
+from cloe.auxiliary.matrix_transforms import BNT_transform
 
 
 class EuclikeError(Exception):
@@ -318,15 +318,15 @@ class Euclike:
             chiwin = dictionary['r_z_func'](zwin)
             Nz = self.phot_ins.nz_WL.get_num_tomographic_bins()
             ni_list = np.zeros((Nz, len(zwin)))
-            for ni in range(1, Nz + 1):
+            for ni in range(Nz):
                 ni_list[ni] = \
-                    self.phot_ins.nz_WL.interpolates_n_i(ni, zwin)(zwin)
+                    self.phot_ins.nz_WL.interpolates_n_i(ni + 1, zwin)(zwin)
             BNT_transformation = BNT_transform(zwin, chiwin, ni_list)
             if obs == 'WL':
                 N_ells = len(self.ells_WL)
                 transformed_array = \
                     BNT_transformation\
-                    .apply_vectorized_symmetric_BNT(self,
+                    .apply_vectorized_symmetric_BNT(
                                                     Nz,
                                                     N_ells,
                                                     obs_array)
@@ -334,7 +334,7 @@ class Euclike:
                 N_ells = len(self.ells_XC)
                 transformed_array = \
                     BNT_transformation\
-                    .apply_vectorized_asymmetric_BNT(self,
+                    .apply_vectorized_nonsymmetric_BNT(
                                                      Nz,
                                                      N_ells,
                                                      obs_array)

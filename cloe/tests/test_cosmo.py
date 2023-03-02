@@ -18,6 +18,9 @@ class cosmoinitTestCase(TestCase):
         # Define standard test case
         cls.cosmo = Cosmology()
         cls.cosmo.cosmo_dic = load_test_pickle('cosmo_test_dic.pickle')
+        cls.cosmo.nonlinear.theory['redshift_bins'] = \
+            cls.cosmo.cosmo_dic['redshift_bins']
+        cls.cosmo.nonlinear.set_Pgg_spectro_model()
         # Define test case for negative curvature
         cls.cosmo_curv_neg = Cosmology()
         cls.cosmo_curv_neg.cosmo_dic = (
@@ -105,18 +108,18 @@ class cosmoinitTestCase(TestCase):
         )
 
     def test_pk_source(self):
-        source = self.cosmo.pk_source
+        source = self.cosmo.pk_source_phot
         type_check = isinstance(source, Cosmology)
         assert type_check, 'Error in returned data type of pk_source'
         # To test the nonlinear case we simply check if the object returned
         # from pk_source is not a Cosmology object. Otherwise we should
         # import the Nonlinear class, going against the independency among
         # different modules in the unit tests
-        self.cosmo.cosmo_dic['NL_flag'] = 1
-        source = self.cosmo.pk_source
+        self.cosmo.cosmo_dic['NL_flag_phot_matter'] = 1
+        source = self.cosmo.pk_source_phot
         type_check = isinstance(source, Cosmology)
         assert not type_check, 'Error in returned data type of pk_source'
-        self.cosmo.cosmo_dic['NL_flag'] = 0
+        self.cosmo.cosmo_dic['NL_flag_phot_matter'] = 0
 
     def test_cosmo_growth_factor(self):
         npt.assert_equal(
@@ -250,15 +253,15 @@ class cosmoinitTestCase(TestCase):
     def test_istf_spectro_galbias(self):
         # assign custom b1_spectro and b2_spectro for maintainability
         nuipar = self.cosmo.cosmo_dic['nuisance_parameters']
-        nuipar['b1_spectro'] = 1.23
-        nuipar['b2_spectro'] = 4.56
+        nuipar['b1_spectro_bin1'] = 1.23
+        nuipar['b1_spectro_bin2'] = 4.56
         # check scalar redshift input: z in 1st bin returns b1_spectro
         bi_val_actual = self.cosmo.istf_spectro_galbias(1.5, [1.0, 2.0])
-        bi_val_desired = nuipar['b1_spectro']
+        bi_val_desired = nuipar['b1_spectro_bin1']
         npt.assert_equal(
             bi_val_actual,
             bi_val_desired,
-            err_msg='Error in istf_spectro_galbias: b1_spectro',
+            err_msg='Error in istf_spectro_galbias: b1_spectro_bin1',
         )
         # check redshift outside bounds, with z=0 and z=10
         npt.assert_raises(
@@ -275,7 +278,7 @@ class cosmoinitTestCase(TestCase):
         zs_vec = [1.5, 2.5]
         z_edge = [1.0, 2.0, 3.0]
         bi_val_actual = self.cosmo.istf_spectro_galbias(zs_vec, z_edge)
-        bi_val_desired = [nuipar['b1_spectro'], nuipar['b2_spectro']]
+        bi_val_desired = [nuipar['b1_spectro_bin1'], nuipar['b1_spectro_bin2']]
         npt.assert_equal(
             len(bi_val_actual),
             len(zs_vec),

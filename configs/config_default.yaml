@@ -24,13 +24,18 @@ Cobaya:
       z_samp: 100
       # Flag to make the choice of the sampler visible to cloe
       solver: *solver
-      # Nonlinear flag selector
-      # 0 -> linear-only
-      # 1 -> Halofit (Takahashi)
-      # 2 -> Mead2020 (w/o baryon corrections)
-      # 3 -> Euclid Emulator 2
-      # 4 -> BACCO (matter)
-      NL_flag: 0
+      # Nonlinear flag selectors
+      # Photometric matter flag
+      #     0 -> linear-only
+      #     1 -> Halofit (Takahashi)
+      #     2 -> Mead2020 (w/o baryon corrections)
+      #     3 -> Euclid Emulator 2
+      #     4 -> BACCO (matter)
+      NL_flag_phot_matter: 0
+      # Spectroscopic flag
+      #     0 -> linear-only
+      #     1 -> EFT
+      NL_flag_spectro: 0
       # Add RSD to photometric probes
       add_phot_RSD: False
       # Use MG gamma

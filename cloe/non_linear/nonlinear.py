@@ -1,10 +1,11 @@
-"""Nonlinear
+"""Nonlinear module
 
-Class to compute nonlinear recipes.
+Module to compute nonlinear recipes.
 """
 
 import numpy as np
 from scipy import interpolate
+import cloe.auxiliary.redshift_bins as rb
 from cloe.non_linear.miscellanous import Misc
 from cloe.non_linear.pgg_spectro import Pgg_spectro_model
 from cloe.non_linear.pgg_phot import Pgg_phot_model
@@ -12,6 +13,7 @@ from cloe.non_linear.pgL_phot import PgL_phot_model
 from cloe.non_linear.pLL_phot import PLL_phot_model
 import euclidemu2
 import baccoemu
+from cloe.non_linear.eft import EFTofLSS
 
 
 class NonlinearError(Exception):
@@ -28,31 +30,36 @@ class Nonlinear:
     """
 
     def __init__(self, cosmo_dic):
-        """Initialise
+        """Class constructor
 
         Initialises class and nonlinear code
 
         Parameters
         ----------
-        cosmo_dic: dictionary
-            External dictionary from Cosmology class
+        cosmo_dic: dict
+            External dictionary from Cosmology class.
+        redshift_bins: list or numpy.ndarray
+            Spectroscopic redshift bins to determine which bin the input
+            redshift corresponds to.
         """
         self.theory = cosmo_dic
+        self.nuis = cosmo_dic['nuisance_parameters']
 
         self.misc = Misc(cosmo_dic)
+
+        # Nonlinear dictionary, to store intermediate quantities
+        # not necessary to the rest of the code
+        self.nonlinear_dic = {'NL_boost': None,
+                              'option_extra_wavenumber': 'hm_smooth',
+                              'option_extra_redshift': 'hm_simple',
+                              'Pk_mu': None}
 
         # Empty variables for emulator class instances
         self.ee2 = None
         self.bemu = None
 
-        self.nonlinear_dic = {'NL_boost': None,
-                              'option_extra_wavenumber': 'hm_smooth',
-                              'option_extra_redshift': 'hm_simple'}
-
-        self.Pgg_spectro_model = Pgg_spectro_model(cosmo_dic,
-                                                   self.nonlinear_dic,
-                                                   self.misc)
-
+        # Instances of classes to compute power spectra interpolators
+        # for the 3x2pt statistics
         self.Pgg_phot_model = Pgg_phot_model(cosmo_dic, self.nonlinear_dic,
                                              self.misc)
         self.PgL_phot_model = PgL_phot_model(cosmo_dic, self.nonlinear_dic,
@@ -60,69 +67,123 @@ class Nonlinear:
         self.PLL_phot_model = PLL_phot_model(cosmo_dic, self.nonlinear_dic,
                                              self.misc)
 
+    def set_Pgg_spectro_model(self):
+        """Sets GCspectro redshift bins and instance of Pgg_spectro_model
+
+        Reads the values of the redshift bin edges from the `theory` class
+        attribute and computes the centers of the bins that are later used
+        for the GCspectro recipe. Also, creates an instance of the
+        Pgg_spectro_model class, used to return the recipe for GCspectro.
+
+        Raises
+        ------
+        KeyError
+            If GCspectro redshift bins cannot be found in the cosmo
+            dictionary.
+        """
+        if 'redshift_bins' not in self.theory.keys():
+            raise KeyError('Attempting to set Pgg_spectro_model class '
+                           'without having specified the GCspectro '
+                           'redshift bins in the cosmo dictionary.')
+        zbins = self.theory['redshift_bins']
+        if not isinstance(zbins, np.ndarray):
+            self.zbins = np.array(zbins)
+        else:
+            self.zbins = zbins
+        self.zmeans = (self.zbins[1:] + self.zbins[:-1]) / 2.0
+
+        # Instance of class to compute power spectra interpolators
+        # for the GCspectro statistics
+        self.Pgg_spectro_model = Pgg_spectro_model(self.theory,
+                                                   self.nonlinear_dic,
+                                                   self.misc, self.zbins)
+
     def update_dic(self, cosmo_dic):
         """Updates Dic
 
-        Calls all routines updating the cosmo dictionary
+        Calls all routines updating the cosmo dictionary, and recomputes
+        the various intermediate nonlinear blocks needed for the different
+        recipes (according to the value of the nonlinear flag).
 
         Parameters
         ----------
-        cosmo_dic: dictionary
-            External dictionary from Cosmology class
+        cosmo_dic: dict
+            External dictionary from Cosmology class.
 
         Returns
         -------
-        cosmo_dic: dict
-            Updated dictionary
-
+        theory: dict
+            Updated dictionary of the Nonlinear class.
         """
         self.theory = cosmo_dic
+        self.nuis = cosmo_dic['nuisance_parameters']
+        self.misc.update_dic(cosmo_dic)
 
         # Creation of EE2 instance on the first request of EE2
-        if (self.theory['NL_flag'] == 3 and self.ee2 is None):
-
+        if (self.theory['NL_flag_phot_matter'] == 3 and self.ee2 is None):
             self.ee2 = euclidemu2.PyEuclidEmulator()
 
         # Creation of BACCO emulator instance on the first request of BACCO
-        if (self.theory['NL_flag'] == 4 and self.bemu is None):
-
+        if (self.theory['NL_flag_phot_matter'] == 4 and self.bemu is None):
             self.bemu = baccoemu.Matter_powerspectrum(verbose=False)
 
-        self.calculate_boost()
+        # Calculate boost factor if NL_flag_phot_matter is 3 or 4
+        if (self.theory['NL_flag_phot_matter'] > 2 and
+                self.theory['NL_flag_phot_matter'] < 5):
+            self.calculate_boost()
 
-        self.misc.update_dic(cosmo_dic)
+        # Compute Pgg(k,mu) if NL_flag_spectro is 1
+        if self.theory['NL_flag_spectro'] == 1:
+            self.calculate_eft()
 
-        self.Pgg_spectro_model.update_dic(cosmo_dic,
-                                          self.nonlinear_dic, self.misc)
-        self.Pgg_phot_model.update_dic(cosmo_dic,
-                                       self.nonlinear_dic, self.misc)
-        self.PgL_phot_model.update_dic(cosmo_dic,
-                                       self.nonlinear_dic, self.misc)
-        self.PLL_phot_model.update_dic(cosmo_dic,
-                                       self.nonlinear_dic, self.misc)
+        # Update of classes for power spectra interpolators
+        self.Pgg_phot_model.update_dic(cosmo_dic, self.nonlinear_dic,
+                                       self.misc)
+        self.PgL_phot_model.update_dic(cosmo_dic, self.nonlinear_dic,
+                                       self.misc)
+        self.PLL_phot_model.update_dic(cosmo_dic, self.nonlinear_dic,
+                                       self.misc)
+        self.Pgg_spectro_model.update_dic(cosmo_dic, self.nonlinear_dic,
+                                          self.misc)
 
         return self.theory
+
+    def calculate_eft(self):
+        """Calculates EFT
+
+        Computes anisotropic galaxy power spectrum, and adds it to the
+        nonlinear dictionary as an array of interpolator objects (one for
+        each redshift bin, as specified by the class attribute zmeans).
+        """
+        # Initializing EFT object
+        eftobj = EFTofLSS(self.theory)
+        # Computing loops at redshift z=0
+        eftobj._Pgg_kmu_terms()
+        # Creating array of Pgg(k,mu) interpolators at the different redshifts
+        Pkmu = np.array(
+            [eftobj.P_kmu_z(f=self.theory['f_z'](float(z)),
+             D=self.theory['D_z_k_func'](float(z), 0),
+             **rb.select_spectro_parameters(float(z), self.nuis))
+             for z in self.zmeans])
+        # Storing in the nonlinear dictionary
+        self.nonlinear_dic['P_kmu'] = Pkmu
 
     def calculate_boost(self):
         """Calculates Boost
 
-        Checks nonlinear flag, computes the corresponding
-        boost-factor and adds it to the nonlinear dictionary
+        Checks nonlinear photometric flag, computes the corresponding
+        boost-factor, and adds it to the nonlinear dictionary.
         """
 
-        if (self.theory['NL_flag'] > 2):
-
-            if (self.theory['NL_flag'] == 3):
-
+        if (self.theory['NL_flag_phot_matter'] > 2 and
+                self.theory['NL_flag_phot_matter'] < 5):
+            if (self.theory['NL_flag_phot_matter'] == 3):
                 wavenumber, boost, redshift_max, flag_range = self.ee2_boost()
-
-            elif (self.theory['NL_flag'] == 4):
-
+            elif (self.theory['NL_flag_phot_matter'] == 4):
                 wavenumber, boost, redshift_max, flag_range = \
-                                                            self.bacco_boost()
-
+                    self.bacco_boost()
             else:
-                raise Exception('Invalid value of NL_flag,'
+                raise Exception('Invalid value of NL_flag_phot_matter,'
                                 ' valid options are [0,1,2,3,4]')
 
             # Extrapolation function for all cases. In the cosmology case, the
@@ -131,30 +192,20 @@ class Nonlinear:
             # hm_simple} and wavenumber extrapolation has the additional option
             # of hm_smooth.
             wavenumber_out, boost_ext = self.extend_boost(
-               wavenumber,
-               boost,
-               redshift_max,
-               flag_range,
+               wavenumber, boost, redshift_max, flag_range,
                option_wavenumber=self.nonlinear_dic['option_extra_wavenumber'],
                option_redshift=self.nonlinear_dic['option_extra_redshift'],
                option_cosmo="hm_simple")
 
             self.nonlinear_dic['NL_boost'] = \
                 interpolate.RectBivariateSpline(
-                        self.theory['z_win'],
-                        wavenumber_out, boost_ext, kx=1, ky=1)
+                    self.theory['z_win'], wavenumber_out,
+                    boost_ext, kx=1, ky=1)
 
     def linear_boost(self):
         """Linear Boost
 
         Returns the boost factor for the linear case (i.e. 1)
-
-        Parameters
-        ----------
-        redshift: float
-            Redshift at which to calculate the boost
-        scale: float
-            Wave mode at which to calculate the boost
 
         Returns
         -------
@@ -168,8 +219,8 @@ class Nonlinear:
     def ee2_boost(self):
         """EE2 Boost
 
-        Returns the boost factor for the EE2 (i.e. NL_flag==3). Parameter
-        ranges are as follows:
+        Returns the boost factor for the EE2 (i.e. NL_flag_phot_matter==3).
+        Parameter ranges are as follows:
 
         - Omb: [0.04, 0.06],
         - Omm: [0.24, 0.40],
@@ -225,7 +276,8 @@ class Nonlinear:
     def bacco_boost(self):
         """BACCO Boost
 
-        Returns the boost factor for the BACCO case (i.e. NL_flag==4).
+        Returns the boost factor for the BACCO case
+        (i.e. NL_flag_phot_matter==4).
         Parameter ranges (in the variables of BACCO) are as follows:
 
         - sigma8_cold: [0.73, 0.9]
@@ -381,8 +433,8 @@ class Nonlinear:
         # Extrapolate everything with HMcode if cosmology is not in range
         # and the option to extrapolate is HMcode.
         # Note that 'Pk_halomodel_recipe' always includes the prediction from
-        # HMcode since for all values of NL_flag corresponding to the emulators
-        # (3, 4) the nonlinear model given by cobaya is HMcode.
+        # HMcode since for all values of NL_flag_phot_matter corresponding to
+        # the emulators (3, 4) the nonlinear model given by cobaya is HMcode.
         if (not flag_range) and option_cosmo == "hm_simple":
 
             wavenumber_out = wavenumber_base
@@ -546,7 +598,7 @@ class Nonlinear:
                     4: self.PLL_phot_model.Pmm_phot_emu
                     }
         Pmm_phot_func = \
-            switcher.get(self.theory['NL_flag'],
+            switcher.get(self.theory['NL_flag_phot_matter'],
                          "Invalid modeling option")
 
         return Pmm_phot_func(redshift, wavenumber)
@@ -557,8 +609,11 @@ class Nonlinear:
         Returns the spectroscopic galaxy-galaxy power spectrum,
         defined in the pgg_spectro module
         """
-        return self.Pgg_spectro_model.Pgg_spectro_def(redshift,
-                                                      wavenumber, mu_rsd)
+        switcher = {1: self.Pgg_spectro_model.Pgg_spectro_eft}
+
+        Pgg_spectro_func = switcher.get(self.theory['NL_flag_spectro'],
+                                        "Invalid modeling option")
+        return Pgg_spectro_func(redshift, wavenumber, mu_rsd)
 
     def Pgdelta_spectro_def(self, redshift, wavenumber, mu_rsd):
         r"""Interface for Pgdelta_spectro_def
@@ -581,7 +636,7 @@ class Nonlinear:
                     4: self.Pgg_phot_model.Pgg_phot_emu
                     }
         Pgg_phot_func = \
-            switcher.get(self.theory['NL_flag'],
+            switcher.get(self.theory['NL_flag_phot_matter'],
                          "Invalid modeling option")
 
         return Pgg_phot_func(redshift, wavenumber)
@@ -598,7 +653,7 @@ class Nonlinear:
                     4: self.PLL_phot_model.Pii_emu
                     }
         Pii_func = \
-            switcher.get(self.theory['NL_flag'],
+            switcher.get(self.theory['NL_flag_phot_matter'],
                          "Invalid modeling option")
 
         return Pii_func(redshift, wavenumber)
@@ -615,7 +670,7 @@ class Nonlinear:
                     4: self.PLL_phot_model.Pdeltai_emu
                     }
         Pdeltai_func = \
-            switcher.get(self.theory['NL_flag'],
+            switcher.get(self.theory['NL_flag_phot_matter'],
                          "Invalid modeling option")
 
         return Pdeltai_func(redshift, wavenumber)
@@ -632,7 +687,7 @@ class Nonlinear:
                     4: self.PLL_phot_model.Pgi_phot_emu
                     }
         Pgi_func = \
-            switcher.get(self.theory['NL_flag'],
+            switcher.get(self.theory['NL_flag_phot_matter'],
                          "Invalid modeling option")
 
         return Pgi_func(redshift, wavenumber)
@@ -657,6 +712,6 @@ class Nonlinear:
                     4: self.PgL_phot_model.Pgdelta_phot_emu
                     }
         PgL_phot_func = \
-            switcher.get(self.theory['NL_flag'],
+            switcher.get(self.theory['NL_flag_phot_matter'],
                          "Invalid modeling option")
         return PgL_phot_func(redshift, wavenumber)

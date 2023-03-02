@@ -125,7 +125,7 @@ class Misc:
 
         try:
             redshift_bin = rb.find_bin(redshift, bin_edges, False)
-            bi_val = np.array([nuisance_src[f'b{i}_spectro']
+            bi_val = np.array([nuisance_src[f'b1_spectro_bin{i}']
                               for i in np.nditer(redshift_bin)])
             return bi_val[0] if np.isscalar(redshift) else bi_val
         except (ValueError, KeyError):

@@ -217,7 +217,7 @@ def update_cobaya_dict_with_halofit_version(cobaya_dict):
         The Cobaya dictionary
     """
 
-    NL_flag = cobaya_dict['likelihood']['Euclid']['NL_flag']
+    NL_flag = cobaya_dict['likelihood']['Euclid']['NL_flag_phot_matter']
     set_halofit_version(cobaya_dict, NL_flag)
 
 
@@ -321,7 +321,8 @@ def generate_params_yaml(models=None):
     models: list of strings
         Strings corresponding to a model.
         Possible strings: 'nuisance_bias', 'nuisance_ia', 'nuisance_nz',
-        'nuisance_magnification_bias', 'nuisance_shear_calibration'
+        'nuisance_magnification_bias', 'nuisance_shear_calibration',
+        'nonlinearities'
 
     Notes
     -----
@@ -332,7 +333,8 @@ def generate_params_yaml(models=None):
 
     if models is None:
         models = ['nuisance_bias', 'nuisance_ia', 'nuisance_nz',
-                  'nuisance_magnification_bias', 'nuisance_shear_calibration']
+                  'nuisance_magnification_bias', 'nuisance_shear_calibration',
+                  'nonlinearities']
     likelihood_params = {}
 
     for model in models:

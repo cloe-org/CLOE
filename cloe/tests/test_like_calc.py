@@ -63,10 +63,10 @@ class likecalcTestCase(TestCase, SpectroTestParent):
             bin_edge_list = [0.90, 1.10, 1.30, 1.50, 1.80]
 
         istf_bias_list = [
-            self.test_dict['nuisance_parameters']['b1_spectro'],
-            self.test_dict['nuisance_parameters']['b2_spectro'],
-            self.test_dict['nuisance_parameters']['b3_spectro'],
-            self.test_dict['nuisance_parameters']['b4_spectro']
+            self.test_dict['nuisance_parameters']['b1_spectro_bin1'],
+            self.test_dict['nuisance_parameters']['b1_spectro_bin2'],
+            self.test_dict['nuisance_parameters']['b1_spectro_bin3'],
+            self.test_dict['nuisance_parameters']['b1_spectro_bin4']
         ]
 
         if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
@@ -139,10 +139,10 @@ class likecalcngTestCase(TestCase, SpectroTestParent):
             bin_edge_list = [0.90, 1.10, 1.30, 1.50, 1.80]
 
         istf_bias_list = [
-            self.test_dict['nuisance_parameters']['b1_spectro'],
-            self.test_dict['nuisance_parameters']['b2_spectro'],
-            self.test_dict['nuisance_parameters']['b3_spectro'],
-            self.test_dict['nuisance_parameters']['b4_spectro']
+            self.test_dict['nuisance_parameters']['b1_spectro_bin1'],
+            self.test_dict['nuisance_parameters']['b1_spectro_bin2'],
+            self.test_dict['nuisance_parameters']['b1_spectro_bin3'],
+            self.test_dict['nuisance_parameters']['b1_spectro_bin4']
         ]
 
         if bin_edge_list[0] <= redshift < bin_edge_list[-1]:

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-r"""DATA HANLDER MODULE
+r"""DATA HANDLER MODULE
 
 Module for rearranging data vectors and covariance matrices into final
 form, and for obtaining the masking vector

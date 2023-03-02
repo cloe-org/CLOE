@@ -37,6 +37,9 @@ class CobayaModel:
             interpolate.InterpolatedUnivariateSpline(
                 self.z_win,
                 np.linspace(0.001, 1.7, 100))
+        self.cosmology.nonlinear.theory['redshift_bins'] = \
+            self.cosmology.cosmo_dic['redshift_bins']
+        self.cosmology.nonlinear.set_Pgg_spectro_model()
 
     def define_info(self, cosmo_inst):
         """Define Information"""
@@ -64,12 +67,15 @@ class CobayaModel:
             # Likelihood: we load the likelihood as an external function
             'likelihood': {'euclid': {
                 'external': EuclidLikelihood,
-                'NL_flag': cosmo_inst.cosmo_dic['NL_flag']}}}
+                'NL_flag_phot_matter':
+                    cosmo_inst.cosmo_dic['NL_flag_phot_matter'],
+                'NL_flag_spectro': cosmo_inst.cosmo_dic['NL_flag_spectro']}}}
         self.info['params'].update(
             cosmo_inst.cosmo_dic['nuisance_parameters'])
         self.info['data'] = mock_data
 
-        set_halofit_version(self.info, cosmo_inst.cosmo_dic['NL_flag'])
+        set_halofit_version(self.info,
+                            cosmo_inst.cosmo_dic['NL_flag_phot_matter'])
 
     def get_cobaya_model(self):
         """Get Cobaya Model"""
@@ -116,7 +122,7 @@ class CobayaModel:
         self.cosmology.cosmo_dic['Pk_weyl'] = \
             self.model.provider.get_Pk_interpolator(
             ("Weyl", "Weyl"), nonlinear=False)
-        if self.cosmology.cosmo_dic['NL_flag'] > 0:
+        if self.cosmology.cosmo_dic['NL_flag_phot_matter'] > 0:
             self.cosmology.cosmo_dic['Pk_halomodel_recipe'] = \
                 self.model.provider.get_Pk_interpolator(
                 ('delta_tot', 'delta_tot'), nonlinear=True)

@@ -66,7 +66,7 @@ class EuclidLikelihood(Likelihood):
              self.observables['selection'])
         self.observables['selection']['add_phot_RSD'] = self.add_phot_RSD
         # Select which power spectra to require from the Boltzmann solver
-        if self.NL_flag > 0:
+        if self.NL_flag_phot_matter > 0:
             self.use_NL = [False, True]
         else:
             self.use_NL = False
@@ -88,6 +88,11 @@ class EuclidLikelihood(Likelihood):
 
         # Initialize Cosmology class for sampling
         self.cosmo = Cosmology()
+        # Adding GCspectro redshift bins to cosmo dictionary and setting up
+        # the internal class for Pgg_spectro with this information.
+        self.cosmo.nonlinear.theory['redshift_bins'] = \
+            self.data['spectro']['edges']
+        self.cosmo.nonlinear.set_Pgg_spectro_model()
 
         # Initialize the fiducial model
         self.set_fiducial_cosmology()
@@ -100,7 +105,6 @@ class EuclidLikelihood(Likelihood):
         self.cosmo.cosmo_dic['fid_H_z_func'] = \
             self.fiducial_cosmology.cosmo_dic['H_z_func']
 
-        self.cosmo.cosmo_dic['redshift_bins'] = self.data['spectro']['edges']
         self.cosmo.cosmo_dic['luminosity_ratio_z_func'] = \
             self.likefinal.data_ins.luminosity_ratio_interpolator
 
@@ -229,12 +233,16 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology.cosmo_dic['sigma8'] = \
             model_fiducial.provider.get_sigma8_z(
             self.z_win)
+        # In order to make the update_cosmo_dic method to work, we need to
+        # specify also in this case the information on the GCspectro bins
+        self.fiducial_cosmology.nonlinear.theory['redshift_bins'] = \
+            self.data['spectro']['edges']
+        self.fiducial_cosmology.nonlinear.set_Pgg_spectro_model()
         # Update dictionary with interpolators
         self.fiducial_cosmology.cosmo_dic['luminosity_ratio_z_func'] = \
             self.likefinal.data_ins.luminosity_ratio_interpolator
         self.fiducial_cosmology.update_cosmo_dic(
-            self.fiducial_cosmology.cosmo_dic['z_win'],
-            0.05)
+            self.fiducial_cosmology.cosmo_dic['z_win'], 0.05)
 
     def get_requirements(self):
         r"""Get Requirements
@@ -282,7 +290,9 @@ class EuclidLikelihood(Likelihood):
         """
 
         try:
-            self.cosmo.cosmo_dic['NL_flag'] = self.NL_flag
+            self.cosmo.cosmo_dic['NL_flag_phot_matter'] = \
+                self.NL_flag_phot_matter
+            self.cosmo.cosmo_dic['NL_flag_spectro'] = self.NL_flag_spectro
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
             self.cosmo.cosmo_dic['H0'] = self.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
@@ -335,7 +345,7 @@ class EuclidLikelihood(Likelihood):
                 self.provider.get_Pk_interpolator(
                 ('Weyl', 'Weyl'), nonlinear=False,
                 extrap_kmax=self.k_max_extrap)
-            if self.NL_flag > 0:
+            if self.NL_flag_phot_matter > 0:
                 self.cosmo.cosmo_dic['Pk_halomodel_recipe'] = \
                     self.provider.get_Pk_interpolator(
                     ('delta_tot', 'delta_tot'), nonlinear=True,
@@ -360,8 +370,10 @@ class EuclidLikelihood(Likelihood):
                 **only_nuisance_params)
 
         except (TypeError, AttributeError):
-            self.cosmo.cosmo_dic['NL_flag'] = \
-                info['likelihood']['Euclid']['NL_flag']
+            self.cosmo.cosmo_dic['NL_flag_phot_matter'] = \
+                info['likelihood']['Euclid']['NL_flag_phot_matter']
+            self.cosmo.cosmo_dic['NL_flag_spectro'] = \
+                info['likelihood']['Euclid']['NL_flag_spectro']
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
             self.cosmo.cosmo_dic['H0'] = model.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
@@ -419,7 +431,7 @@ class EuclidLikelihood(Likelihood):
                 ('Weyl', 'Weyl'), nonlinear=False,
                 extrap_kmin=self.k_min_extrap,
                 extrap_kmax=self.k_max_extrap)
-            if info['likelihood']['Euclid']['NL_flag'] > 0:
+            if info['likelihood']['Euclid']['NL_flag_phot_matter'] > 0:
                 self.cosmo.cosmo_dic['Pk_halomodel_recipe'] = \
                     model.provider.get_Pk_interpolator(
                     ('delta_tot', 'delta_tot'), nonlinear=True,

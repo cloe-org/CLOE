@@ -1,16 +1,21 @@
 """
 module: pgg_spectro
 
-Contains recipes for the spectroscopic galaxy x galaxy power spectrum.
+Contains recipes for the spectroscopic galaxy-galaxy power spectrum.
 """
 
 from cloe.non_linear.power_spectrum import PowerSpectrum
+from cloe.auxiliary.redshift_bins import find_bin
 
 
 class Pgg_spectro_model(PowerSpectrum):
     r"""
-    Class for computation of spectroscopic galaxy x galaxy power spectrum
+    Class for computation of spectroscopic galaxy-galaxy power spectrum
     """
+
+    def __init__(self, cosmo_dic, nonlinear_dic, misc, redshift_bins):
+        super(Pgg_spectro_model, self).__init__(cosmo_dic, nonlinear_dic, misc)
+        self.zbins = redshift_bins
 
     def Pgg_spectro_def(self, redshift, wavenumber, mu_rsd):
         r"""Pgg Spectro Def
@@ -47,6 +52,32 @@ class Pgg_spectro_model(PowerSpectrum):
         growth = self.theory['f_z'](redshift)
         power = self.theory['Pk_delta'].P(redshift, wavenumber)
         pval = (bias + growth * mu_rsd ** 2.0) ** 2.0 * power
+        return pval
+
+    def Pgg_spectro_eft(self, redshift, wavenumber, mu_rsd):
+        r"""Pgg Spectro Eft
+
+        Computes the galaxy-galaxy power spectrum for the spectroscopic probe
+        using the eft model.
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum
+        k_scale: float or numpy.ndarray
+            k-mode at which to evaluate the power spectrum
+        mu_rsd: float or numpy.ndarray
+            cosine of the angle between k and the line of sight
+
+        Returns
+        -------
+        pval: float or numpy.ndarray
+            Value of the galaxy-galaxy power spectrum at given redshift,
+            k-mode and mu values for the spectroscopic probe.
+        """
+        zbin = find_bin(redshift, self.zbins, check_bounds=True)
+        pval = self.nonlinear_dic['P_kmu'][zbin - 1](wavenumber, mu_rsd,
+                                                     grid=False)
         return pval
 
     def Pgdelta_spectro_def(self, redshift, wavenumber, mu_rsd):

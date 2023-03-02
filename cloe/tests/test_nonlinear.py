@@ -16,46 +16,60 @@ class nonlinearinitTestCase(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
 
-        # Load cosmology dictionary for tests with NL=1
-        cosmo_dic_1 = load_test_pickle('cosmo_test_NL1_dic.pickle')
+        # Load cosmology dictionary for tests with NL_flag_phot_matter=1
+        cosmo_dic_1 = load_test_pickle('cosmo_test_NLphot1_dic.pickle')
         # Create instance of Nonlinear class
         cls.nl1 = Nonlinear(cosmo_dic_1)
 
-        # Load cosmology dictionary for tests with NL=2
-        cosmo_dic_2 = load_test_pickle('cosmo_test_NL2_dic.pickle')
+        # Load cosmology dictionary for tests with NL_flag_phot_matter=2
+        cosmo_dic_2 = load_test_pickle('cosmo_test_NLphot2_dic.pickle')
         # Create instance of Nonlinear class
         cls.nl2 = Nonlinear(cosmo_dic_2)
 
-        # Copy cosmo_dic from NL_flag=2 (to have HMcode)
+        # Copy cosmo_dic from NL_flag_phot_matter=2 (to have HMcode)
         cosmo_dic_3 = cosmo_dic_2.copy()
-        cosmo_dic_3['NL_flag'] = 3
+        cosmo_dic_3['NL_flag_phot_matter'] = 3
         # Create instance of Nonlinear class and update its dictionary
         cls.nl3 = Nonlinear(cosmo_dic_3)
+        cls.nl3.set_Pgg_spectro_model()
         cls.nl3.update_dic(cosmo_dic_3)
 
-        # Copy cosmo_dic from NL_flag=2 (to have HMcode)
+        # Copy cosmo_dic from NL_flag_phot_matter=2 (to have HMcode)
         cosmo_dic_4 = cosmo_dic_2.copy()
-        cosmo_dic_4['NL_flag'] = 4
+        cosmo_dic_4['NL_flag_phot_matter'] = 4
         # Create instance of Nonlinear class and update its dictionary
         cls.nl4 = Nonlinear(cosmo_dic_4)
+        cls.nl4.set_Pgg_spectro_model()
         cls.nl4.update_dic(cosmo_dic_4)
 
         # Load cosmology dictionary for cosmology extrapolation tests
-        cosmo_dic_extra = load_test_pickle('cosmo_test_NL2_extra_dic.pickle')
-        cosmo_dic_extra['NL_flag'] = 3
+        cosmo_dic_extra = \
+            load_test_pickle('cosmo_test_NLphot2_extra_dic.pickle')
+        cosmo_dic_extra['NL_flag_phot_matter'] = 3
         # Create instance of Nonlinear class and update its dictionary
         cls.nl3_extra = Nonlinear(cosmo_dic_extra)
+        cls.nl3_extra.set_Pgg_spectro_model()
         cls.nl3_extra.update_dic(cosmo_dic_extra)
 
-        cosmo_dic_extra['NL_flag'] = 4
+        cosmo_dic_extra['NL_flag_phot_matter'] = 4
         # Create instance of Nonlinear class and update its dictionary
         cls.nl4_extra = Nonlinear(cosmo_dic_extra)
+        cls.nl4_extra.set_Pgg_spectro_model()
         cls.nl4_extra.update_dic(cosmo_dic_extra)
+
+        # Load cosmology dictionary for tests
+        cosmo_dic_5 = load_test_pickle('cosmo_test_NLspectro1_dic.pickle')
+        # Create instance of Nonlinear class
+        cls.nl5 = Nonlinear(cosmo_dic_5)
+        cls.nl5.set_Pgg_spectro_model()
+        nonlinear_dic = \
+            load_test_pickle('cosmo_test_NLspectro1_nonlin_dic.pickle')
+        cls.nl5.Pgg_spectro_model.nonlinear_dic = nonlinear_dic
 
     def setUp(self) -> None:
         # Check values
         self.Pgi_spectro_test = -388.28625
-        self.Pgg_spectro_test = 82548.320427
+        self.Pgg_spectro_test = 82261.147583
         self.Pgdelta_spectro_test = 59890.445816
 
         self.Pgg_phot_test_NL1 = 58175.37128267319
@@ -145,28 +159,32 @@ class nonlinearinitTestCase(TestCase):
             self.nl1.Pgg_phot_def(self.redshift1, self.wavenumber1),
             self.Pgg_phot_test_NL1,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pgg_phot_def for NL_flag=1',
+            err_msg='Error in value returned by Pgg_phot_def '
+                    'for NL_flag_phot_matter=1',
         )
 
         npt.assert_allclose(
             self.nl2.Pgg_phot_def(self.redshift1, self.wavenumber1),
             self.Pgg_phot_test_NL2,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pgg_phot_def for NL_flag=2',
+            err_msg='Error in value returned by Pgg_phot_def '
+                    'for NL_flag_phot_matter=2',
         )
 
         npt.assert_allclose(
             self.nl3.Pgg_phot_def(self.redshift1, self.wavenumber1),
             self.Pgg_phot_test_NL3,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pgg_phot_def for NL_flag=3',
+            err_msg='Error in value returned by Pgg_phot_def '
+                    'for NL_flag_phot_matter=3',
         )
 
         npt.assert_allclose(
             self.nl4.Pgg_phot_def(self.redshift1, self.wavenumber1),
             self.Pgg_phot_test_NL4,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pgg_phot_def for NL_flag=4',
+            err_msg='Error in value returned by Pgg_phot_def '
+                    'for NL_flag_phot_matter=4',
         )
 
     def test_Pgdelta_phot_def(self):
@@ -174,49 +192,52 @@ class nonlinearinitTestCase(TestCase):
             self.nl1.Pgdelta_phot_def(self.redshift1, self.wavenumber1),
             self.Pgdelta_phot_test_NL1,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pgdelta_phot_def for NL_flag=1'
+            err_msg='Error in value returned by Pgdelta_phot_def '
+                    'for NL_flag_phot_matter=1'
         )
 
         npt.assert_allclose(
             self.nl2.Pgdelta_phot_def(self.redshift1, self.wavenumber1),
             self.Pgdelta_phot_test_NL2,
             rtol=self.rtol,
-            err_msg=('Error in value returned by Pgdelta_phot_def' +
-                     'for NL_flag=2'),
+            err_msg='Error in value returned by Pgdelta_phot_def '
+                    'for NL_flag_phot_matter=2',
         )
 
         npt.assert_allclose(
             self.nl3.Pgdelta_phot_def(self.redshift1, self.wavenumber1),
             self.Pgdelta_phot_test_NL3,
             rtol=self.rtol,
-            err_msg=('Error in value returned by Pgdelta_phot_def' +
-                     'for NL_flag=3'),
+            err_msg='Error in value returned by Pgdelta_phot_def '
+                    'for NL_flag_phot_matter=3',
         )
 
         npt.assert_allclose(
             self.nl4.Pgdelta_phot_def(self.redshift1, self.wavenumber1),
             self.Pgdelta_phot_test_NL4,
             rtol=self.rtol,
-            err_msg=('Error in value returned by Pgdelta_phot_def ' +
-                     'for NL_flag=4'),
+            err_msg='Error in value returned by Pgdelta_phot_def '
+                    'for NL_flag_phot_matter=4',
         )
 
     def test_Pgg_spectro_def(self):
         npt.assert_allclose(
-            self.nl1.Pgg_spectro_def(self.redshift1, self.wavenumber1,
+            self.nl5.Pgg_spectro_def(self.redshift1, self.wavenumber1,
                                      self.mu),
             self.Pgg_spectro_test,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pgg_spectro_def',
+            err_msg='Error in value returned by Pgg_spectro_def '
+                    'for NL_flag_spectro=1',
         )
 
     def test_Pgdelta_spectro_def(self):
         npt.assert_allclose(
-            self.nl1.Pgdelta_spectro_def(self.redshift1, self.wavenumber1,
+            self.nl5.Pgdelta_spectro_def(self.redshift1, self.wavenumber1,
                                          self.mu),
             self.Pgdelta_spectro_test,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pgdelta_spectro_def',
+            err_msg='Error in value returned by Pgdelta_spectro_def '
+                    'for NL_flag_spectro=1',
         )
 
     def test_Pii_def(self):
@@ -228,17 +249,19 @@ class nonlinearinitTestCase(TestCase):
         type_check = isinstance(test_p1, np.ndarray)
 
         assert type_check, 'Error in returned data type of Pii_def ' \
-                           'for NL_flag=1'
+                           'for NL_flag_phot_matter=1'
 
         assert test_p1.size == self.arrsize, (
-            'Error in size of array returned by Pii_def for NL_flag=1'
+            'Error in size of array returned by Pii_def for '
+            'NL_flag_phot_matter=1'
         )
 
         npt.assert_allclose(
             test_p1,
             self.Pii_test_NL1,
             rtol=self.rtol,
-            err_msg='Error in values returned by Pii_def for NL_flag=1',
+            err_msg='Error in values returned by Pii_def for '
+                    'NL_flag_phot_matter=1',
         )
 
         test_p2 = self.nl2.Pii_def(self.redshift1,
@@ -248,17 +271,18 @@ class nonlinearinitTestCase(TestCase):
 
         type_check = isinstance(test_p2, np.ndarray)
         assert type_check, 'Error in returned data type of Pii_def ' \
-                           'for NL_flag=2'
+                           'for NL_flag_phot_matter=2'
 
         assert test_p2.size == self.arrsize, 'Error in size of array ' \
                                              'returned by Pii_def ' \
-                                             'for NL_flag=2'
+                                             'for NL_flag_phot_matter=2'
 
         npt.assert_allclose(
             test_p2,
             self.Pii_test_NL2,
             rtol=self.rtol,
-            err_msg='Error in values returned by Pii_def for NL_flag=2')
+            err_msg='Error in values returned by Pii_def for '
+                    'NL_flag_phot_matter=2')
 
         test_p3 = self.nl3.Pii_def(self.redshift1,
                                    [self.wavenumber1,
@@ -267,17 +291,18 @@ class nonlinearinitTestCase(TestCase):
 
         type_check = isinstance(test_p3, np.ndarray)
         assert type_check, 'Error in returned data type of Pii_def ' \
-                           'for NL_flag=3'
+                           'for NL_flag_phot_matter=3'
 
         assert test_p3.size == self.arrsize, 'Error in size of array ' \
                                              'returned by Pii_def ' \
-                                             'for NL_flag=3'
+                                             'for NL_flag_phot_matter=3'
 
         npt.assert_allclose(
             test_p3,
             self.Pii_test_NL3,
             rtol=self.rtol,
-            err_msg='Error in values returned by Pii_def for NL_flag=3')
+            err_msg='Error in values returned by Pii_def for '
+                    'NL_flag_phot_matter=3')
 
         test_p4 = self.nl4.Pii_def(self.redshift1,
                                    [self.wavenumber1,
@@ -286,45 +311,50 @@ class nonlinearinitTestCase(TestCase):
 
         type_check = isinstance(test_p4, np.ndarray)
         assert type_check, 'Error in returned data type of Pii_def ' \
-                           'for NL_flag=4'
+                           'for NL_flag_phot_matter=4'
 
         assert test_p4.size == self.arrsize, 'Error in size of array ' \
                                              'returned by Pii_def ' \
-                                             'for NL_flag=4'
+                                             'for NL_flag_phot_matter=4'
 
         npt.assert_allclose(
             test_p4,
             self.Pii_test_NL4,
             rtol=self.rtol,
-            err_msg='Error in values returned by Pii_def for NL_flag=4')
+            err_msg='Error in values returned by Pii_def for '
+                    'NL_flag_phot_matter=4')
 
     def test_Pdeltai_def(self):
         npt.assert_allclose(
             self.nl1.Pdeltai_def(self.redshift1, self.wavenumber1),
             self.Pdeltai_test_NL1,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pdeltai_def for NL_flag=1',
+            err_msg='Error in value returned by Pdeltai_def '
+                    'for NL_flag_phot_matter=1',
         )
 
         npt.assert_allclose(
             self.nl2.Pdeltai_def(self.redshift1, self.wavenumber1),
             self.Pdeltai_test_NL2,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pdeltai_def for NL_flag=2',
+            err_msg='Error in value returned by Pdeltai_def '
+                    'for NL_flag_phot_matter=2',
         )
 
         npt.assert_allclose(
             self.nl3.Pdeltai_def(self.redshift1, self.wavenumber1),
             self.Pdeltai_test_NL3,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pdeltai_def for NL_flag=3',
+            err_msg='Error in value returned by Pdeltai_def '
+                    'for NL_flag_phot_matter=3',
         )
 
         npt.assert_allclose(
             self.nl4.Pdeltai_def(self.redshift1, self.wavenumber1),
             self.Pdeltai_test_NL4,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pdeltai_def for NL_flag=4',
+            err_msg='Error in value returned by Pdeltai_def '
+                    'for NL_flag_phot_matter=4',
         )
 
     def test_Pgi_phot_def(self):
@@ -332,28 +362,32 @@ class nonlinearinitTestCase(TestCase):
             self.nl1.Pgi_phot_def(self.redshift1, self.wavenumber1),
             self.Pgi_phot_test_NL1,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pgi_phot_def for NL_flag=1',
+            err_msg='Error in value returned by Pgi_phot_def '
+                    'for NL_flag_phot_matter=1',
         )
 
         npt.assert_allclose(
             self.nl2.Pgi_phot_def(self.redshift1, self.wavenumber1),
             self.Pgi_phot_test_NL2,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pgi_phot_def for NL_flag=2',
+            err_msg='Error in value returned by Pgi_phot_def '
+                    'for NL_flag_phot_matter=2',
         )
 
         npt.assert_allclose(
             self.nl3.Pgi_phot_def(self.redshift1, self.wavenumber1),
             self.Pgi_phot_test_NL3,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pgi_phot_def for NL_flag=3',
+            err_msg='Error in value returned by Pgi_phot_def '
+                    'for NL_flag_phot_matter=3',
         )
 
         npt.assert_allclose(
             self.nl4.Pgi_phot_def(self.redshift1, self.wavenumber1),
             self.Pgi_phot_test_NL4,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pgi_phot_def for NL_flag=4',
+            err_msg='Error in value returned by Pgi_phot_def '
+                    'for NL_flag_phot_matter=4',
         )
 
     def test_Pgi_spectro_def(self):

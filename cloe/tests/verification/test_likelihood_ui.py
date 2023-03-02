@@ -28,7 +28,8 @@ class LikelihoodUI_test(TestCase):
         self.config_good = {
             'backend': 'Cobaya',
             'Cobaya': {'params': 'file.yaml',
-                       'likelihood': {'Euclid': {'NL_flag': 0,
+                       'likelihood': {'Euclid': {'NL_flag_phot_matter': 0,
+                                                 'NL_flag_spectro': 0,
                                                  'observables_selection': {},
                                                  'observables_specification':
                                                      {},
@@ -39,7 +40,8 @@ class LikelihoodUI_test(TestCase):
         self.config_action_invalid = {
             'backend': 'Cobaya',
             'Cobaya': {'params': 'file.yaml',
-                       'likelihood': {'Euclid': {'NL_flag': 0,
+                       'likelihood': {'Euclid': {'NL_flag_phot_matter': 0,
+                                                 'NL_flag_spectro': 0,
                                                  'observables_selection': {},
                                                  'observables_specification':
                                                      {},

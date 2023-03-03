@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Cosmology
 
 Class to store cosmological parameters and functions.
@@ -157,6 +156,8 @@ class Cosmology:
             Nonlinear matter flag for 3x2pt photometric probes
         NL_flag_spectro: int
             Nonlinear flag for GCspectro
+        bias_model: int
+            bias model
         luminosity_ratio_z_func: function
             Luminosity ratio interpolator for IA model
         nuisance_parameters: dict
@@ -251,6 +252,8 @@ class Cosmology:
                           # NL flags
                           'NL_flag_phot_matter': 0,
                           'NL_flag_spectro': 0,
+                          # bias model
+                          'bias_model': 1,
                           # Use Modified Gravity gamma
                           'use_gamma_MG': 0,
                           # Redshift dependent purity correction
@@ -722,7 +725,7 @@ class Cosmology:
 
         Adds an interpolator for the matter fluctuation
         parameter :math:`\sigma_8` to the dictionary so that it
-        can be evaluated at redshifts not explictly supplied to Cobaya
+        can be evaluated at redshifts not explicitly supplied to Cobaya
 
         Updates 'key' in the cosmo_dic attribute of the class
         by adding an interpolator object
@@ -737,7 +740,7 @@ class Cosmology:
 
         Adds an interpolator for :math:`f\sigma_8` to the dictionary
         so that it can be evaluated at redshifts
-        not explictly supplied to Cobaya
+        not explicitly supplied to Cobaya
 
         Updates 'key' in the cosmo_dic attribute of the class
         by adding an interpolator object
@@ -806,6 +809,38 @@ class Cosmology:
 
         z_in_range = rb.coerce(redshift, bin_edges)
         return self.cosmo_dic['b_inter'](z_in_range)
+
+    def compute_phot_galbias(self, redshift):
+        r"""Compute Phot Galbias
+
+        Computes galaxy bias(es) for the photometric GC probes
+        at a given redshift z
+
+        The bias model is selected from the key 'bias_model'
+        in cosmo_dic.
+        The implemented models are:
+        1 - Linear interpolation
+        2 - Bias = 1
+
+        Parameters
+        ----------
+        redshift: numpy.ndarray of float
+            Redshift(s) at which to calculate bias.
+
+        Returns
+        -------
+        bi_val: numpy.ndarray of float
+            Value(s) of photometric galaxy bias at input redshift(s)
+        """
+        bias_model = self.cosmo_dic['bias_model']
+
+        if bias_model == 1:
+            return self.istf_phot_galbias(redshift)
+        elif bias_model == 2:
+            return 1.0
+        else:
+            raise ValueError('Parameter bias_model out of range:'
+                             f'{bias_model}')
 
     def istf_spectro_galbias(self, redshift, bin_edges=None):
         """Istf Spectro Galbias
@@ -895,7 +930,7 @@ class Cosmology:
             at a given redshift and k-mode for galaxy
             clustering photometric
         """
-        pval = ((self.istf_phot_galbias(redshift) ** 2.0) *
+        pval = ((self.compute_phot_galbias(redshift) ** 2) *
                 self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
         return pval
 
@@ -956,7 +991,7 @@ class Cosmology:
             at a given redshift and k-mode for galaxy clustering
             photometric
         """
-        pval = (self.istf_phot_galbias(redshift) *
+        pval = (self.compute_phot_galbias(redshift) *
                 self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
         return pval
 
@@ -1119,7 +1154,7 @@ class Cosmology:
             Value of photometric galaxy-intrinsic power spectrum
             at a given redshift and k-mode
         """
-        pval = self.fia(redshift) * self.istf_phot_galbias(redshift) * \
+        pval = self.fia(redshift) * self.compute_phot_galbias(redshift) * \
             self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
         return pval
 
@@ -1339,5 +1374,6 @@ class Cosmology:
         # of the nonlinear instance
         self.nonlinear.update_dic(self.cosmo_dic)
         # Update dictionary with bias interpolator and power spectra
-        self.istf_phot_galbias_interpolator()
+        if self.cosmo_dic['bias_model'] == 1:
+            self.istf_phot_galbias_interpolator()
         self.obtain_power_spectra()

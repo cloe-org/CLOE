@@ -293,6 +293,7 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['NL_flag_phot_matter'] = \
                 self.NL_flag_phot_matter
             self.cosmo.cosmo_dic['NL_flag_spectro'] = self.NL_flag_spectro
+            self.cosmo.cosmo_dic['bias_model'] = self.bias_model
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
             self.cosmo.cosmo_dic['H0'] = self.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
@@ -312,7 +313,7 @@ class EuclidLikelihood(Likelihood):
             try:
                 self.cosmo.cosmo_dic['mnu'] = \
                     self.provider.get_param(self.pnames['mnu'])
-            except (KeyError):
+            except KeyError:
                 self.cosmo.cosmo_dic['omnuh2'] = \
                     self.provider.get_param(self.pnames['omnuh2'])
             self.cosmo.cosmo_dic['w'] = \
@@ -374,6 +375,7 @@ class EuclidLikelihood(Likelihood):
                 info['likelihood']['Euclid']['NL_flag_phot_matter']
             self.cosmo.cosmo_dic['NL_flag_spectro'] = \
                 info['likelihood']['Euclid']['NL_flag_spectro']
+            self.cosmo.cosmo_dic['bias_model'] = self.bias_model
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
             self.cosmo.cosmo_dic['H0'] = model.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
@@ -393,7 +395,7 @@ class EuclidLikelihood(Likelihood):
             try:
                 self.cosmo.cosmo_dic['mnu'] = \
                     model.provider.get_param(self.pnames['mnu'])
-            except (KeyError):
+            except KeyError:
                 self.cosmo.cosmo_dic['omnuh2'] = \
                     model.provider.get_param(self.pnames['omnuh2'])
             self.cosmo.cosmo_dic['mnu'] = \

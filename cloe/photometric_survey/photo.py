@@ -79,6 +79,8 @@ class Photo:
         self.add_RSD = add_RSD
         self._precomp_ells = None
 
+        self.multiply_bias_cl = False
+
         # The class might be initialized with no cosmo dictionary, as it is
         # currently done when instantiating Photo from Euclike, for running
         # the likelihood of CLOE
@@ -115,6 +117,10 @@ class Photo:
                          for i in self.nz_WL.get_tomographic_bins()]
         self.magbias = [nuisance_dict[f'magnification_bias_{i}']
                         for i in self.nz_GC.get_tomographic_bins()]
+
+        if self.theory['bias_model'] == 2:
+            self.multiply_bias_cl = True
+
         if self.theory['f_K_z_func'] is None:
             raise KeyError('No interpolated function for transverse comoving '
                            'distance exists in cosmo_dic.')
@@ -316,7 +322,10 @@ class Photo:
         Hzm_arr = self.theory['H_z_func_Mpc'](zm_arr)
         fzm_arr = self.theory['f_z'](zm_arr)
         nzm_arr = self.nz_GC.evaluates_n_i_z(bin_i, zm_arr)
-        bias = self.photobias[bin_i - 1]
+
+        bias = 1.
+        if self.theory['bias_model'] == 1:
+            bias = self.photobias[bin_i - 1]
 
         return Hzm_arr * fzm_arr * nzm_arr / bias
 
@@ -847,6 +856,11 @@ class Photo:
         c_int_arr = self.Cl_generic_integrand(zs_arr, pandwijk)
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, zs_arr)
 
+        if self.multiply_bias_cl is True:
+            bi = self.photobias[bin_i - 1]
+            bj = self.photobias[bin_j - 1]
+            c_final *= bi * bj
+
         return c_final
 
     def Cl_cross(self, ell, bin_i, bin_j, int_step=0.02):
@@ -974,6 +988,10 @@ class Photo:
         c_int_arr = self.Cl_generic_integrand(zs_arr, pandwijk)
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, zs_arr)
         c_final = c_final * (1 + self.multbias[bin_i - 1])
+
+        if self.multiply_bias_cl is True:
+            bi = self.photobias[bin_i - 1]
+            c_final *= bi
 
         return c_final
 

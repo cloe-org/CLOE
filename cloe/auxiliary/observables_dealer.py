@@ -6,6 +6,7 @@ and plot the visualization of the matrix
 
 import pandas as pd
 import seaborn as sns
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import warnings
@@ -74,6 +75,31 @@ def observables_selection_checker(observables_dict):
     return observables_dict
 
 
+def ell_checker(specifications_dict_prob):
+    """
+    Multipoles checker
+
+    Checks if ells selected by the user for the WL, GCphot
+    and the cross-correlation beetween WLxGCphot
+    probes are greater or equal than 0
+    and that ell_max is greater or equal than ell_min
+
+    Parameters
+    ----------
+    specifications_dict_prob: dict
+        dictionary with the specifications for one probe
+    """
+    ells_ranges = \
+        np.array(
+           [specifications_dict_prob['bins'][bin_i][bin_j]['ell_range'][0] for
+            bin_i in specifications_dict_prob['bins'] for
+            bin_j in specifications_dict_prob['bins'][bin_i]])
+    if np.any(ells_ranges < 0):
+        raise ValueError('Error: not all ells in specifications are positive')
+    if np.any(np.diff(ell_ranges, axis=1) < 0):
+        raise ValueError('Error: not all ells max are greater than ells min')
+
+
 def observables_selection_specifications_checker(observables_dict,
                                                  specifications_dict):
     """
@@ -98,15 +124,18 @@ def observables_selection_specifications_checker(observables_dict,
     # add specifications
     if checked_observables_dict['WL']['WL']:
         merged_dict['specifications']['WL'] = specifications_dict['WL']
+        ell_checker(specifications_dict['WL'])
     if checked_observables_dict['GCphot']['GCphot']:
         merged_dict['specifications']['GCphot'] = \
             specifications_dict['GCphot']
+        ell_checker(specifications_dict['GCphot'])
     if checked_observables_dict['GCspectro']['GCspectro']:
         merged_dict['specifications']['GCspectro'] = \
             specifications_dict['GCspectro']
     if checked_observables_dict['WL']['GCphot']:
         merged_dict['specifications']['WL-GCphot'] = \
             specifications_dict['WL-GCphot']
+        ell_checker(specifications_dict['WL-GCphot'])
     # At the moment, these quantities below are not computed
     # by CLOE and we are forcing this selection to be False.
     # Therefore, the specifications are not loaded.

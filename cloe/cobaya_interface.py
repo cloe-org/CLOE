@@ -321,6 +321,15 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['wa'] = \
                 self.provider.get_param(self.pnames['wa'])
             self.cosmo.cosmo_dic['Omm'] = self.provider.get_param('omegam')
+            self.cosmo.cosmo_dic['Omk'] = self.provider.get_param('omk')
+            self.cosmo.cosmo_dic['mnu'] = self.provider.get_param('mnu')
+            self.cosmo.cosmo_dic['w'] = self.provider.get_param('w')
+            self.cosmo.cosmo_dic['wa'] = self.provider.get_param('wa')
+            if self.use_gamma_MG:
+                self.cosmo.cosmo_dic['gamma_MG'] = \
+                    self.provider.get_param('gamma_MG')
+            self.cosmo.cosmo_dic['nnu'] = self.provider.get_param('nnu')
+            self.cosmo.cosmo_dic['tau'] = self.provider.get_param('tau')
             if self.solver == 'camb':
                 self.cosmo.cosmo_dic['Omc'] = self.provider.get_param('omegac')
                 self.cosmo.cosmo_dic['omnuh2'] = \
@@ -328,8 +337,6 @@ class EuclidLikelihood(Likelihood):
                 self.cosmo.cosmo_dic['Omnu'] = \
                     self.provider.get_param('omeganu')
                 self.cosmo.cosmo_dic['nnu'] = self.provider.get_param('nnu')
-            self.cosmo.cosmo_dic['gamma_MG'] = \
-                self.provider.get_param('gamma_MG')
             self.cosmo.cosmo_dic['comov_dist'] = \
                 self.provider.get_comoving_radial_distance(self.z_win)
             self.cosmo.cosmo_dic['angular_dist'] = \
@@ -414,8 +421,18 @@ class EuclidLikelihood(Likelihood):
                     model.provider.get_param('omeganu')
                 self.cosmo.cosmo_dic['nnu'] = model.provider.get_param('nnu')
             self.cosmo.cosmo_dic['Omm'] = model.provider.get_param('omegam')
-            self.cosmo.cosmo_dic['gamma_MG'] = \
-                model.provider.get_param('gamma_MG')
+            self.cosmo.cosmo_dic['Omk'] = model.provider.get_param('omk')
+            self.cosmo.cosmo_dic['mnu'] = model.provider.get_param('mnu')
+            self.cosmo.cosmo_dic['mnu'] = model.provider.get_param('mnu')
+            self.cosmo.cosmo_dic['omnuh2'] = model.provider.get_param('omnuh2')
+            self.cosmo.cosmo_dic['Omnu'] = model.provider.get_param('omeganu')
+            self.cosmo.cosmo_dic['w'] = model.provider.get_param('w')
+            self.cosmo.cosmo_dic['wa'] = model.provider.get_param('wa')
+            if self.use_gamma_MG:
+                self.cosmo.cosmo_dic['gamma_MG'] = \
+                    model.provider.get_param('gamma_MG')
+            self.cosmo.cosmo_dic['nnu'] = model.provider.get_param('nnu')
+            self.cosmo.cosmo_dic['tau'] = model.provider.get_param('tau')
             self.cosmo.cosmo_dic['comov_dist'] = \
                 model.provider.get_comoving_radial_distance(self.z_win)
             self.cosmo.cosmo_dic['angular_dist'] = \
@@ -455,9 +472,9 @@ class EuclidLikelihood(Likelihood):
                                     for your_key in new_keys}
             self.cosmo.cosmo_dic['nuisance_parameters'].update(
                 **only_nuisance_params)
-            if 'observables_specifications' in info['likelihood']['Euclid']:
-                self.observables_specifications = \
-                    info['likelihood']['Euclid']['observables_specifications']
+            if 'observables_selection' in info['likelihood']['Euclid']:
+                self.observables_selection = \
+                    info['likelihood']['Euclid']['observables_selection']
             self.observables = \
                 observables_selection_specifications_checker(
                     info['likelihood']['Euclid']['observables_selection'],

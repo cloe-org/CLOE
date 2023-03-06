@@ -776,7 +776,9 @@ class Cosmology:
                           for idx, vl in enumerate(redshift_means, start=1)]
 
         b_inter = interpolate.interp1d(redshift_means, istf_bias_list,
-                                       fill_value="extrapolate")
+                                       fill_value=(istf_bias_list[0],
+                                                   istf_bias_list[-1]),
+                                       bounds_error=False)
         self.cosmo_dic['b_inter'] = b_inter
 
     def istf_phot_galbias(self, redshift, bin_edges=None):
@@ -785,9 +787,10 @@ class Cosmology:
         Gets galaxy bias(es) for the photometric GC probes by
         interpolation at a given redshift z
 
-        Note: for redshifts above the final bin (z > 2.5), we use the bias
-        from the final bin. Similarly, for redshifts below the first bin
-        (z < 0.001), we use the bias of the first bin.
+        Note: for redshifts above the final bin center, we use the bias
+        from the edge of the intepolation. Similarly, for redshifts below
+        the first bin center, we use the first bias value from the
+        interpolation.
 
         Parameters
         ----------

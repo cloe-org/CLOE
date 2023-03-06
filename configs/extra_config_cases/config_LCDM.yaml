@@ -8,6 +8,7 @@ Cobaya:
       add_phot_RSD: false
       aliases:
       - euclid
+      bias_model: 1
       data: data.yaml
       external: !!python/name:cloe.cobaya_interface.EuclidLikelihood ''
       f_out_z_dep: false

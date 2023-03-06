@@ -36,6 +36,8 @@ Cobaya:
       #     0 -> linear-only
       #     1 -> EFT
       NL_flag_spectro: 0
+      # Bias Model
+      bias_model: 1
       # Add RSD to photometric probes
       add_phot_RSD: False
       # Use MG gamma

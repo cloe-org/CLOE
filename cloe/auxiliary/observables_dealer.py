@@ -96,7 +96,7 @@ def ell_checker(specifications_dict_prob):
             bin_j in specifications_dict_prob['bins'][bin_i]])
     if np.any(ells_ranges < 0):
         raise ValueError('Error: not all ells in specifications are positive')
-    if np.any(np.diff(ell_ranges, axis=1) < 0):
+    if np.any(np.diff(ells_ranges, axis=1) < 0):
         raise ValueError('Error: not all ells max are greater than ells min')
 
 

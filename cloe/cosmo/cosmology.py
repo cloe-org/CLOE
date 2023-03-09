@@ -845,7 +845,7 @@ class Cosmology:
             raise ValueError('Parameter bias_model out of range:'
                              f'{bias_model}')
 
-    def istf_spectro_galbias(self, redshift, bin_edges=None):
+    def istf_spectro_galbias(self, redshift):
         """Istf Spectro Galbias
 
         Gets galaxy bias for the spectroscopic galaxy clustering
@@ -858,8 +858,7 @@ class Cosmology:
         ----------
         redshift: float or numpy.ndarray
             Redshift(s) at which to calculate bias.
-        bin_edges: numpy.ndarray
-            Array of redshift bin edges for spectroscopic GC probe.
+
             Default is Euclid IST: Forecasting choices.
 
         Returns
@@ -873,9 +872,7 @@ class Cosmology:
             If redshift is outside of the bounds defined by the first
             and last element of bin_edges
         """
-
-        if bin_edges is None:
-            bin_edges = np.array([0.90, 1.10, 1.30, 1.50, 1.80])
+        bin_edges = self.cosmo_dic['redshift_bins']
 
         nuisance_src = self.cosmo_dic['nuisance_parameters']
 

@@ -253,10 +253,10 @@ class cosmoinitTestCase(TestCase):
     def test_istf_spectro_galbias(self):
         # assign custom b1_spectro and b2_spectro for maintainability
         nuipar = self.cosmo.cosmo_dic['nuisance_parameters']
-        nuipar['b1_spectro_bin1'] = 1.23
-        nuipar['b1_spectro_bin2'] = 4.56
+        nuipar['b1_spectro_bin1'] = 1.4614804
+        nuipar['b1_spectro_bin2'] = 1.6060949
         # check scalar redshift input: z in 1st bin returns b1_spectro
-        bi_val_actual = self.cosmo.istf_spectro_galbias(1.5, [1.0, 2.0])
+        bi_val_actual = self.cosmo.istf_spectro_galbias(1.0)
         bi_val_desired = nuipar['b1_spectro_bin1']
         npt.assert_equal(
             bi_val_actual,
@@ -275,9 +275,8 @@ class cosmoinitTestCase(TestCase):
             redshift=10,
         )
         # check vector redshift input: output size and values
-        zs_vec = [1.5, 2.5]
-        z_edge = [1.0, 2.0, 3.0]
-        bi_val_actual = self.cosmo.istf_spectro_galbias(zs_vec, z_edge)
+        zs_vec = [1.0, 1.2]
+        bi_val_actual = self.cosmo.istf_spectro_galbias(zs_vec)
         bi_val_desired = [nuipar['b1_spectro_bin1'], nuipar['b1_spectro_bin2']]
         npt.assert_equal(
             len(bi_val_actual),

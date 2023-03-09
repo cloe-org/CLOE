@@ -93,6 +93,7 @@ class EuclidLikelihood(Likelihood):
         self.cosmo.nonlinear.theory['redshift_bins'] = \
             self.data['spectro']['edges']
         self.cosmo.nonlinear.set_Pgg_spectro_model()
+        self.cosmo.cosmo_dic['redshift_bins'] = self.data['spectro']['edges']
 
         # Initialize the fiducial model
         self.set_fiducial_cosmology()
@@ -235,6 +236,8 @@ class EuclidLikelihood(Likelihood):
             self.z_win)
         # In order to make the update_cosmo_dic method to work, we need to
         # specify also in this case the information on the GCspectro bins
+        self.fiducial_cosmology.cosmo_dic['redshift_bins'] = \
+            self.data['spectro']['edges']
         self.fiducial_cosmology.nonlinear.theory['redshift_bins'] = \
             self.data['spectro']['edges']
         self.fiducial_cosmology.nonlinear.set_Pgg_spectro_model()

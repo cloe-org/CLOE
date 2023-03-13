@@ -108,6 +108,7 @@ class EuclidLikelihood(Likelihood):
 
         self.cosmo.cosmo_dic['luminosity_ratio_z_func'] = \
             self.likefinal.data_ins.luminosity_ratio_interpolator
+        self.cosmo.cosmo_dic['obs_selection'] = self.observables['selection']
 
     def set_fiducial_cosmology(self):
         r"""Sets the fiducial cosmology class

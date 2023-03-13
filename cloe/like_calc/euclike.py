@@ -41,6 +41,9 @@ class Euclike:
             Dictionary containing specification for the chosen observables by
             the user.
         """
+        self.do_photo = (any(observables['selection']['WL'].values()) or
+                         any(observables['selection']['GCphot'].values()))
+        self.do_spectro = any(observables['selection']['GCspectro'].values())
         self.data = data
         self.data_ins = reader.Reader(self.data)
         self.data_ins.compute_nz()
@@ -53,10 +56,12 @@ class Euclike:
         # Transforming data
         spectrodata = self.create_spectro_data()
         spectrocov = self.create_spectro_cov()
+        self.spectro_size = spectrodata.size
         # Read photo
         self.data_ins.read_phot()
         # Tranforming data
         photodata = self.create_photo_data()
+        self.photo_size = photodata['all'].size
 
         # Calculate permutations i,j bins for WL, GC-Phot, XC.
         # This refers to the non-redundant bin combinations for
@@ -126,41 +131,46 @@ class Euclike:
                 self.data['spectro']['cov_is_num']):
             self.split_data()
 
-        # Flag to select cases with or without RSD for photometric probes
-        add_RSD = observables['selection']['add_phot_RSD']
+        if self.do_photo:
+            # Flag to select cases with or without RSD for photometric probes
+            add_RSD = observables['selection']['add_phot_RSD']
 
-        # Photo class instance
-        self.phot_ins = Photo(None,
-                              self.data_ins.nz_dict_WL,
-                              self.data_ins.nz_dict_GC_Phot,
-                              add_RSD=add_RSD)
+            # Photo class instance
+            self.phot_ins = Photo(None,
+                                  self.data_ins.nz_dict_WL,
+                                  self.data_ins.nz_dict_GC_Phot,
+                                  add_RSD=add_RSD)
 
-        # Temporary placeholder for theta vector
-        # (will be read from file eventually)
-        theta_min = 0.005
-        theta_max = 20.0
-        nbins_theta = 30
-        theta_deg = np.logspace(np.log10(theta_min),
-                                np.log10(theta_max),
-                                nbins_theta)
-        theta_rad = np.deg2rad(theta_deg)
+            # Temporary placeholder for theta vector
+            # (will be read from file eventually)
+            theta_min = 0.005
+            theta_max = 20.0
+            nbins_theta = 30
+            theta_deg = np.logspace(np.log10(theta_min),
+                                    np.log10(theta_max),
+                                    nbins_theta)
+            theta_rad = np.deg2rad(theta_deg)
 
-        # Sets the precomputed Bessel functions as an attribute of the
-        # Photo class
-        self.phot_ins._set_bessel_tables(theta_rad)
+            # Sets the precomputed Bessel functions as an attribute of the
+            # Photo class
+            self.phot_ins._set_bessel_tables(theta_rad)
 
-        # set the precomputed prefactors for the WL, XC and GCphot Cl's
-        self.phot_ins.set_prefactor(ells_WL=ells_WL,
-                                    ells_XC=ells_XC,
-                                    ells_GC_phot=ells_GC_phot)
-
-        # Spectro class instance
-        self.spec_ins = Spectro(None, list(self.zkeys))
+            # set the precomputed prefactors for the WL, XC and GCphot Cl's
+            self.phot_ins.set_prefactor(ells_WL=ells_WL,
+                                        ells_XC=ells_XC,
+                                        ells_GC_phot=ells_GC_phot)
+        if self.do_spectro:
+            # Spectro class instance
+            self.spec_ins = Spectro(None, list(self.zkeys))
 
     def split_data(self):
         """Split data
 
-        Separates photo and spectro data
+        Split photometric and spectroscopic probes
+        if one of the two covariances is numerical.
+
+        NB this assumes no cross-covariance and no unified simulation suite
+        for the photometric and spectroscopic probes
         """
         # Only photometric data and covariance
         self.mask_ins_phot = Masking()
@@ -463,8 +473,14 @@ class Euclike:
         loglike_tot: float
             loglike = Ln(likelihood) for the Euclid observables
         """
-        photo_theory_vec = self.create_photo_theory(dictionary)
-        spectro_theory_vec = self.create_spectro_theory(dictionary)
+        if self.do_photo:
+            photo_theory_vec = self.create_photo_theory(dictionary)
+        else:
+            photo_theory_vec = np.zeros(self.photo_size)
+        if self.do_spectro:
+            spectro_theory_vec = self.create_spectro_theory(dictionary)
+        else:
+            spectro_theory_vec = np.zeros(self.spectro_size)
         theory_vec = np.concatenate(
             (photo_theory_vec, spectro_theory_vec), axis=0)
 

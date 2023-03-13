@@ -100,23 +100,13 @@ class Photo:
         """
         self.theory = cosmo_dic
         nuisance_dict = self.theory['nuisance_parameters']
+        obs_sel = self.theory['obs_selection']
 
         # Commenting this part out as we are temporarily not using the
         # angular diameter distance obtained from CAMB, but we are coding
         # it up ourselves
         # self.vadd2 = np.vectorize(
         #         self.theory['CAMBdata'].angular_diameter_distance2)
-
-        self.nz_GC = RedshiftDistribution('GCphot', self.nz_dic_GC,
-                                          nuisance_dict)
-        self.nz_WL = RedshiftDistribution('WL', self.nz_dic_WL,
-                                          nuisance_dict)
-        self.photobias = [nuisance_dict[f'b{i}_photo']
-                          for i in self.nz_GC.get_tomographic_bins()]
-        self.multbias = [nuisance_dict[f'multiplicative_bias_{i}']
-                         for i in self.nz_WL.get_tomographic_bins()]
-        self.magbias = [nuisance_dict[f'magnification_bias_{i}']
-                        for i in self.nz_GC.get_tomographic_bins()]
 
         if self.theory['bias_model'] == 2:
             self.multiply_bias_cl = True
@@ -126,40 +116,56 @@ class Photo:
                            'distance exists in cosmo_dic.')
 
         z_wmax = self.theory['z_win'][-1]
-        self.wl_int_z_max = {i: z_wmax + nuisance_dict[f'dz_{i}_WL']
-                             for i in self.nz_WL.get_tomographic_bins()}
-        self.gc_int_z_max = {i: z_wmax + nuisance_dict[f'dz_{i}_GCphot']
-                             for i in self.nz_GC.get_tomographic_bins()}
 
-        # z_wtom is the number of tomographic bins + 1
-        z_wtom_wl = 1 + self.nz_WL.get_num_tomographic_bins()
-        z_wtom_gc = 1 + self.nz_GC.get_num_tomographic_bins()
-        self.interpwin = np.zeros(shape=(self.z_wsamp, z_wtom_wl))
-        self.interpwingal = np.zeros(shape=(self.z_wsamp, z_wtom_gc))
-        self.interpwinia = np.zeros(shape=(self.z_wsamp, z_wtom_wl))
-        self.interpwinmag = np.zeros(shape=(self.z_wsamp, z_wtom_gc))
+        if any(obs_sel['GCphot'].values()):
+            self.nz_GC = RedshiftDistribution('GCphot', self.nz_dic_GC,
+                                              nuisance_dict)
+            self.photobias = [nuisance_dict[f'b{i}_photo']
+                              for i in self.nz_GC.get_tomographic_bins()]
+            self.magbias = [nuisance_dict[f'magnification_bias_{i}']
+                            for i in self.nz_GC.get_tomographic_bins()]
+            # z_wtom is the number of tomographic bins + 1
+            z_wtom_gc = 1 + self.nz_GC.get_num_tomographic_bins()
 
-        self.interpwin[:, 0] = self.z_winterp
-        self.interpwingal[:, 0] = self.z_winterp
-        self.interpwinia[:, 0] = self.z_winterp
-        self.interpwinmag[:, 0] = self.z_winterp
-
-        for tom_i in range(1, z_wtom_wl):
-            self.interpwin[:, tom_i] = self.WL_window(self.z_winterp, tom_i)
-            self.interpwinia[:, tom_i] = self.IA_window(self.z_winterp, tom_i)
-        for tom_i in range(1, z_wtom_gc):
-            self.interpwingal[:, tom_i] = self.GC_window(self.z_winterp, tom_i)
-            self.interpwinmag[:, tom_i] = self.magnification_window(
-                self.z_winterp, tom_i)
-
-        if self.add_RSD and self._precomp_ells is not None:
-            self.interpwinrsd = np.zeros(
-                shape=(z_wtom_gc, 3, len(self._precomp_ells), self.z_wsamp))
-            self.interpwinrsd[0, :, :, :] = self.z_winterp
+            self.gc_int_z_max = {i: z_wmax + nuisance_dict[f'dz_{i}_GCphot']
+                                 for i in self.nz_GC.get_tomographic_bins()}
+            self.interpwingal = np.zeros(shape=(self.z_wsamp, z_wtom_gc))
+            self.interpwinmag = np.zeros(shape=(self.z_wsamp, z_wtom_gc))
+            self.interpwingal[:, 0] = self.z_winterp
+            self.interpwinmag[:, 0] = self.z_winterp
             for tom_i in range(1, z_wtom_gc):
-                self.interpwinrsd[tom_i, :, :, :] = \
-                    self.GC_window_RSD(self.z_winterp,
-                                       self._precomp_ells, tom_i)
+                self.interpwingal[:, tom_i] = self.GC_window(self.z_winterp,
+                                                             tom_i)
+                self.interpwinmag[:, tom_i] = self.magnification_window(
+                    self.z_winterp, tom_i)
+            if self.add_RSD and self._precomp_ells is not None:
+                self.interpwinrsd = np.zeros(
+                    shape=(z_wtom_gc, 3, len(self._precomp_ells),
+                           self.z_wsamp))
+                self.interpwinrsd[0, :, :, :] = self.z_winterp
+                for tom_i in range(1, z_wtom_gc):
+                    self.interpwinrsd[tom_i, :, :, :] = \
+                        self.GC_window_RSD(self.z_winterp,
+                                           self._precomp_ells, tom_i)
+        if any(obs_sel['WL'].values()):
+            self.nz_WL = RedshiftDistribution('WL', self.nz_dic_WL,
+                                              nuisance_dict)
+            self.multbias = [nuisance_dict[f'multiplicative_bias_{i}']
+                             for i in self.nz_WL.get_tomographic_bins()]
+            # z_wtom is the number of tomographic bins + 1
+            z_wtom_wl = 1 + self.nz_WL.get_num_tomographic_bins()
+
+            self.wl_int_z_max = {i: z_wmax + nuisance_dict[f'dz_{i}_WL']
+                                 for i in self.nz_WL.get_tomographic_bins()}
+            self.interpwin = np.zeros(shape=(self.z_wsamp, z_wtom_wl))
+            self.interpwinia = np.zeros(shape=(self.z_wsamp, z_wtom_wl))
+            self.interpwin[:, 0] = self.z_winterp
+            self.interpwinia[:, 0] = self.z_winterp
+            for tom_i in range(1, z_wtom_wl):
+                self.interpwin[:, tom_i] = self.WL_window(self.z_winterp,
+                                                          tom_i)
+                self.interpwinia[:, tom_i] = self.IA_window(self.z_winterp,
+                                                            tom_i)
 
     def _set_bessel_tables(self, theta_rad):
         r"""Set tables for Bessel functions

@@ -165,5 +165,5 @@ class likecalcngTestCase(TestCase, SpectroTestParent):
 
     def test_spectro_cov_nsim(self):
         self.mock_data_ng['spectro']['cov_nsim'] = 1
-        npt.assert_raises(ValueError, self.like_tt_ng.split_data)
+        npt.assert_raises(ValueError, self.like_tt_ng.get_masked_data)
         self.mock_data_ng['spectro']['cov_nsim'] = 3500

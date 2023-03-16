@@ -102,7 +102,7 @@ class datahandlerTestCase(TestCase):
                          f' does not match the expected shape.')
 
     def test_create_masking_vectors(self):
-        self.data_handler._create_masking_vectors(self.data_reader)
+        self.data_handler._create_masking_vector_full(self.data_reader)
 
         npt.assert_equal(self.data_handler._masking_vector,
                          self.masking_vector,

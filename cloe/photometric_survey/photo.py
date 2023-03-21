@@ -329,8 +329,9 @@ class Photo:
         fzm_arr = self.theory['f_z'](zm_arr)
         nzm_arr = self.nz_GC.evaluates_n_i_z(bin_i, zm_arr)
 
-        bias = 1.
         if self.theory['bias_model'] == 1:
+            bias = self.theory['b_inter'](z)
+        elif self.theory['bias_model'] == 2:
             bias = self.photobias[bin_i - 1]
 
         return Hzm_arr * fzm_arr * nzm_arr / bias

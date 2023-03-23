@@ -1,6 +1,6 @@
 FROM continuumio/miniconda3
 
-LABEL Description="CLOE Docker Image"
+LABEL Description="CLOE Docker CI Image"
 WORKDIR /home
 ENV SHELL /bin/bash
 

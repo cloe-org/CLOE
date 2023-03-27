@@ -33,7 +33,7 @@ class Misc:
         """
         self.theory = cosmo_dic
 
-    def fia(self, redshift, k_scale=0.001):
+    def fia(self, redshift, wavenumber=0.001):
         r"""Fia
 
         Computes the intrinsic alignment function. For v1.0
@@ -48,38 +48,44 @@ class Misc:
         ----------
         redshift: float or numpy.ndarray
             Redshift(s) at which to evaluate the intrinsic alignment.
-        k_scale: float or numpy.ndarray
-            k-mode(s) at which to evaluate the intrinsic alignment.
+        wavenumber: float or numpy.ndarray
+            wavenumber(s) at which to evaluate the intrinsic alignment.
 
         Returns
         -------
         fia: float or numpy.ndarray
             Value(s) of intrinsic alignment function at
-            given redshift(s) and k-mode(s)
+            given redshift(s) and wavenumber(s)
         """
-        growth = self.theory['D_z_k_func'](redshift, k_scale)
-        z_is_array = isinstance(redshift, np.ndarray)
-        k_is_array = isinstance(k_scale, np.ndarray)
-        if k_is_array and not z_is_array:
-            growth = growth[0]
-        elif z_is_array and not k_is_array:
-            growth = growth[:, 0]
-        elif not z_is_array and not k_is_array:
-            growth = growth[0, 0]
+        if self.theory['use_gamma_MG']:
+            # if gamma_MG parametrization is used
+            # the k-dependency in the growth_factor
+            # and growth_rate is dropped
+            growth = self.theory['D_z_k_func'](redshift)
         else:
-            redshift = redshift.reshape(-1, 1)
+            growth = self.theory['D_z_k_func'](redshift, wavenumber)
+            redshift_is_array = isinstance(redshift, np.ndarray)
+            wavenumber_is_array = isinstance(wavenumber, np.ndarray)
+            if wavenumber_is_array and not redshift_is_array:
+                growth = growth[0]
+            elif redshift_is_array and not wavenumber_is_array:
+                growth = growth[:, 0]
+            elif not redshift_is_array and not wavenumber_is_array:
+                growth = growth[0, 0]
+            else:
+                redshift = redshift.reshape(-1, 1)
 
         c1 = 0.0134
         aia = self.theory['nuisance_parameters']['aia']
         nia = self.theory['nuisance_parameters']['nia']
         bia = self.theory['nuisance_parameters']['bia']
         omegam = self.theory['Omm']
-        lum = 1.0
         fia = (-aia * c1 * omegam / growth *
-               (1 + redshift) ** nia * lum ** bia)
+               (1 + redshift) ** nia *
+               self.theory['luminosity_ratio_z_func'](redshift) ** bia)
         return fia
 
-    def istf_spectro_galbias(self, redshift, bin_edges=None):
+    def istf_spectro_galbias(self, redshift):
         """Istf Spectro Galbias
 
         Gets galaxy bias for the spectroscopic galaxy clustering
@@ -87,17 +93,16 @@ class Misc:
         used for version 1.0 of CLOE (default recipe).
 
         Attention: this function is going to be removed from the
-        non-linear module. In the future we are not going to employ
+        nonlinear module. In the future we are not going to employ
         the same values used by IST:F, rather we are aiming at having
-        a proper non-linear galaxy bias model with multiple parameters
+        a proper nonlinear galaxy bias model with multiple parameters
         at each considered redshift bin
 
         Parameters
         ----------
         redshift: float or numpy.ndarray
             Redshift(s) at which to calculate bias.
-        bin_edges: numpy.ndarray
-            Array of redshift bin edges for spectroscopic GC probe.
+
             Default is Euclid IST: Forecasting choices.
 
         Returns
@@ -112,15 +117,14 @@ class Misc:
             and last element of bin_edges
         """
 
-        if bin_edges is None:
-            bin_edges = np.array([0.90, 1.10, 1.30, 1.50, 1.80])
+        bin_edges = self.theory['redshift_bins']
 
         nuisance_src = self.theory['nuisance_parameters']
 
         try:
-            z_bin = rb.find_bin(redshift, bin_edges, False)
-            bi_val = np.array([nuisance_src[f'b{i}_spectro']
-                              for i in np.nditer(z_bin)])
+            redshift_bin = rb.find_bin(redshift, bin_edges, False)
+            bi_val = np.array([nuisance_src[f'b1_spectro_bin{i}']
+                              for i in np.nditer(redshift_bin)])
             return bi_val[0] if np.isscalar(redshift) else bi_val
         except (ValueError, KeyError):
             raise ValueError('Spectroscopic galaxy bias cannot be obtained. '
@@ -131,11 +135,11 @@ class Misc:
         r"""Istf Phot Galbias
 
         Gets galaxy bias(es) for the photometric GC probes by
-        interpolation at a given redshift z
+        interpolation at a given redshift
 
-        Note: for redshifts above the final bin (z > 2.5), we use the bias
-        from the final bin. Similarly, for redshifts below the first bin
-        (z < 0.001), we use the bias of the first bin.
+        Note: for redshifts above the final bin (redshift > 2.5), we use the
+        bias from the final bin. Similarly, for redshifts below the first bin
+        (redshift < 0.001), we use the bias of the first bin.
 
         Parameters
         ----------
@@ -155,5 +159,5 @@ class Misc:
             bin_edges = np.array([0.001, 0.418, 0.560, 0.678, 0.789,
                                   0.900, 1.019, 1.155, 1.324, 1.576, 2.50])
 
-        z_in_range = rb.coerce(redshift, bin_edges)
-        return self.theory['b_inter'](z_in_range)
+        redshift_in_range = rb.coerce(redshift, bin_edges)
+        return self.theory['b_inter'](redshift_in_range)

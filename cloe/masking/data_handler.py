@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-r"""DATA HANLDER MODULE
+r"""DATA HANDLER MODULE
 
 Module for rearranging data vectors and covariance matrices into final
 form, and for obtaining the masking vector
@@ -12,17 +12,16 @@ from cloe.data_reader import reader
 
 
 class Data_handler:
-    r"""Reshape data and covariances vectors and define masking vector.
+    r"""Reshape data vectors and covariances and define masking vectors.
 
-    Build the data vector, the total covariance matrix and the masking
-    vector starting from an initialized instance of a Reader object, and from
+    Build data vectors, covariance matrices and masking vectors
+    starting from an initialized instance of a Reader object, and from
     a dictionary containing the user's specifications about the probes to be
-    included in the likelihood evaluation.
-    The data vector, covariance matrix and masking vector have the
-    same structure and dimension, as it should be in order to use them
-    consistently in the likelihood evaluation.
-    They are built as the concatenation of the following probes (in this
-    order, from lower indices to higher indices):
+    included in the likelihood evaluation. The data vector, covariance matrix
+    and masking vector are built for the photometric and spectroscopic probes
+    separately and for the combined case, where they are built as the
+    concatenation of the following probes (in this order, from lower indices to
+    higher indices):
      - WL: Weak Lensing
      - XC-Phot: (Weak Lensing) x (Photometric Galaxy Clustering) cross
        correlation
@@ -37,7 +36,7 @@ class Data_handler:
         r"""Constructor.
 
         Constructor of the class Data_handler.
-        The data vector, covariance matrix and masking vector are
+        The data vectors, covariance matrices and masking vectors are
         built starting from the data_reader, and from the observables
         dictionary.
 
@@ -53,15 +52,7 @@ class Data_handler:
             Instance of an already initialized Reader object
         """
 
-        self._data = data_dict
-        self._cov = cov_dict
         self._obs = obs_dict
-
-        # size of each individual data vector
-        self._wl_size = len(self._data['WL'])
-        self._xc_phot_size = len(self._data['XC-Phot'])
-        self._gc_phot_size = len(self._data['GC-Phot'])
-        self._gc_spectro_size = len(self._data['GC-Spectro'])
 
         # boolean representing whether a given probe has been selected
         self._use_wl = self._obs['selection']['WL']['WL']
@@ -81,16 +72,33 @@ class Data_handler:
                 warn('WL X GCPhot cross-correlation selection has not been '
                      'found in either WL and GCPhot dictionary. Setting it '
                      'to False.')
+        self._use_phot = (self._use_wl or self._use_gc_phot or
+                          self._use_xc_phot)
 
-        self._create_data_vector()
-        self._create_cov_matrix()
-        self._create_masking_vector(data_reader)
+        self._data = data_dict
+        self._cov = cov_dict
+
+        if self._use_gc_spectro:
+            self._gc_spectro_size = len(self._data['GC-Spectro'])
+            self._create_data_vector_spectro()
+            self._create_cov_matrix_spectro()
+            self._create_masking_vector_spectro(data_reader)
+        if self._use_phot:
+            self._wl_size = len(self._data['WL'])
+            self._xc_phot_size = len(self._data['XC-Phot'])
+            self._gc_phot_size = len(self._data['GC-Phot'])
+            self._create_data_vector_phot()
+            self._create_cov_matrix_phot()
+            self._create_masking_vector_phot(data_reader)
+        if self._use_phot and self._use_gc_spectro:
+            self._create_masking_vector_full(data_reader)
 
     def get_data_and_masking_vector(self):
         r"""Getter.
 
         Returns the final unmasked data vector, unmasked
-        covariance matrix, and the masking vector.
+        covariance matrix, and the masking vector
+        for the combination of photometric and spectroscopic probes.
 
         Returns
         -------
@@ -104,6 +112,46 @@ class Data_handler:
         return (self._data_vector,
                 self._cov_matrix,
                 self._masking_vector)
+
+    def get_data_and_masking_vector_phot(self):
+        r"""Getter.
+
+        Returns the final unmasked data vector, unmasked
+        covariance matrix, and the masking vector
+        for the photometric probes.
+
+        Returns
+        -------
+        self._data_vector_phot: np.ndarray
+            Final unmasked data vector
+        self._cov_matrix_phot: np.ndarray
+            Final unmasked covariance matrix
+        self._masking_vector_phot: np.ndarray
+            Masking vector for the photo part
+        """
+        return (self._data_vector_phot,
+                self._cov_matrix_phot,
+                self._masking_vector_phot)
+
+    def get_data_and_masking_vector_spectro(self):
+        r"""Getter.
+
+        Returns the final unmasked data vector, unmasked
+        covariance matrix, and the masking vector
+        for the spectroscopic probes.
+
+        Returns
+        -------
+        self._data_vector_spectro: np.ndarray
+            Final unmasked data vector
+        self._cov_matrix_spectro: np.ndarray
+            Final unmasked covariance matrix
+        self._masking_vector_spectro: np.ndarray
+            Masking vector for the spectro part
+        """
+        return (self._data_vector_spectro,
+                self._cov_matrix_spectro,
+                self._masking_vector_spectro)
 
     @property
     def use_wl(self):
@@ -143,6 +191,27 @@ class Data_handler:
 
         self._data_vector = data_vector
 
+    def _create_data_vector_phot(self):
+        r"""Creates the final unmasked photometric data vector.
+
+        Concatenates data vectors from the three photometric probes,
+        and assigns the result to the internal attribute self._data_vector_phot
+        """
+        data_vector = np.concatenate((self._data['WL'],
+                                      self._data['XC-Phot'],
+                                      self._data['GC-Phot']))
+
+        self._data_vector_phot = data_vector
+
+    def _create_data_vector_spectro(self):
+        r"""Creates the final unmasked spectroscopic data vector.
+
+        Assigns the spectroscopic data vector to the
+        internal attribute self._data_vector_spectro
+        """
+
+        self._data_vector_spectro = self._data['GC-Spectro']
+
     def _create_cov_matrix(self):
         r"""Creates the final unmasked covariance matrix.
 
@@ -154,10 +223,26 @@ class Data_handler:
                                     self._cov['GC-Spectro'])
         self._cov_matrix = cov_matrix
 
-    def _create_masking_vector(self, data):
-        r"""Build the masking vector from the observables specification
+    def _create_cov_matrix_phot(self):
+        r"""Creates the final unmasked photometric covariance matrix.
 
-        Build a masking vector made of 1's and 0's, used to mask the data and
+        Assigns the 3x2pt covariance to the
+        internal attribute self._cov_matrix_phot.
+        """
+        self._cov_matrix_phot = self._cov['3x2pt']
+
+    def _create_cov_matrix_spectro(self):
+        r"""Creates the final unmasked spectroscopic covariance matrix.
+
+        Assigns the GC Spectro covariance
+        to the internal attribute self._cov_matrix_spectro.
+        """
+        self._cov_matrix_spectro = self._cov['GC-Spectro']
+
+    def _create_masking_vector_full(self, data):
+        r"""Builds the masking vector from the observables specification
+
+        Builds a masking vector made of 1's and 0's, used to mask the data and
         theory vectors, starting from the user specifications contained in the
         self._obs dictionary.
 
@@ -243,35 +328,138 @@ class Data_handler:
                 np.full(self._gc_phot_size, self._use_gc_phot, dtype=int))
 
         gc_spectro_vec = []
-        if self._use_gc_spectro:
-            redshifts = data.data_dict['GC-Spectro'].keys()
-            for redshift_index, redshift in enumerate(redshifts):
-                k_pk = data.data_dict['GC-Spectro'][f'{redshift}']['k_pk']
-                multipoles = (
-                    [key for key in
-                     data.data_dict['GC-Spectro'][f'{redshift}'].keys()
-                     if key.startswith('pk')])
-                for multipole in multipoles:
-                    accepted_k_pk = np.array(
-                        self._obs['specifications']['GCspectro']['bins']
-                        [f'n{redshift_index+1}'][f'n{redshift_index+1}']
-                        ['multipoles'][int(multipole[2:])]
-                        ['k_range'])
-                    gc_spectro_vec = np.concatenate(
-                        (gc_spectro_vec,
-                         self._get_masking(k_pk, accepted_k_pk)),
+        redshifts = data.data_dict['GC-Spectro'].keys()
+        for redshift_index, redshift in enumerate(redshifts):
+            k_pk = data.data_dict['GC-Spectro'][f'{redshift}']['k_pk']
+            multipoles = (
+                [key for key in
+                 data.data_dict['GC-Spectro'][f'{redshift}'].keys()
+                 if key.startswith('pk')])
+            for multipole in multipoles:
+                accepted_k_pk = np.array(
+                    self._obs['specifications']['GCspectro']['bins']
+                    [f'n{redshift_index+1}'][f'n{redshift_index+1}']
+                    ['multipoles'][int(multipole[2:])]
+                    ['k_range'])
+                gc_spectro_vec = np.concatenate(
+                    (gc_spectro_vec,
+                     self._get_masking(k_pk, accepted_k_pk)),
+                    axis=None)
+
+        self._masking_vector = np.concatenate(
+            (wl_vec, xc_phot_vec, gc_phot_vec, gc_spectro_vec), axis=None)
+
+    def _create_masking_vector_phot(self, data):
+        r"""Builds the photometric masking vector
+
+        Builds a masking vector made of 1's and 0's, used to mask the data and
+        theory vectors, starting from the user specifications contained in the
+        self._obs dictionary.
+
+        Parameters
+        ----------
+        data: class
+          an instance of the Reader class specifying the structure and
+          organization of the data
+
+        Notes
+        -----
+        The created array contains 1's and 0's and has the same size of the
+        data and theory vector, with 1's in correspondence of the data/theory
+        elements to be included in the likelihood, and 0's in correspondence
+        of the elements that are not to be included.
+        The size of the masking vectors is inferred from the input data.
+        """
+        wl_vec = []
+        if self._use_wl:
+            ells = data.data_dict['WL']['ells']
+            for i in range(1, data.numtomo_wl + 1):
+                for j in range(i, data.numtomo_wl + 1):
+                    accepted_ells = np.array(
+                        self._obs['specifications']['WL']['bins']
+                        [f'n{i}'][f'n{j}']['ell_range'])
+                    wl_vec = np.concatenate(
+                        (wl_vec, self._get_masking(ells, accepted_ells)),
                         axis=None)
 
         else:
-            gc_spectro_vec = (
-                np.full(
-                    self._gc_spectro_size,
-                    self._use_gc_spectro,
-                    dtype=int))
+            wl_vec = np.full(self._wl_size, self._use_wl, dtype=int)
 
-        self._masking_vector = np.concatenate(
-            (wl_vec, xc_phot_vec, gc_phot_vec, gc_spectro_vec),
+        xc_phot_vec = []
+        if self._use_xc_phot:
+            ells = data.data_dict['XC-Phot']['ells']
+            for i in range(1, data.numtomo_wl + 1):
+                for j in range(1, data.numtomo_gcphot + 1):
+                    accepted_ells = np.array(
+                        self._obs['specifications']['WL-GCphot']['bins']
+                        [f'n{i}'][f'n{j}']['ell_range'])
+                    xc_phot_vec = np.concatenate(
+                        (xc_phot_vec, self._get_masking(ells, accepted_ells)),
+                        axis=None)
+        else:
+            xc_phot_vec = (
+                np.full(self._xc_phot_size, self._use_xc_phot, dtype=int))
+
+        gc_phot_vec = []
+        if self._use_gc_phot:
+            ells = data.data_dict['GC-Phot']['ells']
+            for i in range(1, data.numtomo_gcphot + 1):
+                for j in range(i, data.numtomo_gcphot + 1):
+                    accepted_ells = np.array(
+                        self._obs['specifications']['GCphot']['bins']
+                        [f'n{i}'][f'n{j}']['ell_range'])
+                    gc_phot_vec = np.concatenate(
+                        (gc_phot_vec, self._get_masking(ells, accepted_ells)),
+                        axis=None)
+        else:
+            gc_phot_vec = (
+                np.full(self._gc_phot_size, self._use_gc_phot, dtype=int))
+
+        self._masking_vector_phot = np.concatenate(
+            (wl_vec, xc_phot_vec, gc_phot_vec),
             axis=None)
+
+    def _create_masking_vector_spectro(self, data):
+        r"""Builds the spectroscopic masking vector
+
+        Builds a masking vector made of 1's and 0's, used to mask the data and
+        theory vectors, starting from the user specifications contained in the
+        self._obs dictionary.
+
+        Parameters
+        ----------
+        data: class
+          an instance of the Reader class specifying the structure and
+          organization of the data
+
+        Notes
+        -----
+        The created array contains 1's and 0's and has the same size of the
+        data and theory vector, with 1's in correspondence of the data/theory
+        elements to be included in the likelihood, and 0's in correspondence
+        of the elements that are not to be included.
+        The size of the masking vectors is inferred from the input data.
+        """
+        gc_spectro_vec = []
+        redshifts = data.data_dict['GC-Spectro'].keys()
+        for redshift_index, redshift in enumerate(redshifts):
+            k_pk = data.data_dict['GC-Spectro'][f'{redshift}']['k_pk']
+            multipoles = (
+                [key for key in
+                 data.data_dict['GC-Spectro'][f'{redshift}'].keys()
+                 if key.startswith('pk')])
+            for multipole in multipoles:
+                accepted_k_pk = np.array(
+                    self._obs['specifications']['GCspectro']['bins']
+                    [f'n{redshift_index+1}'][f'n{redshift_index+1}']
+                    ['multipoles'][int(multipole[2:])]
+                    ['k_range'])
+                gc_spectro_vec = np.concatenate(
+                    (gc_spectro_vec,
+                     self._get_masking(k_pk, accepted_k_pk)),
+                    axis=None)
+
+        self._masking_vector_spectro = gc_spectro_vec
 
     def _get_masking(self, arr, acceptance_intervals):
         r"""Get a 1/0 mask for arr elements contained in acceptance_intervals

@@ -35,6 +35,7 @@ ns:
     dist: norm
     loc: 0.96
     scale: 0.004
+num_nu_massive: 1
 ombh2:
   latex: \Omega_\mathrm{b} h^2
   prior:
@@ -56,6 +57,7 @@ omch2:
     loc: 0.12
     scale: 0.001
 omegab:
+  derived: 'lambda ombh2, H0: ombh2 * (100.0/H0)**2'
   latex: \Omega_\mathrm{b}
 omegam:
   latex: \Omega_\mathrm{m}
@@ -63,5 +65,6 @@ omk: 0.0
 sigma8:
   latex: \sigma_8
 tau: 0.0925
+use_ppf: true
 w: -1.0
 wa: 0.0

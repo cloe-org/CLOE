@@ -22,5 +22,6 @@ Reviewers, please check the following points before merging.
 - [ ] Check that the implementation follows the [Contributing guidelines and style choices](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/blob/develop/CONTRIBUTING.md)
 - [ ] At least one expert has verified the documentation
 - [ ] Final comments by leads, if any, are correctly taken into account (minor ones within the task; major ones in a new task)
+- [ ] Check that the corresponding branch has been deleted after merging. If not, delete it
 
 > Refer to [reviewer guidelines](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/wikis/Guidelines-for-Reviewers) for more information.

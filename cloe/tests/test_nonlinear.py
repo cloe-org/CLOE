@@ -1,6 +1,6 @@
-"""UNIT TESTS FOR NON-LINEAR
+"""UNIT TESTS FOR NONLINEAR
 
-This module contains unit tests for the non-linear module.
+This module contains unit tests for the nonlinear module.
 
 """
 
@@ -16,29 +16,106 @@ class nonlinearinitTestCase(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
 
-        # Load cosmology dictionary for tests
-        cosmo_dic = load_test_pickle('cosmo_test_dic.pickle')
+        # Load cosmology dictionary for tests with NL_flag_phot_matter=1
+        cosmo_dic_1 = load_test_pickle('cosmo_test_NLphot1_dic.pickle')
         # Create instance of Nonlinear class
-        cls.nl = Nonlinear(cosmo_dic)
+        cls.nl1 = Nonlinear(cosmo_dic_1)
+
+        # Load cosmology dictionary for tests with NL_flag_phot_matter=2
+        cosmo_dic_2 = load_test_pickle('cosmo_test_NLphot2_dic.pickle')
+        # Create instance of Nonlinear class
+        cls.nl2 = Nonlinear(cosmo_dic_2)
+
+        # Copy cosmo_dic from NL_flag_phot_matter=2 (to have HMcode)
+        cosmo_dic_3 = cosmo_dic_2.copy()
+        cosmo_dic_3['NL_flag_phot_matter'] = 3
+        # Create instance of Nonlinear class and update its dictionary
+        cls.nl3 = Nonlinear(cosmo_dic_3)
+        cls.nl3.set_Pgg_spectro_model()
+        cls.nl3.update_dic(cosmo_dic_3)
+
+        # Copy cosmo_dic from NL_flag_phot_matter=2 (to have HMcode)
+        cosmo_dic_4 = cosmo_dic_2.copy()
+        cosmo_dic_4['NL_flag_phot_matter'] = 4
+        # Create instance of Nonlinear class and update its dictionary
+        cls.nl4 = Nonlinear(cosmo_dic_4)
+        cls.nl4.set_Pgg_spectro_model()
+        cls.nl4.update_dic(cosmo_dic_4)
+
+        # Load cosmology dictionary for cosmology extrapolation tests
+        cosmo_dic_extra = \
+            load_test_pickle('cosmo_test_NLphot2_extra_dic.pickle')
+        cosmo_dic_extra['NL_flag_phot_matter'] = 3
+        # Create instance of Nonlinear class and update its dictionary
+        cls.nl3_extra = Nonlinear(cosmo_dic_extra)
+        cls.nl3_extra.set_Pgg_spectro_model()
+        cls.nl3_extra.update_dic(cosmo_dic_extra)
+
+        cosmo_dic_extra['NL_flag_phot_matter'] = 4
+        # Create instance of Nonlinear class and update its dictionary
+        cls.nl4_extra = Nonlinear(cosmo_dic_extra)
+        cls.nl4_extra.set_Pgg_spectro_model()
+        cls.nl4_extra.update_dic(cosmo_dic_extra)
+
+        # Load cosmology dictionary for tests
+        cosmo_dic_5 = load_test_pickle('cosmo_test_NLspectro1_dic.pickle')
+        # Create instance of Nonlinear class
+        cls.nl5 = Nonlinear(cosmo_dic_5)
+        cls.nl5.set_Pgg_spectro_model()
+        nonlinear_dic = \
+            load_test_pickle('cosmo_test_NLspectro1_nonlin_dic.pickle')
+        cls.nl5.Pgg_spectro_model.nonlinear_dic = nonlinear_dic
 
     def setUp(self) -> None:
         # Check values
-        self.Pgg_phot_test = 58392.759202
-        self.Pgdelta_phot_test = 41294.412017
-        self.Pgg_spectro_test = 82548.320427
-        self.Pgdelta_spectro_test = 59890.445816
-        self.Pii_test = np.array([2.417099, 0.902693, 0.321648])
-        self.Pdeltai_test = -265.680094
-        self.Pgi_phot_test = -375.687484
         self.Pgi_spectro_test = -388.28625
+        self.Pgg_spectro_test = 82261.147583
+        self.Pgdelta_spectro_test = 59890.445816
+
+        self.Pgg_phot_test_NL1 = 58175.37128267319
+        self.Pgdelta_phot_test_NL1 = 41140.678806465
+        self.Pii_test_NL1 = np.array([2.40814584, 0.89845222, 0.33413697])
+        self.Pdeltai_test_NL1 = -264.69349205263046
+        self.Pgi_phot_test_NL1 = -374.2923700580575
+
+        self.Pgg_phot_test_NL2 = 58385.00518538
+        self.Pgdelta_phot_test_NL2 = 41290.92152593
+        self.Pii_test_NL2 = np.array([2.41684859, 0.89712765, 0.33484379])
+        self.Pdeltai_test_NL2 = -265.66180498
+        self.Pgi_phot_test_NL2 = -375.64305879
+
+        self.Pgg_phot_test_NL3 = 58057.58175505
+        self.Pgdelta_phot_test_NL3 = 41059.35948637
+        self.Pii_test_NL3 = np.array([2.40329487, 0.89325885, 0.33133042])
+        self.Pdeltai_test_NL3 = -264.17195626
+        self.Pgi_phot_test_NL3 = -373.53644919
+
+        self.Pgg_phot_test_NL4 = 58273.69731319
+        self.Pgdelta_phot_test_NL4 = 41212.25488618
+        self.Pii_test_NL4 = np.array([2.41215574, 0.89132013, 0.33049797])
+        self.Pdeltai_test_NL4 = -265.15569155
+        self.Pgi_phot_test_NL4 = -374.92694385
+
+        self.Pmm_phot_test_NL3_extra_k = 3.4178353
+        self.Pmm_phot_test_NL4_extra_kz = 1.3728688
+
+        self.Pmm_phot_test_extra_cosmo = 3722.815436285109
+
+        self.Pmm_phot_test_extra_k_const = 1.75174
+        self.Pmm_phot_test_extra_k_power_law = 4.39334023
+        self.Pmm_phot_test_extra_k_hm_simple = 3.41310076
+
+        self.Pmm_phot_test_extra_z_const = 13776.70636963
+        self.Pmm_phot_test_extra_z_power_law = 13729.49552857
 
         self.rtol = 1e-3
-        self.z1 = 1.0
-        self.z2 = 0.5
-        self.z3 = 2.0
-        self.k1 = 0.01
-        self.k2 = 0.05
-        self.k3 = 0.1
+        self.redshift1 = 1.0
+        self.redshift2 = 0.5
+        self.redshift3 = 2.0
+        self.wavenumber1 = 0.01
+        self.wavenumber2 = 0.05
+        self.wavenumber3 = 0.1
+        self.wavenumber_extra = 10.0
         self.mu = 0.5
         self.arrsize = 3
 
@@ -48,82 +125,274 @@ class nonlinearinitTestCase(TestCase):
         self.bphot = 1.41406
 
     def tearDown(self):
-        self.Pgg_phot_test = None
-        self.Pgdelta_phot_test = None
+
         self.Pgg_spectro_test = None
         self.Pgdelta_spectro_test = None
-        self.Pii_test = None
-        self.Pdeltai_test = None
-        self.Pgi_phot_test = None
         self.Pgi_spectro_test = None
+
+        self.Pgg_phot_test_NL1 = None
+        self.Pgdelta_phot_test_NL1 = None
+        self.Pii_test_NL1 = None
+        self.Pdeltai_test_NL1 = None
+        self.Pgi_phot_test_NL1 = None
+
+        self.Pgg_phot_test_NL2 = None
+        self.Pgdelta_phot_test_NL2 = None
+        self.Pii_test_NL2 = None
+        self.Pdeltai_test_NL2 = None
+        self.Pgi_phot_test_NL2 = None
+
+        self.Pgg_phot_test_NL3 = None
+        self.Pgdelta_phot_test_NL3 = None
+        self.Pii_test_NL3 = None
+        self.Pdeltai_test_NL3 = None
+        self.Pgi_phot_test_NL3 = None
+
+        self.Pgg_phot_test_NL4 = None
+        self.Pgdelta_phot_test_NL4 = None
+        self.Pii_test_NL4 = None
+        self.Pdeltai_test_NL4 = None
+        self.Pgi_phot_test_NL4 = None
 
     def test_Pgg_phot_def(self):
         npt.assert_allclose(
-            self.nl.Pgg_phot_def(self.z1, self.k1),
-            self.Pgg_phot_test,
+            self.nl1.Pgg_phot_def(self.redshift1, self.wavenumber1),
+            self.Pgg_phot_test_NL1,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pgg_phot_def',
+            err_msg='Error in value returned by Pgg_phot_def '
+                    'for NL_flag_phot_matter=1',
+        )
+
+        npt.assert_allclose(
+            self.nl2.Pgg_phot_def(self.redshift1, self.wavenumber1),
+            self.Pgg_phot_test_NL2,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgg_phot_def '
+                    'for NL_flag_phot_matter=2',
+        )
+
+        npt.assert_allclose(
+            self.nl3.Pgg_phot_def(self.redshift1, self.wavenumber1),
+            self.Pgg_phot_test_NL3,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgg_phot_def '
+                    'for NL_flag_phot_matter=3',
+        )
+
+        npt.assert_allclose(
+            self.nl4.Pgg_phot_def(self.redshift1, self.wavenumber1),
+            self.Pgg_phot_test_NL4,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgg_phot_def '
+                    'for NL_flag_phot_matter=4',
         )
 
     def test_Pgdelta_phot_def(self):
         npt.assert_allclose(
-            self.nl.Pgdelta_phot_def(self.z1, self.k1),
-            self.Pgdelta_phot_test,
+            self.nl1.Pgdelta_phot_def(self.redshift1, self.wavenumber1),
+            self.Pgdelta_phot_test_NL1,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pgdelta_phot_def',
+            err_msg='Error in value returned by Pgdelta_phot_def '
+                    'for NL_flag_phot_matter=1'
+        )
+
+        npt.assert_allclose(
+            self.nl2.Pgdelta_phot_def(self.redshift1, self.wavenumber1),
+            self.Pgdelta_phot_test_NL2,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgdelta_phot_def '
+                    'for NL_flag_phot_matter=2',
+        )
+
+        npt.assert_allclose(
+            self.nl3.Pgdelta_phot_def(self.redshift1, self.wavenumber1),
+            self.Pgdelta_phot_test_NL3,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgdelta_phot_def '
+                    'for NL_flag_phot_matter=3',
+        )
+
+        npt.assert_allclose(
+            self.nl4.Pgdelta_phot_def(self.redshift1, self.wavenumber1),
+            self.Pgdelta_phot_test_NL4,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgdelta_phot_def '
+                    'for NL_flag_phot_matter=4',
         )
 
     def test_Pgg_spectro_def(self):
         npt.assert_allclose(
-            self.nl.Pgg_spectro_def(self.z1, self.k1, self.mu),
+            self.nl5.Pgg_spectro_def(self.redshift1, self.wavenumber1,
+                                     self.mu),
             self.Pgg_spectro_test,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pgg_spectro_def',
+            err_msg='Error in value returned by Pgg_spectro_def '
+                    'for NL_flag_spectro=1',
         )
 
     def test_Pgdelta_spectro_def(self):
         npt.assert_allclose(
-            self.nl.Pgdelta_spectro_def(self.z1, self.k1, self.mu),
+            self.nl5.Pgdelta_spectro_def(self.redshift1, self.wavenumber1,
+                                         self.mu),
             self.Pgdelta_spectro_test,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pgdelta_spectro_def',
+            err_msg='Error in value returned by Pgdelta_spectro_def '
+                    'for NL_flag_spectro=1',
         )
 
     def test_Pii_def(self):
-        test_p = self.nl.Pii_def(self.z1, [self.k1, self.k2, self.k3])
-        type_check = isinstance(test_p, np.ndarray)
+        test_p1 = self.nl1.Pii_def(self.redshift1,
+                                   [self.wavenumber1,
+                                    self.wavenumber2,
+                                    self.wavenumber3])
 
-        assert type_check, 'Error in returned data type of Pii_def'
-        assert test_p.size == self.arrsize, (
-            'Error in size of array returned by Pii_def'
+        type_check = isinstance(test_p1, np.ndarray)
+
+        assert type_check, 'Error in returned data type of Pii_def ' \
+                           'for NL_flag_phot_matter=1'
+
+        assert test_p1.size == self.arrsize, (
+            'Error in size of array returned by Pii_def for '
+            'NL_flag_phot_matter=1'
         )
 
         npt.assert_allclose(
-            test_p,
-            self.Pii_test,
+            test_p1,
+            self.Pii_test_NL1,
             rtol=self.rtol,
-            err_msg='Error in values returned by Pii_def',
+            err_msg='Error in values returned by Pii_def for '
+                    'NL_flag_phot_matter=1',
         )
+
+        test_p2 = self.nl2.Pii_def(self.redshift1,
+                                   [self.wavenumber1,
+                                    self.wavenumber2,
+                                    self.wavenumber3])
+
+        type_check = isinstance(test_p2, np.ndarray)
+        assert type_check, 'Error in returned data type of Pii_def ' \
+                           'for NL_flag_phot_matter=2'
+
+        assert test_p2.size == self.arrsize, 'Error in size of array ' \
+                                             'returned by Pii_def ' \
+                                             'for NL_flag_phot_matter=2'
+
+        npt.assert_allclose(
+            test_p2,
+            self.Pii_test_NL2,
+            rtol=self.rtol,
+            err_msg='Error in values returned by Pii_def for '
+                    'NL_flag_phot_matter=2')
+
+        test_p3 = self.nl3.Pii_def(self.redshift1,
+                                   [self.wavenumber1,
+                                    self.wavenumber2,
+                                    self.wavenumber3])
+
+        type_check = isinstance(test_p3, np.ndarray)
+        assert type_check, 'Error in returned data type of Pii_def ' \
+                           'for NL_flag_phot_matter=3'
+
+        assert test_p3.size == self.arrsize, 'Error in size of array ' \
+                                             'returned by Pii_def ' \
+                                             'for NL_flag_phot_matter=3'
+
+        npt.assert_allclose(
+            test_p3,
+            self.Pii_test_NL3,
+            rtol=self.rtol,
+            err_msg='Error in values returned by Pii_def for '
+                    'NL_flag_phot_matter=3')
+
+        test_p4 = self.nl4.Pii_def(self.redshift1,
+                                   [self.wavenumber1,
+                                    self.wavenumber2,
+                                    self.wavenumber3])
+
+        type_check = isinstance(test_p4, np.ndarray)
+        assert type_check, 'Error in returned data type of Pii_def ' \
+                           'for NL_flag_phot_matter=4'
+
+        assert test_p4.size == self.arrsize, 'Error in size of array ' \
+                                             'returned by Pii_def ' \
+                                             'for NL_flag_phot_matter=4'
+
+        npt.assert_allclose(
+            test_p4,
+            self.Pii_test_NL4,
+            rtol=self.rtol,
+            err_msg='Error in values returned by Pii_def for '
+                    'NL_flag_phot_matter=4')
 
     def test_Pdeltai_def(self):
         npt.assert_allclose(
-            self.nl.Pdeltai_def(self.z1, self.k1),
-            self.Pdeltai_test,
+            self.nl1.Pdeltai_def(self.redshift1, self.wavenumber1),
+            self.Pdeltai_test_NL1,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pdeltai_def',
+            err_msg='Error in value returned by Pdeltai_def '
+                    'for NL_flag_phot_matter=1',
+        )
+
+        npt.assert_allclose(
+            self.nl2.Pdeltai_def(self.redshift1, self.wavenumber1),
+            self.Pdeltai_test_NL2,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pdeltai_def '
+                    'for NL_flag_phot_matter=2',
+        )
+
+        npt.assert_allclose(
+            self.nl3.Pdeltai_def(self.redshift1, self.wavenumber1),
+            self.Pdeltai_test_NL3,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pdeltai_def '
+                    'for NL_flag_phot_matter=3',
+        )
+
+        npt.assert_allclose(
+            self.nl4.Pdeltai_def(self.redshift1, self.wavenumber1),
+            self.Pdeltai_test_NL4,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pdeltai_def '
+                    'for NL_flag_phot_matter=4',
         )
 
     def test_Pgi_phot_def(self):
         npt.assert_allclose(
-            self.nl.Pgi_phot_def(self.z1, self.k1),
-            self.Pgi_phot_test,
+            self.nl1.Pgi_phot_def(self.redshift1, self.wavenumber1),
+            self.Pgi_phot_test_NL1,
             rtol=self.rtol,
-            err_msg='Error in value returned by Pgi_phot_def',
+            err_msg='Error in value returned by Pgi_phot_def '
+                    'for NL_flag_phot_matter=1',
+        )
+
+        npt.assert_allclose(
+            self.nl2.Pgi_phot_def(self.redshift1, self.wavenumber1),
+            self.Pgi_phot_test_NL2,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgi_phot_def '
+                    'for NL_flag_phot_matter=2',
+        )
+
+        npt.assert_allclose(
+            self.nl3.Pgi_phot_def(self.redshift1, self.wavenumber1),
+            self.Pgi_phot_test_NL3,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgi_phot_def '
+                    'for NL_flag_phot_matter=3',
+        )
+
+        npt.assert_allclose(
+            self.nl4.Pgi_phot_def(self.redshift1, self.wavenumber1),
+            self.Pgi_phot_test_NL4,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgi_phot_def '
+                    'for NL_flag_phot_matter=4',
         )
 
     def test_Pgi_spectro_def(self):
         npt.assert_allclose(
-            self.nl.Pgi_spectro_def(self.z1, self.k1),
+            self.nl1.Pgi_spectro_def(self.redshift1, self.wavenumber1),
             self.Pgi_spectro_test,
             rtol=self.rtol,
             err_msg='Error in value returned by Pgi_spectro_def',
@@ -131,100 +400,201 @@ class nonlinearinitTestCase(TestCase):
 
     def test_fia(self):
         npt.assert_allclose(
-            self.nl.misc.fia(self.z1, self.k1),
+            self.nl1.misc.fia(self.redshift1, self.wavenumber1),
             self.fia_test,
             rtol=self.rtol,
             err_msg='Error in value returned by fia',
         )
 
     def test_fia_k_array(self):
-        k_array = np.array([self.k1, self.k2, self.k3])
-        fia = self.nl.misc.fia(self.z1, k_array)
+        wavenumber_array = np.array([self.wavenumber1, self.wavenumber2,
+                                     self.wavenumber3])
+        fia = self.nl1.misc.fia(self.redshift1, wavenumber_array)
         npt.assert_equal(
             isinstance(fia, np.ndarray),
             True,
             err_msg=(
-                'Error in type returned by fia when z is scalar and k is ' +
-                'array'
+                'Error in type returned by fia when redshift is scalar and ' +
+                'wavenumber is array'
             ),
         )
         npt.assert_equal(
             np.size(fia),
-            np.size(k_array),
+            np.size(wavenumber_array),
             err_msg=(
-                'Error in size returned by fia when z is scalar and k ' +
-                'is array'
+                'Error in size returned by fia when redshift is scalar and ' +
+                'wavenumber is array'
             ),
         )
 
     def test_fia_z_array(self):
-        z_array = np.array([self.z1, self.z1])
-        fia = self.nl.misc.fia(z_array, self.k1)
+        redshift_array = np.array([self.redshift1, self.redshift1])
+        fia = self.nl1.misc.fia(redshift_array, self.wavenumber1)
         npt.assert_equal(
             isinstance(fia, np.ndarray),
             True,
             err_msg=(
-                'Error in type returned by fia when z is array and k is ' +
-                'scalar'
+                'Error in type returned by fia when redshift is array and ' +
+                'wavenumber is scalar'
             ),
         )
         npt.assert_equal(
             np.size(fia),
-            np.size(z_array),
+            np.size(redshift_array),
             err_msg=(
-                'Error in size returned by fia when z is array and k is ' +
-                ' scalar'
+                'Error in size returned by fia when redshift is array and ' +
+                'wavenumber is scalar'
             ),
         )
 
     def test_fia_zk_array(self):
-        z_array = np.array([self.z1, self.z1])
-        k_array = np.array([self.k1, self.k2, self.k3])
-        fia = self.nl.misc.fia(z_array, k_array)
+        redshift_array = np.array([self.redshift1, self.redshift1])
+        wavenumber_array = np.array([self.wavenumber1, self.wavenumber2,
+                                     self.wavenumber3])
+        fia = self.nl1.misc.fia(redshift_array, wavenumber_array)
         npt.assert_equal(
             isinstance(fia, np.ndarray),
             True,
             err_msg=(
-                'Error in type returned by fia when z is array and k is array'
+                'Error in type returned by fia when redshift is array and ' +
+                'wavenumber is array'
             ),
         )
         npt.assert_equal(
             np.size(fia),
-            np.size(z_array) * np.size(k_array),
+            np.size(redshift_array) * np.size(wavenumber_array),
             err_msg=(
-                'Error in size returned by fia when z is array and k is array'
+                'Error in size returned by fia when redshift is array and ' +
+                'wavenumber is array'
             ),
         )
         npt.assert_array_equal(
             np.shape(fia),
             (2, 3),
             err_msg=(
-                'Error in size returned by fia when z is array and k is array'
+                'Error in size returned by fia when redshift is array and ' +
+                'wavenumber is array'
             ),
         )
 
     def test_istf_spectro_galbias(self):
         npt.assert_allclose(
-            self.nl.misc.istf_spectro_galbias(self.z1),
+            self.nl1.misc.istf_spectro_galbias(self.redshift1),
             self.bspec,
             rtol=self.rtol,
             err_msg='Error in istf_spectro_galbias',
         )
         self.assertRaises(
             ValueError,
-            self.nl.misc.istf_spectro_galbias,
-            self.z2,
+            self.nl1.misc.istf_spectro_galbias,
+            self.redshift2,
         )
         self.assertRaises(
             ValueError,
-            self.nl.misc.istf_spectro_galbias,
-            self.z3,
+            self.nl1.misc.istf_spectro_galbias,
+            self.redshift3,
         )
 
     def test_istf_phot_galbias(self):
         npt.assert_allclose(
-            self.nl.misc.istf_phot_galbias(self.z1),
+            self.nl1.misc.istf_phot_galbias(self.redshift1),
             self.bphot,
             rtol=self.rtol,
             err_msg='Error in istf_phot_galbias',
+        )
+
+    def test_extrapolation_Pmm_phot_def(self):
+        # Test for wavenumber extrapolation with EE2
+        npt.assert_allclose(
+            self.nl3.Pmm_phot_def(self.redshift1, self.wavenumber_extra),
+            self.Pmm_phot_test_NL3_extra_k,
+            rtol=self.rtol,
+            err_msg='Error in value returned by wavenumber extrapolation of ' +
+                    'Pmm_phot_def for EE2',
+        )
+
+        # Test for wavenumber and redshift extrapolation with BACCO
+        npt.assert_allclose(
+            self.nl4.Pmm_phot_def(self.redshift3, self.wavenumber_extra),
+            self.Pmm_phot_test_NL4_extra_kz,
+            rtol=self.rtol,
+            err_msg='Error in value returned by wavenumber and redshift ' +
+                    'extrapolation of Pmm_phot_def for BACCO',
+        )
+
+        # Test for cosmology extrapolation with EE2
+        npt.assert_allclose(
+            self.nl3_extra.Pmm_phot_def(self.redshift1, self.wavenumber3),
+            self.Pmm_phot_test_extra_cosmo,
+            rtol=self.rtol,
+            err_msg='Error in value returned by cosmo extrapolation of ' +
+                    'Pmm_phot_def for EE2',
+        )
+
+        # Test for cosmology extrapolation with BACCO
+        npt.assert_allclose(
+            self.nl4_extra.Pmm_phot_def(self.redshift1, self.wavenumber3),
+            self.Pmm_phot_test_extra_cosmo,
+            rtol=self.rtol,
+            err_msg='Error in value returned by cosmo extrapolation of ' +
+                    'Pmm_phot_def for BACCO',
+        )
+
+    def test_extrapolation_options(self):
+
+        # Test alternative wavenumber extrapolation options
+        self.nl4.nonlinear_dic['option_extra_wavenumber'] = "const"
+        self.nl4.update_dic(self.nl4.theory)
+
+        npt.assert_allclose(
+            self.nl4.Pmm_phot_def(self.redshift1, self.wavenumber_extra),
+            self.Pmm_phot_test_extra_k_const,
+            rtol=self.rtol,
+            err_msg='Error in value returned by wavenumber extrapolation of ' +
+                    'Pmm_phot_def with constant for BACCO',
+        )
+
+        self.nl4.nonlinear_dic['option_extra_wavenumber'] = "power_law"
+        self.nl4.update_dic(self.nl4.theory)
+
+        npt.assert_allclose(
+            self.nl4.Pmm_phot_def(self.redshift1, self.wavenumber_extra),
+            self.Pmm_phot_test_extra_k_power_law,
+            rtol=self.rtol,
+            err_msg='Error in value returned by wavenumber extrapolation of ' +
+                    'Pmm_phot_def with power law for BACCO',
+        )
+
+        self.nl4.nonlinear_dic['option_extra_wavenumber'] = "hm_simple"
+        self.nl4.update_dic(self.nl4.theory)
+
+        npt.assert_allclose(
+            self.nl4.Pmm_phot_def(self.redshift1, self.wavenumber_extra),
+            self.Pmm_phot_test_extra_k_hm_simple,
+            rtol=self.rtol,
+            err_msg='Error in value returned by wavenumber extrapolation of ' +
+                    'Pmm_phot_def with HM code for BACCO',
+        )
+
+        # Test alternative redshift extrapolation options
+        self.nl4.nonlinear_dic['option_extra_redshift'] = "const"
+        self.nl4.update_dic(self.nl4.theory)
+
+        npt.assert_allclose(
+            self.nl4.Pmm_phot_def(self.redshift3, self.wavenumber1),
+            self.Pmm_phot_test_extra_z_const,
+            rtol=self.rtol,
+            err_msg='Error in value returned by redshift extrapolation of ' +
+                    'Pmm_phot_def with constant for BACCO',
+        )
+
+        self.nl4.nonlinear_dic['option_extra_redshift'] = "power_law"
+        self.nl4.update_dic(self.nl4.theory)
+
+        npt.assert_allclose(
+            self.nl4.Pmm_phot_def(self.redshift3, self.wavenumber1),
+            self.Pmm_phot_test_extra_z_power_law,
+            rtol=self.rtol,
+            err_msg='Error in value returned by redshift extrapolation of ' +
+                    'Pmm_phot_def with power law for BACCO',
         )

@@ -5,14 +5,12 @@ Contains class to compute the Euclid likelihood
 """
 
 import numpy as np
-from cloe.cosmo.cosmology import Cosmology
 from cloe.photometric_survey.photo import Photo
 from cloe.spectroscopic_survey.spectro import Spectro
 from cloe.data_reader import reader
 from cloe.masking.masking import Masking
 from cloe.masking.data_handler import Data_handler
 from cloe.auxiliary.matrix_transforms import BNT_transform
-
 
 class EuclikeError(Exception):
     r"""
@@ -42,121 +40,190 @@ class Euclike:
             Dictionary containing specification for the chosen observables by
             the user.
         """
+        self.observables = observables
+        self.do_photo = (any(observables['selection']['WL'].values()) or
+                         any(observables['selection']['GCphot'].values()))
+        self.do_spectro = any(observables['selection']['GCspectro'].values())
 
         self.data = data
         self.data_ins = reader.Reader(self.data)
-        self.data_ins.compute_nz()
         self.data_ins.compute_luminosity_ratio()
-        # Read spectro
-        self.data_ins.read_GC_spectro()
-        self.zkeys = self.data_ins.data_dict['GC-Spectro'].keys()
         self.data_spectro_fiducial_cosmo = \
             self.data_ins.data_spectro_fiducial_cosmo
-        # Read photo
-        self.data_ins.read_phot()
-        # Read observables
-        self.observables = observables
-        # Photo class instance
-        self.phot_ins = Photo(None,
-                              self.data_ins.nz_dict_WL,
-                              self.data_ins.nz_dict_GC_Phot)
 
-        # Calculate permutations i,j bins for WL, GC-Phot, XC.
-        # This refers to the non-redundant bin combinations for
-        # which we have measurements (i.e. 1-1, 1-2, ..., 1-10,
-        # 2-2, 2-3, ..., 2-10, 3-3, 3-4, etc, in the case of ten
-        # tomographic bins for WL and GC-Phot. Meanwhile, all bin
-        # combinations exist for XC, i.e. for example both 1-2
-        # and 2-1, both 1-3 and 3-1, etc).
-        numtomo_wl = self.data_ins.numtomo_wl
-        numtomo_gcphot = self.data_ins.numtomo_gcphot
-        x_diagonal_wl = np.array(np.triu_indices(n=numtomo_wl,
-                                 m=numtomo_wl)) + 1
-        x_diagonal_gc = np.array(np.triu_indices(n=numtomo_gcphot,
-                                 m=numtomo_gcphot)) + 1
-        self.indices_diagonal_wl = \
-            list(zip(x_diagonal_wl[0], x_diagonal_wl[1]))
-        self.indices_diagonal_gc = \
-            list(zip(x_diagonal_gc[0], x_diagonal_gc[1]))
-        x_full_xc = np.indices((numtomo_gcphot, numtomo_wl))
-        self.indices_all = tuple(zip(x_full_xc[0].flatten() + 1,
-                                 x_full_xc[1].flatten() + 1))
-        self.ells_WL = self.data_ins.data_dict['WL']['ells']
-        self.ells_XC = self.data_ins.data_dict['XC-Phot']['ells']
-        self.ells_GC_phot = self.data_ins.data_dict['GC-Phot']['ells']
+        # Read data, instantiate Photo and Spectro classes
+        # and compute pre-computed quantities
+        if self.do_photo:
+            self.data_ins.compute_nz()
+            # Read photo
+            self.data_ins.read_phot()
 
+            # Calculate permutations i,j bins for WL, GC-Phot, XC.
+            # This refers to the non-redundant bin combinations for
+            # which we have measurements (i.e. 1-1, 1-2, ..., 1-10,
+            # 2-2, 2-3, ..., 2-10, 3-3, 3-4, etc, in the case of ten
+            # tomographic bins for WL and GC-Phot. Meanwhile, all bin
+            # combinations exist for XC, i.e. for example both 1-2
+            # and 2-1, both 1-3 and 3-1, etc).
+            numtomo_wl = self.data_ins.numtomo_wl
+            numtomo_gcphot = self.data_ins.numtomo_gcphot
+            x_diagonal_wl = np.array(np.triu_indices(n=numtomo_wl,
+                                    m=numtomo_wl)) + 1
+            x_diagonal_gc = np.array(np.triu_indices(n=numtomo_gcphot,
+                                    m=numtomo_gcphot)) + 1
+            self.indices_diagonal_wl = \
+                list(zip(x_diagonal_wl[0], x_diagonal_wl[1]))
+            self.indices_diagonal_gc = \
+                list(zip(x_diagonal_gc[0], x_diagonal_gc[1]))
+            x_full_xc = np.indices((numtomo_gcphot, numtomo_wl))
+            self.indices_all = tuple(zip(x_full_xc[0].flatten() + 1,
+                                    x_full_xc[1].flatten() + 1))
+            self.ells_WL = self.data_ins.data_dict['WL']['ells']
+            self.ells_XC = self.data_ins.data_dict['XC-Phot']['ells']
+            self.ells_GC_phot = self.data_ins.data_dict['GC-Phot']['ells']
+
+            # Flag to select cases with or without RSD for photometric probes
+            add_RSD = observables['selection']['add_phot_RSD']
+
+            # Photo class instance
+            self.phot_ins = Photo(None,
+                                  self.data_ins.nz_dict_WL,
+                                  self.data_ins.nz_dict_GC_Phot,
+                                  add_RSD=add_RSD)
+
+            # Temporary placeholder for theta vector
+            # (will be read from file eventually)
+            theta_min = 0.005
+            theta_max = 20.0
+            nbins_theta = 30
+            theta_deg = np.logspace(np.log10(theta_min),
+                                    np.log10(theta_max),
+                                    nbins_theta)
+            theta_rad = np.deg2rad(theta_deg)
+
+            # Sets the precomputed Bessel functions as an attribute of the
+            # Photo class
+            self.phot_ins._set_bessel_tables(theta_rad)
+
+            # set the precomputed prefactors for the WL, XC and GCphot Cl's
+            self.phot_ins.set_prefactor(ells_WL=self.ells_WL,
+                                        ells_XC=self.ells_XC,
+                                        ells_GC_phot=self.ells_GC_phot)
+
+        if self.do_spectro:
+            # Read spectro
+            self.data_ins.read_GC_spectro()
+            self.zkeys = self.data_ins.data_dict['GC-Spectro'].keys()
+
+            # Spectro class instance
+            self.spec_ins = Spectro(None, list(self.zkeys))
+
+        # Create data vectors and covariances and mask them
+        self.get_masked_data()
+
+    def get_masked_data(self):
+        """Get Masked Data
+
+        Creates the data vectors and covariances for photometric and
+        spectroscopic probes, creates instances of the masking class for each
+        and applies the masking to the data and covariances
+        """
+        if self.do_photo:
+            photodata = self.create_photo_data()
+        if self.do_spectro:
+            spectrodata = self.create_spectro_data()
+            spectrocov = self.create_spectro_cov()
         # Reshaping the data vectors and covariance matrices
         # into dictionaries to be passed to the data_handler class
+        if self.do_photo and self.do_spectro:
+            datafinal = {**photodata,
+                         'GC-Spectro': spectrodata}
+            covfinal = {'3x2pt': self.data_ins.data_dict['3x2pt_cov'],
+                        'GC-Spectro': spectrocov}
+        elif self.do_spectro:
+            datafinal = {'GC-Spectro': spectrodata}
+            covfinal = {'GC-Spectro': spectrocov}
+        elif self.do_photo:
+            datafinal = photodata
+            covfinal = {'3x2pt': self.data_ins.data_dict['3x2pt_cov']}
 
-        # Temporary placeholder for theta vector
-        # (will be read from file eventually)
-        theta_min = 0.005
-        theta_max = 20.0
-        nbins_theta = 30
-        theta_deg = np.logspace(np.log10(theta_min),
-                                np.log10(theta_max),
-                                nbins_theta)
-        theta_rad = np.deg2rad(theta_deg)
-
-        # Sets the precomputed Bessel functions as an attribute of the
-        # Photo class
-        self.phot_ins._set_bessel_tables(theta_rad)
-
-        # set the precomputed prefactors for the WL, XC and GCphot Cl's
-        self.phot_ins.set_prefactor(ells_WL=self.ells_WL,
-                                    ells_XC=self.ells_XC,
-                                    ells_GC_phot=self.ells_GC_phot)
-
-        # Spectro class instance
-        self.spec_ins = Spectro(None, list(self.zkeys))
-
-    def create_masked_photo_data(self, dictionary):
-        """
-        Create Masked Photo Data
-
-        Computes the masked photometric data vector
-        and masked input covariance matrix
-
-        Parameters
-        ----------
-        dictionary: dict
-            cosmology dictionary from the Cosmology class
-        """
-
-        # Tranforming data
-        self.photodata = self.create_photo_data(dictionary)
-        datafinal = {**self.photodata,
-                     'GC-Spectro': self.spectrodata}
-        covfinal = {'3x2pt': self.data_ins.data_dict['3x2pt_cov'],
-                    'GC-Spectro': self.spectrocov}
         self.data_handler_ins = Data_handler(datafinal,
                                              covfinal,
                                              self.observables,
                                              self.data_ins)
 
-        self.data_vector, self.cov_matrix, self.masking_vector = \
-            self.data_handler_ins.get_data_and_masking_vector()
+        # Mask data vectors and covariances
+        # for the photometric and spectroscopic probes separately
+        if self.do_photo:
+            self.data_vector_phot, self.cov_matrix_phot, \
+                self.masking_vector_phot =               \
+                self.data_handler_ins.get_data_and_masking_vector_phot()
+            self.mask_ins_phot = Masking()
+            self.mask_ins_phot.set_data_vector(self.data_vector_phot)
+            self.mask_ins_phot.set_masking_vector(self.masking_vector_phot)
+            self.masked_data_vector_phot = (
+                self.mask_ins_phot.get_masked_data_vector())
+            self.mask_ins_phot.set_covariance_matrix(self.cov_matrix_phot)
+            self.masked_cov_matrix_phot = (
+                self.mask_ins_phot.get_masked_covariance_matrix())
+            self.ndata_phot = self.masked_data_vector_phot.size
+            if (self.data['photo']['cov_is_num']):
+                self.nsim_phot = self.data['photo']['cov_nsim']
+                if (self.nsim_phot <= self.ndata_phot + 1.0):
+                    raise ValueError(
+                        "The photo data covariance is not invertible "
+                        "because cov_nsim is too low")
+                elif (self.nsim_phot <= self.ndata_phot + 4.0):
+                    raise ValueError("Cannot apply Percival et al. 2022 "
+                                     "likelihood shape for photo "
+                                     "because cov_nsim is too low")
+            self.masked_invcov_matrix_phot = (
+                np.linalg.inv(self.masked_cov_matrix_phot))
+            # Check for inversion issues
+            if not np.allclose(np.dot(self.masked_cov_matrix_phot,
+                               self.masked_invcov_matrix_phot),
+                               np.eye(self.masked_cov_matrix_phot.shape[0])):
+                raise ValueError("Problem with the inversion of the "
+                                 "photo covariance")
+        if self.do_spectro:
+            self.data_vector_spectro, self.cov_matrix_spectro, \
+                self.masking_vector_spectro =               \
+                self.data_handler_ins.get_data_and_masking_vector_spectro()
+            self.mask_ins_spectro = Masking()
+            self.mask_ins_spectro.set_data_vector(self.data_vector_spectro)
+            self.mask_ins_spectro.set_covariance_matrix(
+                self.cov_matrix_spectro)
+            self.mask_ins_spectro.set_masking_vector(
+                self.masking_vector_spectro)
+            self.masked_data_vector_spectro = (
+                self.mask_ins_spectro.get_masked_data_vector())
+            self.masked_cov_matrix_spectro = (
+                self.mask_ins_spectro.get_masked_covariance_matrix())
+            self.ndata_spectro = self.masked_data_vector_spectro.size
+            if (self.data['spectro']['cov_is_num']):
+                self.nsim_spectro = self.data['spectro']['cov_nsim']
+                if (self.nsim_spectro <= self.ndata_spectro + 1.0):
+                    raise ValueError(
+                        "The spectro data covariance is not invertible "
+                        "because cov_nsim is too low")
+                elif (self.nsim_spectro <= self.ndata_spectro + 4.0):
+                    raise ValueError("Cannot apply Percival et al. 2022 "
+                                     "likelihood shape for spectro "
+                                     "because cov_nsim is too low")
+            self.masked_invcov_matrix_spectro = (
+                np.linalg.inv(self.masked_cov_matrix_spectro))
+            # Check for inversion issues
+            if not np.allclose(np.dot(self.masked_cov_matrix_spectro,
+                               self.masked_invcov_matrix_spectro),
+                               np.eye(
+                               self.masked_cov_matrix_spectro.shape[0])):
+                raise ValueError("Problem with the inversion of the "
+                                 "spectro covariance")
 
-        self.mask_ins = Masking()
-        self.mask_ins.set_data_vector(self.data_vector)
-        self.mask_ins.set_covariance_matrix(self.cov_matrix)
-        self.mask_ins.set_masking_vector(self.masking_vector)
-        self.masked_data_vector = self.mask_ins.get_masked_data_vector()
-        self.masked_cov_matrix = (
-            self.mask_ins.get_masked_covariance_matrix())
-
-        self.masked_invcov_matrix = np.linalg.inv(self.masked_cov_matrix)
-        return None
-
-    def create_photo_data(self, dictionary):
+    def create_photo_data(self):
         """Create Photo Data
 
         Arranges the photo data vector for the likelihood into its final format
-
-        Parameters
-        ----------
-        dictionary: dict
-            cosmology dictionary from the Cosmology class
 
         Returns
         -------
@@ -172,7 +239,7 @@ class Euclike:
             if 'B' in index:
                 del (self.data_ins.data_dict['XC-Phot'][index])
         # Transform GC-Phot
-        # We ignore the first key (ells)
+        # We ignore the first value (ells)
         self.tomo_ind_GC_phot = \
             list(self.data_ins.data_dict['GC-Phot'].keys())[1:]
         datavec_dict['GC-Phot'] = np.array(
@@ -191,15 +258,16 @@ class Euclike:
                 [self.data_ins.data_dict['XC-Phot'][key][ell]
                  for ell in range(len(self.ells_XC))
                  for key in self.tomo_ind_XC])
+
         datavec_dict['WL'] = \
             self.transform_photo_theory_data_vector(datavec_dict['WL'],
-                                                    dictionary, obs='WL')
+                                                    obs='WL')
         datavec_dict['XC-Phot'] = \
             self.transform_photo_theory_data_vector(datavec_dict['XC-Phot'],
-                                                    dictionary, obs='XC-phot')
+                                                    obs='XC-phot')
         datavec_dict['GC-Phot'] = \
             self.transform_photo_theory_data_vector(datavec_dict['GC-Phot'],
-                                                    dictionary, obs='GC-phot')
+                                                    obs='GC-phot')
         datavec_dict['all'] = np.concatenate((datavec_dict['WL'],
                                               datavec_dict['XC-Phot'],
                                               datavec_dict['GC-Phot']), axis=0)
@@ -217,8 +285,8 @@ class Euclike:
         Parameters
         ----------
         dictionary: dict
-            cosmology dictionary from the Cosmology class
-            which is updated at each sampling step
+            cosmology dictionary from the Cosmology class which is updated at
+            each sampling step
 
         Returns
         -------
@@ -286,7 +354,7 @@ class Euclike:
         return self.photo_theory_vec
 
     def transform_photo_theory_data_vector(self, obs_array,
-                                           dictionary, obs='WL'):
+                                           obs='WL'):
         """Transform Photo Theory Data Vector
 
         Transform the photo theory vector with a generic matrix transformation
@@ -350,7 +418,7 @@ class Euclike:
         else:
             raise ValueError("Matrix Transform not implemented yet into CLOE")
         return transformed_array
-
+    
     def create_spectro_theory(self, dictionary):
         """Create Spectro Theory
 
@@ -457,9 +525,10 @@ class Euclike:
             covfull[c1:c2, c1:c2] = self.data_ins.data_dict['GC-Spectro'][
                                         z_ins]['cov']
             kc = kc + 1
+
         return covfull
 
-    def loglike(self, dictionary):
+    def loglike(self, dictionary, npar=None):
         """Loglike
 
         Calculates the log-likelihood for a given model
@@ -469,23 +538,71 @@ class Euclike:
         dictionary: dict
             cosmology dictionary from the Cosmology class
             which is updated at each sampling step
+        npar: int
+            number of sampled parameters (needed in case of
+            numerical covariances, optional, default None)
 
         Returns
         -------
         loglike_tot: float
             loglike = Ln(likelihood) for the Euclid observables
         """
-        self.spectrodata = self.create_spectro_data()
-        self.spectrocov = self.create_spectro_cov()
-        self.create_masked_photo_data(dictionary)
-        photo_theory_vec = self.create_photo_theory(dictionary)
-        spectro_theory_vec = self.create_spectro_theory(dictionary)
-        theory_vec = np.concatenate(
-            (photo_theory_vec, spectro_theory_vec), axis=0)
-        self.mask_ins.set_theory_vector(theory_vec)
-        masked_data_minus_theory = (
-            self.masked_data_vector - self.mask_ins.get_masked_theory_vector())
-        loglike = -0.5 * np.dot(
-            np.dot(masked_data_minus_theory, self.masked_invcov_matrix),
-            masked_data_minus_theory)
+
+        if self.do_photo:
+            photo_theory_vec = self.create_photo_theory(dictionary)
+            self.mask_ins_phot.set_theory_vector(photo_theory_vec)
+            masked_data_minus_theory_phot = (
+                    self.masked_data_vector_phot -
+                    self.mask_ins_phot.get_masked_theory_vector())
+            chi2_phot = np.dot(
+                    np.dot(
+                        masked_data_minus_theory_phot,
+                        self.masked_invcov_matrix_phot),
+                    masked_data_minus_theory_phot)
+            # If the covariance is numerical we use the non-Gaussian likelihood
+            # from Percival et al. 2022 Eq. 52
+            if self.data['photo']['cov_is_num']:
+                B_phot = (self.nsim_phot - self.ndata_phot - 2.0) / \
+                    ((self.nsim_phot - self.ndata_phot - 1.0) *
+                        (self.nsim_phot - self.ndata_phot - 4.0))
+                m_phot = npar + 2.0 + (self.nsim_phot - 1.0 +
+                                       B_phot * (self.ndata_phot - npar)) / \
+                                      (1.0 + B_phot * (self.ndata_phot - npar))
+                loglike_phot = - m_phot / 2.0 * np.log(
+                        1.0 + chi2_phot / (self.nsim_phot - 1.0))
+            else:
+                loglike_phot = -0.5 * chi2_phot
+        else:
+            loglike_phot = 0.0
+        if self.do_spectro:
+            spectro_theory_vec = self.create_spectro_theory(dictionary)
+            self.mask_ins_spectro.set_theory_vector(spectro_theory_vec)
+            masked_data_minus_theory_spectro = (
+                    self.masked_data_vector_spectro -
+                    self.mask_ins_spectro.get_masked_theory_vector())
+            chi2_spectro = np.dot(
+                    np.dot(
+                        masked_data_minus_theory_spectro,
+                        self.masked_invcov_matrix_spectro),
+                    masked_data_minus_theory_spectro)
+            # If the covariance is numerical we use the non-Gaussian likelihood
+            # from Percival et al. 2022 Eq. 52
+            if self.data['spectro']['cov_is_num']:
+                B_spectro = (self.nsim_spectro - self.ndata_spectro - 2.0) / \
+                    ((self.nsim_spectro - self.ndata_spectro - 1.0) *
+                     (self.nsim_spectro - self.ndata_spectro - 4.0))
+                m_spectro = npar + 2.0 + (
+                            self.nsim_spectro - 1.0 +
+                            B_spectro * (self.ndata_spectro - npar)) / \
+                    (1.0 + B_spectro * (self.ndata_spectro - npar))
+                loglike_spectro = - m_spectro / 2.0 * np.log(
+                        1.0 + chi2_spectro / (self.nsim_spectro - 1.0))
+            else:
+                loglike_spectro = -0.5 * chi2_spectro
+        else:
+            loglike_spectro = 0.0
+
+        # Total likelihood
+        loglike = loglike_phot + loglike_spectro
+
         return loglike

@@ -273,7 +273,7 @@ class LikelihoodUI:
         elif type(params) is dict:
             log_debug(f'Field \'params\' is a dict')
             log_info(f'\'params\' will be set as:')
-            log_info(field_value)
+            log_info(params)
         else:
             raise ValueError('key \'params\' in the input yaml configuration '
                              'must be a either a string (the model yaml path)'

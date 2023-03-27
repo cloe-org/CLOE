@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Cosmology
 
 Class to store cosmological parameters and functions.
@@ -96,12 +95,12 @@ class Cosmology:
             of :math:`Mpc^{-1}`
         Pk_delta: function
             Interpolator function for linear matter Pk from Boltzmann code
-        Pk_halofit: function
-            Interpolator function for non-linear matter Pk from Boltzmann code
+        Pk_halomodel_recipe: function
+            Interpolator function for nonlinear matter Pk from Boltzmann code
         Pk_weyl: function
             Interpolator function for linear Weyl Pk from Boltzmann code
         Pk_weyl_NL: function
-            Interpolator function for non-linear Weyl Pk from Boltzmann code
+            Interpolator function for nonlinear Weyl Pk from Boltzmann code
         fsigma8: list
             fsigma8 function evaluated at z
         sigma8: list
@@ -152,9 +151,13 @@ class Cosmology:
         MG_sigma: function
             sigma function from Modified Gravity parametrization
         NL_boost: float
-            Non-linear boost factor
-        NL_flag: int
-            Non-linear flag
+            Nonlinear boost factor
+        NL_flag_phot_matter: int
+            Nonlinear matter flag for 3x2pt photometric probes
+        NL_flag_spectro: int
+            Nonlinear flag for GCspectro
+        bias_model: int
+            bias model
         luminosity_ratio_z_func: function
             Luminosity ratio interpolator for IA model
         nuisance_parameters: dict
@@ -173,6 +176,9 @@ class Cosmology:
                 * Spectroscopic bias values in arXiv:1910.09273
 
                 * IA values in arXiv:1910.09273
+
+            This list is further expanded by the presence of additional
+            parameters for GCspectro, as provided by IST:NL.
 
             This dictionary also stores the choice of likelihood
             to be evaluated, i.e. photometric, spectroscopic, or 3x2pt.
@@ -216,7 +222,7 @@ class Cosmology:
                           'D_z_k': None,
                           # Interpolators
                           'Pk_delta': None,
-                          'Pk_halofit': None,
+                          'Pk_halomodel_recipe': None,
                           'Pk_weyl': None,
                           'Pk_weyl_NL': None,
                           'Pmm_phot': None,
@@ -243,13 +249,21 @@ class Cosmology:
                           'luminosity_ratio_z_func': None,
                           # NL_boost
                           'NL_boost': None,
-                          # NL flag
-                          'NL_flag': 0,
+                          # NL flags
+                          'NL_flag_phot_matter': 0,
+                          'NL_flag_spectro': 0,
+                          # bias model
+                          'bias_model': 1,
                           # Use Modified Gravity gamma
                           'use_gamma_MG': 0,
                           # Redshift dependent purity correction
                           'f_out_z_dep': False,
                           'nuisance_parameters': {
+                             # Intrinsic alignment
+                             'aia': 1.72,
+                             'nia': -0.41,
+                             'bia': 0.0,
+                             # Photometric galaxy bias
                              'b1_photo': 1.0997727037892875,
                              'b2_photo': 1.220245876862528,
                              'b3_photo': 1.2723993083933989,
@@ -260,23 +274,7 @@ class Cosmology:
                              'b8_photo': 1.4964959071110084,
                              'b9_photo': 1.5652475842498528,
                              'b10_photo': 1.7429859437184225,
-                             'b1_spectro': 1.4614804,
-                             'b2_spectro': 1.6060949,
-                             'b3_spectro': 1.7464790,
-                             'b4_spectro': 1.8988660,
-                             'aia': 1.72,
-                             'nia': -0.41,
-                             'bia': 0.0,
-                             'multiplicative_bias_1': 0.0,
-                             'multiplicative_bias_2': 0.0,
-                             'multiplicative_bias_3': 0.0,
-                             'multiplicative_bias_4': 0.0,
-                             'multiplicative_bias_5': 0.0,
-                             'multiplicative_bias_6': 0.0,
-                             'multiplicative_bias_7': 0.0,
-                             'multiplicative_bias_8': 0.0,
-                             'multiplicative_bias_9': 0.0,
-                             'multiplicative_bias_10': 0.0,
+                             # Magnification bias
                              'magnification_bias_1': 0.0,
                              'magnification_bias_2': 0.0,
                              'magnification_bias_3': 0.0,
@@ -287,6 +285,49 @@ class Cosmology:
                              'magnification_bias_8': 0.0,
                              'magnification_bias_9': 0.0,
                              'magnification_bias_10': 0.0,
+                             # Multiplicative bias
+                             'multiplicative_bias_1': 0.0,
+                             'multiplicative_bias_2': 0.0,
+                             'multiplicative_bias_3': 0.0,
+                             'multiplicative_bias_4': 0.0,
+                             'multiplicative_bias_5': 0.0,
+                             'multiplicative_bias_6': 0.0,
+                             'multiplicative_bias_7': 0.0,
+                             'multiplicative_bias_8': 0.0,
+                             'multiplicative_bias_9': 0.0,
+                             'multiplicative_bias_10': 0.0,
+                             # Spectroscopic galaxy bias
+                             'b1_spectro_bin1': 1.4614804,
+                             'b1_spectro_bin2': 1.6060949,
+                             'b1_spectro_bin3': 1.7464790,
+                             'b1_spectro_bin4': 1.8988660,
+                             'b2_spectro_bin1': 0.0,
+                             'b2_spectro_bin2': 0.0,
+                             'b2_spectro_bin3': 0.0,
+                             'b2_spectro_bin4': 0.0,
+                             # Finger of God counterterms
+                             'c0_spectro_bin1': 0.0,
+                             'c0_spectro_bin2': 0.0,
+                             'c0_spectro_bin3': 0.0,
+                             'c0_spectro_bin4': 0.0,
+                             'c2_spectro_bin1': 0.0,
+                             'c2_spectro_bin2': 0.0,
+                             'c2_spectro_bin3': 0.0,
+                             'c2_spectro_bin4': 0.0,
+                             'c4_spectro_bin1': 0.0,
+                             'c4_spectro_bin2': 0.0,
+                             'c4_spectro_bin3': 0.0,
+                             'c4_spectro_bin4': 0.0,
+                             # Shot noise parameters
+                             'aP_spectro_bin1': 0.0,
+                             'aP_spectro_bin2': 0.0,
+                             'aP_spectro_bin3': 0.0,
+                             'aP_spectro_bin4': 0.0,
+                             'Psn_spectro_bin1': 0.0,
+                             'Psn_spectro_bin2': 0.0,
+                             'Psn_spectro_bin3': 0.0,
+                             'Psn_spectro_bin4': 0.0,
+                             # Purity of spectroscopic samples
                              'f_out': 0.0,
                              'f_out_1': 0.0,
                              'f_out_2': 0.0,
@@ -298,15 +339,29 @@ class Cosmology:
         self.nonlinear = Nonlinear(self.cosmo_dic)
 
     @property
-    def pk_source(self):
-        r"""Identifier for linear vs non-linear class
+    def pk_source_phot(self):
+        r"""Identifier for linear vs nonlinear class
 
         Selects either the same Cosmology class from which it is called
         or the attribute corresponding to the instance of a Nonlinear class,
-        based on the value of the nonlinear flag
-
+        based on the value of the nonlinear flag for the photometric probes.
         """
-        if self.cosmo_dic['NL_flag'] == 0:
+        # This method should be modified when other photometric flags will
+        # be included (e.g. baryonic flag)
+        if self.cosmo_dic['NL_flag_phot_matter'] == 0:
+            return self
+        else:
+            return self.nonlinear
+
+    @property
+    def pk_source_spectro(self):
+        r"""Identifier for linear vs nonlinear class
+
+        Selects either the same Cosmology class from which it is called
+        or the attribute corresponding to the instance of a Nonlinear class,
+        based on the value of the nonlinear flag for the spectroscopic probes.
+        """
+        if self.cosmo_dic['NL_flag_spectro'] == 0:
             return self
         else:
             return self.nonlinear
@@ -670,7 +725,7 @@ class Cosmology:
 
         Adds an interpolator for the matter fluctuation
         parameter :math:`\sigma_8` to the dictionary so that it
-        can be evaluated at redshifts not explictly supplied to Cobaya
+        can be evaluated at redshifts not explicitly supplied to Cobaya
 
         Updates 'key' in the cosmo_dic attribute of the class
         by adding an interpolator object
@@ -685,7 +740,7 @@ class Cosmology:
 
         Adds an interpolator for :math:`f\sigma_8` to the dictionary
         so that it can be evaluated at redshifts
-        not explictly supplied to Cobaya
+        not explicitly supplied to Cobaya
 
         Updates 'key' in the cosmo_dic attribute of the class
         by adding an interpolator object
@@ -721,7 +776,9 @@ class Cosmology:
                           for idx, vl in enumerate(redshift_means, start=1)]
 
         b_inter = interpolate.interp1d(redshift_means, istf_bias_list,
-                                       fill_value="extrapolate")
+                                       fill_value=(istf_bias_list[0],
+                                                   istf_bias_list[-1]),
+                                       bounds_error=False)
         self.cosmo_dic['b_inter'] = b_inter
 
     def istf_phot_galbias(self, redshift, bin_edges=None):
@@ -730,9 +787,10 @@ class Cosmology:
         Gets galaxy bias(es) for the photometric GC probes by
         interpolation at a given redshift z
 
-        Note: for redshifts above the final bin (z > 2.5), we use the bias
-        from the final bin. Similarly, for redshifts below the first bin
-        (z < 0.001), we use the bias of the first bin.
+        Note: for redshifts above the final bin center, we use the bias
+        from the edge of the intepolation. Similarly, for redshifts below
+        the first bin center, we use the first bias value from the
+        interpolation.
 
         Parameters
         ----------
@@ -755,7 +813,39 @@ class Cosmology:
         z_in_range = rb.coerce(redshift, bin_edges)
         return self.cosmo_dic['b_inter'](z_in_range)
 
-    def istf_spectro_galbias(self, redshift, bin_edges=None):
+    def compute_phot_galbias(self, redshift):
+        r"""Compute Phot Galbias
+
+        Computes galaxy bias(es) for the photometric GC probes
+        at a given redshift z
+
+        The bias model is selected from the key 'bias_model'
+        in cosmo_dic.
+        The implemented models are:
+        1 - Linear interpolation
+        2 - Bias = 1
+
+        Parameters
+        ----------
+        redshift: numpy.ndarray of float
+            Redshift(s) at which to calculate bias.
+
+        Returns
+        -------
+        bi_val: numpy.ndarray of float
+            Value(s) of photometric galaxy bias at input redshift(s)
+        """
+        bias_model = self.cosmo_dic['bias_model']
+
+        if bias_model == 1:
+            return self.istf_phot_galbias(redshift)
+        elif bias_model == 2:
+            return 1.0
+        else:
+            raise ValueError('Parameter bias_model out of range:'
+                             f'{bias_model}')
+
+    def istf_spectro_galbias(self, redshift):
         """Istf Spectro Galbias
 
         Gets galaxy bias for the spectroscopic galaxy clustering
@@ -768,8 +858,7 @@ class Cosmology:
         ----------
         redshift: float or numpy.ndarray
             Redshift(s) at which to calculate bias.
-        bin_edges: numpy.ndarray
-            Array of redshift bin edges for spectroscopic GC probe.
+
             Default is Euclid IST: Forecasting choices.
 
         Returns
@@ -783,15 +872,13 @@ class Cosmology:
             If redshift is outside of the bounds defined by the first
             and last element of bin_edges
         """
-
-        if bin_edges is None:
-            bin_edges = np.array([0.90, 1.10, 1.30, 1.50, 1.80])
+        bin_edges = self.cosmo_dic['redshift_bins']
 
         nuisance_src = self.cosmo_dic['nuisance_parameters']
 
         try:
             z_bin = rb.find_bin(redshift, bin_edges, False)
-            bi_val = np.array([nuisance_src[f'b{i}_spectro']
+            bi_val = np.array([nuisance_src[f'b1_spectro_bin{i}']
                                for i in np.nditer(z_bin)])
             return bi_val[0] if np.isscalar(redshift) else bi_val
         except (ValueError, KeyError):
@@ -843,7 +930,7 @@ class Cosmology:
             at a given redshift and k-mode for galaxy
             clustering photometric
         """
-        pval = ((self.istf_phot_galbias(redshift) ** 2.0) *
+        pval = ((self.compute_phot_galbias(redshift) ** 2) *
                 self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
         return pval
 
@@ -904,7 +991,7 @@ class Cosmology:
             at a given redshift and k-mode for galaxy clustering
             photometric
         """
-        pval = (self.istf_phot_galbias(redshift) *
+        pval = (self.compute_phot_galbias(redshift) *
                 self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
         return pval
 
@@ -1067,7 +1154,7 @@ class Cosmology:
             Value of photometric galaxy-intrinsic power spectrum
             at a given redshift and k-mode
         """
-        pval = self.fia(redshift) * self.istf_phot_galbias(redshift) * \
+        pval = self.fia(redshift) * self.compute_phot_galbias(redshift) * \
             self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
         return pval
 
@@ -1103,13 +1190,13 @@ class Cosmology:
         Creates interpolators (functions of redshift and scale) for the
         photometric galaxy power spectra (galaxy-galaxy and galaxy-matter)
         and the IA-related power spectra, based on the recipe defined by
-        the value of the non-linear flag, and assigns them to the corresponding
+        the value of the nonlinear flag, and assigns them to the corresponding
         keys of the cosmo dictionary.
 
         Assigns the direct function (functions of redshift, scale and angle
         with the line of sight) for the spectroscopic galaxy power spectra
         (galaxy-galaxy and galaxy-matter) based on the recipe defined by the
-        value of the non-linear flag, to the corresponding keys of the cosmo
+        value of the nonlinear flag, to the corresponding keys of the cosmo
         dictionary.
 
         Note: the interpolators for v1.0 span the range :math:`k=[0.001,100.0]`
@@ -1121,24 +1208,25 @@ class Cosmology:
         spe_bin_edges = np.array([0.90, 1.10, 1.30, 1.50, 1.80])
         z_win_spectro = rb.reduce(z_win, spe_bin_edges[0], spe_bin_edges[-1])
 
-        pksrc = self.pk_source
-        pmm_phot = np.array([pksrc.Pmm_phot_def(zz, k_win)
+        pksrc_phot = self.pk_source_phot
+        pksrc_spectro = self.pk_source_spectro
+        pmm_phot = np.array([pksrc_phot.Pmm_phot_def(zz, k_win)
                              for zz in z_win])
-        pgg_phot = np.array([pksrc.Pgg_phot_def(zz, k_win)
+        pgg_phot = np.array([pksrc_phot.Pgg_phot_def(zz, k_win)
                              for zz in z_win])
-        pgdelta_phot = np.array([pksrc.Pgdelta_phot_def(zz, k_win)
+        pgdelta_phot = np.array([pksrc_phot.Pgdelta_phot_def(zz, k_win)
                                  for zz in z_win])
-        pii = np.array([pksrc.Pii_def(zz, k_win)
+        pii = np.array([pksrc_phot.Pii_def(zz, k_win)
                         for zz in z_win])
-        pdeltai = np.array([pksrc.Pdeltai_def(zz, k_win)
+        pdeltai = np.array([pksrc_phot.Pdeltai_def(zz, k_win)
                             for zz in z_win])
-        pgi_phot = np.array([pksrc.Pgi_phot_def(zz, k_win)
+        pgi_phot = np.array([pksrc_phot.Pgi_phot_def(zz, k_win)
                              for zz in z_win])
-        pgi_spectro = np.array([pksrc.Pgi_spectro_def(zz, k_win)
+        pgi_spectro = np.array([pksrc_phot.Pgi_spectro_def(zz, k_win)
                                 for zz in z_win_spectro])
 
-        self.cosmo_dic['Pgg_spectro'] = pksrc.Pgg_spectro_def
-        self.cosmo_dic['Pgdelta_spectro'] = pksrc.Pgdelta_spectro_def
+        self.cosmo_dic['Pgg_spectro'] = pksrc_spectro.Pgg_spectro_def
+        self.cosmo_dic['Pgdelta_spectro'] = pksrc_spectro.Pgdelta_spectro_def
 
         self.cosmo_dic['Pmm_phot'] = \
             interpolate.RectBivariateSpline(z_win,
@@ -1286,5 +1374,6 @@ class Cosmology:
         # of the nonlinear instance
         self.nonlinear.update_dic(self.cosmo_dic)
         # Update dictionary with bias interpolator and power spectra
-        self.istf_phot_galbias_interpolator()
+        if self.cosmo_dic['bias_model'] == 1:
+            self.istf_phot_galbias_interpolator()
         self.obtain_power_spectra()

@@ -69,10 +69,10 @@ class specinitTestCase(TestCase, SpectroTestParent):
 
         nuisance_dic = self.test_dict['nuisance_parameters']
         istf_bias_list = [
-            nuisance_dic['b1_spectro'],
-            nuisance_dic['b2_spectro'],
-            nuisance_dic['b3_spectro'],
-            nuisance_dic['b4_spectro']
+            nuisance_dic['b1_spectro_bin1'],
+            nuisance_dic['b1_spectro_bin2'],
+            nuisance_dic['b1_spectro_bin3'],
+            nuisance_dic['b1_spectro_bin4']
         ]
 
         if bin_edge_list[0] <= redshift < bin_edge_list[-1]:

@@ -9,6 +9,7 @@ from cloe.cobaya_interface import EuclidLikelihood
 import numpy as np
 from cloe.tests.test_input.data import mock_data
 from scipy import interpolate
+from cloe.auxiliary.likelihood_yaml_handler import set_halofit_version
 
 
 class CobayaModel:
@@ -36,6 +37,9 @@ class CobayaModel:
             interpolate.InterpolatedUnivariateSpline(
                 self.z_win,
                 np.linspace(0.001, 1.7, 100))
+        self.cosmology.nonlinear.theory['redshift_bins'] = \
+            self.cosmology.cosmo_dic['redshift_bins']
+        self.cosmology.nonlinear.set_Pgg_spectro_model()
 
     def define_info(self, cosmo_inst):
         """Define Information"""
@@ -61,10 +65,17 @@ class CobayaModel:
                         'extra_args': {'num_massive_neutrinos': 1,
                                        'dark_energy_model': 'ppf'}}},
             # Likelihood: we load the likelihood as an external function
-            'likelihood': {'euclid': EuclidLikelihood}}
+            'likelihood': {'euclid': {
+                'external': EuclidLikelihood,
+                'NL_flag_phot_matter':
+                    cosmo_inst.cosmo_dic['NL_flag_phot_matter'],
+                'NL_flag_spectro': cosmo_inst.cosmo_dic['NL_flag_spectro']}}}
         self.info['params'].update(
             cosmo_inst.cosmo_dic['nuisance_parameters'])
         self.info['data'] = mock_data
+
+        set_halofit_version(self.info,
+                            cosmo_inst.cosmo_dic['NL_flag_phot_matter'])
 
     def get_cobaya_model(self):
         """Get Cobaya Model"""
@@ -111,6 +122,10 @@ class CobayaModel:
         self.cosmology.cosmo_dic['Pk_weyl'] = \
             self.model.provider.get_Pk_interpolator(
             ("Weyl", "Weyl"), nonlinear=False)
+        if self.cosmology.cosmo_dic['NL_flag_phot_matter'] > 0:
+            self.cosmology.cosmo_dic['Pk_halomodel_recipe'] = \
+                self.model.provider.get_Pk_interpolator(
+                ('delta_tot', 'delta_tot'), nonlinear=True)
         self.cosmology.cosmo_dic['fsigma8'] = \
             self.model.provider.get_fsigma8(self.z_win)
         self.cosmology.cosmo_dic['sigma8'] = \

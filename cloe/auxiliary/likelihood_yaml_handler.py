@@ -180,12 +180,35 @@ def write_params_yaml_from_model_dict(model_dict):
     yaml_handler.yaml_write(params_filepath, param_dict, overwrite)
 
 
+def write_params_yaml_from_info_dict(info_dict):
+    """Writes the params yaml file from the info dictionary.
+
+    The cosmological parameters are *excluded* in params.yaml.
+
+    When invoking Cobaya with CLOE, CLOE can
+    understand non-cosmology parameters
+    only if they are defined in this params.yaml file.
+
+    Parameters
+    ----------
+    info_dict: dict
+        The user model dictionary.
+    """
+    if 'params' not in info_dict.keys():
+        raise KeyError('No params subdictionary found in info dictionary.')
+
+    params_filepath = get_default_params_yaml_path()
+    params_dict = info_dict['params']
+    params_no_cosmo = get_params_dict_without_cosmo_params(params_dict)
+    yaml_handler.yaml_write(params_filepath, params_no_cosmo, True)
+
+
 def update_cobaya_dict_with_halofit_version(cobaya_dict):
     """Updates the main cobaya dictionary with the halofit version to use
 
     The choice of the halofit_version key can be done only outside of the
     EuclidLikelihood class. This function reads the value
-    of the non-linear flag, and updates the cobaya dictionary
+    of the nonlinear flag, and updates the cobaya dictionary
     accordingly.
 
     Parameters
@@ -194,7 +217,7 @@ def update_cobaya_dict_with_halofit_version(cobaya_dict):
         The Cobaya dictionary
     """
 
-    NL_flag = cobaya_dict['likelihood']['Euclid']['NL_flag']
+    NL_flag = cobaya_dict['likelihood']['Euclid']['NL_flag_phot_matter']
     set_halofit_version(cobaya_dict, NL_flag)
 
 
@@ -214,7 +237,7 @@ def set_halofit_version(cobaya_dict: dict, NL_flag: int):
     cobaya_dict: dict
         The Cobaya dictionary
     NL_flag: int
-        The non-linear flag
+        The nonlinear flag
     """
 
     def switch_halofit_version(flag: int) -> str:
@@ -260,9 +283,14 @@ def get_params_dict_without_cosmo_params(params_dict):
 
     new_params_dict = deepcopy(params_dict)
 
-    cosmo_params = ['As', 'logA', 'H0', 'N_eff', 'mnu', 'mnu', 'ns', 'sigma8',
-                    'ombh2', 'omch2', 'omnuh2', 'omk',
-                    'omegab', 'omegac', 'omeganu', 'omegam', 'tau', 'w', 'wa']
+    cosmo_params = ['H0', 'tau', 'tau_reio', 'omk', 'Omega_k',
+                    'ombh2', 'omega_b', 'omch2', 'omega_cdm',
+                    'omnuh2', 'omega_ncdm', 'mnu', 'm_ncdm',
+                    'nnu', 'N_eff',
+                    'num_nu_massless', 'num_nu_massive', 'N_ur', 'N_ncdm',
+                    'As', 'logA', 'A_s', 'ns', 'n_s',
+                    'w', 'wa', 'w0_fld', 'wa_fld',
+                    'sigma8', 'omegab', 'omegac', 'omeganu', 'omegam']
 
     for cosmo_param in cosmo_params:
         new_params_dict.pop(cosmo_param, None)
@@ -293,7 +321,8 @@ def generate_params_yaml(models=None):
     models: list of strings
         Strings corresponding to a model.
         Possible strings: 'nuisance_bias', 'nuisance_ia', 'nuisance_nz',
-        'nuisance_magnification_bias', 'nuisance_shear_calibration'
+        'nuisance_magnification_bias', 'nuisance_shear_calibration',
+        'nonlinearities'
 
     Notes
     -----
@@ -304,7 +333,8 @@ def generate_params_yaml(models=None):
 
     if models is None:
         models = ['nuisance_bias', 'nuisance_ia', 'nuisance_nz',
-                  'nuisance_magnification_bias', 'nuisance_shear_calibration']
+                  'nuisance_magnification_bias', 'nuisance_shear_calibration',
+                  'nonlinearities']
     likelihood_params = {}
 
     for model in models:

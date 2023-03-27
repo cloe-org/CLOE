@@ -5,6 +5,8 @@ photo:
   cov_GC: CovMat-PosPos-{:s}-20Bins.npy
   cov_WL: CovMat-ShearShear-{:s}-20Bins.npy
   cov_model: Gauss
+  cov_is_num: False
+  cov_nsim: 10000
   ndens_GC: niTab-EP10-RB00.dat
   ndens_WL: niTab-EP10-RB00.dat
   root_GC: Cls_{:s}_PosPos.dat
@@ -24,3 +26,5 @@ spectro:
   - 1.5
   - 1.8
   root: cov_power_galaxies_dk0p004_z{:s}.fits
+  cov_is_num: False
+  cov_nsim: 3500

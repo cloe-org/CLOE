@@ -1,5 +1,7 @@
 import sys
 import os
+from cloe.auxiliary.likelihood_yaml_handler \
+	import write_params_yaml_from_info_dict
 
 script_path = os.path.realpath(os.getcwd())
 if script_path.endswith('mcmc_scripts'):
@@ -20,7 +22,15 @@ info = {
                 'aliases': ['euclid'],
                 'external': EuclidLikelihood,
                 'speed': 500,
-                'NL_flag': 0,
+                'k_max_extrap': 500.0,
+                'k_min_extrap': 1e-05,
+                'k_samp': 1000,
+                'z_min': 0.0,
+                'z_max': 4.0,
+                'z_samp': 100,
+                'solver': 'camb',
+                'NL_flag_phot_matter': 0,
+                'NL_flag_spectro': 0,
                 'add_phot_RSD': False,
                 'use_gamma_MG': False,
                 'f_out_z_dep': False,
@@ -29,11 +39,14 @@ info = {
                 {
                     'photo':
                     {
+                        'luminosity_ratio': 'luminosity_ratio.dat',
                         'IA_model': 'zNLA',
                         'cov_3x2pt': 'CovMat-3x2pt-{:s}-20Bins.npy',
                         'cov_GC': 'CovMat-PosPos-{:s}-20Bins.npy',
                         'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.npy',
                         'cov_model': 'Gauss',
+                        'cov_is_num': False,
+                        'cov_nsim': 10000,
                         'ndens_GC': 'niTab-EP10-RB00.dat',
                         'ndens_WL': 'niTab-EP10-RB00.dat',
                         'root_GC': 'Cls_{:s}_PosPos.dat',
@@ -46,6 +59,8 @@ info = {
                         'redshifts': ['1.', '1.2', '1.4', '1.65'],
                         'edges': [0.9, 1.1, 1.3, 1.5, 1.8],
                         'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
+                        'cov_is_num': False,
+                        'cov_nsim': 3500,
                     },
                 },
                 'observables_selection':
@@ -1206,13 +1221,14 @@ info = {
                     'scale': 0.001,
                 },
             },
-            'omegab':
-            {
-                'latex': '\Omega_\mathrm{b}',
-            },
             'omegam':
             {
                 'latex': '\Omega_\mathrm{m}',
+            },
+            'omegab':
+            {
+                'latex': '\Omega_\mathrm{b}',
+                'derived': 'lambda ombh2, H0: ombh2 * (100.0/H0)**2',
             },
             'omk': 0.0,
             'sigma8':
@@ -1253,20 +1269,20 @@ info = {
                 },
             },
             'gamma_MG': 0.55,
-            'b10_photo': 1.7429859437184225,
             'b1_photo': 1.0997727037892875,
-            'b1_spectro': 1.46,
             'b2_photo': 1.220245876862528,
-            'b2_spectro': 1.61,
             'b3_photo': 1.2723993083933989,
-            'b3_spectro': 1.75,
             'b4_photo': 1.316624471897739,
-            'b4_spectro': 1.9,
             'b5_photo': 1.35812370570578,
             'b6_photo': 1.3998214171814918,
             'b7_photo': 1.4446452851824907,
             'b8_photo': 1.4964959071110084,
             'b9_photo': 1.5652475842498528,
+            'b10_photo': 1.7429859437184225,
+            'b1_spectro_bin1': 1.46,
+            'b1_spectro_bin2': 1.61,
+            'b1_spectro_bin3': 1.75,
+            'b1_spectro_bin4': 1.9,
             'aia': 1.72,
             'nia': -0.41,
             'bia': 0.0,
@@ -1315,6 +1331,30 @@ info = {
             'f_out_2': 0.0,
             'f_out_3': 0.0,
             'f_out_4': 0.0,
+            'b2_spectro_bin1': 0.0,
+            'b2_spectro_bin2': 0.0,
+            'b2_spectro_bin3': 0.0,
+            'b2_spectro_bin4': 0.0,
+            'c0_spectro_bin1': 0.0,
+            'c0_spectro_bin2': 0.0,
+            'c0_spectro_bin3': 0.0,
+            'c0_spectro_bin4': 0.0,
+            'c2_spectro_bin1': 0.0,
+            'c2_spectro_bin2': 0.0,
+            'c2_spectro_bin3': 0.0,
+            'c2_spectro_bin4': 0.0,
+            'c4_spectro_bin1': 0.0,
+            'c4_spectro_bin2': 0.0,
+            'c4_spectro_bin3': 0.0,
+            'c4_spectro_bin4': 0.0,
+            'aP_spectro_bin1': 0.0,
+            'aP_spectro_bin2': 0.0,
+            'aP_spectro_bin3': 0.0,
+            'aP_spectro_bin4': 0.0,
+            'Psn_spectro_bin1': 0.0,
+            'Psn_spectro_bin2': 0.0,
+            'Psn_spectro_bin3': 0.0,
+            'Psn_spectro_bin4': 0.0,
         },
         'sampler':
         {
@@ -1329,13 +1369,15 @@ info = {
             {
                 'extra_args':
                 {
+                    'num_nu_massive': 1,
                     'dark_energy_model': 'ppf',
-                    'num_massive_neutrinos': 1,
                 },
                 'stop_at_error': True,
             },
         },
         'timing': True,
 }
+
+write_params_yaml_from_info_dict(info)
 
 updated_info, sampler = run(info)

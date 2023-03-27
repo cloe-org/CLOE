@@ -65,7 +65,7 @@ class EuclidLikelihood(Likelihood):
             self.observables_pf = observables_visualization(
              self.observables['selection'])
         # Select which power spectra to require from the Boltzmann solver
-        if self.NL_flag > 0:
+        if self.NL_flag_phot_matter > 0:
             self.use_NL = [False, True]
         else:
             self.use_NL = False
@@ -87,6 +87,12 @@ class EuclidLikelihood(Likelihood):
 
         # Initialize Cosmology class for sampling
         self.cosmo = Cosmology()
+        # Adding GCspectro redshift bins to cosmo dictionary and setting up
+        # the internal class for Pgg_spectro with this information.
+        self.cosmo.nonlinear.theory['redshift_bins'] = \
+            self.data['spectro']['edges']
+        self.cosmo.nonlinear.set_Pgg_spectro_model()
+        self.cosmo.cosmo_dic['redshift_bins'] = self.data['spectro']['edges']
 
         # Initialize the fiducial model
         self.set_fiducial_cosmology()
@@ -99,9 +105,9 @@ class EuclidLikelihood(Likelihood):
         self.cosmo.cosmo_dic['fid_H_z_func'] = \
             self.fiducial_cosmology.cosmo_dic['H_z_func']
 
-        self.cosmo.cosmo_dic['redshift_bins'] = self.data['spectro']['edges']
         self.cosmo.cosmo_dic['luminosity_ratio_z_func'] = \
             self.likefinal.data_ins.luminosity_ratio_interpolator
+        self.cosmo.cosmo_dic['obs_selection'] = self.observables['selection']
 
     def set_fiducial_cosmology(self):
         r"""Sets the fiducial cosmology class
@@ -228,12 +234,18 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology.cosmo_dic['sigma8'] = \
             model_fiducial.provider.get_sigma8_z(
             self.z_win)
+        # In order to make the update_cosmo_dic method to work, we need to
+        # specify also in this case the information on the GCspectro bins
+        self.fiducial_cosmology.cosmo_dic['redshift_bins'] = \
+            self.data['spectro']['edges']
+        self.fiducial_cosmology.nonlinear.theory['redshift_bins'] = \
+            self.data['spectro']['edges']
+        self.fiducial_cosmology.nonlinear.set_Pgg_spectro_model()
         # Update dictionary with interpolators
         self.fiducial_cosmology.cosmo_dic['luminosity_ratio_z_func'] = \
             self.likefinal.data_ins.luminosity_ratio_interpolator
         self.fiducial_cosmology.update_cosmo_dic(
-            self.fiducial_cosmology.cosmo_dic['z_win'],
-            0.05)
+            self.fiducial_cosmology.cosmo_dic['z_win'], 0.05)
 
     def get_requirements(self):
         r"""Get Requirements
@@ -262,8 +274,7 @@ class EuclidLikelihood(Likelihood):
                 'sigma8_z': {'z': self.z_win},
                 'fsigma8': {'z': self.z_win, 'units': None}}
         if self.solver == 'camb':
-            derived = {'omegab': None, 'omegac': None,
-                       'omnuh2': None, 'omeganu': None,
+            derived = {'omegac': None, 'omnuh2': None, 'omeganu': None,
                        'nnu': None}
             requirements = requirements | derived
 
@@ -282,9 +293,11 @@ class EuclidLikelihood(Likelihood):
         """
 
         try:
-            self.cosmo.cosmo_dic['NL_flag'] = self.NL_flag
+            self.cosmo.cosmo_dic['NL_flag_phot_matter'] = \
+                self.NL_flag_phot_matter
+            self.cosmo.cosmo_dic['NL_flag_spectro'] = self.NL_flag_spectro
+            self.cosmo.cosmo_dic['bias_model'] = self.bias_model
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
-            self.cosmo.cosmo_dic['add_phot_RSD'] = self.add_phot_RSD
             self.cosmo.cosmo_dic['matrix_transform_phot'] = \
                 self.matrix_transform_phot
             self.cosmo.cosmo_dic['H0'] = self.provider.get_param('H0')
@@ -305,7 +318,7 @@ class EuclidLikelihood(Likelihood):
             try:
                 self.cosmo.cosmo_dic['mnu'] = \
                     self.provider.get_param(self.pnames['mnu'])
-            except (KeyError):
+            except KeyError:
                 self.cosmo.cosmo_dic['omnuh2'] = \
                     self.provider.get_param(self.pnames['omnuh2'])
             self.cosmo.cosmo_dic['w'] = \
@@ -313,16 +326,16 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['wa'] = \
                 self.provider.get_param(self.pnames['wa'])
             self.cosmo.cosmo_dic['Omm'] = self.provider.get_param('omegam')
+            if self.use_gamma_MG:
+                self.cosmo.cosmo_dic['gamma_MG'] = \
+                    self.provider.get_param('gamma_MG')
             if self.solver == 'camb':
                 self.cosmo.cosmo_dic['Omc'] = self.provider.get_param('omegac')
-                self.cosmo.cosmo_dic['Omb'] = self.provider.get_param('omegab')
                 self.cosmo.cosmo_dic['omnuh2'] = \
                     self.provider.get_param('omnuh2')
                 self.cosmo.cosmo_dic['Omnu'] = \
                     self.provider.get_param('omeganu')
                 self.cosmo.cosmo_dic['nnu'] = self.provider.get_param('nnu')
-            self.cosmo.cosmo_dic['gamma_MG'] = \
-                self.provider.get_param('gamma_MG')
             self.cosmo.cosmo_dic['comov_dist'] = \
                 self.provider.get_comoving_radial_distance(self.z_win)
             self.cosmo.cosmo_dic['angular_dist'] = \
@@ -339,14 +352,16 @@ class EuclidLikelihood(Likelihood):
                 self.provider.get_Pk_interpolator(
                 ('Weyl', 'Weyl'), nonlinear=False,
                 extrap_kmax=self.k_max_extrap)
-            if self.NL_flag > 0:
-                self.cosmo.cosmo_dic['Pk_halofit'] = \
+            if self.NL_flag_phot_matter > 0:
+                self.cosmo.cosmo_dic['Pk_halomodel_recipe'] = \
                     self.provider.get_Pk_interpolator(
                     ('delta_tot', 'delta_tot'), nonlinear=True,
+                    extrap_kmin=self.k_min_extrap,
                     extrap_kmax=self.k_max_extrap)
                 self.cosmo.cosmo_dic['Pk_weyl_NL'] = \
                     self.provider.get_Pk_interpolator(
                     ('Weyl', 'Weyl'), nonlinear=True,
+                    extrap_kmin=self.k_min_extrap,
                     extrap_kmax=self.k_max_extrap)
             self.cosmo.cosmo_dic['z_win'] = self.z_win
             self.cosmo.cosmo_dic['k_win'] = self.k_win
@@ -362,8 +377,11 @@ class EuclidLikelihood(Likelihood):
                 **only_nuisance_params)
 
         except (TypeError, AttributeError):
-            self.cosmo.cosmo_dic['NL_flag'] = \
-                info['likelihood']['Euclid']['NL_flag']
+            self.cosmo.cosmo_dic['NL_flag_phot_matter'] = \
+                info['likelihood']['Euclid']['NL_flag_phot_matter']
+            self.cosmo.cosmo_dic['NL_flag_spectro'] = \
+                info['likelihood']['Euclid']['NL_flag_spectro']
+            self.cosmo.cosmo_dic['bias_model'] = self.bias_model
             self.cosmo.cosmo_dic['add_phot_RSD'] = \
                 info['likelihood']['Euclid']['add_phot_RSD']
             self.cosmo.cosmo_dic['matrix_transform_phot'] = \
@@ -387,7 +405,7 @@ class EuclidLikelihood(Likelihood):
             try:
                 self.cosmo.cosmo_dic['mnu'] = \
                     model.provider.get_param(self.pnames['mnu'])
-            except (KeyError):
+            except KeyError:
                 self.cosmo.cosmo_dic['omnuh2'] = \
                     model.provider.get_param(self.pnames['omnuh2'])
             self.cosmo.cosmo_dic['mnu'] = \
@@ -400,16 +418,15 @@ class EuclidLikelihood(Likelihood):
             if self.solver == 'camb':
                 self.cosmo.cosmo_dic['Omc'] = \
                     model.provider.get_param('omegac')
-                self.cosmo.cosmo_dic['Omb'] = \
-                    model.provider.get_param('omegab')
                 self.cosmo.cosmo_dic['omnuh2'] = \
                     model.provider.get_param('omnuh2')
                 self.cosmo.cosmo_dic['Omnu'] = \
                     model.provider.get_param('omeganu')
                 self.cosmo.cosmo_dic['nnu'] = model.provider.get_param('nnu')
             self.cosmo.cosmo_dic['Omm'] = model.provider.get_param('omegam')
-            self.cosmo.cosmo_dic['gamma_MG'] = \
-                model.provider.get_param('gamma_MG')
+            if self.use_gamma_MG:
+                self.cosmo.cosmo_dic['gamma_MG'] = \
+                    model.provider.get_param('gamma_MG')
             self.cosmo.cosmo_dic['comov_dist'] = \
                 model.provider.get_comoving_radial_distance(self.z_win)
             self.cosmo.cosmo_dic['angular_dist'] = \
@@ -425,15 +442,18 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Pk_weyl'] = \
                 model.provider.get_Pk_interpolator(
                 ('Weyl', 'Weyl'), nonlinear=False,
+                extrap_kmin=self.k_min_extrap,
                 extrap_kmax=self.k_max_extrap)
-            if info['likelihood']['Euclid']['NL_flag'] > 0:
-                self.cosmo.cosmo_dic['Pk_halofit'] = \
+            if info['likelihood']['Euclid']['NL_flag_phot_matter'] > 0:
+                self.cosmo.cosmo_dic['Pk_halomodel_recipe'] = \
                     model.provider.get_Pk_interpolator(
                     ('delta_tot', 'delta_tot'), nonlinear=True,
+                    extrap_kmin=self.k_min_extrap,
                     extrap_kmax=self.k_max_extrap)
                 self.cosmo.cosmo_dic['Pk_weyl_NL'] = \
                     model.provider.get_Pk_interpolator(
                     ('Weyl', 'Weyl'), nonlinear=True,
+                    extrap_kmin=self.k_min_extrap,
                     extrap_kmax=self.k_max_extrap)
             self.cosmo.cosmo_dic['z_win'] = self.z_win
             self.cosmo.cosmo_dic['k_win'] = self.k_win
@@ -446,9 +466,9 @@ class EuclidLikelihood(Likelihood):
                                     for your_key in new_keys}
             self.cosmo.cosmo_dic['nuisance_parameters'].update(
                 **only_nuisance_params)
-            if 'observables_specifications' in info['likelihood']['Euclid']:
-                self.observables_specifications = \
-                    info['likelihood']['Euclid']['observables_specifications']
+            if 'observables_selection' in info['likelihood']['Euclid']:
+                self.observables_selection = \
+                    info['likelihood']['Euclid']['observables_selection']
             self.observables = \
                 observables_selection_specifications_checker(
                     info['likelihood']['Euclid']['observables_selection'],
@@ -476,5 +496,13 @@ class EuclidLikelihood(Likelihood):
         self.passing_requirements(model, info, **params_values)
         # Update cosmo_dic to interpolators
         self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.05)
-        loglike = self.likefinal.loglike(self.cosmo.cosmo_dic)
+        # Compute number of sampled parameters
+        npar = 0
+        for key in self.provider.model.sampled_dependence.keys():
+            if any(isinstance(
+                    self.provider.model.sampled_dependence[key][i],
+                    EuclidLikelihood) for i in
+                    range(len(self.provider.model.sampled_dependence[key]))):
+                npar += 1
+        loglike = self.likefinal.loglike(self.cosmo.cosmo_dic, npar)
         return loglike

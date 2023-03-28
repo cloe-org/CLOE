@@ -997,8 +997,8 @@ class Photo:
         c_final = c_final * (1 + self.multbias[bin_i - 1])
 
         if self.multiply_bias_cl is True:
-            bi = self.photobias[bin_i - 1]
-            c_final *= bi
+            bj = self.photobias[bin_j - 1]
+            c_final *= bj
 
         return c_final
 

@@ -177,6 +177,7 @@ class EuclidLikelihood(Likelihood):
                 'k_max': self.k_max_Boltzmann,
                 'nonlinear': False,
                 'vars_pairs': ([['delta_tot', 'delta_tot'],
+                                ['delta_nonu', 'delta_nonu'],
                                 ['Weyl', 'Weyl']])
             },
             'comoving_radial_distance': {
@@ -225,6 +226,11 @@ class EuclidLikelihood(Likelihood):
             ('delta_tot', 'delta_tot'), nonlinear=False,
             extrap_kmin=self.k_min_extrap,
             extrap_kmax=self.k_max_extrap)
+        self.fiducial_cosmology.cosmo_dic['Pk_cb'] = \
+            model_fiducial.provider.get_Pk_interpolator(
+            ('delta_nonu', 'delta_nonu'), nonlinear=False,
+            extrap_kmin=self.k_min_extrap,
+            extrap_kmax=self.k_max_extrap)
         self.fiducial_cosmology.cosmo_dic['Pk_weyl'] = \
             model_fiducial.provider.get_Pk_interpolator(
             ('Weyl', 'Weyl'), nonlinear=False,
@@ -268,6 +274,7 @@ class EuclidLikelihood(Likelihood):
                  'k_max': self.k_max_Boltzmann,
                  'nonlinear': self.use_NL,
                  'vars_pairs': ([['delta_tot', 'delta_tot'],
+                                 ['delta_nonu', 'delta_nonu'],
                                  ['Weyl', 'Weyl']])},
                 'comoving_radial_distance': {'z': self.z_win},
                 'angular_diameter_distance': {'z': self.z_win},
@@ -345,6 +352,11 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 self.provider.get_Pk_interpolator(
                 ('delta_tot', 'delta_tot'), nonlinear=False,
+                extrap_kmin=self.k_min_extrap,
+                extrap_kmax=self.k_max_extrap)
+            self.cosmo.cosmo_dic['Pk_cb'] = \
+                self.provider.get_Pk_interpolator(
+                ('delta_nonu', 'delta_nonu'), nonlinear=False,
                 extrap_kmin=self.k_min_extrap,
                 extrap_kmax=self.k_max_extrap)
             self.cosmo.cosmo_dic['Pk_weyl'] = \
@@ -432,6 +444,11 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Pk_delta'] = \
                 model.provider.get_Pk_interpolator(
                 ('delta_tot', 'delta_tot'), nonlinear=False,
+                extrap_kmin=self.k_min_extrap,
+                extrap_kmax=self.k_max_extrap)
+            self.cosmo.cosmo_dic['Pk_cb'] = \
+                model.provider.get_Pk_interpolator(
+                ('delta_nonu', 'delta_nonu'), nonlinear=False,
                 extrap_kmin=self.k_min_extrap,
                 extrap_kmax=self.k_max_extrap)
             self.cosmo.cosmo_dic['Pk_weyl'] = \

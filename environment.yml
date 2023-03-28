@@ -23,6 +23,7 @@ dependencies:
   - pip:
     # Domain-specific 3rd-party Python package (from PyPI)
     - cobaya
+    - classy
     - baccoemu
     - euclidemu2
     # Unit testing and documentation dependencies

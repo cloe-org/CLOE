@@ -50,7 +50,7 @@ class Euclike:
         self.data_ins.compute_luminosity_ratio()
         self.data_spectro_fiducial_cosmo = \
             self.data_ins.data_spectro_fiducial_cosmo
-
+        self.fiducial_cosmo_quantities_dic = {}
         # Read data, instantiate Photo and Spectro classes
         # and compute pre-computed quantities
         if self.do_photo:
@@ -84,6 +84,9 @@ class Euclike:
 
             # Flag to select cases with or without RSD for photometric probes
             add_RSD = observables['selection']['add_phot_RSD']
+            # default value of matrix_transform_phot, gets modified by cobaya
+            # interface
+            self.matrix_transform_phot = False
 
             # Photo class instance
             self.phot_ins = Photo(None,
@@ -119,7 +122,7 @@ class Euclike:
             self.spec_ins = Spectro(None, list(self.zkeys))
 
         # Create data vectors and covariances and mask them
-        self.get_masked_data()
+        #self.get_masked_data()
 
     def get_masked_data(self):
         """Get Masked Data
@@ -340,13 +343,13 @@ class Euclike:
         # Apply any matrix transform activated with a switch
         wl_array = \
             self.transform_photo_theory_data_vector(wl_array,
-                                                    dictionary, obs='WL')
+                                                    obs='WL')
         xc_phot_array = \
             self.transform_photo_theory_data_vector(xc_phot_array,
-                                                    dictionary, obs='XC-phot')
+                                                    obs='XC-phot')
         gc_phot_array = \
             self.transform_photo_theory_data_vector(gc_phot_array,
-                                                    dictionary, obs='GC-phot')
+                                                    obs='GC-phot')
 
         self.photo_theory_vec = np.concatenate(
             (wl_array, xc_phot_array, gc_phot_array), axis=0)
@@ -379,11 +382,10 @@ class Euclike:
             If the requested transform is unapplicable, returns the original
             photo theory/data vector
         """
-        self.phot_ins.calc_nz_distributions(dictionary)
-        self.matrix_transform = dictionary['matrix_transform_phot']
-        if self.matrix_transform == 'BNT':
-            zwin = dictionary['z_win']
-            chiwin = dictionary['r_z_func'](zwin)
+        self.phot_ins.calc_nz_distributions(self.fiducial_cosmo_quantities_dic)
+        if self.matrix_transform_phot == 'BNT':
+            zwin = self.fiducial_cosmo_quantities_dic['z_win']
+            chiwin = self.fiducial_cosmo_quantities_dic['r_z_func'](zwin)
             Nz = self.phot_ins.nz_WL.get_num_tomographic_bins()
             ni_list = np.zeros((Nz, len(zwin)))
             for ni in range(Nz):
@@ -412,7 +414,7 @@ class Euclike:
                 print("In method:transform_photo_theory_data_vector,  \
                      observable passed will not be transformed")
                 transformed_array = obs_array
-        elif self.matrix_transform is False:
+        elif self.matrix_transform_phot is False:
             # Not doing any matrix transform
             transformed_array = obs_array
         else:

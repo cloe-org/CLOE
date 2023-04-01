@@ -382,9 +382,15 @@ class Euclike:
             If the requested transform is unapplicable, returns the original
             photo theory/data vector
         """
-        self.phot_ins.calc_nz_distributions(self.fiducial_cosmo_quantities_dic)
-        if self.matrix_transform_phot == 'BNT':
+
+        transformed_array = obs_array
+        if not self.matrix_transform_phot:
+            # Not doing any matrix transform
+            return transformed_array
+        elif self.matrix_transform_phot == 'BNT':
             zwin = self.fiducial_cosmo_quantities_dic['z_win']
+            self.phot_ins.calc_nz_distributions(
+                self.fiducial_cosmo_quantities_dic)
             chiwin = self.fiducial_cosmo_quantities_dic['r_z_func'](zwin)
             Nz = self.phot_ins.nz_WL.get_num_tomographic_bins()
             ni_list = np.zeros((Nz, len(zwin)))
@@ -414,12 +420,10 @@ class Euclike:
                 print("In method:transform_photo_theory_data_vector,  \
                      observable passed will not be transformed")
                 transformed_array = obs_array
-        elif self.matrix_transform_phot is False:
-            # Not doing any matrix transform
-            transformed_array = obs_array
+            return transformed_array
         else:
-            raise ValueError("Matrix Transform not implemented yet into CLOE")
-        return transformed_array
+            raise ValueError("Specified matrix_transform_phot \
+                             is not available in CLOE")
 
     def create_spectro_theory(self, dictionary):
         """Create Spectro Theory

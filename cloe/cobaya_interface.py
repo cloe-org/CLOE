@@ -109,7 +109,6 @@ class EuclidLikelihood(Likelihood):
         self.likefinal.fiducial_cosmo_quantities_dic.update(
             self.fiducial_cosmology.cosmo_dic)
         self.likefinal.matrix_transform_phot = self.matrix_transform_phot
-        print("matrix transform: ", self.matrix_transform_phot)
         self.likefinal.get_masked_data()
         self.cosmo.cosmo_dic['luminosity_ratio_z_func'] = \
             self.likefinal.data_ins.luminosity_ratio_interpolator

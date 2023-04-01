@@ -27,7 +27,10 @@ class likecalcTestCase(TestCase, SpectroTestParent):
         # init Euclike
         mock_obs = build_mock_observables()
         self.like_tt = Euclike(mock_data, mock_obs)
-
+        self.like_tt.fiducial_cosmo_quantities_dic.update(
+            self.test_dict)
+        self.like_tt.matrix_transform_phot = False
+        self.like_tt.get_masked_data()
         # The correct check value, using the h scaling for the h from
         # supplied external file for all the probes together is:
         self.check_loglike = -1801.491749
@@ -103,6 +106,10 @@ class likecalcngTestCase(TestCase, SpectroTestParent):
         self.mock_data_ng['spectro']['cov_is_num'] = True
         self.mock_data_ng['spectro']['cov_nsim'] = 3500
         self.like_tt_ng = Euclike(self.mock_data_ng, mock_obs)
+        self.like_tt_ng.fiducial_cosmo_quantities_dic.update(
+            self.test_dict)
+        self.like_tt_ng.matrix_transform_phot = False
+        self.like_tt_ng.get_masked_data()
 
         # The correct check value, using the h scaling for the h from
         # supplied external file for all the probes together is:

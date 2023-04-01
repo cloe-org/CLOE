@@ -22,7 +22,7 @@ class datareaderTestCase(TestCase):
                                    'ns', 'sigma8_0', 'w',
                                    'omkh2', 'omnuh2', 'Omnu']
         self.cov_check_GC_spectro = 1.217193e+08
-        self.cov_check_3x2pt = 0.016542
+        self.cov_check_3x2pt = 0.016542459
         self.cl_phot_WL_check = 7.144612e-05
         self.cl_phot_GC_check = 2.239632e-03
         self.cl_phot_XC_check = 2.535458e-04

@@ -72,7 +72,7 @@ class EuclidLikelihood(Likelihood):
             self.use_NL = False
 
         self.likefinal = Euclike(self.data, self.observables)
-        
+
         # Here we set the naming convention for the cosmological parameters
         # accepted by the selected Boltzmann solver
         if not self.solver:
@@ -108,7 +108,8 @@ class EuclidLikelihood(Likelihood):
         # Initialize Euclike module
         self.likefinal.fiducial_cosmo_quantities_dic.update(
             self.fiducial_cosmology.cosmo_dic)
-        self.likefinal.matrix_transform_phot =  self.matrix_transform_phot
+        self.likefinal.matrix_transform_phot = self.matrix_transform_phot
+        print("matrix transform: ", self.matrix_transform_phot)
         self.likefinal.get_masked_data()
         self.cosmo.cosmo_dic['luminosity_ratio_z_func'] = \
             self.likefinal.data_ins.luminosity_ratio_interpolator
@@ -390,6 +391,8 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['bias_model'] = self.bias_model
             self.cosmo.cosmo_dic['add_phot_RSD'] = \
                 info['likelihood']['Euclid']['add_phot_RSD']
+            self.matrix_transform_phot = \
+                info['likelihood']['Euclid']['matrix_transform_phot']
             self.cosmo.cosmo_dic['matrix_transform_phot'] = \
                 info['likelihood']['Euclid']['matrix_transform_phot']
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG

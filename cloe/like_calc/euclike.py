@@ -12,6 +12,7 @@ from cloe.masking.masking import Masking
 from cloe.masking.data_handler import Data_handler
 from cloe.auxiliary.matrix_transforms import BNT_transform
 
+
 class EuclikeError(Exception):
     r"""
     Class to define Exception Error
@@ -68,16 +69,16 @@ class Euclike:
             numtomo_wl = self.data_ins.numtomo_wl
             numtomo_gcphot = self.data_ins.numtomo_gcphot
             x_diagonal_wl = np.array(np.triu_indices(n=numtomo_wl,
-                                    m=numtomo_wl)) + 1
+                                     m=numtomo_wl)) + 1
             x_diagonal_gc = np.array(np.triu_indices(n=numtomo_gcphot,
-                                    m=numtomo_gcphot)) + 1
+                                     m=numtomo_gcphot)) + 1
             self.indices_diagonal_wl = \
                 list(zip(x_diagonal_wl[0], x_diagonal_wl[1]))
             self.indices_diagonal_gc = \
                 list(zip(x_diagonal_gc[0], x_diagonal_gc[1]))
             x_full_xc = np.indices((numtomo_gcphot, numtomo_wl))
             self.indices_all = tuple(zip(x_full_xc[0].flatten() + 1,
-                                    x_full_xc[1].flatten() + 1))
+                                     x_full_xc[1].flatten() + 1))
             self.ells_WL = self.data_ins.data_dict['WL']['ells']
             self.ells_XC = self.data_ins.data_dict['XC-Phot']['ells']
             self.ells_GC_phot = self.data_ins.data_dict['GC-Phot']['ells']
@@ -122,7 +123,6 @@ class Euclike:
             self.spec_ins = Spectro(None, list(self.zkeys))
 
         # Create data vectors and covariances and mask them
-        #self.get_masked_data()
 
     def get_masked_data(self):
         """Get Masked Data
@@ -420,7 +420,7 @@ class Euclike:
         else:
             raise ValueError("Matrix Transform not implemented yet into CLOE")
         return transformed_array
-    
+
     def create_spectro_theory(self, dictionary):
         """Create Spectro Theory
 

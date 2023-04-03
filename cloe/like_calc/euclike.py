@@ -351,10 +351,10 @@ class Euclike:
             self.transform_photo_theory_data_vector(gc_phot_array,
                                                     obs='GC-phot')
 
-        self.photo_theory_vec = np.concatenate(
+        photo_theory_vec = np.concatenate(
             (wl_array, xc_phot_array, gc_phot_array), axis=0)
 
-        return self.photo_theory_vec
+        return photo_theory_vec
 
     def transform_photo_theory_data_vector(self, obs_array,
                                            obs='WL'):

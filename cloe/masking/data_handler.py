@@ -309,7 +309,6 @@ class Data_handler:
             xc_phot_vec = (
                 np.full(self._xc_phot_size, self._use_xc_phot, dtype=int))
 
-        # gc_phot_vec = []
         if self._use_gc_phot:
             zpair = 0
             ells = data.data_dict['GC-Phot']['ells']

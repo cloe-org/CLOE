@@ -70,9 +70,8 @@ class EuclidLikelihood(Likelihood):
             self.use_NL = [False, True]
         else:
             self.use_NL = False
-
+        # Initialize Euclike module
         self.likefinal = Euclike(self.data, self.observables)
-
         # Here we set the naming convention for the cosmological parameters
         # accepted by the selected Boltzmann solver
         if not self.solver:
@@ -85,7 +84,6 @@ class EuclidLikelihood(Likelihood):
         elif self.solver == 'classy':
             self.pnames = \
                 dict(zip(camb_to_classy.keys(), camb_to_classy.values()))
-
         # Initialize Cosmology class for sampling
         self.cosmo = Cosmology()
         # Adding GCspectro redshift bins to cosmo dictionary and setting up
@@ -96,20 +94,25 @@ class EuclidLikelihood(Likelihood):
         self.cosmo.cosmo_dic['redshift_bins'] = self.data['spectro']['edges']
         # Initialize the fiducial model
         self.set_fiducial_cosmology()
-        # Here we add the fiducial angular diameter distance and Hubble factor
-        # to the cosmo dictionary. In this way we can avoid passing the whole
-        # fiducial dictionary
+        # Here we add the fiducial Hubble function plus the angular diameter 
+        # and comoving distance to the cosmo dictionary. These quantities
+        # are requested in different parts of the spectro and photo class.
         self.cosmo.cosmo_dic['fid_d_z_func'] = \
             self.fiducial_cosmology.cosmo_dic['d_z_func']
         self.cosmo.cosmo_dic['fid_r_z_func'] = \
             self.fiducial_cosmology.cosmo_dic['r_z_func']
         self.cosmo.cosmo_dic['fid_H_z_func'] = \
             self.fiducial_cosmology.cosmo_dic['H_z_func']
-        # Initialize Euclike module
+        # Create a separate dictionary with fiducual cosmo quantities that are
+        # available at initialization, before cosmo_dic is available.
         self.likefinal.fiducial_cosmo_quantities_dic.update(
             self.fiducial_cosmology.cosmo_dic)
+        # Set the default of the matrix_transform_phot at initalization
         self.likefinal.matrix_transform_phot = self.matrix_transform_phot
+        # Compute the data vectors, including possible matrix transforms
         self.likefinal.get_masked_data()
+        # Add the luminosity_ratio_z_func to the cosmo_dic after data has been 
+        # read and stored in the data_ins attribute of Euclike
         self.cosmo.cosmo_dic['luminosity_ratio_z_func'] = \
             self.likefinal.data_ins.luminosity_ratio_interpolator
         # Pass the observables selection to the cosmo dictionary

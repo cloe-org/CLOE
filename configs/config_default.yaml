@@ -37,9 +37,15 @@ Cobaya:
       #     1 -> EFT
       NL_flag_spectro: 0
       # Bias Model
+      #     1 -> linear interpolation
+      #     2 -> constant within bins
       bias_model: 1
       # Add RSD to photometric probes
       add_phot_RSD: False
+      # Magnification bias model
+      #     1 -> linear interpolation
+      #     2 -> constant within bins
+      magbias_model: 2
       # Use MG gamma
       use_gamma_MG: False
       # Redshift dependent purity correction

@@ -158,6 +158,8 @@ class Cosmology:
             Nonlinear flag for GCspectro
         bias_model: int
             bias model
+        magbias_model: int
+            Magnification bias model
         luminosity_ratio_z_func: function
             Luminosity ratio interpolator for IA model
         nuisance_parameters: dict
@@ -253,7 +255,11 @@ class Cosmology:
                           'NL_flag_phot_matter': 0,
                           'NL_flag_spectro': 0,
                           # bias model
+                          # (1 => linear interpolation, 2 => constant in bins)
                           'bias_model': 1,
+                          # magnification bias model
+                          # (1 => linear interpolation, 2 => constant in bins)
+                          'magbias_model': 2,
                           # Use Modified Gravity gamma
                           'use_gamma_MG': 0,
                           # Redshift dependent purity correction
@@ -763,23 +769,18 @@ class Cosmology:
             Array of tomographic redshift bin means for photometric GC probe.
             Default is Euclid IST: Forecasting choices.
         """
-
         if redshift_means is None:
-            redshift_means = np.array([0.2095, 0.489, 0.619, 0.7335,
-                                       0.8445, 0.9595, 1.087, 1.2395,
-                                       1.4500000000000002,
-                                       2.0380000000000003])
+            redshift_means = [0.2095, 0.489, 0.619, 0.7335,
+                              0.8445, 0.9595, 1.087, 1.2395,
+                              1.45, 2.038]
 
         nuisance_par = self.cosmo_dic['nuisance_parameters']
 
         istf_bias_list = [nuisance_par[f'b{idx}_photo']
                           for idx, vl in enumerate(redshift_means, start=1)]
 
-        b_inter = interpolate.interp1d(redshift_means, istf_bias_list,
-                                       fill_value=(istf_bias_list[0],
-                                                   istf_bias_list[-1]),
-                                       bounds_error=False)
-        self.cosmo_dic['b_inter'] = b_inter
+        self.cosmo_dic['b_inter']\
+            = rb.linear_interpolator(redshift_means, istf_bias_list)
 
     def istf_phot_galbias(self, redshift, bin_edges=None):
         r"""Istf Phot Galbias

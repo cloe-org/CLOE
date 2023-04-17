@@ -15,6 +15,7 @@ Cobaya:
       k_max_extrap: 500.0
       k_min_extrap: 1.0e-05
       k_samp: 1000
+      magbias_model: 2
       observables_selection: observables_selection.yaml
       observables_specifications:
         GCphot: GCphot.yaml

@@ -7,6 +7,7 @@ from scipy import integrate, interpolate
 from scipy.special import jv
 from cloe.photometric_survey.redshift_distribution \
     import RedshiftDistribution
+from cloe.auxiliary.redshift_bins import linear_interpolator
 import warnings
 
 # General error class
@@ -122,8 +123,12 @@ class Photo:
                                               nuisance_dict)
             self.photobias = [nuisance_dict[f'b{i}_photo']
                               for i in self.nz_GC.get_tomographic_bins()]
+
             self.magbias = [nuisance_dict[f'magnification_bias_{i}']
                             for i in self.nz_GC.get_tomographic_bins()]
+            if self.theory['magbias_model'] == 1:
+                self.magbias = linear_interpolator(None, self.magbias)
+
             # z_wtom is the number of tomographic bins + 1
             z_wtom_gc = 1 + self.nz_GC.get_num_tomographic_bins()
 
@@ -536,11 +541,18 @@ class Photo:
 
         integral_arr = integrate.trapz(intg_mat, dx=diffz, axis=1)
 
-        W_val = (1.5 * H0_Mpc * O_m * self.magbias[bin_i - 1] *
-                 (1.0 + z) *
+        W_val = (1.5 * H0_Mpc * O_m * (1.0 + z) *
                  self.theory['MG_sigma'](z, k) *
                  (self.theory['f_K_z_func'](z) /
                   (1 / H0_Mpc)) * integral_arr)
+
+        if self.theory['magbias_model'] == 1:
+            # magbias is a linear interpolator
+            W_val *= self.magbias(z)
+        elif self.theory['magbias_model'] == 2:
+            # magbias is a list of constants
+            W_val *= self.magbias[bin_i - 1]
+
         return W_val
 
     def WL_window_slow(self, z, bin_i, k=0.0001):

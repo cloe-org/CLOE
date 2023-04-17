@@ -387,7 +387,7 @@ class Euclike:
         if not self.matrix_transform_phot:
             # Not doing any matrix transform
             return transformed_array
-        elif self.matrix_transform_phot == 'BNT':
+        if 'BNT' in self.matrix_transform_phot:
             zwin = self.fiducial_cosmo_quantities_dic['z_win']
             self.phot_ins.calc_nz_distributions(
                 self.fiducial_cosmo_quantities_dic)
@@ -397,7 +397,12 @@ class Euclike:
             for ni in range(Nz):
                 ni_list[ni] = \
                     self.phot_ins.nz_WL.interpolates_n_i(ni + 1, zwin)(zwin)
-            BNT_transformation = BNT_transform(zwin, chiwin, ni_list)
+            test_BNT = False
+            if 'test' in self.matrix_transform_phot:
+                test_BNT = True
+                print("** Testing BNT with Unity Matrix **")
+            BNT_transformation = BNT_transform(zwin, chiwin, ni_list, 
+                                               test_unity=test_BNT)
             if obs == 'WL':
                 N_ells = len(self.ells_WL)
                 transformed_array = \

@@ -104,7 +104,7 @@ class BNT_transform():
     release documentation.
     """
 
-    def __init__(self, z_array, comoving_dist, n_i_z_array):
+    def __init__(self, z_array, comoving_dist, n_i_z_array, test_unity=False):
         """
         Initialize
 
@@ -126,6 +126,7 @@ class BNT_transform():
         self.chi = comoving_dist
         self.n_i_list = n_i_z_array
         self.N_bins = len(self.n_i_list)
+        self.test_unity = test_unity
 
     def get_BNT_matrix(self):
         """
@@ -147,16 +148,20 @@ class BNT_transform():
             B_list[i] = np.trapz(nz / self.chi, self.z)
 
         BNT_matrix = np.eye(self.N_bins)
-        BNT_matrix[1, 0] = -1.
+        if self.test_unity == True:
+            np.savetxt('./bntmat.txt', BNT_matrix)
+            return BNT_matrix
+        else:
+            BNT_matrix[1, 0] = -1.
 
-        for i in range(2, self.N_bins):
-            mat = np.array([[A_list[i - 1], A_list[i - 2]],
-                           [B_list[i - 1], B_list[i - 2]]])
-            A = -1. * np.array([A_list[i], B_list[i]])
-            soln = np.dot(np.linalg.inv(mat), A)
-            BNT_matrix[i, i - 1] = soln[0]
-            BNT_matrix[i, i - 2] = soln[1]
-        return BNT_matrix
+            for i in range(2, self.N_bins):
+                mat = np.array([[A_list[i - 1], A_list[i - 2]],
+                            [B_list[i - 1], B_list[i - 2]]])
+                A = -1. * np.array([A_list[i], B_list[i]])
+                soln = np.dot(np.linalg.inv(mat), A)
+                BNT_matrix[i, i - 1] = soln[0]
+                BNT_matrix[i, i - 2] = soln[1]
+            return BNT_matrix
 
     def apply_vectorized_symmetric_BNT(self, N_z_bins,
                                        N_ell_bins, observed_array):
@@ -182,6 +187,7 @@ class BNT_transform():
             BNT-transformed angular spectra C_ells
         """
         BNT_matrix = self.get_BNT_matrix()
+        print("apply BNT transform")
         self.N_mat_ell = np.identity(N_ell_bins)
         Vec = VectorizeMatrix(N_z_bins)
         D_mat = Vec.duplication_matrix()

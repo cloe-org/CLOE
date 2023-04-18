@@ -9,6 +9,7 @@ user_models:
   nuisance_shear_calibration: nuisance_shear_calibration.yaml
   nuisance_purity: nuisance_purity.yaml
   nonlinearities: nonlinearities.yaml
+  baryonic_feedback: baryonic_feedback.yaml
 user_options:
   # Flag for advanced users to let CLOE overwrite the configs/params.yaml file
   overwrite: True

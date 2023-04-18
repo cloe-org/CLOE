@@ -28,9 +28,11 @@ Cobaya:
       # Photometric matter flag
       #     0 -> linear-only
       #     1 -> Halofit (Takahashi)
-      #     2 -> Mead2020 (w/o baryon corrections)
-      #     3 -> Euclid Emulator 2
-      #     4 -> BACCO (matter)
+      #     2 -> Mead2016 (includes baryon corrections)
+      #     3 -> Mead2020 (w/o baryon corrections)
+      #     4 -> Mead2020_feedback (includes baryon corrections)
+      #     5 -> Euclid Emulator 2
+      #     6 -> BACCO (matter)
       NL_flag_phot_matter: 0
       # Spectroscopic flag
       #     0 -> linear-only

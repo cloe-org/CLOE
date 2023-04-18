@@ -7,7 +7,7 @@ in CLOE.
 from pathlib import Path
 from copy import deepcopy
 from cloe.auxiliary import yaml_handler
-from cloe.auxiliary.logger import log_info
+from cloe.auxiliary.logger import log_info, log_warning
 
 
 def get_default_configs_path():
@@ -143,12 +143,17 @@ def generate_params_dict_from_model_dict(model_dict,
         raise TypeError('User model dictionary is not a dict')
 
     params_dict = {}
+
     for key, filename in model.items():
         if key == 'cosmology' and include_cosmology is False:
             continue
         full_filepath = (model_path / Path(filename)).resolve()
         specific_dict = yaml_handler.yaml_read(full_filepath)
-        params_dict.update(specific_dict)
+        if (specific_dict is not None):
+            params_dict.update(specific_dict)
+        else:
+            log_warning('{}.yaml is empty. If needed, parameters '
+                        'will be set to default values.'.format(key))
 
     return params_dict
 
@@ -228,9 +233,13 @@ def set_halofit_version(cobaya_dict: dict, NL_flag: int):
     | NL_flag=0: not set (no request for Halofit to the Boltzman solver)
     | NL_flag=1: takahashi \
         (Ref: https://arxiv.org/abs/1208.2701)
-    | NL_flag=2: mead2020 \
+    | NL_flag=2: mead2016 \
+        (Ref: https://arxiv.org/abs/1602.02154)
+    | NL_flag=3: mead2020 \
         (Ref: https://arxiv.org/abs/2009.01858)
-    | NL_flag>2: mead2020 (current default version)
+    | NL_flag=4: mead2020_feedback \
+        (Ref: https://arxiv.org/abs/2009.01858)
+    | NL_flag>4: mead2020 (current default version)
 
     Parameters
     ----------
@@ -243,13 +252,24 @@ def set_halofit_version(cobaya_dict: dict, NL_flag: int):
     def switch_halofit_version(flag: int) -> str:
         switcher = {
             1: 'takahashi',
-            2: 'mead2020'
+            2: 'mead2016',
+            3: 'mead2020',
+            4: 'mead2020_feedback'
         }
         return switcher.get(flag, 'mead2020')
 
     if NL_flag > 0:
         cobaya_dict['theory']['camb']['extra_args'][
             'halofit_version'] = switch_halofit_version(NL_flag)
+
+    params = cobaya_dict['params']
+    if NL_flag != 2 and any([par in params.keys() for par in
+                             ['HMCode_A_baryon', 'HMCode_eta_baryon']]):
+        log_warning('Parameters [HMCode_A_baryon, HMCode_eta_baryon] are '
+                    'used only for the Mead2016 case (NL_flag = 2).')
+    elif NL_flag != 4 and 'HMCode_logT_AGN' in params.keys():
+        log_warning('Parameter HMCode_logT_AGN is used only '
+                    'for the Mead2020_feedback case (NL_flag = 4).')
 
 
 def get_params_dict_without_cosmo_params(params_dict):
@@ -292,8 +312,12 @@ def get_params_dict_without_cosmo_params(params_dict):
                     'w', 'wa', 'w0_fld', 'wa_fld',
                     'sigma8', 'omegab', 'omegac', 'omeganu', 'omegam']
 
+    HMCode_params = ['HMCode_A_baryon', 'HMCode_eta_baryon', 'HMCode_logT_AGN']
+
     for cosmo_param in cosmo_params:
         new_params_dict.pop(cosmo_param, None)
+    for HMCode_param in HMCode_params:
+        new_params_dict.pop(HMCode_param, None)
 
     return new_params_dict
 

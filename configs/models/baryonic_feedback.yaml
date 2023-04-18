@@ -1,0 +1,18 @@
+#####################################################
+# Parameters for Mead2016 (NL_flag_phot_matter = 2) #
+#####################################################
+
+# HMCode_A_baryon: 3.13
+# HMCode_eta_baryon: 0.603
+
+# To use one-parameter model from arXiv:1707.06627 the user can remove
+# the default value and specify a eta as a function of A, such that
+
+# HMCode_eta_baryon:
+#   value: 'lambda HMCode_A_baryon: 0.98 - 0.12*HMCode_A_baryon'
+
+##############################################################
+# Parameters for Mead2020_feedback (NL_flag_phot_matter = 4) #
+##############################################################
+
+# HMCode_logT_AGN: 7.8

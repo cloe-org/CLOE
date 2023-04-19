@@ -2,12 +2,17 @@ Getting started
 ==================
 
 This repository contains the theoretical computation of `Euclid` observables as well as the computation of the likelihood given some fiducial data. The likelihood is designed to work as an external likelihood for the Bayesian Analysis Code Cobaya.
-The package **Cosmology Likelihood for Observables in Euclid** **(CLOE)** is developed by the Inter Science Working Group Taskforce for Likelihood development.
+The package **Cosmology Likelihood for Observables in Euclid** **(CLOE)** is developed by the Inter-Science Task Force for Likelihood development.
 
-What's Cobaya?
+What is Cobaya?
 -------------------------
 
 **Cobaya** (code for Bayesian Analysis, and Spanish for Guinea Pig) is a framework for sampling and statistical modelling: it allows you to explore an arbitrary prior or posterior using a range of Monte Carlo samplers (check its `docs  <https://cobaya.readthedocs.io/en/latest/index.html>`_).
+
+Dependencies
+-------------------------
+
+You can find them listed `here  <https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/blob/develop/environment.yml>`_.
 
 
 Installation with a conda environment

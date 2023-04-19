@@ -158,3 +158,14 @@ Once this dictionary has been set up, to run **cobaya** from the **jupyter noteb
     info_updated, samples = run(info)
 
 For further information, see the ``DEMO`` notebook provided with this package.
+
+
+From a Jupyter notebook
+-----------------------
+
+Play with our |link-to-demo| Jupyter notebook.
+
+
+.. |link-to-demo| raw:: html
+
+  <a href="https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/blob/master/notebooks/DEMO.ipynb" target="_blank">DEMO

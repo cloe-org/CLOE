@@ -119,6 +119,9 @@ class CobayaModel:
         self.cosmology.cosmo_dic['Pk_delta'] = \
             self.model.provider.get_Pk_interpolator(
             ("delta_tot", "delta_tot"), nonlinear=False)
+        self.cosmology.cosmo_dic['Pk_cb'] = \
+            self.model.provider.get_Pk_interpolator(
+            ("delta_nonu", "delta_nonu"), nonlinear=False)
         self.cosmology.cosmo_dic['Pk_weyl'] = \
             self.model.provider.get_Pk_interpolator(
             ("Weyl", "Weyl"), nonlinear=False)

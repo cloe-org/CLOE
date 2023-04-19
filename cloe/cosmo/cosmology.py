@@ -95,6 +95,8 @@ class Cosmology:
             of :math:`Mpc^{-1}`
         Pk_delta: function
             Interpolator function for linear matter Pk from Boltzmann code
+        Pk_cb: function
+            Interpolator function for cdm+b Pk from Boltzmann code
         Pk_halomodel_recipe: function
             Interpolator function for nonlinear matter Pk from Boltzmann code
         Pk_weyl: function
@@ -224,6 +226,7 @@ class Cosmology:
                           'D_z_k': None,
                           # Interpolators
                           'Pk_delta': None,
+                          'Pk_cb': None,
                           'Pk_halomodel_recipe': None,
                           'Pk_weyl': None,
                           'Pk_weyl_NL': None,

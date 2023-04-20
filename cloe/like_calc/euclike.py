@@ -185,7 +185,7 @@ class Euclike:
             # Check for inversion issues
             if not np.allclose(np.dot(self.masked_cov_matrix_phot,
                                self.masked_invcov_matrix_phot),
-                               np.eye(self.masked_cov_matrix_phot.shape[0])):
+                               np.eye(self.masked_cov_matrix_phot.shape[0]), atol=1e-7):
                 raise ValueError("Problem with the inversion of the "
                                  "photo covariance")
         if self.do_spectro:

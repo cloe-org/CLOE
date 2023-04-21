@@ -250,6 +250,30 @@ class cosmoinitTestCase(TestCase):
             err_msg='Array output istf_phot_galbias',
         )
 
+    def test_poly_phot_galbias(self):
+        nuipar = self.cosmo.cosmo_dic['nuisance_parameters']
+        nuipar['b0_poly_photo'] = 1.0
+        nuipar['b1_poly_photo'] = 1.0
+        nuipar['b2_poly_photo'] = 1.0
+        nuipar['b3_poly_photo'] = 1.0
+        b_val = self.cosmo.poly_phot_galbias(1.0)
+        z_arr = np.array([1.0, 2.0])
+        b_val_arr = self.cosmo.poly_phot_galbias(z_arr)
+        # check float redshift input
+        npt.assert_almost_equal(
+            b_val,
+            desired=4.0,
+            decimal=8,
+            err_msg='Error in poly_phot_galbias float redshift case'
+        )
+        # check array redshift input
+        npt.assert_allclose(
+            b_val_arr,
+            desired=[4.0, 15.0],
+            rtol=1e-8,
+            err_msg='Error in poly_phot_galbias redshift array case'
+        )
+
     def test_istf_spectro_galbias(self):
         # assign custom b1_spectro and b2_spectro for maintainability
         nuipar = self.cosmo.cosmo_dic['nuisance_parameters']

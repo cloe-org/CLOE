@@ -272,7 +272,7 @@ class Cosmology:
                              'aia': 1.72,
                              'nia': -0.41,
                              'bia': 0.0,
-                             # Photometric galaxy bias
+                             # Photometric galaxy bias (IST:F case)
                              'b1_photo': 1.0997727037892875,
                              'b2_photo': 1.220245876862528,
                              'b3_photo': 1.2723993083933989,
@@ -283,6 +283,11 @@ class Cosmology:
                              'b8_photo': 1.4964959071110084,
                              'b9_photo': 1.5652475842498528,
                              'b10_photo': 1.7429859437184225,
+                             # Photometric galaxy bias (polynomial case)
+                             'b0_poly_photo': 0.830703,
+                             'b1_poly_photo': 1.190547,
+                             'b2_poly_photo': -0.928357,
+                             'b3_poly_photo': 0.423292,
                              # Magnification bias
                              'magnification_bias_1': 0.0,
                              'magnification_bias_2': 0.0,
@@ -817,6 +822,27 @@ class Cosmology:
         z_in_range = rb.coerce(redshift, bin_edges)
         return self.cosmo_dic['b_inter'](z_in_range)
 
+    def poly_phot_galbias(self, redshift):
+        r"""Polynomial Phot Galbias
+
+        Computes bias using a 3rd order polynomial function of redshift
+
+        Parameters
+        ----------
+        redshift: float or numpy.ndarray
+            Redshift(s) at which to calculate bias.
+
+        Returns
+        -------
+        float or numpy.ndarray
+            Value(s) of photometric galaxy bias at input redshift(s)
+        """
+        nuisance = self.cosmo_dic['nuisance_parameters']
+        return nuisance['b0_poly_photo'] + \
+            nuisance['b1_poly_photo'] * redshift + \
+            nuisance['b2_poly_photo'] * np.power(redshift, 2) + \
+            nuisance['b3_poly_photo'] * np.power(redshift, 3)
+
     def compute_phot_galbias(self, redshift):
         r"""Compute Phot Galbias
 
@@ -826,8 +852,10 @@ class Cosmology:
         The bias model is selected from the key 'bias_model'
         in cosmo_dic.
         The implemented models are:
-        1 - Linear interpolation
-        2 - Bias = 1
+
+            #. Linear interpolation
+            #. Bias = 1
+            #. Polynomial bias function
 
         Parameters
         ----------
@@ -836,7 +864,7 @@ class Cosmology:
 
         Returns
         -------
-        bi_val: numpy.ndarray of float
+        numpy.ndarray of float
             Value(s) of photometric galaxy bias at input redshift(s)
         """
         bias_model = self.cosmo_dic['bias_model']
@@ -845,6 +873,8 @@ class Cosmology:
             return self.istf_phot_galbias(redshift)
         elif bias_model == 2:
             return 1.0
+        elif bias_model == 3:
+            return self.poly_phot_galbias(redshift)
         else:
             raise ValueError('Parameter bias_model out of range:'
                              f'{bias_model}')
@@ -1380,4 +1410,6 @@ class Cosmology:
         # Update dictionary with bias interpolator and power spectra
         if self.cosmo_dic['bias_model'] == 1:
             self.istf_phot_galbias_interpolator()
+        elif self.cosmo_dic['bias_model'] == 3:
+            self.cosmo_dic['b_inter'] = self.poly_phot_galbias
         self.obtain_power_spectra()

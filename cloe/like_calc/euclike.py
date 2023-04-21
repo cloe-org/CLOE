@@ -185,7 +185,8 @@ class Euclike:
             # Check for inversion issues
             if not np.allclose(np.dot(self.masked_cov_matrix_phot,
                                self.masked_invcov_matrix_phot),
-                               np.eye(self.masked_cov_matrix_phot.shape[0]), atol=1e-7):
+                               np.eye(self.masked_cov_matrix_phot.shape[0]), 
+                                      atol=1e-7):
                 raise ValueError("Problem with the inversion of the "
                                  "photo covariance")
         if self.do_spectro:
@@ -401,7 +402,7 @@ class Euclike:
             if 'test' in self.matrix_transform_phot:
                 test_BNT = True
                 print("** Testing BNT with Unity Matrix **")
-            BNT_transformation = BNT_transform(zwin, chiwin, ni_list, 
+            BNT_transformation = BNT_transform(zwin, chiwin, ni_list,
                                                test_unity=test_BNT)
             if obs == 'WL':
                 N_ells = len(self.ells_WL)

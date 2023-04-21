@@ -127,10 +127,11 @@ class BNT_transform():
         self.n_i_list = n_i_z_array
         self.N_bins = len(self.n_i_list)
         self.test_unity = test_unity
+        self.BNT_matrix = self.compute_BNT_matrix()
 
-    def get_BNT_matrix(self):
+    def compute_BNT_matrix(self):
         """
-        Get BNT Matrix
+        Compute BNT Matrix
 
         Compute Matrix for the BNT transform
 
@@ -184,14 +185,14 @@ class BNT_transform():
             Stacked array containing the
             BNT-transformed angular spectra C_ells
         """
-        BNT_matrix = self.get_BNT_matrix()
+
         print("apply BNT transform")
         self.N_mat_ell = np.identity(N_ell_bins)
         Vec = VectorizeMatrix(N_z_bins)
         D_mat = Vec.duplication_matrix()
         E_mat = Vec.elimination_matrix()
         C_slash_mat = (np.kron(self.N_mat_ell, D_mat) @ observed_array)
-        B_kron = np.kron(BNT_matrix, BNT_matrix)
+        B_kron = np.kron(self.BNT_matrix, self.BNT_matrix)
         B_kron_Ell = np.kron(self.N_mat_ell, B_kron)
         Ell_mat = np.kron(self.N_mat_ell, E_mat)
         transformed_array = (Ell_mat @ B_kron_Ell @ C_slash_mat)
@@ -220,12 +221,12 @@ class BNT_transform():
             Stacked array containing the
             BNT-transformed angular spectra C_ells
         """
-        BNT_matrix = self.get_BNT_matrix()
+
         self.N_mat_ell = np.identity(N_ell_bins)
         self.N_mat_z = np.identity(N_z_bins)
         A_slash_mat = \
             np.kron(self.N_mat_ell,
-                    np.kron(self.N_mat_z, BNT_matrix)
+                    np.kron(self.N_mat_z, self.BNT_matrix)
                     )
         transformed_array = A_slash_mat @ observed_array
         return transformed_array

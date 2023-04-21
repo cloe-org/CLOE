@@ -148,15 +148,13 @@ class BNT_transform():
             B_list[i] = np.trapz(nz / self.chi, self.z)
 
         BNT_matrix = np.eye(self.N_bins)
-        if self.test_unity == True:
-            np.savetxt('./bntmat.txt', BNT_matrix)
+        if self.test_unity is True:
             return BNT_matrix
         else:
             BNT_matrix[1, 0] = -1.
-
             for i in range(2, self.N_bins):
                 mat = np.array([[A_list[i - 1], A_list[i - 2]],
-                            [B_list[i - 1], B_list[i - 2]]])
+                               [B_list[i - 1], B_list[i - 2]]])
                 A = -1. * np.array([A_list[i], B_list[i]])
                 soln = np.dot(np.linalg.inv(mat), A)
                 BNT_matrix[i, i - 1] = soln[0]

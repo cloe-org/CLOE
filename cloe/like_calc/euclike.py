@@ -114,7 +114,7 @@ class Euclike:
                                         ells_XC=self.ells_XC,
                                         ells_GC_phot=self.ells_GC_phot)
             # if a matrix transform of photometric observables is wanted
-            # precompute here the necessary matrices 
+            # precompute here the necessary matrices
             self.precompute_matrix_transform_photo()
 
         if self.do_spectro:
@@ -363,7 +363,7 @@ class Euclike:
     def precompute_matrix_transform_photo(self):
         """Precompute Matrix Transform
 
-        Precompute matrices needed for matrix transforms of data and 
+        Precompute matrices needed for matrix transforms of data and
         theory vectors, using fiducial quantities at initialization.
         Matrices are stored in the object corresponding to the chosen
         transform specified in the self.matrix_transform_phot key.
@@ -378,7 +378,7 @@ class Euclike:
                 self.fiducial_cosmo_quantities_dic)
             chiwin = self.fiducial_cosmo_quantities_dic['r_z_func'](zwin)
             Nz = self.phot_ins.nz_WL.get_num_tomographic_bins()
-            ni_list = np.array([self.phot_ins.\
+            ni_list = np.array([self.phot_ins.
                                nz_WL.interpolates_n_i(ni + 1, zwin)(zwin)
                                for ni in range(Nz)])
             if 'test' in self.matrix_transform_phot:
@@ -387,11 +387,11 @@ class Euclike:
             else:
                 test_BNT = False
             self.BNT_transformation = BNT_transform(zwin, chiwin, ni_list,
-                                               test_unity=test_BNT)
+                                                    test_unity=test_BNT)
         else:
             print("Warning: specified matrix transform is not implemented.")
         return None
-    
+
     def transform_photo_theory_data_vector(self, obs_array,
                                            obs='WL'):
         """Transform Photo Theory Data Vector

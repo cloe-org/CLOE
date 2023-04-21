@@ -334,10 +334,10 @@ class Photo:
         fzm_arr = self.theory['f_z'](zm_arr)
         nzm_arr = self.nz_GC.evaluates_n_i_z(bin_i, zm_arr)
 
-        if self.theory['bias_model'] == 1:
-            bias = self.theory['b_inter'](z)
-        elif self.theory['bias_model'] == 2:
+        if self.theory['bias_model'] == 2:
             bias = self.photobias[bin_i - 1]
+        elif self.theory['bias_model'] in [1, 3]:
+            bias = self.theory['b_inter'](z)
 
         return Hzm_arr * fzm_arr * nzm_arr / bias
 
@@ -866,6 +866,12 @@ class Photo:
         kernmag_j = prefactor_mag * np.interp(zs_arr, self.interpwinmag[:, 0],
                                               self.interpwinmag[:, bin_j])
 
+        if self.multiply_bias_cl:
+            bi = self.photobias[bin_i - 1]
+            bj = self.photobias[bin_j - 1]
+            kerngal_i = bi * kerngal_i
+            kerngal_j = bj * kerngal_j
+
         pandw_galgal = kerngal_i * kerngal_j * pow_gg
         pandw_magmag = kernmag_i * kernmag_j * pow_dd
         pandw_galmag = (kernmag_i * kerngal_j + kernmag_j * kerngal_i) * pow_gd
@@ -874,11 +880,6 @@ class Photo:
 
         c_int_arr = self.Cl_generic_integrand(zs_arr, pandwijk)
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, zs_arr)
-
-        if self.multiply_bias_cl is True:
-            bi = self.photobias[bin_i - 1]
-            bj = self.photobias[bin_j - 1]
-            c_final *= bi * bj
 
         return c_final
 
@@ -997,6 +998,10 @@ class Photo:
         kernmag_j = prefactor_mag * np.interp(zs_arr, self.interpwinmag[:, 0],
                                               self.interpwinmag[:, bin_j])
 
+        if self.multiply_bias_cl:
+            bj = self.photobias[bin_j - 1]
+            kerngal_j = bj * kerngal_j
+
         pandw_gd = kern_i * kerngal_j * pow_gd
         pandw_gi = kernia_i * kerngal_j * pow_gi
         pandw_dmag = kern_i * kernmag_j * pow_dd
@@ -1007,10 +1012,6 @@ class Photo:
         c_int_arr = self.Cl_generic_integrand(zs_arr, pandwijk)
         c_final = self.theory['c'] * integrate.trapz(c_int_arr, zs_arr)
         c_final = c_final * (1 + self.multbias[bin_i - 1])
-
-        if self.multiply_bias_cl is True:
-            bj = self.photobias[bin_j - 1]
-            c_final *= bj
 
         return c_final
 

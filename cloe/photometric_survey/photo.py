@@ -132,7 +132,7 @@ class Photo:
             # z_wtom is the number of tomographic bins + 1
             z_wtom_gc = 1 + self.nz_GC.get_num_tomographic_bins()
 
-            self.gc_int_z_max = {i: z_wmax + nuisance_dict[f'dz_{i}_GCphot']
+            self.gc_int_z_max = {i: z_wmax
                                  for i in self.nz_GC.get_tomographic_bins()}
             self.interpwingal = np.zeros(shape=(self.z_wsamp, z_wtom_gc))
             self.interpwinmag = np.zeros(shape=(self.z_wsamp, z_wtom_gc))
@@ -160,7 +160,7 @@ class Photo:
             # z_wtom is the number of tomographic bins + 1
             z_wtom_wl = 1 + self.nz_WL.get_num_tomographic_bins()
 
-            self.wl_int_z_max = {i: z_wmax + nuisance_dict[f'dz_{i}_WL']
+            self.wl_int_z_max = {i: z_wmax
                                  for i in self.nz_WL.get_tomographic_bins()}
             self.interpwin = np.zeros(shape=(self.z_wsamp, z_wtom_wl))
             self.interpwinia = np.zeros(shape=(self.z_wsamp, z_wtom_wl))
@@ -467,7 +467,7 @@ class Photo:
            at specified scale for the redshifts defined in z
         """
         dz_i = self.theory['nuisance_parameters'][f'dz_{bin_i}_WL']
-        zint_mat = np.linspace(z, z[-1] + dz_i,
+        zint_mat = np.linspace(z, z[-1],
                                self.z_trapz_sampling)
         zint_mat = zint_mat.T
         diffz = np.diff(zint_mat)
@@ -525,7 +525,7 @@ class Photo:
            at specified scale for the redshifts defined in z
         """
         dz_i = self.theory['nuisance_parameters'][f'dz_{bin_i}_GCphot']
-        zint_mat = np.linspace(z, z[-1] + dz_i,
+        zint_mat = np.linspace(z, z[-1],
                                self.z_trapz_sampling)
         zint_mat = zint_mat.T
         diffz = np.diff(zint_mat)
@@ -771,7 +771,7 @@ class Photo:
             (1 + self.multbias[bin_j - 1])
         return c_final
 
-    def Cl_GC_phot(self, ell, bin_i, bin_j, int_step=0.05):
+    def Cl_GC_phot(self, ell, bin_i, bin_j, int_step=0.01):
         r"""Cl GC Phot
 
         Calculates angular power spectrum for photometric galaxy clustering,
@@ -883,7 +883,7 @@ class Photo:
 
         return c_final
 
-    def Cl_cross(self, ell, bin_i, bin_j, int_step=0.02):
+    def Cl_cross(self, ell, bin_i, bin_j, int_step=0.01):
         r"""Cl Cross
 
         Calculates angular power spectrum for cross-correlation

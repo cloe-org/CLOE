@@ -9,6 +9,7 @@ from unittest import TestCase
 from unittest.mock import patch
 import numpy as np
 import numpy.testing as npt
+from copy import deepcopy
 from cloe.photometric_survey import photo
 from cloe.tests.test_tools import test_data_handler as tdh
 
@@ -50,6 +51,13 @@ class photoinitTestCase(TestCase):
             ells_GC_phot=ells_GC_phot,
         )
         cls.phot_rsd.update(mock_cosmo_dic)
+
+        # Photo module with linear interpolated magnification bias
+        cls.phot_magb1 = photo.Photo(None, nz_dic_WL, nz_dic_GC,
+                                     add_RSD=False)
+        mock_cosmo_dic_magb1 = deepcopy(mock_cosmo_dic)
+        mock_cosmo_dic_magb1['magbias_model'] = 1
+        cls.phot_magb1.update(mock_cosmo_dic_magb1)
 
     def setUp(self) -> None:
         self.win_tol = 1e-03
@@ -110,8 +118,8 @@ class photoinitTestCase(TestCase):
         )
         self.W_IA_check = 0.0001049580
         self.cl_WL_check = 6.908876e-09
-        self.cl_GC_check = 2.89485e-05
-        self.cl_GC_RSD_check = 3.056115e-05
+        self.cl_GC_check = 2.898686e-05
+        self.cl_GC_RSD_check = 3.061158e-05
         self.cl_cross_check = 1.117403e-07
         self.cl_cross_RSD_check = 1.059756e-07
         self.prefac_shearia_check = 0.988620523  # expected value for ell=10
@@ -119,7 +127,7 @@ class photoinitTestCase(TestCase):
         self.xi_ssp_check = [6.326380e-07, 4.395978e-07]
         self.xi_ssm_check = 1.476032e-07
         self.xi_sp_check = -3.455842e-06
-        self.xi_pp_check = 0.005249
+        self.xi_pp_check = 0.005259
 
     def tearDown(self):
         self.integrand_check = None
@@ -199,6 +207,21 @@ class photoinitTestCase(TestCase):
             rtol=self.win_tol,
             err_msg='magnification_window failed',
         )
+
+    def test_magnification_window_1(self):
+        # linear interpolator case
+        int_comp =\
+            self.phot_magb1.magnification_window(self.phot.z_winterp, 1)[10]
+        npt.assert_allclose(
+            int_comp,
+            self.wbincheck_mag,
+            rtol=self.win_tol,
+            err_msg='magnification_window failed',
+        )
+        magbias_type = str(type(self.phot_magb1.magbias))
+        npt.assert_string_equal(
+            magbias_type,
+            "<class 'scipy.interpolate._interpolate.interp1d'>")
 
     def test_WL_window_slow(self):
         int_comp = self.phot.WL_window_slow(

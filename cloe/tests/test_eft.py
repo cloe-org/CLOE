@@ -25,41 +25,41 @@ class eftinitTestCase(TestCase):
     def setUp(self) -> None:
         # Check values
         self.PEH_test = 18366.38013
-        self.Pnw_test = 17568.73279
-        self.Pw_test = -1055.290097
-        self.Sigma2_test = 60.210358
-        self.dSigma2_test = 22.375376
-        self.Sig2mu_test = 86.604014
-        self.RSDdamp_test = 0.644173
-        self.Pb1b1_test = [-1259.130012, 421.6440]
-        self.Pb1b2_test = [2939.746131, 7.975009]
-        self.Pb2b2_test = [-1289.037198, -3.697058]
-        self.Pmu2fb1_test = [-3979.713294, 842.5876]
-        self.Pmu2fb2_test = [799.206919, 22.91450]
-        self.Pmu2f2b12_test = [-3686.998443, 318.0869]
-        self.Pmu2fb12_test = [-1056.806753, 843.9886]
-        self.Pmu2fb1b2_test = [5080.285343, -6.964481]
-        self.Pmu2f2b1_test = [-1278.771612, -0.6129294]
-        self.Pmu2f2b2_test = [-1872.97181, 13.07205]
-        self.Pmu4f4_test = [453.491255, -3.392450]
-        self.Pmu4f3v_test = [-587.737319, -5.782377]
-        self.Pmu4f3b1_test = [-9343.802791, 640.730291]
-        self.Pmu4f2b2_test = [3207.313533, 6.107573]
-        self.Pmu4f2b1_test = [-5643.591866, 1692.57167]
-        self.Pmu4f2b12_test = [4284.198441, 101.303677]
-        self.Pmu4f2_test = [-2325.706544, 417.989582]
-        self.Pmu6f4_test = [-5354.476845, 320.381771]
-        self.Pmu6f3_test = [-3895.75082, 843.413647]
-        self.Pmu6f3b1_test = [6598.590977, 207.163871]
-        self.Pmu8f4_test = [2767.883791, 102.467745]
-        self.PZ1b1_test = [1754.336536, -108.001865]
-        self.PZ1mu2f_test = [-1583.162817, 98.023244]
-        self.PZ1mu2fb1_test = [6846.172425, -422.028837]
-        self.PZ1mu2f2_test = [-3754.686772, 231.778247]
-        self.PZ1mu4f2_test = [3091.485652, -190.250591]
-        self.Pgg_kmu_test = [[137092.131545, 209729.006641],
-                             [52162.804141, 78573.175201],
-                             [21385.385007, 33866.47418]]
+        self.Pnw_test = 17711.220032
+        self.Pw_test = -1060.852868
+        self.Sigma2_test = 60.664153
+        self.dSigma2_test = 22.530151
+        self.Sig2mu_test = 87.258008
+        self.RSDdamp_test = 0.642037
+        self.Pb1b1_test = [-1284.521497, 427.9779]
+        self.Pb1b2_test = [2982.8153, 9.249978]
+        self.Pb2b2_test = [-1306.100102, -4.209333]
+        self.Pmu2fb1_test = [-4052.274427, 854.6795]
+        self.Pmu2fb2_test = [808.474363, 23.71016]
+        self.Pmu2f2b12_test = [-3746.652715, 322.0014]
+        self.Pmu2fb12_test = [-1085.81156, 857.2321]
+        self.Pmu2fb1b2_test = [5157.156238, -5.210208]
+        self.Pmu2f2b1_test = [-1297.827504, -1.116758]
+        self.Pmu2f2b2_test = [-1902.54832, 12.65266]
+        self.Pmu4f4_test = [460.493797, -3.279820]
+        self.Pmu4f3v_test = [-596.12267, -6.114579]
+        self.Pmu4f3b1_test = [-9492.837769, 647.883888]
+        self.Pmu4f2b2_test = [3254.607917, 7.442455]
+        self.Pmu4f2b1_test = [-5754.63044, 1717.782974]
+        self.Pmu4f2b12_test = [4346.336843, 104.3968957]
+        self.Pmu4f2_test = [-2366.77874, 423.845718]
+        self.Pmu6f4_test = [-5439.189189, 323.695929]
+        self.Pmu6f3_test = [-3967.114046, 855.553038]
+        self.Pmu6f3b1_test = [6693.141348, 212.674854]
+        self.Pmu8f4_test = [2807.298302, 104.998138]
+        self.PZ1b1_test = [1782.733917, -109.2234]
+        self.PZ1mu2f_test = [-1609.621346, 99.245109]
+        self.PZ1mu2fb1_test = [6957.823096, -426.915309]
+        self.PZ1mu2f2_test = [-3816.399671, 234.527073]
+        self.PZ1mu4f2_test = [3141.423425, -192.388236]
+        self.Pgg_kmu_test = [[137641.029656, 210569.609045],
+                             [52551.209503, 79154.241991],
+                             [21559.529345, 34160.972728]]
         self.nuis = {'b1': 2.0, 'b2': 0.5,
                      'c0': 1.0, 'c2': 1.0, 'c4': 1.0,
                      'aP': 1.0, 'Psn': 1000.0}

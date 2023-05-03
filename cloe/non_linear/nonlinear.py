@@ -27,6 +27,22 @@ class NonlinearError(Exception):
 class Nonlinear:
     """
     Class to compute nonlinear recipes
+
+    The current available options, depending on the value of the nonlinear
+    flags are:
+
+    NL_flag_phot_matter
+    0: linear-only (from Cosmology class)
+    1: Takahashi
+    2: Mead2016 (includes baryon corrections)
+    3: Mead2020 (w/o baryon corrections)
+    4: Mead2020_feedback (includes baryon corrections)
+    5: Euclid Emulator 2
+    6: Bacco (matter)
+
+    NL_flag_spectro
+    0: linear-only (from Cosmology class)
+    1: EFT
     """
 
     def __init__(self, cosmo_dic):
@@ -120,16 +136,15 @@ class Nonlinear:
         self.misc.update_dic(cosmo_dic)
 
         # Creation of EE2 instance on the first request of EE2
-        if (self.theory['NL_flag_phot_matter'] == 3 and self.ee2 is None):
+        if (self.theory['NL_flag_phot_matter'] == 5 and self.ee2 is None):
             self.ee2 = euclidemu2.PyEuclidEmulator()
 
         # Creation of BACCO emulator instance on the first request of BACCO
-        if (self.theory['NL_flag_phot_matter'] == 4 and self.bemu is None):
+        if (self.theory['NL_flag_phot_matter'] == 6 and self.bemu is None):
             self.bemu = baccoemu.Matter_powerspectrum(verbose=False)
 
-        # Calculate boost factor if NL_flag_phot_matter is 3 or 4
-        if (self.theory['NL_flag_phot_matter'] > 2 and
-                self.theory['NL_flag_phot_matter'] < 5):
+        # Calculate boost factor if NL_flag_phot_matter is 5 or 6
+        if self.theory['NL_flag_phot_matter'] in [5, 6]:
             self.calculate_boost()
 
         # Compute Pgg(k,mu) if NL_flag_spectro is 1
@@ -175,32 +190,27 @@ class Nonlinear:
         boost-factor, and adds it to the nonlinear dictionary.
         """
 
-        if (self.theory['NL_flag_phot_matter'] > 2 and
-                self.theory['NL_flag_phot_matter'] < 5):
-            if (self.theory['NL_flag_phot_matter'] == 3):
-                wavenumber, boost, redshift_max, flag_range = self.ee2_boost()
-            elif (self.theory['NL_flag_phot_matter'] == 4):
-                wavenumber, boost, redshift_max, flag_range = \
-                    self.bacco_boost()
-            else:
-                raise Exception('Invalid value of NL_flag_phot_matter,'
-                                ' valid options are [0,1,2,3,4]')
+        if self.theory['NL_flag_phot_matter'] == 5:
+            wavenumber, boost, redshift_max, flag_range = self.ee2_boost()
+        elif self.theory['NL_flag_phot_matter'] == 6:
+            wavenumber, boost, redshift_max, flag_range = self.bacco_boost()
+        else:
+            raise Exception('Invalid value of NL_flag_phot_matter,'
+                            ' valid options are [0,1,2,3,4,5,6]')
 
-            # Extrapolation function for all cases. In the cosmology case, the
-            # only available option is hm_simple, while for wavenumber and
-            # redshift, options can be selected from {const, power_law,
-            # hm_simple} and wavenumber extrapolation has the additional option
-            # of hm_smooth.
-            wavenumber_out, boost_ext = self.extend_boost(
-               wavenumber, boost, redshift_max, flag_range,
-               option_wavenumber=self.nonlinear_dic['option_extra_wavenumber'],
-               option_redshift=self.nonlinear_dic['option_extra_redshift'],
-               option_cosmo="hm_simple")
+        # Extrapolation function for all cases. In the cosmology case, the
+        # only available option is hm_simple, while for wavenumber and
+        # redshift, options can be selected from {const, power_law,
+        # hm_simple} and wavenumber extrapolation has the additional option
+        # of hm_smooth.
+        wavenumber_out, boost_ext = self.extend_boost(
+            wavenumber, boost, redshift_max, flag_range,
+            option_wavenumber=self.nonlinear_dic['option_extra_wavenumber'],
+            option_redshift=self.nonlinear_dic['option_extra_redshift'],
+            option_cosmo="hm_simple")
 
-            self.nonlinear_dic['NL_boost'] = \
-                interpolate.RectBivariateSpline(
-                    self.theory['z_win'], wavenumber_out,
-                    boost_ext, kx=1, ky=1)
+        self.nonlinear_dic['NL_boost'] = interpolate.RectBivariateSpline(
+            self.theory['z_win'], wavenumber_out, boost_ext, kx=1, ky=1)
 
     def linear_boost(self):
         """Linear Boost
@@ -219,7 +229,7 @@ class Nonlinear:
     def ee2_boost(self):
         """EE2 Boost
 
-        Returns the boost factor for the EE2 (i.e. NL_flag_phot_matter==3).
+        Returns the boost factor for the EE2 (i.e. NL_flag_phot_matter==5).
         Parameter ranges are as follows:
 
         - Omb: [0.04, 0.06],
@@ -277,7 +287,7 @@ class Nonlinear:
         """BACCO Boost
 
         Returns the boost factor for the BACCO case
-        (i.e. NL_flag_phot_matter==4).
+        (i.e. NL_flag_phot_matter==6).
         Parameter ranges (in the variables of BACCO) are as follows:
 
         - sigma8_cold: [0.73, 0.9]
@@ -434,7 +444,7 @@ class Nonlinear:
         # and the option to extrapolate is HMcode.
         # Note that 'Pk_halomodel_recipe' always includes the prediction from
         # HMcode since for all values of NL_flag_phot_matter corresponding to
-        # the emulators (3, 4) the nonlinear model given by cobaya is HMcode.
+        # the emulators (5, 6) the nonlinear model given by cobaya is HMcode.
         if (not flag_range) and option_cosmo == "hm_simple":
 
             wavenumber_out = wavenumber_base
@@ -594,8 +604,10 @@ class Nonlinear:
         """
         switcher = {1: self.PLL_phot_model.Pmm_phot_halo,
                     2: self.PLL_phot_model.Pmm_phot_halo,
-                    3: self.PLL_phot_model.Pmm_phot_emu,
-                    4: self.PLL_phot_model.Pmm_phot_emu
+                    3: self.PLL_phot_model.Pmm_phot_halo,
+                    4: self.PLL_phot_model.Pmm_phot_halo,
+                    5: self.PLL_phot_model.Pmm_phot_emu,
+                    6: self.PLL_phot_model.Pmm_phot_emu
                     }
         Pmm_phot_func = \
             switcher.get(self.theory['NL_flag_phot_matter'],
@@ -632,8 +644,10 @@ class Nonlinear:
         """
         switcher = {1: self.Pgg_phot_model.Pgg_phot_halo,
                     2: self.Pgg_phot_model.Pgg_phot_halo,
-                    3: self.Pgg_phot_model.Pgg_phot_emu,
-                    4: self.Pgg_phot_model.Pgg_phot_emu
+                    3: self.Pgg_phot_model.Pgg_phot_halo,
+                    4: self.Pgg_phot_model.Pgg_phot_halo,
+                    5: self.Pgg_phot_model.Pgg_phot_emu,
+                    6: self.Pgg_phot_model.Pgg_phot_emu
                     }
         Pgg_phot_func = \
             switcher.get(self.theory['NL_flag_phot_matter'],
@@ -649,8 +663,10 @@ class Nonlinear:
         """
         switcher = {1: self.PLL_phot_model.Pii_halo,
                     2: self.PLL_phot_model.Pii_halo,
-                    3: self.PLL_phot_model.Pii_emu,
-                    4: self.PLL_phot_model.Pii_emu
+                    3: self.PLL_phot_model.Pii_halo,
+                    4: self.PLL_phot_model.Pii_halo,
+                    5: self.PLL_phot_model.Pii_emu,
+                    6: self.PLL_phot_model.Pii_emu
                     }
         Pii_func = \
             switcher.get(self.theory['NL_flag_phot_matter'],
@@ -666,8 +682,10 @@ class Nonlinear:
         """
         switcher = {1: self.PLL_phot_model.Pdeltai_halo,
                     2: self.PLL_phot_model.Pdeltai_halo,
-                    3: self.PLL_phot_model.Pdeltai_emu,
-                    4: self.PLL_phot_model.Pdeltai_emu
+                    3: self.PLL_phot_model.Pdeltai_halo,
+                    4: self.PLL_phot_model.Pdeltai_halo,
+                    5: self.PLL_phot_model.Pdeltai_emu,
+                    6: self.PLL_phot_model.Pdeltai_emu
                     }
         Pdeltai_func = \
             switcher.get(self.theory['NL_flag_phot_matter'],
@@ -683,8 +701,10 @@ class Nonlinear:
         """
         switcher = {1: self.PLL_phot_model.Pgi_phot_halo,
                     2: self.PLL_phot_model.Pgi_phot_halo,
-                    3: self.PLL_phot_model.Pgi_phot_emu,
-                    4: self.PLL_phot_model.Pgi_phot_emu
+                    3: self.PLL_phot_model.Pgi_phot_halo,
+                    4: self.PLL_phot_model.Pgi_phot_halo,
+                    5: self.PLL_phot_model.Pgi_phot_emu,
+                    6: self.PLL_phot_model.Pgi_phot_emu
                     }
         Pgi_func = \
             switcher.get(self.theory['NL_flag_phot_matter'],
@@ -708,8 +728,10 @@ class Nonlinear:
         """
         switcher = {1: self.PgL_phot_model.Pgdelta_phot_halo,
                     2: self.PgL_phot_model.Pgdelta_phot_halo,
-                    3: self.PgL_phot_model.Pgdelta_phot_emu,
-                    4: self.PgL_phot_model.Pgdelta_phot_emu
+                    3: self.PgL_phot_model.Pgdelta_phot_halo,
+                    4: self.PgL_phot_model.Pgdelta_phot_halo,
+                    5: self.PgL_phot_model.Pgdelta_phot_emu,
+                    6: self.PgL_phot_model.Pgdelta_phot_emu
                     }
         PgL_phot_func = \
             switcher.get(self.theory['NL_flag_phot_matter'],

@@ -1,10 +1,11 @@
 """redshift_bins
 
 Contains common function to operate on redshift bin edges
-and select nuisance parameters.
+and bin-dependent nuisance parameters.
 """
 
 import numpy as np
+from scipy import interpolate
 
 
 def coerce(zs, redshift_edges, is_sorted=False):
@@ -118,6 +119,43 @@ def reduce(z_bins, lower_bound, upper_bound):
         and less than upper bound.
     """
     return z_bins[(z_bins >= lower_bound) & (z_bins < upper_bound)]
+
+
+def linear_interpolator(x_values, y_values):
+    r"""Linear interpolator
+
+    Returns a linear interpolator for the x and y values in input.
+    Below the first x value, the interpolator
+    is set to return the first y value.
+    Above the last x value, the interpolator
+    is set to return the last y value.
+    This function is used in CLOE to build linear interpolators
+    from an array of redshift means and an array of constants
+    (e.g. galaxy or magnification bias).
+    However, it can be used for any array in input.
+
+    Parameters
+    ----------
+    x_values: numpy.ndarray of float
+        x-values for the interpolator.
+        Default is Euclid IST Forecasting choices arXiv:1910.0927
+        (tomographic redshifts evaluated in the bin center)
+    y_values: numpy.ndarray of float
+        y-values for the interpolator.
+
+    Returns
+    -------
+    interpolator: numpy.ndarray of float
+        Linear interpolator.
+    """
+    if x_values is None:
+        x_values = [0.2095, 0.489, 0.619, 0.7335,
+                    0.8445, 0.9595, 1.087, 1.2395,
+                    1.45, 2.038]
+
+    return interpolate.interp1d(x_values, y_values,
+                                fill_value=(y_values[0], y_values[-1]),
+                                bounds_error=False)
 
 
 def select_spectro_parameters(redshift, nuis_dict, bin_edges=None):

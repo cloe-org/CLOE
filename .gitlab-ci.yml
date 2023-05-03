@@ -53,7 +53,7 @@ Check_HTML:
   script:
     - &apidoc_build_script |
       mkdir docs/build
-      sphinx-apidoc -feo docs/source cloe
+      sphinx-apidoc --module-first -feo docs/source cloe
       sphinx-build docs/source docs/build
     - mv docs/build html_build
   when: manual

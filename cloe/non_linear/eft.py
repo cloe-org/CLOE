@@ -15,7 +15,10 @@ class EFTofLSS:
     r"""EFTofLSS
 
     Class to construct the EFTofLSS model for the nonlinear galaxy anisotropic
-    power spectrum
+    power spectrum. For this recipe we consider the standard assumption that
+    galaxy clustering can be modelled starting from fluctuations of the cold
+    dark matter and baryon density field (cb), regardless from the presence of
+    massive neutrinos.
     """
 
     def __init__(self, cosmo_dic, log10k_min=-4, log10k_max=1.7, nk_tot=1000):
@@ -23,7 +26,7 @@ class EFTofLSS:
         self.ks = np.logspace(log10k_min, log10k_max, nk_tot, endpoint=True)
 
         self.z = cosmo_dic['z_win']
-        self.PL = cosmo_dic['Pk_delta'].P(0.0, self.ks)
+        self.PL = cosmo_dic['Pk_cb'].P(0.0, self.ks)
         self.ns = cosmo_dic['ns']
         self.As = cosmo_dic['As']
         self.h = cosmo_dic['H0'] / 100.0

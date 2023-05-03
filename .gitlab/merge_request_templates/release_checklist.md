@@ -21,3 +21,5 @@ Reviewers, please check the following points before merging.
 - [ ] Manual `Profiling` job run and no unexpected performances issues found
 - [ ] Manual `Verification` job run and results match expectations
 - [ ] Leads have approved the release
+- [ ] The link to the landing page has been updated to that of the `master` 
+      branch in the Wiki page of the corresponding version

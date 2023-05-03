@@ -87,7 +87,8 @@ class Euclike:
             add_RSD = observables['selection']['add_phot_RSD']
             # default value of matrix_transform_phot, gets modified by cobaya
             # interface
-            self.matrix_transform_phot = False
+            self.matrix_transform_phot = \
+                self.observables['selection']['matrix_transform_phot']
 
             # Photo class instance
             self.phot_ins = Photo(None,
@@ -113,9 +114,6 @@ class Euclike:
             self.phot_ins.set_prefactor(ells_WL=self.ells_WL,
                                         ells_XC=self.ells_XC,
                                         ells_GC_phot=self.ells_GC_phot)
-            # if a matrix transform of photometric observables is wanted
-            # precompute here the necessary matrices
-            self.precompute_matrix_transform_photo()
 
         if self.do_spectro:
             # Read spectro
@@ -135,6 +133,8 @@ class Euclike:
         and applies the masking to the data and covariances
         """
         if self.do_photo:
+            # precompute matrix transforms needed for photo data
+            self.precompute_matrix_transform_photo()
             photodata = self.create_photo_data()
         if self.do_spectro:
             spectrodata = self.create_spectro_data()
@@ -369,27 +369,28 @@ class Euclike:
         transform specified in the self.matrix_transform_phot key.
 
         """
-
-        if not self.matrix_transform_phot:
-            return None
-        if 'BNT' in self.matrix_transform_phot:
-            zwin = self.fiducial_cosmo_quantities_dic['z_win']
-            self.phot_ins.calc_nz_distributions(
-                self.fiducial_cosmo_quantities_dic)
-            chiwin = self.fiducial_cosmo_quantities_dic['r_z_func'](zwin)
-            Nz = self.phot_ins.nz_WL.get_num_tomographic_bins()
-            ni_list = np.array([self.phot_ins.
-                               nz_WL.interpolates_n_i(ni + 1, zwin)(zwin)
-                               for ni in range(Nz)])
-            if 'test' in self.matrix_transform_phot:
-                test_BNT = True
-                print("** Testing BNT with Unity Matrix **")
+        if self.do_photo:
+            if not self.matrix_transform_phot:
+                return None
+            if 'BNT' in self.matrix_transform_phot:
+                print("computing BNT transform")
+                zwin = self.fiducial_cosmo_quantities_dic['z_win']
+                self.phot_ins.calc_nz_distributions(
+                    self.fiducial_cosmo_quantities_dic)
+                chiwin = self.fiducial_cosmo_quantities_dic['r_z_func'](zwin)
+                Nz = self.phot_ins.nz_WL.get_num_tomographic_bins()
+                ni_list = np.array([self.phot_ins.
+                                   nz_WL.interpolates_n_i(ni + 1, zwin)(zwin)
+                                   for ni in range(Nz)])
+                if 'test' in self.matrix_transform_phot:
+                    test_BNT = True
+                    print("** Testing BNT with Unity Matrix **")
+                else:
+                    test_BNT = False
+                self.BNT_transformation = BNT_transform(zwin, chiwin, ni_list,
+                                                        test_unity=test_BNT)
             else:
-                test_BNT = False
-            self.BNT_transformation = BNT_transform(zwin, chiwin, ni_list,
-                                                    test_unity=test_BNT)
-        else:
-            print("Warning: specified matrix transform is not implemented.")
+                print("Warning: specified matrix transform not implemented.")
         return None
 
     def transform_photo_theory_data_vector(self, obs_array,
@@ -429,7 +430,6 @@ class Euclike:
                 transformed_array = \
                     self.BNT_transformation\
                     .apply_vectorized_symmetric_BNT(
-                                                    Nz,
                                                     N_ells,
                                                     obs_array)
             elif obs == 'XC-phot':
@@ -437,9 +437,8 @@ class Euclike:
                 transformed_array = \
                     self.BNT_transformation\
                     .apply_vectorized_nonsymmetric_BNT(
-                                                     Nz,
-                                                     N_ells,
-                                                     obs_array)
+                                                       N_ells,
+                                                       obs_array)
             elif obs == 'GC-phot':
                 transformed_array = obs_array
             else:

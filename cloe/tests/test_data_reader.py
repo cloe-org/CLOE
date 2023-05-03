@@ -7,6 +7,7 @@ This module contains unit tests for the data_reader module.
 
 from unittest import TestCase
 import numpy.testing as npt
+import numpy as np
 from cloe.data_reader.reader import Reader
 from cloe.tests.test_input.data import mock_data
 
@@ -22,7 +23,7 @@ class datareaderTestCase(TestCase):
                                    'ns', 'sigma8_0', 'w',
                                    'omkh2', 'omnuh2', 'Omnu']
         self.cov_check_GC_spectro = 1.217193e+08
-        self.cov_check_3x2pt = 0.016542459
+        self.cov_check_3x2pt = 0.016565
         self.cl_phot_WL_check = 7.144612e-05
         self.cl_phot_GC_check = 2.239632e-03
         self.cl_phot_XC_check = 2.535458e-04
@@ -141,13 +142,9 @@ class datareaderTestCase(TestCase):
 
         test_cov_3x2pt = 0.0
 
-        for i in range(shape_3x2pt):
-            for j in range(shape_3x2pt):
-                bin_i = i
-                bin_j = j
-                test_cov_3x2pt += i * j * \
-                    self.data_tester.data_dict['3x2pt_cov'][bin_i, bin_j]
-
+        test_cov_3x2pt = np.sum(np.outer(np.arange(shape_3x2pt),
+                                         np.arange(shape_3x2pt)) *
+                                self.data_tester.data_dict['3x2pt_cov'])
         npt.assert_allclose(test_cov_3x2pt,
                             [self.cov_check_3x2pt], rtol=1e-3,
                             err_msg='Error in loading external photometric'

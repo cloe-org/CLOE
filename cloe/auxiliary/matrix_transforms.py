@@ -104,7 +104,8 @@ class BNT_transform():
     release documentation.
     """
 
-    def __init__(self, z_array, comoving_dist, n_i_z_array, test_unity=False):
+    def __init__(self, z_array, comoving_dist, n_i_z_array,
+                 test_unity=False):
         """
         Initialize
 
@@ -125,7 +126,7 @@ class BNT_transform():
         self.z = z_array
         self.chi = comoving_dist
         self.n_i_list = n_i_z_array
-        self.N_bins = len(self.n_i_list)
+        self.Nz_bins = len(self.n_i_list)
         self.test_unity = test_unity
         self.BNT_matrix = self.compute_BNT_matrix()
 
@@ -141,19 +142,19 @@ class BNT_transform():
              2D-array containing the BNT matrix transform
         """
 
-        A_list = np.zeros((self.N_bins))
-        B_list = np.zeros((self.N_bins))
-        for i in range(self.N_bins):
+        A_list = np.zeros((self.Nz_bins))
+        B_list = np.zeros((self.Nz_bins))
+        for i in range(self.Nz_bins):
             nz = self.n_i_list[i]
             A_list[i] = np.trapz(nz, self.z)
             B_list[i] = np.trapz(nz / self.chi, self.z)
 
-        BNT_matrix = np.eye(self.N_bins)
+        BNT_matrix = np.eye(self.Nz_bins)
         if self.test_unity is True:
             return BNT_matrix
         else:
             BNT_matrix[1, 0] = -1.
-            for i in range(2, self.N_bins):
+            for i in range(2, self.Nz_bins):
                 mat = np.array([[A_list[i - 1], A_list[i - 2]],
                                [B_list[i - 1], B_list[i - 2]]])
                 A = -1. * np.array([A_list[i], B_list[i]])
@@ -162,8 +163,7 @@ class BNT_transform():
                 BNT_matrix[i, i - 2] = soln[1]
             return BNT_matrix
 
-    def apply_vectorized_symmetric_BNT(self, N_z_bins,
-                                       N_ell_bins, observed_array):
+    def apply_vectorized_symmetric_BNT(self, N_ell_bins, observed_array):
         """
         apply_vectorized_symmetric_BNT
 
@@ -171,8 +171,6 @@ class BNT_transform():
 
         Parameters
         ----------
-        N_z_bins: int
-            Number of photometric tomographic redshift bins
         N_ell_bins: int
             Number of photometric multipole bins
         observed_array: array
@@ -186,9 +184,8 @@ class BNT_transform():
             BNT-transformed angular spectra C_ells
         """
 
-        print("apply BNT transform")
         self.N_mat_ell = np.identity(N_ell_bins)
-        Vec = VectorizeMatrix(N_z_bins)
+        Vec = VectorizeMatrix(self.Nz_bins)
         D_mat = Vec.duplication_matrix()
         E_mat = Vec.elimination_matrix()
         C_slash_mat = (np.kron(self.N_mat_ell, D_mat) @ observed_array)
@@ -198,8 +195,7 @@ class BNT_transform():
         transformed_array = (Ell_mat @ B_kron_Ell @ C_slash_mat)
         return transformed_array
 
-    def apply_vectorized_nonsymmetric_BNT(self, N_z_bins,
-                                          N_ell_bins, observed_array):
+    def apply_vectorized_nonsymmetric_BNT(self, N_ell_bins, observed_array):
         """
         apply_vectorized_symmetric_BNT
 
@@ -207,8 +203,6 @@ class BNT_transform():
 
         Parameters
         ----------
-        N_z_bins: int
-            Number of photometric tomographic redshift bins
         N_ell_bins: int
             Number of photometric multipole bins
         observed_array: array
@@ -223,7 +217,7 @@ class BNT_transform():
         """
 
         self.N_mat_ell = np.identity(N_ell_bins)
-        self.N_mat_z = np.identity(N_z_bins)
+        self.N_mat_z = np.identity(self.Nz_bins)
         A_slash_mat = \
             np.kron(self.N_mat_ell,
                     np.kron(self.N_mat_z, self.BNT_matrix)

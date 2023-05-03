@@ -64,7 +64,10 @@ class EuclidLikelihood(Likelihood):
         if self.plot_observables_selection:
             self.observables_pf = observables_visualization(
              self.observables['selection'])
-        self.observables['selection']['add_phot_RSD'] = self.add_phot_RSD
+        self.observables['selection']['add_phot_RSD'] = \
+            self.add_phot_RSD
+        self.observables['selection']['matrix_transform_phot'] = \
+            self.matrix_transform_phot
         # Select which power spectra to require from the Boltzmann solver
         if self.NL_flag_phot_matter > 0:
             self.use_NL = [False, True]
@@ -103,13 +106,12 @@ class EuclidLikelihood(Likelihood):
             self.fiducial_cosmology.cosmo_dic['r_z_func']
         self.cosmo.cosmo_dic['fid_H_z_func'] = \
             self.fiducial_cosmology.cosmo_dic['H_z_func']
-        # Create a separate dictionary with fiducual cosmo quantities that are
-        # available at initialization, before cosmo_dic is available.
+        # Create a separate dictionary with fiducial cosmo quantities that are
+        # available at initialization, before cosmo_dic is created.
         self.likefinal.fiducial_cosmo_quantities_dic.update(
             self.fiducial_cosmology.cosmo_dic)
-        # Set the default of the matrix_transform_phot at initalization
-        self.likefinal.matrix_transform_phot = self.matrix_transform_phot
-        # Compute the data vectors, including possible matrix transforms
+        # Compute the data vectors
+        # and initialize possible matrix transforms
         self.likefinal.get_masked_data()
         # Add the luminosity_ratio_z_func to the cosmo_dic after data has been
         # read and stored in the data_ins attribute of Euclike

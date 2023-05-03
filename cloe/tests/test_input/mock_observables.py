@@ -64,7 +64,8 @@ def build_mock_observables(reader=None):
         'WL': {'WL': True, 'GCphot': True, 'GCspectro': False},
         'GCphot': {'GCphot': True, 'GCspectro': False},
         'GCspectro': {'GCspectro': True},
-        'add_phot_RSD': False
+        'add_phot_RSD': False,
+        'matrix_transform_phot': False
     }
     observables['specifications'] = {
         'WL': wl_specs,

@@ -200,54 +200,56 @@ class cosmoinitTestCase(TestCase):
         keyDfound = 'D_z_k' in self.cosmo.cosmo_dic
         npt.assert_equal(keyDfound, True, err_msg='D_z_k not calculated')
 
-    def test_istf_phot_galbias(self):
+    def test_compute_phot_galbias(self):
         # interpolate a straight-line (b, z) grid to ease the checks
         nuipar = self.cosmo.cosmo_dic['nuisance_parameters']
+        nuipar['bias_model'] = 1
         zs_means = [1.0, 2.0, 3.0]
         nuipar['b1_photo'] = 2.0
         nuipar['b2_photo'] = 4.0
         nuipar['b3_photo'] = 6.0
-        self.cosmo.istf_phot_galbias_interpolator(zs_means)
+        self.cosmo.create_phot_galbias(zs_means)
         # check scalar redshift input
-        bi_val_actual = self.cosmo.istf_phot_galbias(1.5)
+        bi_val_actual = self.cosmo.compute_phot_galbias(1.5)
         npt.assert_almost_equal(
             bi_val_actual,
             desired=3.0,
             decimal=3,
-            err_msg='Error in istf_phot_galbias',
+            err_msg='Error in compute_phot_galbias',
         )
         # check redshift input below zs edges: returns b(z at edge)
-        bi_val_actual = self.cosmo.istf_phot_galbias(0.98, [1.0, 2.0])
+        bi_val_actual = \
+            self.cosmo.compute_phot_galbias(0.98)
         npt.assert_almost_equal(
             bi_val_actual,
             desired=2.0,
             decimal=3,
-            err_msg='Error in istf_phot_galbias (z<)',
+            err_msg='Error in compute_phot_galbias (z<)',
         )
         # check redshift input above zs edges: returns b(z at edge)
-        bi_val_actual = self.cosmo.istf_phot_galbias(2.04, [1.0, 2.0])
+        bi_val_actual = self.cosmo.compute_phot_galbias(3.04)
         npt.assert_almost_equal(
             bi_val_actual,
-            desired=4.0,
+            desired=6.0,
             decimal=3,
-            err_msg='Error in istf_phot_galbias (z>)',
+            err_msg='Error in compute_phot_galbias (z>)',
         )
         # check vector redshift input: output size and values
         zs_vec = [1.5, 2.5]
-        bi_val_actual = self.cosmo.istf_phot_galbias(zs_vec)
+        bi_val_actual = self.cosmo.compute_phot_galbias(zs_vec)
         npt.assert_equal(
             len(bi_val_actual),
             len(zs_vec),
             err_msg=(
-                'Output size of istf_phot_galbias (vec) does not match with ' +
-                'input'
+                'Output size of compute_phot_galbias (array) '
+                'does not match with input'
             ),
         )
         npt.assert_allclose(
             bi_val_actual,
             desired=[3.0, 5.0],
             rtol=1e-3,
-            err_msg='Array output istf_phot_galbias',
+            err_msg='Array output compute_phot_galbias',
         )
 
     def test_poly_phot_galbias(self):

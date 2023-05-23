@@ -272,6 +272,7 @@ class Cosmology:
                              'aia': 1.72,
                              'nia': -0.41,
                              'bia': 0.0,
+                             'pivot_redshift': 0.,
                              # Photometric galaxy bias (IST:F case)
                              'b1_photo': 1.0997727037892875,
                              'b2_photo': 1.220245876862528,
@@ -1072,7 +1073,8 @@ class Cosmology:
 
         .. math::
             f_{\rm IA}(z) &= -\mathcal{A_{\rm IA}}\mathcal{C_{\rm IA}}\
-            \frac{\Omega_{m,0}}{D(z)}(1 + z)^{\eta_{\rm IA}}\
+            \frac{\Omega_{m,0}}{D(z)}\
+            [(1 + z)/(1 + z_{\rm pivot})]^{\eta_{\rm IA}}\
             [\langle L \rangle(z) /L_{\star}(z)]^{\beta_{\rm IA}}\\
 
         Parameters
@@ -1107,12 +1109,14 @@ class Cosmology:
                 redshift = redshift.reshape(-1, 1)
 
         c1 = 0.0134
+        pivot_redshift = \
+            self.cosmo_dic['nuisance_parameters']['pivot_redshift']
         aia = self.cosmo_dic['nuisance_parameters']['aia']
         nia = self.cosmo_dic['nuisance_parameters']['nia']
         bia = self.cosmo_dic['nuisance_parameters']['bia']
         omegam = self.cosmo_dic['Omm']
         fia = (-aia * c1 * omegam / growth *
-               (1 + redshift) ** nia *
+               ((1 + redshift) / (1 + pivot_redshift)) ** nia *
                self.cosmo_dic['luminosity_ratio_z_func'](redshift) ** bia)
         return fia
 

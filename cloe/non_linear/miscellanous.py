@@ -41,7 +41,8 @@ class Misc:
 
         .. math::
             f_{\rm IA}(z) &= -\mathcal{A_{\rm IA}}\mathcal{C_{\rm IA}}\
-            \frac{\Omega_{m,0}}{D(z)}(1 + z)^{\eta_{\rm IA}}\
+            \frac{\Omega_{m,0}}{D(z)}
+            [(1 + z)/(1 + z_{\rm pivot})]^{\eta_{\rm IA}}\
             [\langle L \rangle(z) /L_{\star}(z)]^{\beta_{\rm IA}}\\
 
         Parameters
@@ -76,12 +77,13 @@ class Misc:
                 redshift = redshift.reshape(-1, 1)
 
         c1 = 0.0134
+        pivot_redshift = self.theory['nuisance_parameters']['pivot_redshift']
         aia = self.theory['nuisance_parameters']['aia']
         nia = self.theory['nuisance_parameters']['nia']
         bia = self.theory['nuisance_parameters']['bia']
         omegam = self.theory['Omm']
         fia = (-aia * c1 * omegam / growth *
-               (1 + redshift) ** nia *
+               ((1 + redshift) / (1 + pivot_redshift)) ** nia *
                self.theory['luminosity_ratio_z_func'](redshift) ** bia)
         return fia
 

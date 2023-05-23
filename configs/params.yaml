@@ -5,6 +5,7 @@
 aia: 1.72
 bia: 0.0
 nia: -0.41
+pivot_redshift: 0.
 # Photometric galaxy bias (IST:F case)
 b1_photo: 1.0997727037892875
 b2_photo: 1.220245876862528

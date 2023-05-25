@@ -633,19 +633,10 @@ class Photo:
     def Cl_generic_integrand(self, z, PandW_i_j_z_k):
         r"""Cl Generic Integrand
 
-        Calculates the angular power spectrum integrand
-        for any two probes and tomographic bins for which
-        the bins are supplied. The power
-        spectrum is either that of
-        :math:`\delta \delta`, gg, or :math:`{\rm g}\delta`,
-        with {A, B} in {G, L}
+        Calculates the integrand of the angular power spectra for
+        the different probes given by the different combinations
+        of window functions and power spectra.
 
-        .. math::
-            \frac{W_{i}^{\rm A}(z)W_{j}^{\rm B}(z)}
-            {H(z)f_K^2\left[\tilde{r}(z)\right]}\
-            P_{\rm AB}\left(k_{\ell}=\
-            \frac{{\rm\ell} + 1/2}
-            {f_K\left[\tilde{r}(z)\right]}, z\right)\\
 
         Parameters
         ----------
@@ -690,7 +681,7 @@ class Photo:
             \int {\rm d}z
             \frac{W_{i}^{\rm \gamma}(z)W_{j}^{\rm \gamma}(z)}
             {H(z)f_K^2\left[\tilde{r}(z)\right]}
-            P^{\rm{photo}}_{\rm mm}
+            P^{\rm{photo}}_{\rm \delta \delta}
             \left[ k_{\ell}(z), z \right]
 
         .. math::
@@ -701,7 +692,7 @@ class Photo:
             \frac{W_{i}^{\rm \gamma}(z)W_{j}^{\rm I}(z) +
                   W_{i}^{\rm I}(z)W_{j}^{\rm \gamma}(z)}
             {H(z)f_K^2\left[\tilde{r}(z)\right]}
-            P^{\rm{photo}}_{\rm mI}
+            P^{\rm{photo}}_{\rm \delta I}
             \left[ k_{\ell}(z), z \right]
 
         .. math::
@@ -799,7 +790,7 @@ class Photo:
             \frac{W_{i}^{\rm \mu}(z)W_{j}^{\rm g}(z) +
                   W_{i}^{\rm g}(z)W_{j}^{\rm \mu}(z)}
             {H(z)f_K^2\left[\tilde{r}(z)\right]}
-            P^{\rm{photo}}_{\rm gm}
+            P^{\rm{photo}}_{\rm g\delta}
             \left[ k_{\ell}(z), z \right]
 
         .. math::
@@ -808,7 +799,7 @@ class Photo:
             \int {\rm d}z
             \frac{W_{i}^{\rm \mu}(z)W_{j}^{\rm \mu}(z)}
             {H(z)f_K^2\left[\tilde{r}(z)\right]}
-            P^{\rm{photo}}_{\rm mm}
+            P^{\rm{photo}}_{\delta \delta}
             \left[ k_{\ell}(z), z \right]
 
         Parameters
@@ -890,13 +881,15 @@ class Photo:
         between weak lensing and galaxy clustering, for the supplied bins:
 
         .. math::
-            C_{ij}^{GL} = C_{ij}^{\gamma g}(\ell) + C_{ij}^{Ig}(\ell) +
+            C_{ij}^{LG} = C_{ij}^{\gamma g}(\ell) + C_{ij}^{Ig}(\ell) +
                                  C_{ij}^{\gamma \mu}(\ell) +
                                  C_{ij}^{I\mu}(\ell)
 
         where :math:`\gamma` stands for gravitational shear, g for intrinsic
         number density fluctuations, :math:`\mu` for lensing magnification and
         I for intrinsic shear.
+        The notation LG is related to the order of the contributions at the
+        window functions level respectively in the i-th and j-th bins.
 
         .. math::
             C_{ij}^{\rm \gamma g}(\ell) =
@@ -905,7 +898,7 @@ class Photo:
             \int {\rm d}z
             \frac{W_{i}^{\rm \gamma}(z)W_{j}^{\rm g}(z)}
             {H(z)f_K^2\left[\tilde{r}(z)\right]}
-            P^{\rm{photo}}_{\rm gm}
+            P^{\rm photo}_{g \delta}
             \left[ k_{\ell}(z), z \right]
 
         .. math::
@@ -926,7 +919,7 @@ class Photo:
             \int {\rm d}z
             \frac{W_{i}^{\rm \gamma}(z)W_{j}^{\rm \mu}(z)}
             {H(z)f_K^2\left[\tilde{r}(z)\right]}
-            P^{\rm{photo}}_{\rm mm}
+            P^{\rm photo}_{\delta \delta}
             \left[ k_{\ell}(z), z \right]
 
         .. math::
@@ -937,7 +930,7 @@ class Photo:
             \int {\rm d}z
             \frac{W_{i}^{\rm I}(z)W_{j}^{\rm \mu}(z)}
             {H(z)f_K^2\left[\tilde{r}(z)\right]}
-            P^{\rm{photo}}_{\rm mI}
+            P^{\rm photo}_{\delta I}
             \left[ k_{\ell}(z), z \right]
 
         Parameters

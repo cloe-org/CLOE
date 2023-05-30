@@ -2,16 +2,24 @@
 
 # CLOE: Cosmology Likelihood for Observables in Euclid
 
-This repository contains the theoretical computation of Euclid observables as well as the computation of the likelihood given some fiducial data. The likelihood is designed to work as an external likelihood for the Bayesian Analysis Code `Cobaya`.
-The package Cosmology Likelihood for Observables in `Euclid` (CLOE) is developed by the Inter-Science Working Group Task Force for Likelihood development (IST:L) to compute the `Euclid`  likelihood.
+This repository allows the user to obtain model predictions and cosmological parameter constraints for synthetic and real Euclid data. It is developed by the Inter-Science Taskforce for Likelihood (IST:L) within the Euclid Consortium, in close collaboration with all of the Euclid Science Working Groups, Organisational Units, and the Inter-Science Taskforce for Nonlinear effects (IST:NL).
 
-Check [documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/index.html)
+In the latest version of CLOE, the Euclid observables are defined by the following set:
 
-## What's Cobaya?
+- Weak Gravitational Lensing 
+- Photometric Galaxy Clustering
+- Photometric Galaxy-Galaxy Lensing
+- Spectroscopic Galaxy Clustering
 
-`Cobaya` (code for Bayesian analysis) is a framework for sampling and statistical modelling: it allows you to explore an arbitrary prior or posterior using a range of Monte Carlo samplers.
+CLOE allows the user to consider these probes either separately or in a self-consistent combined analysis. It is also possible to analyze the Euclid data alongside other external datasets. The set of Euclid observables will expand in subsequent versions to include probes such as clusters and cross-correlations with the cosmic microwave background.
 
-Check [documentation](https://cobaya.readthedocs.io/en/latest/index.html)
+Further documentation is found [here](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/index.html)
+
+## Integration of CLOE with other codes
+
+CLOE allows the user to obtain the linear matter power spectrum from either of the [CAMB](https://camb.readthedocs.io/en/latest/) and [CLASS](https://lesgourg.github.io/class_public/class.html) Boltzmann codes.
+
+In order to obtain cosmological parameter constraints, CLOE reads in the redshift distributions and computes the theoretical predictions of the Euclid observables, which are used together with the data and covariance to obtain the likelihood. The likelihood is then evaluated across the parameter space using one of the samplers of [Cobaya](https://cobaya.readthedocs.io/en/latest/) or [CosmoSIS](https://cosmosis.readthedocs.io/en/latest/) to obtain the posterior probability.
 
 ## Installation
 
@@ -72,7 +80,7 @@ pip install numpydoc
 
 ### 2. Installation with pip <a name="pip"></a>
 
-If you don't have anaconda, you would have to install manually on your cluster all the packages listed in Option b) written above, with pip.
+If you do not have anaconda, you would have to install manually on your cluster all the packages listed in Option b) written above, with pip.
 
 ### 3. CLOE Docker image <a name="docker"></a>
 
@@ -165,7 +173,7 @@ Then, compiling with `make` (or `make -j`, check the CLASS documentation) will a
 Users have sometimes encountered issues installing some of the packages (euclidemu2). Before debugging, try to use "conda install" instead of "pip install" (or viceversa, depending on what gives error).
 
 ### Problems with pip
-If pip install doesn't work, either try 'conda install' or try the following:
+If pip install does not work, either try 'conda install' or try the following:
 ```shell
 git clone https://github.com/astropy/extension-helpers.git
 cd extension-helpers
@@ -212,13 +220,13 @@ python -m pytest cloe/tests/verification
 
 Note that these tests require the development tools.
 
-## How do I import CLOE as an external likelihood for `Cobaya`?
-Open and play with ```DEMO.ipynb```. You can find it and launch it with jupyter with
+## Demonstration of how to use CLOE
+
+Learn how to use CLOE with our demo. You can launch it with Jupyter Notebook:
 
 ```
-cd likelihood-implementation/notebooks/
-jupyter notebook
+jupyter-notebook notebooks/DEMO.ipyng
 ```
 
-This DEMO allows to compute the Galaxy Clustering and Weak Lensing observational probes as defined in the current recipe and computes the likelihood value given some benchmark data. It uses Cobaya as the main Bayesian Analysis tool.
+This notebook currently allows the user to compute the model predictions and likelihood given synthetic Euclid data.
 

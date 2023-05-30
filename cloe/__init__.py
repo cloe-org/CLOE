@@ -2,7 +2,7 @@
 
 """CLOE Module
 
-Provide some basic description of the CLOE module.
+This section provides detailed information on the CLOE modules and methods.
 
 """
 

@@ -72,7 +72,7 @@ master_doc = 'index'
 # General information about the project.
 project = u'CLOE'
 copyright = u'2023, Euclid Consortium'
-author = u'Euclid IST:L and IST:NL'
+author = u'Euclid IST:L in close collaboration with all SWGs, OUs, and IST:NL'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

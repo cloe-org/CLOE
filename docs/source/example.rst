@@ -1,11 +1,9 @@
-Example
-==================
+Interactive use examples
+==============================
 
-Here you can find a simple example of how to run CLOE as an external likelihood using the Bayesian Analysis tool **Cobaya** (check its `docs  <https://cobaya.readthedocs.io/en/latest/index.html>`_).
+This section provides a simple example of how to run CLOE alongside the software framework of `Cobaya <https://cobaya.readthedocs.io/en/latest/index.html>`_.
 
-For a detailed break-down of how to run CLOE in this and other ways, see the ``DEMO`` notebook supplied with this package.
-
-One way for CLOE to be run is from an interactive python interpreter (**jupyter notebook**).
+For a detailed breakdown of how to run CLOE in this and other ways, see the ``DEMO`` notebook in the CLOE repository. This notebook requires an interactive Python interpreter such as `Jupyter Notebook <https://jupyter.org/>`_.
 
 From a Python interpreter
 -------------------------
@@ -140,7 +138,7 @@ The dictionary above has several  *keys*:
 - A ``likelihood`` key: likelihood pdf's to be used. In this case, we call an external likelihood file that returns the loglike given the ``params`` values.
 
 
-Once this dictionary has been set up, to run **cobaya** from the **jupyter notebook** use:
+Once this dictionary has been set up, to run **Cobaya** from the **jupyter notebook** use:
 
 .. code:: python
 

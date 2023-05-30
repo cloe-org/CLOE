@@ -315,7 +315,7 @@ class Euclike:
         else:
             wl_array = np.zeros(
                  len(self.ells_WL) *
-                 len(self.indices_diagonal_wl) 
+                 len(self.indices_diagonal_wl)
             )
 
         # Obtain the theory for XC-Phot
@@ -328,7 +328,7 @@ class Euclike:
         else:
             xc_phot_array = np.zeros(
                  len(self.ells_XC) *
-                 len(self.indices_all) 
+                 len(self.indices_all)
             )
 
         # Obtain the theory for GC-Phot
@@ -341,7 +341,7 @@ class Euclike:
         else:
             gc_phot_array = np.zeros(
                 len(self.ells_GC_phot) *
-                len(self.indices_diagonal_gc) 
+                len(self.indices_diagonal_gc)
             )
 
         # Apply any matrix transform activated with a switch

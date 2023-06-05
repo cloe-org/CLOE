@@ -41,7 +41,8 @@ class Misc:
 
         .. math::
             f_{\rm IA}(z) &= -\mathcal{A_{\rm IA}}\mathcal{C_{\rm IA}}\
-            \frac{\Omega_{m,0}}{D(z)}(1 + z)^{\eta_{\rm IA}}\
+            \frac{\Omega_{m,0}}{D(z)}
+            [(1 + z)/(1 + z_{\rm pivot})]^{\eta_{\rm IA}}\
             [\langle L \rangle(z) /L_{\star}(z)]^{\beta_{\rm IA}}\\
 
         Parameters
@@ -76,12 +77,13 @@ class Misc:
                 redshift = redshift.reshape(-1, 1)
 
         c1 = 0.0134
+        pivot_redshift = self.theory['nuisance_parameters']['pivot_redshift']
         aia = self.theory['nuisance_parameters']['aia']
         nia = self.theory['nuisance_parameters']['nia']
         bia = self.theory['nuisance_parameters']['bia']
         omegam = self.theory['Omm']
         fia = (-aia * c1 * omegam / growth *
-               (1 + redshift) ** nia *
+               ((1 + redshift) / (1 + pivot_redshift)) ** nia *
                self.theory['luminosity_ratio_z_func'](redshift) ** bia)
         return fia
 
@@ -131,23 +133,16 @@ class Misc:
                              'Check that redshift is inside the bin edges'
                              'and valid bi_spectro\'s are provided.')
 
-    def istf_phot_galbias(self, redshift, bin_edges=None):
+    def istf_phot_galbias(self, redshift):
         r"""Istf Phot Galbias
 
         Gets galaxy bias(es) for the photometric GC probes by
         interpolation at a given redshift
 
-        Note: for redshifts above the final bin (redshift > 2.5), we use the
-        bias from the final bin. Similarly, for redshifts below the first bin
-        (redshift < 0.001), we use the bias of the first bin.
-
         Parameters
         ----------
         redshift: float or numpy.ndarray
             Redshift(s) at which to calculate bias.
-        bin_edges: numpy.ndarray
-            Array of tomographic redshift bin edges for photometric GC probe.
-            Default is Euclid IST: Forecasting choices.
 
         Returns
         -------
@@ -155,9 +150,4 @@ class Misc:
             Value(s) of photometric galaxy bias at input redshift(s)
         """
 
-        if bin_edges is None:
-            bin_edges = np.array([0.001, 0.418, 0.560, 0.678, 0.789,
-                                  0.900, 1.019, 1.155, 1.324, 1.576, 2.50])
-
-        redshift_in_range = rb.coerce(redshift, bin_edges)
-        return self.theory['b_inter'](redshift_in_range)
+        return self.theory['b_inter'](redshift)

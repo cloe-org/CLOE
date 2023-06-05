@@ -272,6 +272,7 @@ class Cosmology:
                              'aia': 1.72,
                              'nia': -0.41,
                              'bia': 0.0,
+                             'pivot_redshift': 0.,
                              # Photometric galaxy bias (IST:F case)
                              'b1_photo': 1.0997727037892875,
                              'b2_photo': 1.220245876862528,
@@ -777,17 +778,63 @@ class Cosmology:
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['fsigma8'], ext=2)
 
+    def create_phot_galbias(self, redshift_means=None):
+        r"""Create the Photometric Galaxy Bias
+
+        Creates the photometric galaxy bias as
+        function/interpolator of the redshift.
+        The function is stored in the cosmo dictionary 'b_inter'.
+
+        The bias model is selected from the key 'bias_model'
+        in cosmo_dic.
+        The implemented models are:
+
+            #. Linear interpolation
+            #. Bias is constant in bin (returns one here)
+            #. Polynomial bias function
+
+        Parameters
+        ----------
+        redshift_means: numpy.ndarray of float
+            Array of tomographic redshift bin means for photometric GC probe.
+
+        Raises
+        ------
+        ValueError
+            If the bias model parameter in the cosmo dictionary
+            is not 1, 2, or 3.
+        """
+
+        bias_model = self.cosmo_dic['bias_model']
+
+        if bias_model == 1:
+            self.cosmo_dic['b_inter'] \
+                = self.istf_phot_galbias_interpolator(redshift_means)
+        elif bias_model == 2:
+            self.cosmo_dic['b_inter'] \
+                = rb.linear_interpolator([0.0, 4.0], [1.0, 1.0])
+        elif bias_model == 3:
+            self.cosmo_dic['b_inter'] = self.poly_phot_galbias
+        else:
+            raise ValueError('Parameter bias_model not valid:'
+                             f'{bias_model}')
+
     def istf_phot_galbias_interpolator(self, redshift_means=None):
         r"""Istf Phot Galbias interpolator
 
-        Creates a linear interpolator for the galaxy bias for the
+        Returns a linear interpolator for the galaxy bias for the
         photometric GC probes at a given redshift z
 
         Parameters
         ----------
-        redshift_means: array_like
+        redshift_means: numpy.ndarray of float
             Array of tomographic redshift bin means for photometric GC probe.
             Default is Euclid IST: Forecasting choices.
+
+        Returns
+        -------
+        interpolator
+            Linear interpolator of photometric galaxy bias
         """
         if redshift_means is None:
             redshift_means = [0.2095, 0.489, 0.619, 0.7335,
@@ -799,40 +846,7 @@ class Cosmology:
         istf_bias_list = [nuisance_par[f'b{idx}_photo']
                           for idx, vl in enumerate(redshift_means, start=1)]
 
-        self.cosmo_dic['b_inter']\
-            = rb.linear_interpolator(redshift_means, istf_bias_list)
-
-    def istf_phot_galbias(self, redshift, bin_edges=None):
-        r"""Istf Phot Galbias
-
-        Gets galaxy bias(es) for the photometric GC probes by
-        interpolation at a given redshift z
-
-        Note: for redshifts above the final bin center, we use the bias
-        from the edge of the intepolation. Similarly, for redshifts below
-        the first bin center, we use the first bias value from the
-        interpolation.
-
-        Parameters
-        ----------
-        redshift: float or numpy.ndarray
-            Redshift(s) at which to calculate bias.
-        bin_edges: numpy.ndarray
-            Array of tomographic redshift bin edges for photometric GC probe.
-            Default is Euclid IST: Forecasting choices.
-
-        Returns
-        -------
-        bi_val: float of numpy.ndarray
-            Value(s) of photometric galaxy bias at input redshift(s)
-        """
-
-        if bin_edges is None:
-            bin_edges = np.array([0.001, 0.418, 0.560, 0.678, 0.789,
-                                  0.900, 1.019, 1.155, 1.324, 1.576, 2.50])
-
-        z_in_range = rb.coerce(redshift, bin_edges)
-        return self.cosmo_dic['b_inter'](z_in_range)
+        return rb.linear_interpolator(redshift_means, istf_bias_list)
 
     def poly_phot_galbias(self, redshift):
         r"""Polynomial Phot Galbias
@@ -861,13 +875,9 @@ class Cosmology:
         Computes galaxy bias(es) for the photometric GC probes
         at a given redshift z
 
-        The bias model is selected from the key 'bias_model'
-        in cosmo_dic.
-        The implemented models are:
-
-            #. Linear interpolation
-            #. Bias = 1
-            #. Polynomial bias function
+        The bias model is implemented in the method
+        'create_phot_galbias', which must be called before,
+        in order to use this function.
 
         Parameters
         ----------
@@ -879,17 +889,8 @@ class Cosmology:
         numpy.ndarray of float
             Value(s) of photometric galaxy bias at input redshift(s)
         """
-        bias_model = self.cosmo_dic['bias_model']
 
-        if bias_model == 1:
-            return self.istf_phot_galbias(redshift)
-        elif bias_model == 2:
-            return 1.0
-        elif bias_model == 3:
-            return self.poly_phot_galbias(redshift)
-        else:
-            raise ValueError('Parameter bias_model out of range:'
-                             f'{bias_model}')
+        return self.cosmo_dic['b_inter'](redshift)
 
     def istf_spectro_galbias(self, redshift):
         """Istf Spectro Galbias
@@ -1084,7 +1085,8 @@ class Cosmology:
 
         .. math::
             f_{\rm IA}(z) &= -\mathcal{A_{\rm IA}}\mathcal{C_{\rm IA}}\
-            \frac{\Omega_{m,0}}{D(z)}(1 + z)^{\eta_{\rm IA}}\
+            \frac{\Omega_{m,0}}{D(z)}\
+            [(1 + z)/(1 + z_{\rm pivot})]^{\eta_{\rm IA}}\
             [\langle L \rangle(z) /L_{\star}(z)]^{\beta_{\rm IA}}\\
 
         Parameters
@@ -1119,12 +1121,14 @@ class Cosmology:
                 redshift = redshift.reshape(-1, 1)
 
         c1 = 0.0134
+        pivot_redshift = \
+            self.cosmo_dic['nuisance_parameters']['pivot_redshift']
         aia = self.cosmo_dic['nuisance_parameters']['aia']
         nia = self.cosmo_dic['nuisance_parameters']['nia']
         bia = self.cosmo_dic['nuisance_parameters']['bia']
         omegam = self.cosmo_dic['Omm']
         fia = (-aia * c1 * omegam / growth *
-               (1 + redshift) ** nia *
+               ((1 + redshift) / (1 + pivot_redshift)) ** nia *
                self.cosmo_dic['luminosity_ratio_z_func'](redshift) ** bia)
         return fia
 
@@ -1419,9 +1423,6 @@ class Cosmology:
         # Update nonlinear module, by calling the update_dic method
         # of the nonlinear instance
         self.nonlinear.update_dic(self.cosmo_dic)
-        # Update dictionary with bias interpolator and power spectra
-        if self.cosmo_dic['bias_model'] == 1:
-            self.istf_phot_galbias_interpolator()
-        elif self.cosmo_dic['bias_model'] == 3:
-            self.cosmo_dic['b_inter'] = self.poly_phot_galbias
+        # Update dictionary with bias function and power spectra
+        self.create_phot_galbias()
         self.obtain_power_spectra()

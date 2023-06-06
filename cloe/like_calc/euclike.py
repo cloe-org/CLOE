@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Euclike
+"""EUCLIKE
 
-Contains class to compute the Euclid likelihood
+Contains class to compute the Euclid likelihood.
 """
 
 import numpy as np
@@ -15,7 +15,7 @@ from cloe.auxiliary.matrix_transforms import BNT_transform
 
 class EuclikeError(Exception):
     r"""
-    Class to define Exception Error
+    Class to define Exception Error.
     """
 
     pass
@@ -27,7 +27,7 @@ class Euclike:
     """
 
     def __init__(self, data, observables):
-        """Initialize
+        """Initialise.
 
         Constructor of the class Euclike. The data and covariance are
         read and arranged into their final format only once here.
@@ -36,10 +36,10 @@ class Euclike:
         ----------
         data: dict
             Dictionary containing specifications for data loading and handling,
-            to be passed to the data reader module.
+            to be passed to the data reader module
         observables: dict
             Dictionary containing specification for the chosen observables by
-            the user.
+            the user
         """
         self.observables = observables
         self.do_photo = (any(observables['selection']['WL'].values()) or
@@ -126,11 +126,11 @@ class Euclike:
         # Create data vectors and covariances and mask them
 
     def get_masked_data(self):
-        """Get Masked Data
+        """Gets masked data.
 
         Creates the data vectors and covariances for photometric and
         spectroscopic probes, creates instances of the masking class for each
-        and applies the masking to the data and covariances
+        and applies the masking to the data and covariances.
         """
         if self.do_photo:
             # precompute matrix transforms needed for photo data
@@ -228,14 +228,15 @@ class Euclike:
                                  "spectro covariance")
 
     def create_photo_data(self):
-        """Create Photo Data
+        """Arranges the photometric data.
 
-        Arranges the photo data vector for the likelihood into its final format
+        Arranges the photometric data vector for the likelihood
+        into its final format.
 
         Returns
         -------
-        datavec_dict: dict
-            returns a dictionary of arrays with the transformed photo data
+        Photometric data vector: dict
+            Dictionary of arrays with the transformed photo data
         """
 
         datavec_dict = {'GC-Phot': [], 'WL': [], 'XC-Phot': [], 'all': []}
@@ -282,7 +283,7 @@ class Euclike:
         return datavec_dict
 
     def create_photo_theory(self, dictionary):
-        """Create Photo Theory
+        """Creates the photometric theory.
 
         Obtains the photometric theory for the likelihood.
         The theory is evaluated only for the probes specified in the masking
@@ -292,15 +293,15 @@ class Euclike:
         Parameters
         ----------
         dictionary: dict
-            cosmology dictionary from the Cosmology class which is updated at
-            each sampling step
+            Cosmology dictionary from the :obj:`cosmology` class which
+            is updated at each sampling step
 
         Returns
         -------
-        photo_theory_vec: array
-            returns an array with the photo theory vector.
+        Photometric theory vector: numpy.ndarray
+            Array with the photo theory vector.
             The elements of the array corresponding to probes for which the
-            theory is not evaluated, are set to zero.
+            theory is not evaluated, are set to zero
         """
 
         self.phot_ins.update(dictionary)
@@ -455,23 +456,24 @@ class Euclike:
                              is not available in CLOE")
 
     def create_spectro_theory(self, dictionary):
-        """Create Spectro Theory
+        """Creates the spectroscopic theory.
 
         Obtains the theory for the likelihood.
-        The theory is evaluated only if the GC-Spectro probe is enabled in the
+        The theory is evaluated only if the GCspectro probe is enabled in the
         masking vector.
 
         Parameters
         ----------
         dictionary: dict
-            cosmology dictionary from the Cosmology class
-            which is updated at each sampling step
+            Cosmology dictionary from the :obj:`cosmology`
+            class which is updated at each sampling step
+
 
         Returns
         -------
-        theoryvec: list
-            returns the theory array with same indexing/format as the data.
-            If the GC-Spectro probe is not enabled in the masking vector,
+        Spectroscopic theory vector: list
+            Theory array with same indexing/format as the data.
+            If the GCspectro probe is not enabled in the masking vector,
             an array of zeros of the same size is returned.
         """
         # This is something that Sergio needs to change
@@ -504,14 +506,15 @@ class Euclike:
             return theoryvec
 
     def create_spectro_data(self):
-        """Create Spectro Data
+        """Arranges the spectroscopic data.
 
-        Arranges the data vector for the likelihood into its final format
+        Arranges the data vector for the likelihood into its final format.
 
         Returns
         -------
-        datavec: list
-            returns the data as a single array across z, mu, k
+        Spectroscopic data vector: list
+            Data organised as a single array
+            across redshift, cosine and wavenumber
         """
 
         datavec = []
@@ -526,14 +529,16 @@ class Euclike:
         return datavec
 
     def create_spectro_cov(self):
-        """Create Spectro Cov
+        """Arranges the spectroscopic covariance.
 
-        Arranges the covariance for the likelihood into its final format
+        Arranges the spectroscopic covariance for the likelihood
+        into its final format.
 
         Returns
         -------
-        covfull: float N x N matrix
-            returns a single covariance from sub-covariances (split in z)
+        Spectroscopic covariance: numpy.ndarray
+            Single NXN covariance from sub-covariances
+            (split in redshift)
         """
 
         # covnumk generalizes so that each z can have different k binning
@@ -564,22 +569,22 @@ class Euclike:
         return covfull
 
     def loglike(self, dictionary, npar=None):
-        """Loglike
+        """Natural logarithm of the likelihood.
 
-        Calculates the log-likelihood for a given model
+        Calculates the log-likelihood for a given model.
 
         Parameters
         ----------
         dictionary: dict
-            cosmology dictionary from the Cosmology class
+            Cosmology dictionary from the :obj:`cosmology` class
             which is updated at each sampling step
         npar: int
-            number of sampled parameters (needed in case of
+            Number of sampled parameters (needed in case of
             numerical covariances, optional, default None)
 
         Returns
         -------
-        loglike_tot: float
+        Likelihood: float
             loglike = Ln(likelihood) for the Euclid observables
         """
 

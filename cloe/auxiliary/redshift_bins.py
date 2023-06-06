@@ -1,7 +1,7 @@
-"""redshift_bins
+"""REDSHIFT BINS
 
-Contains common function to operate on redshift bin edges
-and bin-dependent nuisance parameters.
+Contains common functions to operate on redshift bin edges
+and redshift dependent nuisance parameters.
 """
 
 import numpy as np
@@ -10,22 +10,22 @@ from scipy import interpolate
 
 def coerce(zs, redshift_edges, is_sorted=False):
     """
-    Return the redshift(s) coerced within the edges.
+    Returns the redshift(s) coerced within the edges.
 
     Parameters
     ----------
     zs: float or numpy.ndarray or list
         Input redshift(s) to be binned
     redshift_edges: numpy.ndarray
-        Array of redshift bin edges.
-        It has to be 1-dimensional.
+        Array of redshift bin edges
+        It has to be 1-dimensional
     is_sorted: bool (optional)
-        Specifies whether redshift_edges is sorted.
+        Specifies whether redshift_edges is sorted
 
     Returns
     -------
-    coerced_zs: float or numpy.ndarray
-        Coerced redshift(s)
+    Coerced redshifts: float or numpy.ndarray
+        Redshift(s) coerced between edges
     """
     min_edge = redshift_edges[0] if is_sorted else min(redshift_edges)
     max_edge = redshift_edges[-1] if is_sorted else max(redshift_edges)
@@ -34,29 +34,29 @@ def coerce(zs, redshift_edges, is_sorted=False):
 
 def find_bin(zs, redshift_edges, check_bounds=False):
     """
-    Return the redshift bin(s) to which zs in input belongs.
+    Returns the redshift bin(s) to which redshift in input belongs.
 
     Parameters
     ----------
-    zs: float or numpy.array or list
-        Input redshift(s) to be binned.
+    zs: float or numpy.ndarray or list
+        Input redshift(s) to be binned
     redshift_edges: numpy.ndarray
-        Array of redshift bin edges.
-        It has to be 1-dimensional and monotonic.
+        Array of redshift bin edges
+        It has to be 1-dimensional and monotonic
     check_bounds: bool
         If True, raises ValueError for
-        input zs outside the boundaries of redshift_edges.
+        input `zs` outside the boundaries of `redshift_edges`
 
     Returns
     -------
-    zs_bin: int or numpy.ndarray of int
+    Redshift bins: int or numpy.ndarray of int
         Bin(s) of the redshift.
         The bin indexing is 1-based:
         zs in the first bin returns 1.
-        If check_bounds is False,
+        If `check_bounds` is False,
         zs below the first bin returns 0,
-        and zs above the last bin returns
-        the length of redshift_edges.
+        and `zs` above the last bin returns
+        the length of `redshift_edges`
 
     Raises
     ------
@@ -83,30 +83,30 @@ def find_bin(zs, redshift_edges, check_bounds=False):
 
 def compute_means_of_consecutive(redshift_edges):
     """
-    Return the means of consecutive redshift edges.
+    Returns the means of consecutive redshift edges.
 
     Parameters
     ----------
     redshift_edges: numpy.ndarray
-        Array of redshift bins.
-        It has to be 1-dimensional and monotonic.
+        Array of redshift bins
+        It has to be 1-dimensional and monotonic
 
     Returns
     -------
-    means: numpy.ndarray
-        Means of consecutive redshift edges.
+    Means: numpy.ndarray
+        Means of consecutive redshift edges
     """
     return (redshift_edges[1:] + redshift_edges[:-1]) / 2
 
 
 def reduce(z_bins, lower_bound, upper_bound):
     """
-    Selects z_bins elements within boundaries.
+    Selects `z_bins` elements within boundaries.
 
     Parameters
     ----------
-    z_bins: ndarray
-        Array of redshift bins.
+    z_bins: numpy.ndarray
+        Array of redshift bins
     lower_bound: float
         Lower bound for the selection (>=)
     upper_bound: float
@@ -114,15 +114,15 @@ def reduce(z_bins, lower_bound, upper_bound):
 
     Returns
     -------
-    reduced_z_bins: ndarray
-        Selected z_bins elements greater (or equal) than lower bound
-        and less than upper bound.
+    Reduced bins: ndarray
+        Selected `z_bins` elements greater (or equal) than lower
+        bound and less than upper bound
     """
     return z_bins[(z_bins >= lower_bound) & (z_bins < upper_bound)]
 
 
 def linear_interpolator(x_values, y_values):
-    r"""Linear interpolator
+    r"""Linear interpolator.
 
     Returns a linear interpolator for the x and y values in input.
     Below the first x value, the interpolator
@@ -138,58 +138,52 @@ def linear_interpolator(x_values, y_values):
     ----------
     x_values: numpy.ndarray of float
         x-values for the interpolator.
-        Default is Euclid IST Forecasting choices arXiv:1910.0927
-        (tomographic redshifts evaluated in the bin center)
     y_values: numpy.ndarray of float
-        y-values for the interpolator.
+        y-values for the interpolator
 
     Returns
     -------
-    interpolator: numpy.ndarray of float
-        Linear interpolator.
+    Interpolator: numpy.ndarray of float
+        Linear interpolator
     """
-    if x_values is None:
-        x_values = [0.2095, 0.489, 0.619, 0.7335,
-                    0.8445, 0.9595, 1.087, 1.2395,
-                    1.45, 2.038]
-
     return interpolate.interp1d(x_values, y_values,
                                 fill_value=(y_values[0], y_values[-1]),
                                 bounds_error=False)
 
 
 def select_spectro_parameters(redshift, nuis_dict, bin_edges=None):
-    """Selector of parameters for GCspectro recipes
+    """Selector of parameters for spectroscopic recipes.
 
-    Returns dictionary of GCspectro parameters based on input redshift,
-    according to the specified bin edges for the spectroscopic bins.
+    Returns dictionary of spectroscopic parameters based on input
+    redshift, according to the specified bin edges for the spectroscopic
+    bins.
 
     Parameters
     ----------
     redshift: float or numpy.ndarray
-        Redshift(s) at which to provide GCspectro parameters.
+        Redshift(s) at which to provide GCspectro parameters
     nuis_dict: dict
         Dictionary containing pairs of all the nuisance parameters and
-        their current values.
+        their current values
     bin_edges: numpy.ndarray
         Array containing the edges of the redshift bins for GSspectro.
-        Default is Euclid IST:F choices.
+        Default is Euclid IST:F choices
 
     Returns
     -------
-    par_dict: dict
+    Params dictionary: dict
         Dictionary containing GCspectro parameters for the selected input
         redshift. Dictionary values are float or numpy.ndarray, depending
-        if redshift is a float or a numpy.ndarray, respectively.
+        if redshift is a float or a numpy.ndarray, respectively
 
     Raises
     ------
     ValueError
         If redshift is outside of the bounds defined by the first
-        and last element of the input bin edges.
+        and last element of the input bin edges
     KeyError
         If nuisance parameter dictionary does not contain expected
-        GCspectro parameters.
+        GCspectro parameters
     """
 
     if bin_edges is None:

@@ -1,4 +1,15 @@
 photo:
+  redshifts:
+  - 0.2095
+  - 0.489
+  - 0.619
+  - 0.7335
+  - 0.8445
+  - 0.9595
+  - 1.087
+  - 1.2395
+  - 1.45
+  - 2.038
   luminosity_ratio: luminosity_ratio.dat
   IA_model: zNLA
   cov_3x2pt: CovMat-3x2pt-{:s}-20Bins.npy

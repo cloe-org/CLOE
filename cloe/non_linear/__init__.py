@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
-"""Nonlinear Module
+"""NONLINEAR MODULE
 
-In this module IST:NL will code up different nonlinear recipes
+This module contains the nonlinear recipes implemented by the Euclid
+Inter-Science Taskforce for Nonlinearities (IST:NL).
+The module :obj:`miscellaneous` is a
+temporary module that mimics the current linear implementation made by
+IST:L and will be substituted by the nonlinear recipes from IST:NL.
 
 """
 

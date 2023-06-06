@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Reader
+"""READER
 
-Contains class to read external data
+Contains class to read external data.
 """
 
 import numpy as np
@@ -14,7 +14,7 @@ from cloe.auxiliary.logger import log_critical
 
 class ReaderError(Exception):
     r"""
-    ReaderError
+    ReaderError.
     """
 
     pass
@@ -26,7 +26,7 @@ class Reader:
     """
 
     def __init__(self, data):
-        """Initialize
+        """Initializes the :obj:`Reader` class.
 
         Parameters
         ----------
@@ -58,23 +58,22 @@ class Reader:
         return
 
     def reader_raw_nz(self, file_dest, file_name):
-        """Reader Raw Nz
+        """Reads in the raw redshift distributions.
 
-        General routine to read the galaxy density
-        distribution n(z) files
+        General routine to read the redshift distribution files.
 
         Parameters
         ----------
         file_dest: str
-            Sub-folder of Reader.data_subdirectory within which to find
-            the n(z) data.
+            Sub-folder of :obj:`Reader.data_subdirectory` within which
+            to find the redshift distribution data
         file_name: str
-            Name of the n(z) files
+            Name of the redshift distribution files
 
         Return
         ------
-        nz_dict: dict
-            dictionary containing raw n(z) data
+        Raw redshift distribution: dict
+            Dictionary containing raw redshift distribution data
         """
         try:
             # Open file and read the content
@@ -92,24 +91,24 @@ class Reader:
                 'n(z) files not found. Please, check out the files')
 
     def reader_luminosity_ratio(self, file_dest, file_name):
-        """Reader luminosity ratio file
+        """Reads in the luminosity ratio file.
 
         General routine to read the the luminosity ratio
         used to compute the IA as a function of redshift
-        data
+        data.
 
         Parameters
         ----------
         file_dest: str
-            Sub-folder of Reader.data_subdirectory within which to find
-            the luminosity ratio as a function of redshift.
+            Sub-folder of :obj:`Reader.data_subdirectory` within which
+            to find the luminosity ratio as a function of redshift
         file_name: str
             Name of the luminosity file
 
         Return
         ------
-        luminosity_ratio_dict: dict
-            dictionary containing raw luminosity ratio data
+        Raw luminosity ratio: dict
+            Dictionary containing raw luminosity ratio data
         """
         try:
             path = Path(self.dat_dir_main, Path(file_dest), Path(file_name))
@@ -123,16 +122,16 @@ class Reader:
                 'Luminosity ratio file not found. Please, check out the file')
 
     def compute_nz(self, file_dest='Photometric'):
-        """Compute Nz
+        """Stores the redshift distributions.
 
-        Function to save n(z) dictionaries as attributes of the Reader class
-        It saves the interpolator of the raw data.
+        Function to save the redshift distribution dictionaries
+        as attributes of the :obj:`Reader` class.
 
         Parameters
         ----------
         file_dest: str
-            Sub-folder of Reader.data_subdirectory within which to find
-            the n(z) data.
+            Sub-folder of :obj:`Reader.data_subdirectory` within which
+            to find the redshift distribution data
         """
         # GC-Phot n(z) data
         file_name_GC = self.data['photo']['ndens_GC']
@@ -160,16 +159,17 @@ class Reader:
                                 list(self.nz_dict_WL_raw.keys())[1:]})
 
     def compute_luminosity_ratio(self, file_dest='Photometric'):
-        """Compute luminosity ratio
+        """Stores luminosity ratio.
 
-        Function to save luminosty ratio dict as attributes of the Reader class
+        Function to save luminosty ratio dict as attributes of the
+        :obj:`Reader` class.
         It saves the interpolator of the raw data.
 
         Parameters
         ----------
         file_dest: str
-            Sub-folder of Reader.data_subdirectory within which to find
-            the luminosity ratio data.
+            Sub-folder of :obj:`Reader.data_subdirectory` within which
+            to find the luminosity ratio data.
         """
         file_name_lum = self.data['photo']['luminosity_ratio']
         self.luminosity_ratio = self.reader_luminosity_ratio(
@@ -180,17 +180,17 @@ class Reader:
                 self.luminosity_ratio['luminosity'])
 
     def read_GC_spectro(self, file_dest='Spectroscopic/data'):
-        """Read GC Spectro
+        """Reads in the spectroscopic data.
 
         Function to read OU-LE3 spectroscopic galaxy clustering files, based
         on location provided to Reader class. Adds contents to the data
-        dictionary (Reader.data_dict).
+        dictionary (:obj:`Reader.data_dict`).
 
         Parameters
         ----------
         file_dest: str
-            Sub-folder of self.data_subdirectory within which to find
-            spectroscopic data.
+            Sub-folder of :obj:`self.data_subdirectory` within which to find
+            spectroscopic data
         """
         root = self.data['spectro']['root']
         redshifts = self.data['spectro']['redshifts']
@@ -284,17 +284,17 @@ class Reader:
         return
 
     def read_phot(self, file_dest='Photometric/data'):
-        """Read Phot
+        """Reads in the photometric data.
 
         Function to read OU-LE3 photometric galaxy clustering and weak lensing
         files, based on location provided to Reader class. Adds contents to
-        the data dictionary (Reader.data_dict).
+        the data dictionary the data dictionary (:obj:`Reader.data_dict`).
 
         Parameters
         ----------
         file_dest: str
-            Sub-folder of self.data_subdirectory within which to find
-            photometric data.
+            Sub-folder of :obj:`self.data_subdirectory` within which to find
+            photometric data
         """
         root_GC = self.data['photo']['root_GC']
         root_WL = self.data['photo']['root_WL']
@@ -371,7 +371,7 @@ class Reader:
         return
 
     def _unpack_3x2pt_cov(self, tx2_cov):
-        """Unpack 3x2pt covariance matrix
+        """Unpacks 3x2pt covariance matrix.
 
         Unpacks the full 3x2pt covariance matrix and reshapes it in order to
         have the different probes as the outermost variable, the
@@ -381,13 +381,13 @@ class Reader:
         Parameters
         ----------
         tx2_cov: numpy.ndarray
-            2-dimensional array containing the 3x2pt covariance matrix.
+            2-dimensional array containing the 3x2pt covariance matrix
 
         Returns
         -------
-        new_tx2_cov: numpy.ndarray
+        3x2pt covariance: numpy.ndarray
             2-dimensional array containing the reshaped 3x2pt covariance
-            matrix.
+            matrix
         """
         nbins_wl = self.num_bins_wl
         nbins_xc = self.num_bins_xcphot

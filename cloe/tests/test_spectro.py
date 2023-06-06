@@ -1,6 +1,6 @@
 """UNIT TESTS FOR SPECTRO
 
-This module contains unit tests for the Spectro sub-module of the
+This module contains unit tests for the :obj:`spectro` sub-module of the
 spectroscopy survey module.
 
 """

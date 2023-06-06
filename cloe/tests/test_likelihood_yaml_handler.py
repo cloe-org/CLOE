@@ -1,3 +1,11 @@
+"""UNIT TESTS FOR LIKELIHOOD YAML HANDLER
+
+This module contains unit tests for the
+:obj:`likelihood_yam_handler` module.
+
+"""
+
+
 from unittest import TestCase
 from unittest.mock import patch
 from cloe.auxiliary.likelihood_yaml_handler import *

@@ -1,4 +1,7 @@
 """COBAYA INTERFACE
+
+Contains the interface with Cobaya. It defines the Euclid Likelihood and
+inherits from the Cobaya likelihood :py:mod:`cobaya.likelihood.Likelihood`.
 """
 
 
@@ -23,7 +26,7 @@ from cloe.auxiliary.params_converter import camb_to_classy
 
 class CobayaInterfaceError(Exception):
     r"""
-    Class to define Exception Error
+    Class to define Exception Error.
     """
 
     pass
@@ -31,20 +34,19 @@ class CobayaInterfaceError(Exception):
 
 class EuclidLikelihood(Likelihood):
     r"""
-    Class to define the Euclid Likelihood
+    Class to define the :obj:`EuclidLikelihood`.
 
-    Inherits from the Likelihood class
-    of Cobaya
+    Inherits from the :obj:`Likelihood` class
+    of Cobaya.
     """
 
     def initialize(self):
-        r"""Initialize
+        r"""Initialise.
 
-        Set up values for initial variables
-        and create instance of Cosmology class
+        Sets up values for initial variables
+        and creates instance of :obj:`cosmology` class.
 
         """
-
         self.k_max_Boltzmann = 50.0
         if self.k_min_extrap < 1E-5:
             warnings.warn(
@@ -91,10 +93,14 @@ class EuclidLikelihood(Likelihood):
         self.cosmo = Cosmology()
         # Adding GCspectro redshift bins to cosmo dictionary and setting up
         # the internal class for Pgg_spectro with this information.
-        self.cosmo.nonlinear.theory['redshift_bins'] = \
+        self.cosmo.nonlinear.theory['redshift_bins_means_spectro'] = \
             self.data['spectro']['edges']
         self.cosmo.nonlinear.set_Pgg_spectro_model()
-        self.cosmo.cosmo_dic['redshift_bins'] = self.data['spectro']['edges']
+        self.cosmo.cosmo_dic['redshift_bins_means_spectro'] = \
+            self.data['spectro']['edges']
+        # Adding Redshift bins means for the photo catalogue
+        self.cosmo.cosmo_dic['redshift_bins_means_phot'] = \
+            self.data['photo']['redshifts']
         # Initialize the fiducial model
         self.set_fiducial_cosmology()
         # "Here we add the fiducial Hubble function (fid_H_z_func),
@@ -124,10 +130,11 @@ class EuclidLikelihood(Likelihood):
         self.cosmo.cosmo_dic['obs_selection'] = self.observables['selection']
 
     def set_fiducial_cosmology(self):
-        r"""Sets the fiducial cosmology class
+        r"""Sets the fiducial cosmology class.
 
-        This method reads the input fiducial cosmology from the instance of
-        the EuclidLikelihood class, and sets up a dedicated Cosmology class.
+        Method that reads the input fiducial cosmology from the instance of
+        the :obj:`EuclidLikelihood` class, and sets up a
+        dedicated :obj:`cosmology` class.
         """
         # This will work if CAMB is installed globally
         self.fiducial_cosmology = Cosmology()
@@ -256,10 +263,14 @@ class EuclidLikelihood(Likelihood):
             self.z_win)
         # In order to make the update_cosmo_dic method to work, we need to
         # specify also in this case the information on the GCspectro bins
-        self.fiducial_cosmology.cosmo_dic['redshift_bins'] = \
+        # and Photo bins
+        self.fiducial_cosmology.cosmo_dic['redshift_bins_means_spectro'] = \
             self.data['spectro']['edges']
-        self.fiducial_cosmology.nonlinear.theory['redshift_bins'] = \
+        self.fiducial_cosmology.nonlinear.theory[
+            'redshift_bins_means_spectro'] = \
             self.data['spectro']['edges']
+        self.fiducial_cosmology.cosmo_dic['redshift_bins_means_phot'] = \
+            self.data['photo']['redshifts']
         self.fiducial_cosmology.nonlinear.set_Pgg_spectro_model()
         # Update dictionary with interpolators
         self.fiducial_cosmology.cosmo_dic['luminosity_ratio_z_func'] = \
@@ -268,16 +279,16 @@ class EuclidLikelihood(Likelihood):
             self.fiducial_cosmology.cosmo_dic['z_win'], 0.05)
 
     def get_requirements(self):
-        r"""Get Requirements
+        r"""Gets requirements.
 
-        New 'theory needs'. Asks for the theory
-        requirements to the theory code via
-        Cobaya.
+        Updates new `theory needs`. Asks for the theory
+        requirements to the theory code via Cobaya.
 
         Returns
         -------
-        dictionary specifying quantities i
-        calculated by a theory code are needed
+        Dictionary: dict
+             Dictionary with quantitities
+             calculated by the theory code
 
         """
         requirements = \
@@ -302,14 +313,14 @@ class EuclidLikelihood(Likelihood):
         return requirements
 
     def passing_requirements(self, model, info, **params_dic):
-        r"""Passing Requirements
+        r"""Passing requirements.
 
         Gets cosmological quantities from the theory code
-        from COBAYA and passes them to an instance of the
+        from Cobaya and passes them to an instance of the
         Cosmology class.
 
-        Cosmological quantities are saved in the cosmo_dic
-        attribute of the Cosmology class.
+        Cosmological quantities are saved in the
+        cosmology dictionary attribute of the Cosmology class.
 
         """
 
@@ -510,11 +521,11 @@ class EuclidLikelihood(Likelihood):
                     self.observables_specifications)
 
     def logp(self, **params_values):
-        r"""Logp
+        r"""Logp.
 
-        Executes passing_requirements,
+        Executes ``passing_requirements``,
         updates cosmology dictionary,
-        calls log_likelihood
+        calls :obj:`log_likelihood`.
 
         Parameters
         ----------
@@ -523,8 +534,8 @@ class EuclidLikelihood(Likelihood):
               the theory code or asked by the likelihood
         Returns
         -------
-        loglike: float
-            value of the function log_likelihood
+        Likelihood: float
+            Value of the function :obj:`log_likelihood`
         """
         model = None
         info = None

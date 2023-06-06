@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """YAML HANDLER
 
-Functions for reading and writing yaml files, these are completely transparent
-to the CLOE-specific configuration.
+Functions for reading and writing :obj:`yaml` files, these are completely
+transparent to the CLOE-specific configuration.
 """
 
 import yaml
@@ -11,26 +11,27 @@ from os.path import exists
 
 
 def yaml_read(file_name):
-    r"""Read a stream from a yaml file.
+    r"""Reads a stream from a yaml file.
 
     Parameters
     ----------
-    file_name: Path or str
-        The name of the file where to read the configuration from.
+    file_name: str
+        The name of the file where to read the configuration from
 
     Returns
     -------
-    dict
+    Dictionary: dict
        The configuration read from the input file
 
     Notes
     -----
-    The reading is performed using the python builtin i/o functions and the
-    pyyaml package.
+    The reading is performed using the python built-in :obj:`io`
+    functions and the :obj:`PyYAML` package.
     Any error checking is delegated to these packages.
-    In this function we use the yaml.load() with Loader=yaml.FullLoader:
-    according to the pyyaml documentation could be dangerous if used on
-    files from untrusted sources.
+    In this function we use the :obj:`yaml.load()` with
+    :obj:`Loader=yaml.FullLoader` according to the :obj:`PyYAML`
+    documentation could be dangerous if used on files from
+    untrusted sources.
     """
 
     with open(file_name, 'r') as file:
@@ -38,29 +39,29 @@ def yaml_read(file_name):
 
 
 def yaml_read_and_check_dict(file_name, needed_keys: list):
-    r"""Read a stream from a yaml file and check the dictionary.
+    r"""Reads a stream from a :obj:`yaml` file and check the dictionary.
 
-    Get a dictionary from a yaml file,
+    Gets a dictionary from a :obj:`yaml` file,
     checks that the dictionary contains the specified needed keys.
 
     Parameters
     ----------
-    file_name: Path or str
-        The name of the file where to read the dictionary from.
-    needed_keys: list of str
+    file_name: str
+        The name of the file where to read the dictionary from
+    needed_keys: list, str
         The keys that must be in the dictionary
 
     Returns
     -------
-    dictionary: dict
+    Dictionary: dict
         The dictionary read from the input file
 
     Raises
     ------
     TypeError
-        if a dictionary is not read from the yaml file
+        If a dictionary is not read from the :obj:`yaml` file
     KeyError
-        if any of the needed keys are not present in the dictionary.
+        If any of the needed keys are not present in the dictionary.
     """
 
     dictionary = yaml_read(file_name)
@@ -76,28 +77,29 @@ def yaml_read_and_check_dict(file_name, needed_keys: list):
 
 
 def yaml_write(file_name, config, overwrite=False):
-    r"""Write a dictionary to a yaml file.
+    r"""Writes a dictionary to a yaml file.
 
     Parameters
     ----------
-    file_name: Path or str
-        The name of the file the stream will be written to.
+    file_name: str
+        The name of the file the stream will be written to
     config: dict
         The dictionary to be written to file
     overwrite: bool
-        Overwrite the output file, if already exists?
+        Overwrites the output file, if already exists
 
     Raises
     ------
     TypeError
-       if the config input parameter is not a dict
+       If the config input parameter is not a dictionary
     RuntimeError
-        if the output file already exists and overwrite is set to False
+        If the output file already exists and overwrite is set to
+        :obj:`False`
 
     Notes
     -----
-    The writing is performed using the python builtin i/o functions and the
-    pyyaml package.
+    The writing is performed using the python built-in :obj:`io` functions
+    and the :obj:`PyYAML` package
     """
 
     if type(config) is not dict:

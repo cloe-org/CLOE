@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-"""CLOE User Interface Module
+"""CLOE USER INTERFACE MODULE
 
-This module implements the top level user interface of CLOE
+This module implements the top level user interface of CLOE.
 
 """
 

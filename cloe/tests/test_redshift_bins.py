@@ -1,8 +1,7 @@
 """UNIT TESTS FOR REDSHIFT_BINS
 
 This module contains unit tests
-for the redshift_bins module.
-=======
+for the :obj:`redshift_bins` module.
 
 """
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Getdist_routines
+"""GETDIST ROUTINES
 
-Contains interfaces to getdist routines
+Contains interfaces to GetDist routines.
 """
 
 import matplotlib.pyplot as plt
@@ -12,12 +12,12 @@ from cloe.auxiliary.run_method import run_is_interactive
 
 
 def triangle_plot_cobaya(chain_file):
-    r"""Produce a triangle plot for the specified chain
+    r"""Produces a triangle plot for the specified chain.
 
     Parameters
     ----------
     chain_file: str
-       Root name for chain files to be passed to getdist
+       Root name for chain files to be passed to GetDist
     """
     sample = loadMCSamples(chain_file, settings={'ignore_rows': 0.3})
 

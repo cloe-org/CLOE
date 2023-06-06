@@ -1,4 +1,6 @@
-"""Default observables dictionary for unit tests
+"""MOCK OBSERVABLES
+
+Default observables dictionary for unit tests.
 
 """
 
@@ -7,7 +9,7 @@ from cloe.tests.test_input.data import mock_data
 
 
 def build_mock_observables(reader=None):
-    r"""Build mock observables dictionary for unit tests
+    r"""Builds mock observables dictionary for unit tests.
     """
     if reader is None:
         reader = Reader(mock_data)

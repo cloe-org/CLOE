@@ -6,14 +6,14 @@ This module contains a class with helper methods for spectro test cases.
 
 
 class SpectroTestParent:
-    """Spectroscopic Test Parent
+    """Spectroscopic test parent.
 
     Parent class to be used in tests of spectro.
 
     """
 
     def Pgg_spectro_def(self, redshift, k_scale, mu_rsd):
-        r"""PGG Spectro Definition
+        r"""Pgg spectro definition.
 
         Computes the redshift-space galaxy-galaxy power spectrum for the
         spectroscopic probe.
@@ -26,18 +26,18 @@ class SpectroTestParent:
         Parameters
         ----------
         redshift: float
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         k_scale: float
-            k-mode at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
         mu_rsd: float
-            cosinus of the angle between the pair separation and
+            Cosinus of the angle between the pair separation and
             the line of sight
 
         Returns
         -------
-        pval: float
+        Power spectrum: float
             Value of galaxy-galaxy power spectrum
-            at a given redshift, k-mode and :math:`\mu_{k}`
+            at a given redshift, wavenumber and :math:`\mu_{k}`
             for galaxy cclustering spectroscopic
 
         """

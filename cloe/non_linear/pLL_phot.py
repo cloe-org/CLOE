@@ -1,7 +1,7 @@
 """
-module: pLL_phot
+pLL_phot
 
-Contains recipes for the lensing x lensing power spectrum.
+This module contains recipes for the lensing x lensing power spectrum.
 """
 
 from cloe.non_linear.power_spectrum import PowerSpectrum
@@ -9,24 +9,24 @@ from cloe.non_linear.power_spectrum import PowerSpectrum
 
 class PLL_phot_model(PowerSpectrum):
     r"""
-    Class for computation of lensing x lensing power spectrum
+    Class for computation of lensing x lensing power spectrum.
     """
 
     def Pmm_phot_def(self, redshift, wavenumber):
-        r"""Pmm Phot Def
+        r"""Pmm phot def.
 
         Computes the matter-matter power spectrum for the photometric probe.
 
         Parameters
         ----------
         redshift: float
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         wavenumber: float or list or numpy.ndarray
-            wavenumber at which to evaluate the  power spectrum.
+            Wavenumber at which to evaluate the  power spectrum
 
         Returns
         -------
-        pval:  float or numpy.ndarray
+        Photometric matter-matter power spectrum: float or numpy.ndarray
             Value of matter-matter power spectrum
             at a given redshift and wavenumber for photometric probes
         """
@@ -34,7 +34,7 @@ class PLL_phot_model(PowerSpectrum):
         return pval
 
     def Pmm_phot_halo(self, redshift, wavenumber):
-        r"""Pmm Phot Halo
+        r"""Pmm phot halo.
 
         Computes the matter-matter power spectrum for the photometric probe
         using halo model based codes.
@@ -42,13 +42,13 @@ class PLL_phot_model(PowerSpectrum):
         Parameters
         ----------
         redshift: float
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         wavenumber: float or list or numpy.ndarray
-            wavenumber at which to evaluate the  power spectrum.
+            Wavenumber at which to evaluate the  power spectrum
 
         Returns
         -------
-        pval:  float or numpy.ndarray
+        Halo model phot power spectrum: float or numpy.ndarray
             Value of matter-matter power spectrum
             at a given redshift and wavenumber for photometric probes
         """
@@ -56,7 +56,7 @@ class PLL_phot_model(PowerSpectrum):
         return pval
 
     def Pmm_phot_emu(self, redshift, wavenumber):
-        r"""Pmm Phot Def
+        r"""Pmm phot def.
 
         Computes the matter-matter power spectrum for the photometric probe
         with the EuclidEmu2 or the BACCO emulator.
@@ -64,13 +64,13 @@ class PLL_phot_model(PowerSpectrum):
         Parameters
         ----------
         redshift: float
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         wavenumber: float or list or numpy.ndarray
-            wavenumber at which to evaluate the  power spectrum.
+            Wavenumber at which to evaluate the  power spectrum
 
         Returns
         -------
-        pval:  float or numpy.ndarray
+        Emulator phot matter-matter power spectrum: float or numpy.ndarray
             Value of matter-matter power spectrum
             at a given redshift and wavenumber for photometric probes
         """
@@ -79,26 +79,27 @@ class PLL_phot_model(PowerSpectrum):
         return pval
 
     def Pii_def(self, redshift, wavenumber):
-        r"""Pii Def
+        r"""Pii def.
 
         Computes the intrinsic alignment (intrinsic-intrinsic) power spectrum.
 
         .. math::
             P_{\rm II}(z, k) = [f_{\rm IA}(z)]^2P_{\rm \delta\delta}(z, k)
 
-        Note: either redshift or wavenumber must be a float (ex. simultaneously
-        setting both of them to numpy.ndarray makes the code crash)
+        Note: either redshift or wavenumber must be a float
+        (e.g. simultaneously setting both of them to :obj:`numpy.ndarray`
+        makes the code crash)
 
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         wavenumber: float or list or numpy.ndarray
-            wavenumber at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
 
         Returns
         -------
-        pval: float or numpy.ndarray
+        Intrinsic alignment power spectrum: float or numpy.ndarray
             Value of intrinsic alignment power spectrum
             at a given redshift and wavenumber
         """
@@ -107,7 +108,7 @@ class PLL_phot_model(PowerSpectrum):
         return pval
 
     def Pii_halo(self, redshift, wavenumber):
-        r"""Pii Def
+        r"""Pii def.
 
         Computes the intrinsic alignment (intrinsic-intrinsic) power spectrum
         assuming the nonlinear alignment model. Uses halo model based codes
@@ -117,19 +118,21 @@ class PLL_phot_model(PowerSpectrum):
             P_{\rm II}(z, k) = [f_{\rm IA}(z)]^2\
             P_{\rm \delta\delta}^{\rm NL}(z, k)
 
-        Note: either redshift or wavenumber must be a float (ex. simultaneously
-        setting both of them to numpy.ndarray makes the code crash)
+        Note: either redshift or wavenumber must be a float
+        (e.g. simultaneously setting both of them to :obj:`numpy.ndarray`
+        makes the code crash)
+
 
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         wavenumber: float or list or numpy.ndarray
-            wavenumber at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
 
         Returns
         -------
-        pval: float or numpy.ndarray
+        Halo model intrinsic alignment power spectrum: float or numpy.ndarray
             Value of intrinsic alignment power spectrum
             at a given redshift and wavenumber
         """
@@ -138,7 +141,7 @@ class PLL_phot_model(PowerSpectrum):
         return pval
 
     def Pii_emu(self, redshift, wavenumber):
-        r"""Pii emu
+        r"""Pii emu.
 
         Computes the intrinsic alignment (intrinsic-intrinsic) power spectrum
         assuming the nonlinear alignment model. Uses the EuclidEmu2 or the
@@ -148,19 +151,20 @@ class PLL_phot_model(PowerSpectrum):
             P_{\rm II}(z, k) = [f_{\rm IA}(z)]^2\
             P_{\rm \delta\delta}^{\rm NL}(z, k)
 
-        Note: either redshift or wavenumber must be a float (ex. simultaneously
-        setting both of them to numpy.ndarray makes the code crash)
+        Note: either redshift or wavenumber must be a float
+        (e.g. simultaneously setting both of them to
+        :obj:`numpy.ndarray` makes the code crash)
 
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         wavenumber: float or list or numpy.ndarray
-            wavenumber at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
 
         Returns
         -------
-        pval: float or numpy.ndarray
+        Emulator intrinsic alignment power spectrum: float or numpy.ndarray
             Value of intrinsic alignment power spectrum
             at a given redshift and wavenumber
         """
@@ -171,26 +175,27 @@ class PLL_phot_model(PowerSpectrum):
         return pval
 
     def Pdeltai_def(self, redshift, wavenumber):
-        r"""Pdeltai Def
+        r"""Pdeltai def.
 
         Computes the density-intrinsic power spectrum.
 
         .. math::
             P_{\rm \delta I}(z, k) = [f_{\rm IA}(z)]P_{\rm \delta\delta}(z, k)
 
-        Note: either redshift or wavenumber must be a float (ex. simultaneously
-        setting both of them to numpy.ndarray makes the code crash)
+        Note: either redshift or wavenumber must be a float
+        (e.g. simultaneously setting both of them to
+        :obj:`numpy.ndarray` makes the code crash).
 
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         wavenumber: float or list or numpy.ndarray
-            wavenumber at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
 
         Returns
         -------
-        pval: float or numpy.ndarray
+        Density-intrinsic power spectrum: float or numpy.ndarray
             Value of density-intrinsic power spectrum
             at a given redshift and wavenumber
         """
@@ -199,7 +204,7 @@ class PLL_phot_model(PowerSpectrum):
         return pval
 
     def Pdeltai_halo(self, redshift, wavenumber):
-        r"""Pdeltai Def
+        r"""Pdeltai def halo model.
 
         Computes the density-intrinsic power spectrum assuming the nonlinear
         linear alignment model. Uses halo model based codes for the matter
@@ -209,19 +214,20 @@ class PLL_phot_model(PowerSpectrum):
             P_{\rm \delta I}(z, k) = [f_{\rm IA}(z)]\
             P_{\rm \delta\delta}^{\rm NL}(z, k)
 
-        Note: either redshift or wavenumber must be a float (ex. simultaneously
-        setting both of them to numpy.ndarray makes the code crash)
+        Note: either redshift or wavenumber must be a float
+        (e.g. simultaneously setting both of them to
+        :obj:`numpy.ndarray` makes the code crash).
 
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         wavenumber: float or list or numpy.ndarray
-            wavenumber at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
 
         Returns
         -------
-        pval: float or numpy.ndarray
+        Halo model density-intrinsic power spectrum: float or numpy.ndarray
             Value of density-intrinsic power spectrum
             at a given redshift and wavenumber
         """
@@ -230,7 +236,7 @@ class PLL_phot_model(PowerSpectrum):
         return pval
 
     def Pdeltai_emu(self, redshift, wavenumber):
-        r"""Pdeltai emu
+        r"""Pdeltai emu.
 
         Computes the density-intrinsic power spectrum assuming the nonlinear
         alignment model. Uses the EuclidEmu2 or the BACCO emulator for the
@@ -240,19 +246,20 @@ class PLL_phot_model(PowerSpectrum):
             P_{\rm \delta I}(z, k) = [f_{\rm IA}(z)]\
             P_{\rm \delta\delta}^{\rm NL}(z, k)
 
-        Note: either redshift or wavenumber must be a float (ex. simultaneously
-        setting both of them to numpy.ndarray makes the code crash)
+        Note: either redshift or wavenumber must be a float
+        (e.g. simultaneously setting both of them to
+        :obj:`numpy.ndarray` makes the code crash).
 
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         wavenumber: float or list or numpy.ndarray
-            wavenumber at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
 
         Returns
         -------
-        pval: float or numpy.ndarray
+        Emulator density-intrinsic power spectrum: float or numpy.ndarray
             Value of density-intrinsic power spectrum
             at a given redshift and wavenumber
         """
@@ -264,27 +271,28 @@ class PLL_phot_model(PowerSpectrum):
         return pval
 
     def Pgi_phot_def(self, redshift, wavenumber):
-        r"""Pgi Phot Def
+        r"""Pgi phot def.
 
         Computes the photometric galaxy-intrinsic power spectrum.
 
         .. math::
             P_{\rm gI}^{\rm photo}(z, k) &=\
-            [f_{\rm IA}(z)]b_g^{\rm photo}(z)P_{\rm \delta\delta}(z, k)\\
+            [f_{\rm IA}(z)]b_{\rm g}^{\rm photo}(z)P_{\rm \delta\delta}(z, k)\\
 
-        Note: either redshift or wavenumber must be a float (ex. simultaneously
-        setting both of them to numpy.ndarray makes the code crash)
+        Note: either redshift or wavenumber must be a float
+        (e.g. simultaneously setting both of them to
+        :obj:`numpy.ndarray` makes the code crash).
 
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         wavenumber: float or list or numpy.ndarray
-            wavenumber at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
 
         Returns
         -------
-        pval: float or numpy.ndarray
+        Photometric galaxy-intrinsic power spectrum: float or numpy.ndarray
             Value of photometric galaxy-intrinsic power spectrum
             at a given redshift and wavenumber
         """
@@ -294,7 +302,7 @@ class PLL_phot_model(PowerSpectrum):
         return pval
 
     def Pgi_phot_halo(self, redshift, wavenumber):
-        r"""Pgi Phot Def
+        r"""Pgi phot def halo.
 
         Computes the photometric galaxy-intrinsic power spectrum assuming a
         linear bias and nonlinear alignment model. Uses halo model based codes
@@ -302,22 +310,23 @@ class PLL_phot_model(PowerSpectrum):
 
         .. math::
             P_{\rm gI}^{\rm photo}(z, k) &=\
-            [f_{\rm IA}(z)]b_g^{\rm photo}(z)\
+            [f_{\rm IA}(z)]b_{\rm g}^{\rm photo}(z)\
             P_{\rm \delta\delta}^{\rm NL}(z, k)\\
 
-        Note: either redshift or wavenumber must be a float (ex. simultaneously
-        setting both of them to numpy.ndarray makes the code crash)
+        Note: either redshift or wavenumber must be a float
+        (e.g. simultaneously setting both of them to
+        :obj:`numpy.ndarray` makes the code crash).
 
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         wavenumber: float or list or numpy.ndarray
-            wavenumber at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
 
         Returns
         -------
-        pval: float or numpy.ndarray
+        Halo model phot galaxy-intrinsic power spectrum: float or numpy.ndarray
             Value of photometric galaxy-intrinsic power spectrum
             at a given redshift and wavenumber
         """
@@ -327,7 +336,7 @@ class PLL_phot_model(PowerSpectrum):
         return pval
 
     def Pgi_phot_emu(self, redshift, wavenumber):
-        r"""Pgi Phot emu
+        r"""Pgi phot emu.
 
         Computes the photometric galaxy-intrinsic power spectrum assuming a
         linear bias and nonlinear alignment model. Uses the EuclidEmu2 or
@@ -336,22 +345,23 @@ class PLL_phot_model(PowerSpectrum):
 
         .. math::
             P_{\rm gI}^{\rm photo}(z, k) &=\
-            [f_{\rm IA}(z)]b_g^{\rm photo}(z)\
+            [f_{\rm IA}(z)]b_{\rm g}^{\rm photo}(z)\
             P_{\rm \delta\delta}^{\rm NL}(z, k)\\
 
-        Note: either redshift or wavenumber must be a float (ex. simultaneously
-        setting both of them to numpy.ndarray makes the code crash)
+        Note: either redshift or wavenumber must be a float
+        (e.g. simultaneously setting both of them to
+        :obj:`numpy.ndarray` makes the code crash).
 
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         wavenumber: float or list or numpy.ndarray
-            wavenumber at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
 
         Returns
         -------
-        pval: float or numpy.ndarray
+        Emulator phot galaxy-intrinsic power spectrum: float or numpy.ndarray
             Value of photometric galaxy-intrinsic power spectrum
             at a given redshift and wavenumber
         """
@@ -364,27 +374,29 @@ class PLL_phot_model(PowerSpectrum):
         return pval
 
     def Pgi_spectro_def(self, redshift, wavenumber):
-        r"""Pgi Spectro Def
+        r"""Pgi spectro def.
 
         Computes the spectroscopic galaxy-intrinsic power spectrum.
 
         .. math::
             P_{\rm gI}^{\rm spectro}(z, k) &=\
-            [f_{\rm IA}(z)]b_g^{\rm spectro}(z)P_{\rm \delta\delta}(z, k)\\
+            [f_{\rm IA}(z)]b_{\rm g}^{\rm spectro}(z)\
+            P_{\rm \delta\delta}(z, k)\\
 
-        Note: either redshift or wavenumber must be a float (ex. simultaneously
-        setting both of them to numpy.ndarray makes the code crash)
+        Note: either redshift or wavenumber must be a float
+        (e.g. simultaneously setting both of them to
+        :obj:`numpy.ndarray` makes the code crash).
 
         Parameters
         ----------
         redshift: float or numpy.ndarray
             Redshift at which to evaluate the power spectrum.
         wavenumber: float or list or numpy.ndarray
-            wavenumber at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum.
 
         Returns
         -------
-        pval: float or numpy.ndarray
+        Spectroscopic galaxy-intrinsic power spectrum: float or numpy.ndarray
             Value of spectroscopic galaxy-intrinsic power spectrum
             at a given redshift and wavenumber
         """

@@ -1,4 +1,6 @@
-"""General class for COBAYA wrapper
+"""COBAYA MODEL HANDLER
+
+General class for Cobaya wrapper.
 
 """
 
@@ -13,7 +15,7 @@ from cloe.auxiliary.likelihood_yaml_handler import set_halofit_version
 
 
 class CobayaModel:
-    """Cobaya Model"""
+    """Cobaya model."""
 
     def __init__(self, cosmo):
         self.cosmology = cosmo
@@ -37,12 +39,12 @@ class CobayaModel:
             interpolate.InterpolatedUnivariateSpline(
                 self.z_win,
                 np.linspace(0.001, 1.7, 100))
-        self.cosmology.nonlinear.theory['redshift_bins'] = \
-            self.cosmology.cosmo_dic['redshift_bins']
+        self.cosmology.nonlinear.theory['redshift_bins_means_spectro'] = \
+            self.cosmology.cosmo_dic['redshift_bins_means_spectro']
         self.cosmology.nonlinear.set_Pgg_spectro_model()
 
     def define_info(self, cosmo_inst):
-        """Define Information"""
+        """Defines information."""
         self.info = {'params': {
             'ombh2': cosmo_inst.cosmo_dic['ombh2'],
             'omch2': cosmo_inst.cosmo_dic['omch2'],
@@ -78,13 +80,13 @@ class CobayaModel:
                             cosmo_inst.cosmo_dic['NL_flag_phot_matter'])
 
     def get_cobaya_model(self):
-        """Get Cobaya Model"""
+        """Gets Cobaya model."""
         self.define_info(self.cosmology)
         self.model = get_model(self.info)
         self.model.logposterior({})
 
     def update_cosmo(self):
-        """Update Cosmology"""
+        """Updates cosmology."""
         self.get_cobaya_model()
         self.cosmology.cosmo_dic['H0'] = self.model.provider.get_param('H0')
         self.cosmology.cosmo_dic['omch2'] = self.model.provider.get_param(

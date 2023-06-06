@@ -1,4 +1,7 @@
-"""PHOTOMETRIC MODULE
+"""PHOTO
+
+This module computes the photometric quantities following the v2.0 recipes
+of CLOE.
 """
 
 # General imports
@@ -15,7 +18,7 @@ import warnings
 
 class PhotoError(Exception):
     r"""
-    Class to define Exception Error
+    Class to define Exception Error.
     """
 
     pass
@@ -23,25 +26,25 @@ class PhotoError(Exception):
 
 class Photo:
     """
-    Class for photometric observables
+    Class for photometric observables.
     """
 
     def __init__(self, cosmo_dic, nz_dic_WL, nz_dic_GC, add_RSD=False):
-        """Initialize
+        """Initialise.
 
-        Constructor of the class Photo
+        Constructor of the class Photo.
 
         Parameters
         ----------
         cosmo_dic: dict
-            Cosmological dictionary from Cosmology class.
+            Cosmological dictionary from :obj:`cosmology` class
         nz_dic_WL: dict
-            Dictionary containing n(z)s for WL probe.
+            Dictionary containing redshift dustributions for WL probe
         nz_dic_GC: dict
-            Dictionary containing n(z)s for GCphot probe.
+            Dictionary containing redshift dustributions for GCphot probe
         add_RSD: bool
             Flag to determine whether RSD have to be included in the
-            calculations for GCphot or not.
+            calculations for GCphot or not
         """
 
         self.nz_dic_WL = nz_dic_WL
@@ -107,7 +110,7 @@ class Photo:
         return None
 
     def update(self, cosmo_dic):
-        r"""Update method
+        r"""Updates method.
 
         Method to update the theory class attribute to the passed cosmo
         dictionary, and recompute all cosmology-dependent quantities.
@@ -115,7 +118,7 @@ class Photo:
         Parameters
         ----------
         cosmo_dic: dict
-            Cosmological dictionary from Cosmology class.
+            Cosmological dictionary from :obj:`cosmology` class
         """
         self.theory = cosmo_dic
         nuisance_dict = self.theory['nuisance_parameters']
@@ -145,7 +148,10 @@ class Photo:
             self.magbias = [nuisance_dict[f'magnification_bias_{i}']
                             for i in self.nz_GC.get_tomographic_bins()]
             if self.theory['magbias_model'] == 1:
-                self.magbias = linear_interpolator(None, self.magbias)
+                self.magbias = \
+                    linear_interpolator(
+                        self.theory['redshift_bins_means_phot'],
+                        self.magbias)
 
             # z_wtom is the number of tomographic bins + 1
             z_wtom_gc = 1 + self.nz_GC.get_num_tomographic_bins()
@@ -191,7 +197,7 @@ class Photo:
                                                             tom_i)
 
     def _set_bessel_tables(self, theta_rad):
-        r"""Set tables for Bessel functions
+        r"""Sets tables for Bessel functions.
 
         Method to set the dictionary containing the precomputed tables of the
         Bessel functions of order 0,2,4.
@@ -200,7 +206,7 @@ class Photo:
         ----------
         theta_rad: list, numpy.ndarray
             Values of the angular separation (in radians) at which the Bessel
-            functions have to be evaluated.
+            functions have to be evaluated
         """
         bessel0_grid = np.array([jv(0, self.ells_dense * th)
                                  for th in theta_rad])
@@ -216,27 +222,27 @@ class Photo:
                       'different angles will lead to unexpected outputs.')
 
     def set_prefactor(self, ells_WL, ells_XC, ells_GC_phot):
-        r"""Compute the prefactors for the WL XC and GCphot :math:`C(\ell)`'s
+        r"""Computes the prefactors for the WL XC and GCphot :math:`C(\ell)`'s.
 
-        The following prefactors are evaluated
+        The following prefactors are evaluated.
 
-        * shearIA_WL (from the ells_WL input array): \
+        * :obj:`shearIA_WL` (from the ells_WL input array): \
           :math:`\left[(\ell+2)!/(\ell-2)!\right]/(\ell+1/2)^4`
-        * shearIA_XC (from the ells_XC input array): \
+        * :obj:`shearIA_XC` (from the ells_XC input array): \
           :math:`\sqrt{(\ell+2)!/(\ell-2)!}/(\ell+1/2)^2`
-        * mag_XC (from the ells_XC input array): \
+        * :obj:`mag_XC` (from the ells_XC input array): \
           :math:`\ell(\ell+1)/(\ell+1/2)^2`
-        * mag_GCphot (from the ells_GCphot input array): \
+        * :obj:`mag_GCphot` (from the ells_GCphot input array): \
           :math:`\ell(\ell+1)/(\ell+1/2)^2`
-        * L0_GCphot (from the ells_GCphot input array): \
+        * :obj:`L0_GCphot` (from the ells_GCphot input array): \
           :math:`\frac{2 \ell^2 + 2 \ell -1}{(2 \ell - 1)(2 \ell + 3)}`
-        * Lplus1_GCphot (from the ells_GCphot input array):
+        * :obj:`Lplus1_GCphot` (from the ells_GCphot input array):
 
           .. math::
               -\frac{(\ell + 1)(\ell + 2)}
               {(2\ell + 3)\sqrt{(2\ell + 1)(2 \ell + 5)}}
 
-        * Lminus1_GCphot (from the ells_GCphot input array):
+        * :obj:`Lminus1_GCphot` (from the ells_GCphot input array):
 
           .. math::
               -\frac{\ell(\ell - 1)}
@@ -250,11 +256,11 @@ class Photo:
         Parameters
         ----------
         ells_WL: numpy.ndarray
-           array of :math:`\ell` values for the WL probe
+           Array of :math:`\ell` values for the WL probe
         ells_XC: numpy.ndarray
-           array of :math:`\ell` values for the XC probe
+           Array of :math:`\ell` values for the XCphot probe
         ells_GC_phot: numpy.ndarray
-           array of :math:`\ell` values for the GCphot probe
+           Array of :math:`\ell` values for the GCphot probe
         """
         self._prefactor_dict = {}
 
@@ -283,7 +289,7 @@ class Photo:
         self._precomp_ells = np.unique(np.concatenate((ells_GC_phot, ells_XC)))
 
     def GC_window(self, z, bin_i):
-        r"""GC Window
+        r"""GC window.
 
         Implements the galaxy clustering photometric window function.
 
@@ -293,15 +299,15 @@ class Photo:
         Parameters
         ----------
         z: numpy.ndarray of float or float
-           Redshift at which to evaluate distribution.
+           Redshift at which to evaluate distribution
         bin_i: int
            Index of desired tomographic bin. Tomographic bin
-           indices start from 1.
+           indices start from 1
 
         Returns
         -------
-        window_GC: float
-           Window function for photometric galaxy clustering.
+        GCphot window function: float
+           Window function for photometric galaxy clustering
         """
 
         n_z_normalized = self.nz_GC.evaluates_n_i_z(bin_i, z)
@@ -310,7 +316,7 @@ class Photo:
         return window_GC
 
     def GC_window_RSD(self, z, ell, bin_i):
-        r"""GC Window RSD
+        r"""GC window RSD.
 
         Implements the RSD correction to the galaxy clustering photometric
         window function in an array-like format, modulo the Limber and
@@ -319,23 +325,24 @@ class Photo:
         .. math::
             W_i^{\rm{G,RSD}}(z,\ell) =
             \frac{1}{c \,b_{\mathrm{g},i}^\mathrm{photo}} \
-            \left[H(z_m)f(z_m)\frac{n_i(z)}{\bar{n_i}}\right]_m
+            \left[H(z_{\rm m})f(z_{\rm m})\
+            \frac{n_i(z)}{\bar{n_i}}\right]_{\rm m}
 
         where :math:`m` assumes the values (-1,0,+1).
 
         Parameters
         ----------
         z: numpy.ndarray or float
-            Redshift at which to evaluate the window function.
+            Redshift at which to evaluate the window function
         ell: numpy.ndarray or float
-            Multipole at which to evaluate the window function.
+            Multipole at which to evaluate the window function
         bin_i: int
             Index of desired tomographic bin. Tomographic bin
-            indices start from 1.
+            indices start from 1
 
         Returns
         -------
-        window_GC_RSD: numpy.ndarray
+        RSD GCphot window function: numpy.ndarray
             Window function for RSD component of photometric galaxy clustering.
         """
         if isinstance(ell, (int, float)):
@@ -360,7 +367,7 @@ class Photo:
         return Hzm_arr * fzm_arr * nzm_arr / bias
 
     def _unpack_RSD_kernel(self, ell, *args):
-        r"""Obtain the RSD kernel for GCphot or XCphot.
+        r"""Obtains the RSD kernel for GCphot or XCphot.
 
         Checks whether the RSD kernel has been already initialized, and
         depending on that unpacks the kernel of the corresponding photometric
@@ -369,16 +376,16 @@ class Photo:
         Parameters
         ----------
         ell: float
-            Multipole at which the RSD kernel has to be computed.
+            Multipole at which the RSD kernel has to be computed
         *args: list
             Extra arguments of variable length, corresponding to the indices
             of the photometric bins for which the RSD kernel has to be
-            computed (2 for GCphot and 1 for XCphot).
+            computed (2 for GCphot and 1 for XCphot)
 
         Returns
         -------
-        kerngalrsd: numpy.ndarray
-            RSD kernel for the specified list of photometric bins.
+        RSD kernel: numpy.ndarray
+            RSD kernel for the specified list of photometric bins
         """
         if np.all([(pref, ell) in self._prefactor_dict.keys() for pref in
                    ['Lminus1_GCphot', 'L0_GCphot', 'Lplus1_GCphot']]):
@@ -405,7 +412,7 @@ class Photo:
         return np.array(kerngalrsd)
 
     def window_integrand(self, zprime, z, nz):
-        r"""Window Integrand
+        r"""Window integrand.
 
         Calculates the Weak-lensing (WL) kernel
         or the Magnification bias kernel integrands
@@ -419,18 +426,18 @@ class Photo:
 
         Parameters
         ----------
-        zprime: float or numpy.array
-            redshift parameter that will be integrated over.
+        zprime: float or numpy.ndarray
+            Redshift parameter that will be integrated over
         z: float
-            Redshift at which kernel is being evaluated.
-        nz: InterpolatedUnivariateSpline, or function
+            Redshift at which kernel is being evaluated
+        nz: Interpolator or function
             Galaxy distribution function for the tomographic bin for
-            which the kernel is currently being evaluated.
+            which the kernel is currently being evaluated
 
         Returns
         -------
-        wint: float
-           kernel integrand
+        Kernel integrand: float
+            Weak-lensing (WL) kernel or the magnification bias kernel integrand
         """
         # Commenting out this piece of code, as we are not using the
         # angular diameter distance function obtained from CAMB for now
@@ -452,11 +459,11 @@ class Photo:
         return wint
 
     def WL_window(self, z, bin_i, k=0.0001):
-        r"""WL Window
+        r"""WL window.
 
         Calculates the weak lensing shear kernel for a given tomographic bin.
         Uses broadcasting to compute a 2D-array of integrands and then applies
-        integrate.trapz on the array along one axis.
+        :obj:`integrate.trapz` on the array along one axis
 
         .. math::
             W_{i}^{\gamma}(\ell, z, k) =
@@ -472,15 +479,15 @@ class Photo:
         z: numpy.ndarray of float
             Redshift at which weight is evaluated.
         bin_i: int
-           index of desired tomographic bin. Tomographic bin
+           Index of desired tomographic bin. Tomographic bin
            indices start from 1.
         k: float
-            k-mode at which to evaluate the Modified Gravity
+            Wavenumber at which to evaluate the Modified Gravity
             :math:`\Sigma(z,k)` function
 
         Returns
         -------
-        W_val: numpy.ndarray
+        Shear kernel: numpy.ndarray
            1-D Numpy array of shear kernel values for specified bin
            at specified scale for the redshifts defined in z
         """
@@ -509,7 +516,7 @@ class Photo:
         return W_val
 
     def magnification_window(self, z, bin_i, k=0.0001):
-        r"""Magnification Bias Window
+        r"""Magnification bias window.
 
         Calculates the magnification bias kernel for a given tomographic bin.
         Uses broadcasting to compute a 2D-array of integrands and then applies
@@ -529,15 +536,15 @@ class Photo:
         z: numpy.ndarray of float
             Redshift at which weight is evaluated.
         bin_i: int
-           index of desired tomographic bin. Tomographic bin
-           indices start from 1.
+           Index of desired tomographic bin. Tomographic bin
+           indices start from 1
         k: float
-            k-mode at which to evaluate the Modified Gravity
+            Wavenumber at which to evaluate the Modified Gravity
             :math:`\Sigma(z,k)` function
 
         Returns
         -------
-        W_val: numpy.ndarray
+        Magnification window: numpy.ndarray
            1-D Numpy array of magnification bias kernel
            values for specified bin
            at specified scale for the redshifts defined in z
@@ -574,7 +581,7 @@ class Photo:
         return W_val
 
     def WL_window_slow(self, z, bin_i, k=0.0001):
-        r"""WL Window Slow
+        r"""WL window slow.
 
         Calculates the weak lensing shear kernel for a given tomographic bin.
 
@@ -592,17 +599,17 @@ class Photo:
         z: float
             Redshift at which kernel is being evaluated.
         bin_i: int
-           index of desired tomographic bin. Tomographic bin
+           Index of desired tomographic bin. Tomographic bin
            indices start from 1.
         k: float
-            k-mode at which to evaluate the Modified Gravity
+            Wavenumber at which to evaluate the Modified Gravity
             :math:`\Sigma(z,k)` function
 
         Returns
         -------
-        W_val: float
+        Shear kernel: float
            Value of shear kernel for specified bin at specified redshift
-           and scale.
+           and scale
         """
         H0_Mpc = self.theory['H0_Mpc']
         O_m = self.theory['Omm']
@@ -619,7 +626,7 @@ class Photo:
         return W_val
 
     def IA_window(self, z, bin_i):
-        r"""IA Window
+        r"""IA window.
 
         Calculates the intrinsic alignment (IA) weight function for a
         given tomographic bin
@@ -631,15 +638,15 @@ class Photo:
         Parameters
         ----------
         z: numpy.ndarray of float or float
-            Redshift at which weight is evaluated.
+            Redshift at which weight is evaluated
         bin_i: int
-           index of desired tomographic bin. Tomographic bin
-           indices start from 1.
+           Index of desired tomographic bin. Tomographic bin
+           indices start from 1
 
         Returns
         -------
-        W_IA: float
-           Value of IA kernel for specified bin at specified redshift.
+        IA kernel: float
+           Value of IA kernel for specified bin at specified redshift
         """
 
         n_z_normalized = self.nz_WL.evaluates_n_i_z(bin_i, z)
@@ -649,7 +656,7 @@ class Photo:
         return W_IA
 
     def Cl_generic_integrand(self, z, PandW_i_j_z_k):
-        r"""Cl Generic Integrand
+        r"""Cl generic integrand.
 
         Calculates the integrand of the angular power spectra for
         the different probes given by the different combinations
@@ -659,16 +666,16 @@ class Photo:
         Parameters
         ----------
         z: numpy.ndarray
-            List of redshifts at which integrand is being evaluated.
+            List of redshifts at which integrand is being evaluated
         PandW_i_j_z_k: numpy.ndarray
            Values of the product of kernel for bin i, kernel for bin j,
            and the power spectrum at redshift z and scale k.
 
         Returns
         -------
-        kern_mult_power: numpy.ndarray
+        Angular power spectrum integran: numpy.ndarray
            Values of the angular power spectrum integrand at
-           the given redshifts and multipole :math:`\ell`.
+           the given redshifts and multipole :math:`\ell`
         """
         kern_mult_power = (PandW_i_j_z_k /
                            (self.theory['H_z_func'](z) *
@@ -680,14 +687,14 @@ class Photo:
         return kern_mult_power
 
     def Cl_WL(self, ell, bin_i, bin_j, int_step=0.01):
-        r"""Cl WL
+        r"""Cl WL.
 
         Calculates angular power spectrum for weak lensing,
         for the supplied bins:
 
         .. math::
-            C_{ij}^{LL} = C_{ij}^{\gamma \gamma}(\ell) +
-            C_{ij}^{I\gamma}(\ell) + C_{ij}^{II}(\ell)
+            C_{ij}^{\rm LL} = C_{ij}^{\gamma \gamma}(\ell) +
+            C_{ij}^{\rm I\gamma}(\ell) + C_{ij}^{\rm II}(\ell)
 
         where :math:`\gamma` stands for gravitational shear and I for
         intrinsic shear.
@@ -726,20 +733,20 @@ class Photo:
         Parameters
         ----------
         ell: float
-            :math:`\ell`-mode at which :math:`C(\ell)` is evaluated.
+            :math:`\ell`-mode at which :math:`C(\ell)` is evaluated
         bin_i: int
            Index of first tomographic bin. Tomographic bin
-           indices start from 1.
+           indices start from 1
         bin_j: int
            Index of second tomographic bin. Tomographic bin
-           indices start from 1.
+           indices start from 1
         int_step: float
-            Size of step for numerical integral over redshift.
+            Size of step for numerical integral over redshift
 
         Returns
         -------
-        c_final: float
-           Value of the angular shear power spectrum.
+        Angular shear power spectrum: float
+           Value of the angular shear power spectrum
         """
 
         cl_int_z_max = min(self.wl_int_z_max[bin_i], self.wl_int_z_max[bin_j])
@@ -781,14 +788,14 @@ class Photo:
         return c_final
 
     def Cl_GC_phot(self, ell, bin_i, bin_j, int_step=0.01):
-        r"""Cl GC Phot
+        r"""Cl GCphot.
 
         Calculates angular power spectrum for photometric galaxy clustering,
         for the supplied bins.
 
         .. math::
-            C_{ij}^{GG}(\ell) = C_{ij}^{gg}(\ell) + C_{ij}^{g\mu}(\ell) +
-            C_{ij}^{\mu\mu}(\ell)
+            C_{ij}^{\rm GG}(\ell) = C_{ij}^{\rm gg}(\ell)
+            + C_{ij}^{\rm g\mu}(\ell) + C_{ij}^{\mu\mu}(\ell)
 
         where g stands for intrinsic number density fluctuations and \mu
         stands for lensing magnification. So
@@ -823,21 +830,21 @@ class Photo:
         Parameters
         ----------
         ell: float
-            :math:`\ell`-mode at which :math:`C(\ell)` is evaluated.
+            :math:`\ell`-mode at which :math:`C(\ell)` is evaluated
         bin_i: int
            Index of first tomographic bin. Tomographic bin
-           indices start from 1.
+           indices start from 1
         bin_j: int
            Index of second tomographic bin. Tomographic bin
-           indices start from 1.
+           indices start from 1
         int_step: float
-            Size of step for numerical integral over redshift.
+            Size of step for numerical integral over redshift
 
         Returns
         -------
-        c_final: float
+        Angular GCphot power spectrum: float
            Value of angular power spectrum for
-           galaxy clustering photometric.
+           galaxy clustering photometric
         """
 
         cl_int_z_max = min(self.gc_int_z_max[bin_i], self.gc_int_z_max[bin_j])
@@ -893,15 +900,15 @@ class Photo:
         return c_final
 
     def Cl_cross(self, ell, bin_i, bin_j, int_step=0.01):
-        r"""Cl Cross
+        r"""Cl cross.
 
         Calculates angular power spectrum for cross-correlation
         between weak lensing and galaxy clustering, for the supplied bins:
 
         .. math::
-            C_{ij}^{LG} = C_{ij}^{\gamma g}(\ell) + C_{ij}^{Ig}(\ell) +
-                                 C_{ij}^{\gamma \mu}(\ell) +
-                                 C_{ij}^{I\mu}(\ell)
+            C_{ij}^{\rm LG} = C_{ij}^{\rm \gamma g}(\ell)
+            + C_{ij}^{\rm Ig}(\ell) + C_{ij}^{\gamma \mu}(\ell)
+            + C_{ij}^{\rm I\mu}(\ell)
 
         where :math:`\gamma` stands for gravitational shear, g for intrinsic
         number density fluctuations, :math:`\mu` for lensing magnification and
@@ -954,21 +961,21 @@ class Photo:
         Parameters
         ----------
         ell: float
-            :math:`\ell`-mode at which :math:`C(\ell)` is evaluated.
+            :math:`\ell`-mode at which :math:`C(\ell)` is evaluated
         bin_i: int
            Index of source tomographic bin. Tomographic bin
-           indices start from 1.
+           indices start from 1
         bin_j: int
            Index of lens tomographic bin. Tomographic bin
-           indices start from 1.
+           indices start from 1
         int_step: float
-            Size of step for numerical integral over redshift.
+            Size of step for numerical integral over redshift
 
         Returns
         -------
-        c_final: float
+        Angular XCphot power spectrum: float
            Value of cross-correlation between weak lensing and
-           galaxy clustering photometric angular power spectrum.
+           galaxy clustering photometric angular power spectrum
         """
 
         cl_int_z_max = min(self.wl_int_z_max[bin_i], self.gc_int_z_max[bin_j])
@@ -1028,9 +1035,9 @@ class Photo:
 
     @staticmethod
     def _eval_prefactor_mag(ell):
-        r"""Compute the magnification prefactor in Limber approximation
+        r"""Computes the magnification prefactor in Limber approximation.
 
-        The prefactor is computed as follows
+        The prefactor is computed as follows.
 
         .. math::
              \ell (\ell + 1) / (\ell + 1/2)^2
@@ -1038,20 +1045,20 @@ class Photo:
         Parameters
         ----------
         ell: float
-           :math:`\ell`-mode at which the prefactor is evaluated.
+           :math:`\ell`-mode at which the prefactor is evaluated
 
         Returns
         -------
-        prefactor: float
-           Value of the prefactor at the given :math:`\ell`.
+        Pre-factor: float
+           Value of the prefactor at the given :math:`\ell`
         """
         return ell * (ell + 1) / (ell + 0.5)**2
 
     @staticmethod
     def _eval_prefactor_shearia(ell):
-        r"""Compute the shearIA prefactor in Limber approximation
+        r"""Computes the shearIA prefactor in Limber approximation.
 
-        The prefactor is computed as follows
+        The prefactor is computed as follows.
 
         .. math::
             \sqrt{(\ell + 2)!/(\ell - 2)!} / (\ell + 1/2)^2
@@ -1059,12 +1066,12 @@ class Photo:
         Parameters
         ----------
         ell: float
-           :math:`\ell`-mode at which the prefactor is evaluated.
+           :math:`\ell`-mode at which the prefactor is evaluated
 
         Returns
         -------
-        prefactor: float
-           Value of the prefactor at the given :math:`\ell`.
+        Pre-factor: float
+           Value of the prefactor at the given :math:`\ell`
         """
         prefactor = np.sqrt((ell + 2.0) * (ell + 1.0) * ell * (ell - 1.0)) / \
             (ell + 0.5)**2
@@ -1072,7 +1079,7 @@ class Photo:
 
     @staticmethod
     def _eval_prefactor_l_0(ell):
-        r"""RSD prefactor :math:`L_{0}` in Limber approximation
+        r"""RSD prefactor :math:`L_{0}` in Limber approximation.
 
         Calculates the :math:`L_{0}` RSD prefactor in the
         harmonic-space power spectrum of galaxy clustering.
@@ -1084,12 +1091,12 @@ class Photo:
         Parameters
         ----------
         ell: int
-            :math:`\ell`-mode at which the prefactor is evaluated.
+            :math:`\ell`-mode at which the prefactor is evaluated
 
         Returns
         -------
         L_0: float
-           Value of the :math:`L_{0}` prefactor at the given :math:`\ell`.
+           Value of the :math:`L_{0}` prefactor at the given :math:`\ell`
         """
         l_0 = (2 * ell ** 2 + 2 * ell - 1) / ((2 * ell - 1) * (2 * ell + 3))
         return l_0
@@ -1108,12 +1115,12 @@ class Photo:
         Parameters
         ----------
         ell: int
-            :math:`\ell`-mode at which the prefactor is evaluated.
+            :math:`\ell`-mode at which the prefactor is evaluated
 
         Returns
         -------
         L_minus1: float
-           Value of the :math:`L_{-1}` prefactor at the given :math:`\ell`.
+           Value of the :math:`L_{-1}` prefactor at the given :math:`\ell`
         """
         l_minus1 = -ell * (ell - 1) / \
             ((2 * ell - 1) * np.sqrt((2 * ell - 3) * (2 * ell + 1)))
@@ -1133,12 +1140,12 @@ class Photo:
         Parameters
         ----------
         ell: int
-            :math:`\ell`-mode at which the prefactor is evaluated.
+            :math:`\ell`-mode at which the prefactor is evaluated
 
         Returns
         -------
         L_plus1: float
-           Value of the :math:`L_{+1}` prefactor at the given :math:`\ell`.
+           Value of the :math:`L_{+1}` prefactor at the given :math:`\ell`
         """
         l_plus1 = -(ell + 1) * (ell + 2) / \
             ((2 * ell + 3) * np.sqrt((2 * ell + 1) * (2 * ell + 5)))
@@ -1156,13 +1163,13 @@ class Photo:
         Parameters
         ----------
         ell: int
-            :math:`\ell`-mode at which the function is evaluated.
+            :math:`\ell`-mode at which the function is evaluated
         r: float
-            Comoving distance at which the redshift is evaluated.
+            Comoving distance at which the redshift is evaluated
 
         Returns
         -------
-        z_minus1: float
+        Redshift: float
             The redshift corresponding to the transverse comoving distance
         """
         z_r_interp = self.theory['z_r_func']
@@ -1181,13 +1188,13 @@ class Photo:
         Parameters
         ----------
         ell: int
-            :math:`\ell`-mode at which the function is evaluated.
+            :math:`\ell`-mode at which the function is evaluated
         r: float
-            Comoving distance at which the redshift is evaluated.
+            Comoving distance at which the redshift is evaluated
 
         Returns
         -------
-        z_plus1: float
+        Redshift: float
             The redshift corresponding to the transverse comoving distance
         """
         z_r_interp = self.theory['z_r_func']
@@ -1195,7 +1202,7 @@ class Photo:
         return z_r_interp(ell_factor * r)
 
     def corr_func_3x2pt(self, obs, theta_deg, bin_i, bin_j):
-        r"""Generic 3x2pt correlation function
+        r"""Generic 3x2pt correlation function.
 
         Computes the specified 3x2pt configuration space correlation function,
         for the specified list of angular separations, and for the specified
@@ -1216,20 +1223,20 @@ class Photo:
         obs: str
             Type of correlation function. It must be selected from the list
             ["Shear-Shear_plus", "Shear-Shear_minus", "Shear-Position",
-            "Position-Position"]. The match is case-insensitive.
+            "Position-Position"]. The match is case-insensitive
         theta_deg: float or numpy.ndarray of float
             :math:`\theta` values at which the correlation function
-            is computed. To be specified in degrees.
+            is computed. To be specified in degrees
         bin_i: int
-            Index of first tomographic bin.
+            Index of first tomographic bin
         bin_j: int
-            Index of second tomographic bin.
+            Index of second tomographic bin
 
         Returns
         -------
-        xi_arr: numpy.ndarray of float
+        Correlation function: numpy.ndarray of float
            Correlation function for the specified observable,
-           angular separations, and bin combination.
+           angular separations, and bin combination
         """
         obs = obs.casefold()
         if obs == 'shear-shear_plus':

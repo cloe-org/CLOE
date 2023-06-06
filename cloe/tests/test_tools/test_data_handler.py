@@ -1,6 +1,7 @@
 """TEST DATA HANDLER
 
-This module contains functions for handling the IO of unit test data products.
+This module contains functions for handling the :obj:`io` of
+unit test data products.
 
 """
 
@@ -14,21 +15,18 @@ default_path = join(Path(__file__).resolve().parents[1], 'test_input')
 
 
 def load_test_npy(file_name, path=None):
-    """Load Test Numpy Binary
-
-    Load Numpy binary file.
+    """Loads test :obj:`numpy` binary.
 
     Parameters
     ----------
-    file_name : str
-        Name of Numpy binary file
-    path : str, optional
+    file_name: str
+        Name of :obj:`numpy` binary file
+    path: str, optional
         Path to test data
 
     Returns
     -------
-    numpy.ndarray
-        Numpy array
+    Numpy array: numpy.ndarray
 
     Raises
     ------
@@ -50,20 +48,21 @@ def load_test_npy(file_name, path=None):
 
 
 def load_test_pickle(file_name, path=None):
-    """Load Test Pickle
+    """Loads test :obj:`pickle`.
 
-    Load Python pickle file from the ``test_input`` directory.
+    Load Python :obj:`pickle` file from the
+    :obj:`test_input` directory.
 
     Parameters
     ----------
-    file_name : str
+    file_name: str
         Name of Python pickle file
-    path : str, optional
+    path: str, optional
         Path to test data
 
     Returns
     -------
-    object
+    Object: object
         Python object (e.g. a dictionary)
 
     """
@@ -77,17 +76,17 @@ def load_test_pickle(file_name, path=None):
 
 
 def save_test_pickle(file_name, object, path=None):
-    """Dump Test Pickle
+    """Dumps test :obj:`pickle`.
 
-    Save Python pickle file to specified path.
+    Saves Python :obj:`pickle` file to specified path.
 
     Parameters
     ----------
-    file_name : str
+    file_name: str
         Name of Python pickle file with full path
-    object : object
+    object: object
         A Python object (e.g. a dictionary)
-    path : str, optional
+    path: str, optional
         Path to test data
 
     """

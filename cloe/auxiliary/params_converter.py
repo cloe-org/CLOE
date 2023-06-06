@@ -1,6 +1,6 @@
 """PARAMETERS CONVERTER
 
-Functions to switch between the naming convention of CAMB/CLASS
+Functions to switch between the naming convention of CAMB/CLASS.
 """
 
 camb_to_classy = {
@@ -19,7 +19,7 @@ camb_to_classy = {
 
 
 def convert_params(params, theory, mode):
-    r"""Main function to convert cosmological parameters
+    r"""Main function to convert cosmological parameters.
 
     Checks the parameters and theory section of an info dictionary and modify
     parameter names according to the choice of Boltzmann solver.
@@ -27,16 +27,16 @@ def convert_params(params, theory, mode):
     Parameters
     ----------
     params: dict
-        Parameters section of the info dictionary.
+        Parameters section of the info dictionary
     theory: dict
-        Theory section of the info dictionary.
+        Theory section of the info dictionary
     mode: str
-        Selected Boltzmann solver. Can be either `camb` or `classy`.
+        Selected Boltzmann solver. Can be either `'camb'` or `'classy'`
 
     Raise
     -----
     ValueError
-        If mode is neither camb or classy.
+        If mode is neither camb or classy
     """
     if mode == 'classy':
         classy_set_params(params, theory)
@@ -48,16 +48,16 @@ def convert_params(params, theory, mode):
 
 
 def classy_set_params(params, theory):
-    r"""CLASS parameter converter
+    r"""CLASS parameter converter.
 
     Resets the parameters dictionary in a CLASS-like format.
 
     Paramters
     ---------
     params: dict
-        Parameters section of the info dictionary.
+        Parameters section of the info dictionary
     theory: dict
-        Theory section of the info dictionary.
+        Theory section of the info dictionary
     """
     for camb_param, classy_param in camb_to_classy.items():
         if camb_param in params.keys():
@@ -79,16 +79,16 @@ def classy_set_params(params, theory):
 
 
 def camb_set_params(params, theory):
-    r"""CAMB parameter converter
+    r"""CAMB parameter converter.
 
     Resets the parameters dictionary in a CAMB-like format.
 
     Parameters
     ----------
     params: dict
-        Parameters section of the info dictionary.
+        Parameters section of the info dictionary
     theory: dict
-        Theory section of the info dictionary.
+        Theory section of the info dictionary
     """
     classy_to_camb = dict(zip(camb_to_classy.values(), camb_to_classy.keys()))
     for classy_param, camb_param in classy_to_camb.items():

@@ -1,6 +1,6 @@
 """UNIT TESTS FOR EFT MODULE
 
-This module contains unit tests for the eft module.
+This module contains unit tests for the :obj:`eft` module.
 
 """
 
@@ -27,10 +27,10 @@ class eftinitTestCase(TestCase):
         self.PEH_test = 18366.38013
         self.Pnw_test = 17711.220032
         self.Pw_test = -1060.852868
-        self.Sigma2_test = 60.664153
-        self.dSigma2_test = 22.530151
-        self.Sig2mu_test = 87.258008
-        self.RSDdamp_test = 0.642037
+        self.Sigma2_test = 64.27875
+        self.dSigma2_test = 17.67467
+        self.Sig2mu_test = 93.026599
+        self.RSDdamp_test = 0.623502
         self.Pb1b1_test = [-1284.521497, 427.9779]
         self.Pb1b2_test = [2982.8153, 9.249978]
         self.Pb2b2_test = [-1306.100102, -4.209333]

@@ -1,6 +1,7 @@
-"""Nonlinear module
+"""NONLINEAR
 
-Module to compute nonlinear recipes.
+This module to computes the nonlinear recipes for the
+photometric and spectroscopic probes.
 """
 
 import numpy as np
@@ -18,7 +19,7 @@ from cloe.non_linear.eft import EFTofLSS
 
 class NonlinearError(Exception):
     r"""
-    Class to define Exception Error
+    Class to define Exception Error.
     """
 
     pass
@@ -26,37 +27,37 @@ class NonlinearError(Exception):
 
 class Nonlinear:
     """
-    Class to compute nonlinear recipes
+    Class to compute nonlinear recipes.
 
     The current available options, depending on the value of the nonlinear
     flags are:
 
-    NL_flag_phot_matter
-    0: linear-only (from Cosmology class)
-    1: Takahashi
-    2: Mead2016 (includes baryon corrections)
-    3: Mead2020 (w/o baryon corrections)
-    4: Mead2020_feedback (includes baryon corrections)
-    5: Euclid Emulator 2
-    6: Bacco (matter)
+    ``NL_flag_phot_matter``
+        - 0: linear-only (from Cosmology class)
+        - 1: Takahashi
+        - 2: Mead2016 (includes baryon corrections)
+        - 3: Mead2020 (w/o baryon corrections)
+        - 4: Mead2020_feedback (includes baryon corrections)
+        - 5: Euclid Emulator 2
+        - 6: Bacco (matter)
 
-    NL_flag_spectro
-    0: linear-only (from Cosmology class)
-    1: EFT
+    ``NL_flag_spectro``
+        - 0: linear-only (from Cosmology class)
+        - 1: EFT.
     """
 
     def __init__(self, cosmo_dic):
-        """Class constructor
+        """Class constructor.
 
-        Initialises class and nonlinear code
+        Initialises class and nonlinear code.
 
         Parameters
         ----------
         cosmo_dic: dict
-            External dictionary from Cosmology class.
+            External dictionary from Cosmology class
         redshift_bins: list or numpy.ndarray
             Spectroscopic redshift bins to determine which bin the input
-            redshift corresponds to.
+            redshift corresponds to
         """
         self.theory = cosmo_dic
         self.nuis = cosmo_dic['nuisance_parameters']
@@ -84,24 +85,25 @@ class Nonlinear:
                                              self.misc)
 
     def set_Pgg_spectro_model(self):
-        """Sets GCspectro redshift bins and instance of Pgg_spectro_model
+        """Sets GCspectro redshift bins for ``Pgg_spectro_model``.
 
-        Reads the values of the redshift bin edges from the `theory` class
-        attribute and computes the centers of the bins that are later used
-        for the GCspectro recipe. Also, creates an instance of the
-        Pgg_spectro_model class, used to return the recipe for GCspectro.
+        Reads the values of the redshift bin edges from the :obj:`theory`
+        class attribute and computes the centers of the bins that are
+        later used for the GCspectro recipe. Also, creates an instance of
+        the :obj:`Pgg_spectro_model class`, used to return the recipe for
+        GCspectro.
 
         Raises
         ------
         KeyError
             If GCspectro redshift bins cannot be found in the cosmo
-            dictionary.
+            dictionary
         """
-        if 'redshift_bins' not in self.theory.keys():
+        if 'redshift_bins_means_spectro' not in self.theory.keys():
             raise KeyError('Attempting to set Pgg_spectro_model class '
                            'without having specified the GCspectro '
                            'redshift bins in the cosmo dictionary.')
-        zbins = self.theory['redshift_bins']
+        zbins = self.theory['redshift_bins_means_spectro']
         if not isinstance(zbins, np.ndarray):
             self.zbins = np.array(zbins)
         else:
@@ -115,7 +117,7 @@ class Nonlinear:
                                                    self.misc, self.zbins)
 
     def update_dic(self, cosmo_dic):
-        """Updates Dic
+        """Updates Dic.
 
         Calls all routines updating the cosmo dictionary, and recomputes
         the various intermediate nonlinear blocks needed for the different
@@ -124,12 +126,12 @@ class Nonlinear:
         Parameters
         ----------
         cosmo_dic: dict
-            External dictionary from Cosmology class.
+            External dictionary from Cosmology class
 
         Returns
         -------
         theory: dict
-            Updated dictionary of the Nonlinear class.
+            Updated dictionary of the :obj:`Nonlinear` class
         """
         self.theory = cosmo_dic
         self.nuis = cosmo_dic['nuisance_parameters']
@@ -164,11 +166,11 @@ class Nonlinear:
         return self.theory
 
     def calculate_eft(self):
-        """Calculates EFT
+        """Calculates EFT.
 
         Computes anisotropic galaxy power spectrum, and adds it to the
         nonlinear dictionary as an array of interpolator objects (one for
-        each redshift bin, as specified by the class attribute zmeans).
+        each redshift bin, as specified by the class attribute ``zmeans``).
         """
         # Initializing EFT object
         eftobj = EFTofLSS(self.theory)
@@ -184,10 +186,10 @@ class Nonlinear:
         self.nonlinear_dic['P_kmu'] = Pkmu
 
     def calculate_boost(self):
-        """Calculates Boost
+        """Calculates the boost factor.
 
         Checks nonlinear photometric flag, computes the corresponding
-        boost-factor, and adds it to the nonlinear dictionary.
+        boost factor, and adds it to the nonlinear dictionary.
         """
 
         if self.theory['NL_flag_phot_matter'] == 5:
@@ -213,23 +215,23 @@ class Nonlinear:
             self.theory['z_win'], wavenumber_out, boost_ext, kx=1, ky=1)
 
     def linear_boost(self):
-        """Linear Boost
+        """Linear boost.
 
-        Returns the boost factor for the linear case (i.e. 1)
+        Returns the boost factor for the linear case (i.e. 1).
 
         Returns
         -------
-        boost: float
-           Value of linear boost at input redshift and scale
+        Boost: float
+           Value of linear boost at input redshift and wavenumber(s)
 
         """
         boost = 1.0
         return boost
 
     def ee2_boost(self):
-        """EE2 Boost
+        """EE2 Boost.
 
-        Returns the boost factor for the EE2 (i.e. NL_flag_phot_matter==5).
+        Returns the boost factor for the EE2 (i.e. ``NL_flag_phot_matter==5``).
         Parameter ranges are as follows:
 
         - Omb: [0.04, 0.06],
@@ -241,14 +243,14 @@ class Nonlinear:
         - wa: [-0.7,  0.5],
         - mnu: [0.00, 0.15],
         - wavenumber (h/Mpc): [0.0087, 9.41]
-        - redshift: [0, 10]
+        - redshift: [0, 10].
 
         Returns
         -------
-        wavenumber_out: numpy.ndarray
+        Wavenumber: numpy.ndarray
            Scales used by EE2 in units of 1/Mpc
-        boost_arr: numpy.ndarray
-           Array with boost at 'z_win' redshifts and scales wavenumber_out
+        Boost: numpy.ndarray
+           Array with boost at `z_win` redshifts and scales `wavenumber_out`
 
         """
 
@@ -284,10 +286,10 @@ class Nonlinear:
         return wavenumber_out, boost_arr, redshift_max, True
 
     def bacco_boost(self):
-        """BACCO Boost
+        """BACCO Boost.
 
         Returns the boost factor for the BACCO case
-        (i.e. NL_flag_phot_matter==6).
+        (i.e. ``NL_flag_phot_matter==6``).
         Parameter ranges (in the variables of BACCO) are as follows:
 
         - sigma8_cold: [0.73, 0.9]
@@ -306,8 +308,9 @@ class Nonlinear:
         wavenumber_out: numpy.ndarray
            Scales used by BACCO in units of 1/Mpc
         boost_arr: numpy.ndarray
-           Array with boost at 'z_win' redshifts and scales wavenumber_out
-        Value of the BACCO boost at input redshift and scale
+           Array with boost at 'z_win' redshifts and scales
+           ``wavenumber_out``. Value of the BACCO boost at input r
+           edshift and scale
         """
         assert self.theory['Omk'] == 0, 'Non flat geometries not supported' \
                                         + ' in BACCO'
@@ -383,47 +386,48 @@ class Nonlinear:
                      option_wavenumber="hm_simple",
                      option_redshift="hm_simple",
                      option_cosmo="hm_simple"):
-        """Calculates extrapolation of the boost outside its given range
+        """Calculates extrapolation of the boost outside its given range.
 
         Returns nonlinear boost array and
         corresponding scales in 1/Mpc.
 
         Options for wavenumber extrapolation:
-            - const, power_law, hm_simple, hm_smooth
+            - const, `power_law`, `hm_simple`, `hm_smooth`
         Options for redshift extrapolation:
-            - const, power_law, hm_simple
+            - const, `power_law`, `hm_simple`
         Options for cosmo extrapolation:
-            - const, hm_simple
+            - const, `hm_simple`
 
-        Both hm_simple and hm_smooth extrapolate with HMcode, but the smooth
-        case uses a tanh to interpolate between a power law extrapolation and
-        HMcode, making it a continuous extrapolation.
+        Both `hm_simple` and `hm_smooth` extrapolate with HMcode, but the
+        smooth case uses a tanh to interpolate between a power
+        law extrapolation and HMcode, making it a continuous
+        extrapolation.
 
         Parameters
         ----------
         wavenumber_in: numpy.ndarray
             Scales used by emulator in units of 1/Mpc
         boost_in: numpy.ndarray
-           Array with boost at 'z_win' redshifts and scales wavenumber_in
+           Array with boost at `z_win` redshifts and scales `wavenumber_in`
         redshift_max: float
             Max redshift of emulator
         flag_range: bool
             Flag for cosmo params range of emulator
         option_wavenumber: string
             Option for wavenumber extrapolation
-        option_redshift: string
+        option_redshift: str
             Option for redshift extrapolation
-        option_cosmo: string
+        option_cosmo: str
             Option for cosmology extrapolation
 
         Returns
         -------
-        wavenumber_out: numpy.ndarray
+        Wavenumber: numpy.ndarray
            Concatenation of scales used by emulator with those used by
            linear power spectrum, in units of 1/Mpc
-        boost_out: numpy.ndarray
-           Array with nonlinear boost at 'z_win' redshifts
-           and scales wavenumber_out
+        Boost: numpy.ndarray
+           Array with nonlinear boost at `z_win` redshifts
+           and scales `wavenumber_out`
 
         """
 
@@ -597,10 +601,10 @@ class Nonlinear:
         return wavenumber_out, boost_out
 
     def Pmm_phot_def(self, redshift, wavenumber):
-        r"""Interface for Pmm_phot_def
+        r"""Interface for ``Pmm_phot_def``.
 
         Returns the matter-matter power spectrum,
-        defined in the pLL_phot module
+        defined in the :obj:`pLL_phot module`.
         """
         switcher = {1: self.PLL_phot_model.Pmm_phot_halo,
                     2: self.PLL_phot_model.Pmm_phot_halo,
@@ -616,10 +620,10 @@ class Nonlinear:
         return Pmm_phot_func(redshift, wavenumber)
 
     def Pgg_spectro_def(self, redshift, wavenumber, mu_rsd):
-        r"""Interface for Pgg_spectro_def
+        r"""Interface for ``Pgg_spectro_def``.
 
         Returns the spectroscopic galaxy-galaxy power spectrum,
-        defined in the pgg_spectro module
+        defined in the :obj:`pgg_spectro` module.
         """
         switcher = {1: self.Pgg_spectro_model.Pgg_spectro_eft}
 
@@ -628,19 +632,19 @@ class Nonlinear:
         return Pgg_spectro_func(redshift, wavenumber, mu_rsd)
 
     def Pgdelta_spectro_def(self, redshift, wavenumber, mu_rsd):
-        r"""Interface for Pgdelta_spectro_def
+        r"""Interface for ``Pgdelta_spectro_def``.
 
         Returns the spectroscopic galaxy-density power spectrum,
-        defined in the pgg_spectro module
+        defined in the :obj:`pgg_spectro` module.
         """
         return self.Pgg_spectro_model.Pgdelta_spectro_def(redshift,
                                                           wavenumber, mu_rsd)
 
     def Pgg_phot_def(self, redshift, wavenumber):
-        r"""Interface for Pgg_phot_def
+        r"""Interface for ``Pgg_phot_def``.
 
         Returns the galaxy-galaxy power spectrum,
-        defined in the pgg_phot module
+        defined in the :obj:`pgg_phot` module.
         """
         switcher = {1: self.Pgg_phot_model.Pgg_phot_halo,
                     2: self.Pgg_phot_model.Pgg_phot_halo,
@@ -656,10 +660,10 @@ class Nonlinear:
         return Pgg_phot_func(redshift, wavenumber)
 
     def Pii_def(self, redshift, wavenumber):
-        r"""Interface for Pii_def
+        r"""Interface for ``Pii_def``.
 
         Returns the intrinsic-intrinsic power spectrum,
-        defined in the pLL_phot module
+        defined in the defined in the :obj:`pLL_phot` module.
         """
         switcher = {1: self.PLL_phot_model.Pii_halo,
                     2: self.PLL_phot_model.Pii_halo,
@@ -675,10 +679,10 @@ class Nonlinear:
         return Pii_func(redshift, wavenumber)
 
     def Pdeltai_def(self, redshift, wavenumber):
-        r"""Interface for Pdeltai_def
+        r"""Interface for ``Pdeltai_def``.
 
         Returns the density-intrinsic power spectrum,
-        defined in the pLL_phot module
+        defined in the defined in the :obj:`pLL_phot` module.
         """
         switcher = {1: self.PLL_phot_model.Pdeltai_halo,
                     2: self.PLL_phot_model.Pdeltai_halo,
@@ -694,10 +698,10 @@ class Nonlinear:
         return Pdeltai_func(redshift, wavenumber)
 
     def Pgi_phot_def(self, redshift, wavenumber):
-        r"""Interface for Pgi phot
+        r"""Interface for ``Pgi_phot``.
 
         Returns the galaxy-intrinsic power spectrum,
-        defined in the pLL_phot module
+        defined in the defined in the :obj:`pLL_phot` module.
         """
         switcher = {1: self.PLL_phot_model.Pgi_phot_halo,
                     2: self.PLL_phot_model.Pgi_phot_halo,
@@ -713,18 +717,18 @@ class Nonlinear:
         return Pgi_func(redshift, wavenumber)
 
     def Pgi_spectro_def(self, redshift, wavenumber):
-        r"""Interface for Pgi_spectro_def
+        r"""Interface for ``Pgi_spectro_def``.
 
         Returns the spectroscopic galaxy-intrinsic power spectrum,
-        defined in the pLL_phot module
+        defined in the defined in the :obj:`pLL_phot` module.
         """
         return self.PLL_phot_model.Pgi_spectro_def(redshift, wavenumber)
 
     def Pgdelta_phot_def(self, redshift, wavenumber):
-        r"""Interface for Pgdelta_phot_def
+        r"""Interface for ``Pgdelta_phot_def``.
 
         Returns the photometric galaxy-density power spectrum,
-        defined in the pgL_phot module
+        defined in the :obj:`pgL_phot` module
         """
         switcher = {1: self.PgL_phot_model.Pgdelta_phot_halo,
                     2: self.PgL_phot_model.Pgdelta_phot_halo,

@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-"""FFTLog
+"""FFTLOG MODULE
 
 Class to perform integrals with the FFTLog algorithm.
+Class to implement the FFTLog algorithm to perform the Fourier
+transform of a periodic sequence of logarithmically spaced points.
 """
 
 import numpy as np
@@ -14,32 +16,33 @@ class fftlog(object):
 
     It computes integrals involving a Bessel function with the algorithm
     described in
-    `Hamilton (2000) <https://arxiv.org/abs/astro-ph/9905191v4>`__
+    `Hamilton (2000) <https://arxiv.org/abs/astro-ph/9905191v4>`__ .
     It decomposes the integrand function using the Fast Fourier Transform;
     after this decomposition, each term can be integrated analitically.
     """
 
     def __init__(self, x, fx, nu=1.1, N_extrap_begin=0, N_extrap_end=0,
                  c_window_width=0.25, N_pad=0):
-        """List of parameters
+        """List of parameters.
 
         Parameters
         ----------
-        x: array
-            original logarithmically sampled domain of the input function. If
-            not even, the algorithmic implementation modifies it accordingly.
-        fx: array
-            original sampled input function
-        nu: Float
-            bias index, used to have a more stable fft
-        N_extrap_begin: Int
-            number of extrapolated points at the beginning of input arrays
-        N_extrap_end: Int
-            number of extrapolated points at the end of input arrays
-        c_window_width: Float
-            fraction of the c_m coefficients smoothed by the window
-        N_pad: Int
-            number of zero-padded points at the beginning and end of f_x array
+        x: numpy.ndarray
+            Original logarithmically sampled domain of the input function. If
+            not even, the algorithmic implementation modifies it accordingly
+        fx: numpy.ndarray
+            Original sampled input function
+        nu: float
+            Bias index, used to have a more stable fast Fourier transform
+        N_extrap_begin: int
+            Number of extrapolated points at the beginning of input arrays
+        N_extrap_end: int
+            Number of extrapolated points at the end of input arrays
+        c_window_width: float
+            Fraction of the ``c_m`` coefficients smoothed by the window
+        N_pad: int
+            Number of zero-padded points at the beginning and end of ``fx``
+            array
         """
         self.x_original = x
         self.dlnx = np.log(x[1] / x[0])
@@ -75,18 +78,18 @@ class fftlog(object):
         self.eta_m = 2 * np.pi * self.m / (float(self.N) * self.dlnx)
 
     def _get_c_m(self):
-        r"""Get smoothed coefficients
+        r"""Gets smoothed coefficients.
 
-        Computes  the smoothed FFT coefficients of "biased" input
+        Computes the smoothed FFT coefficients of "biased" input
         function f(x): f_biased = f(x) / x^\nu
-        (number of x values should be even)
+        (number of x values should be even).
 
         Returns
         -------
-        m: array
-            indexes of the FFTW decomposition
-        c_m: array
-            smoothed coefficients on the biased input function
+        Indexes m: array
+            Indexes of the FFTW decomposition
+        Coefficients c_m: array
+            Smoothed coefficients on the biased input function
         """
         f_biased = self.fx * self.x ** (-self.nu)
         # biased f(x) array, to improve numerical stability
@@ -96,28 +99,27 @@ class fftlog(object):
         return m, c_m
 
     def fftlog(self, ell):
-        r"""Performs the fftlog
+        r"""Performs the fftlog.
 
         Calculates
 
         .. math::
-            F(y) = \int_0^\infty \frac{dx}{x} f(x) j_\ell(xy)
+            F(y) = \int_0^\infty \frac{dx}{x} f(x) j_{\rm \ell}(xy)
 
         where :math:`j_\ell` is the spherical Bessel function of order
         :math:`\ell`.
 
         Parameters
         ----------
-        ell: Float
-            order of the Bessel function present in the integral
+        ell: int
+            Order of the Bessel function present in the integral
 
         Returns
         -------
-        y: array
-            logarithmically spaced array, set as y[:] = (ell+1)/x[::-1]
-        Fy: array
-            fftlog transform, evaluated over the y array
-
+        y, Fy: numpy.ndarray, numpy.ndarray
+         Logarithmically spaced array, set as
+         ``y[:] = (ell+1)/x[::-1]``, FFTlog transform, evaluated
+         over the ``y`` array
         """
         z_ar = self.nu + 1j * self.eta_m
         y = (ell + 1.) / self.x[::-1]

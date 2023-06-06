@@ -1,7 +1,7 @@
 """UNIT TESTS FOR FFTLog
 
-This module contains unit tests for the FFTLog algorithm.
-=======
+This module contains unit tests for the :obj:`FFTLog` module.
+
 
 """
 

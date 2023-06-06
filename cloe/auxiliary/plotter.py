@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Plotter
+"""PLOTTER
 
 Contains class to plot cosmological observables.
 """
@@ -19,7 +19,7 @@ rc('text', usetex=True)
 
 class PlotError(Exception):
     """
-    Class to define Exception Error
+    Class to define Exception Error.
     """
 
     pass
@@ -32,17 +32,17 @@ class Plotter:
 
     def __init__(self, cosmo_dic, data, settings=default_settings):
         """
-        Constructor of class Plotter.
+        Constructor of class :obj:`Plotter`.
 
         Parameters
         ----------
         cosmo_dic: dict
             Cosmological dictionary in structure specified within
-            cosmo.cosmology.
+            :obj:`cosmo.cosmology`
         data: dict
-            Dictionary containing specifications for data loading and handling.
+            Dictionary containing specifications for data loading and handling
         settings: dict
-            Dictionary containing settings for plotting observables.
+            Dictionary containing settings for plotting observables
         """
         self.cosmo_dic = cosmo_dic
         self.read_data = Reader(data)
@@ -81,7 +81,7 @@ class Plotter:
         self.file_GCspec = settings['file_GCspec']
 
     def _set_binning(self, xmin, xmax, nx, btype):
-        r"""Set bins according to edges, number of samples and bin type
+        r"""Sets bins according to edges, number of samples and bin type.
 
         Parameters
         ----------
@@ -116,7 +116,7 @@ class Plotter:
     def plot_Cl_phot(self, ells, bin_i, bin_j, pl_ax, probe='WL',
                      pl_label=None, pl_colour='b', pl_linestyle='-',
                      no_bins=10):
-        """Plot Cl Phot
+        """Plots photometric angular power spectra.
 
         Function to plot given photometric Cls computed with CLOE
         for a given set of ells, and bin combination.
@@ -125,29 +125,30 @@ class Plotter:
         ----------
         ells: numpy.ndarray
             Ell-modes at which to evaluate power spectra. Note: minimum allowed
-            ell is 10, and maximum is 5000.
+            ell is 10, and maximum is 5000
         bin_i: int
             Index of first redshift bin. Note: bin indices start
-            from 1.
+            from 1
         bin_j: int
             Index of second redshift bin. Note: bin indices start
-            from 1.
-        pl_ax: matplotlib axis object
-            Axis object within which to carry out plotting.
+            from 1
+        pl_ax: :obj:`matplotlib.axes.Axes`
+            Matplotlib axes object within which to carry out plotting
         probe: str
-            Which photometric probe to plot power spectra for. Must be either
+            Which photometric probe to plot power spectra for. Either
             'WL' for weak lensing or 'GC-Phot' for photometric galaxy
-            clustering. Set to 'WL' by default.
-            Note: Plotter.plot_Cl_XC must be used for the cross-correlation.
+            clustering. Set to 'WL' by default
+            Note: :obj:`Plotter.plot_Cl_XC` must be used for the
+            cross-correlation
         pl_label: str
             Label for plot to appear in legend. If none is given, this will
-            be set to "Bin {:d} - Bin {:d}".format(bin_i, bin_j).
+            be set to `'Bin {:d} - Bin {:d}'.format(bin_i, bin_j)`
         pl_colour: str
-            Matplotlib colour choice for current plot. Default is 'b' for blue.
+            Matplotlib colour choice for current plot. Default is 'b' for blue
         pl_linestyle: str
-            Matplotlib linestyle choice for current plot. Default is '-'.
+            Matplotlib linestyle choice for current plot. Default is '-'
         no_bins: int
-            Number of redshift bins for chosen probe.
+            Number of redshift bins for chosen probe
         """
         if probe not in ['WL', 'GC-Phot']:
             raise Exception('Must choose valid type of probe: WL, or GC-Phot.')
@@ -173,7 +174,7 @@ class Plotter:
     def plot_external_Cl_phot(self, bin_m, bin_n, pl_ax, probe='WL',
                               pl_label=None, pl_colour='b', pl_linestyle='-',
                               no_bins=10):
-        """Plot External Cl Phot
+        """Plots external photometric angular power spectra.
 
         Plots external OU-LE3 angular power spectra for a stated individual
         probe, for given redshift bin combination, and errors on those.
@@ -182,27 +183,27 @@ class Plotter:
         ----------
         bin_m: int
             Index of first redshift bin. Note: bin indices start
-            from 1.
+            from 1
         bin_n: int
             Index of second redshift bin. Note: bin indices start
-            from 1.
-        pl_ax: matplotlib axis object
-            Axis object within which to carry out plotting.
+            from 1
+        pl_ax: :obj:`matplotlib.axes.Axes`
+            Axis object within which to carry out plotting
         probe: str
             Which photometric probe to plot power spectra for. Must be either
-            'WL' for weak lensing or 'GC-Phot' for photometric galaxy
-            clustering. Set to 'WL' by default.
+        `WL` for weak lensing or `GC-Phot` for photometric galaxy
+            clustering. Set to `WL` by default
             Note: Plotter.plot_external_Cl_XC must be used for the
-            cross-correlation.
+            cross-correlation
         pl_label: str
             Label for plot to appear in legend. If none is given, this will
-            be set to "OU-LE3 Bin {:d} - Bin {:d}".format(bin_i, bin_j).
+            be set to `'OU-LE3 Bin {:d} - Bin {:d}'`.format(bin_i, bin_j)`
         pl_colour: str
-            Matplotlib colour choice for current plot. Default is 'b' for blue.
+            Matplotlib colour choice for current plot. Default is 'b' for blue
         pl_linestyle: str
-            Matplotlib linestyle choice for current plot. Default is '-'.
+            Matplotlib linestyle choice for current plot. Default is '-'
         no_bins: int
-            Number of redshift bins for WL probe.
+            Number of redshift bins for WL probe
         """
         if probe not in ['WL', 'GC-Phot']:
             raise Exception('Must choose valid type of probe: WL, or GC-Phot.')
@@ -262,7 +263,7 @@ class Plotter:
     def plot_Cl_XC(self, ells, bin_WL, bin_GC, pl_ax, pl_label=None,
                    pl_colour='b', pl_linestyle='-', no_bins_WL=10,
                    no_bins_GC=10):
-        """Plot Cl XC
+        """Plots cross-correlation photometric angular power spectra.
 
         Function to plot XC Cls computed with CLOE
         for a given set of ells, and bin combination.
@@ -271,26 +272,26 @@ class Plotter:
         ----------
         ells: numpy.ndarray
             Ell-modes at which to evaluate power spectra. Note: minimum allowed
-            ell is 10, and maximum is 5000.
+            ell is 10, and maximum is 5000
         bin_WL: int
             Index of WL redshift bin. Note: bin indices start
-            from 1.
+            from 1
         bin_GC: int
-            Index of GC-phot redshift bin. Note: bin indices start
-            from 1.
-        pl_ax: matplotlib axis object
-            Axis object within which to carry out plotting.
+            Index of GCphot redshift bin. Note: bin indices start
+            from 1
+        pl_ax: :obj:`matplotlib.axes.Axes`
+            Axis object within which to carry out plotting
         pl_label: str
             Label for plot to appear in legend. If none is given, this will
-            be set to "WL Bin {:d} - GC-Phot Bin {:d}".format(bin_WL, bin_GC).
+            be set to `'WL Bin {:d} - GC-Phot Bin {:d}'.format(bin_WL, bin_GC)`
         pl_colour: str
-            Matplotlib colour choice for current plot. Default is 'b' for blue.
+            Matplotlib colour choice for current plot. Default is `b` for blue
         pl_linestyle: str
-            Matplotlib linestyle choice for current plot. Default is '-'.
+            Matplotlib linestyle choice for current plot. Default is '-'
         no_bins_WL: int
-            Number of redshift bins for WL probe.
+            Number of redshift bins for WL probe
         no_bins_GC: int
-            Number of redshift bins for GC-phot probe.
+            Number of redshift bins for GCphot probe
         """
         if bin_WL > no_bins_WL or bin_GC > no_bins_GC:
             raise Exception('Requested bin index greater than number of bins.')
@@ -310,7 +311,7 @@ class Plotter:
     def plot_external_Cl_XC(self, bin_WL, bin_GC, pl_ax, pl_label=None,
                             pl_colour='b', pl_linestyle='-', no_bins_WL=10,
                             no_bins_GC=10):
-        """Plot External Cl XC
+        """Plots external cross-correlation photometric angular power spectra.
 
         Plots external OU-LE3 XC-Phot power spectra, for given redshift bin
         combination, and errors on those.
@@ -319,24 +320,24 @@ class Plotter:
         ----------
         bin_WL: int
             Index of WL redshift bin. Note: bin indices start
-            from 1.
+            from 1
         bin_GC: int
             Index of GC redshift bin. Note: bin indices start
-            from 1.
-        pl_ax: matplotlib axis object
-            Axis object within which to carry out plotting.
+            from 1
+        pl_ax: :obj:`matplotlib.axes.Axes`
+            Axis object within which to carry out plotting
         pl_label: str
             Label for plot to appear in legend. If none is given, this will
-            be set to "OU-LE3 WL Bin {:d} - GC-Phot Bin {:d}".format(bin_WL,
-            bin_GC).
+            be set to `OU-LE3 WL Bin {:d} - GC-Phot Bin {:d}'.format(bin_WL,
+            bin_GC)`
         pl_colour: str
-            Matplotlib colour choice for current plot. Default is 'b' for blue.
+            Matplotlib colour choice for current plot. Default is 'b' for blue
         pl_linestyle: str
-            Matplotlib linestyle choice for current plot. Default is '-'.
+            Matplotlib linestyle choice for current plot. Default is '-'
         no_bins_WL: int
-            Number of redshift bins for WL probe.
+            Number of redshift bins for WL probe
         no_bins_GC: int
-            Number of redshift bins for GC-phot probe.
+            Number of redshift bins for GCphot probe
         """
         if bin_WL > no_bins_WL or bin_GC > no_bins_GC:
             raise Exception('Requested bin index greater than number of bins.')
@@ -377,29 +378,29 @@ class Plotter:
     def plot_GC_spectro_multipole(self, redshift, ks, multipole_order, pl_ax,
                                   pl_label=None, pl_colour='b',
                                   pl_linestyle='-'):
-        """Plot GC Spectro Multipole
+        """Plots spectrocopic power spectra.
 
-        Plots GC-spectro multipole spectra as calculated by CLOE, for a
-        given redshift, set of ks, and multipole order.
+        Plots spectroscopic multipole spectra as calculated by CLOE,
+        for a given redshift, set of wavenumbers, and multipole order.
 
         Parameters
         ----------
         redshift: float
-            Redshift at which to evaluate spectrum.
+            Redshift at which to evaluate spectrum
         ks: numpy.ndarray
-            Wavenumber values at which to evaluate spectrum.
+            Wavenumber values at which to evaluate spectrum
         multipole_order: int
             Multipole order of spectrum to be evaluated. Note: Must be 0, 2, or
-            4.
-        pl_ax: matplotlib axis object
-            Axis object within which to carry out plotting.
+            4
+        pl_ax: :obj:`matplotlib.axes.Axes`
+            Axis object within which to carry out plotting
         pl_label: str
             Label for plot to appear in legend. If none is given, this will
-            be set to "l={:d}".format(multipole_order).
+            be set to `'l={:d}'.format(multipole_order)`
         pl_colour: str
-            Matplotlib colour choice for current plot. Default is 'b' for blue.
+            Matplotlib colour choice for current plot. Default is `b` for blue
         pl_linestyle: str
-            Matplotlib linestyle choice for current plot. Default is '-'.
+            Matplotlib linestyle choice for current plot. Default is '-'
         """
         # Note: These limits for k are set based on what is currently the
         # expected range for OU-LE3 data. Should this change, this range should
@@ -421,28 +422,28 @@ class Plotter:
     def plot_external_GC_spectro(self, redshift, multipole_order, pl_ax,
                                  pl_label=None, pl_colour='b',
                                  pl_linestyle='-'):
-        """Plot External GC Spectro
+        """Plots external spectroscopic power spectra.
 
-        Plots GC-spectro multipole spectra from OU-LE3 files, for a
-        given redshift, and multipole order, with errors.
+        Plots spectroscopic multipole spectra from OU-LE3 files,
+        for a given redshift, and multipole order, with errors.
 
         Parameters
         ----------
         redshift: str
             Redshift at which to evaluate spectrum. Note: Here, this must be
-            specified as string.
+            specified as string
         multipole_order: int
             Multipole order of spectrum to be evaluated. Note: Must be 0, 2, or
-            4.
-        pl_ax: matplotlib axis object
-            Axis object within which to carry out plotting.
+            4
+        pl_ax: :obj:`matplotlib.axes.Axes`
+            Axis object within which to carry out plotting
         pl_label: str
             Label for plot to appear in legend. If none is given, this will
-            be set to "OU-LE3 l={:d}".format(multipole_order).
+            be set to `'OU-LE3 l={:d}'.format(multipole_order)`
         pl_colour: str
-            Matplotlib colour choice for current plot. Default is 'b' for blue.
+            Matplotlib colour choice for current plot. Default is `b` for blue
         pl_linestyle: str
-            Matplotlib linestyle choice for current plot. Default is '-'.
+            Matplotlib linestyle choice for current plot. Default is '-'
         """
         if float(redshift) > 1.8:
             raise Exception('Euclid maximum redshift for GC-spectro is 1.8.')
@@ -477,7 +478,7 @@ class Plotter:
         return pl_ax
 
     def output_Cl_WL(self):
-        r"""Plot WL observable
+        r"""Plots weak lensing observable.
         """
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
@@ -506,7 +507,7 @@ class Plotter:
                    header=f'{"ell" : >16}{"Cell[sr^(-1)]" : >24}')
 
     def output_Cl_phot(self):
-        r"""Plot photometric clustering observable
+        r"""Plots photometric clustering observable.
         """
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
@@ -535,7 +536,7 @@ class Plotter:
                    header=f'{"ell" : >16}{"Cell[sr^(-1)]" : >24}')
 
     def output_Cl_XC(self):
-        r"""Plot WL-photometric clustering cross-correlation observable
+        r"""Plots photometric cross-correlation observable.
         """
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
@@ -564,7 +565,7 @@ class Plotter:
                    header=f'{"ell" : >16}{"Cell[sr^(-1)]" : >24}')
 
     def output_GC_spectro(self):
-        r"""Plot spectroscopic clustering observable
+        r"""Plots spectroscopic galaxy clustering observable.
         """
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
@@ -622,11 +623,11 @@ class Plotter:
 
     def _set_ax(self, axes, title, xlabel, ylabel,
                 fontsize=20, xscale='linear', yscale='linear'):
-        r"""Set title, axis labels, fontsize and scales of a given axes object
+        r"""Sets title, axis labels, fontsize, scales of a given axes object.
 
         Parameters
         ----------
-        axes: matplotlib.axes object
+        axes: :obj:`matplotlib.axes.Axes`
            Instance on which the settings are applied
         title: str
             Title of the axes object

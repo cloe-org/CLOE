@@ -1,3 +1,10 @@
+"""UNIT TESTS FOR MASKING
+
+This module contains unit tests for the :obj:`masking` module.
+
+"""
+
+
 from unittest import TestCase
 from unittest.mock import patch
 from cloe.masking.masking import Masking

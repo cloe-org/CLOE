@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 r"""DATA HANDLER MODULE
 
-Module for rearranging data vectors and covariance matrices into final
-form, and for obtaining the masking vector
+Module for rearranging data vectors and covariance matrices into
+the needed final form and for obtaining the masking vector.
 """
 
 import numpy as np
@@ -12,7 +12,7 @@ from cloe.data_reader import reader
 
 
 class Data_handler:
-    r"""Reshape data vectors and covariances and define masking vectors.
+    r"""Reshapes data vectors and covariances and defines masking vectors.
 
     Build data vectors, covariance matrices and masking vectors
     starting from an initialized instance of a Reader object, and from
@@ -22,20 +22,24 @@ class Data_handler:
     separately and for the combined case, where they are built as the
     concatenation of the following probes (in this order, from lower indices to
     higher indices):
+
      - WL: Weak Lensing
-     - XC-Phot: (Weak Lensing) x (Photometric Galaxy Clustering) cross
+
+     - XCphot: (Weak Lensing) x (Photometric Galaxy Clustering) cross
        correlation
-     - GC-Phot: Photometric Galaxy Clustering
-     - GC-Spectro: Spectroscopic Galaxy Clustering
+
+     - GCphot: Photometric Galaxy Clustering
+
+     - GCspectro: Spectroscopic Galaxy Clustering
 
     The size of the data vector, covariance matrix and masking vector
-    is inferred from the input Reader object.
+    is inferred from the input :obj:`Reader` object.
     """
 
     def __init__(self, data_dict, cov_dict, obs_dict, data_reader):
-        r"""Constructor.
+        r"""Initialises the class.
 
-        Constructor of the class Data_handler.
+        Constructor of the class :obj:`Data_handler`.
         The data vectors, covariance matrices and masking vectors are
         built starting from the data_reader, and from the observables
         dictionary.
@@ -43,13 +47,13 @@ class Data_handler:
         Parameters
         ----------
         data_dict: dict
-            Dictionary containing the data vectors.
+            Dictionary containing the data vectors
         cov_dict: dict
-            Dictionary containing the covariance matrices.
+            Dictionary containing the covariance matrices
         obs_dict: dict
-            Dictionary containing the user-selected probes.
-        data_reader: class
-            Instance of an already initialized Reader object
+            Dictionary containing the user-selected probes
+        data_reader: :obj:`Reader`
+            Instance of an already initialized :obj:`Reader` object
         """
 
         self._obs = obs_dict
@@ -94,7 +98,7 @@ class Data_handler:
             self._create_masking_vector_full(data_reader)
 
     def get_data_and_masking_vector(self):
-        r"""Getter.
+        r"""Gets data and masking vector.
 
         Returns the final unmasked data vector, unmasked
         covariance matrix, and the masking vector
@@ -102,11 +106,8 @@ class Data_handler:
 
         Returns
         -------
-        self._data_vector: np.ndarray
-            Final unmasked data vector
-        self._cov_matrix: np.ndarray
-            Final unmasked covariance matrix
-        self._masking_vector: np.ndarray
+        Data vector, covariance, masking vector: numpy.ndarray
+            Final unmasked data vector, Final unmasked covariance matrix,
             Masking vector
         """
         return (self._data_vector,
@@ -114,7 +115,7 @@ class Data_handler:
                 self._masking_vector)
 
     def get_data_and_masking_vector_phot(self):
-        r"""Getter.
+        r"""Gets photometric data and masking vector.
 
         Returns the final unmasked data vector, unmasked
         covariance matrix, and the masking vector
@@ -122,19 +123,16 @@ class Data_handler:
 
         Returns
         -------
-        self._data_vector_phot: np.ndarray
-            Final unmasked data vector
-        self._cov_matrix_phot: np.ndarray
-            Final unmasked covariance matrix
-        self._masking_vector_phot: np.ndarray
-            Masking vector for the photo part
+        Data vector, covariance, masking vector: numpy.ndarray
+            Final unmasked data vector, Final unmasked covariance matrix,
+            Masking vector
         """
         return (self._data_vector_phot,
                 self._cov_matrix_phot,
                 self._masking_vector_phot)
 
     def get_data_and_masking_vector_spectro(self):
-        r"""Getter.
+        r"""Gets spectroscopic data and masking vector.
 
         Returns the final unmasked data vector, unmasked
         covariance matrix, and the masking vector
@@ -142,12 +140,9 @@ class Data_handler:
 
         Returns
         -------
-        self._data_vector_spectro: np.ndarray
-            Final unmasked data vector
-        self._cov_matrix_spectro: np.ndarray
-            Final unmasked covariance matrix
-        self._masking_vector_spectro: np.ndarray
-            Masking vector for the spectro part
+        Data vector, covariance, masking vector numpy.ndarray
+            Final unmasked data vector, Final unmasked covariance matrix,
+            Masking vector
         """
         return (self._data_vector_spectro,
                 self._cov_matrix_spectro,
@@ -155,34 +150,35 @@ class Data_handler:
 
     @property
     def use_wl(self):
-        r"""Get whether the WL probe should be used"""
+        r"""Gets whether the WL probe should be used."""
         return self._use_wl
 
     @property
     def use_xc_phot(self):
-        r"""Get whether the XC-Phot probe should be used"""
+        r"""Gets whether the XCphot probe should be used."""
         return self._use_xc_phot
 
     @property
     def use_gc_phot(self):
-        r"""Get whether the GC-Phot probe should be used"""
+        r"""Gets whether the protometric probe should be used."""
         return self._use_gc_phot
 
     @property
     def use_gc_spectro(self):
-        r"""Get whether GC-Spectro probe should be used"""
+        r"""Gets whether spectroscopic probe should be used."""
         return self._use_gc_spectro
 
     @property
     def gc_spectro_size(self):
-        r"""Get the size of the GC-Spectro part of the data vector"""
+        r"""Gets the size of the spectroscopic part of the data vector."""
         return self._gc_spectro_size
 
     def _create_data_vector(self):
         r"""Creates the final unmasked data vector.
 
         Concatenates data vectors from the four individual probes,
-        and assigns the result to the internal attribute self._data_vector.
+        and assigns the result to the internal attribute
+        :obj:`self._data_vector`.
         """
         data_vector = np.concatenate((self._data['WL'],
                                       self._data['XC-Phot'],
@@ -195,7 +191,8 @@ class Data_handler:
         r"""Creates the final unmasked photometric data vector.
 
         Concatenates data vectors from the three photometric probes,
-        and assigns the result to the internal attribute self._data_vector_phot
+        and assigns the result to the internal attribute
+        :obj:`self._data_vector_phot`.
         """
         data_vector = np.concatenate((self._data['WL'],
                                       self._data['XC-Phot'],
@@ -207,7 +204,7 @@ class Data_handler:
         r"""Creates the final unmasked spectroscopic data vector.
 
         Assigns the spectroscopic data vector to the
-        internal attribute self._data_vector_spectro
+        internal attribute :obj:`self._data_vector_spectro`.
         """
 
         self._data_vector_spectro = self._data['GC-Spectro']
@@ -217,7 +214,8 @@ class Data_handler:
 
         Merges the individual covariance matrices for the four individual
         probes into a single matrix (with zero cross-terms),
-        and assigns the result to the internal attribute self._cov_matrix.
+        and assigns the result to the internal attribute
+        :obj:`self._cov_matrix`.
         """
         cov_matrix = merge_matrices(self._cov['3x2pt'],
                                     self._cov['GC-Spectro'])
@@ -227,7 +225,7 @@ class Data_handler:
         r"""Creates the final unmasked photometric covariance matrix.
 
         Assigns the 3x2pt covariance to the
-        internal attribute self._cov_matrix_phot.
+        internal attribute :obj:`self._cov_matrix_phot`.
         """
         self._cov_matrix_phot = self._cov['3x2pt']
 
@@ -235,7 +233,7 @@ class Data_handler:
         r"""Creates the final unmasked spectroscopic covariance matrix.
 
         Assigns the GC Spectro covariance
-        to the internal attribute self._cov_matrix_spectro.
+        to the internal attribute :obj:`self._cov_matrix_spectro`.
         """
         self._cov_matrix_spectro = self._cov['GC-Spectro']
 
@@ -244,12 +242,12 @@ class Data_handler:
 
         Builds a masking vector made of 1's and 0's, used to mask the data and
         theory vectors, starting from the user specifications contained in the
-        self._obs dictionary.
+        :obj:`self._obs dictionary`.
 
         Parameters
         ----------
         data: class
-          an instance of the Reader class specifying the structure and
+          An instance of the :obj:`Reader class` specifying the structure and
           organization of the data
 
         Notes
@@ -349,16 +347,16 @@ class Data_handler:
             (wl_vec, xc_phot_vec, gc_phot_vec, gc_spectro_vec), axis=None)
 
     def _create_masking_vector_phot(self, data):
-        r"""Builds the photometric masking vector
+        r"""Builds the photometric masking vector.
 
         Builds a masking vector made of 1's and 0's, used to mask the data and
         theory vectors, starting from the user specifications contained in the
-        self._obs dictionary.
+        :obj:`self._obs dictionary`.
 
         Parameters
         ----------
         data: class
-          an instance of the Reader class specifying the structure and
+          Instance of the Reader class specifying the structure and
           organization of the data
 
         Notes
@@ -439,16 +437,16 @@ class Data_handler:
             axis=None)
 
     def _create_masking_vector_spectro(self, data):
-        r"""Builds the spectroscopic masking vector
+        r"""Builds the spectroscopic masking vector.
 
         Builds a masking vector made of 1's and 0's, used to mask the data and
         theory vectors, starting from the user specifications contained in the
-        self._obs dictionary.
+        :obj:`self._obs dictionary`.
 
         Parameters
         ----------
         data: class
-          an instance of the Reader class specifying the structure and
+          Instance of the Reader class specifying the structure and
           organization of the data
 
         Notes

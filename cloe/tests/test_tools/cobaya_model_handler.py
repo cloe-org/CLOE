@@ -39,8 +39,8 @@ class CobayaModel:
             interpolate.InterpolatedUnivariateSpline(
                 self.z_win,
                 np.linspace(0.001, 1.7, 100))
-        self.cosmology.nonlinear.theory['redshift_bins'] = \
-            self.cosmology.cosmo_dic['redshift_bins']
+        self.cosmology.nonlinear.theory['redshift_bins_means_spectro'] = \
+            self.cosmology.cosmo_dic['redshift_bins_means_spectro']
         self.cosmology.nonlinear.set_Pgg_spectro_model()
 
     def define_info(self, cosmo_inst):

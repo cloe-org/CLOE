@@ -99,11 +99,11 @@ class Nonlinear:
             If GCspectro redshift bins cannot be found in the cosmo
             dictionary
         """
-        if 'redshift_bins' not in self.theory.keys():
+        if 'redshift_bins_means_spectro' not in self.theory.keys():
             raise KeyError('Attempting to set Pgg_spectro_model class '
                            'without having specified the GCspectro '
                            'redshift bins in the cosmo dictionary.')
-        zbins = self.theory['redshift_bins']
+        zbins = self.theory['redshift_bins_means_spectro']
         if not isinstance(zbins, np.ndarray):
             self.zbins = np.array(zbins)
         else:

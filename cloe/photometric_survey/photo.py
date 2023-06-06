@@ -130,7 +130,10 @@ class Photo:
             self.magbias = [nuisance_dict[f'magnification_bias_{i}']
                             for i in self.nz_GC.get_tomographic_bins()]
             if self.theory['magbias_model'] == 1:
-                self.magbias = linear_interpolator(None, self.magbias)
+                self.magbias = \
+                    linear_interpolator(
+                        self.theory['redshift_bins_means_phot'],
+                        self.magbias)
 
             # z_wtom is the number of tomographic bins + 1
             z_wtom_gc = 1 + self.nz_GC.get_num_tomographic_bins()

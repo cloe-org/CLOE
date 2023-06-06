@@ -1,9 +1,9 @@
 """
-module: miscellanous
+MISCELLANEOUS
 
-Contains functions from cosmology.py that are required
-in the nonlinear module (only temporary to mimic the
-linear implementation made by IST:L)
+This module contains functions from :obj:`cosmology.py` that are
+required in the nonlinear module (only temporary to mimic the
+linear implementation made by IST:L).
 """
 
 import numpy as np
@@ -12,49 +12,49 @@ import cloe.auxiliary.redshift_bins as rb
 
 class Misc:
     r"""
-    Class for storing miscellanous routines
+    Class for storing miscellanous routines.
     """
 
     def __init__(self, cosmo_dic):
-        """Initialize
+        """Initialises the :obj:`Misc` class.
 
-        Constructor of the class Misc
+        Constructor of the class Misc.
 
         Parameters
         ----------
-        cosmo_dic: dictionary
+        cosmo_dic: dict
             External dictionary from nonlinear module
         """
         self.theory = cosmo_dic
 
     def update_dic(self, cosmo_dic):
         """
-        Update theory with an external cosmo dictionary
+        Updates theory with an external cosmo dictionary.
         """
         self.theory = cosmo_dic
 
     def fia(self, redshift, wavenumber=0.001):
-        r"""Fia
+        r"""Intrinsic alignment function.
 
         Computes the intrinsic alignment function. For v1.0
         we set :math:`\langle L \rangle(z) /L_{\star}(z)=1`.
 
         .. math::
             f_{\rm IA}(z) &= -\mathcal{A_{\rm IA}}\mathcal{C_{\rm IA}}\
-            \frac{\Omega_{m,0}}{D(z)}
+            \frac{\Omega_{\rm m,0}}{D(z)}
             [(1 + z)/(1 + z_{\rm pivot})]^{\eta_{\rm IA}}\
-            [\langle L \rangle(z) /L_{\star}(z)]^{\beta_{\rm IA}}\\
+            [\langle L \rangle(z) /L_{\star}(z)]^{\beta_{\rm IA}}\\.
 
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift(s) at which to evaluate the intrinsic alignment.
+            Redshift(s) at which to evaluate the intrinsic alignment
         wavenumber: float or numpy.ndarray
-            wavenumber(s) at which to evaluate the intrinsic alignment.
+            Wavenumber(s) at which to evaluate the intrinsic alignment
 
         Returns
         -------
-        fia: float or numpy.ndarray
+        Intrinsic alignment function: float or numpy.ndarray
             Value(s) of intrinsic alignment function at
             given redshift(s) and wavenumber(s)
         """
@@ -88,35 +88,36 @@ class Misc:
         return fia
 
     def istf_spectro_galbias(self, redshift):
-        """Istf Spectro Galbias
+        """IST:F Spectroscopic galaxy bias.
 
-        Gets galaxy bias for the spectroscopic galaxy clustering
-        probe, at given redshift(s), according to the linear recipe
-        used for version 1.0 of CLOE (default recipe).
+        Gets the galaxy bias for the spectroscopic galaxy
+        clustering probe, at given redshift(s), according to
+        the linear recipe used for version 1.0 of CLOE
+        (default recipe).
 
         Attention: this function is going to be removed from the
         nonlinear module. In the future we are not going to employ
         the same values used by IST:F, rather we are aiming at having
         a proper nonlinear galaxy bias model with multiple parameters
-        at each considered redshift bin
+        at each considered redshift bin.
 
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift(s) at which to calculate bias.
+            Redshift(s) at which to calculate bias
 
-            Default is Euclid IST: Forecasting choices.
+            Default is Euclid IST: Forecasting choices
 
         Returns
         -------
-        bi_val: float or numpy.ndarray
+        Spectroscopic galaxy bias: float or numpy.ndarray
             Value(s) of spectroscopic galaxy bias at input redshift(s)
 
         Raises
         ------
         ValueError
             If redshift is outside of the bounds defined by the first
-            and last element of bin_edges
+            and last element of ``bin_edges``
         """
 
         bin_edges = self.theory['redshift_bins']
@@ -134,19 +135,19 @@ class Misc:
                              'and valid bi_spectro\'s are provided.')
 
     def istf_phot_galbias(self, redshift):
-        r"""Istf Phot Galbias
+        r"""IST:F Photometric galaxy bias.
 
-        Gets galaxy bias(es) for the photometric GC probes by
-        interpolation at a given redshift
+        Gets the galaxy bias(es) for the GCphot probes by
+        interpolation at a given redshift.
 
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift(s) at which to calculate bias.
+            Redshift(s) at which to calculate bias
 
         Returns
         -------
-        bi_val: float or numpy.ndarray
+        Photometric galaxy bias: float or numpy.ndarray
             Value(s) of photometric galaxy bias at input redshift(s)
         """
 

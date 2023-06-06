@@ -1,6 +1,6 @@
 """UNIT TESTS FOR PHOTO
 
-This module contains unit tests for the Photo sub-module of the
+This module contains unit tests for the :obj:`photo` sub-module of the
 photometric survey module.
 
 """

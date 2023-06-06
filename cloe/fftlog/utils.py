@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Utils
+"""UTILS
 
-Utility functions for the FFTLog module.
+Utility functions for the FFTLog module. These are implemented as private
+methods to take as input an array :math:`x`, evaluate its behaviour
+at extrema and use them to logarithmically extrapolate
+the array as well as FAST-PT methods which are called by
+the FFTLog module.
 """
 
 import numpy as np
@@ -17,23 +21,23 @@ def _log_extrap(x, N_extrap_begin, N_extrap_end):
     the array according to
     :math:`x_{i}=x_{0} \exp \left(i \Delta_{\ln x}\right)`, where :math:`x_0`
     is the first/last value and :math:`\Delta_{\ln x}` is the logarithm of the
-    ratio of the first/last two values
+    ratio of the first/last two values.
 
     Parameters
     ----------
-    x: array
-        array to be extrapolated
+    x: numpy.ndarray
+        Array to be extrapolated
 
-    N_extrap_begin: Int
-        number of points to add at the beginning of the input array
+    N_extrap_begin: int
+        Number of points to add at the beginning of the input array
 
-    N_extrap_end: Int
-        number of points to add at the end of the input array
+    N_extrap_end: int
+        Number of points to add at the end of the input array
 
     Returns
     -------
     x_extrap: array
-        returns the extrapolated array
+        Returns the extrapolated array
     """
 
     low_x = high_x = []
@@ -53,7 +57,7 @@ def _c_window(n, n_cut):
 
     One-side window function of c_m,
     Adapted from Eq.(C1) in
-    `McEwen et al. (2016) <https://arxiv.org/abs/1603.04826>`_
+    `McEwen et al. (2016) <https://arxiv.org/abs/1603.04826>`_.
 
     .. math::
         W(x)= \begin{cases}
@@ -65,17 +69,17 @@ def _c_window(n, n_cut):
 
     Parameters
     ----------
-    n: array
-        this array is assumed to be given by np.arange(0, N // 2 + 1),
+    n: numpy.ndarray
+        Array assumed to be given by np.arange(0, N // 2 + 1),
         where N is the number of elements in the array to be transformed
 
-    n_cut: Int
-        specifies where the smoothing of c_m must start
+    n_cut: int
+        Specifies where the smoothing of c_m must start
 
     Returns
     -------
-    W: array
-        array containing the smoothing coefficients
+    W: numpy.ndarray
+        Array containing the smoothing coefficients
     """
 
     n_right = n[-1] - n_cut
@@ -96,22 +100,22 @@ def _g_m_vals(mu, q):
         \frac{\Gamma((\mu+1+q)/2)}{\Gamma((\mu+1-q)/2)}
 
     Switching to asymptotic form when |Im(q)| + |mu| > cut = 200, as done
-    in FAST-PT
+    in FAST-PT.
 
     Parameters
     ----------
-    mu: Float
-        the first coefficient is related to the value of the multipole
+    mu: float
+        The first coefficient is related to the value of the multipole
         involved in the FFTLog integral/Hankel transform
 
-    q: array
-        this array specifies the grid over which the _g_m_vals function is
+    q: numpy.ndarray
+        This array specifies the grid over which the _g_m_vals function is
         evaluated
 
     Returns
     -------
-    g_m: array
-        array containing the evaluated function
+    g_m: numpy.ndarray
+        Array containing the evaluated function
     """
     if (mu + 1 + q.real[0] == 0):
         print("gamma(0) encountered. Please change another nu value!")
@@ -165,15 +169,15 @@ def _g_l(ell, z_array):
 
     Parameters
     ----------
-    ell: Float
-        order of the Bessel function of the FFTLog transform
-    z: array
-        input array used to define the domain of _g_l
+    ell: float
+        Order of the Bessel function of the FFTLog transform
+    z: numpy.ndarray
+        Input array used to define the domain of _g_l
 
     Returns
     -------
-    gl: array
-        computed values of the _g_l function
+    gl: numpy.ndarray
+        Computed values of the _g_l function
     """
     gl = 2.**z_array * _g_m_vals(ell + 0.5, z_array - 1.5)
     return gl

@@ -1,6 +1,6 @@
-"""Logger
+"""LOGGER
 
-This module contains routines to handle loggers
+This module contains routines to handle loggers.
 """
 
 import sys
@@ -10,13 +10,13 @@ from datetime import datetime
 
 
 def open_logger(name='CLOE'):
-    """Open an instance of logging.Logger
+    """Opens an instance of :obj:`logging.Logger`.
 
     Parameters
     ----------
     name : str
         Log name. The filename is the concatenation of the name
-        and the timestamp.
+        and the timestamp
 
     Returns
     -------
@@ -47,7 +47,7 @@ def open_logger(name='CLOE'):
 
 def set_logging_level(log, level):
     """
-    Sets the logging level
+    Sets the logging level.
 
     Parameters
     ----------
@@ -77,7 +77,7 @@ def set_logging_level(log, level):
 
 def log_debug(message):
     """
-    Logs a message with verbose level debug
+    Logs a message with verbose level debug.
 
     Parameters
     ----------
@@ -90,7 +90,7 @@ def log_debug(message):
 
 def log_info(message):
     """
-    Logs a message with verbose level info
+    Logs a message with verbose level info.
 
     Parameters
     ----------
@@ -105,7 +105,7 @@ def log_info(message):
 
 def log_warning(message):
     """
-    Logs a message with verbose level warning
+    Logs a message with verbose level warning.
 
     Parameters
     ----------
@@ -118,7 +118,7 @@ def log_warning(message):
 
 def log_error(message):
     """
-    Logs a message with verbose level error
+    Logs a message with verbose level error.
 
     Parameters
     ----------
@@ -131,7 +131,7 @@ def log_error(message):
 
 def log_critical(message):
     """
-    Logs a message with verbose level critical
+    Logs a message with verbose level critical.
 
     Parameters
     ----------
@@ -143,7 +143,7 @@ def log_critical(message):
 
 
 def close_logger(log):
-    """Close an instance of logging.Logger
+    """Closes an instance of :obj:`logging.Logger`.
 
     Parameters
     ----------
@@ -155,7 +155,7 @@ def close_logger(log):
 
 
 def catch_error(exception, log=None):
-    """Catch an exception and output the error message.
+    """Catches an exception and output the error message.
 
     If a logger is provided, the error is also logged.
 

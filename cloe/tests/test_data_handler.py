@@ -1,3 +1,9 @@
+"""UNIT TESTS FOR DATA HANDLER
+
+This module contains unit tests for the :obj:`data_handler` module.
+
+"""
+
 from unittest import TestCase
 from cloe.masking.data_handler import Data_handler
 import numpy.testing as npt

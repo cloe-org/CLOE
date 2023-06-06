@@ -1,7 +1,8 @@
 """
-module: pgL_phot
+pgL_phot
 
-Contains recipes for the photometric galaxy x lensing power spectrum.
+This module contains  the recipes for the photometric
+galaxy x lensing power spectrum.
 """
 
 from cloe.non_linear.power_spectrum import PowerSpectrum
@@ -9,28 +10,28 @@ from cloe.non_linear.power_spectrum import PowerSpectrum
 
 class PgL_phot_model(PowerSpectrum):
     r"""
-    Class for computation of photometric galaxy x lensing power spectrum
+    Class for computation of photometric galaxy x lensing power spectrum.
     """
 
     def Pgdelta_phot_def(self, redshift, wavenumber):
-        r"""Pgdelta Phot Def
+        r"""Pgdelta phot def.
 
         Computes the galaxy-matter power spectrum for the photometric probe.
 
         .. math::
             P_{\rm g\delta}^{\rm photo}(z, k) &=\
-            [b_g^{\rm photo}(z)] P_{\rm \delta\delta}(z, k)\\
+            [b_{\rm g}^{\rm photo}(z)] P_{\rm \delta\delta}(z, k)\\
 
         Parameters
         ----------
         redshift: float
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         wavenumber: float or list or numpy.ndarray
-            wavenumber at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
 
         Returns
         -------
-        pval: float or numpy.ndarray
+        Photometric galaxy-matter power spectrum: float or numpy.ndarray
             Value of galaxy-matter power spectrum
             at a given redshift and wavenumber for galaxy clustering
             photometric
@@ -40,7 +41,7 @@ class PgL_phot_model(PowerSpectrum):
         return pval
 
     def Pgdelta_phot_halo(self, redshift, wavenumber):
-        r"""Pgdelta Phot Halo
+        r"""Pgdelta phot halo.
 
         Computes the galaxy-matter power spectrum for the photometric probe
         assuming a linear bias model. Uses halo model based codes for the
@@ -48,18 +49,18 @@ class PgL_phot_model(PowerSpectrum):
 
         .. math::
             P_{\rm g\delta}^{\rm photo}(z, k) &=\
-            [b_g^{\rm photo}(z)] P_{\rm \delta\delta}^{\rm NL}(z, k)\\
+            [b_{\rm g}^{\rm photo}(z)] P_{\rm \delta\delta}^{\rm NL}(z, k)\\
 
         Parameters
         ----------
         redshift: float
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         wavenumber: float or list or numpy.ndarray
-            wavenumber at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
 
         Returns
         -------
-        pval: float or numpy.ndarray
+        Halo model phot galaxy-matter power spectrum: float or numpy.ndarray
             Value of galaxy-matter power spectrum
             at a given redshift and wavenumber for galaxy clustering
             photometric
@@ -69,26 +70,26 @@ class PgL_phot_model(PowerSpectrum):
         return pval
 
     def Pgdelta_phot_emu(self, redshift, wavenumber):
-        r"""Pgdelta Phot emu
+        r"""Pgdelta phot emu.
 
         Computes the galaxy-matter power spectrum for the photometric probe
         assuming a linear bias model. Uses the EuclidEmu2 or the BACCO
         emulator for the nonlinear boost to the matter power spectrum.
 
         .. math::
-            P_{\rm g\delta}^{\rm photo}(z, k) &=\
-            [b_g^{\rm photo}(z)] P_{\rm \delta\delta}^{\rm NL}(z, k)\\
+            P_{\rm {\rm g}\delta}^{\rm photo}(z, k) &=\
+            [b_{\rm g}^{\rm photo}(z)] P_{\rm \delta\delta}^{\rm NL}(z, k)\\
 
         Parameters
         ----------
         redshift: float
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         wavenumber: float or list or numpy.ndarray
-            wavenumber at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
 
         Returns
         -------
-        pval: float or numpy.ndarray
+        Emulator phot galaxy-matter power spectrum: float or numpy.ndarray
             Value of galaxy-matter power spectrum
             at a given redshift and wavenumber for galaxy clustering
             photometric

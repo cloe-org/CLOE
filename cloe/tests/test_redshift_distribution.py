@@ -1,8 +1,7 @@
-"""Unit Tests for Redshift Distribution
+"""UNIT TESTS FOR REDSHIFT DISTRIBUTION
 
-This module contains unit tests for the RedshiftDistribution
+This module contains unit tests for the :obj:`RedshiftDistribution`
 sub-module of the photometric survey module.
-=======
 
 """
 

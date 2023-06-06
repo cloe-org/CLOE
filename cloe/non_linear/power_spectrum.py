@@ -1,32 +1,32 @@
 """
-module: power_spectrum
+POWER SPECTRUM
 
-Contains mother class for a generic power spectrum.
+This module contains the mother class to compute a generic power spectrum.
 """
 
 
 class PowerSpectrum:
     r"""
-    Class for generic power spectrum
+    Class for generic power spectrum.
 
     For the moment it only contains
     routines for the initialization and the update of the attributes
-    which are shared by the four child classes
+    which are shared by the four child classes.
     """
 
     def __init__(self, cosmo_dic, nonlinear_dic, misc):
-        """Initialize
+        """Initialise.
 
-        Constructor of the class PowerSpectrum
+        Constructor of the class PowerSpectrum.
 
         Parameters
         ----------
         cosmo_dic: dict
-            cosmological dictionary from nonlinear module
+            Cosmological dictionary from nonlinear module
         nonlinear_dic: dict
-            nonlinear dictionary from nonlinear module
+            Nonlinear dictionary from nonlinear module
         misc: Misc
-            class containing information needed by linear recipe
+            Class containing information needed by linear recipe
         """
         self.theory = cosmo_dic
         self.nonlinear_dic = nonlinear_dic
@@ -34,7 +34,7 @@ class PowerSpectrum:
 
     def update_dic(self, cosmo_dic, nonlinear_dic, misc):
         """
-        Update theory with an external cosmo dictionary
+        Updates theory with an external cosmo dictionary.
         """
         self.theory = cosmo_dic
         self.nonlinear_dic = nonlinear_dic

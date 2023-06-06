@@ -1,8 +1,7 @@
 """UNIT TESTS FOR PARAMETERS CONVERTER
 
 This module contains unit tests
-for the params_converter module.
-=======
+for the :obj:`params_converter` module.
 
 """
 

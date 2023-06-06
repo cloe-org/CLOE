@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
-"""CLOE Module
+"""CLOE PACKAGE
 
-This section provides detailed information on the CLOE modules and methods.
+*Cosmology Likelihood for Observables in Euclid* (CLOE) is a package
+developed by Euclid Inter-Science Task Force for Likelihood
+(IST:Likelihood, IST:L) to compute the *Euclid* likelihood.
+This documentation provides a description of the
+modules implemented in CLOE.
 
 """
 

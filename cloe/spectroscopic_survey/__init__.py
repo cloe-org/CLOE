@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-"""Spectroscopic Module
+"""SPECTROSCOPIC MODULE
 
-In this module, we include functions needed for spectroscopic observables
+This module computes the functions needed to obtain the
+spectroscopic observables.
 
 """
 

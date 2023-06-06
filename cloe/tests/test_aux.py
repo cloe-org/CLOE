@@ -1,6 +1,7 @@
 """UNIT TESTS FOR AUXILIARY
 
-This module contains unit tests for the auxiliary functions module.
+This module contains unit tests for the :obj:`auxiliary`
+functions module.
 
 """
 

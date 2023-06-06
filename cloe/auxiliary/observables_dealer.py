@@ -1,7 +1,7 @@
-"""observables_dealer
+"""OBSERVABLES DEALER
 
 Contains function to read the observable dictionary
-and plot the visualization of the matrix
+and plot the visualization of the matrix.
 """
 
 import pandas as pd
@@ -14,17 +14,17 @@ import warnings
 
 def observables_visualization(observables_dict, palette='standard'):
     """
-    Observables visualization
+    Observables visualisation.
 
     Takes the observables dictionary read by Cobaya
-    and shows the visualization of the matrix
+    and shows the visualisation of the matrix.
 
     Parameters
     ----------
     observables_dict: dict
-        dictionary with the observables selection
+        Dictionary with the observables selection
     palette: string
-        name of the visualiation color palette
+        Name of the visualisation color palette
         Choose between 'standard', 'protanopia',
         'deuteranopia'
     """
@@ -52,15 +52,15 @@ def observables_visualization(observables_dict, palette='standard'):
 
 def observables_selection_checker(observables_dict):
     """
-    Observables selection checker
+    Observables selection checker.
 
     Checks and notifies the user if a selection is
-    not correct
+    not correct.
 
     Parameters
     ----------
     observables_dict: dict
-        dictionary with the observables selection
+        Dictionary with the observables selection
     """
     if (observables_dict['WL']['GCspectro'] or
             observables_dict['GCphot']['GCspectro']):
@@ -77,17 +77,17 @@ def observables_selection_checker(observables_dict):
 
 def ell_checker(specifications_dict_prob):
     """
-    Multipoles checker
+    Multipoles checker.
 
     Checks if ells selected by the user for the WL, GCphot
-    and the cross-correlation beetween WLxGCphot
+    and the cross-correlation beetween photometric
     probes are greater or equal than 0
-    and that ell_max is greater or equal than ell_min
+    and that `ell_max` is greater or equal than `ell_min`.
 
     Parameters
     ----------
     specifications_dict_prob: dict
-        dictionary with the specifications for one probe
+        Dictionary with the specifications for one probe
     """
     ells_ranges = \
         np.array(
@@ -103,17 +103,21 @@ def ell_checker(specifications_dict_prob):
 def observables_selection_specifications_checker(observables_dict,
                                                  specifications_dict):
     """
-    Observables selection and specifications checker
+    Observables selection and specifications checker.
 
     Merges in a single dictionary the observable selection
-    and the specifications loaded in the cobaya_interface.py
+    and the specifications loaded in the :obj:`cobaya_interface.py`.
 
     Parameters
     ----------
     observables_dict: dict
-        dictionary with the observables selection
+        Dictionary with the observables selection
     specifications_dict: dict
-        dictionary with the observables specifications
+        Dictionary with the observables specifications
+    Returns
+    -------
+    Merged dictionary: dict
+        Dictionary with observables selection and specifications
     """
     # First check observables selection
     checked_observables_dict = observables_selection_checker(observables_dict)

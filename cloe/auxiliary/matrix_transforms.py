@@ -7,10 +7,11 @@ The class VectorizeMatrix computes linear operators that allow to
 vectorize 2D-matrices into 1D-vectors.
 See Appendix B of the CLOE v2 release documentation.
 
-The class BNT_transform computes the BNT matrix, given a fiducial cosmology.
+The class BNT_transform computes the Bernardeau-Nishimichi-Taruya (BNT) matrix,
+given a fiducial cosmology.
 This matrix can be used to modify the photometric C_ells to localize
-their Kernels and allow for optimal scale-redshift cuts.
-See Section 7 of the CLOE v2 release documentation.
+their kernels and allow for optimal scale-redshift cuts.
+See the CLOE v2 release documentation.
 
 """
 
@@ -94,13 +95,13 @@ class BNT_transform():
     """
     Class BNT_transform
 
-    The class BNT_transform computes the BNT matrix,
-    given a fiducial cosmology.
+    The class BNT_transform computes the Bernardeau-Nishimichi-Taruya (BNT)
+    matrix, given a fiducial cosmology.
     This matrix can be used to modify the photometric C_ells to localize
-    their Kernels and allow for optimal scale-redshift cuts.
+    their kernels and allow for optimal scale-redshift cuts.
     See Section 7 of the CLOE v2 release documentation for a description
     of the BNT matrix.
-    For the vectorized formalism and application see appendix B of the CLOE v2
+    For the vectorized formalism and application see the CLOE v2
     release documentation.
     """
 
@@ -132,14 +133,15 @@ class BNT_transform():
 
     def compute_BNT_matrix(self):
         """
-        Compute BNT Matrix
+        compute_BNT_matrix
 
-        Compute Matrix for the BNT transform
+        Compute matrix for the BNT transform
 
         Returns
         -------
         BNT_matrix: array
-             2D-array containing the BNT matrix transform
+             2D-array of size Nz_bins x Nz_bins,
+             containing the BNT matrix.
         """
 
         A_list = np.zeros((self.Nz_bins))

@@ -73,9 +73,9 @@ class Euclike:
             x_diagonal_gc = np.array(np.triu_indices(n=numtomo_gcphot,
                                      m=numtomo_gcphot)) + 1
             self.indices_diagonal_wl = \
-                list(zip(x_diagonal_wl[0], x_diagonal_wl[1]))
+                tuple(zip(x_diagonal_wl[0], x_diagonal_wl[1]))
             self.indices_diagonal_gc = \
-                list(zip(x_diagonal_gc[0], x_diagonal_gc[1]))
+                tuple(zip(x_diagonal_gc[0], x_diagonal_gc[1]))
             x_full_xc = np.indices((numtomo_gcphot, numtomo_wl))
             self.indices_all = tuple(zip(x_full_xc[0].flatten() + 1,
                                      x_full_xc[1].flatten() + 1))
@@ -134,15 +134,15 @@ class Euclike:
         """
         if self.do_photo:
             # precompute matrix transforms needed for photo data
-            self.precompute_matrix_transform_photo()
-            photodata = self.create_photo_data()
+            self.precompute_matrix_transform_phot()
+            phot_data = self.create_photo_data()
         if self.do_spectro:
             spectrodata = self.create_spectro_data()
             spectrocov = self.create_spectro_cov()
         # Reshaping the data vectors and covariance matrices
         # into dictionaries to be passed to the data_handler class
         if self.do_photo and self.do_spectro:
-            datafinal = {**photodata,
+            datafinal = {**phot_data,
                          'GC-Spectro': spectrodata}
             covfinal = {'3x2pt': self.data_ins.data_dict['3x2pt_cov'],
                         'GC-Spectro': spectrocov}
@@ -150,7 +150,7 @@ class Euclike:
             datafinal = {'GC-Spectro': spectrodata}
             covfinal = {'GC-Spectro': spectrocov}
         elif self.do_photo:
-            datafinal = photodata
+            datafinal = phot_data
             covfinal = {'3x2pt': self.data_ins.data_dict['3x2pt_cov']}
 
         self.data_handler_ins = Data_handler(datafinal,
@@ -284,7 +284,7 @@ class Euclike:
     def create_photo_theory(self, dictionary):
         """Create Photo Theory
 
-        Obtains the photo theory for the likelihood.
+        Obtains the photometric theory for the likelihood.
         The theory is evaluated only for the probes specified in the masking
         vector. For the probes for which the theory is not evaluated, an array
         of zeros is included in the returned dictionary.
@@ -360,8 +360,8 @@ class Euclike:
 
         return photo_theory_vec
 
-    def precompute_matrix_transform_photo(self):
-        """Precompute Matrix Transform
+    def precompute_matrix_transform_phot(self):
+        """Precompute Matrix Transform Phot
 
         Precompute matrices needed for matrix transforms of data and
         theory vectors, using fiducial quantities at initialization.
@@ -370,9 +370,10 @@ class Euclike:
 
         """
         if self.do_photo:
-            if not self.matrix_transform_phot:
+            print(self.matrix_transform_phot)
+            if self.matrix_transform_phot is None:
                 return None
-            if 'BNT' in self.matrix_transform_phot:
+            elif 'BNT' in self.matrix_transform_phot:
                 print("computing BNT transform")
                 zwin = self.fiducial_cosmo_quantities_dic['z_win']
                 self.phot_ins.calc_nz_distributions(
@@ -397,7 +398,8 @@ class Euclike:
                                            obs='WL'):
         """Transform Photo Theory Data Vector
 
-        Transform the photo theory vector with a generic matrix transformation
+        Transform the photometric theory and data vector
+        with a generic matrix transformation
         specified in the 'matrix_transform_phot' key
         of the info dictionary
 
@@ -405,26 +407,28 @@ class Euclike:
         ----------
         obs_array: array
             Array containing the original (untransformed)
-            photo theory/data vector
+            photometric theory/data vector
         dictionary: dict
             cosmology dictionary from the Cosmology class
         obs: string
-            String specifying the photo observable which will be transformed.
+            String specifying the photometric
+            observable which will be transformed.
             Default: 'WL'
 
         Returns
         -------
         transformed_array: array
-            Returns an array with the transformed photo theory/data vector
+            Returns an array with the transformed
+            photometric theory/data vector
             If the requested transform is unapplicable, returns the original
-            photo theory/data vector
+            photometric theory/data vector
         """
 
         transformed_array = obs_array
-        if not self.matrix_transform_phot:
+        if self.matrix_transform_phot is None:
             # Not doing any matrix transform
             return transformed_array
-        if 'BNT' in self.matrix_transform_phot:
+        elif 'BNT' in self.matrix_transform_phot:
             if obs == 'WL':
                 N_ells = len(self.ells_WL)
                 transformed_array = \

@@ -182,7 +182,6 @@ class likecalcngTestCase(TestCase, SpectroTestParent):
         self.like_tt_ng = Euclike(self.mock_data_ng, mock_obs)
         self.like_tt_ng.fiducial_cosmo_quantities_dic.update(
             self.test_dict)
-        self.like_tt_ng.matrix_transform_phot = False
         self.like_tt_ng.get_masked_data()
 
         # The correct check value, using the h scaling for the h from

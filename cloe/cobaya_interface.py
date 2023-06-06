@@ -97,8 +97,11 @@ class EuclidLikelihood(Likelihood):
         self.cosmo.cosmo_dic['redshift_bins'] = self.data['spectro']['edges']
         # Initialize the fiducial model
         self.set_fiducial_cosmology()
-        # Here we add the fiducial Hubble function plus the angular diameter
-        # and comoving distance to the cosmo dictionary. These quantities
+        # "Here we add the fiducial Hubble function (fid_H_z_func),
+        # comoving distance (fid_r_z_func),
+        # and angular diameter distance (fid_d_z_func)
+        # to the cosmo dictionary
+        # These quantities
         # are requested in different parts of the spectro and photo class.
         self.cosmo.cosmo_dic['fid_d_z_func'] = \
             self.fiducial_cosmology.cosmo_dic['d_z_func']

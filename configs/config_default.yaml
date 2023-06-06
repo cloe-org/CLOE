@@ -45,7 +45,7 @@ Cobaya:
       # Add RSD to photometric probes
       add_phot_RSD: False
       # Apply a generic matrix transformation to the photo observables (available options: 'BNT')
-      matrix_transform_phot: False
+      matrix_transform_phot: null
       # Magnification bias model
       #     1 -> linear interpolation
       #     2 -> constant within bins

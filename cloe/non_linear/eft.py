@@ -110,7 +110,7 @@ class EFTofLSS:
 
         return smoothPowerSpectrum[kNumber // 2:kNumber // 2 + kNumber]
 
-    def IRresum(self, P_EH, lamb=0.25, kS=0.29, lOsc=68.813):
+    def IRresum(self, P_EH, lamb=0.25, kS=0.2, lOsc=102.707):
         r"""Function for IR-resummation.
 
         Splits the linear power spectrum into a smooth and a wiggly part,
@@ -135,6 +135,8 @@ class EFTofLSS:
            Damping factor for IR-resummation,
            :math:`d\Sigma` for IR-resummation
         """
+        lOsc /= self.h
+        kS *= self.h
 
         # Gaussian filtering to compute Pnw
         Pnw = self._gaussianFiltering(lamb=lamb)

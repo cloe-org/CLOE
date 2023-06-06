@@ -1,7 +1,8 @@
 """
-module: spectro
+SPECTRO
 
-Prototype computation of spectroscopic galaxy clustering likelihood.
+This module computes the spectroscopic quantities following the
+v2.0 recipes of CLOE.
 """
 
 # Global
@@ -13,20 +14,20 @@ from cloe.fftlog.fftlog import fftlog
 
 class Spectro:
     r"""
-    Class for Galaxy clustering spectroscopic observable
+    Class for the spectroscopic observables.
     """
 
     def __init__(self, cosmo_dic, z_str):
-        """Initialize
+        """Initialises the class.
 
-        Constructor of the class Spectro
+        Constructor of the class :obj:`Spectro`.
 
         Parameters
         ----------
         cosmo_dic: dict
-            Cosmology dictionary containing the current cosmology.
-        z_str: list of strings
-            List of the redshift bin centers.
+            Cosmology dictionary containing the current cosmology
+        z_str: list of str
+            List of the redshift bin centers
         """
         if cosmo_dic is not None:
             self.update(cosmo_dic)
@@ -41,22 +42,22 @@ class Spectro:
         self.z_arr = np.array(z_str).astype("float")
 
     def update(self, cosmo_dic):
-        r"""Update method
+        r"""Updates method.
 
-        Method to update the `theory` class attribute to the
+        Method to update the :obj:`theory` class attribute to the
         dictionaries passed as input.
 
         Parameters
         ----------
         cosmo_dic: dict
-            Cosmology dictionary containing the current cosmology.
+            Cosmology dictionary containing the current cosmology
         """
         self.theory = cosmo_dic
 
     def scaling_factor_perp(self, z):
-        r"""Scaling Factor Perp
+        r"""Perpendicular scaling factor.
 
-        Computation of the perpendicular scaling factor
+        Computation of the perpendicular scaling factor.
 
         .. math::
             q_{\perp}(z) &= \frac{D_{\rm M}(z)}{D'_{\rm M}(z)}\\
@@ -64,19 +65,19 @@ class Spectro:
         Parameters
         ----------
         z: float
-           Redshift at which to evaluate the galaxy power spectrum.
+           Redshift at which to evaluate the galaxy power spectrum
 
         Returns
         -------
-        scaling_factor_perp: float
+        Perpendicular scaling factor: float
            Value of the perpendicular scaling factor at given redshift
         """
         return self.theory['d_z_func'](z) / self.theory['fid_d_z_func'](z)
 
     def scaling_factor_parall(self, z):
-        r"""Scaling Factor Parall
+        r"""Parallel scaling factor.
 
-        Computation of the parallel scaling factor
+        Computation of the parallel scaling factor.
 
         .. math::
             q_{\parallel}(z) &= \frac{H'(z)}{H(z)}\\
@@ -84,19 +85,19 @@ class Spectro:
         Parameters
         ----------
         z: float
-           Redshift at which to evaluate the galaxy power spectrum.
+           Redshift at which to evaluate the galaxy power spectrum
 
         Returns
         -------
-        scaling_factor_parall: float
+        Parallel scaling factor: float
            Value of the the parallel scaling factor at a given redshift
         """
         return self.theory['fid_H_z_func'](z) / self.theory['H_z_func'](z)
 
     def get_k(self, k_prime, mu_prime, z):
-        r"""Get k
+        r"""Gets wavenumber.
 
-        Computation of the wavenumber k
+        Computation of the wavenumber k.
 
         .. math::
             k(k',\mu_k', z) &= k' \left[[q_{\parallel}(z)]^{-2} \,
@@ -106,16 +107,16 @@ class Spectro:
         Parameters
         ----------
         z: float
-           Redshift at which to evaluate the galaxy power spectrum.
+           Redshift at which to evaluate the galaxy power spectrum
         k_prime: float
            Fiducial scale (wavenumber) at which to evaluate the galaxy power
         mu_prime: float or numpy.ndarray of float
            Fiducial cosine of the angle between the wavenumber and
-           line of sight (Alcock–Paczynski distorted).
+           line of sight (Alcock–Paczynski distorted)
 
         Returns
         -------
-        get_k: float or numpy.ndarray of float
+        Wavenumber: float or numpy.ndarray of float
            Value of the scalar wavenumber  at given redshift
            cosine of the angle and fiducial wavenumber
         """
@@ -124,9 +125,9 @@ class Spectro:
                           (1 - mu_prime**2))**(1. / 2)
 
     def get_mu(self, mu_prime, z):
-        r"""Get Mu
+        r"""Gets cosine of the angle.
 
-        Computation of the cosine of the angle
+        Computation of the cosine of the angle.
 
         .. math::
             \mu_k(\mu_k') &= \mu_k' \, [q_{\parallel}(z)]^{-1}
@@ -137,14 +138,14 @@ class Spectro:
         Parameters
         ----------
         z: float
-           Redshift at which to evaluate the galaxy power spectrum.
+           Redshift at which to evaluate the galaxy power spectrum
         mu_prime: float or numpy.ndarray of float
            Fiducial cosine of the angle between the wavenumber
-           and line of sight (Alcock–Paczynski distorted).
+           and line of sight (Alcock–Paczynski distorted)
 
         Returns
         -------
-        get_mu: float or numpy.ndarray of float
+        Cosine of the angle: float or numpy.ndarray of float
            Value of the cosine of the angle at given redshift
            and fiducial wavenumber
         """
@@ -155,9 +156,9 @@ class Spectro:
             (1 - mu_prime**2))**(-1. / 2)
 
     def multipole_spectra_integrand(self, mu_rsd, z, k, ms):
-        r"""Multipole Spectra Integrand
+        r"""Multipole power spectrum integrand.
 
-        Computation of multipole power spectra integrand
+        Computation of multipole power spectrum integrand
         over the whole :math:`\mu_k'` grid [-1, 1].
         Note: we name :math:`\ell = m` in the code
 
@@ -169,20 +170,20 @@ class Spectro:
         ----------
         mu_rsd: numpy.ndarray of float
            Cosines of the angles between the wavenumber and
-           line of sight (Alcock–Paczynski distorted).
+           line of sight (Alcock–Paczynski distorted)
            Warning: only mu_rsd = self.mu_grid works (issue 706)
         z: float
-            Redshift at which to evaluate power spectrum.
+            Redshift at which to evaluate power spectrum
         k: float
-            Scale (wavenumber) at which to evaluate power spectrum.
+            Scale (wavenumber) at which to evaluate power spectrum
         ms: list of int
-            Order of the Legendre expansion.
+            Order of the Legendre expansion
 
         Returns
         -------
-        integrand: numpy.ndarray of numpy.ndarray of float
+        Integrand: numpy.ndarray of numpy.ndarray of float
             Integrand (over :math:`\mu_k'` between [-1,1])
-            of multipole power spectrum expansion, for all m
+            of multipole power spectrum expansion, for all m.
         """
         if self.theory['Pgg_spectro'] is None:
             raise Exception('Pgg_spectro is not defined inside the cosmo dic. '
@@ -198,7 +199,7 @@ class Spectro:
             return galspec * np.array([legendre(m)(mu_rsd) for m in ms])
 
     def multipole_spectra(self, z, k, ms=None):
-        r"""Multipole Spectra
+        r"""Multipole power spectra.
 
         Computation of multipole power spectra.
         Note: we name :math:`\ell = m` in the code.
@@ -212,15 +213,15 @@ class Spectro:
         Parameters
         ----------
         z: float
-            Redshift at which to evaluate power spectrum.
+            Redshift at which to evaluate power spectrum
         k: float
-            Scale (wavenumber) at which to evaluate power spectrum.
+            Scale (wavenumber) at which to evaluate power spectrum
         ms: list of int
             Orders of the Legendre expansion. Default is [0, 2, 4]
 
         Returns
         -------
-        spectra: numpy.ndarray of float
+        Spectra: numpy.ndarray of float
             Multipole power spectra
         """
 
@@ -260,34 +261,34 @@ class Spectro:
                                        k_min=5e-5,
                                        k_max=50,
                                        k_num_points=2048):
-        r"""Evaluate the multipole correlation function
+        r"""Evaluates the multipole correlation function.
 
-        Evaluate the multipole correlation function for the separation values
+        Evaluates the multipole correlation function for the separation values
         contained in the :math:`s` array, at the requested values of redshift
-        (:math:`z`) and multipole (:math:`\ell`).
+        :math:`z` and multipole :math:`\ell`.
 
         Parameters
         ----------
         s: numpy.array of float
-            array of :math:`s` values in Mpc/h
+            Array of :math:`s` values in Mpc/h
         z: float
-            a value of redshift, among {1.00, 1.20, 1.40, 1.65}
+            Value of redshift, among {1.00, 1.20, 1.40, 1.65}
         ell: int or array of int
-            a value or array of values of :math:`\ell` among {0, 2, 4}
+            Value or array of values of :math:`\ell` among {0, 2, 4}
         k_min: float
-           lower bound of the range of wavenumbers used for the evaluation of
+           Lower bound of the range of wavenumbers used for the evaluation of
            the multipole power spectra
         k_max: float
-           upper bound of the range of wavenumbers used for the evaluation of
+           Upper bound of the range of wavenumbers used for the evaluation of
            the multipole power spectra
         k_num_points: int
-           number of points used for the evaluation of the multipole
+           Number of points used for the evaluation of the multipole
            power spectra
 
         Returns
         -------
-        multipole_correlation_function: numpy.array of float
-            an array of shape (len(ell), len(s)), containing the values of the
+        Multipole correlation function: numpy.ndarray of float
+            Array of shape (len(ell), len(s)), containing the values of the
             multipole correlation function evaluated in correspondence of the
             :math:`\ell` and :math:`s` values provided as input
         """

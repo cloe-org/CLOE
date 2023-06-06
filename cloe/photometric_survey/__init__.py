@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-"""Photometric Module
+"""PHOTOMETRIC MODULE
 
-In this module, we include functions needed for photometric observables
+This module computes the functions needed to obtain the photometric
+observables.
 
 """
 

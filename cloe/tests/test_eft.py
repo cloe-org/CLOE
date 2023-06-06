@@ -1,6 +1,6 @@
 """UNIT TESTS FOR EFT MODULE
 
-This module contains unit tests for the eft module.
+This module contains unit tests for the :obj:`eft` module.
 
 """
 

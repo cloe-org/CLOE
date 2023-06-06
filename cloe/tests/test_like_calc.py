@@ -1,4 +1,4 @@
-"""UNIT TESTS FOR LIKE_CALC
+"""UNIT TESTS FOR LIKELIHOOD CALCULATION
 
 This module contains unit tests for the likelihood calculation module.
 
@@ -44,19 +44,19 @@ class likecalcTestCase(TestCase, SpectroTestParent):
         from the final bin. Similarly, for redshifts below the first bin
         (z < 0.90), we use the bias of the first bin.
 
-        Attention: this will change in the future
+        Attention: this will change in the future.
 
         Parameters
         ----------
         redshift: float
-            Redshift at which to calculate bias.
+            Redshift at which to calculate bias
         bin_edge_list: list
             List of redshift bin edges for spectroscopic GC probe.
-            Default is Euclid IST: Forecasting choices.
+            Default is Euclid IST: Forecasting choices
 
         Returns
         -------
-        bi_val: float
+        Bias value: float
             Value of spectroscopic galaxy bias at input redshift
         """
         if bin_edge_list is None:
@@ -120,19 +120,19 @@ class likecalcngTestCase(TestCase, SpectroTestParent):
         from the final bin. Similarly, for redshifts below the first bin
         (z < 0.90), we use the bias of the first bin.
 
-        Attention: this will change in the future
+        Attention: this will change in the future.
 
         Parameters
         ----------
         redshift: float
-            Redshift at which to calculate bias.
+            Redshift at which to calculate bias
         bin_edge_list: list
-            List of redshift bin edges for spectroscopic GC probe.
-            Default is Euclid IST: Forecasting choices.
+            List of redshift bin edges for spectroscopic GC probe
+            Default is Euclid IST: Forecasting choices
 
         Returns
         -------
-        bi_val: float
+        Bias value: float
             Value of spectroscopic galaxy bias at input redshift
         """
         if bin_edge_list is None:

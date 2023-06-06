@@ -1,6 +1,6 @@
 """UNIT TESTS FOR TEST TOOLS
 
-This module contains unit tests for the unit test tools.
+This module contains unit tests for :obj:`test_tools`.
 
 """
 

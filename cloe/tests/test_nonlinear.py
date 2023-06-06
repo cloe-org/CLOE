@@ -1,6 +1,7 @@
 """UNIT TESTS FOR NONLINEAR
 
-This module contains unit tests for the nonlinear module.
+This module contains unit tests for the
+:obj:`non_linear` module.
 
 """
 

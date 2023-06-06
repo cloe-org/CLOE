@@ -40,8 +40,12 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.autosectionlabel',
     'numpydoc'
 ]
+
+# Make sure the target is unique
+autosectionlabel_prefix_document = True
 
 # Include init in class documentation.
 autoclass_content = 'both'
@@ -98,7 +102,7 @@ language = None
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = []
+exclude_patterns = ['cloe.info.rst']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -394,6 +398,7 @@ intersphinx_mapping = {
     'python': ('http://docs.python.org/3', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
     'scipy': ('https://docs.scipy.org/doc/scipy/reference', None),
-    'matplotlib': ('https://matplotlib.org', None)
+    'matplotlib': ('https://matplotlib.org', None),
+    'cobaya': ('https://cobaya.readthedocs.io/en/latest/', None)
     }
 

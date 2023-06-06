@@ -1,7 +1,7 @@
 """UNIT TESTS FOR DATA_READER
 
-This module contains unit tests for the data_reader module.
-=======
+This module contains unit tests for the :obj:`data_reader` module.
+
 
 """
 

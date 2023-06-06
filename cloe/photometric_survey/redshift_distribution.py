@@ -1,4 +1,9 @@
-"""Photometric Redshift Distribution module
+"""
+PHOTOMETRIC REDSHIFT DISTRIBUTION MODULE
+
+This module computes useful quantities to
+get the redshift ditributions for weak lensing and
+photometric galaxy clustering.
 """
 
 from scipy.interpolate import InterpolatedUnivariateSpline
@@ -11,20 +16,21 @@ class RedshiftDistribution:
     """
 
     def __init__(self, probe, nz_dict, nuisance_dict):
-        """Initialize
+        """Initialises the class.
 
-        Constructor of the class RedshiftDistribution.
+        Constructor of the class :obj:`RedshiftDistribution`.
 
         Parameters
         ----------
         probe: str
-           It can be 'GCphot' or 'WL'.
+           It can be `'GCphot'` or `'WL'`
         nz_dict: dict
-            Dictionary of the form { 'n%d' : InterpolatedUnivariateSpline}.
+            Dictionary of the form { `'n%d' : InterpolatedUnivariateSpline`}.
         nuisance_dict: dict
             Dictionary containing the nuisance parameters.
             The relevant keys are:
-            Shifts in z -> 'dz_%d_{probe}', where probe is 'GCphot' or 'WL'.
+            Shifts in `z -> 'dz_%d_{probe}'`, where probe is `'GCphot'`
+            or `'WL'`
 
         Notes
         -----
@@ -56,21 +62,19 @@ class RedshiftDistribution:
         We might want to extend this function to account for
         uncertainties in the redshift distributions due to blending
         using the parametrization described in
-        [1] MacCrann, N., Becker, M. R., McCullough, J., et al., 2021,
-        DOI: https://doi.org/10.1093/mnras/stab2870
-        arXiv e-prints, arXiv:2012.08567
+        [1] MacCrann, N., Becker, M. R., McCullough, J., et al., 2021.
 
         Parameters
         ----------
         bin_i: int
-            The tomographic redshift bin; bins starts from 1.
+            The tomographic redshift bin; bins starts from 1
         zs: numpy.ndarray of float, or float
-            The redshift(s) at which to evaluate the distribution.
+            The redshift(s) at which to evaluate the distribution
 
         Returns
         -------
-        n_i_z: numpy.ndarray of float, or float
-            The evaluated redshift distribution.
+        Redshift distribution: numpy.ndarray of float, or float
+            The evaluated redshift distribution
         """
         ni = self.nz_dict[f'n{bin_i}']
         dz_i = self.dz_dict[bin_i]
@@ -86,14 +90,14 @@ class RedshiftDistribution:
         Parameters
         ----------
         bin_i: int
-            The tomographic redshift bin; bins starts from 1.
+            The tomographic redshift bin; bins starts from 1
         zs: numpy.ndarray of float
-            The redshifts used for interpolating the distribution.
+            The redshifts used for interpolating the distribution
 
         Returns
         -------
-        n_i: InterpolatedUnivariateSpline
-            The interpolated redshift distribution for bin i.
+        Interpolated redshift distribution: InterpolatedUnivariateSpline
+            The interpolated redshift distribution for bin i
         """
         values = self.evaluates_n_i_z(bin_i, zs)
         return InterpolatedUnivariateSpline(zs, values, ext='zeros')
@@ -103,8 +107,8 @@ class RedshiftDistribution:
 
         Returns
         -------
-        tomographic_bins: list of int
-            The list of tomographic bins.
+        tomographic bins: list of int
+            The list of tomographic bins
         """
         return self.bins
 
@@ -113,7 +117,7 @@ class RedshiftDistribution:
 
         Returns
         -------
-        num_tomographic_bins: int
-            The number of tomographic bins.
+        Number of bins: int
+            The number of tomographic bins
         """
         return len(self.bins)

@@ -1,4 +1,11 @@
-"""Adapted from the PBJ code by C. Moretti, A. Oddo"""
+"""
+EFT MODULE
+
+This module computes several nonlinear spectra using the `PBJ code`
+for the Joint analysis of Power Spectrum and Bispectrum,
+adapted from arXiv:2108.03204, extended to include redshift-space
+terms by IST:NL.
+"""
 
 import numpy as np
 from scipy.integrate import simps
@@ -12,13 +19,13 @@ import fastpt.FASTPT_simple as fpts
 
 
 class EFTofLSS:
-    r"""EFTofLSS
+    r"""Effective field theory of large scale structures.
 
-    Class to construct the EFTofLSS model for the nonlinear galaxy anisotropic
-    power spectrum. For this recipe we consider the standard assumption that
-    galaxy clustering can be modelled starting from fluctuations of the cold
-    dark matter and baryon density field (cb), regardless from the presence of
-    massive neutrinos.
+    Class to construct the `EFTofLSS` model for the nonlinear anisotropic
+    galaxy power spectrum. For this recipe we consider the standard
+    assumption that galaxy clustering can be modelled starting from
+    fluctuations of the cold dark matter and baryon density field,
+    regardless of the presence of massive neutrinos.
     """
 
     def __init__(self, cosmo_dic, log10k_min=-4, log10k_max=1.7, nk_tot=1000):
@@ -40,15 +47,17 @@ class EFTofLSS:
                                  n_pad=1000)
 
     def CallEH_NW(self):
-        r"""CallEH_NW
+        r"""Calls ``Eisenstein-Hu_NW``.
 
         Computes the smooth matter power spectrum at redshift z=0 following the
-        prescription of Eisenstein & Hu 1998.
+        prescription of Eisenstein & Hu (1998).
 
         Returns
         -------
-        P_EH: numpy.ndarray, Eisenstein-Hu fit for the matter power spectrum
-        computed on a log-spaced k-grid, in (1/Mpc)^3 units
+        Eisenstein-Hu fit power spectrum: numpy.ndarray
+            Eisenstein-Hu fit for the matter power spectrum
+            computed on a log-spaced k-grid, in
+            :math:`(1/Mpc)^3` units
         """
 
         Tcmb = 2.726
@@ -109,18 +118,22 @@ class EFTofLSS:
 
         Parameters
         ----------
-        P_EH:    numpy.ndarray, smooth Eisenstein-Hu matter power spectrum
-        lamb:    float, width of Gaussian filter (default 0.25)
-        kS:      float, scale of separation between large and small scales
-                 (default 0.2)
-        lOsc:    float, scale of the BAO (default to 102.707)
+        P_EH: numpy.ndarray
+            Smooths Eisenstein-Hu matter power spectrum
+        lamb: float
+            Width of Gaussian filter (default 0.25)
+        kS: float
+            Scale of separation between large and
+            small scales (default 0.2)
+        lOsc: float
+            Scale of the BAO (default to 102.707)
 
         Returns
         -------
-        Pnw:     numpy.ndarray, no-wiggle power spectrum
-        Pw:      numpy.ndarray, wiggle power spectrum
-        Sigma2:  float, damping factor for IR-resummation
-        dSigma2: float, damping factor for IR-resummation
+        Pnw, Pw, Sigma2, dSigma2: numpy.ndarray, numpy.ndarray, float, float
+           No-wiggle power spectrum, Wiggle power spectrum,
+           Damping factor for IR-resummation,
+           :math:`d\Sigma` for IR-resummation
         """
 
         # Gaussian filtering to compute Pnw
@@ -182,24 +195,38 @@ class EFTofLSS:
         setattr(self, 'loop13_w', loop13_w)
 
     def P_kmu_z(self, f=None, D=None, **kwargs):
-        r"""P_kmu_z
+        r"""P_kmu_z.
 
         Computes the nonlinear galaxy power spectrum in redshift space at the
-        proper redshift specified by the growth parameters
+        proper redshift specified by the growth parameters.
 
         Parameters
         ----------
-        f, D:             float, growth rate and growth factor
+        f: float
+            Growth rate
+        D: float
+            Growth factor
 
         **kwargs:         Dictionary containing the model parameters
-        b1, b2:           float, bias parameters
-        c0, c2, c4:       float, EFT counterterms
-        aP:               float, shot-noise parameter
-        Psn:              float, Poisson shot noise
+        b1: float
+            Bias parameter
+        b2: float
+            Bias parameter
+        c0: float
+            EFT counterterms
+        c2: float
+            EFT counterterms
+        c4: float
+            EFT counterterms
+        aP: float
+            Shot-noise parameter
+        Psn: float
+            Poisson shot-noise
 
         Returns
         -------
-        P(k, mu) as interpolator
+        Nonlinear galaxy power spectrum: object
+            Scipy Interpolator
         """
 
         if f is None:
@@ -282,20 +309,29 @@ class EFTofLSS:
 
 
 class FASTPTPlus(fpts.FASTPT):
-    r"""FASTPTPlus
+    r"""FASTPTPlus.
 
     Class to compute all the building blocks for the Ivanov EFT based model,
-    inherits from fastpt.FASTPT_simple
+    inherits from `fastpt.FASTPT_simple`.
     """
 
     def Pkmu_22_one_loop_terms(self, k, P, P_window=None, C_window=None):
-        r"""Pkmu_22_one_loop_terms
+        r"""Pkmu_22_one_loop_terms.
 
         Computes the mode-coupling loop corrections for the redshift-space
-        galaxy power spectrum
+        galaxy power spectrum.
 
-        k: array of floats, Fourier wavenumbers, log-spaced
-        P: array of floats, power spectrum
+        Parameters
+        ----------
+        k: numpy.ndarray
+            Fourier wavenumbers, log-spaced
+        P: numpy.ndarray
+            Power spectrum
+
+        Returns
+        -------
+        Pb1b1, Pb1b2,.. , Pmu8f4: numpy.ndarray
+            Mode-coupling loop corrections
         """
         Power, MAT = self.J_k(P, P_window=P_window, C_window=C_window)
         J000, J002, J004, J2m22, J1m11, J1m13, J2m20r = MAT
@@ -379,13 +415,22 @@ class FASTPTPlus(fpts.FASTPT):
                 Pmu6f3b1, Pmu8f4)
 
     def Pkmu_13_one_loop_terms(self, k, P):
-        r"""Pkmu_13_one_loop_terms
+        r"""Pkmu_13_one_loop_terms.
 
         Computes the propagator loop corrections for the redshift-space galaxy
-        power spectrum
+        power spectrum.
 
-        k: array of floats, Fourier wavenumbers, log-spaced
-        P: array of floats, power spectrum
+        Parameters
+        ----------
+        k: numpy.ndarray
+            Fourier wavenumbers, log-spaced
+        P: numpy.ndarray
+            Power spectrum
+
+        Returns
+        -------
+        PZ1b1, PZ1mu2f, PZ1mu2fb1, PZ1mu2f2, PZ1mu4f2: numpy.ndarray
+            Propagator loop corrections
         """
 
         PZ1b1 = self.P_dd_13_reg(k, P)
@@ -397,12 +442,22 @@ class FASTPTPlus(fpts.FASTPT):
         return PZ1b1, PZ1mu2f, PZ1mu2fb1, PZ1mu2f2, PZ1mu4f2
 
     def P_dd_13_reg(self, k, P):
-        r"""P_dd_13_reg
+        r"""P_dd_13_reg.
 
-        Computes the regularized version of P_13 for the matter power spectrum
+        Computes the regularized version of `P_13` for the matter
+        power spectrum.
 
-        k: array of floats, Fourier wavenumbers, log-spaced
-        P: array of floats, power spectrum
+        Parameters
+        ----------
+        k: numpy.ndarray
+            Fourier wavenumbers, log-spaced
+        P: numpy.ndarray
+            Power spectrum
+
+        Returns
+        -------
+        P_bar: numpy.ndarray
+            Regularised version of `P_13` for the matter power spectrum
         """
 
         N = k.size
@@ -441,12 +496,22 @@ class FASTPTPlus(fpts.FASTPT):
         return P_bar
 
     def P_mu2f2_13(self, k, P):
-        r"""P_mu2f2_13
+        r"""P_mu2f2_13.
 
-        Computes the contribution P_mu2f2_13 for the galaxy power spectrum
+        Computes the contribution `P_mu2f2_13` for the
+        galaxy power spectrum.
 
-        k: array of floats, Fourier wavenumbers, log-spaced
-        P: array of floats, power spectrum
+        Parameters
+        ----------
+        k: numpy.ndarray
+            Fourier wavenumbers, log-spaced
+        P: numpy.ndarray
+            Power spectrum
+
+        Returns
+        -------
+        Pb1g3_bar: numpy.ndarray
+            Contribution `P_mu2f2_13` for the galaxy power spectrum
         """
 
         N = k.size
@@ -487,12 +552,22 @@ class FASTPTPlus(fpts.FASTPT):
         return Pb1g3_bar
 
     def P_tt_13_reg(self, k, P):
-        r"""P_tt_13_reg
+        r"""P_tt_13_reg.
 
-        Computes the contribution P_Z1mu2f for the galaxy power spectrum
+        Computes the contribution `P_Z1mu2f` for the galaxy
+        power spectrum.
 
-        k: array of floats, Fourier wavenumbers, log-spaced
-        P: array of floats, power spectrum
+        Parameters
+        ----------
+        k: numpy.ndarray
+            Fourier wavenumbers, log-spaced
+        P: numpy.ndarray
+            Power spectrum
+
+        Returns
+        -------
+        P13tt_bar: numpy.ndarray
+            Contribution `P_Z1mu2f` for the galaxy power spectrum
         """
 
         N = k.size
@@ -533,12 +608,22 @@ class FASTPTPlus(fpts.FASTPT):
         return P13tt_bar
 
     def P_mu2fb1_13(self, k, P):
-        r"""P_mu2fb1_13
+        r"""P_mu2fb1_13.
 
-        Computes the contribution P_Z1mu2fb1 for the galaxy power spectrum
+        Computes the contribution `P_Z1mu2fb1` for the galaxy
+        power spectrum.
 
-        k: array of floats, Fourier wavenumbers, log-spaced
-        P: array of floats, power spectrum
+        Parameters
+        ----------
+        k: numpy.ndarray
+            Fourier wavenumbers, log-spaced
+        P: numpy.ndarray
+            Power spectrum
+
+        Returns
+        -------
+        P13_bar: numpy.ndarray
+            Contribution `P_Z1mu2fb1` for the galaxy power spectrum
         """
         N = k.size
         n = np.arange(-N + 1, N)
@@ -577,14 +662,23 @@ class FASTPTPlus(fpts.FASTPT):
         return P13_bar
 
     def P_mu4f2_13(self, k, P):
-        r"""P_mu4f2_13
+        r"""P_mu4f2_13.
 
-        Computes the contribution P_Z1mu4f2 for the galaxy power spectrum
+        Computes the contribution `P_Z1mu4f2` for the galaxy
+        power spectrum.
 
-        k: array of floats, Fourier wavenumbers, log-spaced
-        P: array of floats, power spectrum
+        Parameters
+        ----------
+        k: numpy.ndarray
+            Fourier wavenumbers, log-spaced
+        P: numpy.ndarray
+            Power spectrum
+
+        Returns
+        -------
+        P13_bar: numpy.ndarray
+            Contribution `P_Z1mu4f2` for the galaxy power spectrum
         """
-
         N = k.size
         n = np.arange(-N + 1, N)
         dL = np.log(k[1]) - np.log(k[0])

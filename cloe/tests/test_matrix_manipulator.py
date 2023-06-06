@@ -1,3 +1,11 @@
+"""UNIT TESTS FOR MATRIX MANIPULATOR
+
+This module contains unit tests for the
+:obj:`matrix_manipulator` module.
+
+"""
+
+
 from unittest import TestCase
 from unittest.mock import patch
 import cloe.auxiliary.matrix_manipulator as matrix_manipulator

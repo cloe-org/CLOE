@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-"""Likelihood Calculation Module
+"""LIKELIHOOD CALCULATION MODULE
 
-In this module, we compute the likelihood given the
-theory, data vector, and covariance.
+This module computes the likelihood given the
+theory vector, the data vector and the covariance for the
+photometric and spectroscopic probes.
 
 """
 

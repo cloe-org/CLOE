@@ -1,6 +1,7 @@
 """UNIT TESTS FOR COSMO
 
-This module contains unit tests for the cosmo module.
+This module contains unit tests for the :obj:`cosmology`
+module.
 
 """
 

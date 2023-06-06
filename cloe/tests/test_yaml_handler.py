@@ -1,3 +1,10 @@
+"""TEST YAML HANDLER
+
+This module contains functions for handling the :obj:`yaml`
+files (loading, writing..).
+"""
+
+
 from unittest import TestCase
 from unittest.mock import patch
 from cloe.auxiliary.yaml_handler import yaml_write, yaml_read

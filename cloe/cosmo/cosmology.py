@@ -1,4 +1,4 @@
-"""Cosmology
+"""COSMOLOGY
 
 Class to store cosmological parameters and functions.
 """
@@ -14,7 +14,7 @@ from scipy.integrate import quad
 
 class CosmologyError(Exception):
     r"""
-    Class to define Exception Error
+    Class to define Exception Error.
     """
 
     pass
@@ -22,128 +22,128 @@ class CosmologyError(Exception):
 
 class Cosmology:
     r"""
-    Class for cosmological observables
+    Class for cosmological observables.
     """
 
     def __init__(self):
         r"""
-        List of cosmological parameters implemented
+        List of cosmological parameters implemented.
 
         Parameters
         ----------
         H0: float
-            Present-day Hubble constant :math:`(km·s^{-1}·Mpc^{-1})`
+            Present-day Hubble constant :math:`{\rm (km·s^{-1}·Mpc^{-1})}`
         H0_Mpc: float
-            Present-day Hubble constant :math:`(Mpc^{-1})`
+            Present-day Hubble constant :math:`{\rm (Mpc^{-1})}`
         omch2: float
             Present-day CDM energy density
-            Omega_CDM * (H0/100)**2
+            :math:`\Omega_{\rm CDM}(H_0/100)^2`
         ombh2: float
             Present-day baryon energy density
-            Omega_baryon * (H0/100)**2
+            :math:`\Omega_{\rm baryon}(H_0/100)^2`
         omkh2: float
             Present-day curvature energy density
-            Omega_k * (H0/100)**2
+            :math:`\Omega_{\rm k}(H_0/100)^2`
         Omc: float
             Present-day CDM energy density
-            Omega_CDM
+            :math:`\Omega_{\rm CDM}`
         Omb: float
             Present-day baryon energy density
-            Omega_baryon
+            :math:`\Omega_{\rm baryon}`
         Omk: float
             Present-day curvature energy density
-            Omega_k
+            :math:`\Omega_{\rm k}`
         As: float
-            amplitude of the primordial power spectrum
+            Amplitude of the primordial power spectrum
         ns: float
-            spectral tilt of the primordial
+            Spectral tilt of the primordial
             power spectrum
         sigma8_0: float
-            sigma8 evaluated at z = 0
+            :math:`\sigma_8` evaluated at z = 0
         w: float
            Dark energy equation of state
         wa: float
            Dark energy equation of state
         gamma_MG: float
-           Modified Gravity gamma parameter
+           Modified Gravity :math:`\gamma` parameter
         omnuh2: float
             Present-day massive neutrinos energy density
-            Omega_neutrinos * (H0/100)**2
+            :math:`\Omega_{\rm neutrinos}(H_0/100)^2`
         Omnu: float
             Present-day massive neutrinos energy density
-            Omega_neutrinos
+            :math:`\Omega_{\rm neutrinos}`
         Omm: float
             Present-day total matter energy density
-            Omega_m
+            :math:`\Omega_{\rm m}`
             Assumes sum of baryons, CDM and neutrinos
-        Omc: float
-            Present-day cold dark matter energy density
-            Omega_cdm
-        Omk: float
-            Present-day curvature energy density
-            Omega_k
         mnu: float
             Sum of massive neutrino species masses (eV)
         comov_dist: list
-            Value of comoving distances at redshifts z_win
+            Value of comoving distances at redshifts `z_win`
         angular_dist: list
-            Value of angular diameter distances at redshifts z_win
+            Value of angular diameter distances at redshifts `z_win`
         H: list
-            Hubble function evaluated at redshifts z_win
+            Hubble function evaluated at redshifts `z_win`
         H_Mpc: list
-            Hubble function evaluated at redshifts z_win in units
-            of :math:`Mpc^{-1}`
+            Hubble function evaluated at redshifts `z_win` in units
+            of :math:`{\rm Mpc^{-1}}`
         Pk_delta: function
-            Interpolator function for linear matter Pk from Boltzmann code
+            Interpolator function for linear matter :math:`P(k)` from
+            Boltzmann code
         Pk_cb: function
-            Interpolator function for cdm+b Pk from Boltzmann code
+            Interpolator function for cdm+b :math:`P(k)` from
+            Boltzmann code
         Pk_halomodel_recipe: function
-            Interpolator function for nonlinear matter Pk from Boltzmann code
+            Interpolator function for nonlinear matter :math:`P(k)` from
+            Boltzmann code
         Pk_weyl: function
-            Interpolator function for linear Weyl Pk from Boltzmann code
+            Interpolator function for linear Weyl :math:`P(k)` from
+            Boltzmann code
         Pk_weyl_NL: function
-            Interpolator function for nonlinear Weyl Pk from Boltzmann code
+            Interpolator function for nonlinear Weyl :math:`P(k)` from
+            Boltzmann code
         fsigma8: list
-            fsigma8 function evaluated at z
+            :math:`f \sigma_8` function evaluated at redshift `z`
         sigma8: list
-            sigma8 function evaluated at z
+            :math:`\sigma_8` function evaluated at redshift `z`
         c: float
-            Speed-of-light in units of :math:`km·s^{-1}`
+            Speed-of-light in units of :math:`{\rm km·s^{-1}}`
         r_z_func: function
             Interpolated function for comoving distance
         d_z_func: function
             Interpolated function for angular diameter distance
         sigma8_z_func: function
-            Interpolated function for sigma8
+            Interpolated function for :math:`\sigma_8`
         fsigma8_z_func: function
-            Interpolated function for fsigma8
+            Interpolated function for :math:`f \sigma_8`
         f_z: function
             Interpolated growth rate function
         H_z_func: function
             Interpolated function for Hubble parameter
         H_z_func_Mpc: function
-            Interpolated function for Hubble parameter in :math:`Mpc^{-1}`
+            Interpolated function for Hubble parameter :math:`{\rm Mpc^{-1}}`
         D_z_k_func: function
             Interpolated function for growth factor
         z_win: list
-            Array of redshifts ar which H and comov_dist are evaluated at
+            Array of redshifts at which :math:`H` and :obj:`comov_dist`
+            are evaluated at
         k_win: list
-            Array of k values which will be used to evaluate galaxy power
+            Array of wavenumbers which will be used to evaluate galaxy power
             spectra
         Pmm_phot: function
             Matter-matter power spectrum for photometric probes
         Pgg_phot: function
-            Galaxy-galaxy power spectrum for GC-phot
+            Galaxy-galaxy power spectrum for GCphot
         Pgdelta_phot: function
-            Galaxy-matter power spectrum for GC-phot
+            Galaxy-matter power spectrum for GCphot
         Pgg_spectro: function
-            Galaxy-galaxy power spectrum for GC-spectro
+            Galaxy-galaxy power spectrum for GCspectro
         Pgdelta_spectro: function
-            Galaxy-matter power spectrum for GC-spectro
+            Galaxy-matter power spectrum for GCspectro
         Pii: function
             Intrinsic alignment (intrinsic-intrinsic) power spectrum
         Pdeltai: function
-            Density-intrinsic cross-spectrum
+            Matter-intrinsic cross-spectrum
         Pgi_phot: function
             Photometric galaxy-intrinsic cross-spectrum
         Pgi_spectro: function
@@ -177,17 +177,17 @@ class Cosmology:
                 * Photo-z values corresponding to
                 :math:`b_{(x,i)}=\sqrt{1+\bar{b}_{(x,i)}}`
 
+                There are 3 bias options (linear, constant, polynomial)
+
                 * Spectroscopic bias values in arXiv:1910.09273
 
                 * IA values in arXiv:1910.09273
 
-            This list is further expanded by the presence of additional
-            parameters for GCspectro, as provided by IST:NL.
+                * Additional parameters for GCspectro, as provided by IST:NL
 
             This dictionary also stores the choice of likelihood
             to be evaluated, i.e. photometric, spectroscopic, or 3x2pt.
-            By default, if a choice isn't explicitly specified, the 3x2pt
-            likelihood is calculated.
+            By default the 3x2pt likelihood is calculated.
         """
         # Initialize cosmo dictionary
         # Note: added speed of light to dictionary. It is in
@@ -355,11 +355,12 @@ class Cosmology:
 
     @property
     def pk_source_phot(self):
-        r"""Identifier for linear vs nonlinear class
+        r"""Identifier for linear vs nonlinear class for photometric probes.
 
         Selects either the same Cosmology class from which it is called
-        or the attribute corresponding to the instance of a Nonlinear class,
-        based on the value of the nonlinear flag for the photometric probes.
+        or the attribute corresponding to the instance of a :obj:`non_linear`
+        class, based on the value of the nonlinear flag for the
+        photometric probes.
         """
         # This method should be modified when other photometric flags will
         # be included (e.g. baryonic flag)
@@ -370,11 +371,12 @@ class Cosmology:
 
     @property
     def pk_source_spectro(self):
-        r"""Identifier for linear vs nonlinear class
+        r"""Identifier for linear vs nonlinear class.
 
-        Selects either the same Cosmology class from which it is called
-        or the attribute corresponding to the instance of a Nonlinear class,
-        based on the value of the nonlinear flag for the spectroscopic probes.
+        Selects either the same :obj:`cosmology` class from which it is called
+        or the attribute corresponding to the instance of a :obj:`non_linear`
+        class, based on the value of the nonlinear flag for the spectroscopic
+        probes.
         """
         if self.cosmo_dic['NL_flag_spectro'] == 0:
             return self
@@ -383,19 +385,19 @@ class Cosmology:
 
     def matter_density(self, zs):
         r"""
-        Computes the matter density as,
+        Computes the matter density as
 
         .. math::
-            \Omega_m(z) = \Omega_{{m},0}(1+z)^3H_0^2/H^2(z)
+            \Omega_{\rm m}(z) = \Omega_{{\rm m},0}(1+z)^3H_0^2/H^2(z)
 
         Parameters
         ----------
         zs: numpy.ndarray
-            redshifts for the matter density
+            Redshifts for the matter density
 
         Returns
         -------
-        Omm_z: numpy.ndarray
+        Matter density parameter: numpy.ndarray
             Matter density as a function of redshift
 
         """
@@ -410,19 +412,19 @@ class Cosmology:
             D(z, k) =\sqrt{P_{\rm \delta\delta}(z, k)\
             /P_{\rm \delta\delta}(z=0, k)}\\
 
-        and normalizes as for :math:`D(z)/D(0)`
+        and normalizes as for :math:`D(z)/D(0)`.
 
         Parameters
         ----------
         zs: numpy.ndarray
-            redshifts for the power spectrum
+            Redshifts for the power spectrum
         ks: numpy.ndarray
-            list of modes for the power spectrum
+            List of modes for the power spectrum
 
         Returns
         -------
-        D_z_k: numpy.ndarray
-            Growth factor as function of redshift and k-mode
+        Growth factor: numpy.ndarray
+            Growth factor as function of redshift and wavenumber
 
         """
         # This function will be updated.
@@ -437,10 +439,10 @@ class Cosmology:
 
     # This function is deprecated
     def growth_rate(self, zs, ks):
-        r"""Growth Rate
+        r"""Growth rate.
 
         Adds an interpolator for the growth rate (this function is actually
-        deprecated since we use the growth rate directly from Cobaya)
+        deprecated since we use the growth rate directly from Cobaya).
 
         .. math::
             f(z, k) &=-\frac{(1+z)}{D(z,k)}\frac{dD(z, k)}{dz}\\
@@ -448,14 +450,14 @@ class Cosmology:
         Parameters
         ----------
         zs: list
-            list of redshift for the power spectrum
+            List of redshift for the power spectrum
         ks: float
-            mode for the power spectrum
+            Mode for the power spectrum
 
         Returns
         -------
-        f_z_k: object
-            Interpolator growth rate as function of redshift and k-mode
+        Growth rate: object
+            Interpolator growth rate as function of redshift and wavenumber
 
         """
         # To be updated.
@@ -473,7 +475,7 @@ class Cosmology:
             log_debug('Check k is a scalar, not an array')
 
     def growth_rate_cobaya(self):
-        r"""Growth Rate Cobaya
+        r"""Growth rate from Cobaya.
 
         Calculates growth rate according to
 
@@ -482,7 +484,7 @@ class Cosmology:
 
         Updates 'key' in the cosmo_dic attribute of the class
         by adding an interpolator object
-        which interpolates f(z)
+        which interpolates f(z).
 
         """
         fs8 = self.cosmo_dic['fsigma8_z_func'](self.cosmo_dic['z_win'])
@@ -495,19 +497,19 @@ class Cosmology:
 
     def growth_rate_MG(self, zs):
         r"""
-        Computes the growth rate using :math:`\gamma_{MG}` as
+        Computes the growth rate using :math:`\gamma_{\rm MG}` as
 
         .. math::
-            f(z;\gamma_{MG})=\left[\Omega_{m}(z)\right]^{\gamma_{MG}}
+            f(z;\gamma_{\rm MG})=[\Omega_{\rm m}(z)]^{\gamma_{\rm MG}}
 
         Updates 'key' in the cosmo_dic attribute of the class
         by adding an interpolator object
-        which interpolates f(z)
+        which interpolates f(z).
 
         Parameters
         ----------
         zs: list
-            list of redshift for the power spectrum
+            List of redshift for the power spectrum
 
         """
         f_MG = self.matter_density(zs)**self.cosmo_dic['gamma_MG']
@@ -517,34 +519,33 @@ class Cosmology:
                 y=f_MG, ext=2)
 
     def _growth_integrand_MG(self, z_prime):
-        r"""
-        Integrand function for the growth_factor_MG
+        r"""Integrand function for the :obj:`growth_factor_MG`.
 
         .. math::
-              \frac{f(z';\gamma_{MG})}{1+z'}
+              \frac{f(z';\gamma_{\rm MG})}{1+z'}
 
         Parameters
         ----------
-        z_prime: double
-           integrand variable (redshift)
+        z_prime: float
+           Integrand variable (redshift)
         """
         return self.cosmo_dic['f_z'](z_prime) / (1.0 + z_prime)
 
     def growth_factor_MG(self):
         r"""
-        Computes the growth factor using the :math:`\gamma_{MG}` as
+        Computes the growth factor using the :math:`\gamma_{\rm MG}` as
 
         .. math::
-           D(z;\gamma_{MG}) = {\rm exp}\left[\int_z^\infty{\rm d}z' \
-               \frac{f(z';\gamma_{MG})}{1+z'}\right]
+           D(z;\gamma_{\rm MG}) = {\rm exp}\left[\int_z^\infty{\rm d}z' \
+               \frac{f(z';\gamma_{\rm MG})}{1+z'}\right]
 
-        and normalizes as for :math:`D(z)/D(0)`
+        and normalizes as for :math:`D(z)/D(0)`.
 
         Returns
         -------
-        D_MG: numpy.ndarray
-            values of the growth factor using the modified
-            gravity parameter :math:`\gamma_{MG}`
+        Growth factor for MG: numpy.ndarray
+            Values of the growth factor using the modified
+            gravity parameter :math:`\gamma_{\rm MG}`
         """
         integral = [quad(self._growth_integrand_MG, z,
                          self.cosmo_dic['z_win'][-1])[0] for z in
@@ -552,10 +553,10 @@ class Cosmology:
         return np.exp(integral) / np.exp(integral[0])
 
     def interp_growth_factor(self):
-        """Interpolates the growth factor
+        """Interpolates the growth factor.
 
         Adds an interpolator for the growth factor (function of redshift and
-        scale) to the cosmo dictionary
+        scale) to the cosmo dictionary.
         """
         z_win = self.cosmo_dic['z_win']
         k_win = self.cosmo_dic['k_win']
@@ -572,50 +573,50 @@ class Cosmology:
                                                 kx=3, ky=3)
 
     def interp_comoving_dist(self):
-        """Interp Comoving Dist
+        """Interpolates the comoving distance.
 
         Adds an interpolator for comoving distance to the dictionary so that
         it can be evaluated at redshifts not explicitly supplied to Cobaya.
 
         Updates 'key' in the cosmo_dic attribute of the class
         by adding an interpolator object
-        which interpolates comoving distance as a function of redshift
+        which interpolates comoving distance as a function of redshift.
         """
 
         self.cosmo_dic['r_z_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['comov_dist'], ext=2)
 
     def interp_z_of_r(self):
-        """Interp z(r)
+        """Interpolates the redshift.
 
         Adds an interpolator for the redshift as a function of the
         comoving distance to the dictionary.
 
-        Updates 'key' in the cosmo_dic attribute of the class
+        Updates 'key' in the :obj:`cosmo_dic` attribute of the class
         by adding an interpolator object
         which interpolates redshift as a function of comoving distance.
 
         Note: The interpolator is used in in photo.py member functions
-        z_plus1 and z_minus1. There the values are extrapolated for values
-        larger than :math:r_{max} since the corresponding multipole factor is
-        larger than unity. Therefore, we set here the extrapolation mode to
-        return zeros and not raise a ValueError as everywhere else in the code,
-        so that the code runs smoothly with RSD.
+        ``z_plus1`` and ``z_minus1``. There the values are extrapolated
+        for values larger than :math:`r_{max}` since the corresponding
+        multipole factor is larger than unity. Therefore, we set here the
+        extrapolation mode to return zeros and not raise a ValueError as
+        everywhere else in the code, so that the code runs smoothly with RSD.
         """
         self.cosmo_dic['z_r_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['comov_dist'],
             y=self.cosmo_dic['z_win'], ext='zeros')
 
     def interp_transverse_comoving_dist(self):
-        """Interp Transverse Comoving Dist
+        """Interpolates the transverse comoving distance.
 
         Adds an interpolator for the transverse comoving distance to the
         dictionary so that it can be evaluated at redshifts not explicitly
         supplied to Cobaya.
 
-        Updates 'key' in the cosmo_dic attribute of the class
+        Updates 'key' in the :obj:`cosmo_dic` attribute of the class
         by adding an interpolator object which interpolates
-        transverse comoving distance as a function of redshift
+        transverse comoving distance as a function of redshift.
         """
         transverse_comoving_dist = (self.cosmo_dic['angular_dist'] *
                                     (1.0 + self.cosmo_dic['z_win']))
@@ -625,7 +626,7 @@ class Cosmology:
                 y=transverse_comoving_dist, ext=2)
 
     def interp_transverse_comoving_dist_z12(self):
-        """Interp Transverse Comoving Dist from z1 to z2
+        """Interpolates the transverse comoving distance.
 
         Adds an interpolator for the transverse comoving distance from
         :math:`z_1` to :math:`z_2` to the dictionary so that it can be
@@ -635,7 +636,7 @@ class Cosmology:
         Updates 'key' in the cosmo_dic attribute of the current class
         by adding an interpolator object which interpolates the
         transverse comoving distance as a function of the specified
-        redshifts
+        redshifts.
         """
         x_int = self.cosmo_dic['z_win']
 
@@ -660,10 +661,10 @@ class Cosmology:
             interpolate.RectBivariateSpline(x_int, x_int, y_int, kx=3, ky=3)
 
     def f_K_z12_wrapper(self, z1, z2):
-        """Wrapper for the transverse comoving distance from z1 to z2
+        """Wrapper for the transverse comoving distance from z1 to z2.
 
         Does type checking, calls the method stored in
-        self.cosmo_dic['_f_K_z12_func'], and returns the output variable
+        :obj:`self.cosmo_dic['_f_K_z12_func']`, and returns the output variable
         according to the type of the input variables. The output distance
         is positive-defined, and the function is symmetric in :math:`z_1`
         and :math:`z_2`, except for the shape of the return value.
@@ -677,7 +678,7 @@ class Cosmology:
 
         Returns
         -------
-        f_K_z12: float or numpy.ndarray
+        Transverse comoving distance: float or numpy.ndarray
             Transverse comoving distance between :math:`z_1` and :math:`z_2`
         """
         if (isinstance(z1, (int, float)) and isinstance(z2,
@@ -693,20 +694,20 @@ class Cosmology:
         return abs(f_K_z12)
 
     def interp_angular_dist(self):
-        """Interp Angular Dist
+        """Interpolates the angular diameter distance.
 
         Adds an interpolator for angular distance to the dictionary so that
-        it can be evaluated at redshifts not explicitly supplied to cobaya.
+        it can be evaluated at redshifts not explicitly supplied to Cobaya.
 
         Updates 'key' in the cosmo_dic attribute of the class by adding an
         interpolator object of angular diameter distance
-        as a function of redshift
+        as a function of redshift.
         """
         self.cosmo_dic['d_z_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['angular_dist'], ext=2)
 
     def interp_H(self):
-        """Interp H
+        """Interpolates the Hubble parameter.
 
         Adds an interpolator for the Hubble parameter to the dictionary so that
         it can be evaluated at redshifts not explicitly supplied to Cobaya.
@@ -714,13 +715,13 @@ class Cosmology:
         Updates 'key' in the cosmo_dic attribute of the class
         by adding an interpolator object
         which interpolates the Hubble parameter
-        H(z) as a function of redshift
+        :math:`H(z)` as a function of redshift.
         """
         self.cosmo_dic['H_z_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['z_win'], y=self.cosmo_dic['H'], ext=2)
 
     def interp_H_Mpc(self):
-        """Interp H Mpc
+        """Interpolates the Hubble parameter (Mpc).
 
         Adds an interpolator for the Hubble parameter in Mpc to the
         dictionary so that it can be evaluated at redshifts not
@@ -729,52 +730,52 @@ class Cosmology:
         Updates 'key' in the cosmo_dic attribute of the class
         by adding an interpolator object
         which interpolates the Hubble parameter
-        H(z) in Mpc as a function of redshift
+        :math:`H(z)` in Mpc as a function of redshift.
         """
         self.cosmo_dic['H_z_func_Mpc'] = \
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['H_Mpc'], ext=2)
 
     def interp_sigma8(self):
-        r"""Interp Sigma8
+        r"""Interpolates :math:`\sigma_8`.
 
         Adds an interpolator for the matter fluctuation
         parameter :math:`\sigma_8` to the dictionary so that it
-        can be evaluated at redshifts not explicitly supplied to Cobaya
+        can be evaluated at redshifts not explicitly supplied to Cobaya.
 
         Updates 'key' in the cosmo_dic attribute of the class
         by adding an interpolator object
-        which interpolates :math:`\sigma_8` as a function of redshift
+        which interpolates :math:`\sigma_8` as a function of redshift.
         """
         self.cosmo_dic['sigma8_z_func'] = \
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['sigma8'], ext=2)
 
     def interp_fsigma8(self):
-        r"""Interp fsigma8
+        r"""Interpolates :math:`f\sigma_8`.
 
         Adds an interpolator for :math:`f\sigma_8` to the dictionary
         so that it can be evaluated at redshifts
-        not explicitly supplied to Cobaya
+        not explicitly supplied to Cobaya.
 
         Updates 'key' in the cosmo_dic attribute of the class
         by adding an interpolator object
         which interpolates :math:`f\sigma_8` as a
-        function of redshift
+        function of redshift.
         """
         self.cosmo_dic['fsigma8_z_func'] = \
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['fsigma8'], ext=2)
 
     def create_phot_galbias(self, redshift_means=None):
-        r"""Create the Photometric Galaxy Bias
+        r"""Creates the photometric galaxy bias.
 
         Creates the photometric galaxy bias as
         function/interpolator of the redshift.
         The function is stored in the cosmo dictionary 'b_inter'.
 
         The bias model is selected from the key 'bias_model'
-        in cosmo_dic.
+        in :obj:`cosmo_dic`.
         The implemented models are:
 
             #. Linear interpolation
@@ -784,13 +785,13 @@ class Cosmology:
         Parameters
         ----------
         redshift_means: numpy.ndarray of float
-            Array of tomographic redshift bin means for photometric GC probe.
+            Array of tomographic redshift bin means for GCphot
 
         Raises
         ------
         ValueError
             If the bias model parameter in the cosmo dictionary
-            is not 1, 2, or 3.
+            is not 1, 2, or 3
         """
 
         bias_model = self.cosmo_dic['bias_model']
@@ -808,20 +809,20 @@ class Cosmology:
                              f'{bias_model}')
 
     def istf_phot_galbias_interpolator(self, redshift_means=None):
-        r"""Istf Phot Galbias interpolator
+        r"""IST:F Photometric galaxy bias interpolator.
 
         Returns a linear interpolator for the galaxy bias for the
-        photometric GC probes at a given redshift z
+        photometric GC probes at a given redshift.
 
         Parameters
         ----------
         redshift_means: numpy.ndarray of float
-            Array of tomographic redshift bin means for photometric GC probe.
-            Default is Euclid IST: Forecasting choices.
+            Array of tomographic redshift bin means for GCphot
+            Default is Euclid IST: Forecasting choices
 
         Returns
         -------
-        interpolator
+        Interpolator: rb.linear_interpolator
             Linear interpolator of photometric galaxy bias
         """
         if redshift_means is None:
@@ -837,18 +838,18 @@ class Cosmology:
         return rb.linear_interpolator(redshift_means, istf_bias_list)
 
     def poly_phot_galbias(self, redshift):
-        r"""Polynomial Phot Galbias
+        r"""Polynomial photometric galaxy bias.
 
-        Computes bias using a 3rd order polynomial function of redshift
+        Computes bias using a 3rd order polynomial function of redshift.
 
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift(s) at which to calculate bias.
+            Redshift(s) at which to calculate bias
 
         Returns
         -------
-        float or numpy.ndarray
+        Photometric polynomial galaxy bias: float or numpy.ndarray
             Value(s) of photometric galaxy bias at input redshift(s)
         """
         nuisance = self.cosmo_dic['nuisance_parameters']
@@ -858,47 +859,47 @@ class Cosmology:
             nuisance['b3_poly_photo'] * np.power(redshift, 3)
 
     def compute_phot_galbias(self, redshift):
-        r"""Compute Phot Galbias
+        r"""Computes the photometric galaxy bias.
 
-        Computes galaxy bias(es) for the photometric GC probes
-        at a given redshift z
+        Computes galaxy bias(es) for GCphot
+        at a given redshift.
 
         The bias model is implemented in the method
-        'create_phot_galbias', which must be called before,
+        `create_phot_galbias`, which must be called before,
         in order to use this function.
 
         Parameters
         ----------
         redshift: numpy.ndarray of float
-            Redshift(s) at which to calculate bias.
+            Redshift(s) at which to calculate bias
 
         Returns
         -------
-        numpy.ndarray of float
+        Photometric interpolated galaxy bias: numpy.ndarray of float
             Value(s) of photometric galaxy bias at input redshift(s)
         """
 
         return self.cosmo_dic['b_inter'](redshift)
 
     def istf_spectro_galbias(self, redshift):
-        """Istf Spectro Galbias
+        """IST:F Spectroscopic galaxy bias interpolator.
 
         Gets galaxy bias for the spectroscopic galaxy clustering
         probe, at given redshift(s), according to the linear recipe
         used for version 1.0 of CLOE (default recipe).
 
-        Attention: this will change in the future
+        Attention: this will change in the future.
 
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift(s) at which to calculate bias.
+            Redshift(s) at which to calculate bias
 
-            Default is Euclid IST: Forecasting choices.
+            Default is Euclid IST: Forecasting choices
 
         Returns
         -------
-        bi_val: float or numpy.ndarray
+        Spectroscopic galaxy bias: float or numpy.ndarray
             Value(s) of spectroscopic galaxy bias at input redshift(s)
 
         Raises
@@ -922,20 +923,20 @@ class Cosmology:
                              'and valid bi_spec\'s are provided.')
 
     def Pmm_phot_def(self, redshift, k_scale):
-        r"""Pmm Phot Def
+        r"""Matter power spectrum.
 
         Computes the matter-matter power spectrum for the photometric probe.
 
         Parameters
         ----------
         redshift: float
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         k_scale: float or list or numpy.ndarray
-            k-mode at which to evaluate the  power spectrum.
+            Wavenumber at which to evaluate the  power spectrum
 
         Returns
         -------
-        pval:  float or numpy.ndarray
+        Photometric matter-matter power spectrum:  float or numpy.ndarray
             Value of matter-matter power spectrum
             at a given redshift and k-mode for photometric probes
         """
@@ -943,7 +944,7 @@ class Cosmology:
         return pval
 
     def Pgg_phot_def(self, redshift, k_scale):
-        r"""Pgg Phot Def
+        r"""Galaxy power spectrum.
 
         Computes the galaxy-galaxy power spectrum for the photometric probe.
 
@@ -954,23 +955,22 @@ class Cosmology:
         Parameters
         ----------
         redshift: float
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         k_scale: float or list or numpy.ndarray
-            k-mode at which to evaluate the  power spectrum.
+            Wavenumber at which to evaluate the  power spectrum
 
         Returns
         -------
-        pval:  float or numpy.ndarray
+        Photometric galaxy-galaxy power spectrum: float or numpy.ndarray
             Value of galaxy-galaxy power spectrum
-            at a given redshift and k-mode for galaxy
-            clustering photometric
+            at a given redshift and wavenumber for GCphot
         """
         pval = ((self.compute_phot_galbias(redshift) ** 2) *
                 self.cosmo_dic['Pk_delta'].P(redshift, k_scale))
         return pval
 
     def Pgg_spectro_def(self, redshift, k_scale, mu_rsd):
-        r"""Pgg Spectro Def
+        r"""Redshift-space galaxy power spectrum.
 
         Computes the redshift-space galaxy-galaxy power spectrum for the
         spectroscopic probe.
@@ -983,18 +983,18 @@ class Cosmology:
         Parameters
         ----------
         redshift: float
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         k_scale: float or list or numpy.ndarray
-            k-mode at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
         mu_rsd: float or numpy.ndarray
-            cosine of the angle between the pair separation and
+            Cosine of the angle between the pair separation and
             the line of sight
 
         Returns
         -------
-        pval: float or numpy.ndarray
+        Spectroscopic galaxy-galaxy power spectrum: float or numpy.ndarray
             Value of galaxy-galaxy power spectrum
-            at a given redshift, k-mode and :math:`\mu_{k}`
+            at a given redshift, wavenumber and :math:`\mu_{k}`
             for galaxy clustering spectroscopic
         """
         bias = self.istf_spectro_galbias(redshift)
@@ -1004,7 +1004,7 @@ class Cosmology:
         return pval
 
     def Pgdelta_phot_def(self, redshift, k_scale):
-        r"""Pgdelta Phot Def
+        r"""Galaxy-matter cross-power spectrum.
 
         Computes the galaxy-matter power spectrum for the photometric probe.
 
@@ -1015,15 +1015,15 @@ class Cosmology:
         Parameters
         ----------
         redshift: float
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         k_scale: float or list or numpy.ndarray
-            k-mode at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
 
         Returns
         -------
-        pval: float or numpy.ndarray
+        Photometric galaxy-matter power spectrum: float or numpy.ndarray
             Value of galaxy-matter power spectrum
-            at a given redshift and k-mode for galaxy clustering
+            at a given redshift and wavenumber for galaxy clustering
             photometric
         """
         pval = (self.compute_phot_galbias(redshift) *
@@ -1031,7 +1031,7 @@ class Cosmology:
         return pval
 
     def Pgdelta_spectro_def(self, redshift, k_scale, mu_rsd):
-        r"""Pgdelta Spectro Def
+        r"""Galaxy-matter cross-power spectrum in redshift space.
 
         Computes the redshift-space galaxy-matter power spectrum for the
         spectroscopic probe.
@@ -1044,18 +1044,18 @@ class Cosmology:
         Parameters
         ----------
         redshift: float
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         k_scale: float or list or numpy.ndarray
-            k-mode at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
         mu_rsd: float or numpy.ndarray
-            cosine of the angle between the pair separation
+            Cosine of the angle between the pair separation
             and the line of sight
 
         Returns
         -------
-        pval: float or numpy.ndarray.
+        Spectroscopic galaxy-matter power spectrum: float or numpy.ndarray
             Value of galaxy-matter power spectrum
-            at a given redshift, k-mode and :math:`\mu_{k}`
+            at a given redshift, wavenumber and :math:`\mu_{k}`
             for galaxy clustering spectroscopic
         """
         bias = self.istf_spectro_galbias(redshift)
@@ -1066,7 +1066,7 @@ class Cosmology:
         return pval
 
     def fia(self, redshift, k_scale=0.001):
-        r"""Fia
+        r"""Intrinsic alignment function.
 
         Computes the intrinsic alignment function. For v1.0
         we set :math:`\langle L \rangle(z) /L_{\star}(z)=1`.
@@ -1080,15 +1080,15 @@ class Cosmology:
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift(s) at which to evaluate the intrinsic alignment.
+            Redshift(s) at which to evaluate the intrinsic alignment
         k_scale: float or numpy.ndarray
-            k-mode(s) at which to evaluate the intrinsic alignment.
+            Wavenumber(s) at which to evaluate the intrinsic alignment
 
         Returns
         -------
-        fia: float or numpy.ndarray
+        Intrinsic alignment function: float or numpy.ndarray
             Value(s) of intrinsic alignment function at
-            given redshift(s) and k-mode(s)
+            given redshift(s) and wavenumber(s)
         """
         if self.cosmo_dic['use_gamma_MG']:
             # if gamma_MG parametrization is used
@@ -1121,7 +1121,7 @@ class Cosmology:
         return fia
 
     def Pii_def(self, redshift, k_scale):
-        r"""Pii Def
+        r"""Intrinsic alignment power spectrum.
 
         Computes the intrinsic alignment (intrinsic-intrinsic) power spectrum.
 
@@ -1131,24 +1131,24 @@ class Cosmology:
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         k_scale: float or list or numpy.ndarray
-            k-mode at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
 
         Returns
         -------
-        pval: float or numpy.ndarray
+        Intrinsic alignment power spectrum: float or numpy.ndarray
             Value of intrinsic alignment power spectrum
-            at a given redshift and k-mode
+            at a given redshift and wavenumber
         """
         pval = self.fia(redshift)**2.0 * \
             self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
         return pval
 
     def Pdeltai_def(self, redshift, k_scale):
-        r"""Pdeltai Def
+        r"""Matter-intrinsic cross-power spectrum.
 
-        Computes the density-intrinsic power spectrum.
+        Computes the matter-intrinsic power spectrum.
 
         .. math::
             P_{\rm \delta I}(z, k) = [f_{\rm IA}(z)]P_{\rm \delta\delta}(z, k)
@@ -1156,22 +1156,22 @@ class Cosmology:
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         k_scale: float or list or numpy.ndarray
-            k-mode at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
 
         Returns
         -------
-        pval: float or numpy.ndarray
-            Value of density-intrinsic power spectrum
-            at a given redshift and k-mode
+        Matter-intrinsic power spectrum: float or numpy.ndarray
+            Value of matter-intrinsic power spectrum
+            at a given redshift and wavenumber
         """
         pval = self.fia(redshift) * \
             self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
         return pval
 
     def Pgi_phot_def(self, redshift, k_scale):
-        r"""Pgi Phot Def
+        r"""Galaxy-intrinsic cross-power spectrum.
 
         Computes the photometric galaxy-intrinsic power spectrum.
 
@@ -1182,22 +1182,22 @@ class Cosmology:
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         k_scale: float or list or numpy.ndarray
-            k-mode at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
 
         Returns
         -------
-        pval: float or numpy.ndarray
+        Photometric galaxy-intrinsic power spectrum: float or numpy.ndarray
             Value of photometric galaxy-intrinsic power spectrum
-            at a given redshift and k-mode
+            at a given redshift and wavenumber
         """
         pval = self.fia(redshift) * self.compute_phot_galbias(redshift) * \
             self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
         return pval
 
     def Pgi_spectro_def(self, redshift, k_scale):
-        r"""Pgi Spectro Def
+        r"""Galaxy-intrinsic cross-power spectrum in redshift space.
 
         Computes the spectroscopic galaxy-intrinsic power spectrum.
 
@@ -1208,22 +1208,22 @@ class Cosmology:
         Parameters
         ----------
         redshift: float or numpy.ndarray
-            Redshift at which to evaluate the power spectrum.
+            Redshift at which to evaluate the power spectrum
         k_scale: float or list or numpy.ndarray
-            k-mode at which to evaluate the power spectrum.
+            Wavenumber at which to evaluate the power spectrum
 
         Returns
         -------
-        pval: float or numpy.ndarray
+        Spectroscopic galaxy-intrinsic power spectrum: float or numpy.ndarray
             Value of spectroscopic galaxy-intrinsic power spectrum
-            at a given redshift and k-mode
+            at a given redshift and wavenumber
         """
         pval = self.fia(redshift) * self.istf_spectro_galbias(redshift) * \
             self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
         return pval
 
     def obtain_power_spectra(self):
-        """Adds photometric/spectroscopic power spectra to the cosmo dictionary
+        """Adds photometric/spectroscopic power spectra to cosmo dictionary.
 
         Creates interpolators (functions of redshift and scale) for the
         photometric galaxy power spectra (galaxy-galaxy and galaxy-matter)
@@ -1237,7 +1237,8 @@ class Cosmology:
         value of the nonlinear flag, to the corresponding keys of the cosmo
         dictionary.
 
-        Note: the interpolators for v1.0 span the range :math:`k=[0.001,100.0]`
+        Note: start_jupyter_nb.shinterpolators for v1.0 span the range
+        :math:`k=[0.001,100.0]`.
         """
 
         k_win = self.cosmo_dic['k_win']
@@ -1304,69 +1305,69 @@ class Cosmology:
         return
 
     def MG_mu_def(self, redshift, k_scale, MG_mu):
-        r"""MG Mu Def
+        r"""Modified gravitational coupling to matter.
 
         Returns the function :math:`\mu(z, k)` according to the
-        Modified Gravity (MG) parametrization
+        Modified Gravity (MG) parametrisation.
 
         .. math::
             \Psi(z,k) &= -4\pi G\
             \frac{\bar\rho_{\rm m}(z)\delta_{\rm m}(z, k)}{k^2(1+z)^2}\
-            \mu(z,k)\\
+            \mu(z,k)\\.
 
         Parameters
         ----------
         redshift: float
-            Redshift at which to evaluate :math:`\mu(z, k)`.
+            Redshift at which to evaluate :math:`\mu(z, k)`
         k_scale: float or list or numpy.ndarray
-            k-mode at which to evaluate :math:`\mu(z, k)`.
+            Wavenumber at which to evaluate :math:`\mu(z, k)`
         MG_mu: float
             Value of constant (for v1.0) :math:`\mu(z, k)`
-            function.
+            function
 
         Returns
         -------
-        MG_mu: float
+        Modified gravity parameter: float
             Value of the Modified Gravity :math:`\mu(z, k)` function
-            at a given redshift and k-mode
+            at a given redshift and wavenumber
         """
 
         return MG_mu
 
     def MG_sigma_def(self, redshift, k_scale, MG_sigma):
-        r"""MG Sigma Def
+        r"""Modified gravitational coupling to light.
 
         Returns the function :math:`\Sigma(z, k)` according to the
-        Modified Gravity (MG) parametrization
+        Modified Gravity (MG) parametrisation.
 
         .. math::
             \Phi(z,k)+\Psi(z,k) &= -8\pi G\
             \frac{\bar\rho_{\rm m}(z)\delta_{\rm m}(z,k)}{k^2(1+z)^2}\
-            \Sigma(z,k)\\
+            \Sigma(z,k)\\.
 
         Parameters
         ----------
         redshift: float
-            Redshift at which to evaluate :math:`\Sigma(z, k)`.
+            Redshift at which to evaluate :math:`\Sigma(z, k)`
         k_scale: float
-            k-mode at which to evaluate :math:`\Sigma(z, k)`.
+            Wavenumber at which to evaluate :math:`\Sigma(z, k)`
         MG_sigma: float
             Value of constant (for v1.0) :math:`\Sigma(z, k)`
             function
 
         Returns
         -------
-        MG_sigma: float
+        Modified gravity parameter: float
             Value of the Modified Gravity :math:`\Sigma(z, k)` function
-            at a given redshift and k-mode
+            at a given redshift and wavenumber
         """
 
         return MG_sigma
 
     def update_cosmo_dic(self, zs, ks, MG_mu=1.0, MG_sigma=1.0):
-        """Update Cosmo Dic
+        """Updates the cosmology dictionary.
 
-        Update the dictionary with other cosmological quantities
+        Updates the dictionary with other cosmological quantities.
 
         Parameters
         ----------

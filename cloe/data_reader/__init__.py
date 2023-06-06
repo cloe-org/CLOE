@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-"""Data Reading Module
+"""DATA READER MODULE
 
-In this module, we load external data e.g. OU LE3 data vectors and n(z)s, for
-use in likelihood calculations.
-
+This module contains methods to the load external data to be used
+in the likelihood calculations, *e.g.* OU-level 3 redshift distributions
+and data vectors for the photometric and spectroscopic probes.
 """
 
 __all__ = ['reader']  # list submodules

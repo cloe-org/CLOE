@@ -19,8 +19,8 @@ class cosmoinitTestCase(TestCase):
         # Define standard test case
         cls.cosmo = Cosmology()
         cls.cosmo.cosmo_dic = load_test_pickle('cosmo_test_dic.pickle')
-        cls.cosmo.nonlinear.theory['redshift_bins'] = \
-            cls.cosmo.cosmo_dic['redshift_bins']
+        cls.cosmo.nonlinear.theory['redshift_bins_means_spectro'] = \
+            cls.cosmo.cosmo_dic['redshift_bins_means_spectro']
         cls.cosmo.nonlinear.set_Pgg_spectro_model()
         # Define test case for negative curvature
         cls.cosmo_curv_neg = Cosmology()
@@ -204,12 +204,14 @@ class cosmoinitTestCase(TestCase):
     def test_compute_phot_galbias(self):
         # interpolate a straight-line (b, z) grid to ease the checks
         nuipar = self.cosmo.cosmo_dic['nuisance_parameters']
-        nuipar['bias_model'] = 1
         zs_means = [1.0, 2.0, 3.0]
         nuipar['b1_photo'] = 2.0
         nuipar['b2_photo'] = 4.0
         nuipar['b3_photo'] = 6.0
-        self.cosmo.create_phot_galbias(zs_means)
+        self.cosmo.create_phot_galbias(model=2,
+                                       x_values=zs_means,
+                                       y_values=[2., 4., 6.])
+        print(self.cosmo.compute_phot_galbias(1.5))
         # check scalar redshift input
         bi_val_actual = self.cosmo.compute_phot_galbias(1.5)
         npt.assert_almost_equal(

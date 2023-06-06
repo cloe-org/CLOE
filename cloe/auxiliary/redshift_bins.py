@@ -138,8 +138,6 @@ def linear_interpolator(x_values, y_values):
     ----------
     x_values: numpy.ndarray of float
         x-values for the interpolator.
-        Default is Euclid IST Forecasting choices `arXiv:1910.0927`
-        (tomographic redshifts evaluated in the bin center)
     y_values: numpy.ndarray of float
         y-values for the interpolator
 
@@ -148,11 +146,6 @@ def linear_interpolator(x_values, y_values):
     Interpolator: numpy.ndarray of float
         Linear interpolator
     """
-    if x_values is None:
-        x_values = [0.2095, 0.489, 0.619, 0.7335,
-                    0.8445, 0.9595, 1.087, 1.2395,
-                    1.45, 2.038]
-
     return interpolate.interp1d(x_values, y_values,
                                 fill_value=(y_values[0], y_values[-1]),
                                 bounds_error=False)

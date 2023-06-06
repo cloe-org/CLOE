@@ -120,7 +120,7 @@ class Misc:
             and last element of ``bin_edges``
         """
 
-        bin_edges = self.theory['redshift_bins']
+        bin_edges = self.theory['redshift_bins_means_spectro']
 
         nuisance_src = self.theory['nuisance_parameters']
 

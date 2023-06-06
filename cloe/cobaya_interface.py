@@ -47,7 +47,6 @@ class EuclidLikelihood(Likelihood):
         and creates instance of :obj:`cosmology` class.
 
         """
-
         self.k_max_Boltzmann = 50.0
         if self.k_min_extrap < 1E-5:
             warnings.warn(
@@ -93,11 +92,14 @@ class EuclidLikelihood(Likelihood):
         self.cosmo = Cosmology()
         # Adding GCspectro redshift bins to cosmo dictionary and setting up
         # the internal class for Pgg_spectro with this information.
-        self.cosmo.nonlinear.theory['redshift_bins'] = \
+        self.cosmo.nonlinear.theory['redshift_bins_means_spectro'] = \
             self.data['spectro']['edges']
         self.cosmo.nonlinear.set_Pgg_spectro_model()
-        self.cosmo.cosmo_dic['redshift_bins'] = self.data['spectro']['edges']
-
+        self.cosmo.cosmo_dic['redshift_bins_means_spectro'] = \
+            self.data['spectro']['edges']
+        # Adding Redshift bins means for the photo catalogue
+        self.cosmo.cosmo_dic['redshift_bins_means_phot'] = \
+            self.data['photo']['redshifts']
         # Initialize the fiducial model
         self.set_fiducial_cosmology()
 
@@ -247,10 +249,14 @@ class EuclidLikelihood(Likelihood):
             self.z_win)
         # In order to make the update_cosmo_dic method to work, we need to
         # specify also in this case the information on the GCspectro bins
-        self.fiducial_cosmology.cosmo_dic['redshift_bins'] = \
+        # and Photo bins
+        self.fiducial_cosmology.cosmo_dic['redshift_bins_means_spectro'] = \
             self.data['spectro']['edges']
-        self.fiducial_cosmology.nonlinear.theory['redshift_bins'] = \
+        self.fiducial_cosmology.nonlinear.theory[
+            'redshift_bins_means_spectro'] = \
             self.data['spectro']['edges']
+        self.fiducial_cosmology.cosmo_dic['redshift_bins_means_phot'] = \
+            self.data['photo']['redshifts']
         self.fiducial_cosmology.nonlinear.set_Pgg_spectro_model()
         # Update dictionary with interpolators
         self.fiducial_cosmology.cosmo_dic['luminosity_ratio_z_func'] = \

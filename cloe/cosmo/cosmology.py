@@ -767,7 +767,8 @@ class Cosmology:
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['fsigma8'], ext=2)
 
-    def create_phot_galbias(self, redshift_means=None):
+    def create_phot_galbias(self, model=None, x_values=[0.0, 4.0],
+                            y_values=[1.0, 1.0]):
         r"""Creates the photometric galaxy bias.
 
         Creates the photometric galaxy bias as
@@ -784,8 +785,13 @@ class Cosmology:
 
         Parameters
         ----------
-        redshift_means: numpy.ndarray of float
-            Array of tomographic redshift bin means for GCphot
+        model: integer
+            selection of the bias model.
+            If None, uses the one stored in cosmo_dic['bias_model']
+        x_values: numpy.ndarray of float
+            x-values for the interpolator.
+        y_values: numpy.ndarray of float
+            y-values for the interpolator.
 
         Raises
         ------
@@ -794,21 +800,25 @@ class Cosmology:
             is not 1, 2, or 3
         """
 
-        bias_model = self.cosmo_dic['bias_model']
+        if model is None:
+            bias_model = self.cosmo_dic['bias_model']
+        else:
+            bias_model = model
 
         if bias_model == 1:
             self.cosmo_dic['b_inter'] \
-                = self.istf_phot_galbias_interpolator(redshift_means)
+                = self.istf_phot_galbias_interpolator(
+                    self.cosmo_dic['redshift_bins_means_phot'])
         elif bias_model == 2:
             self.cosmo_dic['b_inter'] \
-                = rb.linear_interpolator([0.0, 4.0], [1.0, 1.0])
+                = rb.linear_interpolator(x_values, y_values)
         elif bias_model == 3:
             self.cosmo_dic['b_inter'] = self.poly_phot_galbias
         else:
             raise ValueError('Parameter bias_model not valid:'
                              f'{bias_model}')
 
-    def istf_phot_galbias_interpolator(self, redshift_means=None):
+    def istf_phot_galbias_interpolator(self, redshift_means):
         r"""IST:F Photometric galaxy bias interpolator.
 
         Returns a linear interpolator for the galaxy bias for the
@@ -818,22 +828,18 @@ class Cosmology:
         ----------
         redshift_means: numpy.ndarray of float
             Array of tomographic redshift bin means for GCphot
-            Default is Euclid IST: Forecasting choices
 
         Returns
         -------
         Interpolator: rb.linear_interpolator
             Linear interpolator of photometric galaxy bias
         """
-        if redshift_means is None:
-            redshift_means = [0.2095, 0.489, 0.619, 0.7335,
-                              0.8445, 0.9595, 1.087, 1.2395,
-                              1.45, 2.038]
 
         nuisance_par = self.cosmo_dic['nuisance_parameters']
 
         istf_bias_list = [nuisance_par[f'b{idx}_photo']
-                          for idx, vl in enumerate(redshift_means, start=1)]
+                          for idx, vl in
+                          enumerate(redshift_means, start=1)]
 
         return rb.linear_interpolator(redshift_means, istf_bias_list)
 
@@ -908,7 +914,7 @@ class Cosmology:
             If redshift is outside of the bounds defined by the first
             and last element of bin_edges
         """
-        bin_edges = self.cosmo_dic['redshift_bins']
+        bin_edges = self.cosmo_dic['redshift_bins_means_spectro']
 
         nuisance_src = self.cosmo_dic['nuisance_parameters']
 

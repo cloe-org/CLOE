@@ -10,6 +10,8 @@ from cloe.spectroscopic_survey.spectro import Spectro
 from cloe.data_reader import reader
 from cloe.masking.masking import Masking
 from cloe.masking.data_handler import Data_handler
+from cloe.photometric_survey.redshift_distribution \
+    import RedshiftDistribution
 from cloe.auxiliary.matrix_transforms import BNT_transform
 
 
@@ -372,21 +374,22 @@ class Euclike:
         """
         if self.do_photo:
             print(self.matrix_transform_phot)
-            if self.matrix_transform_phot is None:
+            if not self.matrix_transform_phot:
                 return None
             elif 'BNT' in self.matrix_transform_phot:
-                print("computing BNT transform")
+                print("** Pre-computing BNT matrix **")
                 zwin = self.fiducial_cosmo_quantities_dic['z_win']
-                self.phot_ins.calc_nz_distributions(
-                    self.fiducial_cosmo_quantities_dic)
+                nuisance_dict = \
+                    self.fiducial_cosmo_quantities_dic['nuisance_parameters']
+                nz_WL = RedshiftDistribution('WL', self.phot_ins.nz_dic_WL,
+                                             nuisance_dict)
                 chiwin = self.fiducial_cosmo_quantities_dic['r_z_func'](zwin)
-                Nz = self.phot_ins.nz_WL.get_num_tomographic_bins()
-                ni_list = np.array([self.phot_ins.
-                                   nz_WL.interpolates_n_i(ni + 1, zwin)(zwin)
+                Nz = nz_WL.get_num_tomographic_bins()
+                ni_list = np.array([nz_WL.interpolates_n_i(ni + 1, zwin)(zwin)
                                    for ni in range(Nz)])
                 if 'test' in self.matrix_transform_phot:
                     test_BNT = True
-                    print("** Testing BNT with Unity Matrix **")
+                    print("** Testing BNT with unity matrix **")
                 else:
                     test_BNT = False
                 self.BNT_transformation = BNT_transform(zwin, chiwin, ni_list,
@@ -426,7 +429,7 @@ class Euclike:
         """
 
         transformed_array = obs_array
-        if self.matrix_transform_phot is None:
+        if not self.matrix_transform_phot:
             # Not doing any matrix transform
             return transformed_array
         elif 'BNT' in self.matrix_transform_phot:

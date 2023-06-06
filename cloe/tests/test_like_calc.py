@@ -93,18 +93,10 @@ class likecalcBNT_TestCase(TestCase, SpectroTestParent):
 
     def setUp(self):
 
-        mock_data['cov_model'] = 'Gauss'
         mock_cosmo_dic = load_test_pickle('like_calc_test_dic.pickle')
         mock_cosmo_dic['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
         # self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic
-        # init Euclike
-        mock_obs = build_mock_observables()
-        mock_obs['selection']['matrix_transform_phot'] = 'BNT-test'
-        self.like_tt = Euclike(mock_data, mock_obs)
-        self.like_tt.fiducial_cosmo_quantities_dic.update(
-            self.test_dict)
-        self.like_tt.get_masked_data()
         # The correct check value, using the h scaling for the h from
         # supplied external file for all the probes together is:
         self.check_loglike = -1721.244143
@@ -156,7 +148,15 @@ class likecalcBNT_TestCase(TestCase, SpectroTestParent):
             bi_val = istf_bias_list[0]
         return bi_val
 
-    def test_loglike_BNT(self):
+    def test_loglike_BNT_unity(self):
+        # init Euclike
+        self.mock_obs = build_mock_observables()
+        mock_data['cov_model'] = 'Gauss'
+        self.mock_obs['selection']['matrix_transform_phot'] = 'BNT-test'
+        self.like_tt = Euclike(mock_data, self.mock_obs)
+        self.like_tt.fiducial_cosmo_quantities_dic.update(
+            self.test_dict)
+        self.like_tt.get_masked_data()
         npt.assert_allclose(
             self.like_tt.loglike(self.test_dict, 1),
             self.check_loglike,

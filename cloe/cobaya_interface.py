@@ -66,7 +66,10 @@ class EuclidLikelihood(Likelihood):
         if self.plot_observables_selection:
             self.observables_pf = observables_visualization(
              self.observables['selection'])
-        self.observables['selection']['add_phot_RSD'] = self.add_phot_RSD
+        self.observables['selection']['add_phot_RSD'] = \
+            self.add_phot_RSD
+        self.observables['selection']['matrix_transform_phot'] = \
+            self.matrix_transform_phot
         # Select which power spectra to require from the Boltzmann solver
         if self.NL_flag_phot_matter > 0:
             self.use_NL = [False, True]
@@ -74,7 +77,6 @@ class EuclidLikelihood(Likelihood):
             self.use_NL = False
         # Initialize Euclike module
         self.likefinal = Euclike(self.data, self.observables)
-
         # Here we set the naming convention for the cosmological parameters
         # accepted by the selected Boltzmann solver
         if not self.solver:
@@ -87,7 +89,6 @@ class EuclidLikelihood(Likelihood):
         elif self.solver == 'classy':
             self.pnames = \
                 dict(zip(camb_to_classy.keys(), camb_to_classy.values()))
-
         # Initialize Cosmology class for sampling
         self.cosmo = Cosmology()
         # Adding GCspectro redshift bins to cosmo dictionary and setting up
@@ -102,17 +103,30 @@ class EuclidLikelihood(Likelihood):
             self.data['photo']['redshifts']
         # Initialize the fiducial model
         self.set_fiducial_cosmology()
-
-        # Here we add the fiducial angular diameter distance and Hubble factor
-        # to the cosmo dictionary. In this way we can avoid passing the whole
-        # fiducial dictionary
+        # "Here we add the fiducial Hubble function (fid_H_z_func),
+        # comoving distance (fid_r_z_func),
+        # and angular diameter distance (fid_d_z_func)
+        # to the cosmo dictionary
+        # These quantities
+        # are requested in different parts of the spectro and photo class.
         self.cosmo.cosmo_dic['fid_d_z_func'] = \
             self.fiducial_cosmology.cosmo_dic['d_z_func']
+        self.cosmo.cosmo_dic['fid_r_z_func'] = \
+            self.fiducial_cosmology.cosmo_dic['r_z_func']
         self.cosmo.cosmo_dic['fid_H_z_func'] = \
             self.fiducial_cosmology.cosmo_dic['H_z_func']
-
+        # Create a separate dictionary with fiducial cosmo quantities that are
+        # available at initialization, before cosmo_dic is created.
+        self.likefinal.fiducial_cosmo_quantities_dic.update(
+            self.fiducial_cosmology.cosmo_dic)
+        # Compute the data vectors
+        # and initialize possible matrix transforms
+        self.likefinal.get_masked_data()
+        # Add the luminosity_ratio_z_func to the cosmo_dic after data has been
+        # read and stored in the data_ins attribute of Euclike
         self.cosmo.cosmo_dic['luminosity_ratio_z_func'] = \
             self.likefinal.data_ins.luminosity_ratio_interpolator
+        # Pass the observables selection to the cosmo dictionary
         self.cosmo.cosmo_dic['obs_selection'] = self.observables['selection']
 
     def set_fiducial_cosmology(self):
@@ -317,6 +331,8 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['bias_model'] = self.bias_model
             self.cosmo.cosmo_dic['magbias_model'] = self.magbias_model
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
+            self.cosmo.cosmo_dic['matrix_transform_phot'] = \
+                self.matrix_transform_phot
             self.cosmo.cosmo_dic['H0'] = self.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
@@ -404,6 +420,12 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['NL_flag_spectro'] = \
                 info['likelihood']['Euclid']['NL_flag_spectro']
             self.cosmo.cosmo_dic['bias_model'] = self.bias_model
+            self.cosmo.cosmo_dic['add_phot_RSD'] = \
+                info['likelihood']['Euclid']['add_phot_RSD']
+            self.matrix_transform_phot = \
+                info['likelihood']['Euclid']['matrix_transform_phot']
+            self.cosmo.cosmo_dic['matrix_transform_phot'] = \
+                info['likelihood']['Euclid']['matrix_transform_phot']
             self.cosmo.cosmo_dic['magbias_model'] = self.magbias_model
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
             self.cosmo.cosmo_dic['H0'] = model.provider.get_param('H0')

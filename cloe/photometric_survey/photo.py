@@ -91,6 +91,24 @@ class Photo:
         if cosmo_dic is not None:
             self.update(cosmo_dic)
 
+    def calc_nz_distributions(self, cosmo_dic):
+        r"""calc_nz_distributions method
+
+        Method to compute the n(z) distributions, based on the
+        input cosmology and nuisance parameters of the cosmo_dic
+
+        Parameters
+        ----------
+        cosmo_dic: dict
+            Cosmological dictionary from Cosmology class.
+        """
+        nuisance_dict = cosmo_dic['nuisance_parameters']
+        self.nz_GC = RedshiftDistribution('GCphot', self.nz_dic_GC,
+                                          nuisance_dict)
+        self.nz_WL = RedshiftDistribution('WL', self.nz_dic_WL,
+                                          nuisance_dict)
+        return None
+
     def update(self, cosmo_dic):
         r"""Updates method.
 

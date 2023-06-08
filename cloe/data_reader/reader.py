@@ -360,12 +360,10 @@ class Reader:
         tx2_cov_str = self.data['photo']['cov_3x2pt'].format(self.data[
             'photo']['cov_model'])
         tx2_cov = np.load(Path(full_path, tx2_cov_str))
-        new_tx2_cov = self._unpack_3x2pt_cov(tx2_cov)
-
         self.data_dict['WL'] = WL_dict
         self.data_dict['XC-Phot'] = XC_phot_dict
         self.data_dict['GC-Phot'] = GC_phot_dict
-        self.data_dict['3x2pt_cov'] = new_tx2_cov
+        self.data_dict['3x2pt_cov'] = tx2_cov
 
         del (GC_file)
         del (WL_file)

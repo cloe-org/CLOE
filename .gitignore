@@ -20,6 +20,8 @@ dist/
 *.egg*
 chains/
 notebooks/chains/
+notebooks/figs/
+.vscode/
 
 # Test outputs #
 ################

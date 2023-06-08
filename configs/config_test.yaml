@@ -10,6 +10,7 @@ Cobaya:
       NL_flag_phot_matter: 0
       NL_flag_spectro: 0
       add_phot_RSD: False
+      matrix_transform_phot: False
       plot_observables_selection: False
       # The user can overwrite here the values of
       # the fields 'data', 'observables_selection', and 'observables_specifications'

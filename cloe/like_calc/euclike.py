@@ -70,17 +70,15 @@ class Euclike:
             # and 2-1, both 1-3 and 3-1, etc).
             numtomo_wl = self.data_ins.numtomo_wl
             numtomo_gcphot = self.data_ins.numtomo_gcphot
-            x_diagonal_wl = np.array(np.triu_indices(n=numtomo_wl,
-                                     m=numtomo_wl)) + 1
-            x_diagonal_gc = np.array(np.triu_indices(n=numtomo_gcphot,
-                                     m=numtomo_gcphot)) + 1
+            x_diagonal_wl = np.array(np.triu_indices(numtomo_wl)) + 1
+            x_diagonal_gcphot = np.array(np.triu_indices(numtomo_gcphot)) + 1
+            x_full_xc = np.indices((numtomo_gcphot,
+                                    numtomo_wl)).reshape(2, -1) + 1
             self.indices_diagonal_wl = \
                 tuple(zip(x_diagonal_wl[0], x_diagonal_wl[1]))
-            self.indices_diagonal_gc = \
-                tuple(zip(x_diagonal_gc[0], x_diagonal_gc[1]))
-            x_full_xc = np.indices((numtomo_gcphot, numtomo_wl))
-            self.indices_all = tuple(zip(x_full_xc[0].flatten() + 1,
-                                     x_full_xc[1].flatten() + 1))
+            self.indices_diagonal_gcphot = \
+                tuple(zip(x_diagonal_gcphot[0], x_diagonal_gcphot[1]))
+            self.indices_all = tuple(zip(x_full_xc[0], x_full_xc[1]))
             self.ells_WL = self.data_ins.data_dict['WL']['ells']
             self.ells_XC = self.data_ins.data_dict['XC-Phot']['ells']
             self.ells_GC_phot = self.data_ins.data_dict['GC-Phot']['ells']
@@ -339,12 +337,12 @@ class Euclike:
             gc_phot_array = np.array(
                 [self.phot_ins.Cl_GC_phot(ell, element[0], element[1])
                  for ell in self.ells_GC_phot
-                 for element in self.indices_diagonal_gc]
+                 for element in self.indices_diagonal_gcphot]
             )
         else:
             gc_phot_array = np.zeros(
                 len(self.ells_GC_phot) *
-                len(self.indices_diagonal_gc)
+                len(self.indices_diagonal_gcphot)
             )
 
         # Apply any matrix transform activated with a switch

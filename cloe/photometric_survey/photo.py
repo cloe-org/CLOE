@@ -39,9 +39,9 @@ class Photo:
         cosmo_dic: dict
             Cosmological dictionary from :obj:`cosmology` class
         nz_dic_WL: dict
-            Dictionary containing redshift dustributions for WL probe
+            Dictionary containing redshift distributions for WL probe
         nz_dic_GC: dict
-            Dictionary containing redshift dustributions for GCphot probe
+            Dictionary containing redshift distributions for GCphot probe
         add_RSD: bool
             Flag to determine whether RSD have to be included in the
             calculations for GCphot or not
@@ -68,6 +68,10 @@ class Photo:
         self.z_winterp[2] = z_wmin3
         # Number of bins should be generalized, hard-coded for now
 
+        # Cl integral z step (TODO: take from the accuracy module)
+        int_step = 0.01
+        self.z_grid_for_cl = np.arange(self.cl_int_z_min, z_wmax, int_step)
+
         # ell grid integrated over to obtain the 3x2pt correlation functions
         self.ell_max = int(1e5)
         self.nint = 128
@@ -80,8 +84,12 @@ class Photo:
         self.bessel_dict = {}
         self._prefactor_dict = {}
 
+        self.ells_WL = []
+        self.ells_GC_phot = []
+        self.ells_XC = []
+
         self.add_RSD = add_RSD
-        self._precomp_ells = None
+        self._ells_GC_or_XC = None
 
         self.multiply_bias_cl = False
 
@@ -137,7 +145,25 @@ class Photo:
             raise KeyError('No interpolated function for transverse comoving '
                            'distance exists in cosmo_dic.')
 
+        self.f_K_z_grid = self.theory['f_K_z_func'](self.z_grid_for_cl)
+        self.H_z_grid = self.theory['H_z_func'](self.z_grid_for_cl)
+
         z_wmax = self.theory['z_win'][-1]
+
+        # holders for power spectra in Limber approximation
+        self.power_dd_WL = []
+        self.power_ii_WL = []
+        self.power_di_WL = []
+        self.power_gg_GC = []
+        self.power_dd_GC = []
+        self.power_gd_GC = []
+        self.power_gd_XC = []
+        self.power_gi_XC = []
+        self.power_dd_XC = []
+        self.power_di_XC = []
+        self._stored_WL = False
+        self._stored_GC = False
+        self._stored_XC = False
 
         if any(obs_sel['GCphot'].values()):
             self.nz_GC = RedshiftDistribution('GCphot', self.nz_dic_GC,
@@ -156,8 +182,6 @@ class Photo:
             # z_wtom is the number of tomographic bins + 1
             z_wtom_gc = 1 + self.nz_GC.get_num_tomographic_bins()
 
-            self.gc_int_z_max = {i: z_wmax
-                                 for i in self.nz_GC.get_tomographic_bins()}
             self.interpwingal = np.zeros(shape=(self.z_wsamp, z_wtom_gc))
             self.interpwinmag = np.zeros(shape=(self.z_wsamp, z_wtom_gc))
             self.interpwingal[:, 0] = self.z_winterp
@@ -167,15 +191,15 @@ class Photo:
                                                              tom_i)
                 self.interpwinmag[:, tom_i] = self.magnification_window(
                     self.z_winterp, tom_i)
-            if self.add_RSD and self._precomp_ells is not None:
+            if self.add_RSD and self._ells_GC_or_XC is not None:
                 self.interpwinrsd = np.zeros(
-                    shape=(z_wtom_gc, 3, len(self._precomp_ells),
+                    shape=(z_wtom_gc, 3, len(self._ells_GC_or_XC),
                            self.z_wsamp))
                 self.interpwinrsd[0, :, :, :] = self.z_winterp
                 for tom_i in range(1, z_wtom_gc):
                     self.interpwinrsd[tom_i, :, :, :] = \
                         self.GC_window_RSD(self.z_winterp,
-                                           self._precomp_ells, tom_i)
+                                           self._ells_GC_or_XC, tom_i)
         if any(obs_sel['WL'].values()):
             self.nz_WL = RedshiftDistribution('WL', self.nz_dic_WL,
                                               nuisance_dict)
@@ -221,9 +245,11 @@ class Photo:
                       'separations. Computing 3x2pt correlation functions at '
                       'different angles will lead to unexpected outputs.')
 
-    def set_prefactor(self, ells_WL, ells_XC, ells_GC_phot):
+    def set_prefactor(self, ells_WL=None, ells_XC=None, ells_GC_phot=None):
         r"""Computes the prefactors for the WL XC and GCphot :math:`C(\ell)`'s.
 
+        The arrays of :math:`\ell` values provided as input are stored
+        in the class instance, to be used in other private methods.
         The following prefactors are evaluated.
 
         * :obj:`shearIA_WL` (from the ells_WL input array): \
@@ -262,31 +288,43 @@ class Photo:
         ells_GC_phot: numpy.ndarray
            Array of :math:`\ell` values for the GCphot probe
         """
-        self._prefactor_dict = {}
 
         # WL
-        for ell in ells_WL:
-            self._prefactor_dict['shearIA_WL', ell] = \
-                (self._eval_prefactor_shearia(ell))**2
+        if ells_WL is not None:
+            self._prefactor_dict['shearIA_WL'] = \
+                (self._eval_prefactor_shearia(ells_WL))**2
+            self.ells_WL = ells_WL
 
         # XC
-        for ell in ells_XC:
-            self._prefactor_dict['shearIA_XC', ell] = \
-                self._eval_prefactor_shearia(ell)
-            self._prefactor_dict['mag_XC', ell] = self._eval_prefactor_mag(ell)
+        if ells_XC is not None:
+            self._prefactor_dict['shearIA_XC'] = \
+                self._eval_prefactor_shearia(ells_XC)
+            self._prefactor_dict['mag_XC'] = \
+                self._eval_prefactor_mag(ells_XC)
+            self.ells_XC = ells_XC
 
         # GCphot
-        for ell in ells_GC_phot:
-            self._prefactor_dict['mag_GCphot', ell] = \
-                self._eval_prefactor_mag(ell)
-            self._prefactor_dict['L0_GCphot', ell] = \
-                self._eval_prefactor_l_0(ell)
-            self._prefactor_dict['Lplus1_GCphot', ell] = \
-                self._eval_prefactor_l_plus1(ell)
-            self._prefactor_dict['Lminus1_GCphot', ell] = \
-                self._eval_prefactor_l_minus1(ell)
+        if ells_GC_phot is not None:
+            self._prefactor_dict['mag_GCphot'] = \
+                self._eval_prefactor_mag(ells_GC_phot)
+            self._prefactor_dict['L0_GCphot'] = \
+                self._eval_prefactor_l_0(ells_GC_phot)
+            self._prefactor_dict['Lplus1_GCphot'] = \
+                self._eval_prefactor_l_plus1(ells_GC_phot)
+            self._prefactor_dict['Lminus1_GCphot'] = \
+                self._eval_prefactor_l_minus1(ells_GC_phot)
+            self.ells_GC_phot = ells_GC_phot
 
-        self._precomp_ells = np.unique(np.concatenate((ells_GC_phot, ells_XC)))
+        if self.add_RSD:
+            if ells_GC_phot is not None and ells_XC is not None:
+                self._ells_GC_or_XC = \
+                        np.union1d(self.ells_GC_phot, self.ells_XC)
+                self._prefactor_dict['L0_GC_or_XC'] = \
+                    self._eval_prefactor_l_0(self._ells_GC_or_XC)
+                self._prefactor_dict['Lplus1_GC_or_XC'] = \
+                    self._eval_prefactor_l_plus1(self._ells_GC_or_XC)
+                self._prefactor_dict['Lminus1_GC_or_XC'] = \
+                    self._eval_prefactor_l_minus1(self._ells_GC_or_XC)
 
     def GC_window(self, z, bin_i):
         r"""GC window.
@@ -387,16 +425,15 @@ class Photo:
         RSD kernel: numpy.ndarray
             RSD kernel for the specified list of photometric bins
         """
-        if np.all([(pref, ell) in self._prefactor_dict.keys() for pref in
-                   ['Lminus1_GCphot', 'L0_GCphot', 'Lplus1_GCphot']]):
-            prefactor_Lminus1 = self._prefactor_dict['Lminus1_GCphot', ell]
-            prefactor_L0 = self._prefactor_dict['L0_GCphot', ell]
-            prefactor_Lplus1 = self._prefactor_dict['Lplus1_GCphot', ell]
-            index = np.where(self._precomp_ells == ell)[0][0]
+        if self._ells_GC_or_XC is not None:
+            idx = np.where(self._ells_GC_or_XC == ell)[0][0]
+            prefactor_Lminus1 = self._prefactor_dict['Lminus1_GC_or_XC'][idx]
+            prefactor_L0 = self._prefactor_dict['L0_GC_or_XC'][idx]
+            prefactor_Lplus1 = self._prefactor_dict['Lplus1_GC_or_XC'][idx]
             kerngalrsd = \
-                [prefactor_Lminus1 * self.interpwinrsd[bin, 0, index, :] +
-                 prefactor_L0 * self.interpwinrsd[bin, 1, index, :] +
-                 prefactor_Lplus1 * self.interpwinrsd[bin, 2, index, :]
+                [prefactor_Lminus1 * self.interpwinrsd[bin, 0, idx, :] +
+                 prefactor_L0 * self.interpwinrsd[bin, 1, idx, :] +
+                 prefactor_Lplus1 * self.interpwinrsd[bin, 2, idx, :]
                  for bin in args]
         else:
             prefactor_Lminus1 = self._eval_prefactor_l_minus1(ell)
@@ -655,7 +692,7 @@ class Photo:
 
         return W_IA
 
-    def Cl_generic_integrand(self, z, PandW_i_j_z_k):
+    def Cl_generic_integrand(self, PandW_i_j_z_k):
         r"""Cl generic integrand.
 
         Calculates the integrand of the angular power spectra for
@@ -665,29 +702,26 @@ class Photo:
 
         Parameters
         ----------
-        z: numpy.ndarray
-            List of redshifts at which integrand is being evaluated
         PandW_i_j_z_k: numpy.ndarray
            Values of the product of kernel for bin i, kernel for bin j,
            and the power spectrum at redshift z and scale k.
 
         Returns
         -------
-        Angular power spectrum integran: numpy.ndarray
+        Angular power spectrum integrand: numpy.ndarray
            Values of the angular power spectrum integrand at
-           the given redshifts and multipole :math:`\ell`
+           the given redshifts and multipoles :math:`\ell`.
         """
-        kern_mult_power = (PandW_i_j_z_k /
-                           (self.theory['H_z_func'](z) *
-                            (self.theory['f_K_z_func'](z)) ** 2.0))
+        kern_mult_power = \
+            PandW_i_j_z_k / (self.H_z_grid * (self.f_K_z_grid ** 2))
 
         if np.isnan(PandW_i_j_z_k).any():
             raise Exception('Requested k, z values are outside of power'
                             ' spectrum interpolation range.')
         return kern_mult_power
 
-    def Cl_WL(self, ell, bin_i, bin_j, int_step=0.01):
-        r"""Cl WL.
+    def Cl_WL(self, ells, bin_i, bin_j):
+        r"""Cl WL
 
         Calculates angular power spectrum for weak lensing,
         for the supplied bins:
@@ -732,63 +766,80 @@ class Photo:
 
         Parameters
         ----------
-        ell: float
-            :math:`\ell`-mode at which :math:`C(\ell)` is evaluated
+        ells: numpy.ndarray of float
+            :math:`\ell`-modes at which :math:`C(\ell)` is evaluated.
         bin_i: int
            Index of first tomographic bin. Tomographic bin
            indices start from 1
         bin_j: int
            Index of second tomographic bin. Tomographic bin
-           indices start from 1
-        int_step: float
-            Size of step for numerical integral over redshift
+           indices start from 1.
 
         Returns
         -------
-        Angular shear power spectrum: float
-           Value of the angular shear power spectrum
+        Angular shear power spectrum: numpy.ndarray of float
+           Values of the angular shear power spectrum
         """
 
-        cl_int_z_max = min(self.wl_int_z_max[bin_i], self.wl_int_z_max[bin_j])
-        zs_arr = np.arange(self.cl_int_z_min, cl_int_z_max, int_step)
+        same_ells = np.array_equal(ells, self.ells_WL)
+        precomputed_shearIA = 'shearIA_WL' in self._prefactor_dict.keys()
+        if not precomputed_shearIA or not same_ells:
+            self.set_prefactor(ells_WL=ells)
 
-        P_dd = self.theory['Pmm_phot']
-        P_ii = self.theory['Pii']
-        P_di = self.theory['Pdeltai']
+        prefactor_wl = self._prefactor_dict['shearIA_WL']
 
-        ks_arr = (ell + 0.5) / self.theory['f_K_z_func'](zs_arr)
-        pow_dd = P_dd(zs_arr, ks_arr, grid=False)
-        pow_ii = P_ii(zs_arr, ks_arr, grid=False)
-        pow_di = P_di(zs_arr, ks_arr, grid=False)
-
-        kern_i = np.interp(zs_arr, self.interpwin[:, 0],
+        kern_i = np.interp(self.z_grid_for_cl, self.interpwin[:, 0],
                            self.interpwin[:, bin_i])
-        kern_j = np.interp(zs_arr, self.interpwin[:, 0],
+        kern_j = np.interp(self.z_grid_for_cl, self.interpwin[:, 0],
                            self.interpwin[:, bin_j])
-        kernia_i = np.interp(zs_arr, self.interpwinia[:, 0],
+        kernia_i = np.interp(self.z_grid_for_cl, self.interpwinia[:, 0],
                              self.interpwinia[:, bin_i])
-        kernia_j = np.interp(zs_arr, self.interpwinia[:, 0],
+        kernia_j = np.interp(self.z_grid_for_cl, self.interpwinia[:, 0],
                              self.interpwinia[:, bin_j])
 
-        if ('shearIA_WL', ell) in self._prefactor_dict.keys():
-            prefactor_wl = self._prefactor_dict['shearIA_WL', ell]
-        else:
-            prefactor_wl = (self._eval_prefactor_shearia(ell))**2
+        self._evaluate_power_WL(force_recompute=(not same_ells))
 
-        pandw_dd = kern_i * kern_j * pow_dd
-        pandw_ii = kernia_i * kernia_j * pow_ii
-        pandw_di = (kern_i * kernia_j + kernia_i * kern_j) * pow_di
+        pandw_dd = kern_i * kern_j * self.power_dd_WL
+        pandw_ii = kernia_i * kernia_j * self.power_ii_WL
+        pandw_di = \
+            (kern_i * kernia_j + kernia_i * kern_j) * self.power_di_WL
         pandwijk = pandw_dd + pandw_ii + pandw_di
 
-        c_int_arr = self.Cl_generic_integrand(zs_arr, pandwijk)
+        c_int_arr = self.Cl_generic_integrand(pandwijk)
+
         c_final = prefactor_wl * self.theory['c'] * \
-            integrate.trapz(c_int_arr, zs_arr)
+            integrate.trapz(c_int_arr, self.z_grid_for_cl)
         c_final = c_final * (1 + self.multbias[bin_i - 1]) * \
             (1 + self.multbias[bin_j - 1])
+
         return c_final
 
-    def Cl_GC_phot(self, ell, bin_i, bin_j, int_step=0.01):
-        r"""Cl GCphot.
+    def _evaluate_power_WL(self, force_recompute=False):
+        r"""Evaluate Power WL
+
+        Evaluates and store the matter power spectra for weak lensing.
+
+        Parameters
+        ----------
+        force_recompute: bool
+            Forces to recompute the power spectra.
+        """
+
+        if not self._stored_WL or force_recompute:
+            # reshape ells to a column vector
+            ell_col = np.atleast_2d(self.ells_WL).T
+            k_grid = (ell_col + 0.5) / self.f_K_z_grid
+
+            P_dd = self.theory['Pmm_phot']
+            P_ii = self.theory['Pii']
+            P_di = self.theory['Pdeltai']
+            self.power_dd_WL = P_dd(self.z_grid_for_cl, k_grid, grid=False)
+            self.power_ii_WL = P_ii(self.z_grid_for_cl, k_grid, grid=False)
+            self.power_di_WL = P_di(self.z_grid_for_cl, k_grid, grid=False)
+            self._stored_WL = True
+
+    def Cl_GC_phot(self, ells, bin_i, bin_j):
+        r"""Cl GC Phot
 
         Calculates angular power spectrum for photometric galaxy clustering,
         for the supplied bins.
@@ -829,58 +880,58 @@ class Photo:
 
         Parameters
         ----------
-        ell: float
-            :math:`\ell`-mode at which :math:`C(\ell)` is evaluated
+        ells: numpy.ndarray of float
+            :math:`\ell`-modes at which :math:`C(\ell)` is evaluated.
         bin_i: int
            Index of first tomographic bin. Tomographic bin
            indices start from 1
         bin_j: int
            Index of second tomographic bin. Tomographic bin
-           indices start from 1
-        int_step: float
-            Size of step for numerical integral over redshift
+           indices start from 1.
 
         Returns
         -------
         Angular GCphot power spectrum: float
-           Value of angular power spectrum for
+           Values of angular power spectrum for
            galaxy clustering photometric
         """
 
-        cl_int_z_max = min(self.gc_int_z_max[bin_i], self.gc_int_z_max[bin_j])
-        zs_arr = np.arange(self.cl_int_z_min, cl_int_z_max, int_step)
+        same_ells = np.array_equal(ells, self.ells_GC_phot)
+        precomputed_mag = 'mag_GCphot' in self._prefactor_dict.keys()
 
-        P_gg = self.theory['Pgg_phot']
-        P_dd = self.theory['Pmm_phot']
-        P_gd = self.theory['Pgdelta_phot']
+        if not precomputed_mag or not same_ells:
+            self.set_prefactor(ells_GC_phot=ells)
 
-        ks_arr = (ell + 0.5) / self.theory['f_K_z_func'](zs_arr)
-        pow_gg = P_gg(zs_arr, ks_arr, grid=False)
-        pow_dd = P_dd(zs_arr, ks_arr, grid=False)
-        pow_gd = P_gd(zs_arr, ks_arr, grid=False)
-
-        if ('mag_GCphot', ell) in self._prefactor_dict.keys():
-            prefactor_mag = self._prefactor_dict['mag_GCphot', ell]
-        else:
-            prefactor_mag = self._eval_prefactor_mag(ell)
+        prefactor_mag = self._prefactor_dict['mag_GCphot']
+        prefactor_mag_col = np.atleast_2d(prefactor_mag).T
 
         if self.add_RSD:
-            kerngalrsd = self._unpack_RSD_kernel(ell, bin_i, bin_j)
-            kerngalrsd_i = kerngalrsd[0]
-            kerngalrsd_j = kerngalrsd[1]
+            kerngalrsd = \
+                np.array([self._unpack_RSD_kernel(ell, bin_i, bin_j)
+                          for ell in ells])
+            kerngalrsd_i = kerngalrsd[:, 0, :]
+            kerngalrsd_j = kerngalrsd[:, 1, :]
         else:
-            kerngalrsd_i = 0.0
-            kerngalrsd_j = 0.0
+            kerngalrsd_i = np.zeros(len(ells))
+            kerngalrsd_j = np.zeros(len(ells))
 
-        kerngal_i = np.interp(zs_arr, self.interpwingal[:, 0],
-                              self.interpwingal[:, bin_i] + kerngalrsd_i)
-        kerngal_j = np.interp(zs_arr, self.interpwingal[:, 0],
-                              self.interpwingal[:, bin_j] + kerngalrsd_j)
+        kerngal_i = \
+            np.array(
+                [np.interp(self.z_grid_for_cl, self.interpwingal[:, 0],
+                           self.interpwingal[:, bin_i] + kerngalrsd_ell_i)
+                 for kerngalrsd_ell_i in kerngalrsd_i])
+        kerngal_j = \
+            np.array(
+                [np.interp(self.z_grid_for_cl, self.interpwingal[:, 0],
+                           self.interpwingal[:, bin_j] + kerngalrsd_ell_j)
+                 for kerngalrsd_ell_j in kerngalrsd_j])
 
-        kernmag_i = prefactor_mag * np.interp(zs_arr, self.interpwinmag[:, 0],
-                                              self.interpwinmag[:, bin_i])
-        kernmag_j = prefactor_mag * np.interp(zs_arr, self.interpwinmag[:, 0],
-                                              self.interpwinmag[:, bin_j])
+        kernmag_i = prefactor_mag_col * \
+            np.interp(self.z_grid_for_cl, self.interpwinmag[:, 0],
+                      self.interpwinmag[:, bin_i])
+        kernmag_j = prefactor_mag_col * \
+            np.interp(self.z_grid_for_cl, self.interpwinmag[:, 0],
+                      self.interpwinmag[:, bin_j])
 
         if self.multiply_bias_cl:
             bi = self.photobias[bin_i - 1]
@@ -888,19 +939,47 @@ class Photo:
             kerngal_i = bi * kerngal_i
             kerngal_j = bj * kerngal_j
 
-        pandw_galgal = kerngal_i * kerngal_j * pow_gg
-        pandw_magmag = kernmag_i * kernmag_j * pow_dd
-        pandw_galmag = (kernmag_i * kerngal_j + kernmag_j * kerngal_i) * pow_gd
+        self._evaluate_power_GC_phot(force_recompute=(not same_ells))
+
+        pandw_galgal = kerngal_i * kerngal_j * self.power_gg_GC
+        pandw_magmag = kernmag_i * kernmag_j * self.power_dd_GC
+        pandw_galmag = (kernmag_i * kerngal_j + kernmag_j * kerngal_i) * \
+            self.power_gd_GC
 
         pandwijk = pandw_magmag + pandw_galgal + pandw_galmag
 
-        c_int_arr = self.Cl_generic_integrand(zs_arr, pandwijk)
-        c_final = self.theory['c'] * integrate.trapz(c_int_arr, zs_arr)
+        c_int_arr = self.Cl_generic_integrand(pandwijk)
+        c_final = self.theory['c'] * \
+            integrate.trapz(c_int_arr, self.z_grid_for_cl)
 
         return c_final
 
-    def Cl_cross(self, ell, bin_i, bin_j, int_step=0.01):
-        r"""Cl cross.
+    def _evaluate_power_GC_phot(self, force_recompute=False):
+        r"""Evaluate Power GC photometric
+
+        Evaluates and store the matter power spectra for GC photometric.
+
+        Parameters
+        ----------
+        force_recompute: bool
+            Forces to recompute the power spectra.
+        """
+
+        if not self._stored_GC or force_recompute:
+            # reshape ells to a column vector
+            ell_col = np.atleast_2d(self.ells_GC_phot).T
+            k_grid = (ell_col + 0.5) / self.f_K_z_grid
+
+            P_gg = self.theory['Pgg_phot']
+            P_dd = self.theory['Pmm_phot']
+            P_gd = self.theory['Pgdelta_phot']
+            self.power_gg_GC = P_gg(self.z_grid_for_cl, k_grid, grid=False)
+            self.power_dd_GC = P_dd(self.z_grid_for_cl, k_grid, grid=False)
+            self.power_gd_GC = P_gd(self.z_grid_for_cl, k_grid, grid=False)
+            self._stored_GC = True
+
+    def Cl_cross(self, ells, bin_i, bin_j):
+        r"""Cl Cross
 
         Calculates angular power spectrum for cross-correlation
         between weak lensing and galaxy clustering, for the supplied bins:
@@ -960,78 +1039,99 @@ class Photo:
 
         Parameters
         ----------
-        ell: float
-            :math:`\ell`-mode at which :math:`C(\ell)` is evaluated
+        ells: numpy.ndarray of float
+            :math:`\ell`-modes at which :math:`C(\ell)` is evaluated.
         bin_i: int
            Index of source tomographic bin. Tomographic bin
            indices start from 1
         bin_j: int
            Index of lens tomographic bin. Tomographic bin
-           indices start from 1
-        int_step: float
-            Size of step for numerical integral over redshift
+           indices start from 1.
 
         Returns
         -------
         Angular XCphot power spectrum: float
-           Value of cross-correlation between weak lensing and
+           Values of cross-correlation between weak lensing and
            galaxy clustering photometric angular power spectrum
         """
 
-        cl_int_z_max = min(self.wl_int_z_max[bin_i], self.gc_int_z_max[bin_j])
-        zs_arr = np.arange(self.cl_int_z_min, cl_int_z_max, int_step)
+        same_ells = np.array_equal(ells, self.ells_XC)
+        precomputed_shearIA = 'shearIA_XC' in self._prefactor_dict.keys()
+        precomputed_mag = 'mag_XC' in self._prefactor_dict.keys()
+        if not precomputed_shearIA or not precomputed_mag or not same_ells:
+            self.set_prefactor(ells_XC=ells)
 
-        P_gd = self.theory['Pgdelta_phot']
-        P_gi = self.theory['Pgi_phot']
-        P_dd = self.theory['Pmm_phot']
-        P_di = self.theory['Pdeltai']
+        prefactor_mag = self._prefactor_dict['mag_XC']
+        prefactor_shearia = self._prefactor_dict['shearIA_XC']
 
-        ks_arr = (ell + 0.5) / self.theory['f_K_z_func'](zs_arr)
-        pow_gd = P_gd(zs_arr, ks_arr, grid=False)
-        pow_gi = P_gi(zs_arr, ks_arr, grid=False)
-        pow_dd = P_dd(zs_arr, ks_arr, grid=False)
-        pow_di = P_di(zs_arr, ks_arr, grid=False)
-
-        if ('shearIA_XC', ell) in self._prefactor_dict.keys():
-            prefactor_shearia = self._prefactor_dict['shearIA_XC', ell]
-        else:
-            prefactor_shearia = self._eval_prefactor_shearia(ell)
-        if ('mag_XC', ell) in self._prefactor_dict.keys():
-            prefactor_mag = self._prefactor_dict['mag_XC', ell]
-        else:
-            prefactor_mag = self._eval_prefactor_mag(ell)
+        prefactor_mag_col = np.atleast_2d(prefactor_mag).T
+        prefactor_shearia_col = np.atleast_2d(prefactor_shearia).T
 
         if self.add_RSD:
-            kerngalrsd_j = self._unpack_RSD_kernel(ell, bin_j)[0]
+            kerngalrsd_j = [self._unpack_RSD_kernel(ell, bin_j)[0]
+                            for ell in ells]
         else:
-            kerngalrsd_j = 0.0
+            kerngalrsd_j = np.zeros(len(ells))
 
-        kern_i = prefactor_shearia * np.interp(zs_arr, self.interpwin[:, 0],
-                                               self.interpwin[:, bin_i])
-        kernia_i = prefactor_shearia * \
-            np.interp(zs_arr, self.interpwinia[:, 0],
+        kern_i = prefactor_shearia_col * np.interp(
+            self.z_grid_for_cl, self.interpwin[:, 0], self.interpwin[:, bin_i])
+        kernia_i = prefactor_shearia_col * \
+            np.interp(self.z_grid_for_cl, self.interpwinia[:, 0],
                       self.interpwinia[:, bin_i])
-        kerngal_j = np.interp(zs_arr, self.interpwingal[:, 0],
-                              self.interpwingal[:, bin_j] + kerngalrsd_j)
-        kernmag_j = prefactor_mag * np.interp(zs_arr, self.interpwinmag[:, 0],
-                                              self.interpwinmag[:, bin_j])
+        kerngal_j = \
+            np.array(
+                [np.interp(self.z_grid_for_cl, self.interpwingal[:, 0],
+                           self.interpwingal[:, bin_j] + kerngalrsd_ell_j)
+                 for kerngalrsd_ell_j in kerngalrsd_j])
+        kernmag_j = prefactor_mag_col * \
+            np.interp(self.z_grid_for_cl, self.interpwinmag[:, 0],
+                      self.interpwinmag[:, bin_j])
 
         if self.multiply_bias_cl:
             bj = self.photobias[bin_j - 1]
             kerngal_j = bj * kerngal_j
 
-        pandw_gd = kern_i * kerngal_j * pow_gd
-        pandw_gi = kernia_i * kerngal_j * pow_gi
-        pandw_dmag = kern_i * kernmag_j * pow_dd
-        pandw_imag = kernia_i * kernmag_j * pow_di
+        self._evaluate_power_XC(force_recompute=(not same_ells))
+
+        pandw_gd = kern_i * kerngal_j * self.power_gd_XC
+        pandw_gi = kernia_i * kerngal_j * self.power_gi_XC
+        pandw_dmag = kern_i * kernmag_j * self.power_dd_XC
+        pandw_imag = kernia_i * kernmag_j * self.power_di_XC
 
         pandwijk = pandw_gd + pandw_gi + pandw_dmag + pandw_imag
 
-        c_int_arr = self.Cl_generic_integrand(zs_arr, pandwijk)
-        c_final = self.theory['c'] * integrate.trapz(c_int_arr, zs_arr)
+        c_int_arr = self.Cl_generic_integrand(pandwijk)
+        c_final = self.theory['c'] * \
+            integrate.trapz(c_int_arr, self.z_grid_for_cl)
         c_final = c_final * (1 + self.multbias[bin_i - 1])
 
         return c_final
+
+    def _evaluate_power_XC(self, force_recompute=False):
+        r"""Evaluate Power XC
+
+        Evaluates and store the matter power spectra for XC.
+
+        Parameters
+        ----------
+        force_recompute: bool
+            Forces to recompute the power spectra.
+        """
+
+        if not self._stored_XC or force_recompute:
+            # reshape ells to a column vector
+            ell_col = np.atleast_2d(self.ells_XC).T
+            k_grid = (ell_col + 0.5) / self.f_K_z_grid
+
+            P_gd = self.theory['Pgdelta_phot']
+            P_gi = self.theory['Pgi_phot']
+            P_dd = self.theory['Pmm_phot']
+            P_di = self.theory['Pdeltai']
+            self.power_gd_XC = P_gd(self.z_grid_for_cl, k_grid, grid=False)
+            self.power_gi_XC = P_gi(self.z_grid_for_cl, k_grid, grid=False)
+            self.power_dd_XC = P_dd(self.z_grid_for_cl, k_grid, grid=False)
+            self.power_di_XC = P_di(self.z_grid_for_cl, k_grid, grid=False)
+            self._stored_XC = True
 
     @staticmethod
     def _eval_prefactor_mag(ell):
@@ -1044,13 +1144,13 @@ class Photo:
 
         Parameters
         ----------
-        ell: float
-           :math:`\ell`-mode at which the prefactor is evaluated
+        ell: float or numpy.ndarray of float
+           :math:`\ell`-mode(s) at which the prefactor is evaluated
 
         Returns
         -------
-        Pre-factor: float
-           Value of the prefactor at the given :math:`\ell`
+        Pre-factor: float or numpy.ndarray of float
+           Value(s) of the prefactor at the given :math:`\ell`
         """
         return ell * (ell + 1) / (ell + 0.5)**2
 
@@ -1065,13 +1165,13 @@ class Photo:
 
         Parameters
         ----------
-        ell: float
-           :math:`\ell`-mode at which the prefactor is evaluated
+        ell: float or numpy.ndarray of float
+           :math:`\ell`-mode(s) at which the prefactor is evaluated
 
         Returns
         -------
-        Pre-factor: float
-           Value of the prefactor at the given :math:`\ell`
+        Pre-factor: float or numpy.ndarray of float
+           Value(s) of the prefactor at the given :math:`\ell`
         """
         prefactor = np.sqrt((ell + 2.0) * (ell + 1.0) * ell * (ell - 1.0)) / \
             (ell + 0.5)**2
@@ -1090,13 +1190,13 @@ class Photo:
 
         Parameters
         ----------
-        ell: int
-            :math:`\ell`-mode at which the prefactor is evaluated
+        ell: float or numpy.ndarray of float
+            :math:`\ell`-mode(s) at which the prefactor is evaluated
 
         Returns
         -------
-        L_0: float
-           Value of the :math:`L_{0}` prefactor at the given :math:`\ell`
+        L_0: float or numpy.ndarray of float
+           Value(s) of the :math:`L_{0}` prefactor at the given :math:`\ell`
         """
         l_0 = (2 * ell ** 2 + 2 * ell - 1) / ((2 * ell - 1) * (2 * ell + 3))
         return l_0
@@ -1114,13 +1214,13 @@ class Photo:
 
         Parameters
         ----------
-        ell: int
-            :math:`\ell`-mode at which the prefactor is evaluated
+        ell: float or numpy.ndarray of float
+            :math:`\ell`-mode(s) at which the prefactor is evaluated
 
         Returns
         -------
-        L_minus1: float
-           Value of the :math:`L_{-1}` prefactor at the given :math:`\ell`
+        L_minus1: float or numpy.ndarray of float
+           Value(s) of the :math:`L_{-1}` prefactor at the given :math:`\ell`
         """
         l_minus1 = -ell * (ell - 1) / \
             ((2 * ell - 1) * np.sqrt((2 * ell - 3) * (2 * ell + 1)))
@@ -1139,13 +1239,13 @@ class Photo:
 
         Parameters
         ----------
-        ell: int
-            :math:`\ell`-mode at which the prefactor is evaluated
+        ell: float or numpy.ndarray of float
+            :math:`\ell`-mode(s) at which the prefactor is evaluated
 
         Returns
         -------
-        L_plus1: float
-           Value of the :math:`L_{+1}` prefactor at the given :math:`\ell`
+        L_plus1: float or numpy.ndarray of float
+           Value(s) of the :math:`L_{+1}` prefactor at the given :math:`\ell`
         """
         l_plus1 = -(ell + 1) * (ell + 2) / \
             ((2 * ell + 3) * np.sqrt((2 * ell + 1) * (2 * ell + 5)))
@@ -1270,8 +1370,7 @@ class Photo:
         theta_rad = np.deg2rad(theta_deg)
         xi_arr = np.empty(theta_deg.size)
 
-        cells_int = np.array([cells_func(ell, bin_i, bin_j)
-                              for ell in self.ells_int])
+        cells_int = cells_func(self.ells_int, bin_i, bin_j).flatten()
         cells_interp = interpolate.interp1d(self.ells_int, cells_int,
                                             kind='cubic')
 

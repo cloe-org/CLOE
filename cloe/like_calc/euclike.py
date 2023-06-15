@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """EUCLIKE
 
 Contains class to compute the Euclid likelihood.
@@ -70,6 +69,7 @@ class Euclike:
             # and 2-1, both 1-3 and 3-1, etc).
             numtomo_wl = self.data_ins.numtomo_wl
             numtomo_gcphot = self.data_ins.numtomo_gcphot
+
             x_diagonal_wl = np.array(np.triu_indices(numtomo_wl)) + 1
             x_diagonal_gcphot = np.array(np.triu_indices(numtomo_gcphot)) + 1
             x_full_xc = np.indices((numtomo_gcphot,
@@ -79,6 +79,7 @@ class Euclike:
             self.indices_diagonal_gcphot = \
                 tuple(zip(x_diagonal_gcphot[0], x_diagonal_gcphot[1]))
             self.indices_all = tuple(zip(x_full_xc[0], x_full_xc[1]))
+
             self.ells_WL = self.data_ins.data_dict['WL']['ells']
             self.ells_XC = self.data_ins.data_dict['XC-Phot']['ells']
             self.ells_GC_phot = self.data_ins.data_dict['GC-Phot']['ells']
@@ -309,41 +310,30 @@ class Euclike:
         # Obtain the theory for WL
         if self.data_handler_ins.use_wl:
             wl_array = np.array(
-                [self.phot_ins.Cl_WL(ell, element[0], element[1])
-                 for ell in self.ells_WL
-                 for element in self.indices_diagonal_wl]
-            )
+                [self.phot_ins.Cl_WL(self.ells_WL, element[0], element[1])
+                 for element in self.indices_diagonal_wl]).flatten('F')
         else:
             wl_array = np.zeros(
-                 len(self.ells_WL) *
-                 len(self.indices_diagonal_wl)
-            )
+                 len(self.ells_WL) * len(self.indices_diagonal_wl))
 
         # Obtain the theory for XC-Phot
         if self.data_handler_ins.use_xc_phot:
             xc_phot_array = np.array(
-                [self.phot_ins.Cl_cross(ell, element[1], element[0])
-                 for ell in self.ells_XC
-                 for element in self.indices_all]
-            )
+                [self.phot_ins.Cl_cross(self.ells_XC, element[1], element[0])
+                 for element in self.indices_all]).flatten('F')
         else:
             xc_phot_array = np.zeros(
-                 len(self.ells_XC) *
-                 len(self.indices_all)
-            )
+                 len(self.ells_XC) * len(self.indices_all))
 
         # Obtain the theory for GC-Phot
         if self.data_handler_ins.use_gc_phot:
             gc_phot_array = np.array(
-                [self.phot_ins.Cl_GC_phot(ell, element[0], element[1])
-                 for ell in self.ells_GC_phot
-                 for element in self.indices_diagonal_gcphot]
-            )
+                [self.phot_ins.Cl_GC_phot(self.ells_GC_phot,
+                                          element[0], element[1])
+                 for element in self.indices_diagonal_gcphot]).flatten('F')
         else:
             gc_phot_array = np.zeros(
-                len(self.ells_GC_phot) *
-                len(self.indices_diagonal_gcphot)
-            )
+                len(self.ells_GC_phot) * len(self.indices_diagonal_gcphot))
 
         # Apply any matrix transform activated with a switch
         wl_array = \

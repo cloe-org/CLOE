@@ -23,9 +23,9 @@ class photoinitTestCase(TestCase):
         nz_dic_WL = tdh.load_test_npy('nz_dict_WL.npy').item()
         nz_dic_GC = tdh.load_test_npy('nz_dict_GC_phot.npy').item()
 
-        ells_WL = np.arange(2, 1000, 1)
-        ells_XC = np.arange(2, 2000, 1)
-        ells_GC_phot = np.arange(2, 3000, 1)
+        cls.ells_WL = np.arange(2, 10, 1)
+        cls.ells_XC = np.arange(2, 15, 1)
+        cls.ells_GC_phot = np.arange(2, 20, 1)
 
         cls.nz_dic_WL = nz_dic_WL
         cls.nz_dic_GC = nz_dic_GC
@@ -38,17 +38,17 @@ class photoinitTestCase(TestCase):
             add_RSD=False,
         )
         cls.phot.set_prefactor(
-            ells_WL=ells_WL,
-            ells_XC=ells_XC,
-            ells_GC_phot=ells_GC_phot,
+            ells_WL=cls.ells_WL,
+            ells_XC=cls.ells_XC,
+            ells_GC_phot=cls.ells_GC_phot,
         )
         cls.phot.update(mock_cosmo_dic)
 
         cls.phot_rsd = photo.Photo(None, nz_dic_WL, nz_dic_GC, add_RSD=True)
         cls.phot_rsd.set_prefactor(
-            ells_WL=ells_WL,
-            ells_XC=ells_XC,
-            ells_GC_phot=ells_GC_phot,
+            ells_WL=cls.ells_WL,
+            ells_XC=cls.ells_XC,
+            ells_GC_phot=cls.ells_GC_phot,
         )
         cls.phot_rsd.update(mock_cosmo_dic)
 
@@ -68,9 +68,9 @@ class photoinitTestCase(TestCase):
         self.wbincheck_mag = 0.0
 
         self.test_prefactor_rtol = 1e-04
-        self.test_prefactor_input_ells_WL = range(2, 4)
-        self.test_prefactor_input_ells_XC = range(2, 5)
-        self.test_prefactor_input_ells_GC_phot = range(2, 6)
+        self.test_prefactor_input_ells_WL = np.arange(2, 4)
+        self.test_prefactor_input_ells_XC = np.arange(2, 5)
+        self.test_prefactor_input_ells_GC_phot = np.arange(2, 6)
         self.test_prefactor_num_check = 7
         self.test_prefactor_len_check = {}
         self.test_prefactor_len_check['shearIA_WL'] = len(
@@ -249,10 +249,13 @@ class photoinitTestCase(TestCase):
         )
 
     def test_cl_WL(self):
-        cl_int = self.phot.Cl_WL(10.0, 1, 1)
+        ells = np.array([10.0])
+        # Copy because Cl_WL modifies the class
+        phot_copy = deepcopy(self.phot)
+        cl_int = phot_copy.Cl_WL(ells, 1, 1)
         npt.assert_allclose(
             cl_int,
-            self.cl_WL_check,
+            [self.cl_WL_check],
             rtol=self.cl_tol,
             err_msg='Cl WL test failed',
         )
@@ -267,7 +270,10 @@ class photoinitTestCase(TestCase):
         # pass a value of ell with non-precomputed prefactor
         shearia_mock.return_value = 1
         mag_mock.return_value = 1
-        self.phot.Cl_WL(2.5, 1, 1)
+        # Copy because Cl_WL modifies the class
+        phot_copy = deepcopy(self.phot)
+        ells = np.array([2.5])
+        phot_copy.Cl_WL(ells, 1, 1)
         npt.assert_equal(
             shearia_mock.call_count,
             1,
@@ -291,7 +297,8 @@ class photoinitTestCase(TestCase):
         mag_mock.reset_mock()
         shearia_mock.return_value = 1
         mag_mock.return_value = 1
-        self.phot.Cl_WL(2, 1, 1)
+        phot_copy = deepcopy(self.phot)
+        phot_copy.Cl_WL(self.ells_WL, 1, 1)
         npt.assert_equal(
             shearia_mock.call_count,
             0,
@@ -321,7 +328,9 @@ class photoinitTestCase(TestCase):
         # pass a value of ell with non-precomputed prefactor
         shearia_mock.return_value = 1
         mag_mock.return_value = 1
-        self.phot.Cl_cross(2.5, 1, 1)
+        phot_copy = deepcopy(self.phot)
+        ells = np.array([2.5])
+        phot_copy.Cl_cross(ells, 1, 1)
         npt.assert_equal(
             shearia_mock.call_count,
             1,
@@ -345,7 +354,8 @@ class photoinitTestCase(TestCase):
         mag_mock.reset_mock()
         shearia_mock.return_value = 1
         mag_mock.return_value = 1
-        self.phot.Cl_cross(2, 1, 1)
+        phot_copy = deepcopy(self.phot)
+        phot_copy.Cl_cross(self.ells_XC, 1, 1)
         npt.assert_equal(
             shearia_mock.call_count,
             0,
@@ -377,7 +387,10 @@ class photoinitTestCase(TestCase):
         # pass a value of ell with non-precomputed prefactor
         shearia_mock.return_value = 1
         mag_mock.return_value = 1
-        self.phot.Cl_GC_phot(2.5, 1, 1)
+        # Copy because Cl_GC_phot modifies the state of the class
+        phot_copy = deepcopy(self.phot)
+        ells = np.array([2.5])
+        phot_copy.Cl_GC_phot(ells, 1, 1)
         npt.assert_equal(
             shearia_mock.call_count,
             0,
@@ -401,7 +414,8 @@ class photoinitTestCase(TestCase):
         mag_mock.reset_mock()
         shearia_mock.return_value = 1
         mag_mock.return_value = 1
-        self.phot.Cl_GC_phot(2, 1, 1)
+        phot_copy = deepcopy(self.phot)
+        phot_copy.Cl_GC_phot(self.ells_GC_phot, 1, 1)
         npt.assert_equal(
             shearia_mock.call_count,
             0,
@@ -442,16 +456,20 @@ class photoinitTestCase(TestCase):
         )
 
     def test_cl_GC(self):
-        cl_int = self.phot.Cl_GC_phot(10.0, 1, 1)
+        phot_copy = deepcopy(self.phot)
+        ells = np.array([10.0])
+        cl_int = phot_copy.Cl_GC_phot(ells, 1, 1)
         npt.assert_allclose(
             cl_int,
-            self.cl_GC_check,
+            [self.cl_GC_check],
             rtol=self.cl_tol,
             err_msg='Cl GC photometric test failed',
         )
 
     def test_cl_GC_RSD(self):
-        cl_int = self.phot_rsd.Cl_GC_phot(10.0, 1, 1)
+        phot_copy = deepcopy(self.phot_rsd)
+        ells = np.array([10.0])
+        cl_int = phot_copy.Cl_GC_phot(ells, 1, 1)
         npt.assert_allclose(
             cl_int,
             self.cl_GC_RSD_check,
@@ -460,16 +478,20 @@ class photoinitTestCase(TestCase):
         )
 
     def test_cl_cross(self):
-        cl_int = self.phot.Cl_cross(10.0, 1, 1)
+        phot_copy = deepcopy(self.phot)
+        ells = np.array([10.0])
+        cl_int = phot_copy.Cl_cross(ells, 1, 1)
         npt.assert_allclose(
             cl_int,
-            self.cl_cross_check,
+            [self.cl_cross_check],
             rtol=self.cl_tol,
             err_msg='Cl XC cross test failed',
         )
 
     def test_cl_cross_RSD(self):
-        cl_int = self.phot_rsd.Cl_cross(10.0, 1, 1)
+        phot_copy = deepcopy(self.phot_rsd)
+        ells = np.array([10.0])
+        cl_int = phot_copy.Cl_cross(ells, 1, 1)
         npt.assert_allclose(
             cl_int,
             self.cl_cross_RSD_check,
@@ -496,13 +518,14 @@ class photoinitTestCase(TestCase):
         )
 
     def test_set_prefactor(self):
-        self.phot.set_prefactor(
+        phot_copy = deepcopy(self.phot)
+        phot_copy.set_prefactor(
             ells_WL=self.test_prefactor_input_ells_WL,
             ells_XC=self.test_prefactor_input_ells_XC,
             ells_GC_phot=self.test_prefactor_input_ells_GC_phot,
         )
 
-        prefac_types = set(key[0] for key in self.phot._prefactor_dict.keys())
+        prefac_types = phot_copy._prefactor_dict.keys()
         input_ell_val = self.test_prefactor_input_ell_val
 
         # test that the prefactors exist for seven quantities: shearIA_WL,
@@ -522,10 +545,7 @@ class photoinitTestCase(TestCase):
         # for the correct number of ells, and that the calculation is correct
         # for one specific ell value
         for prefac in prefac_types:
-            num_entries = len([
-                key[0] for key in self.phot._prefactor_dict.keys()
-                if key[0] == prefac
-            ])
+            num_entries = len(phot_copy._prefactor_dict[prefac])
             npt.assert_equal(
                 num_entries,
                 self.test_prefactor_len_check[prefac],
@@ -537,12 +557,12 @@ class photoinitTestCase(TestCase):
                 ),
             )
             npt.assert_allclose(
-                self.phot._prefactor_dict[prefac, input_ell_val],
+                phot_copy._prefactor_dict[prefac][1],
                 self.test_prefactor_val_check[prefac],
                 rtol=self.test_prefactor_rtol,
                 err_msg='Unexpected value of prefactor for type={prefac},'
                 f' ell={input_ell_val}:'
-                f' {self.phot._prefactor_dict[prefac, input_ell_val]} instead'
+                f' {phot_copy._prefactor_dict[prefac][1]} instead'
                 f' of {self.test_prefactor_val_check[prefac]}'
             )
 
@@ -568,7 +588,8 @@ class photoinitTestCase(TestCase):
     #                      self.nz_dic_GC)
 
     def test_corr_func_ssp(self):
-        xi_ssp = self.phot.corr_func_3x2pt(
+        phot_copy = deepcopy(self.phot)
+        xi_ssp = phot_copy.corr_func_3x2pt(
             'Shear-Shear_plus',
             [1.0, 1.5],
             1,
@@ -582,7 +603,8 @@ class photoinitTestCase(TestCase):
         )
 
     def test_corr_func_ssm(self):
-        xi_ssm = self.phot.corr_func_3x2pt('Shear-Shear_minus', 1.0, 1, 1)
+        phot_copy = deepcopy(self.phot)
+        xi_ssm = phot_copy.corr_func_3x2pt('Shear-Shear_minus', 1.0, 1, 1)
         npt.assert_allclose(
             xi_ssm,
             self.xi_ssm_check,
@@ -591,7 +613,8 @@ class photoinitTestCase(TestCase):
         )
 
     def test_corr_func_sp(self):
-        xi_sp = self.phot.corr_func_3x2pt('Shear-Position', 1.0, 1, 1)
+        phot_copy = deepcopy(self.phot)
+        xi_sp = phot_copy.corr_func_3x2pt('Shear-Position', 1.0, 1, 1)
         npt.assert_allclose(
             xi_sp,
             self.xi_sp_check,
@@ -600,7 +623,8 @@ class photoinitTestCase(TestCase):
         )
 
     def test_corr_func_pp(self):
-        xi_pp = self.phot.corr_func_3x2pt('Position-Position', 1.0, 1, 1)
+        phot_copy = deepcopy(self.phot)
+        xi_pp = phot_copy.corr_func_3x2pt('Position-Position', 1.0, 1, 1)
         npt.assert_allclose(
             xi_pp,
             self.xi_pp_check,

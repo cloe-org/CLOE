@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """PLOTTER
 
 Contains class to plot cosmological observables.
@@ -163,8 +162,7 @@ class Plotter:
             c_func = self.phot_ins.Cl_WL
         elif probe == 'GC-Phot':
             c_func = self.phot_ins.Cl_GC_phot
-        cl_arr = np.array([c_func(cur_ell, bin_i, bin_j) for
-                           cur_ell in ells])
+        cl_arr = c_func(ells, bin_i, bin_j)
         if pl_label is None:
             pl_label = "Bin {:d} - Bin {:d}".format(bin_i, bin_j)
         pl_ax.plot(ells, cl_arr, label=pl_label, color=pl_colour,
@@ -300,8 +298,7 @@ class Plotter:
         # be reviewed.
         if np.min(ells) < 10.0 or np.max(ells) > 5000.0:
             raise Exception('ell-modes must be between 10 and 5000.')
-        cl_arr = np.array([self.phot_ins.Cl_cross(cur_ell, bin_WL, bin_GC) for
-                           cur_ell in ells])
+        cl_arr = self.phot_ins.Cl_cross(ells, bin_WL, bin_GC)
         if pl_label is None:
             pl_label = "WL Bin {:d} - GC-Phot Bin {:d}".format(bin_WL, bin_GC)
         pl_ax.plot(ells, cl_arr, label=pl_label, color=pl_colour,

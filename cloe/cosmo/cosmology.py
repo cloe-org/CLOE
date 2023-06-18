@@ -258,7 +258,8 @@ class Cosmology:
                           'NL_flag_phot_matter': 0,
                           'NL_flag_spectro': 0,
                           # bias model
-                          # (1 => linear interpolation, 2 => constant in bins)
+                          # (1 => linear interpolation, 2 => constant in bins
+                          # 3 => 3rd order polynomial)
                           'bias_model': 1,
                           # magnification bias model
                           # (1 => linear interpolation, 2 => constant in bins)

@@ -31,7 +31,8 @@ mock_data = {
   'spectro': {
     'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
     'redshifts': ["1.", "1.2", "1.4", "1.65"],
-    'cov_is_num': False},
+    'cov_is_num': False,
+    'Fourier': True},
   'photo': {
     'luminosity_ratio': 'luminosity_ratio.dat',
     'ndens_GC': 'niTab-EP10-RB00.dat',

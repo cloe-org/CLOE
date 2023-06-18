@@ -184,7 +184,9 @@ class Reader:
 
         Function to read OU-LE3 spectroscopic galaxy clustering files, based
         on location provided to Reader class. Adds contents to the data
-        dictionary (:obj:`Reader.data_dict`).
+        dictionary (:obj:`Reader.data_dict`). Note: at the moment it is
+        assumed that the Fourier space data is in Mpc/h units while the
+        configuration space data is in Mpc units.
 
         Parameters
         ----------
@@ -241,44 +243,83 @@ class Reader:
             log_critical('There was an error when reading the fiducial '
                          'data from OU-level3 files in read_GC_spectro')
 
-        k_fac = (self.data_spectro_fiducial_cosmo['H0'] / 100.0)
-        p_fac = 1.0 / ((self.data_spectro_fiducial_cosmo['H0'] / 100.0) ** 3.0)
-        cov_fac = p_fac ** 2.0
+        if self.data['spectro']['Fourier']:
+            k_fac = (self.data_spectro_fiducial_cosmo['H0'] / 100.0)
+            p_fac = 1.0 / (k_fac ** 3.0)
+            cov_fac = p_fac ** 2.0
 
-        for z_label in redshifts:
-            cur_it_fname = root.format(z_label)
-            cur_full_path = Path(self.dat_dir_main, file_dest, cur_it_fname)
-            fits_file = fits.open(cur_full_path)
-            average = fits_file[1].data
-            kk = average["SCALE_1DIM"] * k_fac
-            pk0 = average["AVERAGE0"] * p_fac
-            pk2 = average["AVERAGE2"] * p_fac
-            pk4 = average["AVERAGE4"] * p_fac
+            for z_label in redshifts:
+                cur_it_fname = root.format(z_label)
+                cur_full_path = Path(self.dat_dir_main, file_dest,
+                                     cur_it_fname)
+                fits_file = fits.open(cur_full_path)
+                average = fits_file[1].data
+                kk = average["SCALE_1DIM"] * k_fac
+                pk0 = average["AVERAGE0"] * p_fac
+                pk2 = average["AVERAGE2"] * p_fac
+                pk4 = average["AVERAGE4"] * p_fac
 
-            cov = fits_file[2].data["COVARIANCE"] * cov_fac
-            cov_k_i = fits_file[2].data["SCALE_1DIM-I"] * k_fac
-            cov_k_j = fits_file[2].data["SCALE_1DIM-J"] * k_fac
-            cov_l_i = fits_file[2].data["MULTIPOLE-I"]
-            cov_l_j = fits_file[2].data["MULTIPOLE-J"]
+                cov = fits_file[2].data["COVARIANCE"] * cov_fac
+                cov_k_i = fits_file[2].data["SCALE_1DIM-I"] * k_fac
+                cov_k_j = fits_file[2].data["SCALE_1DIM-J"] * k_fac
+                cov_l_i = fits_file[2].data["MULTIPOLE-I"]
+                cov_l_j = fits_file[2].data["MULTIPOLE-J"]
 
-            nk = len(kk)
-            cov = np.reshape(cov, newshape=(3 * nk, 3 * nk))
-            cov_k_i = np.reshape(cov_k_i, newshape=(3 * nk, 3 * nk))
-            cov_k_j = np.reshape(cov_k_j, newshape=(3 * nk, 3 * nk))
-            cov_l_i = np.reshape(cov_l_i, newshape=(3 * nk, 3 * nk))
-            cov_l_j = np.reshape(cov_l_j, newshape=(3 * nk, 3 * nk))
+                nk = len(kk)
+                cov = np.reshape(cov, newshape=(3 * nk, 3 * nk))
+                cov_k_i = np.reshape(cov_k_i, newshape=(3 * nk, 3 * nk))
+                cov_k_j = np.reshape(cov_k_j, newshape=(3 * nk, 3 * nk))
+                cov_l_i = np.reshape(cov_l_i, newshape=(3 * nk, 3 * nk))
+                cov_l_j = np.reshape(cov_l_j, newshape=(3 * nk, 3 * nk))
 
-            GC_spectro_dict['{:s}'.format(z_label)] = {'k_pk': kk,
-                                                       'pk0': pk0,
-                                                       'pk2': pk2,
-                                                       'pk4': pk4,
-                                                       'cov': cov,
-                                                       'cov_k_i': cov_k_i,
-                                                       'cov_k_j': cov_k_j,
-                                                       'cov_l_i': cov_l_i,
-                                                       'cov_l_j': cov_l_j}
+                GC_spectro_dict['{:s}'.format(z_label)] = {'k_pk': kk,
+                                                           'pk0': pk0,
+                                                           'pk2': pk2,
+                                                           'pk4': pk4,
+                                                           'cov': cov,
+                                                           'cov_k_i': cov_k_i,
+                                                           'cov_k_j': cov_k_j,
+                                                           'cov_l_i': cov_l_i,
+                                                           'cov_l_j': cov_l_j}
 
-            fits_file.close()
+                fits_file.close()
+
+        else:
+            for z_label in redshifts:
+                cur_it_fname = root.format(z_label)
+                cur_full_path = Path(self.dat_dir_main, file_dest,
+                                     cur_it_fname)
+                fits_file = fits.open(cur_full_path)
+                average = fits_file[1].data
+                rr = average["SCALE_1DIM"]
+                xi0 = average["AVERAGE0"]
+                xi2 = average["AVERAGE2"]
+                xi4 = average["AVERAGE4"]
+
+                cov = fits_file[2].data["COVARIANCE"]
+                cov_r_i = fits_file[2].data["SCALE_1DIM-I"]
+                cov_r_j = fits_file[2].data["SCALE_1DIM-J"]
+                cov_l_i = fits_file[2].data["MULTIPOLE-I"]
+                cov_l_j = fits_file[2].data["MULTIPOLE-J"]
+
+                nr = len(rr)
+                cov = np.reshape(cov, newshape=(3 * nr, 3 * nr))
+                cov_r_i = np.reshape(cov_r_i, newshape=(3 * nr, 3 * nr))
+                cov_r_j = np.reshape(cov_r_j, newshape=(3 * nr, 3 * nr))
+                cov_l_i = np.reshape(cov_l_i, newshape=(3 * nr, 3 * nr))
+                cov_l_j = np.reshape(cov_l_j, newshape=(3 * nr, 3 * nr))
+
+                GC_spectro_dict['{:s}'.format(z_label)] = {'r_xi': rr,
+                                                           'xi0': xi0,
+                                                           'xi2': xi2,
+                                                           'xi4': xi4,
+                                                           'cov': cov,
+                                                           'cov_r_i': cov_r_i,
+                                                           'cov_r_j': cov_r_j,
+                                                           'cov_l_i': cov_l_i,
+                                                           'cov_l_j': cov_l_j}
+
+                fits_file.close()
 
         self.data_dict['GC-Spectro'] = GC_spectro_dict
         return

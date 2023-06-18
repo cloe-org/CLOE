@@ -326,22 +326,35 @@ class Data_handler:
 
         gc_spectro_vec = []
         redshifts = data.data_dict['GC-Spectro'].keys()
-        for redshift_index, redshift in enumerate(redshifts):
-            k_pk = data.data_dict['GC-Spectro'][f'{redshift}']['k_pk']
-            multipoles = (
-                [key for key in
-                 data.data_dict['GC-Spectro'][f'{redshift}'].keys()
-                 if key.startswith('pk')])
-            for multipole in multipoles:
-                accepted_k_pk = np.array(
-                    self._obs['specifications']['GCspectro']['bins']
-                    [f'n{redshift_index+1}'][f'n{redshift_index+1}']
-                    ['multipoles'][int(multipole[2:])]
-                    ['k_range'])
+
+        if self._obs['specifications']['GCspectro']['statistics'] == \
+                'legendre_multipole_power_spectrum':
+            for redshift_index, redshift in enumerate(redshifts):
+                k_pk = data.data_dict['GC-Spectro'][f'{redshift}']['k_pk']
+                multipoles = (
+                    [key for key in
+                     data.data_dict['GC-Spectro'][f'{redshift}'].keys()
+                     if key.startswith('pk')])
+                for multipole in multipoles:
+                    accepted_k_pk = np.array(
+                        self._obs['specifications']['GCspectro']['bins']
+                        [f'n{redshift_index+1}'][f'n{redshift_index+1}']
+                        ['multipoles'][int(multipole[2:])]
+                        ['k_range'])
+                    gc_spectro_vec = np.concatenate(
+                        (gc_spectro_vec,
+                         self._get_masking(k_pk, accepted_k_pk)), axis=None)
+        elif self._obs['specifications']['GCspectro']['statistics'] == \
+                'legendre_multipole_correlation_function':
+            for redshift_index, redshift in enumerate(redshifts):
+                r_xi = data.data_dict['GC-Spectro'][f'{redshift}']['r_xi']
+                multipoles = (
+                    [key for key in
+                     data.data_dict['GC-Spectro'][f'{redshift}'].keys()
+                     if key.startswith('xi')])
                 gc_spectro_vec = np.concatenate(
-                    (gc_spectro_vec,
-                     self._get_masking(k_pk, accepted_k_pk)),
-                    axis=None)
+                        (gc_spectro_vec,
+                         np.ones(r_xi.size * len(multipoles))), axis=None)
 
         self._masking_vector = np.concatenate(
             (wl_vec, xc_phot_vec, gc_phot_vec, gc_spectro_vec), axis=None)
@@ -459,22 +472,35 @@ class Data_handler:
         """
         gc_spectro_vec = []
         redshifts = data.data_dict['GC-Spectro'].keys()
-        for redshift_index, redshift in enumerate(redshifts):
-            k_pk = data.data_dict['GC-Spectro'][f'{redshift}']['k_pk']
-            multipoles = (
-                [key for key in
-                 data.data_dict['GC-Spectro'][f'{redshift}'].keys()
-                 if key.startswith('pk')])
-            for multipole in multipoles:
-                accepted_k_pk = np.array(
-                    self._obs['specifications']['GCspectro']['bins']
-                    [f'n{redshift_index+1}'][f'n{redshift_index+1}']
-                    ['multipoles'][int(multipole[2:])]
-                    ['k_range'])
+
+        if self._obs['specifications']['GCspectro']['statistics'] == \
+                'legendre_multipole_power_spectrum':
+            for redshift_index, redshift in enumerate(redshifts):
+                k_pk = data.data_dict['GC-Spectro'][f'{redshift}']['k_pk']
+                multipoles = (
+                    [key for key in
+                     data.data_dict['GC-Spectro'][f'{redshift}'].keys()
+                     if key.startswith('pk')])
+                for multipole in multipoles:
+                    accepted_k_pk = np.array(
+                        self._obs['specifications']['GCspectro']['bins']
+                        [f'n{redshift_index+1}'][f'n{redshift_index+1}']
+                        ['multipoles'][int(multipole[2:])]
+                        ['k_range'])
+                    gc_spectro_vec = np.concatenate(
+                        (gc_spectro_vec,
+                         self._get_masking(k_pk, accepted_k_pk)), axis=None)
+        elif self._obs['specifications']['GCspectro']['statistics'] == \
+                'legendre_multipole_correlation_function':
+            for redshift_index, redshift in enumerate(redshifts):
+                r_xi = data.data_dict['GC-Spectro'][f'{redshift}']['r_xi']
+                multipoles = (
+                    [key for key in
+                     data.data_dict['GC-Spectro'][f'{redshift}'].keys()
+                     if key.startswith('xi')])
                 gc_spectro_vec = np.concatenate(
-                    (gc_spectro_vec,
-                     self._get_masking(k_pk, accepted_k_pk)),
-                    axis=None)
+                        (gc_spectro_vec,
+                         np.ones(r_xi.size * len(multipoles))), axis=None)
 
         self._masking_vector_spectro = gc_spectro_vec
 

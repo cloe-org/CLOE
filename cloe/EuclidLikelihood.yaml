@@ -28,6 +28,9 @@ k_samp: 1000
 z_min: 0.0
 z_max: 4.0
 z_samp: 100
+# Select statistics for spectroscopic probes (legendre_multipole_power_spectrum
+# or legendre_multipole_correlation_function)
+statistics_spectro: legendre_multipole_power_spectrum
 # Add RSD to photometric probes
 add_phot_RSD: False
 # Apply a generic matrix transformation to the photo observables (available options: 'BNT', 'BNT-test')

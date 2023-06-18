@@ -48,6 +48,22 @@ class Euclike:
         self.do_spectro = any(observables['selection']['GCspectro'].values())
 
         self.data = data
+        if self.do_spectro:
+            if observables['specifications']['GCspectro']['statistics'] == \
+                    'legendre_multipole_power_spectrum':
+                self.do_fourier_spectro = True
+                self.str_start_spectro = 'pk'
+                self.scale_var_spectro = 'k_pk'
+            elif observables['specifications']['GCspectro']['statistics'] == \
+                    'legendre_multipole_correlation_function':
+                self.do_fourier_spectro = False
+                self.str_start_spectro = 'xi'
+                self.scale_var_spectro = 'r_xi'
+            else:
+                raise ValueError('Unknown statistics_spectro choice. '
+                                 'Use legendre_multipole_power_spectrum '
+                                 'or legendre_multipole_correlation_function')
+            self.data['spectro']['Fourier'] = self.do_fourier_spectro
         self.data_ins = reader.Reader(self.data)
         self.data_ins.compute_luminosity_ratio()
         self.data_spectro_fiducial_cosmo = \
@@ -467,34 +483,36 @@ class Euclike:
             If the GCspectro probe is not enabled in the masking vector,
             an array of zeros of the same size is returned.
         """
-        # This is something that Sergio needs to change
-        # Now the multipoles are within observables[specifications]
-        # In order to pass the tests, I hard code m_inst now
-        # Maybe Sergio has a better idea of what to these forloops
-        # To include all info of the specifications
-        if self.data_handler_ins.use_gc_spectro:
-            self.spec_ins.update(dictionary)
-            # m_ins = [v for k, v in dictionary['nuisance_parameters'].items()
-            #         if k.startswith('multipole_')]
-            m_ins = [0, 2, 4]
-            k_m_matrices = []
-            for z_ins in self.zkeys:
+
+        self.spec_ins.update(dictionary)
+        k_m_matrices = []
+        for z_ins in self.zkeys:
+            m_ins = [int(str(key)[-1]) for key in
+                     self.data_ins.data_dict['GC-Spectro'][z_ins].keys()
+                     if key.startswith(self.str_start_spectro)]
+            if self.do_fourier_spectro:
                 k_m_matrix = []
-                for k_ins in (
-                        self.data_ins.data_dict['GC-Spectro'][z_ins]['k_pk']):
+                for scale_ins in (
+                        self.data_ins.data_dict['GC-Spectro'][z_ins][
+                            self.scale_var_spectro]):
                     k_m_matrix.append(
                         self.spec_ins.multipole_spectra(
                             float(z_ins),
-                            k_ins,
+                            scale_ins,
                             ms=m_ins)
                     )
                 k_m_matrices.append(k_m_matrix)
-            theoryvec = np.hstack(k_m_matrices).T.flatten()
-            return theoryvec
-
-        else:
-            theoryvec = np.zeros(self.data_handler_ins.gc_spectro_size)
-            return theoryvec
+                theoryvec = np.hstack(k_m_matrices).T.flatten()
+            else:
+                k_m_matrices.append(
+                    self.spec_ins.multipole_correlation_function(
+                        self.data_ins.data_dict['GC-Spectro'][z_ins][
+                            self.scale_var_spectro],
+                        float(z_ins),
+                        m_ins)
+                )
+                theoryvec = np.array(k_m_matrices).flatten()
+        return theoryvec
 
     def create_spectro_data(self):
         """Arranges the spectroscopic data.
@@ -513,7 +531,7 @@ class Euclike:
             multipoles = (
                 [k for k in
                  self.data_ins.data_dict['GC-Spectro'][z_ins].keys()
-                 if k.startswith('pk')])
+                 if k.startswith(self.str_start_spectro)])
             for m_ins in multipoles:
                 datavec = np.append(datavec, self.data_ins.data_dict[
                               'GC-Spectro'][z_ins][m_ins])
@@ -532,27 +550,28 @@ class Euclike:
             (split in redshift)
         """
 
-        # covnumk generalizes so that each z can have different k binning
-        covnumk = [0]
+        # covnumsc generalizes so that each z can have different binning
+        covnumsc = [0]
         for z_ins in self.zkeys:
             num_multipoles = len(
                 [k for k in
                  self.data_ins.data_dict['GC-Spectro'][z_ins].keys()
-                 if k.startswith('pk')])
-            covnumk.append(
+                 if k.startswith(self.str_start_spectro)])
+            covnumsc.append(
                 num_multipoles *
-                len(self.data_ins.data_dict['GC-Spectro'][z_ins]['k_pk']))
+                len(self.data_ins.data_dict['GC-Spectro'][z_ins][
+                    self.scale_var_spectro]))
 
         # Put all covariances into a single/larger covariance.
         # As no cross-covariances, this takes on a block-form
         # along the diagonal.
-        covfull = np.zeros([sum(covnumk), sum(covnumk)])
+        covfull = np.zeros([sum(covnumsc), sum(covnumsc)])
         kc = 0
         c1 = 0
         c2 = 0
         for z_ins in self.zkeys:
-            c1 = c1 + covnumk[kc]
-            c2 = c2 + covnumk[kc + 1]
+            c1 = c1 + covnumsc[kc]
+            c2 = c2 + covnumsc[kc + 1]
             covfull[c1:c2, c1:c2] = self.data_ins.data_dict['GC-Spectro'][
                                         z_ins]['cov']
             kc = kc + 1

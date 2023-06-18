@@ -16,7 +16,6 @@
 # k_range: [[0.01, 0.2], [0.3, 0.5]]
 # To exclude all scales, 
 # an empty list can be provided.
-statistics: legendre_multipole_power_spectrum
 bins:
   n1: 
     n1:

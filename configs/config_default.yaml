@@ -42,6 +42,9 @@ Cobaya:
       #     1 -> linear interpolation
       #     2 -> constant within bins
       bias_model: 1
+      # Select statistics for spectroscopic probes (legendre_multipole_power_spectrum
+      # or legendre_multipole_correlation_function)
+      statistics_spectro: legendre_multipole_power_spectrum
       # Add RSD to photometric probes
       add_phot_RSD: False
       # Apply a generic matrix transformation to the photo observables (available options: 'BNT', 'BNT-test')

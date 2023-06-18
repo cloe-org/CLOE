@@ -9,6 +9,7 @@ Cobaya:
       external: !!python/name:cloe.cobaya_interface.EuclidLikelihood ''
       NL_flag_phot_matter: 0
       NL_flag_spectro: 0
+      statistics_spectro: legendre_multipole_power_spectrum
       plot_observables_selection: False
       # The user can overwrite here the values of
       # the fields 'data', 'observables_selection', and 'observables_specifications'

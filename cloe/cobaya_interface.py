@@ -70,6 +70,9 @@ class EuclidLikelihood(Likelihood):
             self.add_phot_RSD
         self.observables['selection']['matrix_transform_phot'] = \
             self.matrix_transform_phot
+        if 'GCspectro' in self.observables['specifications'].keys():
+            self.observables['specifications']['GCspectro']['statistics'] = \
+                self.statistics_spectro
         # Select which power spectra to require from the Boltzmann solver
         if self.NL_flag_phot_matter > 0:
             self.use_NL = [False, True]

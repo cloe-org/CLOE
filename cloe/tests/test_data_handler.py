@@ -17,11 +17,22 @@ class datahandlerTestCase(TestCase):
 
     @classmethod
     def setUpClass(self):
+        self.data_reader = Reader(mock_data)
+        self.data_reader.compute_nz()
+        self.data_reader.read_GC_spectro()
+        self.data_reader.read_phot()
+
+        self.observables = build_mock_observables(self.data_reader)
         self.wl_size = 1100
         self.xc_phot_size = 2000
         self.gc_phot_size = 1100
         self.tx2_size = self.wl_size + self.xc_phot_size + self.gc_phot_size
-        self.gc_spectro_size = 1500
+        if self.observables['specifications']['GCspectro']['statistics'] == \
+                'legendre_multipole_power_spectrum':
+            self.gc_spectro_size = 1500
+        elif self.observables['specifications']['GCspectro']['statistics'] == \
+                'legendre_multipole_correlation_function':
+            self.gc_spectro_size = 2400
         self.datavec_shape = (self.wl_size +
                               self.xc_phot_size +
                               self.gc_phot_size +
@@ -48,12 +59,7 @@ class datahandlerTestCase(TestCase):
                 'GC-Spectro': self.gc_spectro_vec}
         cov = {'3x2pt': self.tx2_cov,
                'GC-Spectro': self.gc_spectro_cov}
-        self.data_reader = Reader(mock_data)
-        self.data_reader.compute_nz()
-        self.data_reader.read_GC_spectro()
-        self.data_reader.read_phot()
 
-        self.observables = build_mock_observables(self.data_reader)
         self.data_handler = Data_handler(
             data, cov, self.observables, self.data_reader)
         self.masking_vector = np.ones(self.datavec_shape[0]).astype(int)

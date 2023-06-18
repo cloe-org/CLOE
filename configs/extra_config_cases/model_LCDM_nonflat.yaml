@@ -1,4 +1,5 @@
 user_models:
+  baryonic_feedback: baryonic_feedback.yaml
   cosmology: extra_cosmologies/cosmology_LCDM_nonflat.yaml
   modified_gravity: modified_gravity.yaml
   nonlinearities: nonlinearities.yaml

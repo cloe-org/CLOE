@@ -90,19 +90,19 @@ The CLOE Docker image comes with CLOE and all dependencies pre-installed. In ord
 
 Log into the Euclid GitLab container registry,
 
-```bash
+```shell
 docker login gitlab.euclid-sgs.uk:4567
 ```
 
 pull the latest CLOE Docker image
 
-```bash
+```shell
 docker pull gitlab.euclid-sgs.uk:4567/pf-ist-likelihood/likelihood-implementation/cloe
 ```
 
 and tag an alias called `cloe` to avoid writing the full image name for every command.
 
-```bash
+```shell
 git tag gitlab.euclid-sgs.uk:4567/pf-ist-likelihood/likelihood-implementation/cloe cloe
 ```
 
@@ -114,13 +114,13 @@ No further installation or set up is required.
 
 An interactive CLOE Docker container can be launched as follows.
 
-```bash
+```shell
 docker run -it --rm cloe
 ```
 
 Inside the container you will need to activate the `cloe` environment.
 
-```bash
+```shell
 conda activate cloe
 ```
 
@@ -130,13 +130,13 @@ All the CLOE package materials can be found in `/home`.
 
 CLOE can be run in a non-interactive (i.e. detached) container as follows:
 
-```bash
+```shell
 docker run --rm cloe bash -cl "<COMMAND>"
 ```
 
 where `<COMMAND>` is the command line you wish to run, e.g. to run the `run_cloe.py` script.
 
-```bash
+```shell
 docker run --rm cloe bash -cl "python run_cloe.py configs/config_profiling_evaluate_likelihood.yaml"
 ```
 
@@ -144,7 +144,7 @@ docker run --rm cloe bash -cl "python run_cloe.py configs/config_profiling_evalu
 
 It is also possible to launch a Jupyter Notebook using a CLOE Docker container as the backend. To do so run the following:
 
-```bash
+```shell
 docker run -p 8888:8888 --rm cloe bash -cl "notebook"
 ```
 
@@ -184,11 +184,32 @@ pip install .
 
 To run CLOE, execute:
 
-```bash
+```shell
 python run_cloe.py configs/config_default.yaml
 ```
 
 The output is written in a folder called `chains` that is generated at runtime.
+
+### Using CLOE with external datasets such as Planck
+
+The CLOE conda environment does not include the Planck likelihood (`clik`) and the user will therefore need to separately install it to consider a combined analysis of Euclid and Planck.
+
+Once the Planck likelihood is installed, the following lines can be included in the `likelihood` field of `config_default.yaml` (in the same way as Euclid):
+
+.. code-block:: python
+
+	likelihood:
+  		planck_2018_lowl.TT_clik:
+    		clik_file: /your/path/to/plc_3.0/low_l/commander/commander_dx12_v3_2_29.clik
+  		planck_2018_lowl.EE_clik:
+    		clik_file: /your/path/to/plc_3.0/low_l/simall/simall_100x143_offlike5_EE_Aplanck_B.clik
+  		planck_2018_highl_plik.TTTEEE:
+    		clik_file: /your/path/to/plc_3.0/hi_l/plik/plik_rd12_HM_v22b_TTTEEE.clik
+
+If the Planck likelihood is installed via `cobaya-install` (which is a feature of Cobaya and not CosmoSIS), then the `clik_file` lines above need to be removed.
+
+Instead of directly editing `config_default.py`, it is also possible to add the corresponding call in the `likelihood` block within the `info` dictionary of the example run scripts provided in the `mcmc_scripts` directory of CLOE. 
+These example scripts accomplish exactly the same commands as the `run_cloe.py` instructions. The IST:L team has constructed the scripts from an internal notebook that is based on the contents of `config_default.yaml`.
 
 ## Structure of the repository
 *  **cloe**: folder containing the CLOE python package (see the [API documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/index.html) for details)
@@ -208,13 +229,13 @@ The output is written in a folder called `chains` that is generated at runtime.
 
 To run the unit tests locally:
 
-```bash
+```shell
 python -m pytest
 ```
 
 To run the verification tests locally:
 
-```bash
+```shell
 python -m pytest cloe/tests/verification
 ```
 
@@ -224,9 +245,8 @@ Note that these tests require the development tools.
 
 Learn how to use CLOE with our demo. You can launch it with Jupyter Notebook:
 
-```
+```shell
 jupyter-notebook notebooks/DEMO.ipyng
 ```
 
 This notebook currently allows the user to compute the model predictions and likelihood given synthetic Euclid data.
-

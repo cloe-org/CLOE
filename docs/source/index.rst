@@ -9,12 +9,6 @@ CLOE Documentation
 Cosmology Likelihood for Observables in Euclid (CLOE) is a validated analysis package developed by the Likelihood Inter-Science Taskforce (IST:L) for the Euclid mission, 
 in close collaboration with all of the Euclid Science Working Groups (SWG), Organisational Units (OU), and the Nonlinear Inter-Science Taskforce (IST:NL).
 
-.. image:: fancy_cloe_logo.png
-  :width: 100%
-  :alt: CLOE logo
-
-
-
 Package Contents
 ================
 

@@ -2,8 +2,8 @@ About this code
 ==================
 
 **Cosmology Likelihood for Observables in Euclid (CLOE)** is a software package that allows the user to obtain model predictions and cosmological parameter constraints for synthetic and real Euclid data. 
-The software package is developed by the `core team <https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/wikis/ISTL-core-members>`_ of the Inter-Science Taskforce for Likelihood (IST:L) within the Euclid Consortium, in close collaboration with all of the Euclid Science Working Groups, Organisational Units, 
-and the Inter-Science Taskforce for Nonlinear effects (IST:NL).
+The software package is developed by the `core team <https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/wikis/ISTL-core-members>`_ of the Inter-Science Taskforce for Likelihood (IST:L) within the Euclid Consortium, 
+in close collaboration with all of the Euclid Science Working Groups, Organisational Units, and the Inter-Science Taskforce for Nonlinear effects (IST:NL).
 
 In the latest version of CLOE, the Euclid observables are defined by the following set:
 

@@ -32,9 +32,9 @@ We provide below different options for installation: [with conda](#conda), or [w
 
 ### 1. Installation with a conda environment <a name="conda"></a>
 
-**Option a)**
+**Option a) (recommended)**
 
-Use the `environment.yml` that we provide: 
+Use the `environment.yml` that we provide, which includes all the required dependencies with fixed versions that have been tested with CLOE:
 
 ```shell
 conda env create -f environment.yml
@@ -66,7 +66,6 @@ pip install fast-pt
 pip install camb
 pip install gsl
 pip install cobaya
-pip install classy
 pip install baccoemu
 pip install euclidemu2
 pip install pytest
@@ -148,6 +147,13 @@ It is also possible to launch a Jupyter Notebook using a CLOE Docker container a
 docker run -p 8888:8888 --rm cloe bash -cl "notebook"
 ```
 
+### 4. Optional dependencies
+
+The following optional packages can be installed to provide CLOE with additional functionality:
+
+| Package                                    | Notes                                                                                             |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| [classy](https://pypi.org/project/classy/) | To use [CLASS](https://lesgourg.github.io/class_public/class.html) as a Boltzmann solver for CLOE |
 
 ## Troubleshooting <a name="troubles"></a>
 

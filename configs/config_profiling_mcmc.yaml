@@ -1,0 +1,30 @@
+backend: Cobaya
+Cobaya:
+  debug: true
+  force: true
+  likelihood:
+    Euclid:
+      aliases:
+      - euclid
+      external: !!python/name:cloe.cobaya_interface.EuclidLikelihood ''
+      NL_flag_phot_matter: 0
+      NL_flag_spectro: 0
+      statistics_spectro: legendre_multipole_power_spectrum
+      plot_observables_selection: False
+      # The user can overwrite here the values of
+      # the fields 'data', 'observables_selection', and 'observables_specifications'
+      # with respect to configs_default.yaml:
+      # - by specifying a yaml file
+      # - by specifying a dictionary, in yaml format
+      # Please note that if specifying a dictionary, all the fields must be present
+  output: chains/my_euclid_experiment
+  params: ./model_test.yaml
+  sampler:
+    evaluate: null
+  theory:
+    camb:
+      extra_args:
+        dark_energy_model: ppf
+        num_massive_neutrinos: 1
+      stop_at_error: true
+  timing: true

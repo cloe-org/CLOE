@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="9.586" timestamp="2023-06-06T12:06:40.284069" hostname="EST01109506"><testcase classname="cloe.tests.test_cosmo" name="PYCODESTYLE" time="0.077" /><testcase classname="cloe.tests.test_cosmo.cosmoinitTestCase" name="test_compute_phot_galbias" time="0.031"><failure message="NameError: name 'x' is not defined">self = &lt;cloe.tests.test_cosmo.cosmoinitTestCase testMethod=test_compute_phot_galbias&gt;
+
+    def test_compute_phot_galbias(self):
+        # interpolate a straight-line (b, z) grid to ease the checks
+        nuipar = self.cosmo.cosmo_dic['nuisance_parameters']
+        zs_means = [1.0, 2.0, 3.0]
+        nuipar['b1_photo'] = 2.0
+        nuipar['b2_photo'] = 4.0
+        nuipar['b3_photo'] = 6.0
+&gt;       self.cosmo.create_phot_galbias(model=2,
+                                       x_values=zs_means,
+                                       y_values=[2., 4., 6.])
+
+cloe/tests/test_cosmo.py:211: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;cloe.cosmo.cosmology.Cosmology object at 0x1940253d0&gt;, model = 2, x_values = [1.0, 2.0, 3.0], y_values = [2.0, 4.0, 6.0]
+
+    def create_phot_galbias(self, model=None, x_values=[0.0, 4.0],
+                            y_values=[1.0, 1.0]):
+        r"""Creates the photometric galaxy bias.
+    
+        Creates the photometric galaxy bias as
+        function/interpolator of the redshift.
+        The function is stored in the cosmo dictionary 'b_inter'.
+    
+        The bias model is selected from the key 'bias_model'
+        in :obj:`cosmo_dic`.
+        The implemented models are:
+    
+            #. Linear interpolation
+            #. Bias is constant in bin (returns one here)
+            #. Polynomial bias function
+    
+        Parameters
+        ----------
+        model: integer
+            selection of the bias model.
+            If None, uses the one stored in cosmo_dic['bias_model']
+        x_values: numpy.ndarray of float
+            x-values for the interpolator.
+        y_values: numpy.ndarray of float
+            y-values for the interpolator.
+    
+        Raises
+        ------
+        ValueError
+            If the bias model parameter in the cosmo dictionary
+            is not 1, 2, or 3
+        """
+    
+        if model is None:
+            bias_model = self.cosmo_dic['bias_model']
+        else:
+            bias_model = model
+    
+        if bias_model == 1:
+            self.cosmo_dic['b_inter'] \
+                = self.istf_phot_galbias_interpolator(
+                    self.cosmo_dic['redshift_bins_means_phot'])
+        elif bias_model == 2:
+            self.cosmo_dic['b_inter'] \
+&gt;               = rb.linear_interpolator(x, y)
+E           NameError: name 'x' is not defined
+
+cloe/cosmo/cosmology.py:814: NameError</failure></testcase></testsuite></testsuites>

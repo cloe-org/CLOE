@@ -1,0 +1,57 @@
+# This yaml file contains the user specifications for the Euclid observables
+# computed theoretically in CLOE.
+
+# Users should never edit this file. The default values listed here will
+# be overwritten by the ones specified in the configuration files.
+
+# Name given to the likelihood block (Cobaya will print this name)
+aliases: [euclid]
+# Speed in evaluations/second
+speed: 500
+# Selected Boltzmann solver
+solver: camb
+# List of parameters that are
+# only parameters of the likelihood
+params: !defaults [../configs/params]
+# Nonlinear flag selectors
+NL_flag_phot_matter: 0
+NL_flag_spectro: 0
+# Bias Model
+bias_model: 1
+# Magnification bias model
+magbias_model: 1
+# k values for extrapolation of the matter power spectrum
+k_max_extrap: 500.0
+k_min_extrap: 0.00001
+k_samp: 1000
+# z limit values and size for the z-array
+z_min: 0.0
+z_max: 4.0
+z_samp: 100
+# Select statistics for spectroscopic probes (legendre_multipole_power_spectrum
+# or legendre_multipole_correlation_function)
+statistics_spectro: legendre_multipole_power_spectrum
+# Add RSD to photometric probes
+add_phot_RSD: False
+# Apply a generic matrix transformation to the photo observables (available options: 'BNT', 'BNT-test')
+matrix_transform_phot: False
+# Use MG gamma
+use_gamma_MG: False
+# Redshift dependent purity correction
+f_out_z_dep: False
+# Information about where the data is stored
+data: !defaults [../configs/data]
+# Selection of the observables to be computed
+observables_selection: !defaults [../configs/observables_selection]
+# Specifications for each of the observables
+observables_specifications:
+  WL: !defaults [../configs/WL]
+  GCphot: !defaults [../configs/GCphot]
+  GCspectro: !defaults [../configs/GCspectro]
+  WL-GCphot: !defaults [../configs/WL-GCphot]
+  # Note: This is not yet provided by CLOE
+  # therefore it will load empty dictionaries
+  GCphot-GCspectro: !defaults [../configs/GCphot-GCspectro]
+  WL-GCspectro: !defaults [../configs/WL-GCspectro]
+# Plot the selected observables during the initialization of the likelihood
+plot_observables_selection: False

@@ -1,74 +1,258 @@
 [![pipeline status](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/badges/master/pipeline.svg)](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/commits/master) [![coverage report](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/badges/master/coverage.svg)](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/commits/master)
 
-# Euclid-Box
+# CLOE: Cosmology Likelihood for Observables in Euclid
 
-This repository contains the theoretical computation of Euclid observables as well as the computation of the likelihood given some fiducial data. The likelihood is designed to work as an external likelihood for the Bayesian Analysis Code `Cobaya`.
+This repository allows the user to obtain model predictions and cosmological parameter constraints for synthetic and real Euclid data. It is developed by the Inter-Science Taskforce for Likelihood (IST:L) within the Euclid Consortium, in close collaboration with all of the Euclid Science Working Groups, Organisational Units, and the Inter-Science Taskforce for Nonlinear effects (IST:NL).
 
-Check [documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/index.html)
+In the latest version of CLOE, the Euclid observables are defined by the following set:
 
-## What's COBAYA?
+- Weak Gravitational Lensing 
+- Photometric Galaxy Clustering
+- Photometric Galaxy-Galaxy Lensing
+- Spectroscopic Galaxy Clustering
 
-`Cobaya` (code for Bayesian analysis, and Spanish for Guinea Pig) is a framework for sampling and statistical modelling: it allows you to explore an arbitrary prior or posterior using a range of Monte Carlo samplers.
+CLOE allows the user to consider these probes either separately or in a self-consistent combined analysis. It is also possible to analyze the Euclid data alongside other external datasets. The set of Euclid observables will expand in subsequent versions to include probes such as clusters and cross-correlations with the cosmic microwave background.
 
-Check [documentation](https://cobaya.readthedocs.io/en/latest/index.html)
+Further documentation is found [here](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/index.html)
 
+## Integration of CLOE with other codes
 
-### Conda environment
+CLOE allows the user to obtain the linear matter power spectrum from either of the [CAMB](https://camb.readthedocs.io/en/latest/) and [CLASS](https://lesgourg.github.io/class_public/class.html) Boltzmann codes.
 
-To build the package in a dedicated Conda environment with development tools run:
+In order to obtain cosmological parameter constraints, CLOE reads in the redshift distributions and computes the theoretical predictions of the Euclid observables, which are used together with the data and covariance to obtain the likelihood. The likelihood is then evaluated across the parameter space using one of the samplers of [Cobaya](https://cobaya.readthedocs.io/en/latest/) or [CosmoSIS](https://cosmosis.readthedocs.io/en/latest/) to obtain the posterior probability.
 
-```bash
+## Installation
+
+**git clone CLOE**
+
+```shell
+git clone https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation.git
+```
+We provide below different options for installation: [with conda](#conda), or [with pip](#pip), or [with docker](#docker). In the [troubleshooting](#troubles) section you can find a list of  suggestions to solve issues that we encountered so far, which may help you with the installation.
+
+### 1. Installation with a conda environment <a name="conda"></a>
+
+**Option a) (recommended)**
+
+Use the `environment.yml` that we provide, which includes all the required dependencies with fixed versions that have been tested with CLOE:
+
+```shell
 conda env create -f environment.yml
-conda activate likelihood
-python setup.py install
+conda activate cloe
+pip install .
 ```
 
-### Stand-alone build
+**Option b)** 
 
-The Euclid-Box package can be obtained by cloning this repository using git and get  installed by simply running:
+If our environment does not work on your cluster (ex. it gets stuck), but you have anaconda, we recommend to create your own environment as follows: 
 
-```bash
-python setup.py install
+```shell
+conda create -n cloe python=3.9 
+source activate cloe
 ```
 
-### Unit tests
+Then, install all the following packages, in this order either with pip or with conda (depending on what works on your cluster):
+
+```shell
+pip install astropy
+pip install jupyter
+pip install matplotlib
+conda install mpi4py
+conda install numpy
+conda install scipy
+conda install seaborn
+conda install tensorflow
+pip install fast-pt
+pip install camb
+pip install gsl
+pip install cobaya
+pip install baccoemu
+pip install euclidemu2
+pip install pytest
+pip install pytest-cov
+pip install pytest-pycodestyle
+pip install pytest-pydocstyle
+pip install sphinx
+pip install sphinx-rtd-theme
+pip install numpydoc
+```
+
+### 2. Installation with pip <a name="pip"></a>
+
+If you do not have anaconda, you would have to install manually on your cluster all the packages listed in Option b) written above, with pip.
+
+### 3. CLOE Docker image <a name="docker"></a>
+
+The CLOE Docker image comes with CLOE and all dependencies pre-installed. In order to use this image you will need to have [Docker](https://www.docker.com/) installed on the relevant machine.
+
+#### Pull the Docker Image
+
+Log into the Euclid GitLab container registry,
+
+```shell
+docker login gitlab.euclid-sgs.uk:4567
+```
+
+pull the latest CLOE Docker image
+
+```shell
+docker pull gitlab.euclid-sgs.uk:4567/pf-ist-likelihood/likelihood-implementation/cloe
+```
+
+and tag an alias called `cloe` to avoid writing the full image name for every command.
+
+```shell
+git tag gitlab.euclid-sgs.uk:4567/pf-ist-likelihood/likelihood-implementation/cloe cloe
+```
+
+No further installation or set up is required.
+
+#### Run a Docker container
+
+##### Interactive container 
+
+An interactive CLOE Docker container can be launched as follows.
+
+```shell
+docker run -it --rm cloe
+```
+
+Inside the container you will need to activate the `cloe` environment.
+
+```shell
+conda activate cloe
+```
+
+All the CLOE package materials can be found in `/home`. 
+
+##### Detached container
+
+CLOE can be run in a non-interactive (i.e. detached) container as follows:
+
+```shell
+docker run --rm cloe bash -cl "<COMMAND>"
+```
+
+where `<COMMAND>` is the command line you wish to run, e.g. to run the `run_cloe.py` script.
+
+```shell
+docker run --rm cloe bash -cl "python run_cloe.py configs/config_profiling_evaluate_likelihood.yaml"
+```
+
+##### Jupyter notebook
+
+It is also possible to launch a Jupyter Notebook using a CLOE Docker container as the backend. To do so run the following:
+
+```shell
+docker run -p 8888:8888 --rm cloe bash -cl "notebook"
+```
+
+### 4. Optional dependencies
+
+The following optional packages can be installed to provide CLOE with additional functionality:
+
+| Package                                    | Notes                                                                                             |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| [classy](https://pypi.org/project/classy/) | To use [CLASS](https://lesgourg.github.io/class_public/class.html) as a Boltzmann solver for CLOE |
+
+## Troubleshooting <a name="troubles"></a>
+
+### Problems installing openmpi4/4.1.1
+
+Try installing (loading, depending on cluster) the following packages in this order: 
+
+```shell
+module load gnu9
+module load anaconda
+module load openmpi4/4.1.1
+```
+
+### Problems with classy
+Users of Mac computers with Apple chips often encouter issues when trying to install `classy` using `pip`. First of all, `classy` is not a requirement for CLOE to work, if you are happy using CAMB as a Boltzmann solver you can simply skip the installation of `classy`. If you need to install it, you can download CLASS and edit the Makefile with one of the two following options:
+
+1. deactivate OpenMP or
+2. change the C compiler to `gcc`.
+
+Then, compiling with `make` (or `make -j`, check the CLASS documentation) will also generate the python wrapper `classy`.
+
+### Problems with other specific packages
+Users have sometimes encountered issues installing some of the packages (euclidemu2). Before debugging, try to use "conda install" instead of "pip install" (or viceversa, depending on what gives error).
+
+### Problems with pip
+If pip install does not work, either try 'conda install' or try the following:
+```shell
+git clone https://github.com/astropy/extension-helpers.git
+cd extension-helpers
+pip install .
+```
+
+## Running CLOE
+
+To run CLOE, execute:
+
+```shell
+python run_cloe.py configs/config_default.yaml
+```
+
+The output is written in a folder called `chains` that is generated at runtime.
+
+### Using CLOE with external datasets such as Planck
+
+The CLOE conda environment does not include the Planck likelihood (`clik`) and the user will therefore need to separately install it to consider a combined analysis of Euclid and Planck.
+
+Once the Planck likelihood is installed, the following lines can be included in the `likelihood` field of `config_default.yaml` (in the same way as Euclid):
+
+.. code-block:: python
+
+	likelihood:
+  		planck_2018_lowl.TT_clik:
+    		clik_file: /your/path/to/plc_3.0/low_l/commander/commander_dx12_v3_2_29.clik
+  		planck_2018_lowl.EE_clik:
+    		clik_file: /your/path/to/plc_3.0/low_l/simall/simall_100x143_offlike5_EE_Aplanck_B.clik
+  		planck_2018_highl_plik.TTTEEE:
+    		clik_file: /your/path/to/plc_3.0/hi_l/plik/plik_rd12_HM_v22b_TTTEEE.clik
+
+If the Planck likelihood is installed via `cobaya-install` (which is a feature of Cobaya and not CosmoSIS), then the `clik_file` lines above need to be removed.
+
+Instead of directly editing `config_default.py`, it is also possible to add the corresponding call in the `likelihood` block within the `info` dictionary of the example run scripts provided in the `mcmc_scripts` directory of CLOE. 
+These example scripts accomplish exactly the same commands as the `run_cloe.py` instructions. The IST:L team has constructed the scripts from an internal notebook that is based on the contents of `config_default.yaml`.
+
+## Structure of the repository
+*  **cloe**: folder containing the CLOE python package (see the [API documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/index.html) for details)
+*  **configs**: folder containing configurations files to specify the cosmological and nuisance parameters with user specifications for scales and redshifts
+*  **data**:  folder containing at the moment, the fiducial data labeled as `ExternalBenchmark` for photometric and spectrocopic probes
+*  **docs**:  folder containing automatically generated documentation
+*  **example**: folder containing  example yaml configuration files for the user
+*  **mcmc scripts**: folder containing example python scripts to run mcmc chains for different combinations of probes with free or fixed nuisance parameters
+*  **notebooks**: folder containing example jupyter notebooks
+*  **scripts**: folder containing  example python scripts to simulate data
+*  ```run_cloe.py```: top level script for running the CLOE user interface
+*  ```setup.py```: top level script for installing or testing the CLOE package
+*  ```LICENCE.txt```: file containing the MIT license CLOE is under
+
+
+## Unit and verification tests
 
 To run the unit tests locally:
 
-```bash
-python setup.py test
+```shell
+python -m pytest
 ```
 
-Note that this requires the development tools.
+To run the verification tests locally:
 
+```shell
+python -m pytest cloe/tests/verification
+```
 
-### How do I import the likelihood as an external likelihood for `Cobaya`?
-Open and play with ```DEMO.ipynb```
+Note that these tests require the development tools.
 
-## Structure of the repository
+## Demonstration of how to use CLOE
 
-*  **data**: folder that contains, at the moment, the fiducial data
-*  **docs**: automatically generated documentation
-*  **notebooks**: folder containing example notebooks
-*  **scripts**: folder containing example scripts
-*  **likelihood**: likelihood code
-     *  ```cobaya_interface.py```: interface with COBAYA, pass theory needed to other classes, returns loglike
-     * like_calc: code that calculates the likelihood given the data and the theory prediction
-        * ```euclike.py```: class with the calculation of the likelihood and construction of the covariance matrices in the way it is needed by the calculation ([documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/likelihood.like_calc.euclike.html))
-     
-     * cosmo: cosmology module which takes cosmological parameters and theory requirements from Cobaya
-        *   ```cosmology.py```: class with cosmological function ([documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/likelihood.cosmo.cosmology.html))
-        
-    * data_reader: code containing routines to read OU-level3 information and data files
-        *  ```reader.py```: class with functions to read fiducial data ([documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/likelihood.data_reader.reader.html))
-    * photometric_survey: code for photo-z observables 
-        *  ```photo.py```: class with the theoretical prediction of the photo-z observables ([documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/likelihood.photometric_survey.photo.html))
-    * spectroscopic_survey: code for the spectroscopy GC observable
-        * ```spec.py```: class with the theoretical prediction of the spectroscopy GC observables  ([documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/likelihood.spectroscopic_survey.spec.html))       
-    * auxiliary: code for auxiliary functions
-        * ```plotter.py```: class with plotting functions  ([documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/likelihood.auxiliary.plotter.html))
-    * test: unit tests to check likelihood code
-        *   ```test_cosmo.py```: class with unit tests for cosmology class cosmology.py
-        *   ```test_shear.py```: class with unit tests for shear class shear.py
-        *   ```test_spec.py```: class with unit tests for spec class spec.py
-        *   ```test_wrapper.py```: class with a general call to COBAYA `get_model` wrapper
+Learn how to use CLOE with our demo. You can launch it with Jupyter Notebook:
+
+```shell
+jupyter-notebook notebooks/DEMO.ipyng
+```
+
+This notebook currently allows the user to compute the model predictions and likelihood given synthetic Euclid data.

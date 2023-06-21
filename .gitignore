@@ -18,7 +18,22 @@ build/
 dist/
 *cache*
 *.egg*
+chains/
+notebooks/chains/
+notebooks/figs/
+.vscode/
+
+# Test outputs #
+################
+coverage.xml
+pytest.xml 
 
 # Notebook checkpoints #
 ########################
 *.ipynb_checkpoints*
+
+# Files #
+#########
+notebooks/DEMO.py
+docs/source/cloe.*
+docs/source/modules.rst

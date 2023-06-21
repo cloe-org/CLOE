@@ -4,7 +4,7 @@
 from setuptools import setup, find_packages
 import os
 
-__name__ = 'likelihood'
+__name__ = 'cloe'
 
 release_info = {}
 infopath = os.path.abspath(os.path.join(os.path.dirname(__file__),
@@ -18,7 +18,7 @@ with open(os.path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 # Function to automatically find scripts.
 def find_scripts():
-    sdir = '.'
+    sdir = './scripts'
     return [os.path.join(sdir, val) for val in os.listdir(sdir) if
             val.endswith('.py') and '__init__' not in val]
 

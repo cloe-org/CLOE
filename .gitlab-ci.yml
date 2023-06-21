@@ -1,48 +1,74 @@
+default:
+  image: gitlab.euclid-sgs.uk:4567/pf-ist-likelihood/likelihood-implementation
+
+# Caches
+cache:
+  key: $CI_COMMIT_REF_SLUG
+  paths:
+    - .pytest_cache
+
 # Install dependencies
 before_script:
-  - apt-get update
-  - apt-get upgrade -y
-  - apt-get install software-properties-common -y
-  - add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe restricted multiverse"
-  - apt-get install gfortran -y
-  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b -p $HOME/miniconda
-  - export PATH=$HOME/miniconda/bin:$PATH
-  - conda env create -f environment.yml
-  - source activate likelihood
-  - pip install coverage nose pytest pytest-cov
+  - source activate cloe
+  - conda list
+  - ls -a
+  - echo $CI_PIPELINE_SOURCE
 
-# Install package
-Install:
-  script: python setup.py test
+# Run unit tests
+Tests:
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  script:
+    - python -m pytest
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - cloe/*
+      - cloe/**/*
+      - configs/*
+      - data/ExternalBenchmark/*
+      - environment.yml
+      - .gitlab-ci.yml
+      - setup.cfg
   artifacts:
-    when: always
     reports:
       junit: pytest.xml
-      cobertura: coverage.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+
+# Run verification tests
+Verification:
+  script:
+    - export TF_CPP_MIN_LOG_LEVEL=1
+    - python -m pytest cloe/tests/verification
+  when: manual
+  artifacts:
+    reports:
+      junit: pytest.xml
+  only:
+    - merge_requests
 
 # Build temporary API docs for reviewer
 Check_HTML:
   script:
-    - &build_script |
-      source activate likelihood
-      pip install sphinx sphinx-rtd-theme numpydoc
+    - &apidoc_build_script |
       mkdir docs/build
-      sphinx-apidoc -feo docs/source likelihood
+      sphinx-apidoc --module-first -feo docs/source cloe
       sphinx-build docs/source docs/build
     - mv docs/build html_build
+  when: manual
   artifacts:
     paths:
       - html_build/
     expose_as: 'API HTML Build'
-  except:
-      - master
+  only:
+    - merge_requests
 
 # Build API docs for deployment
 pages:
   script:
-    - *build_script
+    - *apidoc_build_script
     - mv docs/build public/
   artifacts:
     paths:
@@ -52,12 +78,16 @@ pages:
 
 # Get Profiling Report
 Profiling:
-  script: 
-    - python profiling.py 1
-    - python -m cProfile -o profiling.pstats profiling.py
+  script:
+    - python -m cProfile -o evaluate_likelihood.pstats run_cloe.py configs/config_profiling_evaluate_likelihood.yaml
+    - python -m cProfile -o mcmc.pstats run_cloe.py configs/config_profiling_mcmc.yaml
     - mkdir products
-    - mv profiling.pstats products/
+    - mv *.pstats products/
+  when: manual
   artifacts:
     paths:
       - products/
     expose_as: 'Profiling Report'
+  only:
+    - merge_requests
+    - master

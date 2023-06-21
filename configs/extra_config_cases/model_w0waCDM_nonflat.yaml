@@ -1,0 +1,13 @@
+user_models:
+  baryonic_feedback: baryonic_feedback.yaml
+  cosmology: extra_cosmologies/cosmology_w0waCDM_nonflat.yaml
+  modified_gravity: modified_gravity.yaml
+  nonlinearities: nonlinearities.yaml
+  nuisance_bias: nuisance_bias.yaml
+  nuisance_ia: nuisance_ia.yaml
+  nuisance_magnification_bias: nuisance_magnification_bias.yaml
+  nuisance_nz: nuisance_nz.yaml
+  nuisance_purity: nuisance_purity.yaml
+  nuisance_shear_calibration: nuisance_shear_calibration.yaml
+user_options:
+  overwrite: true

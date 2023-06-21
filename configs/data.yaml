@@ -1,0 +1,41 @@
+photo:
+  redshifts:
+  - 0.2095
+  - 0.489
+  - 0.619
+  - 0.7335
+  - 0.8445
+  - 0.9595
+  - 1.087
+  - 1.2395
+  - 1.45
+  - 2.038
+  luminosity_ratio: luminosity_ratio.dat
+  IA_model: zNLA
+  cov_3x2pt: CovMat-3x2pt-{:s}-20Bins.npy
+  cov_GC: CovMat-PosPos-{:s}-20Bins.npy
+  cov_WL: CovMat-ShearShear-{:s}-20Bins.npy
+  cov_model: Gauss
+  cov_is_num: False
+  cov_nsim: 10000
+  ndens_GC: niTab-EP10-RB00.dat
+  ndens_WL: niTab-EP10-RB00.dat
+  root_GC: Cls_{:s}_PosPos.dat
+  root_WL: Cls_{:s}_ShearShear.dat
+  root_XC: Cls_{:s}_PosShear.dat
+sample: ExternalBenchmark
+spectro:
+  redshifts:
+  - '1.'
+  - '1.2'
+  - '1.4'
+  - '1.65'
+  edges:
+  - 0.9
+  - 1.1
+  - 1.3
+  - 1.5
+  - 1.8
+  root: cov_power_galaxies_dk0p004_z{:s}.fits
+  cov_is_num: False
+  cov_nsim: 3500

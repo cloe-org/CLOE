@@ -1,20 +1,18 @@
-Example
-==================
+Interactive use examples
+==============================
 
-Here you can find a simple example of how to run the Euclid likelihood as an external likelihood using the Bayesian Analysis tool **cobaya** (check its `docs  <https://cobaya.readthedocs.io/en/latest/index.html>`_).
+This section provides a simple example of how to run CLOE alongside the software framework of `Cobaya <https://cobaya.readthedocs.io/en/latest/index.html>`_.
 
-For a detailed break-down of how to run the likelihood in this and other ways, see the ``DEMO`` notebook supplied with this package.
-
-One way for the likelihood to be run is from an interactive python interpreter (**jupyter notebook**).
+For a detailed breakdown of how to run CLOE in this and other ways, see the ``DEMO`` notebook in the CLOE repository. This notebook requires an interactive Python interpreter such as `Jupyter Notebook <https://jupyter.org/>`_.
 
 From a Python interpreter
 -------------------------
 
-An external likelihood can be supplied to **cobaya** directly through a Python interpreter. In order to do this, the choice of likelihood and parameters must be stored in a Python dictionary. For example:
+An external likelihood can be supplied to **Cobaya** directly through a Python interpreter. In order to do this, the choice of likelihood and parameters must be stored in a Python dictionary. For example:
 
 .. code:: python
 
-    # We are running the Euclid-Likelihood as an external likelihood class for Cobaya
+    # We are running CLOE as an external likelihood class for Cobaya
     # Cobaya needs a dictionary or yaml file as input to start running
     # This dictionary below ('info') can be modified up to some point by the user to
     # adapt it to the user's needs.
@@ -74,10 +72,10 @@ An external likelihood can be supplied to **cobaya** directly through a Python i
             'b9_photo': 1.5652475842498528,
             'b10_photo': 1.7429859437184225,
             # Spectroscopic bias parameters
-            'b1_spec': 1.46,
-            'b2_spec': 1.61,
-            'b3_spec': 1.75,
-            'b4_spec': 1.90},
+            'b1_spectro': 1.46,
+            'b2_spectro': 1.61,
+            'b3_spectro': 1.75,
+            'b4_spectro': 1.90},
         #'theory': Cobaya's protected key of the input dictionary.
         # Cobaya needs to ask some minimum theoretical requirements to a Boltzman Solver
         # (UC): you can choose between CAMB or CLASS
@@ -86,7 +84,7 @@ An external likelihood can be supplied to **cobaya** directly through a Python i
         # and the dark energy model
         #
         # ATTENTION: If you have CAMB/CLASS already installed and
-        # you are not using the likelihood conda environment
+        # you are not using the CLOE conda environment
         # or option (2) in cell (3) (Cobaya modules), you can add an extra key called 'path' within the camb dictionary
         # to point to your already installed CAMB code:
         'theory': {'camb':
@@ -102,7 +100,7 @@ An external likelihood can be supplied to **cobaya** directly through a Python i
         # 'packages_path': Cobaya's protected key of the input dictionary.
         # This is the variable you need to update
         # if you are running Cobaya with cobaya_modules (option (2) above).
-        # If you are using the conda likelihood environment or option (1),
+        # If you are using the conda CLOE environment or option (1),
         # please, comment the line below
         #
         'packages_path': modules_path,
@@ -115,7 +113,7 @@ An external likelihood can be supplied to **cobaya** directly through a Python i
         #'likelihood': Cobaya's protected key of the input dictionary.
         # (UC): The user can select which data wants to use for the analysis.
         # Check Cobaya's documentation to see the list of the current available data experiments
-        # In this DEMO, we load the Euclid-Likelihood as an external function, and name it 'Euclid'
+        # In this DEMO, we load CLOE as an external function, and name it 'Euclid'
         'likelihood': {'Euclid': EuclidLikelihood},
         #'debug': Cobaya's protected key of the input dictionary.
         # (UC): how much information you want Cobaya to print? If debug: True, it prints every single detail
@@ -140,7 +138,7 @@ The dictionary above has several  *keys*:
 - A ``likelihood`` key: likelihood pdf's to be used. In this case, we call an external likelihood file that returns the loglike given the ``params`` values.
 
 
-Once this dictionary has been set up, to run **cobaya** from the **jupyter notebook** use:
+Once this dictionary has been set up, to run **Cobaya** from the **jupyter notebook** use:
 
 .. code:: python
 
@@ -158,3 +156,14 @@ Once this dictionary has been set up, to run **cobaya** from the **jupyter noteb
     info_updated, samples = run(info)
 
 For further information, see the ``DEMO`` notebook provided with this package.
+
+
+From a Jupyter notebook
+-----------------------
+
+Play with our |link-to-demo| Jupyter notebook.
+
+
+.. |link-to-demo| raw:: html
+
+  <a href="https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/blob/master/notebooks/DEMO.ipynb" target="_blank">DEMO

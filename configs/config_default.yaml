@@ -1,0 +1,93 @@
+# Choice of the Boltzmann solver. Allowed values are
+# camb (for CAMB) and classy (for CLASS)
+define: &solver camb
+backend: Cobaya
+Cobaya:
+  # Documentation about Cobaya keys can be found at:
+  # https://cobaya.readthedocs.io/en/latest/cosmo_basic_runs.html
+  debug: true
+  force: true
+  likelihood:
+    Euclid:
+      aliases:
+      - euclid
+      external: !!python/name:cloe.cobaya_interface.EuclidLikelihood ''
+      # Speed in evaluations/second
+      speed: 500
+      # k values for extrapolation of the matter power spectrum
+      k_max_extrap: 500.0
+      k_min_extrap: 0.00001
+      k_samp: 1000
+      # z limit values and size for the z-array
+      z_min: 0.0
+      z_max: 4.0
+      z_samp: 100
+      # Flag to make the choice of the sampler visible to cloe
+      solver: *solver
+      # Nonlinear flag selectors
+      # Photometric matter flag
+      #     0 -> linear-only
+      #     1 -> Halofit (Takahashi)
+      #     2 -> Mead2016 (includes baryon corrections)
+      #     3 -> Mead2020 (w/o baryon corrections)
+      #     4 -> Mead2020_feedback (includes baryon corrections)
+      #     5 -> Euclid Emulator 2
+      #     6 -> BACCO (matter)
+      NL_flag_phot_matter: 0
+      # Spectroscopic flag
+      #     0 -> linear-only
+      #     1 -> EFT
+      NL_flag_spectro: 0
+      # Bias Model
+      #     1 -> linear interpolation
+      #     2 -> constant within bins
+      bias_model: 1
+      # Select statistics for spectroscopic probes (legendre_multipole_power_spectrum
+      # or legendre_multipole_correlation_function)
+      statistics_spectro: legendre_multipole_power_spectrum
+      # Add RSD to photometric probes
+      add_phot_RSD: False
+      # Apply a generic matrix transformation to the photo observables (available options: 'BNT', 'BNT-test')
+      matrix_transform_phot: False
+      # Magnification bias model
+      #     1 -> linear interpolation
+      #     2 -> constant within bins
+      magbias_model: 2
+      # Use MG gamma
+      use_gamma_MG: False
+      # Redshift dependent purity correction
+      f_out_z_dep: False
+      # Plot the selected observables during the initialization of the likelihood
+      plot_observables_selection: False
+      ##
+      # The user can overwrite here the values of
+      # the fields 'data', 'observables_selection', and 'observables_specifications':
+      # - by specifying a yaml file
+      # - by specifying a dictionary (in yaml format)
+      # Please note that if specifying a dictionary, all the fields must be present
+      ##
+      # Information about where the data is stored
+      data: data.yaml
+      # Selection of the observables to be computed
+      observables_selection: observables_selection.yaml
+      # Specifications for each of the observables
+      observables_specifications:
+        GCphot: GCphot.yaml
+        GCspectro: GCspectro.yaml
+        WL: WL.yaml
+        WL-GCphot: WL-GCphot.yaml
+        # Note: This is not yet provided by CLOE
+        # therefore it will load empty dictionaries
+        GCphot-GCspectro: GCphot-GCspectro.yaml
+        WL-GCspectro: WL-GCspectro.yaml
+  output: chains/my_euclid_experiment
+  params: ./model_default.yaml
+  sampler:
+    mcmc:
+      max_tries: 100000
+  theory:
+    *solver:
+      extra_args: {}
+      stop_at_error: true
+  timing: true
+action: run

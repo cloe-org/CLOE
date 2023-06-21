@@ -40,6 +40,7 @@ Tests:
 # Run verification tests
 Verification:
   script:
+    - export TF_CPP_MIN_LOG_LEVEL=1
     - python -m pytest cloe/tests/verification
   when: manual
   artifacts:

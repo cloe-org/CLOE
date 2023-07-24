@@ -700,3 +700,27 @@ class photoinitTestCase(TestCase):
             rtol=1e-6,
             err_msg='Lplus1 prefactor test failed'
         )
+
+    def test_poly_mag_bias(self):
+        nuipar = self.phot.theory['nuisance_parameters']
+        nuipar['b0_mag_poly'] = 1.0
+        nuipar['b1_mag_poly'] = 1.0
+        nuipar['b2_mag_poly'] = 1.0
+        nuipar['b3_mag_poly'] = 1.0
+        b_val = self.phot.poly_mag_bias(1.0)
+        z_arr = np.array([1.0, 2.0])
+        b_val_arr = self.phot.poly_mag_bias(z_arr)
+        # check float redshift input
+        npt.assert_almost_equal(
+            b_val,
+            desired=4.0,
+            decimal=8,
+            err_msg='Error in poly_mag_bias float redshift case'
+        )
+        # check array redshift input
+        npt.assert_allclose(
+            b_val_arr,
+            desired=[4.0, 15.0],
+            rtol=1e-8,
+            err_msg='Error in poly_mag_bias redshift array case'
+        )

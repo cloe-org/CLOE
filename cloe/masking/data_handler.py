@@ -258,7 +258,7 @@ class Data_handler:
         of the elements that are not to be included.
         The size of the masking vectors is inferred from the input data.
         """
-
+        wl_vec = []
         # define variables for better readability
         zpairs_wl = data.numtomo_wl * (data.numtomo_wl + 1) // 2
         zpairs_xc = data.numtomo_wl * data.numtomo_gcphot
@@ -266,16 +266,24 @@ class Data_handler:
             (data.numtomo_gcphot + 1) // 2
 
         if self._use_wl:
-            zpair = 0
-            ells = data.data_dict['WL']['ells']
-            wl_vec = np.zeros((len(ells), zpairs_wl))
-            for i in range(1, data.numtomo_wl + 1):
-                for j in range(i, data.numtomo_wl + 1):
-                    accepted_ells = np.array(
-                        self._obs['specifications']['WL']['bins']
-                        [f'n{i}'][f'n{j}']['ell_range'])
-                    wl_vec[:, zpair] = self._get_masking(ells, accepted_ells)
-                    zpair += 1
+            if self._obs['specifications']['WL']['statistics'] == \
+                    'angular_power_spectrum':
+                zpair = 0
+                ells = data.data_dict['WL']['ells']
+                wl_vec = np.zeros((len(ells), zpairs_wl))
+                for i in range(1, data.numtomo_wl + 1):
+                    for j in range(i, data.numtomo_wl + 1):
+                        accepted_ells = np.array(
+                            self._obs['specifications']['WL']['bins']
+                            [f'n{i}'][f'n{j}']['ell_range'])
+                        wl_vec[:, zpair] = self._get_masking(ells,
+                                                             accepted_ells)
+                        zpair += 1
+            elif self._obs['specifications']['WL']['statistics'] == \
+                    'angular_correlation_function':
+                zpairs_wl *= 2
+                wl_vec = np.ones((len(data.data_dict['WL']['thetas']),
+                                  zpairs_wl))
             wl_vec = wl_vec.flatten()
             # the default for np.ndarray.flatten()
             # is leftmost axis as outermost for loop
@@ -291,34 +299,48 @@ class Data_handler:
             wl_vec = np.full(self._wl_size, self._use_wl, dtype=int)
 
         if self._use_xc_phot:
-            zpair = 0
-            ells = data.data_dict['XC-Phot']['ells']
-            xc_phot_vec = np.zeros((len(ells), zpairs_xc))
-            for i in range(1, data.numtomo_wl + 1):
-                for j in range(1, data.numtomo_gcphot + 1):
-                    accepted_ells = np.array(
-                        self._obs['specifications']['WL-GCphot']['bins']
-                        [f'n{i}'][f'n{j}']['ell_range'])
-                    xc_phot_vec[:, zpair] = \
-                        self._get_masking(ells, accepted_ells)
-                    zpair += 1
+            if self._obs['specifications']['WL-GCphot']['statistics'] == \
+                    'angular_power_spectrum':
+                zpair = 0
+                ells = data.data_dict['XC-Phot']['ells']
+                xc_phot_vec = np.zeros((len(ells), zpairs_xc))
+                for i in range(1, data.numtomo_wl + 1):
+                    for j in range(1, data.numtomo_gcphot + 1):
+                        accepted_ells = np.array(
+                            self._obs['specifications']['WL-GCphot']['bins']
+                            [f'n{i}'][f'n{j}']['ell_range'])
+                        xc_phot_vec[:, zpair] = \
+                            self._get_masking(ells, accepted_ells)
+                        zpair += 1
+            elif self._obs['specifications']['WL-GCphot']['statistics'] == \
+                    'angular_correlation_function':
+                xc_phot_vec = \
+                    np.ones((len(data.data_dict['XC-Phot']['thetas']),
+                             zpairs_xc))
             xc_phot_vec = xc_phot_vec.flatten()
         else:
             xc_phot_vec = (
                 np.full(self._xc_phot_size, self._use_xc_phot, dtype=int))
 
         if self._use_gc_phot:
-            zpair = 0
-            ells = data.data_dict['GC-Phot']['ells']
-            gc_phot_vec = np.zeros((len(ells), zpairs_gcphot))
-            for i in range(1, data.numtomo_gcphot + 1):
-                for j in range(i, data.numtomo_gcphot + 1):
-                    accepted_ells = np.array(
-                        self._obs['specifications']['GCphot']['bins']
-                        [f'n{i}'][f'n{j}']['ell_range'])
-                    gc_phot_vec[:, zpair] = \
-                        self._get_masking(ells, accepted_ells)
-                    zpair += 1
+            if self._obs['specifications']['GCphot']['statistics'] == \
+                    'angular_power_spectrum':
+                zpair = 0
+                ells = data.data_dict['GC-Phot']['ells']
+                gc_phot_vec = np.zeros((len(ells), zpairs_gcphot))
+                for i in range(1, data.numtomo_gcphot + 1):
+                    for j in range(i, data.numtomo_gcphot + 1):
+                        accepted_ells = np.array(
+                            self._obs['specifications']['GCphot']['bins']
+                            [f'n{i}'][f'n{j}']['ell_range'])
+                        gc_phot_vec[:, zpair] = \
+                            self._get_masking(ells, accepted_ells)
+                        zpair += 1
+            elif self._obs['specifications']['GCphot']['statistics'] == \
+                    'angular_correlation_function':
+                gc_phot_vec = \
+                    np.ones((len(data.data_dict['GC-Phot']['thetas']),
+                             zpairs_gcphot))
             gc_phot_vec = gc_phot_vec.flatten()
         else:
             gc_phot_vec = (
@@ -380,6 +402,7 @@ class Data_handler:
         of the elements that are not to be included.
         The size of the masking vectors is inferred from the input data.
         """
+        wl_vec = []
         # define variables for better readability
         zpairs_wl = data.numtomo_wl * (data.numtomo_wl + 1) // 2
         zpairs_xc = data.numtomo_wl * data.numtomo_gcphot
@@ -387,16 +410,24 @@ class Data_handler:
             (data.numtomo_gcphot + 1) // 2
 
         if self._use_wl:
-            zpair = 0
-            ells = data.data_dict['WL']['ells']
-            wl_vec = np.zeros((len(ells), zpairs_wl))
-            for i in range(1, data.numtomo_wl + 1):
-                for j in range(i, data.numtomo_wl + 1):
-                    accepted_ells = np.array(
-                        self._obs['specifications']['WL']['bins']
-                        [f'n{i}'][f'n{j}']['ell_range'])
-                    wl_vec[:, zpair] = self._get_masking(ells, accepted_ells)
-                    zpair += 1
+            if self._obs['specifications']['WL']['statistics'] == \
+                    'angular_power_spectrum':
+                zpair = 0
+                ells = data.data_dict['WL']['ells']
+                wl_vec = np.zeros((len(ells), zpairs_wl))
+                for i in range(1, data.numtomo_wl + 1):
+                    for j in range(i, data.numtomo_wl + 1):
+                        accepted_ells = np.array(
+                            self._obs['specifications']['WL']['bins']
+                            [f'n{i}'][f'n{j}']['ell_range'])
+                        wl_vec[:, zpair] = self._get_masking(ells,
+                                                             accepted_ells)
+                        zpair += 1
+            elif self._obs['specifications']['WL']['statistics'] == \
+                    'angular_correlation_function':
+                zpairs_wl *= 2
+                wl_vec = np.ones((len(data.data_dict['WL']['thetas']),
+                                  zpairs_wl))
             wl_vec = wl_vec.flatten()
             # the default for np.ndarray.flatten()
             # is leftmost axis as outermost for loop
@@ -412,34 +443,48 @@ class Data_handler:
             wl_vec = np.full(self._wl_size, self._use_wl, dtype=int)
 
         if self._use_xc_phot:
-            zpair = 0
-            ells = data.data_dict['XC-Phot']['ells']
-            xc_phot_vec = np.zeros((len(ells), zpairs_xc))
-            for i in range(1, data.numtomo_wl + 1):
-                for j in range(1, data.numtomo_gcphot + 1):
-                    accepted_ells = np.array(
-                        self._obs['specifications']['WL-GCphot']['bins']
-                        [f'n{i}'][f'n{j}']['ell_range'])
-                    xc_phot_vec[:, zpair] = \
-                        self._get_masking(ells, accepted_ells)
-                    zpair += 1
+            if self._obs['specifications']['WL-GCphot']['statistics'] == \
+                    'angular_power_spectrum':
+                zpair = 0
+                ells = data.data_dict['XC-Phot']['ells']
+                xc_phot_vec = np.zeros((len(ells), zpairs_xc))
+                for i in range(1, data.numtomo_wl + 1):
+                    for j in range(1, data.numtomo_gcphot + 1):
+                        accepted_ells = np.array(
+                            self._obs['specifications']['WL-GCphot']['bins']
+                            [f'n{i}'][f'n{j}']['ell_range'])
+                        xc_phot_vec[:, zpair] = \
+                            self._get_masking(ells, accepted_ells)
+                        zpair += 1
+            elif self._obs['specifications']['WL-GCphot']['statistics'] == \
+                    'angular_correlation_function':
+                xc_phot_vec = \
+                    np.ones((len(data.data_dict['XC-Phot']['thetas']),
+                             zpairs_xc))
             xc_phot_vec = xc_phot_vec.flatten()
         else:
             xc_phot_vec = (
                 np.full(self._xc_phot_size, self._use_xc_phot, dtype=int))
 
         if self._use_gc_phot:
-            zpair = 0
-            ells = data.data_dict['GC-Phot']['ells']
-            gc_phot_vec = np.zeros((len(ells), zpairs_gcphot))
-            for i in range(1, data.numtomo_gcphot + 1):
-                for j in range(i, data.numtomo_gcphot + 1):
-                    accepted_ells = np.array(
-                        self._obs['specifications']['GCphot']['bins']
-                        [f'n{i}'][f'n{j}']['ell_range'])
-                    gc_phot_vec[:, zpair] = \
-                        self._get_masking(ells, accepted_ells)
-                    zpair += 1
+            if self._obs['specifications']['GCphot']['statistics'] == \
+                    'angular_power_spectrum':
+                zpair = 0
+                ells = data.data_dict['GC-Phot']['ells']
+                gc_phot_vec = np.zeros((len(ells), zpairs_gcphot))
+                for i in range(1, data.numtomo_gcphot + 1):
+                    for j in range(i, data.numtomo_gcphot + 1):
+                        accepted_ells = np.array(
+                            self._obs['specifications']['GCphot']['bins']
+                            [f'n{i}'][f'n{j}']['ell_range'])
+                        gc_phot_vec[:, zpair] = \
+                            self._get_masking(ells, accepted_ells)
+                        zpair += 1
+            elif self._obs['specifications']['GCphot']['statistics'] == \
+                    'angular_correlation_function':
+                gc_phot_vec = \
+                    np.ones((len(data.data_dict['GC-Phot']['thetas']),
+                             zpairs_gcphot))
             gc_phot_vec = gc_phot_vec.flatten()
         else:
             gc_phot_vec = (

@@ -357,6 +357,11 @@ class Reader:
                 raise ValueError('The parameter cov_nsim for photo data '
                                  'must be positive')
 
+        if self.data['photo']['Fourier']:
+            scale_var_str = 'ells'
+        else:
+            scale_var_str = 'thetas'
+
         GC_phot_dict = {}
         WL_dict = {}
         XC_phot_dict = {}
@@ -394,9 +399,9 @@ class Reader:
         self.num_bins_xcphot = self.numtomo_wl * self.numtomo_gcphot
         self.num_bins_gcphot = int(self.numtomo_gcphot *
                                    (self.numtomo_gcphot + 1) / 2)
-        self.num_ells_wl = len(WL_dict['ells'])
-        self.num_ells_xcphot = len(XC_phot_dict['ells'])
-        self.num_ells_gcphot = len(GC_phot_dict['ells'])
+        self.num_scales_wl = len(WL_dict[scale_var_str])
+        self.num_scales_xcphot = len(XC_phot_dict[scale_var_str])
+        self.num_scales_gcphot = len(GC_phot_dict[scale_var_str])
 
         tx2_cov_str = self.data['photo']['cov_3x2pt'].format(self.data[
             'photo']['cov_model'])
@@ -435,57 +440,57 @@ class Reader:
         nbins_gc = self.num_bins_gcphot
         nbins_tot = nbins_wl + nbins_xc + nbins_gc
 
-        wl_side = nbins_wl * self.num_ells_wl
-        xc_side = nbins_xc * self.num_ells_xcphot
-        gc_side = nbins_gc * self.num_ells_gcphot
+        wl_side = nbins_wl * self.num_scales_wl
+        xc_side = nbins_xc * self.num_scales_xcphot
+        gc_side = nbins_gc * self.num_scales_gcphot
 
         new_tx2_cov = np.zeros((tx2_cov.shape[0], tx2_cov.shape[1]))
 
         for i in range(nbins_wl):
-            cur_i = int(i * self.num_ells_wl)
-            next_i = int((i + 1) * self.num_ells_wl)
+            cur_i = int(i * self.num_scales_wl)
+            next_i = int((i + 1) * self.num_scales_wl)
             for j in range(nbins_wl):
-                cur_j = int(j * self.num_ells_wl)
-                next_j = int((j + 1) * self.num_ells_wl)
+                cur_j = int(j * self.num_scales_wl)
+                next_j = int((j + 1) * self.num_scales_wl)
                 new_tx2_cov[cur_i:next_i, cur_j:next_j] = \
                     tx2_cov[i::nbins_tot, j::nbins_tot]
             for j in range(nbins_xc):
-                cur_j = int(wl_side + j * self.num_ells_xcphot)
-                next_j = int(wl_side + (j + 1) * self.num_ells_xcphot)
+                cur_j = int(wl_side + j * self.num_scales_xcphot)
+                next_j = int(wl_side + (j + 1) * self.num_scales_xcphot)
                 new_tx2_cov[cur_i:next_i, cur_j:next_j] = \
                     tx2_cov[i::nbins_tot, (nbins_wl + j)::nbins_tot]
             for j in range(nbins_gc):
-                cur_j = int(wl_side + xc_side + j * self.num_ells_gcphot)
+                cur_j = int(wl_side + xc_side + j * self.num_scales_gcphot)
                 next_j = int(wl_side + xc_side +
-                             (j + 1) * self.num_ells_gcphot)
+                             (j + 1) * self.num_scales_gcphot)
                 new_tx2_cov[cur_i:next_i, cur_j:next_j] = \
                     tx2_cov[i::nbins_tot,
                             (nbins_wl + nbins_xc + j)::nbins_tot]
 
         for i in range(nbins_xc):
-            cur_i = int(wl_side + i * self.num_ells_xcphot)
-            next_i = int(wl_side + (i + 1) * self.num_ells_xcphot)
+            cur_i = int(wl_side + i * self.num_scales_xcphot)
+            next_i = int(wl_side + (i + 1) * self.num_scales_xcphot)
             for j in range(nbins_xc):
-                cur_j = int(wl_side + j * self.num_ells_xcphot)
-                next_j = int(wl_side + (j + 1) * self.num_ells_xcphot)
+                cur_j = int(wl_side + j * self.num_scales_xcphot)
+                next_j = int(wl_side + (j + 1) * self.num_scales_xcphot)
                 new_tx2_cov[cur_i:next_i, cur_j:next_j] = \
                     tx2_cov[(nbins_wl + i)::nbins_tot,
                             (nbins_wl + j)::nbins_tot]
             for j in range(nbins_gc):
-                cur_j = int(wl_side + xc_side + j * self.num_ells_gcphot)
+                cur_j = int(wl_side + xc_side + j * self.num_scales_gcphot)
                 next_j = int(wl_side + xc_side +
-                             (j + 1) * self.num_ells_gcphot)
+                             (j + 1) * self.num_scales_gcphot)
                 new_tx2_cov[cur_i:next_i, cur_j:next_j] = \
                     tx2_cov[(nbins_wl + i)::nbins_tot,
                             (nbins_wl + nbins_xc + j)::nbins_tot]
 
         for i in range(nbins_gc):
-            cur_i = int(wl_side + xc_side + i * self.num_ells_gcphot)
-            next_i = int(wl_side + xc_side + (i + 1) * self.num_ells_gcphot)
+            cur_i = int(wl_side + xc_side + i * self.num_scales_gcphot)
+            next_i = int(wl_side + xc_side + (i + 1) * self.num_scales_gcphot)
             for j in range(nbins_gc):
-                cur_j = int(wl_side + xc_side + j * self.num_ells_gcphot)
+                cur_j = int(wl_side + xc_side + j * self.num_scales_gcphot)
                 next_j = int(wl_side + xc_side +
-                             (j + 1) * self.num_ells_gcphot)
+                             (j + 1) * self.num_scales_gcphot)
                 new_tx2_cov[cur_i:next_i, cur_j:next_j] = \
                     tx2_cov[(nbins_wl + nbins_xc + i)::nbins_tot,
                             (nbins_wl + nbins_xc + j)::nbins_tot]

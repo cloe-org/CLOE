@@ -10,6 +10,9 @@ Cobaya:
       NL_flag_phot_matter: 0
       NL_flag_spectro: 0
       statistics_spectro: legendre_multipole_power_spectrum
+      # Select statistics for photometric probes (angular_power_spectrum or
+      # angular_correlation_function)
+      statistics_photo: angular_power_spectrum
       plot_observables_selection: False
       # The user can overwrite here the values of
       # the fields 'data', 'observables_selection', and 'observables_specifications'

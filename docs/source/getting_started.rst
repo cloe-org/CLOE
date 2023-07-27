@@ -35,9 +35,15 @@ To run the unit tests locally:
 
 .. code-block:: bash
 
-	python setup.py test
+	python -m pytest
 
-Note that this requires the development tools.
+To run the verification tests locally:
+
+.. code-block:: bash
+
+	python -m pytest cloe/tests/verification
+
+Note that these tests require the development tools.
 
 Running CLOE
 --------------------
@@ -78,6 +84,5 @@ Yes! Learn how to use CLOE with our demo. You can launch it with Jupyter Noteboo
 .. code-block:: bash
 	
 	jupyter-notebook notebooks/DEMO.ipyng
-
 
 More information about the structure of the repository can be found in the `README <https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/blob/master/README.md>`_. 

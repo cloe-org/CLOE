@@ -25,7 +25,7 @@ dependencies:
   # Domain-specific 3rd-party Python packages (from conda-forge)
   - fast-pt==3.1.1
   # Additional non-Python dependencies
-  - camb==1.4.0
+  - camb==1.5.0
   - gsl==2.7
   - pip:
     # Domain-specific 3rd-party Python package (from PyPI)

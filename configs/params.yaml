@@ -29,6 +29,10 @@ b6_photo: 1.3998214171814918
 b7_photo: 1.4446452851824907
 b8_photo: 1.4964959071110084
 b9_photo: 1.5652475842498528
+b0_mag_poly: -1.50685
+b1_mag_poly: 1.35034
+b2_mag_poly: 0.08321
+b3_mag_poly: 0.04279
 bia: 0.0
 c0_spectro_bin1: 0.0
 c0_spectro_bin2: 0.0

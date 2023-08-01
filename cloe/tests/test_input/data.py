@@ -22,7 +22,8 @@ This module contains default data configurations for unit tests.
                 'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.npy',
                 'cov_3x2pt': 'CovMat-3x2pt-{:s}-20Bins.npy',
                 'cov_model': 'Gauss',
-                'cov_is_num': False}
+                'cov_is_num': False,
+                'Fourier': True}
                      }
 """
 
@@ -45,5 +46,6 @@ mock_data = {
     'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.npy',
     'cov_3x2pt': 'CovMat-3x2pt-{:s}-20Bins.npy',
     'cov_model': 'Gauss',
-    'cov_is_num': False}
+    'cov_is_num': False,
+    'Fourier': True}
 }

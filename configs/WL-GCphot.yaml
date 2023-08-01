@@ -16,7 +16,6 @@
 # ell_range: [[20, 400], [401, 4000]]
 # To exclude all angular scales, 
 # an empty list can be provided
-statistics: angular_power_spectrum
 bins:
   n1: 
     n1: 

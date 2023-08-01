@@ -229,9 +229,9 @@ class Plotter:
         # error bar calculation.
         nbins_wl = self.read_data.num_bins_wl
         nbins_xc = self.read_data.num_bins_xcphot
-        nells_wl = self.read_data.num_ells_wl
-        nells_xc = self.read_data.num_ells_xcphot
-        nells_gc = self.read_data.num_ells_gcphot
+        nells_wl = self.read_data.num_scales_wl
+        nells_xc = self.read_data.num_scales_xcphot
+        nells_gc = self.read_data.num_scales_gcphot
 
         cov_diags = np.sqrt(np.diagonal(self.read_data.data_dict['3x2pt_cov']))
         counter = 0
@@ -350,8 +350,8 @@ class Plotter:
         # changes, the following code will need to be reviewed to correct the
         # error bar calculation.
         nbins_wl = self.read_data.num_bins_wl
-        nells_wl = self.read_data.num_ells_wl
-        nells_xc = self.read_data.num_ells_xcphot
+        nells_wl = self.read_data.num_scales_wl
+        nells_xc = self.read_data.num_scales_xcphot
 
         cov_diags = np.sqrt(np.diagonal(self.read_data.data_dict['3x2pt_cov']))
         counter = 0

@@ -64,6 +64,29 @@ class Euclike:
                                  'Use legendre_multipole_power_spectrum '
                                  'or legendre_multipole_correlation_function')
             self.data['spectro']['Fourier'] = self.do_fourier_spectro
+        if self.do_photo:
+            # Determine if to use Fourier or configuration space
+            photo_obs = ['WL', 'GCphot', 'WL-GCphot']
+            for obs_name in photo_obs:
+                if obs_name in observables['specifications'].keys():
+                    key = obs_name
+                    break
+            if observables['specifications'][key]['statistics'] == \
+                    'angular_power_spectrum':
+                self.do_fourier_photo = True
+                self.scale_var_photo = 'ells'
+                self.num_wl_obs = 1
+            elif observables['specifications'][key]['statistics'] == \
+                    'angular_correlation_function':
+                self.do_fourier_photo = False
+                self.scale_var_photo = 'thetas'
+                self.num_wl_obs = 2
+            else:
+                raise ValueError('Unknown statistics_photo choice. '
+                                 'Use angular_power_spectrum '
+                                 'or angular_correlation_function')
+            self.data['photo']['Fourier'] = self.do_fourier_photo
+
         self.data_ins = reader.Reader(self.data)
         self.data_ins.compute_luminosity_ratio()
         self.data_spectro_fiducial_cosmo = \
@@ -95,10 +118,12 @@ class Euclike:
             self.indices_diagonal_gcphot = \
                 tuple(zip(x_diagonal_gcphot[0], x_diagonal_gcphot[1]))
             self.indices_all = tuple(zip(x_full_xc[0], x_full_xc[1]))
-
-            self.ells_WL = self.data_ins.data_dict['WL']['ells']
-            self.ells_XC = self.data_ins.data_dict['XC-Phot']['ells']
-            self.ells_GC_phot = self.data_ins.data_dict['GC-Phot']['ells']
+            self.scales_WL = \
+                self.data_ins.data_dict['WL'][self.scale_var_photo]
+            self.scales_XC = \
+                self.data_ins.data_dict['XC-Phot'][self.scale_var_photo]
+            self.scales_GC_phot = \
+                self.data_ins.data_dict['GC-Phot'][self.scale_var_photo]
 
             # Flag to select cases with or without RSD for photometric probes
             add_RSD = observables['selection']['add_phot_RSD']
@@ -115,22 +140,23 @@ class Euclike:
 
             # Temporary placeholder for theta vector
             # (will be read from file eventually)
-            theta_min = 0.005
-            theta_max = 20.0
-            nbins_theta = 30
-            theta_deg = np.logspace(np.log10(theta_min),
-                                    np.log10(theta_max),
-                                    nbins_theta)
-            theta_rad = np.deg2rad(theta_deg)
+            theta_min_arcmin = 0.6
+            theta_max_arcmin = 500.0
+            nbins_theta = 20
+            theta_arcmin = np.logspace(np.log10(theta_min_arcmin),
+                                       np.log10(theta_max_arcmin),
+                                       nbins_theta)
+            theta_rad = np.deg2rad(theta_arcmin / 60.)
 
             # Sets the precomputed Bessel functions as an attribute of the
             # Photo class
             self.phot_ins._set_bessel_tables(theta_rad)
 
-            # set the precomputed prefactors for the WL, XC and GCphot Cl's
-            self.phot_ins.set_prefactor(ells_WL=self.ells_WL,
-                                        ells_XC=self.ells_XC,
-                                        ells_GC_phot=self.ells_GC_phot)
+            if self.do_fourier_photo:
+                # set the precomputed prefactors for the WL, XC and GCphot Cls
+                self.phot_ins.set_prefactor(ells_WL=self.scales_WL,
+                                            ells_XC=self.scales_XC,
+                                            ells_GC_phot=self.scales_GC_phot)
 
         if self.do_spectro:
             # Read spectro
@@ -264,24 +290,24 @@ class Euclike:
             if 'B' in index:
                 del (self.data_ins.data_dict['XC-Phot'][index])
         # Transform GC-Phot
-        # We ignore the first value (ells)
+        # We ignore the first value (scales)
         self.tomo_ind_GC_phot = \
             list(self.data_ins.data_dict['GC-Phot'].keys())[1:]
         datavec_dict['GC-Phot'] = np.array(
-                [self.data_ins.data_dict['GC-Phot'][key][ell]
-                 for ell in range(len(self.ells_GC_phot))
+                [self.data_ins.data_dict['GC-Phot'][key][scale]
+                 for scale in range(len(self.scales_GC_phot))
                  for key in self.tomo_ind_GC_phot])
 
         self.tomo_ind_WL = list(self.data_ins.data_dict['WL'].keys())[1:]
         datavec_dict['WL'] = np.array(
-                [self.data_ins.data_dict['WL'][key][ell]
-                 for ell in range(len(self.ells_WL))
+                [self.data_ins.data_dict['WL'][key][scale]
+                 for scale in range(len(self.scales_WL))
                  for key in self.tomo_ind_WL])
 
         self.tomo_ind_XC = list(self.data_ins.data_dict['XC-Phot'].keys())[1:]
         datavec_dict['XC-Phot'] = np.array(
-                [self.data_ins.data_dict['XC-Phot'][key][ell]
-                 for ell in range(len(self.ells_XC))
+                [self.data_ins.data_dict['XC-Phot'][key][scale]
+                 for scale in range(len(self.scales_XC))
                  for key in self.tomo_ind_XC])
 
         datavec_dict['WL'] = \
@@ -325,31 +351,73 @@ class Euclike:
 
         # Obtain the theory for WL
         if self.data_handler_ins.use_wl:
-            wl_array = np.array(
-                [self.phot_ins.Cl_WL(self.ells_WL, element[0], element[1])
-                 for element in self.indices_diagonal_wl]).flatten('F')
+            if self.do_fourier_photo:
+                wl_array = np.array(
+                    [self.phot_ins.Cl_WL(self.scales_WL,
+                                         element[0], element[1])
+                     for element in self.indices_diagonal_wl]
+                ).flatten('F')
+            else:
+                wl_xi_plus = np.array(
+                    [self.phot_ins.corr_func_3x2pt('shear-shear_plus',
+                                                   self.scales_WL,
+                                                   element[0], element[1])
+                     for element in self.indices_diagonal_wl]
+                ).flatten('F')
+                wl_xi_minus = np.array(
+                    [self.phot_ins.corr_func_3x2pt('shear-shear_minus',
+                                                   self.scales_WL,
+                                                   element[0], element[1])
+                     for element in self.indices_diagonal_wl]
+                ).flatten('F')
+                wl_array = np.concatenate((wl_xi_plus, wl_xi_minus), axis=0)
         else:
             wl_array = np.zeros(
-                 len(self.ells_WL) * len(self.indices_diagonal_wl))
+                 self.num_wl_obs * len(self.scales_WL) *
+                 len(self.indices_diagonal_wl)
+            )
 
         # Obtain the theory for XC-Phot
         if self.data_handler_ins.use_xc_phot:
-            xc_phot_array = np.array(
-                [self.phot_ins.Cl_cross(self.ells_XC, element[1], element[0])
-                 for element in self.indices_all]).flatten('F')
+            if self.do_fourier_photo:
+                xc_phot_array = np.array(
+                    [self.phot_ins.Cl_cross(self.scales_XC,
+                                            element[1], element[0])
+                     for element in self.indices_all]
+                ).flatten('F')
+            else:
+                xc_phot_array = np.array(
+                    [self.phot_ins.corr_func_3x2pt('shear-position',
+                                                   self.scales_XC,
+                                                   element[1], element[0])
+                     for element in self.indices_all]
+                ).flatten('F')
         else:
             xc_phot_array = np.zeros(
-                 len(self.ells_XC) * len(self.indices_all))
+                 len(self.scales_XC) *
+                 len(self.indices_all)
+            )
 
         # Obtain the theory for GC-Phot
         if self.data_handler_ins.use_gc_phot:
-            gc_phot_array = np.array(
-                [self.phot_ins.Cl_GC_phot(self.ells_GC_phot,
-                                          element[0], element[1])
-                 for element in self.indices_diagonal_gcphot]).flatten('F')
+            if self.do_fourier_photo:
+                gc_phot_array = np.array(
+                    [self.phot_ins.Cl_GC_phot(self.scales_GC_phot,
+                                              element[0], element[1])
+                     for element in self.indices_diagonal_gcphot]
+                ).flatten('F')
+            else:
+                gc_phot_array = np.array(
+                    [self.phot_ins.corr_func_3x2pt('position-position',
+                                                   self.scales_GC_phot,
+                                                   element[0], element[1])
+                     for element in self.indices_diagonal_gcphot]
+                ).flatten('F')
         else:
             gc_phot_array = np.zeros(
-                len(self.ells_GC_phot) * len(self.indices_diagonal_gcphot))
+                len(self.scales_GC_phot) *
+                len(self.indices_diagonal_gcphot)
+            )
 
         # Apply any matrix transform activated with a switch
         wl_array = \
@@ -438,18 +506,18 @@ class Euclike:
             return transformed_array
         elif 'BNT' in self.matrix_transform_phot:
             if obs == 'WL':
-                N_ells = len(self.ells_WL)
+                N_scales = len(self.scales_WL)
                 transformed_array = \
                     self.BNT_transformation\
                     .apply_vectorized_symmetric_BNT(
-                                                    N_ells,
+                                                    N_scales,
                                                     obs_array)
             elif obs == 'XC-phot':
-                N_ells = len(self.ells_XC)
+                N_scales = len(self.scales_XC)
                 transformed_array = \
                     self.BNT_transformation\
                     .apply_vectorized_nonsymmetric_BNT(
-                                                       N_ells,
+                                                       N_scales,
                                                        obs_array)
             elif obs == 'GC-phot':
                 transformed_array = obs_array

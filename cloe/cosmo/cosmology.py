@@ -258,11 +258,14 @@ class Cosmology:
                           'NL_flag_phot_matter': 0,
                           'NL_flag_spectro': 0,
                           # bias model
-                          # (1 => linear interpolation, 2 => constant in bins
-                          # 3 => 3rd order polynomial)
+                          # 1 => linear interpolation,
+                          # 2 => constant in bins,
+                          # 3 => 3rd order polynomial,
                           'bias_model': 1,
                           # magnification bias model
-                          # (1 => linear interpolation, 2 => constant in bins)
+                          # 1 => linear interpolation,
+                          # 2 => constant in bins,
+                          # 3 => cubic dependence of redshift,
                           'magbias_model': 2,
                           # Use Modified Gravity gamma
                           'use_gamma_MG': 0,
@@ -307,6 +310,11 @@ class Cosmology:
                              'magnification_bias_11': 0.4917,
                              'magnification_bias_12': 0.98555,
                              'magnification_bias_13': 1.6056,
+                             # Magnification bias (polynomial case)
+                             'b0_mag_poly': -1.50685,
+                             'b1_mag_poly': 1.35034,
+                             'b2_mag_poly': 0.08321,
+                             'b3_mag_poly': 0.04279,
                              # Multiplicative bias
                              'multiplicative_bias_1': 0.0,
                              'multiplicative_bias_2': 0.0,

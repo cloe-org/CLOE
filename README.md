@@ -19,7 +19,7 @@ Further documentation is found [here](http://pf-ist-likelihood.pages.euclid-sgs.
 
 CLOE allows the user to obtain the linear matter power spectrum from either of the [CAMB](https://camb.readthedocs.io/en/latest/) and [CLASS](https://lesgourg.github.io/class_public/class.html) Boltzmann codes.
 
-In order to obtain cosmological parameter constraints, CLOE reads in the redshift distributions and computes the theoretical predictions of the Euclid observables, which are used together with the data and covariance to obtain the likelihood. The likelihood is then evaluated across the parameter space using one of the samplers of [Cobaya](https://cobaya.readthedocs.io/en/latest/) or [CosmoSIS](https://cosmosis.readthedocs.io/en/latest/) to obtain the posterior probability.
+In order to obtain cosmological parameter constraints, CLOE reads in the redshift distributions and computes the theoretical predictions of the Euclid observables, which are used together with the data and covariance to obtain the likelihood. The likelihood is then evaluated across the parameter space using one of the samplers of [Cobaya](https://cobaya.readthedocs.io/en/latest/) or [CosmoSIS](https://cosmosis.readthedocs.io/en/latest/) to obtain the posterior probability. **The latter is not part of the current v2.0 release.**
 
 ## Installation
 

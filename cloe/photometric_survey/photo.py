@@ -123,6 +123,15 @@ class Photo:
         Method to update the theory class attribute to the passed cosmo
         dictionary, and recompute all cosmology-dependent quantities.
 
+        The model for magnification galaxy bias is determined with the value of
+        the `magbias_model` key in the `cosmo_dic` input parameter.
+
+        The implemented models are:
+
+            #. Linear interpolation between input bin values
+            #. Constant value per tomographic bin
+            #. Third-order polynomial bias function
+
         Parameters
         ----------
         cosmo_dic: dict
@@ -171,13 +180,19 @@ class Photo:
             self.photobias = [nuisance_dict[f'b{i}_photo']
                               for i in self.nz_GC.get_tomographic_bins()]
 
-            self.magbias = [nuisance_dict[f'magnification_bias_{i}']
-                            for i in self.nz_GC.get_tomographic_bins()]
-            if self.theory['magbias_model'] == 1:
-                self.magbias = \
-                    linear_interpolator(
-                        self.theory['redshift_bins_means_phot'],
-                        self.magbias)
+            if self.theory['magbias_model'] <= 2:
+                self.magbias = [nuisance_dict[f'magnification_bias_{i}']
+                                for i in self.nz_GC.get_tomographic_bins()]
+                if self.theory['magbias_model'] == 1:
+                    self.magbias = \
+                        linear_interpolator(
+                            self.theory['redshift_bins_means_phot'],
+                            self.magbias)
+            elif self.theory['magbias_model'] == 3:
+                self.magbias = self.poly_mag_bias
+            else:
+                raise ValueError('magbias_model flag can only be selected '
+                                 'from the values (1,2,3)')
 
             # z_wtom is the number of tomographic bins + 1
             z_wtom_gc = 1 + self.nz_GC.get_num_tomographic_bins()
@@ -552,6 +567,29 @@ class Photo:
 
         return W_val
 
+    def poly_mag_bias(self, z):
+        r"""Polynomial magnification bias.
+
+        Computes bias using a 3rd order polynomial function of redshift.
+
+        Parameters
+        ----------
+        z: float or numpy.ndarray
+            Redshift(s) at which to calculate bias
+
+        Returns
+        -------
+        Magnification bias: float or numpy.ndarray
+            Value(s) of magnification bias at input redshift(s)
+        """
+        nuisance = self.theory['nuisance_parameters']
+        bias = (
+            nuisance['b0_mag_poly'] +
+            nuisance['b1_mag_poly'] * z +
+            nuisance['b2_mag_poly'] * np.power(z, 2) +
+            nuisance['b3_mag_poly'] * np.power(z, 3))
+        return bias
+
     def magnification_window(self, z, bin_i, k=0.0001):
         r"""Magnification bias window.
 
@@ -608,12 +646,13 @@ class Photo:
                  (self.theory['f_K_z_func'](z) /
                   (1 / H0_Mpc)) * integral_arr)
 
-        if self.theory['magbias_model'] == 1:
-            # magbias is a linear interpolator
-            W_val *= self.magbias(z)
-        elif self.theory['magbias_model'] == 2:
+        if self.theory['magbias_model'] == 2:
             # magbias is a list of constants
             W_val *= self.magbias[bin_i - 1]
+        else:
+            # magbias is either a linear interpolator or a cubic polynomial
+            # to be evaluated as a function of the redshift
+            W_val *= self.magbias(z)
 
         return W_val
 

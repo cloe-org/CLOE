@@ -31,6 +31,9 @@ z_samp: 100
 # Select statistics for spectroscopic probes (legendre_multipole_power_spectrum
 # or legendre_multipole_correlation_function)
 statistics_spectro: legendre_multipole_power_spectrum
+# Select statistics for photometric probes (angular_power_spectrum
+# or angular_correlation_function)
+statistics_photo: angular_power_spectrum
 # Add RSD to photometric probes
 add_phot_RSD: False
 # Apply a generic matrix transformation to the photo observables (available options: 'BNT', 'BNT-test')

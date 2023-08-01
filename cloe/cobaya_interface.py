@@ -66,13 +66,18 @@ class EuclidLikelihood(Likelihood):
         if self.plot_observables_selection:
             self.observables_pf = observables_visualization(
              self.observables['selection'])
-        self.observables['selection']['add_phot_RSD'] = \
-            self.add_phot_RSD
+        self.observables['selection']['add_phot_RSD'] = self.add_phot_RSD
         self.observables['selection']['matrix_transform_phot'] = \
             self.matrix_transform_phot
         if 'GCspectro' in self.observables['specifications'].keys():
             self.observables['specifications']['GCspectro']['statistics'] = \
                 self.statistics_spectro
+        # set the parameters used to determine what statistics to use
+        # for the photometric probes
+        for key in self.observables['specifications'].keys():
+            if key in ['WL', 'GCphot', 'WL-GCphot']:
+                self.observables['specifications'][key]['statistics'] = \
+                    self.statistics_photo
         # Select which power spectra to require from the Boltzmann solver
         if self.NL_flag_phot_matter > 0:
             self.use_NL = [False, True]

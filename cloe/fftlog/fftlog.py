@@ -131,5 +131,7 @@ class fftlog(object):
         Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi) / 4.
         # here the ordering of N_extrap_begin and N_extrap_end is reversed
         # since we have moved to Fourier space
-        return y[self.N_extrap_end:self.N - self.N_extrap_begin],\
+        return (
+            y[self.N_extrap_end:self.N - self.N_extrap_begin],
             Fy[self.N_extrap_end:self.N - self.N_extrap_begin]
+        )

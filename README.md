@@ -102,7 +102,7 @@ docker pull gitlab.euclid-sgs.uk:4567/pf-ist-likelihood/likelihood-implementatio
 and tag an alias called `cloe` to avoid writing the full image name for every command.
 
 ```shell
-git tag gitlab.euclid-sgs.uk:4567/pf-ist-likelihood/likelihood-implementation/cloe cloe
+docker tag gitlab.euclid-sgs.uk:4567/pf-ist-likelihood/likelihood-implementation/cloe cloe
 ```
 
 No further installation or set up is required.

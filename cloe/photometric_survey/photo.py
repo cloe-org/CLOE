@@ -638,6 +638,8 @@ class Photo:
                                                    zint_mat[zii, 0],
                                                    n_z_normalized)
                              for zii in range(len(zint_mat))])
+        if self.theory['magbias_model'] != 2:
+            intg_mat *= self.magbias(zint_mat)
 
         integral_arr = integrate.trapz(intg_mat, dx=diffz, axis=1)
 
@@ -649,10 +651,6 @@ class Photo:
         if self.theory['magbias_model'] == 2:
             # magbias is a list of constants
             W_val *= self.magbias[bin_i - 1]
-        else:
-            # magbias is either a linear interpolator or a cubic polynomial
-            # to be evaluated as a function of the redshift
-            W_val *= self.magbias(z)
 
         return W_val
 

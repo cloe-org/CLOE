@@ -336,6 +336,7 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['NL_flag_phot_matter'] = \
                 self.NL_flag_phot_matter
             self.cosmo.cosmo_dic['NL_flag_spectro'] = self.NL_flag_spectro
+            self.cosmo.cosmo_dic['f_out_z_dep'] = self.f_out_z_dep
             self.cosmo.cosmo_dic['bias_model'] = self.bias_model
             self.cosmo.cosmo_dic['magbias_model'] = self.magbias_model
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
@@ -427,6 +428,8 @@ class EuclidLikelihood(Likelihood):
                 info['likelihood']['Euclid']['NL_flag_phot_matter']
             self.cosmo.cosmo_dic['NL_flag_spectro'] = \
                 info['likelihood']['Euclid']['NL_flag_spectro']
+            self.cosmo.cosmo_dic['f_out_z_dep'] = \
+                info['likelihood']['Euclid']['f_out_z_dep']
             self.cosmo.cosmo_dic['bias_model'] = self.bias_model
             self.cosmo.cosmo_dic['add_phot_RSD'] = \
                 info['likelihood']['Euclid']['add_phot_RSD']

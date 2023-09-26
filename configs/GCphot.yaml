@@ -36,6 +36,12 @@ bins:
       ell_range: [[20, 4000]]
     n10: 
       ell_range: [[20, 4000]]
+    n11: 
+      ell_range: [[20, 4000]]
+    n12: 
+      ell_range: [[20, 4000]]
+    n13: 
+      ell_range: [[20, 4000]]
   n2: 
     n2: 
       ell_range: [[20, 4000]]
@@ -55,6 +61,12 @@ bins:
       ell_range: [[20, 4000]]
     n10: 
       ell_range: [[20, 4000]]
+    n11: 
+      ell_range: [[20, 4000]]
+    n12: 
+      ell_range: [[20, 4000]]
+    n13: 
+      ell_range: [[20, 4000]]
   n3: 
     n3: 
       ell_range: [[20, 4000]]
@@ -72,6 +84,12 @@ bins:
       ell_range: [[20, 4000]]
     n10: 
       ell_range: [[20, 4000]]
+    n11: 
+      ell_range: [[20, 4000]]
+    n12: 
+      ell_range: [[20, 4000]]
+    n13: 
+      ell_range: [[20, 4000]]
   n4: 
     n4: 
       ell_range: [[20, 4000]]
@@ -87,6 +105,12 @@ bins:
       ell_range: [[20, 4000]]
     n10: 
       ell_range: [[20, 4000]]
+    n11: 
+      ell_range: [[20, 4000]]
+    n12: 
+      ell_range: [[20, 4000]]
+    n13: 
+      ell_range: [[20, 4000]]
   n5: 
     n5: 
       ell_range: [[20, 4000]]
@@ -100,6 +124,12 @@ bins:
       ell_range: [[20, 4000]]
     n10: 
       ell_range: [[20, 4000]]
+    n11: 
+      ell_range: [[20, 4000]]
+    n12: 
+      ell_range: [[20, 4000]]
+    n13: 
+      ell_range: [[20, 4000]]
   n6: 
     n6: 
       ell_range: [[20, 4000]]
@@ -111,6 +141,12 @@ bins:
       ell_range: [[20, 4000]]
     n10: 
       ell_range: [[20, 4000]]
+    n11: 
+      ell_range: [[20, 4000]]
+    n12: 
+      ell_range: [[20, 4000]]
+    n13: 
+      ell_range: [[20, 4000]]
   n7: 
     n7: 
       ell_range: [[20, 4000]]
@@ -120,6 +156,12 @@ bins:
       ell_range: [[20, 4000]]
     n10: 
       ell_range: [[20, 4000]]
+    n11: 
+      ell_range: [[20, 4000]]
+    n12: 
+      ell_range: [[20, 4000]]
+    n13: 
+      ell_range: [[20, 4000]]
   n8: 
     n8: 
       ell_range: [[20, 4000]]
@@ -127,11 +169,44 @@ bins:
       ell_range: [[20, 4000]]
     n10: 
       ell_range: [[20, 4000]]
+    n11: 
+      ell_range: [[20, 4000]]
+    n12: 
+      ell_range: [[20, 4000]]
+    n13: 
+      ell_range: [[20, 4000]]
   n9: 
     n9: 
       ell_range: [[20, 4000]]
     n10: 
       ell_range: [[20, 4000]]
+    n11: 
+      ell_range: [[20, 4000]]
+    n12: 
+      ell_range: [[20, 4000]]
+    n13: 
+      ell_range: [[20, 4000]]
   n10: 
     n10: 
+      ell_range: [[20, 4000]]
+    n11: 
+      ell_range: [[20, 4000]]
+    n12: 
+      ell_range: [[20, 4000]]
+    n13: 
+      ell_range: [[20, 4000]]
+  n11: 
+    n11: 
+      ell_range: [[20, 4000]]
+    n12: 
+      ell_range: [[20, 4000]]
+    n13: 
+      ell_range: [[20, 4000]]
+  n12: 
+    n12: 
+      ell_range: [[20, 4000]]
+    n13: 
+      ell_range: [[20, 4000]]
+  n13: 
+    n13: 
       ell_range: [[20, 4000]]

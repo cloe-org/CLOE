@@ -12,4 +12,4 @@ user_models:
   baryonic_feedback: baryonic_feedback.yaml
 user_options:
   # Flag for advanced users to let CLOE overwrite the configs/params.yaml file
-  overwrite: True
+  overwrite: False

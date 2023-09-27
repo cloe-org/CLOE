@@ -445,7 +445,6 @@ class Euclike:
 
         """
         if self.do_photo:
-            print(self.matrix_transform_phot)
             if not self.matrix_transform_phot:
                 return None
             elif 'BNT' in self.matrix_transform_phot:

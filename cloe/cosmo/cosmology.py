@@ -596,7 +596,9 @@ class Cosmology:
 
         if self.cosmo_dic['use_gamma_MG']:
             self.cosmo_dic['D_z_k_func'] = \
-                interpolate.UnivariateSpline(z_win, self.growth_factor_MG())
+                interpolate.interp1d(z_win, self.growth_factor_MG(),
+                                     kind="cubic")
+
         else:
             growth_grid = self.growth_factor(z_win, k_win)
             self.cosmo_dic['D_z_k_func'] = \
@@ -1343,6 +1345,87 @@ class Cosmology:
                                             kx=1, ky=1)
         return
 
+    def rescale_power_spectra_MG(self):
+        r"""Rescale the power spectra accounting for Modified Gravity.
+
+        Update the power spectra contained in the cosmology dictionary
+        according to
+
+
+        .. math::
+            P_A^{\mathrm{MG}}(k, z)=P_A(k, z)\left[\frac{D_{\mathrm{MG}}\
+            (z ; \gamma)}{D(z)}\right]^2
+
+        The rescaling is applied to :math:`P_{\rm mm}`, :math:`P_{\rm mg}`,
+        :math:`P_{\rm gg}`, :math:`P_{\rm II}`, :math:`P_{\rm mI}`,
+        :math:`P_{\rm gI}` spectra.
+
+        """
+
+        # Compute the rescaling faction, (D_MG/D_GR)^2
+        n_x_dims = len(self.cosmo_dic['D_z_k'].shape)
+        if n_x_dims == 2:
+            D_GR = self.cosmo_dic['D_z_k'][:, 0]
+            # The slicing is performed since the code retrieves a function of
+            # z and k and we take the large scale growth factor
+        elif n_x_dims == 1:
+            D_GR = self.cosmo_dic['D_z_k']
+        D_MG = self.growth_factor_MG()
+        k_win = self.cosmo_dic['k_win']
+        z_win = self.cosmo_dic['z_win']
+        # TODO: this should be done *once* in the obtain_power_spectra function
+        # this to be solved in a new task
+
+        rescaling_factor = (D_MG / D_GR)**2
+        rescaling_matrix = np.repeat(rescaling_factor[np.newaxis, :],
+                                     len(k_win), 0)
+
+        pksrc_phot = self.pk_source_phot
+        pmm_phot = np.array([pksrc_phot.Pmm_phot_def(zz, k_win)
+                             for zz in z_win]) * rescaling_matrix
+        pgg_phot = np.array([pksrc_phot.Pgg_phot_def(zz, k_win)
+                             for zz in z_win]) * rescaling_matrix
+        pgdelta_phot = np.array([pksrc_phot.Pgdelta_phot_def(zz, k_win)
+                                 for zz in z_win]) * rescaling_matrix
+        pii = np.array([pksrc_phot.Pii_def(zz, k_win)
+                        for zz in z_win]) * rescaling_matrix
+        pdeltai = np.array([pksrc_phot.Pdeltai_def(zz, k_win)
+                            for zz in z_win]) * rescaling_matrix
+        pgi_phot = np.array([pksrc_phot.Pgi_phot_def(zz, k_win)
+                             for zz in z_win]) * rescaling_matrix
+
+        self.cosmo_dic['Pmm_phot'] = \
+            interpolate.RectBivariateSpline(z_win,
+                                            k_win,
+                                            pmm_phot,
+                                            kx=1, ky=1)
+        self.cosmo_dic['Pgg_phot'] = \
+            interpolate.RectBivariateSpline(z_win,
+                                            k_win,
+                                            pgg_phot,
+                                            kx=1, ky=1)
+        self.cosmo_dic['Pgdelta_phot'] = \
+            interpolate.RectBivariateSpline(z_win,
+                                            k_win,
+                                            pgdelta_phot,
+                                            kx=1, ky=1)
+
+        self.cosmo_dic['Pii'] = \
+            interpolate.RectBivariateSpline(z_win,
+                                            k_win,
+                                            pii,
+                                            kx=1, ky=1)
+        self.cosmo_dic['Pdeltai'] = \
+            interpolate.RectBivariateSpline(z_win,
+                                            k_win,
+                                            pdeltai,
+                                            kx=1, ky=1)
+        self.cosmo_dic['Pgi_phot'] = \
+            interpolate.RectBivariateSpline(z_win,
+                                            k_win,
+                                            pgi_phot,
+                                            kx=1, ky=1)
+
     def MG_mu_def(self, redshift, k_scale, MG_mu):
         r"""Modified gravitational coupling to matter.
 
@@ -1454,3 +1537,6 @@ class Cosmology:
         # Update dictionary with bias function and power spectra
         self.create_phot_galbias()
         self.obtain_power_spectra()
+        # Rescale spectra in the dictionary if MG is included
+        if self.cosmo_dic['use_gamma_MG']:
+            self.rescale_power_spectra_MG()

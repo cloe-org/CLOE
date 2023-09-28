@@ -515,3 +515,117 @@ class cosmoinitTestCase(TestCase):
             0.002,
         )
         self.cosmo.cosmo_dic['z_win'] = z_win
+
+    def test_rescale_Pk_MG(self):
+        self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.002)
+        k_win = self.cosmo.cosmo_dic['k_win']
+        z_win = self.cosmo.cosmo_dic['z_win']
+        Pmm_phot = self.cosmo.cosmo_dic['Pmm_phot'](z_win, k_win, grid=False)
+        Pgg_phot = self.cosmo.cosmo_dic['Pgg_phot'](z_win, k_win, grid=False)
+        Pgdelta_phot = self.cosmo.cosmo_dic['Pgdelta_phot'](z_win, k_win,
+                                                            grid=False)
+        Pii = self.cosmo.cosmo_dic['Pii'](z_win, k_win, grid=False)
+        Pdeltai = self.cosmo.cosmo_dic['Pdeltai'](z_win, k_win, grid=False)
+        Pgi_phot = self.cosmo.cosmo_dic['Pgi_phot'](z_win, k_win, grid=False)
+        self.cosmo.cosmo_dic['use_gamma_MG'] = False
+        self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.002)
+        # check that nothing gets rescaled if Flag == False
+        npt.assert_allclose(
+            Pmm_phot,
+            self.cosmo.cosmo_dic['Pmm_phot'](z_win, k_win, grid=False),
+            rtol=1e-7,
+            err_msg='MG rescaling applied to Pmm_phot!',
+        )
+        npt.assert_allclose(
+            Pgdelta_phot,
+            self.cosmo.cosmo_dic['Pgdelta_phot'](z_win, k_win, grid=False),
+            rtol=1e-7,
+            err_msg='MG rescaling applied to Pgdelta_phot!',
+        )
+        npt.assert_allclose(
+            Pii,
+            self.cosmo.cosmo_dic['Pii'](z_win, k_win, grid=False),
+            rtol=1e-7,
+            err_msg='MG rescaling applied to Pii!',
+        )
+        npt.assert_allclose(
+            Pdeltai,
+            self.cosmo.cosmo_dic['Pdeltai'](z_win, k_win, grid=False),
+            rtol=1e-7,
+            err_msg='MG rescaling applied to Pdeltai!',
+        )
+        npt.assert_allclose(
+            Pgi_phot,
+            self.cosmo.cosmo_dic['Pgi_phot'](z_win, k_win, grid=False),
+            rtol=1e-7,
+            err_msg='MG rescaling applied to Pgi_phot!',
+        )
+        npt.assert_allclose(
+            Pgg_phot,
+            self.cosmo.cosmo_dic['Pgg_phot'](z_win, k_win, grid=False),
+            rtol=1e-7,
+            err_msg='MG rescaling applied to Pgg_phot!',
+        )
+        self.cosmo.cosmo_dic['use_gamma_MG'] = True
+        self.cosmo.cosmo_dic['gamma_MG'] = 1.0
+        self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.002)
+
+        Pmm_phot_MG = self.cosmo.cosmo_dic['Pmm_phot'](z_win,
+                                                       k_win, grid=False)
+        Pgg_phot_MG = self.cosmo.cosmo_dic['Pgg_phot'](z_win,
+                                                       k_win, grid=False)
+        Pgdelta_phot_MG = self.cosmo.cosmo_dic['Pgdelta_phot'](z_win,
+                                                               k_win,
+                                                               grid=False)
+        Pii_MG = self.cosmo.cosmo_dic['Pii'](z_win, k_win, grid=False)
+        Pdeltai_MG = self.cosmo.cosmo_dic['Pdeltai'](z_win, k_win, grid=False)
+        Pgi_phot_MG = self.cosmo.cosmo_dic['Pgi_phot'](z_win, k_win,
+                                                       grid=False)
+
+        # check that stuff changes, if Flag == True
+        npt.assert_equal(np.any(np.not_equal(Pmm_phot, Pmm_phot_MG)), True)
+        npt.assert_equal(np.any(np.not_equal(Pgg_phot, Pgg_phot_MG)), True)
+        npt.assert_equal(np.any(np.not_equal(Pgdelta_phot,
+                                             Pgdelta_phot_MG)), True)
+        npt.assert_equal(np.any(np.not_equal(Pii, Pii_MG)), True)
+        npt.assert_equal(np.any(np.not_equal(Pdeltai, Pdeltai_MG)), True)
+        npt.assert_equal(np.any(np.not_equal(Pgi_phot, Pgi_phot_MG)), True)
+
+        self.cosmo.cosmo_dic['use_gamma_MG'] = True
+        self.cosmo.cosmo_dic['gamma_MG'] = 6 / 11
+        self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.002)
+
+        Pmm_phot_MG = self.cosmo.cosmo_dic['Pmm_phot'](z_win,
+                                                       k_win, grid=False)
+        Pgg_phot_MG = self.cosmo.cosmo_dic['Pgg_phot'](z_win,
+                                                       k_win, grid=False)
+        Pgdelta_phot_MG = self.cosmo.cosmo_dic['Pgdelta_phot'](z_win,
+                                                               k_win,
+                                                               grid=False)
+        Pii_MG = self.cosmo.cosmo_dic['Pii'](z_win, k_win, grid=False)
+        Pdeltai_MG = self.cosmo.cosmo_dic['Pdeltai'](z_win, k_win, grid=False)
+        Pgi_phot_MG = self.cosmo.cosmo_dic['Pgi_phot'](z_win, k_win,
+                                                       grid=False)
+        P_shape = Pii_MG.shape
+
+        # check that things chaing slightly if gamma==6/11, GR value
+        # rtol_MG has been chosen checking the effect of gamma, as we know
+        # the ratio cannot be one being this just an approximation
+        rtol_MG = 5e-3
+        npt.assert_allclose(Pmm_phot / Pmm_phot_MG, np.ones(P_shape),
+                            rtol=rtol_MG,
+                            err_msg='Wrong rescaling applied to Pmm_phot')
+        npt.assert_allclose(Pgg_phot / Pgg_phot_MG, np.ones(P_shape),
+                            rtol=rtol_MG,
+                            err_msg='Wrong rescaling applied to Pgg_phot')
+        npt.assert_allclose(Pgdelta_phot / Pgdelta_phot_MG,
+                            np.ones(P_shape), rtol=rtol_MG,
+                            err_msg='Wrong rescaling applied to Pgdelta_phot')
+        npt.assert_allclose(Pii / Pii_MG, np.ones(P_shape), rtol=rtol_MG,
+                            err_msg='Wrong rescaling applied to Pii')
+        npt.assert_allclose(Pdeltai / Pdeltai_MG, np.ones(P_shape),
+                            rtol=rtol_MG,
+                            err_msg='Wrong rescaling applied to Pdeltai')
+        npt.assert_allclose(Pgi_phot / Pgi_phot_MG, np.ones(P_shape),
+                            rtol=rtol_MG,
+                            err_msg='Wrong rescaling applied to Pgi_phot')

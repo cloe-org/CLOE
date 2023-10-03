@@ -161,6 +161,8 @@ class Euclike:
         if self.do_spectro:
             # Read spectro
             self.data_ins.read_GC_spectro()
+            self.data_spectro_fiducial_cosmo = \
+                self.data_ins.data_spectro_fiducial_cosmo
             self.zkeys = self.data_ins.data_dict['GC-Spectro'].keys()
 
             # Spectro class instance

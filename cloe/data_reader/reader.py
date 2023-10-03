@@ -223,9 +223,10 @@ class Reader:
             self.data_spectro_fiducial_cosmo = {
                 'H0': fid_cosmo_file[1].header['HUBBLE'] *
                 100,
-                'omch2': (fid_cosmo_file[1].header['OMEGA_M'] -
+                'omch2': ((fid_cosmo_file[1].header['OMEGA_M'] -
                           fid_cosmo_file[1].header['OMEGA_B']) *
-                fid_cosmo_file[1].header['HUBBLE']**2,
+                          fid_cosmo_file[1].header['HUBBLE']**2 -
+                          0.0006451438915397982),
                 'ombh2': fid_cosmo_file[1].header['OMEGA_B'] *
                 fid_cosmo_file[1].header['HUBBLE']**2,
                 'ns': fid_cosmo_file[1].header['INDEX_N'],
@@ -234,8 +235,8 @@ class Reader:
                 'omkh2': fid_cosmo_file[1].header['OMEGA_K'] *
                 fid_cosmo_file[1].header['HUBBLE']**2,
                 # OU-LE3 spectro files always with omnuh2 = 0
-                'omnuh2': 0.000644201,
-                'Omnu': 0.001435066}
+                'omnuh2': 0.0006451438915397982,
+                'Omnu': 0.0014214235118735832}
             # Omega_radiation is ignored here
             fid_cosmo_file.close()
 

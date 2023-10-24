@@ -12,7 +12,7 @@
 WL:
   WL: True
   GCphot: True
-  GCspectro: True
+  GCspectro: False
 GCphot:
   GCphot: True
   GCspectro: False

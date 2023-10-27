@@ -40,7 +40,10 @@ class EFTofLSS:
         self.Obh2 = cosmo_dic['ombh2']
         self.Omh2 = cosmo_dic['omch2'] + self.Obh2
         self.tau = cosmo_dic['tau']
-        self.Dz = cosmo_dic['D_z_k_func'](self.z, 0.0)
+        if cosmo_dic['use_gamma_MG']:
+            self.Dz = cosmo_dic['D_z_k_func_MG'](self.z)
+        else:
+            self.Dz = cosmo_dic['D_z_k_func'](self.z, 0.05)
         self.f = cosmo_dic['f_z'](0.0)
 
         self.fastpt = FASTPTPlus(self.ks, -2, low_extrap=-6, high_extrap=5,

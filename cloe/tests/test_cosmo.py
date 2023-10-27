@@ -32,6 +32,16 @@ class cosmoinitTestCase(TestCase):
         cls.cosmo_curv_pos.cosmo_dic = (
             load_test_pickle('cosmo_test_curv_pos_dic.pickle')
         )
+        # Define test case for gamma parametrization
+        cls.cosmo_gamma = Cosmology()
+        cls.cosmo_gamma.cosmo_dic = (
+            load_test_pickle('cosmo_test_gamma_dic.pickle')
+        )
+        # Define test case for nonlinear model
+        cls.cosmo_NL = Cosmology()
+        cls.cosmo_NL.cosmo_dic = (
+            load_test_pickle('cosmo_test_NLphot2_gamma_dic.pickle')
+        )
 
     def setUp(self) -> None:
         # Check values
@@ -43,19 +53,25 @@ class cosmoinitTestCase(TestCase):
         self.fK12check = [1454.728042, 2538.164745, 3369.714525]
         self.fK12check_curv_neg = [2897.029977, 1600.91614, 691.969792]
         self.fK12check_curv_pos = 1886.960791
-        self.Pgg_phot_test = 58392.759202
-        self.Pgg_phot_test_interpolation = 58332.02434
-        self.Pgdelta_phot_test = 41294.412017
-        self.Pgdelta_phot_test_interpolation = 41253.453724
+        self.Pgg_phot_test = 50899.825923
+        self.Pgg_phot_test_interpolation = 50877.507301
+        self.Pgdelta_phot_test = 38553.567529
+        self.Pgdelta_phot_test_interpolation = 38538.420539
         self.Pgg_spectro_test = 82548.320427
         self.Pgdelta_spectro_test = 59890.445816
         self.Pii_test = 2.417099
         self.Pdeltai_test = -265.680094
-        self.Pgi_phot_test = -375.687484
+        self.Pgi_phot_test = -350.751905
         self.Pgi_spectro_test = -388.28625
         self.MG_mu_test = 1.0
         self.MG_sigma_test = 1.0
         self.matter_density = 0.317763
+        self.redshift_test = 1.0
+        self.growth_rate_check = 0.879284
+        self.growth_rate_MG_check = 0.877252
+        self.Pk_delta_MG_check = [3875.837355, 1091.360072]
+        self.Pk_cb_MG_check = [3909.994641, 1101.189673]
+        self.Pk_halomodel_MG_check = [4033.881642, 1353.201077]
 
     def tearDown(self):
         self.H0check = None
@@ -76,6 +92,11 @@ class cosmoinitTestCase(TestCase):
         self.Pgi_phot_test = None
         self.Pgi_spectro_test = None
         self.omega_density = None
+        self.growth_rate_check = None
+        self.growth_rate_MG_check = None
+        self.Pk_delta_MG_check = None
+        self.Pk_cb_MG_check = None
+        self.Pk_halomodel_MG_check = None
 
     def test_cosmo_init(self):
         emptflag = bool(self.cosmo.cosmo_dic)
@@ -146,6 +167,20 @@ class cosmoinitTestCase(TestCase):
             err_msg='Error in f_z_k calculation',
         )
 
+    def test_cosmo_growth_rate_interp(self):
+        growth_rate = self.cosmo.cosmo_dic['f_z'](self.redshift_test)
+        npt.assert_allclose(
+            growth_rate, self.growth_rate_check, rtol=1e-5,
+            err_msg='Error in the interpolator of the growth rate'
+        )
+
+    def test_cosmo_growth_rate_MG_interp(self):
+        growth_rate = self.cosmo_gamma.cosmo_dic['f_z'](self.redshift_test)
+        npt.assert_allclose(
+            growth_rate, self.growth_rate_MG_check, rtol=1e-5,
+            err_msg='Error in the interpolator of the growth rate'
+        )
+
     def test_transverse_comoving_dist(self):
         npt.assert_allclose(
             self.cosmo.cosmo_dic['f_K_z_func'](1.0),
@@ -211,7 +246,6 @@ class cosmoinitTestCase(TestCase):
         self.cosmo.create_phot_galbias(model=2,
                                        x_values=zs_means,
                                        y_values=[2., 4., 6.])
-        print(self.cosmo.compute_phot_galbias(1.5))
         # check scalar redshift input
         bi_val_actual = self.cosmo.compute_phot_galbias(1.5)
         npt.assert_almost_equal(
@@ -475,7 +509,9 @@ class cosmoinitTestCase(TestCase):
         )
 
     def test_growth_rate_MG(self):
-        self.cosmo.growth_rate_MG(self.cosmo.cosmo_dic['z_win'])
+        self.cosmo.cosmo_dic['use_gamma_MG'] = True
+        self.cosmo.cosmo_dic['gamma_MG'] = 0.55
+        self.cosmo.interp_growth_rate()
         npt.assert_allclose(
             self.cosmo.cosmo_dic['f_z'](0),
             self.fcheck,
@@ -484,7 +520,9 @@ class cosmoinitTestCase(TestCase):
         )
 
     def test_growth_factor_MG(self):
-        self.cosmo.growth_rate_MG(self.cosmo.cosmo_dic['z_win'])
+        self.cosmo.cosmo_dic['use_gamma_MG'] = True
+        self.cosmo.cosmo_dic['gamma_MG'] = 0.55
+        self.cosmo.interp_growth_rate()
         test_growth_factor_MG = self.cosmo.growth_factor_MG()
         npt.assert_allclose(
             test_growth_factor_MG[0],
@@ -516,116 +554,17 @@ class cosmoinitTestCase(TestCase):
         )
         self.cosmo.cosmo_dic['z_win'] = z_win
 
-    def test_rescale_Pk_MG(self):
-        self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.002)
-        k_win = self.cosmo.cosmo_dic['k_win']
-        z_win = self.cosmo.cosmo_dic['z_win']
-        Pmm_phot = self.cosmo.cosmo_dic['Pmm_phot'](z_win, k_win, grid=False)
-        Pgg_phot = self.cosmo.cosmo_dic['Pgg_phot'](z_win, k_win, grid=False)
-        Pgdelta_phot = self.cosmo.cosmo_dic['Pgdelta_phot'](z_win, k_win,
-                                                            grid=False)
-        Pii = self.cosmo.cosmo_dic['Pii'](z_win, k_win, grid=False)
-        Pdeltai = self.cosmo.cosmo_dic['Pdeltai'](z_win, k_win, grid=False)
-        Pgi_phot = self.cosmo.cosmo_dic['Pgi_phot'](z_win, k_win, grid=False)
-        self.cosmo.cosmo_dic['use_gamma_MG'] = False
-        self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.002)
-        # check that nothing gets rescaled if Flag == False
-        npt.assert_allclose(
-            Pmm_phot,
-            self.cosmo.cosmo_dic['Pmm_phot'](z_win, k_win, grid=False),
-            rtol=1e-7,
-            err_msg='MG rescaling applied to Pmm_phot!',
-        )
-        npt.assert_allclose(
-            Pgdelta_phot,
-            self.cosmo.cosmo_dic['Pgdelta_phot'](z_win, k_win, grid=False),
-            rtol=1e-7,
-            err_msg='MG rescaling applied to Pgdelta_phot!',
-        )
-        npt.assert_allclose(
-            Pii,
-            self.cosmo.cosmo_dic['Pii'](z_win, k_win, grid=False),
-            rtol=1e-7,
-            err_msg='MG rescaling applied to Pii!',
-        )
-        npt.assert_allclose(
-            Pdeltai,
-            self.cosmo.cosmo_dic['Pdeltai'](z_win, k_win, grid=False),
-            rtol=1e-7,
-            err_msg='MG rescaling applied to Pdeltai!',
-        )
-        npt.assert_allclose(
-            Pgi_phot,
-            self.cosmo.cosmo_dic['Pgi_phot'](z_win, k_win, grid=False),
-            rtol=1e-7,
-            err_msg='MG rescaling applied to Pgi_phot!',
-        )
-        npt.assert_allclose(
-            Pgg_phot,
-            self.cosmo.cosmo_dic['Pgg_phot'](z_win, k_win, grid=False),
-            rtol=1e-7,
-            err_msg='MG rescaling applied to Pgg_phot!',
-        )
-        self.cosmo.cosmo_dic['use_gamma_MG'] = True
-        self.cosmo.cosmo_dic['gamma_MG'] = 1.0
-        self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.002)
+    def test_rescaled_linear_power_MG(self):
+        pk_MG = self.cosmo_gamma.rescaled_linear_power_MG(1.0, [0.1, 0.2])
+        npt.assert_allclose(pk_MG, self.Pk_delta_MG_check, rtol=1e-5,
+                            err_msg='Error in MG linear matter power spectrum')
 
-        Pmm_phot_MG = self.cosmo.cosmo_dic['Pmm_phot'](z_win,
-                                                       k_win, grid=False)
-        Pgg_phot_MG = self.cosmo.cosmo_dic['Pgg_phot'](z_win,
-                                                       k_win, grid=False)
-        Pgdelta_phot_MG = self.cosmo.cosmo_dic['Pgdelta_phot'](z_win,
-                                                               k_win,
-                                                               grid=False)
-        Pii_MG = self.cosmo.cosmo_dic['Pii'](z_win, k_win, grid=False)
-        Pdeltai_MG = self.cosmo.cosmo_dic['Pdeltai'](z_win, k_win, grid=False)
-        Pgi_phot_MG = self.cosmo.cosmo_dic['Pgi_phot'](z_win, k_win,
-                                                       grid=False)
+    def test_rescaled_linear_power_cb_MG(self):
+        pk_MG = self.cosmo_gamma.rescaled_linear_power_cb_MG(1.0, [0.1, 0.2])
+        npt.assert_allclose(pk_MG, self.Pk_cb_MG_check, rtol=1e-5,
+                            err_msg='Error in MG linear cb power spectrum')
 
-        # check that stuff changes, if Flag == True
-        npt.assert_equal(np.any(np.not_equal(Pmm_phot, Pmm_phot_MG)), True)
-        npt.assert_equal(np.any(np.not_equal(Pgg_phot, Pgg_phot_MG)), True)
-        npt.assert_equal(np.any(np.not_equal(Pgdelta_phot,
-                                             Pgdelta_phot_MG)), True)
-        npt.assert_equal(np.any(np.not_equal(Pii, Pii_MG)), True)
-        npt.assert_equal(np.any(np.not_equal(Pdeltai, Pdeltai_MG)), True)
-        npt.assert_equal(np.any(np.not_equal(Pgi_phot, Pgi_phot_MG)), True)
-
-        self.cosmo.cosmo_dic['use_gamma_MG'] = True
-        self.cosmo.cosmo_dic['gamma_MG'] = 6 / 11
-        self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.002)
-
-        Pmm_phot_MG = self.cosmo.cosmo_dic['Pmm_phot'](z_win,
-                                                       k_win, grid=False)
-        Pgg_phot_MG = self.cosmo.cosmo_dic['Pgg_phot'](z_win,
-                                                       k_win, grid=False)
-        Pgdelta_phot_MG = self.cosmo.cosmo_dic['Pgdelta_phot'](z_win,
-                                                               k_win,
-                                                               grid=False)
-        Pii_MG = self.cosmo.cosmo_dic['Pii'](z_win, k_win, grid=False)
-        Pdeltai_MG = self.cosmo.cosmo_dic['Pdeltai'](z_win, k_win, grid=False)
-        Pgi_phot_MG = self.cosmo.cosmo_dic['Pgi_phot'](z_win, k_win,
-                                                       grid=False)
-        P_shape = Pii_MG.shape
-
-        # check that things chaing slightly if gamma==6/11, GR value
-        # rtol_MG has been chosen checking the effect of gamma, as we know
-        # the ratio cannot be one being this just an approximation
-        rtol_MG = 5e-3
-        npt.assert_allclose(Pmm_phot / Pmm_phot_MG, np.ones(P_shape),
-                            rtol=rtol_MG,
-                            err_msg='Wrong rescaling applied to Pmm_phot')
-        npt.assert_allclose(Pgg_phot / Pgg_phot_MG, np.ones(P_shape),
-                            rtol=rtol_MG,
-                            err_msg='Wrong rescaling applied to Pgg_phot')
-        npt.assert_allclose(Pgdelta_phot / Pgdelta_phot_MG,
-                            np.ones(P_shape), rtol=rtol_MG,
-                            err_msg='Wrong rescaling applied to Pgdelta_phot')
-        npt.assert_allclose(Pii / Pii_MG, np.ones(P_shape), rtol=rtol_MG,
-                            err_msg='Wrong rescaling applied to Pii')
-        npt.assert_allclose(Pdeltai / Pdeltai_MG, np.ones(P_shape),
-                            rtol=rtol_MG,
-                            err_msg='Wrong rescaling applied to Pdeltai')
-        npt.assert_allclose(Pgi_phot / Pgi_phot_MG, np.ones(P_shape),
-                            rtol=rtol_MG,
-                            err_msg='Wrong rescaling applied to Pgi_phot')
+    def test_rescaled_halomodel_power_MG(self):
+        pk_MG = self.cosmo_NL.rescaled_halomodel_power_MG(1.0, [0.1, 0.2])
+        npt.assert_allclose(pk_MG, self.Pk_halomodel_MG_check, rtol=1e-5,
+                            err_msg='Error in MG halomodel power spectrum')

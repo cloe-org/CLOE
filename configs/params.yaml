@@ -26,7 +26,7 @@ Psn_spectro_bin1: 1627.758
 Psn_spectro_bin2: 3231.92
 Psn_spectro_bin3: 5680.44
 Psn_spectro_bin4: 10608.98
-# Spectro probe: corretion to Poissonian shot noise 
+# Spectro probe: corretion to Poissonian shot noise
 aP_spectro_bin1: 0.053
 aP_spectro_bin2: 0.139
 aP_spectro_bin3: 0.151
@@ -123,3 +123,5 @@ multiplicative_bias_10: 0.0
 multiplicative_bias_11: 0.0
 multiplicative_bias_12: 0.0
 multiplicative_bias_13: 0.0
+# Pivot redshift for calculation of fIA
+pivot_redshift: 0.0

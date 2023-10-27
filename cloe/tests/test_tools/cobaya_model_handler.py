@@ -118,17 +118,17 @@ class CobayaModel:
         self.cosmology.cosmo_dic['angular_dist'] = \
             self.model.provider.get_angular_diameter_distance(
             self.cosmology.cosmo_dic['z_win'])
-        self.cosmology.cosmo_dic['Pk_delta'] = \
+        self.cosmology.cosmo_dic['Pk_delta_Boltzmann'] = \
             self.model.provider.get_Pk_interpolator(
             ("delta_tot", "delta_tot"), nonlinear=False)
-        self.cosmology.cosmo_dic['Pk_cb'] = \
+        self.cosmology.cosmo_dic['Pk_cb_Boltzmann'] = \
             self.model.provider.get_Pk_interpolator(
             ("delta_nonu", "delta_nonu"), nonlinear=False)
         self.cosmology.cosmo_dic['Pk_weyl'] = \
             self.model.provider.get_Pk_interpolator(
             ("Weyl", "Weyl"), nonlinear=False)
         if self.cosmology.cosmo_dic['NL_flag_phot_matter'] > 0:
-            self.cosmology.cosmo_dic['Pk_halomodel_recipe'] = \
+            self.cosmology.cosmo_dic['Pk_halomodel_recipe_Boltzmann'] = \
                 self.model.provider.get_Pk_interpolator(
                 ('delta_tot', 'delta_tot'), nonlinear=True)
         self.cosmology.cosmo_dic['fsigma8'] = \

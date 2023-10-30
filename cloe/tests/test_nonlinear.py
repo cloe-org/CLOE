@@ -8,6 +8,7 @@ This module contains unit tests for the
 from unittest import TestCase
 import numpy as np
 import numpy.testing as npt
+from copy import deepcopy
 from cloe.non_linear.nonlinear import Nonlinear
 from cloe.tests.test_tools.test_data_handler import load_test_pickle
 
@@ -77,11 +78,21 @@ class nonlinearinitTestCase(TestCase):
             load_test_pickle('cosmo_test_NLspectro1_nonlin_dic.pickle')
         cls.nl7.Pgg_spectro_model.nonlinear_dic = nonlinear_dic
 
+        cosmo_dic_8 = deepcopy(cosmo_dic_7)
+        cosmo_dic_8['nuisance_parameters']['Psn_spectro_bin1'] = 1000.0
+        cosmo_dic_8['nuisance_parameters']['aP_spectro_bin1'] = 1.0
+        cosmo_dic_8['nuisance_parameters']['e0k2_spectro_bin1'] = 1.0
+        cosmo_dic_8['nuisance_parameters']['e2k2_spectro_bin1'] = 1.0
+        cls.nl8 = Nonlinear(cosmo_dic_8)
+        cls.nl8.set_Pgg_spectro_model()
+        cls.nl8.Pgg_spectro_model.nonlinear_dic = nonlinear_dic
+
     def setUp(self) -> None:
         # Check values
         self.Pgi_spectro_test = -388.28625
         self.Pgg_spectro_test = 82780.067618
         self.Pgdelta_spectro_test = 59890.445816
+        self.noise_Pgg_spectro = 2000.125
 
         self.Pgg_phot_test_NL1 = 50711.837574
         self.Pgdelta_phot_test_NL1 = 38411.177621
@@ -152,6 +163,7 @@ class nonlinearinitTestCase(TestCase):
         self.Pgg_spectro_test = None
         self.Pgdelta_spectro_test = None
         self.Pgi_spectro_test = None
+        self.noise_Pgg_spectro = None
 
         self.Pgg_phot_test_NL1 = None
         self.Pgdelta_phot_test_NL1 = None
@@ -295,6 +307,14 @@ class nonlinearinitTestCase(TestCase):
             rtol=self.rtol,
             err_msg='Error in value returned by Pgg_spectro_def '
                     'for NL_flag_spectro=1',
+        )
+
+    def test_noise_Pgg_spectro(self):
+        npt.assert_allclose(
+            self.nl8.noise_Pgg_spectro(self.redshift1, self.wavenumber1,
+                                       self.mu),
+            self.noise_Pgg_spectro, rtol=self.rtol,
+            err_msg='Error in value returned by noise_Pgg_spectro'
         )
 
     def test_Pgdelta_spectro_def(self):

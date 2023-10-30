@@ -362,6 +362,14 @@ class Cosmology:
                              'b2_spectro_bin2': 0.0,
                              'b2_spectro_bin3': 0.0,
                              'b2_spectro_bin4': 0.0,
+                             'bG2_spectro_bin1': 0.0,
+                             'bG2_spectro_bin2': 0.0,
+                             'bG2_spectro_bin3': 0.0,
+                             'bG2_spectro_bin4': 0.0,
+                             'bG3_spectro_bin1': 0.0,
+                             'bG3_spectro_bin2': 0.0,
+                             'bG3_spectro_bin3': 0.0,
+                             'bG3_spectro_bin4': 0.0,
                              # Finger of God counterterms
                              'c0_spectro_bin1': 0.0,
                              'c0_spectro_bin2': 0.0,
@@ -375,6 +383,10 @@ class Cosmology:
                              'c4_spectro_bin2': 0.0,
                              'c4_spectro_bin3': 0.0,
                              'c4_spectro_bin4': 0.0,
+                             'ck4_spectro_bin1': 0.0,
+                             'ck4_spectro_bin2': 0.0,
+                             'ck4_spectro_bin3': 0.0,
+                             'ck4_spectro_bin4': 0.0,
                              # Shot noise parameters
                              'aP_spectro_bin1': 0.0,
                              'aP_spectro_bin2': 0.0,
@@ -384,6 +396,14 @@ class Cosmology:
                              'Psn_spectro_bin2': 0.0,
                              'Psn_spectro_bin3': 0.0,
                              'Psn_spectro_bin4': 0.0,
+                             'e0k2_spectro_bin1': 0.0,
+                             'e0k2_spectro_bin2': 0.0,
+                             'e0k2_spectro_bin3': 0.0,
+                             'e0k2_spectro_bin4': 0.0,
+                             'e2k2_spectro_bin1': 0.0,
+                             'e2k2_spectro_bin2': 0.0,
+                             'e2k2_spectro_bin3': 0.0,
+                             'e2k2_spectro_bin4': 0.0,
                              # Purity of spectroscopic samples
                              'f_out': 0.0,
                              'f_out_1': 0.0,
@@ -1260,6 +1280,31 @@ class Cosmology:
             self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
         return pval
 
+    def noise_Pgg_spectro(self, redshift, k_scale, mu_rsd):
+        r"""Noise corrections to spectroscopic Pgg.
+
+        This method is only used for the linear-only case (NL_flag_spectro=0),
+        where we assume that the Poissonian contribution has already been
+        subtracted and that the non-Poissonian contribution is negligible.
+        Therefore this function returns 0 for every redshift, scale, and angle
+        to the line of sight.
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum
+        wavenumber: float or numpy.ndarray
+            Wavenumber at which to evaluate the power spectrum
+        mu_rsd: float or numpy.ndarray
+            Cosine of the angle between wavenumber and the
+            line of sight
+
+        Returns
+        -------
+        Noise contribution for the spectroscopic galaxy power spectrum
+        """
+        return 0.0
+
     def obtain_power_spectra(self):
         """Adds photometric/spectroscopic power spectra to cosmo dictionary.
 
@@ -1565,3 +1610,6 @@ class Cosmology:
         # Update dictionary with bias function and power spectra
         self.create_phot_galbias()
         self.obtain_power_spectra()
+
+        self.cosmo_dic['noise_Pgg_spectro'] = \
+            self.pk_source_spectro.noise_Pgg_spectro

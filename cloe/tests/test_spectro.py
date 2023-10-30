@@ -23,6 +23,8 @@ class specinitTestCase(TestCase, SpectroTestParent):
 
     def setUp(self):
         self.test_dict['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
+        self.test_dict['noise_Pgg_spectro'] = \
+            np.vectorize(self.noise_Pgg_spectro)
         self.check_multipole_spectra_m0 = 12292.778742
         self.check_multipole_spectra_m1 = 0.0
         self.check_multipole_spectra_m2 = 8408.473137

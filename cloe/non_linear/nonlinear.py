@@ -189,6 +189,7 @@ class Nonlinear:
                             **rb.select_spectro_parameters(float(z),
                                                            self.nuis))
              for i, z in enumerate(self.zmeans)])
+
         # Storing in the nonlinear dictionary
         self.nonlinear_dic['P_kmu'] = Pkmu
 
@@ -640,6 +641,15 @@ class Nonlinear:
         Pgg_spectro_func = switcher.get(self.theory['NL_flag_spectro'],
                                         "Invalid modeling option")
         return Pgg_spectro_func(redshift, wavenumber, mu_rsd)
+
+    def noise_Pgg_spectro(self, redshift, wavenumber, mu_rsd):
+        r"""Interface for ``noise_Pgg_spectro``.
+
+        Returns the noise contributions to the galaxy-galaxy power spectrum,
+        defined in the :obj:`pgg_spectro` module.
+        """
+        noise_func = self.Pgg_spectro_model.noise_Pgg_spectro
+        return noise_func(redshift, wavenumber, mu_rsd)
 
     def Pgdelta_spectro_def(self, redshift, wavenumber, mu_rsd):
         r"""Interface for ``Pgdelta_spectro_def``.

@@ -8,6 +8,16 @@ b2_spectro_bin1: 1.061
 b2_spectro_bin2: 1.433
 b2_spectro_bin3: 1.903
 b2_spectro_bin4: 2.970
+# Spectro probe: nonlocal quadratic galaxy bias
+bG2_spectro_bin1: 0.0
+bG2_spectro_bin2: 0.0
+bG2_spectro_bin3: 0.0
+bG2_spectro_bin4: 0.0
+# Spectro probe: nonlocal cubic galaxy bias
+bG3_spectro_bin1: 0.0
+bG3_spectro_bin2: 0.0
+bG3_spectro_bin3: 0.0
+bG3_spectro_bin4: 0.0
 # Spectro probe: EFT counter terms
 c0_spectro_bin1: 6.490
 c0_spectro_bin2: 4.398
@@ -21,6 +31,10 @@ c4_spectro_bin1: 56.729
 c4_spectro_bin2: 57.041
 c4_spectro_bin3: 45.242
 c4_spectro_bin4: 41.217
+ck4_spectro_bin1: 0.0
+ck4_spectro_bin2: 0.0
+ck4_spectro_bin3: 0.0
+ck4_spectro_bin4: 0.0
 # Spectro probe: 1/bar(n)
 Psn_spectro_bin1: 1627.758
 Psn_spectro_bin2: 3231.92
@@ -31,6 +45,16 @@ aP_spectro_bin1: 0.053
 aP_spectro_bin2: 0.139
 aP_spectro_bin3: 0.151
 aP_spectro_bin4: 0.311
+# Spectro probe: scale-dependent shot noise
+e0k2_spectro_bin1: 0.0
+e0k2_spectro_bin2: 0.0
+e0k2_spectro_bin3: 0.0
+e0k2_spectro_bin4: 0.0
+# Spectro probe: scale- and mu-dependent shot noise
+e2k2_spectro_bin1: 0.0
+e2k2_spectro_bin2: 0.0
+e2k2_spectro_bin3: 0.0
+e2k2_spectro_bin4: 0.0
 # Spectro probe: unique purity nuisance parameter
 f_out: 0.0
 # Spectro probe: purity nuisance parameter per redshift bin

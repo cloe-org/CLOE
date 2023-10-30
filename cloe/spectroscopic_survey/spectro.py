@@ -193,6 +193,29 @@ class Spectro:
             self.theory['Pgg_spectro'](z, self.get_k(k, mu_rsd, z),
                                        self.get_mu(mu_rsd, z))
 
+        # Find the outlier fraction value in the nuisance_parameters dictionary
+        if self.theory['f_out_z_dep']:
+            if np.where(np.isclose(self.z_arr, z))[0].size == 1:
+                iz = int(np.where(np.isclose(self.z_arr, z))[0])
+            else:
+                raise Exception('Problem matching redshift to bin center in'
+                                'multipole_spectra')
+            # redshift-dependent case
+            f_out = self.theory['nuisance_parameters']['f_out_' + str(iz + 1)]
+        else:
+            # redshift-independent case
+            f_out = self.theory['nuisance_parameters']['f_out']
+
+        outlier_factor = (1.0 - f_out) ** 2.0
+
+        galspec *= outlier_factor
+
+        # Add shot-noise contributions (after the systematics!)
+        noise = \
+            self.theory['noise_Pgg_spectro'](z, self.get_k(k, self.mu_grid, z),
+                                             self.get_mu(self.mu_grid, z))
+        galspec += noise
+
         if np.array_equal(mu_rsd, self.mu_grid):
             return galspec * np.array([self.dict_m_legendrepol[m] for m in ms])
         else:
@@ -238,22 +261,7 @@ class Spectro:
                                                              z, k, ms),
                             self.mu_grid)
 
-        # Find the outlier fraction value in the nuisance_parameters dictionary
-        if self.theory['f_out_z_dep']:
-            if np.where(np.isclose(self.z_arr, z))[0].size == 1:
-                iz = int(np.where(np.isclose(self.z_arr, z))[0])
-            else:
-                raise Exception('Problem matching redshift to bin center in'
-                                'multipole_spectra')
-            # redshift dependent case
-            f_out = self.theory['nuisance_parameters']['f_out_' + str(iz + 1)]
-        else:
-            # redshift independent case
-            f_out = self.theory['nuisance_parameters']['f_out']
-
-        outlier_factor = (1.0 - f_out) ** 2.0
-
-        spectra = outlier_factor * prefactors * integrals
+        spectra = prefactors * integrals
 
         return np.asarray(spectra)
 

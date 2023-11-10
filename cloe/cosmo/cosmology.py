@@ -295,6 +295,8 @@ class Cosmology:
                           'use_gamma_MG': 0,
                           # Redshift dependent purity correction
                           'f_out_z_dep': False,
+                          # Spectroscopic galaxy clustering redshift error
+                          'GCsp_z_err': False,
                           'nuisance_parameters': {
                              # Intrinsic alignment
                              'aia': 1.72,

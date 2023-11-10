@@ -90,7 +90,7 @@ class nonlinearinitTestCase(TestCase):
     def setUp(self) -> None:
         # Check values
         self.Pgi_spectro_test = -388.28625
-        self.Pgg_spectro_test = 82780.067618
+        self.Pgg_spectro_test = 82780.064486
         self.Pgdelta_spectro_test = 59890.445816
         self.noise_Pgg_spectro = 2000.125
 

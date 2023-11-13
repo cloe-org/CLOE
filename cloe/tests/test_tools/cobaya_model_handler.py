@@ -67,11 +67,12 @@ class CobayaModel:
                         'extra_args': {'num_massive_neutrinos': 1,
                                        'dark_energy_model': 'ppf'}}},
             # Likelihood: we load the likelihood as an external function
-            'likelihood': {'euclid': {
+            'likelihood': {'Euclid': {
                 'external': EuclidLikelihood,
                 'NL_flag_phot_matter':
                     cosmo_inst.cosmo_dic['NL_flag_phot_matter'],
-                'NL_flag_spectro': cosmo_inst.cosmo_dic['NL_flag_spectro']}}}
+                'NL_flag_spectro': cosmo_inst.cosmo_dic['NL_flag_spectro'],
+                'solver': 'camb'}}}
         self.info['params'].update(
             cosmo_inst.cosmo_dic['nuisance_parameters'])
         self.info['data'] = mock_data

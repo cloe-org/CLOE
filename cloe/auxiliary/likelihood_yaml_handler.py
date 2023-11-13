@@ -258,7 +258,7 @@ def set_halofit_version(cobaya_dict: dict, NL_flag: int):
         The nonlinear flag
     """
 
-    def switch_halofit_version(flag: int) -> str:
+    def switch_halofit_version_in_camb(flag: int) -> str:
         switcher = {
             1: 'takahashi',
             2: 'mead2016',
@@ -267,9 +267,26 @@ def set_halofit_version(cobaya_dict: dict, NL_flag: int):
         }
         return switcher.get(flag, 'mead2020')
 
+    def switch_halofit_version_in_classy(flag: int) -> str:
+        switcher = {
+            1: 'halofit',
+            2: 'hmcode',
+        }
+        if flag in switcher.keys():
+            return switcher.get(flag)
+        else:
+            raise ValueError('The only available options for '
+                             'NL_flag_phot_matter when classy is selected '
+                             'are 1 (Halofit) and 2 (HMCode2016)')
+
     if NL_flag > 0:
-        cobaya_dict['theory']['camb']['extra_args'][
-            'halofit_version'] = switch_halofit_version(NL_flag)
+        solver = cobaya_dict['likelihood']['Euclid']['solver']
+        if solver == 'camb':
+            cobaya_dict['theory']['camb']['extra_args'][
+                'halofit_version'] = switch_halofit_version_in_camb(NL_flag)
+        elif solver == 'classy':
+            cobaya_dict['theory']['classy']['extra_args'][
+                'non_linear'] = switch_halofit_version_in_classy(NL_flag)
 
     params = cobaya_dict['params']
     if NL_flag != 2 and any([par in params.keys() for par in

@@ -6,7 +6,7 @@ galaxy x galaxy power spectrum.
 """
 
 from cloe.non_linear.power_spectrum import PowerSpectrum
-from cloe.auxiliary.redshift_bins import find_bin
+from cloe.auxiliary.redshift_bins import find_bin, select_spectro_parameters
 
 
 class Pgg_spectro_model(PowerSpectrum):
@@ -66,7 +66,7 @@ class Pgg_spectro_model(PowerSpectrum):
         ----------
         redshift: float
             Redshift at which to evaluate the power spectrum
-        k_scale: float or numpy.ndarray
+        wavenumber: float or numpy.ndarray
             Wavenumber at which to evaluate the power spectrum
         mu_rsd: float or numpy.ndarray
             Cosine of the angle between wavenumber and the
@@ -82,6 +82,39 @@ class Pgg_spectro_model(PowerSpectrum):
         pval = self.nonlinear_dic['P_kmu'][zbin - 1](wavenumber, mu_rsd,
                                                      grid=False)
         return pval
+
+    def noise_Pgg_spectro(self, redshift, wavenumber, mu_rsd):
+        r"""Noise corrections to spectroscopic Pgg.
+
+        Computes the noise contributions to the spectroscopic galaxy power
+        spectrum, first selecting the parameters of the corresponding
+        spectroscopic bins (through the specified redshift), and then
+        evaluating the noise as a function of wavenumber and angle to the
+        line of sight.
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum
+        wavenumber: float or numpy.ndarray
+            Wavenumber at which to evaluate the power spectrum
+        mu_rsd: float or numpy.ndarray
+            Cosine of the angle between wavenumber and the
+            line of sight
+
+        Returns
+        -------
+        Noise contribution for the spectroscopic galaxy power spectrum at a
+        given redshift, wavenumber and angle to the line of sight
+        """
+        nuisance_dict = self.theory['nuisance_parameters']
+        params = select_spectro_parameters(redshift, nuisance_dict)
+        aP = params['aP'] if 'aP' in params.keys() else 0.0
+        e0k2 = params['e0k2'] if 'e0k2' in params.keys() else 0.0
+        e2k2 = params['e2k2'] if 'e2k2' in params.keys() else 0.0
+        Psn = params['Psn'] if 'Psn' in params.keys() else 0.0
+        noise = Psn * ((1.0 + aP) + (e0k2 + e2k2 * mu_rsd**2) * wavenumber**2)
+        return noise
 
     def Pgdelta_spectro_def(self, redshift, wavenumber, mu_rsd):
         r"""Pgdelta spectro def.

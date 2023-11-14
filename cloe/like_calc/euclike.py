@@ -161,6 +161,8 @@ class Euclike:
         if self.do_spectro:
             # Read spectro
             self.data_ins.read_GC_spectro()
+            self.data_spectro_fiducial_cosmo = \
+                self.data_ins.data_spectro_fiducial_cosmo
             self.zkeys = self.data_ins.data_dict['GC-Spectro'].keys()
 
             # Spectro class instance
@@ -445,7 +447,6 @@ class Euclike:
 
         """
         if self.do_photo:
-            print(self.matrix_transform_phot)
             if not self.matrix_transform_phot:
                 return None
             elif 'BNT' in self.matrix_transform_phot:

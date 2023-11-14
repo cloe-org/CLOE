@@ -15,7 +15,9 @@ camb_to_classy = {
     'w': 'w0_fld',
     'wa': 'wa_fld',
     'As': 'A_s',
-    'ns': 'n_s'}
+    'ns': 'n_s',
+    'HMCode_A_baryon': 'c_min',
+    'HMCode_eta_baryon': 'eta_0'}
 
 
 def convert_params(params, theory, mode):

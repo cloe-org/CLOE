@@ -21,6 +21,8 @@ class likecalcTestCase(TestCase, SpectroTestParent):
 
         mock_cosmo_dic = load_test_pickle('like_calc_test_dic.pickle')
         mock_cosmo_dic['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
+        mock_cosmo_dic['noise_Pgg_spectro'] = \
+            np.vectorize(self.noise_Pgg_spectro)
         # self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic
         # init Euclike
@@ -31,7 +33,7 @@ class likecalcTestCase(TestCase, SpectroTestParent):
         self.like_tt.get_masked_data()
         # The correct check value, using the h scaling for the h from
         # supplied external file for all the probes together is:
-        self.check_loglike = -1721.244143
+        self.check_loglike = -297112.297579
 
     def tearDown(self):
         self.check_loglike = None
@@ -95,11 +97,13 @@ class likecalcBNT_TestCase(TestCase, SpectroTestParent):
 
         mock_cosmo_dic = load_test_pickle('like_calc_test_dic.pickle')
         mock_cosmo_dic['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
+        mock_cosmo_dic['noise_Pgg_spectro'] = \
+            np.vectorize(self.noise_Pgg_spectro)
         # self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic
         # The correct check value, using the h scaling for the h from
         # supplied external file for all the probes together is:
-        self.check_loglike = -1721.244143
+        self.check_loglike = -297112.297597
 
     def tearDown(self):
         self.check_loglike = None
@@ -171,6 +175,8 @@ class likecalcngTestCase(TestCase, SpectroTestParent):
 
         mock_cosmo_dic = load_test_pickle('like_calc_test_dic.pickle')
         mock_cosmo_dic['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
+        mock_cosmo_dic['noise_Pgg_spectro'] = \
+            np.vectorize(self.noise_Pgg_spectro)
 
         # self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic
@@ -186,7 +192,7 @@ class likecalcngTestCase(TestCase, SpectroTestParent):
 
         # The correct check value, using the h scaling for the h from
         # supplied external file for all the probes together is:
-        self.check_loglike_ng = -1682.686194
+        self.check_loglike_ng = -6810.190555
 
     def tearDown(self):
         self.check_loglike_ng = None

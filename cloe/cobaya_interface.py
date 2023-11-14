@@ -249,12 +249,12 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology.cosmo_dic['H_Mpc'] = \
             model_fiducial.provider.get_Hubble(
             self.z_win, units='1/Mpc'),
-        self.fiducial_cosmology.cosmo_dic['Pk_delta'] = \
+        self.fiducial_cosmology.cosmo_dic['Pk_delta_Boltzmann'] = \
             model_fiducial.provider.get_Pk_interpolator(
             ('delta_tot', 'delta_tot'), nonlinear=False,
             extrap_kmin=self.k_min_extrap,
             extrap_kmax=self.k_max_extrap)
-        self.fiducial_cosmology.cosmo_dic['Pk_cb'] = \
+        self.fiducial_cosmology.cosmo_dic['Pk_cb_Boltzmann'] = \
             model_fiducial.provider.get_Pk_interpolator(
             ('delta_nonu', 'delta_nonu'), nonlinear=False,
             extrap_kmin=self.k_min_extrap,
@@ -336,6 +336,8 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['NL_flag_phot_matter'] = \
                 self.NL_flag_phot_matter
             self.cosmo.cosmo_dic['NL_flag_spectro'] = self.NL_flag_spectro
+            self.cosmo.cosmo_dic['f_out_z_dep'] = self.f_out_z_dep
+            self.cosmo.cosmo_dic['GCsp_z_err'] = self.GCsp_z_err
             self.cosmo.cosmo_dic['bias_model'] = self.bias_model
             self.cosmo.cosmo_dic['magbias_model'] = self.magbias_model
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
@@ -384,12 +386,12 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['H'] = self.provider.get_Hubble(self.z_win)
             self.cosmo.cosmo_dic['H_Mpc'] = \
                 self.provider.get_Hubble(self.z_win, units='1/Mpc')
-            self.cosmo.cosmo_dic['Pk_delta'] = \
+            self.cosmo.cosmo_dic['Pk_delta_Boltzmann'] = \
                 self.provider.get_Pk_interpolator(
                 ('delta_tot', 'delta_tot'), nonlinear=False,
                 extrap_kmin=self.k_min_extrap,
                 extrap_kmax=self.k_max_extrap)
-            self.cosmo.cosmo_dic['Pk_cb'] = \
+            self.cosmo.cosmo_dic['Pk_cb_Boltzmann'] = \
                 self.provider.get_Pk_interpolator(
                 ('delta_nonu', 'delta_nonu'), nonlinear=False,
                 extrap_kmin=self.k_min_extrap,
@@ -399,7 +401,7 @@ class EuclidLikelihood(Likelihood):
                 ('Weyl', 'Weyl'), nonlinear=False,
                 extrap_kmax=self.k_max_extrap)
             if self.NL_flag_phot_matter > 0:
-                self.cosmo.cosmo_dic['Pk_halomodel_recipe'] = \
+                self.cosmo.cosmo_dic['Pk_halomodel_recipe_Boltzmann'] = \
                     self.provider.get_Pk_interpolator(
                     ('delta_tot', 'delta_tot'), nonlinear=True,
                     extrap_kmin=self.k_min_extrap,
@@ -427,6 +429,10 @@ class EuclidLikelihood(Likelihood):
                 info['likelihood']['Euclid']['NL_flag_phot_matter']
             self.cosmo.cosmo_dic['NL_flag_spectro'] = \
                 info['likelihood']['Euclid']['NL_flag_spectro']
+            self.cosmo.cosmo_dic['f_out_z_dep'] = \
+                info['likelihood']['Euclid']['f_out_z_dep']
+            self.cosmo.cosmo_dic['GCsp_z_err'] = \
+                info['likelihood']['Euclid']['GCsp_z_err']
             self.cosmo.cosmo_dic['bias_model'] = self.bias_model
             self.cosmo.cosmo_dic['add_phot_RSD'] = \
                 info['likelihood']['Euclid']['add_phot_RSD']
@@ -435,7 +441,8 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['matrix_transform_phot'] = \
                 info['likelihood']['Euclid']['matrix_transform_phot']
             self.cosmo.cosmo_dic['magbias_model'] = self.magbias_model
-            self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
+            self.cosmo.cosmo_dic['use_gamma_MG'] = \
+                info['likelihood']['Euclid']['use_gamma_MG']
             self.cosmo.cosmo_dic['H0'] = model.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
@@ -473,7 +480,7 @@ class EuclidLikelihood(Likelihood):
                     model.provider.get_param('omeganu')
                 self.cosmo.cosmo_dic['nnu'] = model.provider.get_param('nnu')
             self.cosmo.cosmo_dic['Omm'] = model.provider.get_param('omegam')
-            if self.use_gamma_MG:
+            if info['likelihood']['Euclid']['use_gamma_MG']:
                 self.cosmo.cosmo_dic['gamma_MG'] = \
                     model.provider.get_param('gamma_MG')
             self.cosmo.cosmo_dic['comov_dist'] = \
@@ -483,12 +490,12 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['H'] = model.provider.get_Hubble(self.z_win)
             self.cosmo.cosmo_dic['H_Mpc'] = \
                 model.provider.get_Hubble(self.z_win, units='1/Mpc')
-            self.cosmo.cosmo_dic['Pk_delta'] = \
+            self.cosmo.cosmo_dic['Pk_delta_Boltzmann'] = \
                 model.provider.get_Pk_interpolator(
                 ('delta_tot', 'delta_tot'), nonlinear=False,
                 extrap_kmin=self.k_min_extrap,
                 extrap_kmax=self.k_max_extrap)
-            self.cosmo.cosmo_dic['Pk_cb'] = \
+            self.cosmo.cosmo_dic['Pk_cb_Boltzmann'] = \
                 model.provider.get_Pk_interpolator(
                 ('delta_nonu', 'delta_nonu'), nonlinear=False,
                 extrap_kmin=self.k_min_extrap,
@@ -499,7 +506,7 @@ class EuclidLikelihood(Likelihood):
                 extrap_kmin=self.k_min_extrap,
                 extrap_kmax=self.k_max_extrap)
             if info['likelihood']['Euclid']['NL_flag_phot_matter'] > 0:
-                self.cosmo.cosmo_dic['Pk_halomodel_recipe'] = \
+                self.cosmo.cosmo_dic['Pk_halomodel_recipe_Boltzmann'] = \
                     model.provider.get_Pk_interpolator(
                     ('delta_tot', 'delta_tot'), nonlinear=True,
                     extrap_kmin=self.k_min_extrap,

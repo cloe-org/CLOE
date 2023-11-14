@@ -60,6 +60,8 @@ Cobaya:
       use_gamma_MG: False
       # Redshift dependent purity correction
       f_out_z_dep: False
+      # Include spectroscopic galaxy clustering redshift error
+      GCsp_z_err: False
       # Plot the selected observables during the initialization of the likelihood
       plot_observables_selection: False
       ##

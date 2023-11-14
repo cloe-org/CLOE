@@ -3,8 +3,7 @@ EFT MODULE
 
 This module computes several nonlinear spectra using the `PBJ code`
 for the Joint analysis of Power Spectrum and Bispectrum,
-adapted from arXiv:2108.03204, extended to include redshift-space
-terms by IST:NL.
+adapted from arXiv:2207.14784 / 2306.09275, ported to CLOE by IST:NL.
 """
 
 import numpy as np
@@ -40,7 +39,10 @@ class EFTofLSS:
         self.Obh2 = cosmo_dic['ombh2']
         self.Omh2 = cosmo_dic['omch2'] + self.Obh2
         self.tau = cosmo_dic['tau']
-        self.Dz = cosmo_dic['D_z_k_func'](self.z, 0.0)
+        if cosmo_dic['use_gamma_MG']:
+            self.Dz = cosmo_dic['D_z_k_func_MG'](self.z)
+        else:
+            self.Dz = cosmo_dic['D_z_k_func'](self.z, 0.05)
         self.f = cosmo_dic['f_z'](0.0)
 
         self.fastpt = FASTPTPlus(self.ks, -2, low_extrap=-6, high_extrap=5,
@@ -211,17 +213,27 @@ class EFTofLSS:
 
         **kwargs:         Dictionary containing the model parameters
         b1: float
-            Bias parameter
+            Linear bias parameter
         b2: float
-            Bias parameter
+            Quadratic local bias parameter
+        bG2: float
+            Quadratic nonlical bias parameter
+        bG3: float
+            Cubic nonlocal bias parameter
         c0: float
-            EFT counterterms
+            EFT counterterm
         c2: float
-            EFT counterterms
+            EFT counterterm
         c4: float
-            EFT counterterms
+            EFT counterterm
+        ck4: float
+            EFT counterterm
         aP: float
             Shot-noise parameter
+        e0k2: float
+            Shot-noise parameter, scale-dependent
+        e2k2:
+            Shot-noise parameter, scale- and mu-dependent
         Psn: float
             Poisson shot-noise
 
@@ -262,37 +274,41 @@ class EFTofLSS:
         loop13_w = self.loop13_w * D4
 
         # Bias parameters
-        b1 = kwargs['b1'] if 'b1' in kwargs.keys() else 1
-        b2 = kwargs['b2'] if 'b2' in kwargs.keys() else 0
-        c0 = kwargs['c0'] if 'c0' in kwargs.keys() else 0
-        c2 = kwargs['c2'] if 'c2' in kwargs.keys() else 0
-        c4 = kwargs['c4'] if 'c4' in kwargs.keys() else 0
-        aP = kwargs['aP'] if 'aP' in kwargs.keys() else 0
-        Psn = kwargs['Psn'] if 'Psn' in kwargs.keys() else 0
+        b1 = kwargs['b1'] if 'b1' in kwargs.keys() else 1.0
+        b2 = kwargs['b2'] if 'b2' in kwargs.keys() else 0.0
+        bG2 = kwargs['bG2'] if 'bG2' in kwargs.keys() else 0.0
+        bG3 = kwargs['bG3'] if 'bG3' in kwargs.keys() else 0.0
+        c0 = kwargs['c0'] if 'c0' in kwargs.keys() else 0.0
+        c2 = kwargs['c2'] if 'c2' in kwargs.keys() else 0.0
+        c4 = kwargs['c4'] if 'c4' in kwargs.keys() else 0.0
+        ck4 = kwargs['ck4'] if 'ck4' in kwargs.keys() else 0.0
 
         def Kaiser(b1, f, mu):
             return b1 + f * mu**2
 
-        # Next-to-leading order, counterterm, noise
+        # Next-to-leading order and counterterm. Noise corrections are computed
+        # in the relative power spectrum model module
         PNLO = Kaiser(b1, f, mu)**2 * (Pnw_sub + RSDdamp * Pw_sub *
                                        (1.0 + ks_sub**2 * Sig2mu))
         Pkmu_ctr = (-2.0 * (c0 + c2 * f * mu**2 + c4 * f * f * mu**4) *
-                    ks_sub**2 * (Pnw_sub + RSDdamp * Pw_sub))
-        Pkmu_noise = Psn * (1.0 + aP)
+                    ks_sub**2 + ck4 * f**4 * mu**4 * Kaiser(b1, f, mu)**2 *
+                    ks_sub**4) * (Pnw_sub + RSDdamp * Pw_sub)
 
         # Biases
-        bias22 = np.array([b1**2 * mu**0, b1 * b2 * mu**0, b2**2 * mu**0,
-                           mu**2 * f * b1, mu**2 * f * b2,
+        bias22 = np.array([b1**2 * mu**0, b1 * b2 * mu**0, b1 * bG2 * mu**0,
+                           b2**2 * mu**0, b2 * bG2 * mu**0, bG2**2 * mu**0,
+                           mu**2 * f * b1, mu**2 * f * b2, mu**2 * f * bG2,
                            (mu * f * b1)**2, (mu * b1)**2 * f,
-                           mu**2 * f * b1 * b2,
+                           mu**2 * f * b1 * b2, mu**2 * f * b1 * bG2,
                            (mu * f)**2 * b1, (mu * f)**2 * b2,
-                           (mu * f)**4, mu**4 * f**3,
+                           (mu * f)**2 * bG2, (mu * f)**4, mu**4 * f**3,
                            mu**4 * f**3 * b1, mu**4 * f**2 * b2,
-                           mu**4 * f**2 * b1,
+                           mu**4 * f**2 * bG2, mu**4 * f**2 * b1,
                            mu**4 * f**2 * b1**2, mu**4 * f**2,
                            mu**6 * f**4, mu**6 * f**3, mu**6 * f**3 * b1,
                            mu**8 * f**4])
-        bias13 = np.array([b1 * Kaiser(b1, f, mu),
+        bias13 = np.array([b1 * Kaiser(b1, f, mu), bG3 * Kaiser(b1, f, mu),
+                           bG2 * Kaiser(b1, f, mu),
                            mu**2 * f * Kaiser(b1, f, mu),
                            mu**2 * f * b1 * Kaiser(b1, f, mu),
                            (mu * f)**2 * Kaiser(b1, f, mu),
@@ -305,7 +321,7 @@ class EFTofLSS:
 
         Pkmu_22 = Pkmu_22_nw + RSDdamp * Pkmu_22_w
         Pkmu_13 = Pkmu_13_nw + RSDdamp * Pkmu_13_w
-        Pkmu = PNLO + Pkmu_22 + Pkmu_13 + Pkmu_ctr + Pkmu_noise
+        Pkmu = PNLO + Pkmu_22 + Pkmu_13 + Pkmu_ctr
 
         return RectBivariateSpline(self.ks, mu, Pkmu)
 
@@ -342,30 +358,37 @@ class FASTPTPlus(fpts.FASTPT):
                  2 / 3.0 * J2m22 + 1342 / 1029.0 * J002 + 16 / 35.0 * J1m13 +
                  64 / 1715.0 * J004)
         Pb1b2 = 34 / 21.0 * J000 + 2.0 * J1m11 + 8 / 21.0 * J002
+        Pb1bG2 = (-72 / 35.0 * J000 + 8 / 5.0 * (J1m13 - J1m11) +
+                  88 / 49.0 * J002 + 64 / 245.0 * J004)
         Pb2b2 = 0.5 * (J000 - J000[0])
+        Pb2bG2 = 4 / 3. * (J002 - J000)
+        PbG2bG2 = 16 / 15. * J000 - 32 / 21. * J002 + 16 / 35. * J004
 
         Pmu2fb1 = 2. * (1003 / 735.0 * J000 + J2m20r / 3.0 +
                         116 / 35.0 * J1m11 + 1606 / 1029.0 * J002 +
                         2 / 3.0 * J2m22 + 24 / 35.0 * J1m13 +
                         128 / 1715.0 * J004)
         Pmu2fb2 = 26 / 21.0 * J000 + 2.0 * J1m11 + 16 / 21.0 * J002
+        Pmu2fbG2 = (-152 / 105. * J000 + 8 / 5. * (J1m13 - J1m11) +
+                    136 / 147. * J002 + 128 / 245. * J004)
         Pmu2f2b12 = (-J000 + J2m20r + J002 - J2m22) / 3.0
         Pmu2fb12 = (82 / 21.0 * J000 + 2 / 3.0 * J2m20r + 264 / 35.0 * J1m11 +
                     44 / 21.0 * J002 + 4 / 3.0 * J2m22 + 16 / 35.0 * J1m13)
         Pmu2fb1b2 = 2.0 * (J000 + J1m11)
-        Pmu2f2b1 = 0.25 * (-72 / 35.0 * J000 + 8 / 5.0 * (J1m13 - J1m11) +
-                           88 / 49.0 * J002 + 64 / 245.0 * J004)
-        Pmu2f2b2 = 0.25 * 4 / 3.0 * (J002 - J000)
+        Pmu2fb1bG2 = 8.0 * ((J002 - J000) / 3.0 + (J1m13 - J1m11) / 5.0)
+        Pmu2f2b1 = 0.25 * Pb1bG2
+        Pmu2f2b2 = 0.25 * Pb2bG2
+        Pmu2f2bG2 = 0.50 * PbG2bG2
 
-        Pmu4f4 = 3 / 32.0 * (16 / 15.0 * J000 - 32 / 21.0 * J002 +
-                             16 / 35.0 * J004)
-        Pmu4f3 = (-152 / 105.0 * J000 + 8 / 5.0 * (J1m13 - J1m11) +
-                  136 / 147.0 * J002 + 128 / 245.0 * J004) / 4.0
+        Pmu4f4 = 3 / 32.0 * PbG2bG2
+        Pmu4f3 = Pmu2fbG2 / 4.0
         Pmu4f3b1 = (4 / 3.0 * (J002 - J000) + 2 / 3.0 * (J2m20r - J2m22) +
                     2 / 5.0 * (J1m13 - J1m11))
         Pmu4f2b2 = 5 / 3.0 * J000 + 2.0 * J1m11 + J002 / 3.0
+        Pmu4f2bG2 = (8 / 5.0 * (J1m13 - J1m11) - 32 / 15.0 * J000 +
+                     40 / 21.0 * J002 + 8 / 35.0 * J004)
         Pmu4f2b1 = (98 / 15.0 * J000 + 4 / 3.0 * J2m20r + 498 / 35.0 * J1m11 +
-                    794 / 147.0 * J002 + 8 / 3.0 * J2m22 + 62 / 35.0 * J1m13 +
+                    794 / 147. * J002 + 8 / 3.0 * J2m22 + 62 / 35.0 * J1m13 +
                     16 / 245.0 * J004)
         Pmu4f2b12 = 8 / 3.0 * J000 + 4.0 * J1m11 + J002 / 3.0 + J2m22
         Pmu4f2 = (851 / 735.0 * J000 + J2m20r / 3.0 + 108 / 35.0 * J1m11 +
@@ -386,20 +409,27 @@ class FASTPTPlus(fpts.FASTPT):
         if self.extrap:
             _, Pb1b1 = self.EK.PK_original(Pb1b1)
             _, Pb1b2 = self.EK.PK_original(Pb1b2)
+            _, Pb1bG2 = self.EK.PK_original(Pb1bG2)
             _, Pb2b2 = self.EK.PK_original(Pb2b2)
+            _, Pb2bG2 = self.EK.PK_original(Pb2bG2)
+            _, PbG2bG2 = self.EK.PK_original(PbG2bG2)
 
             _, Pmu2fb1 = self.EK.PK_original(Pmu2fb1)
             _, Pmu2fb2 = self.EK.PK_original(Pmu2fb2)
+            _, Pmu2fbG2 = self.EK.PK_original(Pmu2fbG2)
             _, Pmu2f2b12 = self.EK.PK_original(Pmu2f2b12)
             _, Pmu2fb12 = self.EK.PK_original(Pmu2fb12)
             _, Pmu2fb1b2 = self.EK.PK_original(Pmu2fb1b2)
+            _, Pmu2fb1bG2 = self.EK.PK_original(Pmu2fb1bG2)
             _, Pmu2f2b1 = self.EK.PK_original(Pmu2f2b1)
             _, Pmu2f2b2 = self.EK.PK_original(Pmu2f2b2)
+            _, Pmu2f2bG2 = self.EK.PK_original(Pmu2f2bG2)
 
             _, Pmu4f4 = self.EK.PK_original(Pmu4f4)
             _, Pmu4f3 = self.EK.PK_original(Pmu4f3)
             _, Pmu4f3b1 = self.EK.PK_original(Pmu4f3b1)
             _, Pmu4f2b2 = self.EK.PK_original(Pmu4f2b2)
+            _, Pmu4f2bG2 = self.EK.PK_original(Pmu4f2bG2)
             _, Pmu4f2b1 = self.EK.PK_original(Pmu4f2b1)
             _, Pmu4f2b12 = self.EK.PK_original(Pmu4f2b12)
             _, Pmu4f2 = self.EK.PK_original(Pmu4f2)
@@ -410,10 +440,10 @@ class FASTPTPlus(fpts.FASTPT):
 
             _, Pmu8f4 = self.EK.PK_original(Pmu8f4)
 
-        return (Pb1b1, Pb1b2, Pb2b2, Pmu2fb1, Pmu2fb2,
-                Pmu2f2b12, Pmu2fb12, Pmu2fb1b2, Pmu2f2b1,
-                Pmu2f2b2, Pmu4f4, Pmu4f3, Pmu4f3b1, Pmu4f2b2,
-                Pmu4f2b1, Pmu4f2b12, Pmu4f2, Pmu6f4, Pmu6f3,
+        return (Pb1b1, Pb1b2, Pb1bG2, Pb2b2, Pb2bG2, PbG2bG2, Pmu2fb1, Pmu2fb2,
+                Pmu2fbG2, Pmu2f2b12, Pmu2fb12, Pmu2fb1b2, Pmu2fb1bG2, Pmu2f2b1,
+                Pmu2f2b2, Pmu2f2bG2, Pmu4f4, Pmu4f3, Pmu4f3b1, Pmu4f2b2,
+                Pmu4f2bG2, Pmu4f2b1, Pmu4f2b12, Pmu4f2, Pmu6f4, Pmu6f3,
                 Pmu6f3b1, Pmu8f4)
 
     def Pkmu_13_one_loop_terms(self, k, P):
@@ -431,17 +461,19 @@ class FASTPTPlus(fpts.FASTPT):
 
         Returns
         -------
-        PZ1b1, PZ1mu2f, PZ1mu2fb1, PZ1mu2f2, PZ1mu4f2: numpy.ndarray
+        PZ1b1, PZ1bG3, ..., PZ1mu4f2: numpy.ndarray
             Propagator loop corrections
         """
 
         PZ1b1 = self.P_dd_13_reg(k, P)
+        PZ1bG3 = self.P_b1bG3(k, P)
+        PZ1bG2 = 5.0 / 2.0 * PZ1bG3
         PZ1mu2f = self.P_tt_13_reg(k, P)
         PZ1mu2fb1 = self.P_mu2fb1_13(k, P)
         PZ1mu2f2 = 3.0 / 8.0 * self.P_mu2f2_13(k, P)
         PZ1mu4f2 = self.P_mu4f2_13(k, P)
 
-        return PZ1b1, PZ1mu2f, PZ1mu2fb1, PZ1mu2f2, PZ1mu4f2
+        return PZ1b1, PZ1bG3, PZ1bG2, PZ1mu2f, PZ1mu2fb1, PZ1mu2f2, PZ1mu4f2
 
     def P_dd_13_reg(self, k, P):
         r"""P_dd_13_reg.
@@ -496,6 +528,61 @@ class FASTPTPlus(fpts.FASTPT):
         P_bar = 1 / 252.0 * k**3 / (2 * np.pi)**2 * P * g_k
 
         return P_bar
+
+    def P_b1bG3(self, k, P):
+        r"""P_b1bG3
+
+        Computes the contribution `P_b1bG3` for the galaxy power spectrum
+
+        Parameters
+        ----------
+        k: numpy.ndarray
+            Fourier wavenumbers, log-spaced
+        P: numpy.ndarray
+            Power spectrum
+
+        Returns
+        -------
+        P_b1bG3: numpy.ndarray
+            `P_b1bG3` contribution to the galaxy power spectrum
+        """
+
+        N = k.size
+        n = np.arange(-N + 1, N)
+        dL = np.log(k[1]) - np.log(k[0])
+        s = n * dL
+        cut = 7
+        high_s = s[s > cut]
+        low_s = s[s < -cut]
+        mid_high_s = s[(s <= cut) & (s > 0)]
+        mid_low_s = s[(s >= -cut) & (s < 0)]
+
+        def _Zb1g3(r):
+            return r * (-12.0 / r**2 + 44.0 + 44.0 * r**2 - 12 * r**4 +
+                        6.0 / r**3 * (r**2 - 1.0)**4 *
+                        np.log((r + 1.0) / np.absolute(r - 1.0)))
+
+        def _Zb1g3_low(r):
+            return r * (512 / 5.0 - 1536 / 35.0 / r**2 +
+                        512 / 105.0 / r**4 + 512 / 1155.0 / r**6 +
+                        512 / 5005.0 / r**8)
+
+        def _Zb1g3_high(r):
+            return r * (512 / 5.0 * r**2 - 1536 / 35.0 * r**4 +
+                        512 / 105.0 * r**6 + 512 / 1155.0 * r**8)
+
+        fb1g3_mid_low = _Zb1g3(np.exp(-mid_low_s))
+        fb1g3_mid_high = _Zb1g3(np.exp(-mid_high_s))
+        fb1g3_high = _Zb1g3_high(np.exp(-high_s))
+        fb1g3_low = _Zb1g3_low(np.exp(-low_s))
+
+        fb1g3 = np.hstack((fb1g3_low, fb1g3_mid_low, 64, fb1g3_mid_high,
+                           fb1g3_high))
+        gb1g3 = fftconvolve(P, fb1g3) * dL
+        gb1g3_k = gb1g3[N - 1:2 * N - 1]
+        Pb1g3_bar = -1.0 / 42.0 * k**3 / (2 * np.pi)**2 * P * gb1g3_k
+
+        return Pb1g3_bar
 
     def P_mu2f2_13(self, k, P):
         r"""P_mu2f2_13.

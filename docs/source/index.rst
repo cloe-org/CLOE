@@ -20,6 +20,7 @@ Package Contents
    getting_started
    example
    cloe
+   run_with_cosmosis
    cite_us
    contributing
 

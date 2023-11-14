@@ -2,6 +2,14 @@ b2_spectro_bin1: 0.0
 b2_spectro_bin2: 0.0
 b2_spectro_bin3: 0.0
 b2_spectro_bin4: 0.0
+bG2_spectro_bin1: 0.0
+bG2_spectro_bin2: 0.0
+bG2_spectro_bin3: 0.0
+bG2_spectro_bin4: 0.0
+bG3_spectro_bin1: 0.0
+bG3_spectro_bin2: 0.0
+bG3_spectro_bin3: 0.0
+bG3_spectro_bin4: 0.0
 c0_spectro_bin1: 0.0
 c0_spectro_bin2: 0.0
 c0_spectro_bin3: 0.0
@@ -14,6 +22,10 @@ c4_spectro_bin1: 0.0
 c4_spectro_bin2: 0.0
 c4_spectro_bin3: 0.0
 c4_spectro_bin4: 0.0
+ck4_spectro_bin1: 0.0
+ck4_spectro_bin2: 0.0
+ck4_spectro_bin3: 0.0
+ck4_spectro_bin4: 0.0
 aP_spectro_bin1: 0.0
 aP_spectro_bin2: 0.0
 aP_spectro_bin3: 0.0
@@ -22,3 +34,11 @@ Psn_spectro_bin1: 0.0
 Psn_spectro_bin2: 0.0
 Psn_spectro_bin3: 0.0
 Psn_spectro_bin4: 0.0
+e0k2_spectro_bin1: 0.0
+e0k2_spectro_bin2: 0.0
+e0k2_spectro_bin3: 0.0
+e0k2_spectro_bin4: 0.0
+e2k2_spectro_bin1: 0.0
+e2k2_spectro_bin2: 0.0
+e2k2_spectro_bin3: 0.0
+e2k2_spectro_bin4: 0.0

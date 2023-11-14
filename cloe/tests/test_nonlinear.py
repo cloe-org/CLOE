@@ -8,6 +8,7 @@ This module contains unit tests for the
 from unittest import TestCase
 import numpy as np
 import numpy.testing as npt
+from copy import deepcopy
 from cloe.non_linear.nonlinear import Nonlinear
 from cloe.tests.test_tools.test_data_handler import load_test_pickle
 
@@ -77,47 +78,57 @@ class nonlinearinitTestCase(TestCase):
             load_test_pickle('cosmo_test_NLspectro1_nonlin_dic.pickle')
         cls.nl7.Pgg_spectro_model.nonlinear_dic = nonlinear_dic
 
+        cosmo_dic_8 = deepcopy(cosmo_dic_7)
+        cosmo_dic_8['nuisance_parameters']['Psn_spectro_bin1'] = 1000.0
+        cosmo_dic_8['nuisance_parameters']['aP_spectro_bin1'] = 1.0
+        cosmo_dic_8['nuisance_parameters']['e0k2_spectro_bin1'] = 1.0
+        cosmo_dic_8['nuisance_parameters']['e2k2_spectro_bin1'] = 1.0
+        cls.nl8 = Nonlinear(cosmo_dic_8)
+        cls.nl8.set_Pgg_spectro_model()
+        cls.nl8.Pgg_spectro_model.nonlinear_dic = nonlinear_dic
+
     def setUp(self) -> None:
         # Check values
         self.Pgi_spectro_test = -388.28625
-        self.Pgg_spectro_test = 82595.002101
+        self.Pgg_spectro_test = 82780.064486
         self.Pgdelta_spectro_test = 59890.445816
+        self.noise_Pgg_spectro = 2000.125
 
-        self.Pgg_phot_test_NL1 = 58175.37128267319
-        self.Pgdelta_phot_test_NL1 = 41140.678806465
+        self.Pgg_phot_test_NL1 = 50711.837574
+        self.Pgdelta_phot_test_NL1 = 38411.177621
         self.Pii_test_NL1 = np.array([2.40814584, 0.89845222, 0.33413697])
         self.Pdeltai_test_NL1 = -264.69349205263046
-        self.Pgi_phot_test_NL1 = -374.2923700580575
+        self.Pgi_phot_test_NL1 = -349.456473
 
-        self.Pgg_phot_test_NL2 = 58265.169583
-        self.Pgdelta_phot_test_NL2 = 41204.182708
+        self.Pgg_phot_test_NL2 = 50788.61478
+        self.Pgdelta_phot_test_NL2 = 38469.331753
         self.Pii_test_NL2 = np.array([2.411818, 0.897909, 0.334765])
         self.Pdeltai_test_NL2 = -265.099577
-        self.Pgi_phot_test_NL2 = -374.866598
+        self.Pgi_phot_test_NL2 = -349.985546
 
-        self.Pgg_phot_test_NL3 = 58385.00518538
-        self.Pgdelta_phot_test_NL3 = 41290.92152593
+        self.Pgg_phot_test_NL3 = 50893.410633
+        self.Pgdelta_phot_test_NL3 = 38548.708331
         self.Pii_test_NL3 = np.array([2.41684859, 0.89712765, 0.33484379])
         self.Pdeltai_test_NL3 = -265.66180498
-        self.Pgi_phot_test_NL3 = -375.64305879
+        self.Pgi_phot_test_NL3 = -350.707697
 
-        self.Pgg_phot_test_NL4 = 58361.236575
-        self.Pgdelta_phot_test_NL4 = 41272.119726
+        self.Pgg_phot_test_NL4 = 50893.404511
+        self.Pgdelta_phot_test_NL4 = 38548.70369
         self.Pii_test_NL4 = np.array([2.415794, 0.896139, 0.333824])
         self.Pdeltai_test_NL4 = -265.53667
-        self.Pgi_phot_test_NL4 = -375.484674
+        self.Pgi_phot_test_NL4 = -350.707655
 
-        self.Pgg_phot_test_NL5 = 58057.58175505
-        self.Pgdelta_phot_test_NL5 = 41059.35948637
+        self.Pgg_phot_test_NL5 = 50607.973268
+        self.Pgdelta_phot_test_NL5 = 38332.506635
         self.Pii_test_NL5 = np.array([2.40329487, 0.89325885, 0.33133042])
         self.Pdeltai_test_NL5 = -264.17195626
-        self.Pgi_phot_test_NL5 = -373.53644919
+        self.Pgi_phot_test_NL5 = -348.740741
 
-        self.Pgg_phot_test_NL6 = 58273.69731319
-        self.Pgdelta_phot_test_NL6 = 41212.25488618
+        self.Pgg_phot_test_NL6 = 50788.004036
+        self.Pgdelta_phot_test_NL6 = 38468.869152
         self.Pii_test_NL6 = np.array([2.41173, 0.890966, 0.330161])
         self.Pdeltai_test_NL6 = -265.15569155
-        self.Pgi_phot_test_NL6 = -374.92694385
+        self.Pgi_phot_test_NL6 = -349.981338
 
         self.Pmm_phot_test_NL5_extra_k = 3.4178353
         self.Pmm_phot_test_NL6_extra_kz = 1.3728688
@@ -145,13 +156,14 @@ class nonlinearinitTestCase(TestCase):
         self.D_test = 0.6061337447181263
         self.fia_test = -0.00909382071134854
         self.bspec = 1.46148
-        self.bphot = 1.41406
+        self.bphot = 1.320236
 
     def tearDown(self):
 
         self.Pgg_spectro_test = None
         self.Pgdelta_spectro_test = None
         self.Pgi_spectro_test = None
+        self.noise_Pgg_spectro = None
 
         self.Pgg_phot_test_NL1 = None
         self.Pgdelta_phot_test_NL1 = None
@@ -295,6 +307,14 @@ class nonlinearinitTestCase(TestCase):
             rtol=self.rtol,
             err_msg='Error in value returned by Pgg_spectro_def '
                     'for NL_flag_spectro=1',
+        )
+
+    def test_noise_Pgg_spectro(self):
+        npt.assert_allclose(
+            self.nl8.noise_Pgg_spectro(self.redshift1, self.wavenumber1,
+                                       self.mu),
+            self.noise_Pgg_spectro, rtol=self.rtol,
+            err_msg='Error in value returned by noise_Pgg_spectro'
         )
 
     def test_Pgdelta_spectro_def(self):

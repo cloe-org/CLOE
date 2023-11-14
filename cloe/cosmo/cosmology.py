@@ -10,6 +10,7 @@ from cloe.non_linear.nonlinear import Nonlinear
 from cloe.auxiliary import redshift_bins as rb
 from cloe.auxiliary.logger import log_debug, log_error
 from scipy.integrate import quad
+from copy import deepcopy
 
 
 class CosmologyError(Exception):
@@ -87,15 +88,28 @@ class Cosmology:
         H_Mpc: list
             Hubble function evaluated at redshifts `z_win` in units
             of :math:`{\rm Mpc^{-1}}`
-        Pk_delta: function
+        Pk_delta_Boltzmann: function
             Interpolator function for linear matter :math:`P(k)` from
             Boltzmann code
-        Pk_cb: function
+        Pk_cb_Boltzmann: function
             Interpolator function for cdm+b :math:`P(k)` from
             Boltzmann code
-        Pk_halomodel_recipe: function
+        Pk_halomodel_recipe_Boltzmann: function
             Interpolator function for nonlinear matter :math:`P(k)` from
             Boltzmann code
+        Pk_delta: function
+            Interpolator function for linear matter :math:`P(k)`. Coincides
+            with `Pk_delta_Boltzmann` if `use_gamma_MG` is False, otherwise
+            returns a rescaled version according to the value of `gamma_MG`.
+        Pk_cb: function
+            Interpolator function for cdm+b :math:`P(k)`. Coincides with
+            `Pk_cb_Boltzmann` if `use_gamma_MG` is False, otherwise returns
+            a rescaled version according to the value of `gamma_MG`.
+        Pk_halomodel_recipe: function
+            Interpolator function for nonlinear matter :math:`P(k)`. Coincides
+            with `Pk_halomodel_rcipe_Boltzmann` if `use_gamma_MG` is False,
+            otherwise returns a rescaled version according to the value of
+            `gamma_MG`.
         Pk_weyl: function
             Interpolator function for linear Weyl :math:`P(k)` from
             Boltzmann code
@@ -122,8 +136,13 @@ class Cosmology:
             Interpolated function for Hubble parameter
         H_z_func_Mpc: function
             Interpolated function for Hubble parameter :math:`{\rm Mpc^{-1}}`
-        D_z_k_func: function
+        _D_z_k_func: function
             Interpolated function for growth factor
+        D_z_k_func: function
+            Wrapper for interpolated function for growth factor, that makes
+            the output type consistent with the input type.
+        D_z_k_func_MG: function
+            Interpolated function for growth factor (modified gravity)
         z_win: list
             Array of redshifts at which :math:`H` and :obj:`comov_dist`
             are evaluated at
@@ -225,6 +244,9 @@ class Cosmology:
                           'sigma8': None,
                           'D_z_k': None,
                           # Interpolators
+                          'Pk_delta_Boltzmann': None,
+                          'Pk_cb_Boltzmann': None,
+                          'Pk_halomodel_recipe_Boltzmann': None,
                           'Pk_delta': None,
                           'Pk_cb': None,
                           'Pk_halomodel_recipe': None,
@@ -247,7 +269,9 @@ class Cosmology:
                           'd_z_func': None,
                           'H_z_func': None,
                           'H_z_func_Mpc': None,
+                          '_D_z_k_func': None,
                           'D_z_k_func': None,
+                          'D_z_k_func_MG': None,
                           'sigma8_z_func': None,
                           'fsigma8_z_func': None,
                           'f_z': None,
@@ -271,6 +295,8 @@ class Cosmology:
                           'use_gamma_MG': 0,
                           # Redshift dependent purity correction
                           'f_out_z_dep': False,
+                          # Spectroscopic galaxy clustering redshift error
+                          'GCsp_z_err': False,
                           'nuisance_parameters': {
                              # Intrinsic alignment
                              'aia': 1.72,
@@ -338,6 +364,14 @@ class Cosmology:
                              'b2_spectro_bin2': 0.0,
                              'b2_spectro_bin3': 0.0,
                              'b2_spectro_bin4': 0.0,
+                             'bG2_spectro_bin1': 0.0,
+                             'bG2_spectro_bin2': 0.0,
+                             'bG2_spectro_bin3': 0.0,
+                             'bG2_spectro_bin4': 0.0,
+                             'bG3_spectro_bin1': 0.0,
+                             'bG3_spectro_bin2': 0.0,
+                             'bG3_spectro_bin3': 0.0,
+                             'bG3_spectro_bin4': 0.0,
                              # Finger of God counterterms
                              'c0_spectro_bin1': 0.0,
                              'c0_spectro_bin2': 0.0,
@@ -351,6 +385,10 @@ class Cosmology:
                              'c4_spectro_bin2': 0.0,
                              'c4_spectro_bin3': 0.0,
                              'c4_spectro_bin4': 0.0,
+                             'ck4_spectro_bin1': 0.0,
+                             'ck4_spectro_bin2': 0.0,
+                             'ck4_spectro_bin3': 0.0,
+                             'ck4_spectro_bin4': 0.0,
                              # Shot noise parameters
                              'aP_spectro_bin1': 0.0,
                              'aP_spectro_bin2': 0.0,
@@ -360,6 +398,14 @@ class Cosmology:
                              'Psn_spectro_bin2': 0.0,
                              'Psn_spectro_bin3': 0.0,
                              'Psn_spectro_bin4': 0.0,
+                             'e0k2_spectro_bin1': 0.0,
+                             'e0k2_spectro_bin2': 0.0,
+                             'e0k2_spectro_bin3': 0.0,
+                             'e0k2_spectro_bin4': 0.0,
+                             'e2k2_spectro_bin1': 0.0,
+                             'e2k2_spectro_bin2': 0.0,
+                             'e2k2_spectro_bin3': 0.0,
+                             'e2k2_spectro_bin4': 0.0,
                              # Purity of spectroscopic samples
                              'f_out': 0.0,
                              'f_out_1': 0.0,
@@ -464,8 +510,9 @@ class Cosmology:
         # We want to obtain delta directly from Cobaya.
         # Here depends on z and k.
         try:
-            P_z_k = self.cosmo_dic['Pk_delta'].P(zs, ks)
-            D_z_k = np.sqrt(P_z_k / self.cosmo_dic['Pk_delta'].P(0.0, ks))
+            power_interp = self.cosmo_dic['Pk_delta_Boltzmann']
+            P_z_k = power_interp.P(zs, ks)
+            D_z_k = np.sqrt(P_z_k / power_interp.P(0.0, ks))
             return D_z_k
         except CosmologyError:
             w('Computation error in D(z, k)')
@@ -507,49 +554,31 @@ class Cosmology:
             log_error('Computation error in f(z, k)')
             log_debug('Check k is a scalar, not an array')
 
-    def growth_rate_cobaya(self):
-        r"""Growth rate from Cobaya.
+    def interp_growth_rate(self):
+        r"""Interpolates the growth rate.
 
-        Calculates growth rate according to
-
-        .. math::
-                   f(z) &=f\sigma_8(z) / \sigma_8(z)\\
-
-        Updates 'key' in the cosmo_dic attribute of the class
-        by adding an interpolator object
-        which interpolates f(z).
-
-        """
-        fs8 = self.cosmo_dic['fsigma8_z_func'](self.cosmo_dic['z_win'])
-        s8 = self.cosmo_dic['sigma8_z_func'](self.cosmo_dic['z_win'])
-        growth = fs8 / s8
-        self.cosmo_dic['f_z'] = \
-            interpolate.InterpolatedUnivariateSpline(
-                x=self.cosmo_dic['z_win'],
-                y=growth, ext=2)
-
-    def growth_rate_MG(self, zs):
-        r"""
-        Computes the growth rate using :math:`\gamma_{\rm MG}` as
+        Adds an interpolator for the growth rate (function of redshift)
+        to the cosmo dictionary. The growth rate is defined depending on
+        the value of the `use_gamma_MG` flag, as either
 
         .. math::
-            f(z;\gamma_{\rm MG})=[\Omega_{\rm m}(z)]^{\gamma_{\rm MG}}
+                       f(z) &=f\sigma_8(z) / \sigma_8(z)\\
 
-        Updates 'key' in the cosmo_dic attribute of the class
-        by adding an interpolator object
-        which interpolates f(z).
+        or
 
-        Parameters
-        ----------
-        zs: list
-            List of redshift for the power spectrum
+        .. math::
+                f(z;\gamma_{\rm MG})=[\Omega_{\rm m}(z)]^{\gamma_{\rm MG}}
 
         """
-        f_MG = self.matter_density(zs)**self.cosmo_dic['gamma_MG']
+        z_win = self.cosmo_dic['z_win']
+        if self.cosmo_dic['use_gamma_MG']:
+            growth = self.matter_density(z_win)**self.cosmo_dic['gamma_MG']
+        else:
+            fs8 = self.cosmo_dic['fsigma8_z_func'](z_win)
+            s8 = self.cosmo_dic['sigma8_z_func'](z_win)
+            growth = fs8 / s8
         self.cosmo_dic['f_z'] = \
-            interpolate.InterpolatedUnivariateSpline(
-                x=self.cosmo_dic['z_win'],
-                y=f_MG, ext=2)
+            interpolate.InterpolatedUnivariateSpline(x=z_win, y=growth, ext=2)
 
     def _growth_integrand_MG(self, z_prime):
         r"""Integrand function for the :obj:`growth_factor_MG`.
@@ -562,7 +591,11 @@ class Cosmology:
         z_prime: float
            Integrand variable (redshift)
         """
-        return self.cosmo_dic['f_z'](z_prime) / (1.0 + z_prime)
+        if self.cosmo_dic['use_gamma_MG']:
+            growth = self.cosmo_dic['f_z'](z_prime)
+        else:
+            growth = self.matter_density(z_prime)**0.55
+        return growth / (1.0 + z_prime)
 
     def growth_factor_MG(self):
         r"""
@@ -585,25 +618,19 @@ class Cosmology:
                     self.cosmo_dic['z_win']]
         return np.exp(integral) / np.exp(integral[0])
 
-    def interp_growth_factor(self):
+    def assign_growth_factor(self):
         """Interpolates the growth factor.
 
         Adds an interpolator for the growth factor (function of redshift and
         scale) to the cosmo dictionary.
         """
-        z_win = self.cosmo_dic['z_win']
-        k_win = self.cosmo_dic['k_win']
-
         if self.cosmo_dic['use_gamma_MG']:
-            self.cosmo_dic['D_z_k_func'] = \
-                interpolate.UnivariateSpline(z_win, self.growth_factor_MG())
-        else:
-            growth_grid = self.growth_factor(z_win, k_win)
-            self.cosmo_dic['D_z_k_func'] = \
-                interpolate.RectBivariateSpline(z_win,
-                                                k_win,
-                                                growth_grid,
-                                                kx=3, ky=3)
+            z_win = self.cosmo_dic['z_win']
+            self.cosmo_dic['D_z_k_func_MG'] = \
+                interpolate.interp1d(z_win, self.growth_factor_MG(),
+                                     kind="cubic")
+
+        self.cosmo_dic['D_z_k_func'] = self.growth_factor
 
     def interp_comoving_dist(self):
         """Interpolates the comoving distance.
@@ -1133,19 +1160,13 @@ class Cosmology:
             # if gamma_MG parametrization is used
             # the k-dependency in the growth_factor
             # and growth_rate is dropped
-            growth = self.cosmo_dic['D_z_k_func'](redshift)
+            growth = self.cosmo_dic['D_z_k_func_MG'](redshift)
         else:
             growth = self.cosmo_dic['D_z_k_func'](redshift, k_scale)
-            z_is_array = isinstance(redshift, np.ndarray)
-            k_is_array = isinstance(k_scale, np.ndarray)
-            if k_is_array and not z_is_array:
-                growth = growth[0]
-            elif z_is_array and not k_is_array:
-                growth = growth[:, 0]
-            elif not z_is_array and not k_is_array:
-                growth = growth[0, 0]
-            else:
-                redshift = redshift.reshape(-1, 1)
+
+        if (isinstance(redshift, (list, np.ndarray)) and
+                isinstance(wavenumber, (list, np.ndarray))):
+            redshift = np.repeat(redshift[:, np.newaxis], len(wavenumber), 1)
 
         c1 = 0.0134
         pivot_redshift = \
@@ -1261,6 +1282,31 @@ class Cosmology:
             self.cosmo_dic['Pk_delta'].P(redshift, k_scale)
         return pval
 
+    def noise_Pgg_spectro(self, redshift, k_scale, mu_rsd):
+        r"""Noise corrections to spectroscopic Pgg.
+
+        This method is only used for the linear-only case (NL_flag_spectro=0),
+        where we assume that the Poissonian contribution has already been
+        subtracted and that the non-Poissonian contribution is negligible.
+        Therefore this function returns 0 for every redshift, scale, and angle
+        to the line of sight.
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum
+        wavenumber: float or numpy.ndarray
+            Wavenumber at which to evaluate the power spectrum
+        mu_rsd: float or numpy.ndarray
+            Cosine of the angle between wavenumber and the
+            line of sight
+
+        Returns
+        -------
+        Noise contribution for the spectroscopic galaxy power spectrum
+        """
+        return 0.0
+
     def obtain_power_spectra(self):
         """Adds photometric/spectroscopic power spectra to cosmo dictionary.
 
@@ -1342,6 +1388,104 @@ class Cosmology:
                                             pgi_spectro,
                                             kx=1, ky=1)
         return
+
+    def rescaled_linear_power_MG(self, redshift, wavenumber):
+        r"""Rescaled linear power spectrum due to Modified Gravity
+
+        The rescaling is carried out with the ratio of the growth factors
+        squared, as
+
+        .. math::
+            P_{\rm lin}^{\rm MG}(k, z)=P_{\rm lin}(k, z)\left[\frac{D_{\rm MG}\
+            (z ; \gamma)}{D(z)}\right]^2
+
+        Parameters
+        ----------
+        redshift: float or numpy.ndarray
+            Redshift at which to evaluate the power spectrum
+        wavenumber: float or list or numpy.ndarray
+            Wavenumber at which to evaluate the power spectrum
+
+        Returns
+        -------
+        Rescaled power spectrum: float or numpy.ndarray
+            Linear power spectrum rescaled by MG for the total matter density
+        """
+        ratio = (self.cosmo_dic['D_z_k_func_MG'](redshift) /
+                 self.cosmo_dic['D_z_k_func'](redshift, 0.05))
+
+        if (isinstance(redshift, (list, np.ndarray)) and
+                isinstance(wavenumber, (list, np.ndarray))):
+            ratio = np.repeat(ratio[:, np.newaxis], len(wavenumber), 1)
+
+        return (self.cosmo_dic['Pk_delta_Boltzmann'].P(redshift, wavenumber) *
+                ratio**2)
+
+    def rescaled_linear_power_cb_MG(self, redshift, wavenumber):
+        r"""Rescaled linear cb power spectrum due to Modified Gravity
+
+        The rescaling is carried out with the ratio of the growth factors
+        squared, as
+
+        .. math::
+            P_{\rm lin}^{\rm MG}(k, z)=P_{\rm lin}(k, z)\left[\frac{D_{\rm MG}\
+            (z ; \gamma)}{D(z)}\right]^2
+
+        Parameters
+        ----------
+        redshift: float or numpy.ndarray
+            Redshift at which to evaluate the power spectrum
+        wavenumber: float or list or numpy.ndarray
+            Wavenumber at which to evaluate the power spectrum
+
+        Returns
+        -------
+        Rescaled power spectrum: float or numpy.ndarray
+            Linear power spectrum rescaled by MG for the cdm+b component
+        """
+        ratio = (self.cosmo_dic['D_z_k_func_MG'](redshift) /
+                 self.cosmo_dic['D_z_k_func'](redshift, 0.05))
+
+        if (isinstance(redshift, (list, np.ndarray)) and
+                isinstance(wavenumber, (list, np.ndarray))):
+            ratio = np.repeat(ratio[:, np.newaxis], len(wavenumber), 1)
+
+        return (self.cosmo_dic['Pk_cb_Boltzmann'].P(redshift, wavenumber) *
+                ratio**2)
+
+    def rescaled_halomodel_power_MG(self, redshift, wavenumber):
+        r"""Rescaled halomodel power spectrum due to Modified Gravity
+
+        The rescaling is carried out with the ratio of the growth factors
+        squared, as
+
+        .. math::
+            P_{\rm lin}^{\rm MG}(k, z)=P_{\rm lin}(k, z)\left[\frac{D_{\rm MG}\
+            (z ; \gamma)}{D(z)}\right]^2
+
+        Parameters
+        ----------
+        redshift: float or numpy.ndarray
+            Redshift at which to evaluate the power spectrum
+        wavenumber: float or list or numpy.ndarray
+            Wavenumber at which to evaluate the power spectrum
+
+        Returns
+        -------
+        Rescaled power spectrum: float or numpy.ndarray
+            Halomodel power spectrum rescaled by MG for the total matter
+            density
+        """
+        ratio = (self.cosmo_dic['D_z_k_func_MG'](redshift) /
+                 self.cosmo_dic['D_z_k_func'](redshift, 0.05))
+
+        if (isinstance(redshift, (list, np.ndarray)) and
+                isinstance(wavenumber, (list, np.ndarray))):
+            ratio = np.repeat(ratio[:, np.newaxis], len(wavenumber), 1)
+
+        return (self.cosmo_dic['Pk_halomodel_recipe_Boltzmann'].P(redshift,
+                                                                  wavenumber) *
+                ratio**2)
 
     def MG_mu_def(self, redshift, k_scale, MG_mu):
         r"""Modified gravitational coupling to matter.
@@ -1434,11 +1578,8 @@ class Cosmology:
         self.cosmo_dic['f_K_z12_func'] = self.f_K_z12_wrapper
         self.interp_fsigma8()
         self.interp_sigma8()
-        if self.cosmo_dic['use_gamma_MG']:
-            self.growth_rate_MG(zs)
-        else:
-            self.growth_rate_cobaya()
-        self.interp_growth_factor()
+        self.interp_growth_rate()
+        self.assign_growth_factor()
         self.interp_angular_dist()
         # For the moment we use our own definition
         # of the growth factor
@@ -1448,9 +1589,29 @@ class Cosmology:
         self.cosmo_dic['MG_mu'] = lambda x, y: self.MG_mu_def(x, y, MG_mu)
         self.cosmo_dic['MG_sigma'] = lambda x, y: self.MG_sigma_def(x, y,
                                                                     MG_sigma)
+        # Create deepcopy objects of the power spectrum interpolators obtained
+        # from the Boltzmann solver. If use_gamma_MG=True, then the methods
+        # to evaluate the power spectra, i.e. .P, are substituted with the
+        # Modified Gravity functions
+        self.cosmo_dic['Pk_delta'] = \
+            deepcopy(self.cosmo_dic['Pk_delta_Boltzmann'])
+        self.cosmo_dic['Pk_cb'] = \
+            deepcopy(self.cosmo_dic['Pk_cb_Boltzmann'])
+        if self.cosmo_dic['NL_flag_phot_matter'] > 0:
+            self.cosmo_dic['Pk_halomodel_recipe'] = \
+                deepcopy(self.cosmo_dic['Pk_halomodel_recipe_Boltzmann'])
+        if self.cosmo_dic['use_gamma_MG']:
+            self.cosmo_dic['Pk_delta'].P = self.rescaled_linear_power_MG
+            self.cosmo_dic['Pk_cb'].P = self.rescaled_linear_power_cb_MG
+            if self.cosmo_dic['NL_flag_phot_matter'] > 0:
+                self.cosmo_dic['Pk_halomodel_recipe'].P = \
+                    self.rescaled_halomodel_power_MG
         # Update nonlinear module, by calling the update_dic method
         # of the nonlinear instance
         self.nonlinear.update_dic(self.cosmo_dic)
         # Update dictionary with bias function and power spectra
         self.create_phot_galbias()
         self.obtain_power_spectra()
+
+        self.cosmo_dic['noise_Pgg_spectro'] = \
+            self.pk_source_spectro.noise_Pgg_spectro

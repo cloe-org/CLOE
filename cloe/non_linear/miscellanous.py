@@ -62,19 +62,13 @@ class Misc:
             # if gamma_MG parametrization is used
             # the k-dependency in the growth_factor
             # and growth_rate is dropped
-            growth = self.theory['D_z_k_func'](redshift)
+            growth = self.theory['D_z_k_func_MG'](redshift)
         else:
             growth = self.theory['D_z_k_func'](redshift, wavenumber)
-            redshift_is_array = isinstance(redshift, np.ndarray)
-            wavenumber_is_array = isinstance(wavenumber, np.ndarray)
-            if wavenumber_is_array and not redshift_is_array:
-                growth = growth[0]
-            elif redshift_is_array and not wavenumber_is_array:
-                growth = growth[:, 0]
-            elif not redshift_is_array and not wavenumber_is_array:
-                growth = growth[0, 0]
-            else:
-                redshift = redshift.reshape(-1, 1)
+
+        if (isinstance(redshift, (list, np.ndarray)) and
+                isinstance(wavenumber, (list, np.ndarray))):
+            redshift = np.repeat(redshift[:, np.newaxis], len(wavenumber), 1)
 
         c1 = 0.0134
         pivot_redshift = self.theory['nuisance_parameters']['pivot_redshift']
@@ -82,6 +76,7 @@ class Misc:
         nia = self.theory['nuisance_parameters']['nia']
         bia = self.theory['nuisance_parameters']['bia']
         omegam = self.theory['Omm']
+
         fia = (-aia * c1 * omegam / growth *
                ((1 + redshift) / (1 + pivot_redshift)) ** nia *
                self.theory['luminosity_ratio_z_func'](redshift) ** bia)

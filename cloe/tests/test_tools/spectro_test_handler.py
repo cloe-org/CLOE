@@ -46,3 +46,27 @@ class SpectroTestParent:
         power = self.test_dict['Pk_delta'].P(redshift, k_scale)
         pval = (bias + growth * mu_rsd ** 2.0) ** 2.0 * power
         return pval
+
+    def noise_Pgg_spectro(self, redshift, k_scale, mu_rsd):
+        r"""Noise corrections to spectroscopic Pgg.
+
+        For the linear-theory case we assume that the Poissonian contribution
+        has already been subtracted. Therefore this function returns 0 for
+        every redshift, scale, and angle to the line of sight.
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum
+        wavenumber: float or numpy.ndarray
+            Wavenumber at which to evaluate the power spectrum
+        mu_rsd: float or numpy.ndarray
+            Cosine of the angle between wavenumber and the
+            line of sight
+
+        Returns
+        -------
+        Noise contribution for the spectroscopic galaxy power spectrum at a
+        given redshift, wavenumber and angle to the line of sight
+        """
+        return 0.0

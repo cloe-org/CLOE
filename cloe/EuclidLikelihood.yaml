@@ -42,6 +42,8 @@ matrix_transform_phot: False
 use_gamma_MG: False
 # Redshift dependent purity correction
 f_out_z_dep: False
+# Include spectroscopic galaxy clustering redshift error
+GCsp_z_err: False
 # Information about where the data is stored
 data: !defaults [../configs/data]
 # Selection of the observables to be computed

@@ -155,6 +155,43 @@ class Spectro:
             self.scaling_factor_perp(z)**(-2) *
             (1 - mu_prime**2))**(-1. / 2)
 
+    def gal_redshift_scatter(self, k, mu_rsd, z):
+        r"""Unbiased scatter in the measured galaxy redshifts.
+
+        Computes the correction factor to the galaxy power
+        spectrum, when taking into account errors in the measured
+        redshift of the galaxies.
+
+        .. math::
+            F_z(k(k',\mu_k'),\mu(\mu_k');z) = \
+                e^{-k^2\mu_k^2[\frac{c}{H(z)}(1+z)\sigma_{z_0}]^2}
+
+        Parameters
+        ----------
+        k: float or numpy.ndarray of float
+            Scale (wavenumber) at which to evaluate the correction
+            factor
+        mu_rsd: numpy.ndarray of float
+           Cosines of the angles between the wavenumber and the
+           line of sight (Alcock–Paczynski distorted)
+           Warning: only mu_rsd = self.mu_grid works (issue 706)
+        z: float or numpy.ndarray of float
+            Redshift at which to evaluate the correction factor
+
+        Returns
+        -------
+        Factor: float or numpy.ndarray of float
+            Value of the correction factor :math:`F_z` due to errors
+            in measured galaxy redshift, for given values of k, mu
+            and redshift.
+        """
+
+        sigma_z0 = 1e-3
+        sigma_r = self.theory['c'] * (1 + z) * sigma_z0 / \
+            self.theory['fid_H_z_func'](z)
+
+        return np.exp(-k**2 * mu_rsd**2 * sigma_r**2)
+
     def multipole_spectra_integrand(self, mu_rsd, z, k, ms):
         r"""Multipole power spectrum integrand.
 
@@ -192,6 +229,37 @@ class Spectro:
         galspec = \
             self.theory['Pgg_spectro'](z, self.get_k(k, mu_rsd, z),
                                        self.get_mu(mu_rsd, z))
+
+        if self.theory['GCsp_z_err']:
+            # Get redshift error correction term
+            z_err = self.gal_redshift_scatter(self.get_k(k, mu_rsd, z),
+                                              self.get_mu(mu_rsd, z), z)
+
+            # Multiply by redshift error correction
+            galspec *= z_err
+
+        # Find the outlier fraction value in the nuisance_parameters dictionary
+        if self.theory['f_out_z_dep']:
+            if np.where(np.isclose(self.z_arr, z))[0].size == 1:
+                iz = int(np.where(np.isclose(self.z_arr, z))[0])
+            else:
+                raise Exception('Problem matching redshift to bin center in'
+                                'multipole_spectra')
+            # redshift-dependent case
+            f_out = self.theory['nuisance_parameters']['f_out_' + str(iz + 1)]
+        else:
+            # redshift-independent case
+            f_out = self.theory['nuisance_parameters']['f_out']
+
+        outlier_factor = (1.0 - f_out) ** 2.0
+
+        galspec *= outlier_factor
+
+        # Add shot-noise contributions (after the systematics!)
+        noise = \
+            self.theory['noise_Pgg_spectro'](z, self.get_k(k, self.mu_grid, z),
+                                             self.get_mu(self.mu_grid, z))
+        galspec += noise
 
         if np.array_equal(mu_rsd, self.mu_grid):
             return galspec * np.array([self.dict_m_legendrepol[m] for m in ms])
@@ -238,22 +306,7 @@ class Spectro:
                                                              z, k, ms),
                             self.mu_grid)
 
-        # Find the outlier fraction value in the nuisance_parameters dictionary
-        if self.theory['f_out_z_dep']:
-            if np.where(np.isclose(self.z_arr, z))[0].size == 1:
-                iz = int(np.where(np.isclose(self.z_arr, z))[0])
-            else:
-                raise Exception('Problem matching redshift to bin center in'
-                                'multipole_spectra')
-            # redshift dependent case
-            f_out = self.theory['nuisance_parameters']['f_out_' + str(iz + 1)]
-        else:
-            # redshift independent case
-            f_out = self.theory['nuisance_parameters']['f_out']
-
-        outlier_factor = (1.0 - f_out) ** 2.0
-
-        spectra = outlier_factor * prefactors * integrals
+        spectra = prefactors * integrals
 
         return np.asarray(spectra)
 

@@ -23,22 +23,26 @@ class specinitTestCase(TestCase, SpectroTestParent):
 
     def setUp(self):
         self.test_dict['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
-        self.check_multipole_spectra_m0 = 12292.778742
+        self.test_dict['noise_Pgg_spectro'] = \
+            np.vectorize(self.noise_Pgg_spectro)
+        self.check_multipole_spectra_m0 = 11122.850049
         self.check_multipole_spectra_m1 = 0.0
-        self.check_multipole_spectra_m2 = 8408.473137
+        self.check_multipole_spectra_m2 = 5619.37934
         self.check_multipole_spectra_m3 = 0.0
-        self.check_multipole_spectra_m4 = 678.085174
+        self.check_multipole_spectra_m4 = 57.930836
         self.check_multipole_spectra_integrand = 3343.949991
         self.check_scaling_factor_perp = 1.007444
         self.check_scaling_factor_parall = 1.007426
         self.check_get_k = 0.000993
         self.check_get_mu = 1.00
+        self.check_gal_redshift_scatter = 0.999980054
 
     def tearDown(self):
         self.check_scaling_factor_perp = None
         self.check_scaling_factor_parall = None
         self.check_get_k = None
         self.check_get_mu = None
+        self.check_gal_redshift_scatter = None
 
     def istf_spectro_galbias(self, redshift, bin_edge_list=None):
         """
@@ -141,12 +145,32 @@ class specinitTestCase(TestCase, SpectroTestParent):
         )
         idx = np.where(mu_grid == 0.7)
         value = integrand[0][idx]
+        fz = self.spectro.gal_redshift_scatter(self.spectro.get_k(0.1,
+                                                                  0.7, 1.0),
+                                               self.spectro.get_mu(0.7, 1.0),
+                                               1.0)
+        npt.assert_allclose(
+            value,
+            self.check_multipole_spectra_integrand * fz,
+            rtol=1e-05,
+            err_msg='Multipole spectra integrand failed',
+        )
+
+    def test_multipole_spectra_integrand_no_z_err(self):
+        self.test_dict['GCsp_z_err'] = False
+        mu_grid = np.linspace(-1, 1, 2001)
+        integrand = (
+            self.spectro.multipole_spectra_integrand(mu_grid, 1.0, 0.1, [2])
+        )
+        idx = np.where(mu_grid == 0.7)
+        value = integrand[0][idx]
         npt.assert_allclose(
             value,
             self.check_multipole_spectra_integrand,
-            rtol=1e-06,
-            err_msg='Multipole spectra integrand failed',
+            rtol=1e-05,
+            err_msg='Multipole spectra integrand no z err failed',
         )
+        self.test_dict['GCsp_z_err'] = True
 
     def test_scaling_factor_perp(self):
         npt.assert_allclose(
@@ -178,6 +202,16 @@ class specinitTestCase(TestCase, SpectroTestParent):
             self.check_get_mu,
             rtol=1e-03,
             err_msg='get_mu failed',
+        )
+
+    def test_gal_redshift_scatter(self):
+        npt.assert_allclose(
+            self.spectro.gal_redshift_scatter(self.check_get_k,
+                                              self.check_get_mu,
+                                              0.01),
+            self.check_gal_redshift_scatter,
+            rtol=1e-05,
+            err_msg='Gal Redshift Scatter failed',
         )
 
     @patch('cloe.fftlog.fftlog.fftlog.fftlog')

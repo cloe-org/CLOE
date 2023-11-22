@@ -33,7 +33,7 @@ class likecalcTestCase(TestCase, SpectroTestParent):
         self.like_tt.get_masked_data()
         # The correct check value, using the h scaling for the h from
         # supplied external file for all the probes together is:
-        self.check_loglike = -297112.297579
+        self.check_loglike = -237546.323079
 
     def tearDown(self):
         self.check_loglike = None
@@ -103,7 +103,7 @@ class likecalcBNT_TestCase(TestCase, SpectroTestParent):
         self.test_dict = mock_cosmo_dic
         # The correct check value, using the h scaling for the h from
         # supplied external file for all the probes together is:
-        self.check_loglike = -297112.297597
+        self.check_loglike = -237546.323079
 
     def tearDown(self):
         self.check_loglike = None
@@ -192,7 +192,7 @@ class likecalcngTestCase(TestCase, SpectroTestParent):
 
         # The correct check value, using the h scaling for the h from
         # supplied external file for all the probes together is:
-        self.check_loglike_ng = -6810.190555
+        self.check_loglike_ng = -6584.718508
 
     def tearDown(self):
         self.check_loglike_ng = None

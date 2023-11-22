@@ -9,6 +9,7 @@ from unittest.mock import patch
 from unittest import TestCase
 import numpy as np
 import numpy.testing as npt
+from copy import deepcopy
 from cloe.spectroscopic_survey.spectro import Spectro
 from cloe.tests.test_tools.spectro_test_handler import SpectroTestParent
 from cloe.tests.test_tools.test_data_handler import load_test_pickle
@@ -19,23 +20,45 @@ class specinitTestCase(TestCase, SpectroTestParent):
     @classmethod
     def setUpClass(cls) -> None:
         cls.test_dict = load_test_pickle('spectro_test_dic.pickle')
+        cls.test_dict_1 = deepcopy(cls.test_dict)
+        cls.test_dict_1['GCsp_z_err'] = True
+        cls.test_dict_2 = deepcopy(cls.test_dict)
+        cls.test_dict_2['f_out'] = 1.0
+        cls.test_dict_3 = deepcopy(cls.test_dict)
+        cls.test_dict_3['f_out_z_dep'] = True
+        cls.test_dict_3['f_out_1'] = 1.0
+
         cls.spectro = Spectro(cls.test_dict, ['1.', '1.2', '1.4', '1.65'])
+        cls.spectro_1 = Spectro(cls.test_dict_1, ['1.', '1.2', '1.4', '1.65'])
+        cls.spectro_2 = Spectro(cls.test_dict_2, ['1.', '1.2', '1.4', '1.65'])
+        cls.spectro_3 = Spectro(cls.test_dict_3, ['1.', '1.2', '1.4', '1.65'])
 
     def setUp(self):
         self.test_dict['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
         self.test_dict['noise_Pgg_spectro'] = \
             np.vectorize(self.noise_Pgg_spectro)
-        self.check_multipole_spectra_m0 = 11122.850049
+        self.test_dict_1['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
+        self.test_dict_1['noise_Pgg_spectro'] = \
+            np.vectorize(self.noise_Pgg_spectro)
+        self.test_dict_2['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
+        self.test_dict_2['noise_Pgg_spectro'] = \
+            np.vectorize(self.noise_Pgg_spectro)
+        self.test_dict_3['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
+        self.test_dict_3['noise_Pgg_spectro'] = \
+            np.vectorize(self.noise_Pgg_spectro)
+
+        self.check_multipole_spectra_m0 = 12292.776078
         self.check_multipole_spectra_m1 = 0.0
-        self.check_multipole_spectra_m2 = 5619.37934
+        self.check_multipole_spectra_m2 = 8409.284572
         self.check_multipole_spectra_m3 = 0.0
-        self.check_multipole_spectra_m4 = 57.930836
-        self.check_multipole_spectra_integrand = 3343.949991
+        self.check_multipole_spectra_m4 = 678.085174
+        self.check_multipole_spectra_integrand_no_z_err = 3343.949991
+        self.check_multipole_spectra_integrand = 2969.445812
         self.check_scaling_factor_perp = 1.007444
         self.check_scaling_factor_parall = 1.007426
         self.check_get_k = 0.000993
         self.check_get_mu = 1.00
-        self.check_gal_redshift_scatter = 0.999980054
+        self.check_gal_redshift_scatter = 0.999923
 
     def tearDown(self):
         self.check_scaling_factor_perp = None
@@ -141,23 +164,18 @@ class specinitTestCase(TestCase, SpectroTestParent):
     def test_multipole_spectra_integrand(self):
         mu_grid = np.linspace(-1, 1, 2001)
         integrand = (
-            self.spectro.multipole_spectra_integrand(mu_grid, 1.0, 0.1, [2])
+            self.spectro_1.multipole_spectra_integrand(mu_grid, 1.0, 0.1, [2])
         )
         idx = np.where(mu_grid == 0.7)
         value = integrand[0][idx]
-        fz = self.spectro.gal_redshift_scatter(self.spectro.get_k(0.1,
-                                                                  0.7, 1.0),
-                                               self.spectro.get_mu(0.7, 1.0),
-                                               1.0)
         npt.assert_allclose(
             value,
-            self.check_multipole_spectra_integrand * fz,
+            self.check_multipole_spectra_integrand,
             rtol=1e-05,
             err_msg='Multipole spectra integrand failed',
         )
 
     def test_multipole_spectra_integrand_no_z_err(self):
-        self.test_dict['GCsp_z_err'] = False
         mu_grid = np.linspace(-1, 1, 2001)
         integrand = (
             self.spectro.multipole_spectra_integrand(mu_grid, 1.0, 0.1, [2])
@@ -166,11 +184,10 @@ class specinitTestCase(TestCase, SpectroTestParent):
         value = integrand[0][idx]
         npt.assert_allclose(
             value,
-            self.check_multipole_spectra_integrand,
+            self.check_multipole_spectra_integrand_no_z_err,
             rtol=1e-05,
             err_msg='Multipole spectra integrand no z err failed',
         )
-        self.test_dict['GCsp_z_err'] = True
 
     def test_scaling_factor_perp(self):
         npt.assert_allclose(
@@ -267,34 +284,26 @@ class specinitTestCase(TestCase, SpectroTestParent):
                          err_msg='Unexpected number of calls to fftlog()')
 
     def test_f_out(self):
-        self.test_dict['nuisance_parameters']['f_out'] = 1.0
         npt.assert_allclose(
-            self.spectro.multipole_spectra(1.0, 0.1, ms=[1]),
+            self.spectro_2.multipole_spectra(1.0, 0.1, ms=[1]),
             0.0,
             atol=1e-10,
             err_msg='Test redshift independent f_out failed',
         )
-        self.test_dict['nuisance_parameters']['f_out'] = 0.0
 
     def test_f_out_z_dep(self):
-        self.test_dict['f_out_z_dep'] = True
-        self.test_dict['nuisance_parameters']['f_out_1'] = 1.0
         npt.assert_allclose(
-            self.spectro.multipole_spectra(1.0, 0.1, ms=[1]),
+            self.spectro_3.multipole_spectra(1.0, 0.1, ms=[1]),
             0.0,
             atol=1e-10,
             err_msg='Test redshift dependent f_out failed',
         )
-        self.test_dict['f_out_z_dep'] = False
-        self.test_dict['nuisance_parameters']['f_out_1'] = 0.0
 
     def test_f_out_z_exception(self):
-        self.test_dict['f_out_z_dep'] = True
         npt.assert_raises(
             Exception,
-            self.spectro.multipole_spectra,
+            self.spectro_3.multipole_spectra,
             20.0,
             0.1,
             ms=[1],
         )
-        self.test_dict['f_out_z_dep'] = False

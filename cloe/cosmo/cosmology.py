@@ -412,6 +412,8 @@ class Cosmology:
                              'f_out_2': 0.0,
                              'f_out_3': 0.0,
                              'f_out_4': 0.0,
+                             # 1-point redshift error dispersion for GCspectro
+                             'sigma_z': 0.002,
                              # Redshift distribution shifts
                              'dz_1_GCphot': -0.02222, 'dz_1_WL': -0.02222,
                              'dz_2_GCphot': -0.02155, 'dz_2_WL': -0.02155,

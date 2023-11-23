@@ -164,7 +164,7 @@ class Spectro:
 
         .. math::
             F_z(k(k',\mu_k'),\mu(\mu_k');z) = \
-                e^{-k^2\mu_k^2[\frac{c}{H(z)}(1+z)\sigma_{z_0}]^2}
+                e^{-k^2\mu_k^2[\frac{c}{H(z)}\sigma_{z_0}]^2}
 
         Parameters
         ----------
@@ -186,9 +186,8 @@ class Spectro:
             and redshift.
         """
 
-        sigma_z0 = 1e-3
-        sigma_r = self.theory['c'] * (1 + z) * sigma_z0 / \
-            self.theory['fid_H_z_func'](z)
+        sigma_z = self.theory['nuisance_parameters']['sigma_z']
+        sigma_r = self.theory['c'] * sigma_z / self.theory['fid_H_z_func'](z)
 
         return np.exp(-k**2 * mu_rsd**2 * sigma_r**2)
 

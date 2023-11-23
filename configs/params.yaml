@@ -149,3 +149,5 @@ multiplicative_bias_12: 0.0
 multiplicative_bias_13: 0.0
 # Pivot redshift for calculation of fIA
 pivot_redshift: 0.0
+# 1-point redshift error dispersion for GCspectro
+sigma_z: 0.002

@@ -21,16 +21,6 @@ from cloe.like_calc.euclike import Euclike
 from cloe.auxiliary.observables_dealer import *
 from cloe.auxiliary.params_converter import camb_to_classy
 
-# Error classes
-
-
-class CobayaInterfaceError(Exception):
-    r"""
-    Class to define Exception Error.
-    """
-
-    pass
-
 
 class EuclidLikelihood(Likelihood):
     r"""

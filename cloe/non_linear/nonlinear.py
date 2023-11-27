@@ -17,14 +17,6 @@ import baccoemu
 from cloe.non_linear.eft import EFTofLSS
 
 
-class NonlinearError(Exception):
-    r"""
-    Class to define Exception Error.
-    """
-
-    pass
-
-
 class Nonlinear:
     """
     Class to compute nonlinear recipes.

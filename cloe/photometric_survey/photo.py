@@ -16,14 +16,6 @@ import warnings
 # General error class
 
 
-class PhotoError(Exception):
-    r"""
-    Class to define Exception Error.
-    """
-
-    pass
-
-
 class Photo:
     """
     Class for photometric observables.
@@ -652,51 +644,6 @@ class Photo:
             # magbias is a list of constants
             W_val *= self.magbias[bin_i - 1]
 
-        return W_val
-
-    def WL_window_slow(self, z, bin_i, k=0.0001):
-        r"""WL window slow.
-
-        Calculates the weak lensing shear kernel for a given tomographic bin.
-
-        .. math::
-            W_{i}^{\gamma}(z, k) =
-            \frac{3}{2}\left ( \frac{H_0}{c}\right )^2
-            \Omega_{{\rm m},0} (1 + z) \Sigma(z, k)
-            f_K\left[\tilde{r}(z)\right]
-            \int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm L}(z^{\prime})
-            \frac{f_K\left[\tilde{r}(z^{\prime}) - \tilde{r}(z)\right]}
-            {f_K\left[\tilde{r}(z^{\prime})\right]}}\\
-
-        Parameters
-        ----------
-        z: float
-            Redshift at which kernel is being evaluated.
-        bin_i: int
-           Index of desired tomographic bin. Tomographic bin
-           indices start from 1.
-        k: float
-            Wavenumber at which to evaluate the Modified Gravity
-            :math:`\Sigma(z,k)` function
-
-        Returns
-        -------
-        Shear kernel: float
-           Value of shear kernel for specified bin at specified redshift
-           and scale
-        """
-        H0_Mpc = self.theory['H0_Mpc']
-        O_m = self.theory['Omm']
-
-        n_z_normalized = self.nz_WL.interpolates_n_i(bin_i, self.z_winterp)
-
-        W_val = ((1.5 * H0_Mpc * O_m * (1.0 + z) *
-                  self.theory['MG_sigma'](z, k) * (
-                  self.theory['f_K_z_func'](z) /
-                  (1 / H0_Mpc)) * integrate.quad(self.window_integrand,
-                                                 a=z,
-                                                 b=self.wl_int_z_max[bin_i],
-                                                 args=(z, n_z_normalized))[0]))
         return W_val
 
     def IA_window(self, z, bin_i):

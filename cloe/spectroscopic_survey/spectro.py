@@ -206,7 +206,7 @@ class Spectro:
         ----------
         mu_rsd: numpy.ndarray of float
            Cosines of the angles between the wavenumber and
-           line of sight (Alcock–Paczynski distorted)
+           line of sight (Alcock-Paczynski distorted)
            Warning: only mu_rsd = self.mu_grid works (issue 706)
         z: float
             Redshift at which to evaluate power spectrum

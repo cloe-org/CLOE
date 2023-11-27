@@ -37,3 +37,4 @@ pytest.xml
 notebooks/DEMO.py
 docs/source/cloe.*
 docs/source/modules.rst
+.idea/misc.xml

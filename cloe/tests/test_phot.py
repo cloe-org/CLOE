@@ -223,19 +223,6 @@ class photoinitTestCase(TestCase):
             magbias_type,
             "<class 'scipy.interpolate._interpolate.interp1d'>")
 
-    def test_WL_window_slow(self):
-        int_comp = self.phot.WL_window_slow(
-            z=self.phot.z_winterp[10],
-            bin_i=1,
-            k=0.1,
-        )
-        npt.assert_allclose(
-            int_comp,
-            self.wbincheck,
-            rtol=self.win_tol,
-            err_msg='WL_window_slow failed',
-        )
-
     # wab here refers to the product of the two window functions.
     def test_power_exception(self):
         pow_ = float("NaN")
@@ -576,16 +563,6 @@ class photoinitTestCase(TestCase):
             self.nz_dic_WL,
             self.nz_dic_GC,
         )
-
-    # this function tests a temporary part of code, see #767
-    # def test_CAMBdata_is_None(self):
-    #    temp_cosmo_dic = self.phot.theory.copy()
-    #    temp_cosmo_dic['CAMBdata'] = None
-    #    npt.assert_raises(KeyError,
-    #                      photo.Photo,
-    #                      temp_cosmo_dic,
-    #                      self.nz_dic_WL,
-    #                      self.nz_dic_GC)
 
     def test_corr_func_ssp(self):
         phot_copy = deepcopy(self.phot)

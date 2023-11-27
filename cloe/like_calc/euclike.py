@@ -14,14 +14,6 @@ from cloe.photometric_survey.redshift_distribution \
 from cloe.auxiliary.matrix_transforms import BNT_transform
 
 
-class EuclikeError(Exception):
-    r"""
-    Class to define Exception Error.
-    """
-
-    pass
-
-
 class Euclike:
     """
     Class to compute the Euclid likelihood from the theory, data, covariance.

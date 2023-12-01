@@ -40,4 +40,3 @@ dependencies:
     - pyhmcode==1.0.0
     # Unit testing and documentation dependencies (from PyPI)
     - pytest-pydocstyle==2.3.2
-

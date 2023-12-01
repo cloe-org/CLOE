@@ -30,10 +30,20 @@ Cobaya:
       #     1 -> Halofit (Takahashi)
       #     2 -> Mead2016 (includes baryon corrections)
       #     3 -> Mead2020 (w/o baryon corrections)
-      #     4 -> Mead2020_feedback (includes baryon corrections)
-      #     5 -> Euclid Emulator 2
-      #     6 -> BACCO (matter)
+      #     4 -> Euclid Emulator 2
+      #     5 -> BACCO (matter)
       NL_flag_phot_matter: 0
+      # Baryonic feedback flag selector
+      #     0 -> no baryonic feedback
+      #     1 -> Mead2016
+      #     2 -> Mead2020_feedback
+      #     3 -> BCemu
+      #     4 -> BACCO (baryonic feedback)
+      NL_flag_phot_baryon: 0
+      # Baryonic feedback z_dependence flag selector for Bacco or BCemu emulators
+      #     False -> 1 set of parameters per redshift bin
+      #     True  -> Power law dependence on z
+      Baryon_redshift_model: True
       # Spectroscopic flag
       #     0 -> linear-only
       #     1 -> EFT

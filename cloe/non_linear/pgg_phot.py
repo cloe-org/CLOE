@@ -45,11 +45,13 @@ class Pgg_phot_model(PowerSpectrum):
 
         Computes the galaxy-galaxy power spectrum for the photometric probe
         assuming a linear bias model. Uses halo model based codes for the
-        matter power spectrum.
+        matter power spectrum, with baryon effects (if selected) added
+        as a boost, unless the halo model code already includes it.
 
         .. math::
             P_{\rm gg}^{\rm photo}(z, k) &=\
-            [b_{\rm g}^{\rm photo}(z)]^2 P_{\rm \delta\delta}^{\rm NL}(z, k)\\
+            [b_{\rm g}^{\rm photo}(z)]^2 P_{\rm \delta\delta}^{\rm NL}(z, k)\
+            S_{\rm bar}(z, k)\\
 
         Parameters
         ----------
@@ -66,7 +68,8 @@ class Pgg_phot_model(PowerSpectrum):
             clustering photometric
         """
         pval = ((self.misc.istf_phot_galbias(redshift) ** 2.0) *
-                self.theory['Pk_halomodel_recipe'].P(redshift, wavenumber))
+                self.theory['Pk_halomodel_recipe'].P(redshift, wavenumber) *
+                self.nonlinear_dic['Bar_boost'](redshift, wavenumber)[0])
         return pval
 
     def Pgg_phot_emu(self, redshift, wavenumber):
@@ -74,11 +77,13 @@ class Pgg_phot_model(PowerSpectrum):
 
         Computes the galaxy-galaxy power spectrum for the photometric probe
         assuming a linear bias model. Uses the EuclidEmu2 or the BACCO
-        emulator for the nonlinear boost to the matter power spectrum.
+        emulator for the nonlinear boost to the matter power spectrum, with
+        baryon effects (if selected) added as a boost.
 
         .. math::
             P_{\rm gg}^{\rm photo}(z, k) &=\
-            [b_{\rm g}^{\rm photo}(z)]^2 P_{\rm \delta\delta}^{\rm NL}(z, k)\\
+            [b_{\rm g}^{\rm photo}(z)]^2 P_{\rm \delta\delta}(z, k)\
+            B_{\rm NL}(z, k) S_{\rm bar}(z, k)\\
 
         Parameters
         ----------
@@ -96,6 +101,7 @@ class Pgg_phot_model(PowerSpectrum):
         """
         pval = ((self.misc.istf_phot_galbias(redshift) ** 2.0) *
                 self.theory['Pk_delta'].P(redshift, wavenumber) *
-                self.nonlinear_dic['NL_boost'](redshift, wavenumber)[0])
+                self.nonlinear_dic['NL_boost'](redshift, wavenumber)[0] *
+                self.nonlinear_dic['Bar_boost'](redshift, wavenumber)[0])
 
         return pval

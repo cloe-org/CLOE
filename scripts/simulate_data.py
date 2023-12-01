@@ -13,7 +13,8 @@ from cloe.photometric_survey.photo import Photo
 
 #sys.exit()
 
-nlflag=4
+nlflag=3
+barflag=2
 
 info = {
     'params': {
@@ -64,23 +65,29 @@ info = {
         'multiplicative_bias_8': 0.0,
         'multiplicative_bias_9': 0.0,
         'multiplicative_bias_10': 0.0,
-        'b1_spectro': 1.4614804,
-        'b2_spectro': 1.6060949,
-        'b3_spectro': 1.7464790,
-        'b4_spectro': 1.8988660,
+        'b1_spectro_bin1': 1.4614804,
+        'b1_spectro_bin2': 1.6060949,
+        'b1_spectro_bin3': 1.7464790,
+        'b1_spectro_bin4': 1.8988660,
         'aia': 1.72,
         'nia': -0.41,
         'bia': 0.0,
-        'dz_1_GCphot': 0.0, 'dz_1_WL': 0.0,
-        'dz_2_GCphot': 0.0, 'dz_2_WL': 0.0,
-        'dz_3_GCphot': 0.0, 'dz_3_WL': 0.0,
-        'dz_4_GCphot': 0.0, 'dz_4_WL': 0.0,
-        'dz_5_GCphot': 0.0, 'dz_5_WL': 0.0,
-        'dz_6_GCphot': 0.0, 'dz_6_WL': 0.0,
-        'dz_7_GCphot': 0.0, 'dz_7_WL': 0.0,
-        'dz_8_GCphot': 0.0, 'dz_8_WL': 0.0,
-        'dz_9_GCphot': 0.0, 'dz_9_WL': 0.0,
-        'dz_10_GCphot': 0.0, 'dz_10_WL': 0.0},
+        # Redshift distributions nuisance parameters: shifts
+        'dz_1_GCphot': 0., 'dz_1_WL': 0.,
+        'dz_2_GCphot': 0., 'dz_2_WL': 0.,
+        'dz_3_GCphot': 0., 'dz_3_WL': 0.,
+        'dz_4_GCphot': 0., 'dz_4_WL': 0.,
+        'dz_5_GCphot': 0., 'dz_5_WL': 0.,
+        'dz_6_GCphot': 0., 'dz_6_WL': 0.,
+        'dz_7_GCphot': 0., 'dz_7_WL': 0.,
+        'dz_8_GCphot': 0., 'dz_8_WL': 0.,
+        'dz_9_GCphot': 0., 'dz_9_WL': 0.,
+        'dz_10_GCphot': 0., 'dz_10_WL': 0.,
+        # HMcode baryon parameter
+        'HMCode_logT_AGN':7.8
+        # OTHER BARYON PARAMETERS ARE SET TO DEFAULTS IN params.yaml.
+        # IF THOSE ARE NOT DEFINED RE-RUN NL DEMO.
+    },
     'theory': {'camb':
                {'stop_at_error': True,
                 'extra_args':{'num_massive_neutrinos': 1,
@@ -100,7 +107,21 @@ info['likelihood'] = {'Euclid':
                          'GCspectro': {'GCspectro': True}
                      },
                      'plot_observables_selection': False,
-                     'NL_flag': nlflag,
+                     'NL_flag_phot_matter': nlflag,
+                       # Baryon flag
+                      # With this, the user can specify which baryon model they want
+                      # For the time-being the available options are:
+                            #0 -> No baryonic feedback
+                            #1 -> Bacco baryons
+                            #2 -> BCMemu baryons
+                            #3 -> HMcode baryons
+                     'NL_flag_phot_baryon': barflag,
+                     # This flag sets the redshift evolution for baryonic parameters for emulators
+                     # The options are:
+                            # True -> use X(z) = X_0 * (1+z)^(-nu_X), no. of params: 7*2 = 14
+                            # False -> use X_i at each redshift bin i and interpolate, no. of params: 7*10 = 70
+                     'Baryon_redshift_model': False,
+                     'NL_flag_spectro': 0,
                      'data': {
                         'sample': 'ExternalBenchmark',
                         'spectro': {
@@ -122,7 +143,8 @@ info['likelihood'] = {'Euclid':
 
                     }}
 
-set_halofit_version(info, info['likelihood']['Euclid']['NL_flag'])
+set_halofit_version(info, info['likelihood']['Euclid']['NL_flag_phot_matter'],
+                          info['likelihood']['Euclid']['NL_flag_phot_baryon'])
 
 model = get_model(info)
 logposterior = model.logposterior({})
@@ -178,8 +200,10 @@ for i in range(1, nbin + 1):
             header_WL = header_WL + '\tE%s-E%s'%(i, j)
         header_XC = header_XC + '\tP%s-E%s'%(i, j)
 
-txtstr='NL_flag_{:d}'.format(info['likelihood']['Euclid']['NL_flag'])
-
+txtstr='NL_flag_phot_matter_{:d}'.format(info['likelihood']['Euclid']['NL_flag_phot_matter'])+ \
+       '_Bar_flag_{:d}'.format(info['likelihood']['Euclid']['NL_flag_phot_baryon'])
+print("saving to: data_path/*"+txtstr+"*")
+print(data_path + 'Cls_zNLA_PosPos_'+txtstr+'.dat')
 np.savetxt(data_path + 'Cls_zNLA_PosPos_'+txtstr+'.dat',
            matGC, fmt='%.12e', delimiter='\t',
            newline='\n', header=header_GC)

@@ -78,7 +78,8 @@ class CobayaModel:
         self.info['data'] = mock_data
 
         set_halofit_version(self.info,
-                            cosmo_inst.cosmo_dic['NL_flag_phot_matter'])
+                            cosmo_inst.cosmo_dic['NL_flag_phot_matter'],
+                            cosmo_inst.cosmo_dic['NL_flag_phot_baryon'])
 
     def get_cobaya_model(self):
         """Gets Cobaya model."""

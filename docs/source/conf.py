@@ -401,4 +401,3 @@ intersphinx_mapping = {
     'matplotlib': ('https://matplotlib.org', None),
     'cobaya': ('https://cobaya.readthedocs.io/en/latest/', None)
     }
-

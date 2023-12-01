@@ -16,6 +16,10 @@ params: !defaults [../configs/params]
 # Nonlinear flag selectors
 NL_flag_phot_matter: 0
 NL_flag_spectro: 0
+# Baryonic feedback flag selector
+NL_flag_phot_baryon: 0
+# Baryonic feedback z_dependence flag selector for BCemu and Bacco emulators
+Baryon_redshift_model: True
 # Bias Model
 bias_model: 1
 # Magnification bias model

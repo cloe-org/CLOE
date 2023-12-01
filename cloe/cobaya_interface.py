@@ -326,6 +326,10 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['NL_flag_phot_matter'] = \
                 self.NL_flag_phot_matter
             self.cosmo.cosmo_dic['NL_flag_spectro'] = self.NL_flag_spectro
+            self.cosmo.cosmo_dic['NL_flag_phot_baryon'] = \
+                self.NL_flag_phot_baryon
+            self.cosmo.cosmo_dic['Baryon_redshift_model'] = \
+                self.Baryon_redshift_model
             self.cosmo.cosmo_dic['f_out_z_dep'] = self.f_out_z_dep
             self.cosmo.cosmo_dic['GCsp_z_err'] = self.GCsp_z_err
             self.cosmo.cosmo_dic['bias_model'] = self.bias_model
@@ -419,6 +423,10 @@ class EuclidLikelihood(Likelihood):
                 info['likelihood']['Euclid']['NL_flag_phot_matter']
             self.cosmo.cosmo_dic['NL_flag_spectro'] = \
                 info['likelihood']['Euclid']['NL_flag_spectro']
+            self.cosmo.cosmo_dic['NL_flag_phot_baryon'] = \
+                info['likelihood']['Euclid']['NL_flag_phot_baryon']
+            self.cosmo.cosmo_dic['Baryon_redshift_model'] = \
+                info['likelihood']['Euclid']['Baryon_redshift_model']
             self.cosmo.cosmo_dic['f_out_z_dep'] = \
                 info['likelihood']['Euclid']['f_out_z_dep']
             self.cosmo.cosmo_dic['GCsp_z_err'] = \

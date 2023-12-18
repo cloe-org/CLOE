@@ -32,9 +32,9 @@ k_samp: 1000
 z_min: 0.0
 z_max: 4.0
 z_samp: 100
-# Select statistics for spectroscopic probes (legendre_multipole_power_spectrum
-# or legendre_multipole_correlation_function)
-statistics_spectro: legendre_multipole_power_spectrum
+# Select statistics for spectroscopic probes (multipole_power_spectrum
+# or multipole_correlation_function)
+statistics_spectro: multipole_power_spectrum
 # Select statistics for photometric probes (angular_power_spectrum
 # or angular_correlation_function)
 statistics_photo: angular_power_spectrum
@@ -56,7 +56,9 @@ observables_selection: !defaults [../configs/observables_selection]
 observables_specifications:
   WL: !defaults [../configs/WL]
   GCphot: !defaults [../configs/GCphot]
-  GCspectro: !defaults [../configs/GCspectro]
+  GCspectro:
+    multipole_power_spectrum: !defaults [../configs/GCspectro-Fourier]
+    multipole_correlation_function: !defaults [../configs/GCspectro-ConfigurationSpace]
   WL-GCphot: !defaults [../configs/WL-GCphot]
   # Note: This is not yet provided by CLOE
   # therefore it will load empty dictionaries

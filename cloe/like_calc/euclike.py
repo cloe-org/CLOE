@@ -42,19 +42,19 @@ class Euclike:
         self.data = data
         if self.do_spectro:
             if observables['specifications']['GCspectro']['statistics'] == \
-                    'legendre_multipole_power_spectrum':
+                    'multipole_power_spectrum':
                 self.do_fourier_spectro = True
                 self.str_start_spectro = 'pk'
                 self.scale_var_spectro = 'k_pk'
             elif observables['specifications']['GCspectro']['statistics'] == \
-                    'legendre_multipole_correlation_function':
+                    'multipole_correlation_function':
                 self.do_fourier_spectro = False
                 self.str_start_spectro = 'xi'
                 self.scale_var_spectro = 'r_xi'
             else:
                 raise ValueError('Unknown statistics_spectro choice. '
-                                 'Use legendre_multipole_power_spectrum '
-                                 'or legendre_multipole_correlation_function')
+                                 'Use multipole_power_spectrum '
+                                 'or multipole_correlation_function')
             self.data['spectro']['Fourier'] = self.do_fourier_spectro
         if self.do_photo:
             # Determine if to use Fourier or configuration space

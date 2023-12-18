@@ -337,7 +337,7 @@ info = {
                     },
                     'GCspectro':
                     {
-                        'statistics': 'legendre_multipole_power_spectrum',
+                        'statistics': 'multipole_power_spectrum',
                         'bins':
                         {
                             'n1':

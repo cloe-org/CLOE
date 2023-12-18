@@ -53,9 +53,9 @@ Cobaya:
       #     1 -> linear interpolation
       #     2 -> constant within bins
       magbias_model: 2
-      # Select statistics for spectroscopic probes (legendre_multipole_power_spectrum
-      # or legendre_multipole_correlation_function)
-      statistics_spectro: legendre_multipole_power_spectrum
+      # Select statistics for spectroscopic probes (multipole_power_spectrum
+      # or multipole_correlation_function)
+      statistics_spectro: multipole_power_spectrum
       # Add RSD to photometric probes
       add_phot_RSD: False
       # Use MG gamma
@@ -242,7 +242,7 @@ Cobaya:
 
 
         GCspectro: 
-            statistics: legendre_multipole_power_spectrum
+            statistics: multipole_power_spectrum
             bins:
                   n1: 
                     n1:

@@ -162,7 +162,8 @@ def _g_m_vals(mu, q):
 def _g_l(ell, z_array):
     r"""Computes _g_l
 
-    Computes the _g_l function, defined as
+    Computes the _g_l function, defined as in
+    `Fang et al. (2020) <https://arxiv.org/abs/1911.11947>`
 
     .. math::
         g_\ell(z) = 2^z * \Gamma((\ell+z)/2) / \Gamma((3+\ell-z)/2)
@@ -180,4 +181,56 @@ def _g_l(ell, z_array):
         Computed values of the _g_l function
     """
     gl = 2.**z_array * _g_m_vals(ell + 0.5, z_array - 1.5)
+    return gl
+
+
+def _g_l_1(ell, z_array):
+    r"""Computes _g_l_1
+
+    Computes the _g_l_1 function, defined as in
+    `Fang et al. (2020) <https://arxiv.org/abs/1911.11947>`
+
+    .. math::
+        g_\ell(z) = 2^(z-1) * (z-1) * \Gamma((\ell+z-1)/2)/\Gamma((4+\ell-z)/2)
+
+    Parameters
+    ----------
+    ell: float
+        Order of the Bessel function of the FFTLog transform
+    z: numpy.ndarray
+        Input array used to define the domain of _g_l
+
+    Returns
+    -------
+    gl: numpy.ndarray
+        Computed values of the _g_l function
+    """
+    gl = -2.**(z_array - 1) * (z_array - 1) * \
+        _g_m_vals(ell + 0.5, z_array - 2.5)
+    return gl
+
+
+def _g_l_2(ell, z_array):
+    r"""Computes _g_l_2
+
+    Computes the _g_l_2 function, defined as in
+    `Fang et al. (2020) <https://arxiv.org/abs/1911.11947>`
+
+    .. math::
+        g_\ell(z)=2^(z-2)*(z-1)*(z-2)*\Gamma((\ell+z-2)/2)/\Gamma((5+\ell-z)/2)
+
+    Parameters
+    ----------
+    ell: float
+        Order of the Bessel function of the FFTLog transform
+    z: numpy.ndarray
+        Input array used to define the domain of _g_l
+
+    Returns
+    -------
+    gl: numpy.ndarray
+        Computed values of the _g_l function
+    """
+    gl = 2.**(z_array - 2) * (z_array - 1) * (z_array - 2) * \
+        _g_m_vals(ell + 0.5, z_array - 3.5)
     return gl

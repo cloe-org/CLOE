@@ -11,7 +11,7 @@ Cobaya:
       NL_flag_spectro: 0
       NL_flag_phot_baryon: 0
       Baryon_redshift_model: True
-      statistics_spectro: legendre_multipole_power_spectrum
+      statistics_spectro: multipole_power_spectrum
       # Select statistics for photometric probes (angular_power_spectrum or
       # angular_correlation_function)
       statistics_photo: angular_power_spectrum

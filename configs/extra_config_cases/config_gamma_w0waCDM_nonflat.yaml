@@ -20,14 +20,16 @@ Cobaya:
       observables_specifications:
         GCphot: GCphot.yaml
         GCphot-GCspectro: GCphot-GCspectro.yaml
-        GCspectro: GCspectro.yaml
+        GCspectro:
+          multipole_power_spectrum: GCspectro-Fourier.yaml
+          multipole_correlation_function: GCspectro-ConfigurationSpace.yaml
         WL: WL.yaml
         WL-GCphot: WL-GCphot.yaml
         WL-GCspectro: WL-GCspectro.yaml
       plot_observables_selection: false
       solver: camb
       speed: 500
-      statistics_spectro: legendre_multipole_power_spectrum
+      statistics_spectro: multipole_power_spectrum
       use_gamma_MG: true
       z_max: 4.0
       z_min: 0.0

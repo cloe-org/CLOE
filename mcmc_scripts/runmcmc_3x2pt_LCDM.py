@@ -32,7 +32,7 @@ info = {
                 'NL_flag_phot_matter': 0,
                 'NL_flag_spectro': 0,
                 'bias_model': 1,
-                'statistics_spectro': 'legendre_multipole_power_spectrum',
+                'statistics_spectro': 'multipole_power_spectrum',
                 'add_phot_RSD': False,
                 'magbias_model': 2,
                 'use_gamma_MG': False,

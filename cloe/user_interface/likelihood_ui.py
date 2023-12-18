@@ -240,9 +240,19 @@ class LikelihoodUI:
                                       'WL-GCphot', 'WL-GCspectro']
                         self._check_and_update_likelihood_fields(obs_spec_dic,
                                                                  sub_fields)
+                    elif field == 'GCspectro':
+                        dic = field_value
+                        # corr_fun_str defined just to avoid exceeding line
+                        # length
+                        corr_fun_str =\
+                            'multipole_correlation_function'
+                        sub_fields = ['multipole_power_spectrum',
+                                      corr_fun_str]
+                        self._check_and_update_likelihood_fields(dic,
+                                                                 sub_fields)
 
-                    log_info(f'\'{field}\' will be set as:')
-                    log_info(field_value)
+                log_info(f'\'{field}\' will be set as:')
+                log_info(field_value)
 
     def _check_and_update_params_field(self, cobaya_dict):
         """

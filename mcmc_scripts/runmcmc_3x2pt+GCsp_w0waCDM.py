@@ -44,9 +44,9 @@ info = {
                     {
                         'luminosity_ratio': 'luminosity_ratio.dat',
                         'IA_model': 'zNLA',
-                        'cov_3x2pt': 'CovMat-3x2pt-{:s}-20Bins.npy',
-                        'cov_GC': 'CovMat-PosPos-{:s}-20Bins.npy',
-                        'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.npy',
+                        'cov_3x2pt': 'CovMat-3x2pt-{:s}-20Bins.npz',
+                        'cov_GC': 'CovMat-PosPos-{:s}-20Bins.npz',
+                        'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.npz',
                         'cov_model': 'Gauss',
                         'cov_is_num': False,
                         'cov_nsim': 10000,

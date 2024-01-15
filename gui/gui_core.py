@@ -759,7 +759,7 @@ class Ui_MainWindow(object):
         self.Photo_SSC_include.setText(_translate("MainWindow", "Include SSC"))
         self.Photo_data_root.setText(_translate("MainWindow", "data/ExternalBenchmark/Photometric/"))
         self.label_45.setText(_translate("MainWindow", "GCph filename"))
-        self.Photo_gaussian_covariance_filename.setText(_translate("MainWindow", "CovMat-3x2pt-zNLA-20Bins.npy"))
+        self.Photo_gaussian_covariance_filename.setText(_translate("MainWindow", "CovMat-3x2pt-zNLA-20Bins.npz"))
         self.label_47.setText(_translate("MainWindow", "Photometric Gaussian Covariance filename"))
         self.GGL_filename.setText(_translate("MainWindow", "Cls_zNLA_PosShear.dat"))
         self.label_48.setText(_translate("MainWindow", "Photometric Super Sample Covariance Path"))

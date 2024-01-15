@@ -745,7 +745,6 @@ class Cosmology:
         except CosmologyError:
             w('Computation error in D(z, k)')
 
-    # This function is deprecated
     def growth_rate(self, zs, ks):
         r"""Growth rate.
 

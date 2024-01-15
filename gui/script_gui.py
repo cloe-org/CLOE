@@ -123,8 +123,8 @@ class ConfigGUIWindow(QtWidgets.QMainWindow):
 
         dictionary_data = {"photo": { "IA_model": "zNLA",
                             "cov_3x2pt": self.ui.Photo_gaussian_covariance_filename.text(),
-                            "cov_GC": "CovMat-PosPos-{:s}-20Bins.npy",
-                            "cov_WL": "CovMat-ShearShear-{:s}-20Bins.npy",
+                            "cov_GC": "CovMat-PosPos-{:s}-20Bins.npz",
+                            "cov_WL": "CovMat-ShearShear-{:s}-20Bins.npz",
                             "cov_model": cov_model,
                             "ndens_GC": "niTab-EP10-RB00.dat",
                             "ndens_WL": "niTab-EP10-RB00.dat",

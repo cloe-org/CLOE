@@ -174,9 +174,9 @@ info['likelihood']['Euclid']['data'] = {
                             'root_WL': 'Cls_{:s}_ShearShear_NL_'+flag_data_str+'.dat',
                             'root_XC': 'Cls_{:s}_PosShear_NL_'+flag_data_str+'.dat',
                             'IA_model': 'zNLA',
-                            'cov_GC':     'CovMat-PosPos-{:s}-20bins-NL_'+flag_cov_str+'.npy',
-                            'cov_WL': 'CovMat-ShearShear-{:s}-20bins-NL_'+flag_cov_str+'.npy',
-                            'cov_3x2pt':     'CovMat-3x2pt-{:s}-20bins-NL_'+flag_cov_str+'.npy',
+                            'cov_GC':     'CovMat-PosPos-{:s}-20bins-NL_'+flag_cov_str+'.npz',
+                            'cov_WL': 'CovMat-ShearShear-{:s}-20bins-NL_'+flag_cov_str+'.npz',
+                            'cov_3x2pt':     'CovMat-3x2pt-{:s}-20bins-NL_'+flag_cov_str+'.npz',
                             'cov_model': covmodel}}
 
 

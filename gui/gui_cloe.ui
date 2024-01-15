@@ -1520,7 +1520,7 @@
        <item row="9" column="0">
         <widget class="QLineEdit" name="Photo_gaussian_covariance_filename">
          <property name="text">
-          <string>CovMat-3x2pt-zNLA-20Bins.npy</string>
+          <string>CovMat-3x2pt-zNLA-20Bins.npz</string>
          </property>
         </widget>
        </item>

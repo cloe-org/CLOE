@@ -1,9 +1,13 @@
+# Adapted from the camb_interface.py script in the original CosmoSIS standard library repository
 from cosmosis.datablock import names, option_section as opt
 from cosmosis.datablock.cosmosis_py import errors
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
 import warnings
 import traceback
+
+from cloe.auxiliary import yaml_handler
+from cloe.auxiliary import likelihood_yaml_handler
 
 # Finally we can now import camb
 import camb
@@ -19,7 +23,6 @@ MODE_ALL = "all"
 MODES = [MODE_BG, MODE_THERM, MODE_CMB, MODE_POWER, MODE_ALL]
 
 DEFAULT_A_S = 2.1e-9
-
 
 # See this table for description:
 #https://camb.readthedocs.io/en/latest/transfer_variables.html#transfer-variables
@@ -64,10 +67,11 @@ def get_choice(options, name, valid, default=None, prefix=''):
     return prefix + choice
 
 def setup(options):
-    mode = options.get_string(opt, 'mode', default="all")
-    if not mode in MODES:
-        raise ValueError("Unknown mode {}.  Must be one of: {}".format(mode, MODES))
-
+    # Get CAMB options from the cobaya config file 
+    cloe_config_file = options.get_string(opt, 'cloe_config_file')
+    cloe_config_dict = yaml_handler.yaml_read(cloe_config_file)['Cobaya']
+    
+    mode = 'power'
     # These are parameters for CAMB
     config = {}
 
@@ -87,9 +91,6 @@ def setup(options):
     config['Want_cl_2D_array'] = False
     config['Want_CMB'] = config['WantCls']
     config['DoLensing'] = options.get_bool(opt, 'do_lensing', default=False)
-    config['NonLinear'] = get_choice(options, 'nonlinear', ['none', 'pk', 'lens', 'both'], 
-                                     default='none' if mode in [MODE_BG, MODE_THERM] else 'both', 
-                                     prefix='NonLinear_')
 
     config['scalar_initial_condition'] = 'initial_' + options.get_string(opt, 'initial', default='adiabatic')
     
@@ -123,13 +124,21 @@ def setup(options):
     more_config['use_ppf_w'] = options.get_bool(opt, 'use_ppf_w', default=False)
     more_config['do_bao'] = options.get_bool(opt, 'do_bao', default=True)
     
-    more_config["nonlinear_params"] = get_optional_params(options, opt, ["halofit_version", "Min_kh_nonlinear"])
-
-    halofit_version = more_config['nonlinear_params'].get('halofit_version')
-    known_halofit_versions = list(camb.nonlinear.halofit_version_names.keys()) + [None]
-    if halofit_version not in known_halofit_versions:
-        raise ValueError("halofit_version must be one of : {}.  You put: {}".format(known_halofit_versions, halofit_version))
-
+    # Check nonlinear specifications based on cobaya config file
+    if cloe_config_dict['likelihood']['Euclid']['NL_flag_phot_matter'] == 0 and cloe_config_dict['likelihood']['Euclid']['NL_flag_spectro'] == 0:
+        config['NonLinear'] = 'NonLinear_none'
+        more_config["nonlinear_params"] = {}
+    else:
+        config['NonLinear'] = 'NonLinear_pk'
+        likelihood_yaml_handler.set_halofit_version(cloe_config_dict, 
+                                                    cloe_config_dict['likelihood']['Euclid']['NL_flag_phot_matter'], 
+                                                    cloe_config_dict['likelihood']['Euclid']['NL_flag_phot_baryon'])
+        halofit_version = cloe_config_dict['theory']['camb']['extra_args']['halofit_version']
+        known_halofit_versions = list(camb.nonlinear.halofit_version_names.keys()) + [None]
+        if halofit_version not in known_halofit_versions:
+            raise ValueError("halofit_version must be one of : {}.  You put: {}".format(known_halofit_versions, halofit_version))
+        more_config["nonlinear_params"]= {'halofit_version': halofit_version}
+    
     more_config["accuracy_params"] = get_optional_params(options, opt, 
                                                         ['AccuracyBoost', 'lSampleBoost', 'lAccuracyBoost', 'DoLateRadTruncation'])
                                                         #  'TimeStepBoost', 'BackgroundTimeStepBoost', 'IntTolBoost', 
@@ -139,35 +148,26 @@ def setup(options):
                                                         #  'KmaxBoost', 'neutrino_q_boost', 'AccuratePolarization', 'AccurateBB',  
                                                         #  'AccurateReionization'])
 
-    more_config['zmin'] = options.get_double(opt, 'zmin', default=0.0)
-    more_config['zmax'] = options.get_double(opt, 'zmax', default=3.01)
-    more_config['nz'] = options.get_int(opt, 'nz', default=150)
-    more_config.update(get_optional_params(options, opt, ["zmid", "nz_mid"]))
+    more_config['zmin'] = cloe_config_dict['likelihood']['Euclid']['z_min']
+    more_config['zmax'] = cloe_config_dict['likelihood']['Euclid']['z_max']
+    more_config['nz'] = cloe_config_dict['likelihood']['Euclid']['z_samp']
+    # more_config.update(get_optional_params(options, opt, ["zmid", "nz_mid"]))
 
-    more_config['zmin_background'] = options.get_double(opt, 'zmin_background', default=more_config['zmin'])
-    more_config['zmax_background'] = options.get_double(opt, 'zmax_background', default=more_config['zmax'])
-    more_config['nz_background'] = options.get_int(opt, 'nz_background', default=more_config['nz'])
+    more_config['zmin_background'] = cloe_config_dict['likelihood']['Euclid']['z_min']
+    more_config['zmax_background'] = cloe_config_dict['likelihood']['Euclid']['z_max']
+    more_config['nz_background'] = cloe_config_dict['likelihood']['Euclid']['z_samp']
 
     more_config["transfer_params"] = get_optional_params(options, opt, ["k_per_logint", "accurate_massive_neutrino_transfers"])
     # Adjust CAMB defaults
-    more_config["transfer_params"]["kmax"] = options.get_double(opt, "kmax", default=10.0)
+    more_config["transfer_params"]["kmax"] = cloe_config_dict['likelihood']['Euclid']['k_max_extrap']
     # more_config["transfer_params"]["high_precision"] = options.get_bool(opt, "high_precision", default=True)
 
-    more_config['kmin'] = options.get_double(opt, "kmin", default=1e-5)
-    more_config['kmax'] = options.get_double(opt, "kmax", more_config["transfer_params"]["kmax"])
-    more_config['kmax_extrapolate'] = options.get_double(opt, "kmax_extrapolate", default=more_config['kmax'])
-    more_config['nk'] = options.get_int(opt, "nk", default=200)
+    more_config['kmin'] = cloe_config_dict['likelihood']['Euclid']['k_min_extrap']
+    more_config['kmax'] = cloe_config_dict['likelihood']['Euclid']['k_max_extrap']
+    more_config['kmax_extrapolate'] = cloe_config_dict['likelihood']['Euclid']['k_max_extrap']
+    more_config['nk'] = cloe_config_dict['likelihood']['Euclid']['k_samp']
 
-    more_config['power_spectra'] = options.get_string(opt, "power_spectra", default="delta_tot").split()
-    bad_power = []
-    for p in more_config['power_spectra']:
-        if p not in matter_power_section_names:
-            bad_power.append(p)
-    if bad_power:
-        bad_power = ", ".join(bad_power)
-        good_power = ", ".join(matter_power_section_names.keys())
-        raise ValueError("""These matter power types are not known: {}.
-Please use any these (separated by spaces): {}""".format(bad_power, good_power))
+    more_config['power_spectra'] = ['delta_tot', 'weyl', 'delta_nonu']
 
     camb.set_feedback_level(level=options.get_int(opt, "feedback", default=0))
     return [config, more_config]
@@ -269,13 +269,11 @@ def extract_initial_power_params(block, config, more_config):
 def extract_nonlinear_params(block, config, more_config):
     version = more_config["nonlinear_params"].get('halofit_version', '')
 
-    if version == "mead2015" or version == "mead2016" or version == "mead":
-        A = block[names.halo_model_parameters, 'A']
-        eta0 = block[names.halo_model_parameters, "eta"]
-        hmcode_params = {"HMCode_A_baryon": A, "HMCode_eta_baryon":eta0}
+    if version == "mead2015" or version == "mead2016" or version == "mead2020":
+        hmcode_params = {"HMCode_A_baryon": block[names.cloe_parameters, 'hmcode_a_baryon'],
+                         "HMCode_eta_baryon": block[names.cloe_parameters, 'hmcode_eta_baryon']}
     elif version == "mead2020_feedback":
-        T_AGN = block[names.halo_model_parameters, 'logT_AGN']
-        hmcode_params = {"HMCode_logT_AGN": T_AGN}
+        hmcode_params = {"HMCode_logT_AGN": block[names.cloe_parameters, 'hmcode_logt_agn']}
     else:
         hmcode_params = {}
 
@@ -514,8 +512,8 @@ def save_matter_power(r, block, more_config):
     # There are two kmax values - the max one calculated directly,
     # and the max one extrapolated out too.  We output to the larger
     # of these
-    kmax_power = max(more_config['kmax'], more_config['kmax_extrapolate'])
-    k = np.logspace(np.log10(more_config['kmin']), np.log10(kmax_power), more_config['nk'])
+    kmax_power = max(more_config['kmax']/block[cosmo, "h0"], more_config['kmax_extrapolate']/block[cosmo, "h0"])
+    k = np.logspace(np.log10(more_config['kmin']/block[cosmo, "h0"]), np.log10(kmax_power), more_config['nk'])
     z = np.linspace(more_config['zmin'], more_config['zmax'], more_config['nz'])
 
     P_tot = None

@@ -22,9 +22,22 @@ Cobaya:
     Euclid:
       aliases:
       - euclid
-      external: !!python/name:cloe.cobaya_interface.EuclidLikelihood 
+      external: !!python/name:cloe.cobaya_interface.EuclidLikelihood
+      # Selected Boltzmann solver
+      solver: camb
       # Speed in evaluations/second
       speed: 500
+      # Nonlinear flag selectors
+      NL_flag_phot_matter: 0
+      NL_flag_spectro: 0
+      # Baryonic feedback flag selector
+      NL_flag_phot_baryon: 0
+      # Baryonic feedback z_dependence flag selector for BCemu and Bacco emulators
+      Baryon_redshift_model: True
+      # Bias Model
+      bias_model: 1
+      # Magnification bias model
+      magbias_model: 1
       # k values for extrapolation of the matter power spectrum
       k_max_extrap: 500.0
       k_min_extrap: 0.0001
@@ -33,39 +46,24 @@ Cobaya:
       z_min: 0.0
       z_max: 4.0
       z_samp: 100
-      # Flag to make the choice of the sampler visible to cloe
-      solver: camb
-      # Nonlinear flag selectors
-      # Photometric matter flag
-      #     0 -> linear-only
-      #     1 -> Halofit (Takahashi)
-      #     2 -> Mead2020 (w/o baryon corrections)
-      #     3 -> Euclid Emulator 2
-      #     4 -> BACCO (matter)
-      NL_flag_phot_matter: 0
-      # Spectroscopic flag
-      #     0 -> linear-only
-      #     1 -> EFT
-      NL_flag_spectro: 0
-      # Bias Model
-      bias_model: 1
-      # Magnification bias model
-      #     1 -> linear interpolation
-      #     2 -> constant within bins
-      magbias_model: 2
       # Select statistics for spectroscopic probes (multipole_power_spectrum
       # or multipole_correlation_function)
       statistics_spectro: multipole_power_spectrum
+      # Select statistics for photometric probes (angular_power_spectrum
+      # or angular_correlation_function)
+      statistics_photo: angular_power_spectrum
       # Add RSD to photometric probes
-      add_phot_RSD: False
+      add_phot_RSD: True
+      # Apply a generic matrix transformation to the photo observables (available options: 'BNT', 'BNT-test')
+      matrix_transform_phot: False
       # Use MG gamma
       use_gamma_MG: False
       # Redshift dependent purity correction
       f_out_z_dep: False
+      # Include spectroscopic galaxy clustering redshift error
+      GCsp_z_err: True
       # Plot the selected observables during the initialization of the likelihood
       plot_observables_selection: False
-      # Switch to allow for matrix transformations of theory and data vectors ('BNT' or 'BNT-test)
-      matrix_transform_phot: False
       ##
       # The user can overwrite here the values of
       # the fields data, observables_selection, and observables_specifications:
@@ -107,10 +105,10 @@ Cobaya:
       observables_selection:                       
                           WL:
                             WL: True
-                            GCphot: False
+                            GCphot: True
                             GCspectro: False
                           GCphot:
-                            GCphot: False
+                            GCphot: True
                             GCspectro: False
                           GCspectro:
                             GCspectro: False
@@ -241,45 +239,83 @@ Cobaya:
                 ell_range: [[20, 4000]]
 
 
-        GCspectro: 
-            statistics: multipole_power_spectrum
-            bins:
-                  n1: 
-                    n1:
-                      multipoles:
-                        0:
-                          k_range: [[0.01, 0.5]]
-                        2: 
-                          k_range: [[0.01, 0.5]]
-                        4:
-                          k_range: [[0.01, 0.5]]
-                  n2: 
-                    n2:
-                      multipoles:
-                        0:
-                          k_range: [[0.01, 0.5]]
-                        2:
-                          k_range: [[0.01, 0.5]]
-                        4:
-                          k_range: [[0.01, 0.5]]
+        GCspectro:
+            multipole_correlation_function:
+              bins:
+                n1: 
+                  n1:
+                    multipoles:
+                      0:
+                        r_range: [[1, 200]]
+                      2: 
+                        r_range: [[1, 200]]
+                      4:
+                        r_range: [[1, 200]]
+                n2: 
+                  n2:
+                    multipoles:
+                      0:
+                        r_range: [[1, 200]]
+                      2:
+                        r_range: [[1, 200]]
+                      4:
+                        r_range: [[1, 200]]
+                n3: 
                   n3: 
+                    multipoles:
+                      0:
+                        r_range: [[1, 200]]
+                      2:
+                        r_range: [[1, 200]]
+                      4:
+                        r_range: [[1, 200]]
+                n4: 
+                  n4:
+                    multipoles:
+                      0:
+                        r_range: [[1, 200]]
+                      2:
+                        r_range: [[1, 200]]
+                      4:
+                        r_range: [[1, 200]]
+            multipole_power_spectrum:
+              bins:
+                    n1: 
+                      n1:
+                        multipoles:
+                          0:
+                            k_range: [[0.01, 0.5]]
+                          2: 
+                            k_range: [[0.01, 0.5]]
+                          4:
+                            k_range: [[0.01, 0.5]]
+                    n2: 
+                      n2:
+                        multipoles:
+                          0:
+                            k_range: [[0.01, 0.5]]
+                          2:
+                            k_range: [[0.01, 0.5]]
+                          4:
+                            k_range: [[0.01, 0.5]]
                     n3: 
-                      multipoles:
-                        0:
-                          k_range: [[0.01, 0.5]]
-                        2:
-                          k_range: [[0.01, 0.5]]
-                        4:
-                          k_range: [[0.01, 0.5]]
-                  n4: 
-                    n4:
-                      multipoles:
-                        0:
-                          k_range: [[0.01, 0.5]]
-                        2:
-                          k_range: [[0.01, 0.5]]
-                        4:
-                          k_range: [[0.01, 0.5]]
+                      n3: 
+                        multipoles:
+                          0:
+                            k_range: [[0.01, 0.5]]
+                          2:
+                            k_range: [[0.01, 0.5]]
+                          4:
+                            k_range: [[0.01, 0.5]]
+                    n4: 
+                      n4:
+                        multipoles:
+                          0:
+                            k_range: [[0.01, 0.5]]
+                          2:
+                            k_range: [[0.01, 0.5]]
+                          4:
+                            k_range: [[0.01, 0.5]]
 
         WL: 
             statistics: angular_power_spectrum

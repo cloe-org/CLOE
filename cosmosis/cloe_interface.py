@@ -60,6 +60,15 @@ def setup(options):
     observables['selection']['add_phot_RSD'] = info['add_phot_RSD']
     observables['selection']['matrix_transform_phot'] = \
             info['matrix_transform_phot']
+    if 'GCspectro' in observables['specifications'].keys():
+        observables['specifications']['GCspectro']['statistics'] = \
+            info['statistics_spectro']
+    # set the parameters used to determine what statistics to use
+    # for the photometric probes
+    for key in observables['specifications'].keys():
+        if key in ['WL', 'GCphot', 'WL-GCphot']:
+            observables['specifications'][key]['statistics'] = \
+                info['statistics_photo']
     # initialize Euclike class
     likefinal = Euclike(data, observables)
     # initialize cosmo dict
@@ -75,6 +84,15 @@ def setup(options):
     cloe_cosmo.cosmo_dic['NL_flag_spectro'] = info['NL_flag_spectro']
     cloe_cosmo.cosmo_dic['bias_model'] = info['bias_model']
     cloe_cosmo.cosmo_dic['use_gamma_MG'] = info['use_gamma_MG']
+    cloe_cosmo.cosmo_dic['NL_flag_phot_baryon'] = \
+                info['NL_flag_phot_baryon']
+    cloe_cosmo.cosmo_dic['Baryon_redshift_model'] = \
+                info['Baryon_redshift_model']
+    cloe_cosmo.cosmo_dic['f_out_z_dep'] = info['f_out_z_dep']
+    cloe_cosmo.cosmo_dic['GCsp_z_err'] = info['GCsp_z_err']
+    cloe_cosmo.cosmo_dic['magbias_model'] = info['magbias_model']
+    cloe_cosmo.cosmo_dic['matrix_transform_phot'] = \
+                info['matrix_transform_phot']
     # Adding GCphot and GCspectro redshift bins to cosmo dictionary and setting up
     # the internal class for Pgg_spectro with this information.
     cloe_cosmo.cosmo_dic['redshift_bins_means_phot'] = \
@@ -179,12 +197,12 @@ def set_fiducial_cosmology(likefinal, info):
     fid_cosmo.cosmo_dic['H_Mpc'] = \
         results.h_of_z(
         fid_cosmo.cosmo_dic['z_win'])
-    fid_cosmo.cosmo_dic['Pk_delta'] = \
+    fid_cosmo.cosmo_dic['Pk_delta_Boltzmann'] = \
         results.get_matter_power_interpolator(
             nonlinear=False, 
             var1='delta_tot', var2='delta_tot',
             extrap_kmax=fid_cosmo.cosmo_dic['k_win'][-1])
-    fid_cosmo.cosmo_dic['Pk_cb'] = \
+    fid_cosmo.cosmo_dic['Pk_cb_Boltzmann'] = \
         results.get_matter_power_interpolator(
             nonlinear=False, 
             var1='delta_nonu', var2='delta_nonu',
@@ -193,6 +211,12 @@ def set_fiducial_cosmology(likefinal, info):
         results.get_matter_power_interpolator(
             nonlinear=False, 
             var1='Weyl', var2='Weyl',
+            extrap_kmax=fid_cosmo.cosmo_dic['k_win'][-1])
+    if info['NL_flag_phot_matter'] > 0:
+        fid_cosmo.cosmo_dic['Pk_halomodel_recipe_Boltzmann'] = \
+        results.get_matter_power_interpolator(
+            nonlinear=True,
+            var1='delta_tot', var2='delta_tot',
             extrap_kmax=fid_cosmo.cosmo_dic['k_win'][-1])
     fid_cosmo.cosmo_dic['fsigma8'] = \
         results.get_fsigma8()[::-1]
@@ -309,17 +333,17 @@ def execute(block, config):
         # interpolator class for cosmo_dict
         h3 = block[cosmo,'h0']**3
         z, k, pk_delta = block.get_grid('matter_power_lin', 'z', 'k_h', 'p_k')
-        cloe_cosmo.cosmo_dic['Pk_delta'] = PowerSpectrumInterpolator(z, k * block[cosmo,'h0'], 
+        cloe_cosmo.cosmo_dic['Pk_delta_Boltzmann'] = PowerSpectrumInterpolator(z, k * block[cosmo,'h0'], 
                                                                      pk_delta / h3)
         z, k, pk_cb = block.get_grid('cdm_baryon_power_lin', 'z', 'k_h', 'p_k')
-        cloe_cosmo.cosmo_dic['Pk_cb'] = PowerSpectrumInterpolator(z, k * block[cosmo,'h0'], 
+        cloe_cosmo.cosmo_dic['Pk_cb_Boltzmann'] = PowerSpectrumInterpolator(z, k * block[cosmo,'h0'], 
                                                                   pk_cb / h3)
         z, k, pk_weyl = block.get_grid('weyl_curvature_power_lin', 'z', 'k_h', 'p_k')
         cloe_cosmo.cosmo_dic['Pk_weyl'] = PowerSpectrumInterpolator(z, k * block[cosmo,'h0'], 
                                                                     pk_weyl / h3)
         if cloe_cosmo.cosmo_dic['NL_flag_phot_matter'] > 0:
             z, k, pk_delta_nl = block.get_grid('matter_power_nl', 'z', 'k_h', 'p_k')
-            cloe_cosmo.cosmo_dic['Pk_halomodel_recipe'] = PowerSpectrumInterpolator(
+            cloe_cosmo.cosmo_dic['Pk_halomodel_recipe_Boltzmann'] = PowerSpectrumInterpolator(
                                                                 z, k * block[cosmo,'h0'], 
                                                                 pk_delta_nl / h3)
             z, k, pk_weyl_nl = block.get_grid('weyl_curvature_power_nl', 'z', 'k_h', 'p_k')
@@ -362,17 +386,17 @@ def execute(block, config):
         # interpolator class for cosmo_dict
         h3 = block[cosmo,'h0']**3
         z, k, pk_delta = block.get_grid('matter_power_lin', 'z', 'k_h', 'p_k')
-        cloe_cosmo.cosmo_dic['Pk_delta'] = PowerSpectrumInterpolator(z, k * block[cosmo,'h0'], 
+        cloe_cosmo.cosmo_dic['Pk_delta_Boltzmann'] = PowerSpectrumInterpolator(z, k * block[cosmo,'h0'], 
                                                                      pk_delta / h3)
         z, k, pk_cb = block.get_grid('cdm_baryon_power_lin', 'z', 'k_h', 'p_k')
-        cloe_cosmo.cosmo_dic['Pk_cb'] = PowerSpectrumInterpolator(z, k * block[cosmo,'h0'], 
+        cloe_cosmo.cosmo_dic['Pk_cb_Boltzmann'] = PowerSpectrumInterpolator(z, k * block[cosmo,'h0'], 
                                                                   pk_cb / h3)
         z, k, pk_weyl = block.get_grid('weyl_curvature_power_lin', 'z', 'k_h', 'p_k')
         cloe_cosmo.cosmo_dic['Pk_weyl'] = PowerSpectrumInterpolator(z, k * block[cosmo,'h0'], 
                                                                     pk_weyl / h3)
         if cloe_cosmo.cosmo_dic['NL_flag_phot_matter'] > 0:
             z, k, pk_delta_nl = block.get_grid('matter_power_nl', 'z', 'k_h', 'p_k')
-            cloe_cosmo.cosmo_dic['Pk_halomodel_recipe'] = PowerSpectrumInterpolator(
+            cloe_cosmo.cosmo_dic['Pk_halomodel_recipe_Boltzmann'] = PowerSpectrumInterpolator(
                                                                 z, k * block[cosmo,'h0'], 
                                                                 pk_delta_nl / h3)
             z, k, pk_weyl_nl = block.get_grid('weyl_curvature_power_nl', 'z', 'k_h', 'p_k')
@@ -383,6 +407,10 @@ def execute(block, config):
     section, nuisance_params = zip(*block.keys(section=cloe_params))
     for nuisance_param in nuisance_params:
         # catch capitalisation errors
+        if 'bg' in nuisance_param:
+            nuisance_param = nuisance_param.replace('bg','bG')
+        if 'mg' in nuisance_param:
+            nuisance_param = nuisance_param.replace('mg','MG')
         if 'wl' in nuisance_param:
             nuisance_param = nuisance_param.replace('wl','WL')
         if 'gc' in nuisance_param:
@@ -391,8 +419,22 @@ def execute(block, config):
             nuisance_param = nuisance_param.replace('ap','aP')
         if 'psn' in nuisance_param:
             nuisance_param = nuisance_param.replace('psn','Psn')
+        if 'm1' in nuisance_param:
+            nuisance_param = nuisance_param.replace('m1','M1')
+        if 'm_' in nuisance_param:
+            nuisance_param = nuisance_param.replace('m_','M_')
+        if 'log10mc' in nuisance_param:
+            nuisance_param = nuisance_param.replace('log10mc','log10Mc')
+        if 'hmcode_logt_agn' in nuisance_param:
+            nuisance_param = nuisance_param.replace('hmcode_logt_agn','HMCode_logT_AGN')
+        if 'hmcode_eta_baryon' in nuisance_param:
+            nuisance_param = nuisance_param.replace('hmcode_eta_baryon','HMCode_eta_baryon')
+        if 'hmcode_a_baryon' in nuisance_param:
+            nuisance_param = nuisance_param.replace('hmcode_a_baryon','HMCode_A_baryon')
+
         cloe_cosmo.cosmo_dic['nuisance_parameters'].update(
                 {nuisance_param: block[cloe_params, nuisance_param]})
+
     # Update cosmo_dic
     cloe_cosmo.update_cosmo_dic(cloe_cosmo.cosmo_dic['z_win'], 0.05)
     # Calculate log-likelihood 

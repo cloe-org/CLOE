@@ -25,7 +25,7 @@ This file is the top-level parameter file containing the pipeline specifications
 cosmosis run_cosmosis.ini
 ```
 
-This file has been arranged in the format typical of `CosmoSIS` parameter files, with options to specify the path of the file containing the parameters to sample over, the sampler to use, the output file path and format, and the modules that make up the pipeline. Here two modules are specified: the Boltzmann solver (we set `[camb]` as an example) and `[euclid]`, which is the CLOE module. For the `[camb]` module we use the pubilc release of the CAMB Boltzmann solver and the `camb_interface.py` script within the public `CosmoSIS` repository.
+This file has been arranged in the format typical of `CosmoSIS` parameter files, with options to specify the path of the file containing the parameters to sample over, the sampler to use, the output file path and format, and the modules that make up the pipeline. Here two modules are specified: the Boltzmann solver (we set `[camb]` as an example) and `[euclid]`, which is the CLOE module. For the `[camb]` module we use the pubilc release of the CAMB Boltzmann solver and the `camb_interface.py` script within this folder.
 
 The `[euclid]` module takes in the path of the `CosmoSIS`-CLOE interface script and the path of the yaml configuration file as parameters. Note that the module is named `[euclid]` while the likelihood is called `cloe` to make the difference more explicit.
 
@@ -54,6 +54,8 @@ If not defined, the prior distribution is assumed to be flat.
 ### cloe_interface.py
 This file is the interface script between `CosmoSIS` and CLOE in the case of scenario A. It takes in the configuration yaml file and desired output path of the chain as parameters. Within this script, the cosmological parameters calculated with the Boltzmann solver in the previous step are retrieved from the `CosmoSIS` datablock and converted into a CLOE-friendly format, for the logposterior to be calculated within the CLOE module. The log-likelihood is then put into the `CosmoSIS`-native likelihood datablock.  
 
+### camb_interface.py
+This file has been adapted from the original `camb_interface.py` script from the `cosmosis-standard-library` repository, such that it is ensured that the options for the Boltzmann solver follows that in the `cobaya_config_for-cosmosis.yaml` file. Hence, it is neccessary to specify this yaml file in the `[camb]` section of the ini file. 
 
 ## Scenario B
 

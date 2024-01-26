@@ -69,6 +69,8 @@ def execute(block, config):
             cosmo_param = cosmo_param.replace('as','As')
         if cosmo_param=='loga':
             cosmo_param = cosmo_param.replace('loga','logA')
+        if 'bg' in cosmo_param:
+            cosmo_param = cosmo_param.replace('bg','bG')
         if 'mg' in cosmo_param:
             cosmo_param = cosmo_param.replace('mg','MG')
         if 'wl' in cosmo_param:
@@ -79,7 +81,23 @@ def execute(block, config):
             cosmo_param = cosmo_param.replace('ap','aP')
         if 'psn' in cosmo_param:
             cosmo_param = cosmo_param.replace('psn','Psn')
+        if 'm1' in cosmo_param:
+            cosmo_param = cosmo_param.replace('m1','M1')
+        if 'm_' in cosmo_param:
+            cosmo_param = cosmo_param.replace('m_','M_')
+        if 'log10mc' in cosmo_param:
+            cosmo_param = cosmo_param.replace('log10mc','log10Mc')
+        if 'hmcode_logt_agn' in cosmo_param:
+            cosmo_param = cosmo_param.replace('hmcode_logt_agn','HMCode_logT_AGN')
+        if 'hmcode_eta_baryon' in cosmo_param:
+            cosmo_param = cosmo_param.replace('hmcode_eta_baryon','HMCode_eta_baryon')
+        if 'hmcode_a_baryon' in cosmo_param:
+            cosmo_param = cosmo_param.replace('hmcode_a_baryon','HMCode_A_baryon')
         info['params'].update({cosmo_param: block[cosmo, cosmo_param]})
+    
+    # Set the correct nonlinear halofit version
+    set_halofit_version(info, info['likelihood']['Euclid']['NL_flag_phot_matter'],
+                        info['likelihood']['Euclid']['NL_flag_phot_baryon'])
     # create updated model instance based on updated sampled point
     model = get_model(info)
     # calculate the logposterior of the point

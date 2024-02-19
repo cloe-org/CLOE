@@ -64,6 +64,7 @@ info = {
                         'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
                         'cov_is_num': False,
                         'cov_nsim': 3500,
+                        'scale_cuts_fourier': 'GCspectro-Fourier.yaml',
                     },
                 },
                 'observables_selection':

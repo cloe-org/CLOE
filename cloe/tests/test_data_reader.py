@@ -22,6 +22,7 @@ class datareaderTestCase(TestCase):
         self.fiducial_key_check = ['H0', 'omch2', 'ombh2',
                                    'ns', 'sigma8_0', 'w',
                                    'omkh2', 'omnuh2', 'Omnu']
+        self.GC_sp_scale_cut_key_check = ['bins']
         self.cov_check_GC_spectro = 1.217193e+08
         self.cov_check_3x2pt = 0.016565
         self.cl_phot_WL_check = 7.144612e-05
@@ -46,6 +47,7 @@ class datareaderTestCase(TestCase):
         self.nz_dict_GC_Phot_check = None
         self.nz_dict_WL_check = None
         self.fiducial_key_check = None
+        self.GC_sp_scale_cut_key_check = None
 
     def test_data_dict_init(self):
         true_dict = list(self.data_tester.data_dict.keys())
@@ -177,3 +179,9 @@ class datareaderTestCase(TestCase):
         npt.assert_equal(list(
                         self.data_tester.data_spectro_fiducial_cosmo.keys()),
                         self.fiducial_key_check)
+
+    def test_scale_cut_reading_check(self):
+        self.data_tester.read_GC_spectro_scale_cuts()
+        npt.assert_equal(list(
+                        self.data_tester.GC_spectro_scale_cuts.keys()),
+                        self.GC_sp_scale_cut_key_check)

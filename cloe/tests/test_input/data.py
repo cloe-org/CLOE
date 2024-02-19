@@ -9,7 +9,8 @@ This module contains default data configurations for unit tests.
             'spectro': {
                 'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
                 'redshifts': ["1.", "1.2", "1.4", "1.65"],
-                'cov_is_num': False},
+                'cov_is_num': False,
+                'scale_cuts_fourier': 'GCspectro-Fourier_test.yaml'},
             'photo': {
                 'luminosity_ratio': 'luminosity_ratio.dat',
                 'ndens_GC': 'niTab-EP10-RB00.dat',
@@ -33,7 +34,8 @@ mock_data = {
     'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
     'redshifts': ["1.", "1.2", "1.4", "1.65"],
     'cov_is_num': False,
-    'Fourier': True},
+    'Fourier': True,
+    'scale_cuts_fourier': 'GCspectro-Fourier_test.yaml'},
   'photo': {
     'luminosity_ratio': 'luminosity_ratio.dat',
     'ndens_GC': 'niTab-EP10-RB00.dat',

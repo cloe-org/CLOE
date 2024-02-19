@@ -348,6 +348,7 @@ class Data_handler:
 
         gc_spectro_vec = []
         redshifts = data.data_dict['GC-Spectro'].keys()
+        data.read_GC_spectro_scale_cuts()
 
         if self._obs['specifications']['GCspectro']['statistics'] == \
                 'multipole_power_spectrum':
@@ -359,14 +360,14 @@ class Data_handler:
                      if key.startswith('pk')])
                 for multipole in multipoles:
                     accepted_k_pk = np.array(
-                        self._obs['specifications']['GCspectro']
-                        ['multipole_power_spectrum']['bins']
+                        data.GC_spectro_scale_cuts['bins']
                         [f'n{redshift_index+1}'][f'n{redshift_index+1}']
                         ['multipoles'][int(multipole[2:])]
                         ['k_range'])
                     gc_spectro_vec = np.concatenate(
                         (gc_spectro_vec,
                          self._get_masking(k_pk, accepted_k_pk)), axis=None)
+
         elif self._obs['specifications']['GCspectro']['statistics'] == \
                 'multipole_correlation_function':
             for redshift_index, redshift in enumerate(redshifts):
@@ -525,6 +526,7 @@ class Data_handler:
         """
         gc_spectro_vec = []
         redshifts = data.data_dict['GC-Spectro'].keys()
+        data.read_GC_spectro_scale_cuts()
 
         if self._obs['specifications']['GCspectro']['statistics'] == \
                 'multipole_power_spectrum':
@@ -536,14 +538,14 @@ class Data_handler:
                      if key.startswith('pk')])
                 for multipole in multipoles:
                     accepted_k_pk = np.array(
-                        self._obs['specifications']['GCspectro']
-                        ['multipole_power_spectrum']['bins']
+                        data.GC_spectro_scale_cuts['bins']
                         [f'n{redshift_index+1}'][f'n{redshift_index+1}']
                         ['multipoles'][int(multipole[2:])]
                         ['k_range'])
                     gc_spectro_vec = np.concatenate(
                         (gc_spectro_vec,
                          self._get_masking(k_pk, accepted_k_pk)), axis=None)
+
         elif self._obs['specifications']['GCspectro']['statistics'] == \
                 'multipole_correlation_function':
             for redshift_index, redshift in enumerate(redshifts):

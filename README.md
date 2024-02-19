@@ -220,7 +220,7 @@ These example scripts accomplish exactly the same commands as the `run_cloe.py` 
 ## Structure of the repository
 *  **cloe**: folder containing the CLOE python package (see the [API documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/index.html) for details)
 *  **configs**: folder containing configurations files to specify the cosmological and nuisance parameters with user specifications for scales and redshifts
-*  **data**:  folder containing at the moment, the fiducial data labeled as `ExternalBenchmark` for photometric and spectrocopic probes
+*  **data**:  folder containing at the moment, the fiducial data labeled as `ExternalBenchmark` for photometric and spectroscopic probes
 *  **docs**:  folder containing automatically generated documentation
 *  **example**: folder containing  example yaml configuration files for the user
 *  **mcmc scripts**: folder containing example python scripts to run mcmc chains for different combinations of probes with free or fixed nuisance parameters

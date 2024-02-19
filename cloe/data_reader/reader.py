@@ -5,11 +5,12 @@ Contains class to read external data.
 """
 
 import numpy as np
+import yaml
+import logging
 from astropy.io import fits, ascii
 from pathlib import Path
 from scipy import interpolate
 from scipy import integrate
-from cloe.auxiliary.logger import log_critical
 
 
 class ReaderError(Exception):
@@ -35,8 +36,8 @@ class Reader:
         """
         self.data = data
 
-        root_dir = Path(__file__).resolve().parents[2]
-        self.dat_dir_main = Path(root_dir, Path('data'),
+        self.root_dir = Path(__file__).resolve().parents[2]
+        self.dat_dir_main = Path(self.root_dir, Path('data'),
                                  Path(self.data['sample']))
         self.data_dict = {'GC-Spectro': None, 'GC-Phot': None, 'WL': None,
                           'XC-Phot': None}
@@ -49,6 +50,7 @@ class Reader:
         self.nz_dict_GC_Phot_raw = {}
         self.numtomo_gcphot = {}
         self.numtomo_wl = {}
+        self.GC_spectro_scale_cuts = {}
         self.luminosity_ratio_interpolator = None
 
         # Added empty dict to fill in fiducial
@@ -179,14 +181,72 @@ class Reader:
                 self.luminosity_ratio['z'],
                 self.luminosity_ratio['luminosity'])
 
+    def read_GC_spectro_scale_cuts(self, config_folder='configs',
+                                   data_folder='Spectroscopic/data'):
+        r"""Reads the spectroscopic scale cuts and converts units.
+
+        Function to read the scale cuts specified in the configuration data.
+        The input is being read and saved as a dictionary within the
+        :obj:`Reader` class.
+        The units from the input file are converted from :math:`\frac{h}{Mpc}`
+        to :math:`\frac{1}{Mpc}` to be consistent with the input of the data
+        vectors. In the rest of the code :math:`\frac{1}{Mpc}` is used.
+
+        Parameters
+        ----------
+        config_folder: str
+            Sub-folder of :obj:`Reader.root_dir` which is the highest-level
+            folder of the likelihood code
+        data_folder: str
+            Sub_folder of :obj:`Reader.dat_dir_main` within which to find
+            the spectroscopic data
+
+        """
+
+        # get file name from data.yaml
+        fname_scale_cuts = self.data['spectro']['scale_cuts_fourier']
+
+        # construct path to the scale cut file
+        path = str(self.root_dir / config_folder / fname_scale_cuts)
+
+        with open(path, 'r') as file:
+            GC_sp_scale_cuts = yaml.load(file.read(), Loader=yaml.FullLoader)
+
+        # read the fiducial cosmological parameters
+        self.read_GC_spectro()
+        h = self.data_spectro_fiducial_cosmo['H0'] / 100.0
+
+        # create the scale cuts dictionary
+        redshifts = self.data_dict['GC-Spectro'].keys()
+        GC_sp_scale_cuts_h = GC_sp_scale_cuts
+
+        for redshift_index, redshift in enumerate(redshifts):
+            k_pk = self.data_dict['GC-Spectro'][f'{redshift}']['k_pk']
+            multipoles = (
+                [key for key in
+                    self.data_dict['GC-Spectro'][f'{redshift}'].keys()
+                    if key.startswith('pk')])
+            for multipole in multipoles:
+                # conversion from h/Mpc to 1/Mpc units (multiply by h)
+                (GC_sp_scale_cuts_h['bins'][f'n{redshift_index+1}']
+                    [f'n{redshift_index+1}']['multipoles'][int(multipole[2:])]
+                    ['k_range'][0]) = [i * h for i in
+                                       (GC_sp_scale_cuts['bins']
+                                        [f'n{redshift_index+1}']
+                                        [f'n{redshift_index+1}']
+                                        ['multipoles'][int(multipole[2:])]
+                                        ['k_range'][0])]
+
+        self.GC_spectro_scale_cuts = GC_sp_scale_cuts_h
+
+        return
+
     def read_GC_spectro(self, file_dest='Spectroscopic/data'):
         """Reads in the spectroscopic data.
 
         Function to read OU-LE3 spectroscopic galaxy clustering files, based
         on location provided to Reader class. Adds contents to the data
-        dictionary (:obj:`Reader.data_dict`). Note: at the moment it is
-        assumed that the Fourier space data is in Mpc/h units while the
-        configuration space data is in Mpc units.
+        dictionary (:obj:`Reader.data_dict`).
 
         Parameters
         ----------
@@ -241,7 +301,8 @@ class Reader:
             fid_cosmo_file.close()
 
         except ReaderError:
-            log_critical('There was an error when reading the fiducial '
+            log = logging.getLogger('CLOE')
+            log.critical('There was an error when reading the fiducial '
                          'data from OU-level3 files in read_GC_spectro')
 
         if self.data['spectro']['Fourier']:

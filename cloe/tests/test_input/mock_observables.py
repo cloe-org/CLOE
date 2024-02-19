@@ -15,6 +15,7 @@ def build_mock_observables(reader=None):
         reader = Reader(mock_data)
         reader.compute_nz()
         reader.read_GC_spectro()
+        reader.read_GC_spectro_scale_cuts()
         reader.read_phot()
 
     ell_range = [5, 10000]
@@ -48,28 +49,20 @@ def build_mock_observables(reader=None):
                      'bins': xc_phot_bins}
 
     redshifts = reader.data_dict['GC-Spectro'].keys()
-    gc_spectro_fourier_bins = {}
     gc_spectro_configuration_space_bins = {}
     for redshift_index, redshift in enumerate(redshifts):
         multipoles = (
             [key for key in
              reader.data_dict['GC-Spectro'][f'{redshift}'].keys()
              if key.startswith('pk')])
-        multipole_bins_fourier = {}
         multipole_bins_configuration_space = {}
         for multipole in multipoles:
-            multipole_bins_fourier[int(multipole[2:])] =\
-                {'k_range': [k_range]}
             multipole_bins_configuration_space[int(multipole[2:])] =\
                 {'r_range': [r_range]}
-        gc_spectro_fourier_bins[f'n{redshift_index+1}'] = {
-            f'n{redshift_index+1}': {'multipoles': multipole_bins_fourier}}
         gc_spectro_configuration_space_bins[f'n{redshift_index+1}'] = {
             f'n{redshift_index+1}': {
                 'multipoles': multipole_bins_configuration_space}}
     gc_spectro_specs = {'statistics': 'multipole_power_spectrum',
-                        'multipole_power_spectrum':
-                        {'bins': gc_spectro_fourier_bins},
                         'multipole_correlation_function':
                         {'bins': gc_spectro_configuration_space_bins}}
 

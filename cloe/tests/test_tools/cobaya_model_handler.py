@@ -29,6 +29,7 @@ class CobayaModel:
         # Once the Cobaya interface is adjusted to use a set k_min, the same
         # value should be used here.
         self.k_max_Boltzmann = 10.0
+        self.k_max_extrap = 500.0
         self.k_min_GC_phot_interp = 0.001
         self.k_max_GC_phot_interp = 50.0
         self.k_samp_GC = 100
@@ -122,17 +123,20 @@ class CobayaModel:
             self.cosmology.cosmo_dic['z_win'])
         self.cosmology.cosmo_dic['Pk_delta_Boltzmann'] = \
             self.model.provider.get_Pk_interpolator(
-            ("delta_tot", "delta_tot"), nonlinear=False)
+                ("delta_tot", "delta_tot"), nonlinear=False,
+                extrap_kmax=self.k_max_extrap)
         self.cosmology.cosmo_dic['Pk_cb_Boltzmann'] = \
             self.model.provider.get_Pk_interpolator(
-            ("delta_nonu", "delta_nonu"), nonlinear=False)
+                ("delta_nonu", "delta_nonu"), nonlinear=False,
+                extrap_kmax=self.k_max_extrap)
         self.cosmology.cosmo_dic['Pk_weyl'] = \
             self.model.provider.get_Pk_interpolator(
             ("Weyl", "Weyl"), nonlinear=False)
         if self.cosmology.cosmo_dic['NL_flag_phot_matter'] > 0:
             self.cosmology.cosmo_dic['Pk_halomodel_recipe_Boltzmann'] = \
                 self.model.provider.get_Pk_interpolator(
-                ('delta_tot', 'delta_tot'), nonlinear=True)
+                    ('delta_tot', 'delta_tot'), nonlinear=True,
+                    extrap_kmax=self.k_max_extrap)
         self.cosmology.cosmo_dic['fsigma8'] = \
             self.model.provider.get_fsigma8(self.z_win)
         self.cosmology.cosmo_dic['sigma8'] = \

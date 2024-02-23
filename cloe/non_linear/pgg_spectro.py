@@ -108,7 +108,7 @@ class Pgg_spectro_model(PowerSpectrum):
         given redshift, wavenumber and angle to the line of sight
         """
         nuisance_dict = self.theory['nuisance_parameters']
-        params = select_spectro_parameters(redshift, nuisance_dict)
+        params = select_spectro_parameters(redshift, nuisance_dict, self.zbins)
         aP = params['aP'] if 'aP' in params.keys() else 0.0
         e0k2 = params['e0k2'] if 'e0k2' in params.keys() else 0.0
         e2k2 = params['e2k2'] if 'e2k2' in params.keys() else 0.0

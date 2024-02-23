@@ -7,8 +7,9 @@ adapted from arXiv:2207.14784 / 2306.09275, ported to CLOE by IST:NL.
 """
 
 import numpy as np
+from scipy.fftpack import dst, idst
 from scipy.integrate import simps
-from scipy.interpolate import RectBivariateSpline
+from scipy.interpolate import splrep, splev, RectBivariateSpline
 from scipy.ndimage import gaussian_filter1d
 from scipy.special import spherical_jn
 from scipy.special import legendre
@@ -31,28 +32,35 @@ class EFTofLSS:
 
         self.ks = np.logspace(log10k_min, log10k_max, nk_tot, endpoint=True)
 
-        self.z = cosmo_dic['z_win']
-        self.PL = cosmo_dic['Pk_cb'].P(0.0, self.ks)
         self.ns = cosmo_dic['ns']
         self.As = cosmo_dic['As']
         self.h = cosmo_dic['H0'] / 100.0
         self.Obh2 = cosmo_dic['ombh2']
         self.Omh2 = cosmo_dic['omch2'] + self.Obh2
         self.tau = cosmo_dic['tau']
+
+        self.linear_power_func = cosmo_dic['Pk_cb']
         if cosmo_dic['use_gamma_MG']:
-            self.Dz = cosmo_dic['D_z_k_func_MG'](self.z)
+            self.growth_factor_func = cosmo_dic['D_z_k_func_MG']
         else:
-            self.Dz = cosmo_dic['D_z_k_func'](self.z, 0.05)
-        self.f = cosmo_dic['f_z'](0.0)
+            self.growth_factor_func = cosmo_dic['D_z_k_func']
+        self.growth_rate_func = cosmo_dic['f_z']
 
         self.fastpt = FASTPTPlus(self.ks, -2, low_extrap=-6, high_extrap=5,
                                  n_pad=1000)
+        self.use_gamma_MG = cosmo_dic['use_gamma_MG']
+        self.IR_type_in_grid = None
 
-    def CallEH_NW(self):
+    def CallEH_NW(self, redshift):
         r"""Calls ``Eisenstein-Hu_NW``.
 
-        Computes the smooth matter power spectrum at redshift z=0 following the
-        prescription of Eisenstein & Hu (1998).
+        Computes the smooth matter power spectrum at a given redshift following
+        the prescription of Eisenstein & Hu (1998).
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift
 
         Returns
         -------
@@ -77,11 +85,11 @@ class EFTofLSS:
         T0 = L0 / (L0 + C0 * q * q)
         T0 /= T0[0]
         P_EH = kL**self.ns * T0**2
-        P_EH *= self.PL[0] / P_EH[0]
+        P_EH *= self.linear_power_func.P(redshift, self.ks)[0] / P_EH[0]
 
         return P_EH
 
-    def _gaussianFiltering(self, lamb):
+    def _gaussianFiltering(self, lamb, redshift):
         def extrapolateX(x):
             logx = np.log10(x)
             xSize = x.size
@@ -105,14 +113,109 @@ class EFTofLSS:
         qlog = np.log10(self.ks)
         dqlog = qlog[1] - qlog[0]
         qlog = np.log10(extrapolateX(self.ks))
-        pLin = extrapolateFx(self.ks, self.PL)
-        pEH = self.CallEH_NW()
+        pLin = extrapolateFx(self.ks, self.linear_power_func.P(redshift,
+                                                               self.ks))
+        pEH = self.CallEH_NW(redshift)
         pEH = extrapolateFx(self.ks, pEH)
         smoothPowerSpectrum = gaussian_filter1d(pLin / pEH, lamb / dqlog) * pEH
 
         return smoothPowerSpectrum[kNumber // 2:kNumber // 2 + kNumber]
 
-    def IRresum(self, P_EH, lamb=0.25, kS=0.2, lOsc=102.707):
+    def pksmooth_dst(self, redshift):
+        r"""pksmooth_dst.
+
+        Computes the no-wiggle power spectrum by identifying and removing the
+        BAO bump in configuration space by means of a type-II dst transform,
+        then transforming back to Fourier space. Based on arXiv:1712.08067,
+        arXiv:1906.02742, adapted from the baccoemu implementation.
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift
+
+        Returns
+        -------
+        smooth_itp: interpolator object
+            No-wiggle power spectrum at the input redshift
+        """
+
+        # Sample k, P(k) in 2^15 points
+        nk = int(2**15)
+        kmin = 1e-4
+        kmax = 10
+        klin = np.linspace(kmin, kmax, nk)
+        pklin = self.linear_power_func.P(redshift, klin)
+
+        # DST-II log(k *P(k))
+        logkpk = np.log10(klin * pklin)
+        dstpk = dst(logkpk, type=2)
+
+        # Split in even and odd indices,
+        even = dstpk[0::2]  # array with even indexes
+        odd = dstpk[1::2]  # array with odd indexes
+        i_even = np.arange(len(even)).astype(int)
+        i_odd = np.arange(len(odd)).astype(int)
+        even_cs = splrep(i_even, even, s=0)
+        odd_cs = splrep(i_odd, odd, s=0)
+
+        # Compute second derivatives and interpolate with cubic splines
+        even_2nd_der = splev(i_even, even_cs, der=2, ext=0)
+        odd_2nd_der = splev(i_odd, odd_cs, der=2, ext=0)
+
+        # Rescale the fixed ranges for the BAO bump based on omega_m
+        range_imin = np.array([150, 300])
+        range_imax = np.array([300, 600])
+        range_imin = (range_imin * (0.1376591 / self.Omh2)**0.25).astype(int)
+        range_imax = (range_imax * (0.1376591 / self.Omh2)**0.25).astype(int)
+        imin_start = np.argmax(even_2nd_der[range_imin[0]:range_imin[1]]) + \
+            range_imin[0] - 30
+        imax_start = np.where(
+            even_2nd_der[range_imax[0]:range_imax[1]] < 0.04)[0][0] + \
+            range_imax[0]
+
+        # Cut out the BAOs
+        # mask indices
+        i_even_holed = np.concatenate((i_even[:imin_start],
+                                       i_even[imax_start:]))
+        i_odd_holed = np.concatenate((i_odd[:imin_start], i_odd[imax_start:]))
+        # mask log(k*P(k))
+        even_holed = np.concatenate((even[:imin_start], even[imax_start:]))
+        odd_holed = np.concatenate((odd[:imin_start], odd[imax_start:]))
+
+        # Interpolate the arrays rescaled by (i+1)^2 with cubic splines
+        even_holed_cs = \
+            splrep(i_even_holed, even_holed * (i_even_holed + 1)**2, s=0)
+        odd_holed_cs = \
+            splrep(i_odd_holed, odd_holed * (i_odd_holed + 1)**2, s=0)
+
+        # Merge the two arrays containing the respective elements without BAO,
+        # and without the rescaling factor of (i + 1)^2, and inversely FST
+        even_smooth = splev(i_even, even_holed_cs, der=0, ext=0) / \
+            (i_even + 1)**2
+        odd_smooth = splev(i_odd, odd_holed_cs, der=0, ext=0) / (i_odd + 1)**2
+
+        dstkpk_smooth = np.zeros(nk)
+        dstkpk_smooth[0::2] = even_smooth
+        dstkpk_smooth[1::2] = odd_smooth
+        pksmooth = idst(dstkpk_smooth, type=2) / (2 * len(dstkpk_smooth))
+        pksmooth = 10**(pksmooth) / klin
+
+        k_low = klin[np.where(klin <= 5)]
+        k_high = self.ks[np.where(self.ks > 5)]
+        pksmooth_low = pksmooth[np.where(klin <= 5)]
+        pksmooth_high = self.linear_power_func.P(redshift, k_high)
+
+        ktot = np.concatenate((k_low, k_high))
+        pksmooth_tot = np.concatenate((pksmooth_low, pksmooth_high))
+
+        pksmooth_spl = splrep(np.log(ktot), np.log(pksmooth_tot), s=0)
+        smooth_itp = np.exp(splev(np.log(self.ks), pksmooth_spl, der=0, ext=0))
+
+        return smooth_itp
+
+    def IRresum(self, IRres='DST', redshift=0.0, lamb=0.25, kS=0.2,
+                lOsc=102.707):
         r"""Function for IR-resummation.
 
         Splits the linear power spectrum into a smooth and a wiggly part,
@@ -120,8 +223,11 @@ class EFTofLSS:
 
         Parameters
         ----------
-        P_EH: numpy.ndarray
-            Smooths Eisenstein-Hu matter power spectrum
+        IRres: string
+            Algorithm for infra-red resummation. Options include 'EH' for
+            Eisenstein-Hu, 'DST' for discrete sine transform (default 'DST')
+        redshift: string
+            Redshift (default 0.0)
         lamb: float
             Width of Gaussian filter (default 0.25)
         kS: float
@@ -140,11 +246,15 @@ class EFTofLSS:
         lOsc /= self.h
         kS *= self.h
 
-        # Gaussian filtering to compute Pnw
-        Pnw = self._gaussianFiltering(lamb=lamb)
+        # E&H + gaussian filtering
+        if IRres == 'EH':
+            Pnw = self._gaussianFiltering(lamb=lamb, redshift=redshift)
+        # Discrete Sine Transform
+        elif IRres == 'DST':
+            Pnw = self.pksmooth_dst(redshift=redshift)
 
         # Wiggle-smooth split
-        Pw = self.PL - Pnw
+        Pw = self.linear_power_func.P(redshift, self.ks) - Pnw
 
         # Sigma2 as integral up to 0.2;
         # Uses Simpson integration (no extreme accuracy needed)
@@ -172,15 +282,23 @@ class EFTofLSS:
         RSDdamp = np.exp(-self.ks[:, np.newaxis]**2 * Sig2mu)
         return Sig2mu, RSDdamp
 
-    def _Pgg_kmu_terms(self):
+    def _Pgg_kmu_terms(self, redshift, IRres='DST'):
         r"""Pgg_kmu_terms
 
         Computes the terms for the loop corrections at redshift z=0, splits
         into wiggle and no-wiggle and stores them as attributes of the class
-        """
 
-        self.PEH = self.CallEH_NW()
-        self.Pnw, self.Pw, self.Sigma2, self.dSigma2 = self.IRresum(self.PEH)
+        Parameters
+        ----------
+        redshift: float
+            Redshift
+        IRres: string
+            Algorithm for infra-red resummation. Options include 'EH' for
+            Eisenstein-Hu, 'DST' for discrete sine transform (default 'DST')
+        """
+        self.PL = self.linear_power_func.P(redshift, self.ks)
+        self.Pnw, self.Pw, self.Sigma2, self.dSigma2 = \
+            self.IRresum(IRres=IRres, redshift=redshift)
 
         # Loops on P_L and Pnw
         loop22_L = self.fastpt.Pkmu_22_one_loop_terms(self.ks, self.PL,
@@ -198,7 +316,8 @@ class EFTofLSS:
         setattr(self, 'loop22_w', loop22_w)
         setattr(self, 'loop13_w', loop13_w)
 
-    def P_kmu_z(self, f=None, D=None, **kwargs):
+    def P_kmu_z(self, redshift, use_growth_rescaling=False, IRres='DST',
+                **kwargs):
         r"""P_kmu_z.
 
         Computes the nonlinear galaxy power spectrum in redshift space at the
@@ -206,12 +325,16 @@ class EFTofLSS:
 
         Parameters
         ----------
-        f: float
-            Growth rate
-        D: float
-            Growth factor
+        redshift: float
+            Redshift
+        use_growth_rescaling: bool
+            Keyword to select rescaling of power spectrum with linear growth
+            rate or computation at the requested redshift (default False)
+        IRres: string
+            Algorithm for infra-red resummation. Options include 'EH' for
+            Eisenstein-Hu, 'DST' for discrete sine transform (default 'DST')
 
-        **kwargs:         Dictionary containing the model parameters
+        **kwargs: Dictionary containing the model parameters
         b1: float
             Linear bias parameter
         b2: float
@@ -243,12 +366,23 @@ class EFTofLSS:
             Scipy Interpolator
         """
 
-        if f is None:
-            f = self.f
-        if D is None:
-            D = self.Dz
+        if use_growth_rescaling:
+            if self.IR_type_in_grid is None or self.IR_type_in_grid != IRres:
+                self._Pgg_kmu_terms(redshift=0.0, IRres=IRres)
+                self.IR_type_in_grid = IRres
+            if self.use_gamma_MG:
+                D = self.growth_factor_func(redshift)
+            else:
+                D = self.growth_factor_func(redshift, 0.05)
+        else:
+            self._Pgg_kmu_terms(redshift=redshift, IRres=IRres)
+            self.IR_type_in_grid = None
+            D = 1.0
+
         D2 = D**2
         D4 = D**4
+
+        f = self.growth_rate_func(redshift)
 
         mu = np.linspace(-1, 1, 51).reshape(1, 51)
 

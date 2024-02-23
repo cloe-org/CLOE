@@ -127,6 +127,8 @@ class Nonlinear:
         self.PLL_phot_model = PLL_phot_model(cosmo_dic, self.nonlinear_dic,
                                              self.misc)
 
+        self.eftobj = None
+
     def set_Pgg_spectro_model(self):
         """Sets GCspectro redshift bins for ``Pgg_spectro_model``.
 
@@ -269,21 +271,16 @@ class Nonlinear:
         each redshift bin, as specified by the class attribute ``zmeans``).
         """
         # Initializing EFT object
-        eftobj = EFTofLSS(self.theory)
-        # Computing loops at redshift z=0
-        eftobj._Pgg_kmu_terms()
-        # Creating array of Pgg(k,mu) interpolators at the different redshifts
-        growth_rate = [self.theory['f_z'](float(z)) for z in self.zmeans]
-        if self.theory['use_gamma_MG']:
-            growth_factor = [self.theory['D_z_k_func_MG'](float(z))
-                             for z in self.zmeans]
-        else:
-            growth_factor = [self.theory['D_z_k_func'](float(z), 0.05)
-                             for z in self.zmeans]
+        self.eftobj = EFTofLSS(self.theory)
+        # Check if rescaling by growth can be carried out (currently the only
+        # discriminant is whether massive neutrinos are included or not)
+        use_growth_rescaling = False if self.theory['mnu'] != 0.0 else True
+        # Computing P(k,mu) interpolator for each specified redshift
         Pkmu = np.array(
-            [eftobj.P_kmu_z(f=growth_rate[i], D=growth_factor[i],
-                            **rb.select_spectro_parameters(float(z),
-                                                           self.nuis))
+            [self.eftobj.P_kmu_z(
+                redshift=z, use_growth_rescaling=use_growth_rescaling,
+                IRres='DST', **rb.select_spectro_parameters(
+                    float(z), self.nuis, self.zbins))
              for i, z in enumerate(self.zmeans)])
 
         # Storing in the nonlinear dictionary

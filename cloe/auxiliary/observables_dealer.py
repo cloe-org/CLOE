@@ -101,7 +101,8 @@ def ell_checker(specifications_dict_prob):
 
 
 def observables_selection_specifications_checker(observables_dict,
-                                                 specifications_dict):
+                                                 specifications_dict,
+                                                 statistics_photo):
     """
     Observables selection and specifications checker.
 
@@ -114,6 +115,9 @@ def observables_selection_specifications_checker(observables_dict,
         Dictionary with the observables selection
     specifications_dict: dict
         Dictionary with the observables specifications
+    statistics_photo: string
+        Statistics used for photo observables (Fourier or Configuration space)
+
     Returns
     -------
     Merged dictionary: dict
@@ -128,18 +132,21 @@ def observables_selection_specifications_checker(observables_dict,
     # add specifications
     if checked_observables_dict['WL']['WL']:
         merged_dict['specifications']['WL'] = specifications_dict['WL']
-        ell_checker(specifications_dict['WL'])
+        if statistics_photo == 'angular_power_spectrum':
+            ell_checker(specifications_dict['WL'][statistics_photo])
     if checked_observables_dict['GCphot']['GCphot']:
         merged_dict['specifications']['GCphot'] = \
             specifications_dict['GCphot']
-        ell_checker(specifications_dict['GCphot'])
+        if statistics_photo == 'angular_power_spectrum':
+            ell_checker(specifications_dict['GCphot'][statistics_photo])
     if checked_observables_dict['GCspectro']['GCspectro']:
         merged_dict['specifications']['GCspectro'] = \
             specifications_dict['GCspectro']
     if checked_observables_dict['WL']['GCphot']:
         merged_dict['specifications']['WL-GCphot'] = \
             specifications_dict['WL-GCphot']
-        ell_checker(specifications_dict['WL-GCphot'])
+        if statistics_photo == 'angular_power_spectrum':
+            ell_checker(specifications_dict['WL-GCphot'][statistics_photo])
     # At the moment, these quantities below are not computed
     # by CLOE and we are forcing this selection to be False.
     # Therefore, the specifications are not loaded.

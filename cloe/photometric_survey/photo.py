@@ -1285,7 +1285,7 @@ class Photo:
         ell_factor = (2 * ell + 5) / (2 * ell + 1)
         return z_r_interp(ell_factor * r)
 
-    def corr_func_3x2pt(self, obs, theta_deg, bin_i, bin_j):
+    def corr_func_3x2pt(self, obs, theta_arcmin, bin_i, bin_j):
         r"""Generic 3x2pt correlation function.
 
         Computes the specified 3x2pt configuration space correlation function,
@@ -1308,9 +1308,9 @@ class Photo:
             Type of correlation function. It must be selected from the list
             ["Shear-Shear_plus", "Shear-Shear_minus", "Shear-Position",
             "Position-Position"]. The match is case-insensitive
-        theta_deg: float or numpy.ndarray of float
+        theta_arcmin: float or numpy.ndarray of float
             :math:`\theta` values at which the correlation function
-            is computed. To be specified in degrees
+            is computed. To be specified in arcmins
         bin_i: int
             Index of first tomographic bin
         bin_j: int
@@ -1341,18 +1341,18 @@ class Photo:
                              '"Shear-Shear_minus", "Shear-Position", '
                              '"Position-Position"]')
 
-        if isinstance(theta_deg, np.ndarray):
+        if isinstance(theta_arcmin, np.ndarray):
             pass
-        elif isinstance(theta_deg, list):
-            theta_deg = np.array(theta_deg)
-        elif isinstance(theta_deg, (float, int)):
-            theta_deg = np.array([theta_deg])
+        elif isinstance(theta_arcmin, list):
+            theta_arcmin = np.array(theta_arcmin)
+        elif isinstance(theta_arcmin, (float, int)):
+            theta_arcmin = np.array([theta_arcmin])
         else:
-            raise TypeError('theta_deg argument must be a int, float, list or '
-                            'numpy.ndarray')
+            raise TypeError('theta_arcmin argument must be a int, float, list'
+                            ' or numpy.ndarray')
 
-        theta_rad = np.deg2rad(theta_deg)
-        xi_arr = np.empty(theta_deg.size)
+        theta_rad = np.deg2rad(theta_arcmin / 60)
+        xi_arr = np.empty(theta_arcmin.size)
 
         cells_int = cells_func(self.ells_int, bin_i, bin_j).flatten()
         cells_interp = interpolate.interp1d(self.ells_int, cells_int,

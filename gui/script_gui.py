@@ -138,11 +138,11 @@ class ConfigGUIWindow(QtWidgets.QMainWindow):
                             "root": self.ui.GCsp_covariance_filename.text()}
                             }
 
-        with open('../configs/WL.yaml', 'w') as yaml_file:
+        with open('../configs/WL-FourierSpace.yaml', 'w') as yaml_file:
             yaml.dump(dictionary_WL, yaml_file, default_flow_style=None, sort_keys=False)
-        with open('../configs/GCphot.yaml', 'w') as yaml_file:
+        with open('../configs/GCphot-FourierSpace.yaml', 'w') as yaml_file:
             yaml.dump(dictionary_GCph, yaml_file, default_flow_style=None, sort_keys=False)
-        with open('../configs/GCspectro-Fourier.yaml', 'w') as yaml_file:
+        with open('../configs/GCspectro-FourierSpace.yaml', 'w') as yaml_file:
             yaml.dump(dictionary_GCsp, yaml_file, default_flow_style=None, sort_keys=False)
         with open('../configs/observables_selection.yaml', 'w') as yaml_file:
             yaml.dump(dictionary_observable_selection, yaml_file, default_flow_style=None,

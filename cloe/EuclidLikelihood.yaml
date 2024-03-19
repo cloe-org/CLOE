@@ -54,15 +54,25 @@ data: !defaults [../configs/data]
 observables_selection: !defaults [../configs/observables_selection]
 # Specifications for each of the observables
 observables_specifications:
-  WL: !defaults [../configs/WL]
-  GCphot: !defaults [../configs/GCphot]
+  WL:
+    angular_power_spectrum: !defaults [../configs/WL-FourierSpace]
+    angular_correlation_function: !defaults [../configs/WL-ConfigurationSpace]
+  GCphot:
+    angular_power_spectrum: !defaults [../configs/GCphot-FourierSpace]
+    angular_correlation_function: !defaults [../configs/GCphot-ConfigurationSpace]
   GCspectro:
-    multipole_power_spectrum: !defaults [../configs/GCspectro-Fourier]
+    multipole_power_spectrum: !defaults [../configs/GCspectro-FourierSpace]
     multipole_correlation_function: !defaults [../configs/GCspectro-ConfigurationSpace]
-  WL-GCphot: !defaults [../configs/WL-GCphot]
+  WL-GCphot:
+    angular_power_spectrum: !defaults [../configs/WL-GCphot-FourierSpace]
+    angular_correlation_function: !defaults [../configs/WL-GCphot-ConfigurationSpace]
   # Note: This is not yet provided by CLOE
   # therefore it will load empty dictionaries
-  GCphot-GCspectro: !defaults [../configs/GCphot-GCspectro]
-  WL-GCspectro: !defaults [../configs/WL-GCspectro]
+  GCphot-GCspectro:
+    angular_power_spectrum: !defaults [../configs/GCphot-GCspectro-FourierSpace]
+    angular_correlation_function: !defaults [../configs/GCphot-GCspectro-ConfigurationSpace]
+  WL-GCspectro:
+    angular_power_spectrum: !defaults [../configs/WL-GCspectro-FourierSpace]
+    angular_correlation_function: !defaults [../configs/WL-GCspectro-ConfigurationSpace]
 # Plot the selected observables during the initialization of the likelihood
 plot_observables_selection: False

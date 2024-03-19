@@ -251,6 +251,16 @@ class LikelihoodUI:
                         self._check_and_update_likelihood_fields(dic,
                                                                  sub_fields)
 
+                    elif field == 'GCphot' \
+                            or field == 'WL' \
+                            or field == 'WL-GCphot' \
+                            or field == 'GCphot-GCspectro' \
+                            or field == 'WL-GCspectro':
+                        dic = field_value
+                        sub_fields = ['angular_power_spectrum',
+                                      'angular_correlation_function']
+                        self._check_and_update_likelihood_fields(dic,
+                                                                 sub_fields)
                 log_info(f'\'{field}\' will be set as:')
                 log_info(field_value)
 

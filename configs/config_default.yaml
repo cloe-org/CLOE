@@ -87,16 +87,26 @@ Cobaya:
       observables_selection: observables_selection.yaml
       # Specifications for each of the observables
       observables_specifications:
-        GCphot: GCphot.yaml
+        GCphot:
+          angular_power_spectrum: GCphot-FourierSpace.yaml
+          angular_correlation_function: GCphot-ConfigurationSpace.yaml
         GCspectro:
-          multipole_power_spectrum: GCspectro-Fourier.yaml
+          multipole_power_spectrum: GCspectro-FourierSpace.yaml
           multipole_correlation_function: GCspectro-ConfigurationSpace.yaml
-        WL: WL.yaml
-        WL-GCphot: WL-GCphot.yaml
+        WL:
+          angular_power_spectrum: WL-FourierSpace.yaml
+          angular_correlation_function: WL-ConfigurationSpace.yaml
+        WL-GCphot:
+          angular_power_spectrum: WL-GCphot-FourierSpace.yaml
+          angular_correlation_function: WL-GCphot-ConfigurationSpace.yaml
         # Note: This is not yet provided by CLOE
         # therefore it will load empty dictionaries
-        GCphot-GCspectro: GCphot-GCspectro.yaml
-        WL-GCspectro: WL-GCspectro.yaml
+        GCphot-GCspectro:
+          angular_power_spectrum: GCphot-GCspectro-FourierSpace.yaml
+          angular_correlation_function: GCphot-GCspectro-ConfigurationSpace.yaml
+        WL-GCspectro:
+          angular_power_spectrum: WL-GCspectro-FourierSpace.yaml
+          angular_correlation_function: WL-GCspectro-ConfigurationSpace.yaml
   output: chains/my_euclid_experiment
   params: ./model_default.yaml
   sampler:

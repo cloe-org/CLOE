@@ -18,14 +18,26 @@ Cobaya:
       magbias_model: 2
       observables_selection: observables_selection.yaml
       observables_specifications:
-        GCphot: GCphot.yaml
-        GCphot-GCspectro: GCphot-GCspectro.yaml
+        GCphot:
+          angular_power_spectrum: GCphot-FourierSpace.yaml
+          angular_correlation_function: GCphot-ConfigurationSpace.yaml
         GCspectro:
-          multipole_power_spectrum: GCspectro-Fourier.yaml
+          multipole_power_spectrum: GCspectro-FourierSpace.yaml
           multipole_correlation_function: GCspectro-ConfigurationSpace.yaml
-        WL: WL.yaml
-        WL-GCphot: WL-GCphot.yaml
-        WL-GCspectro: WL-GCspectro.yaml
+        WL:
+          angular_power_spectrum: WL-FourierSpace.yaml
+          angular_correlation_function: WL-ConfigurationSpace.yaml
+        WL-GCphot:
+          angular_power_spectrum: WL-GCphot-FourierSpace.yaml
+          angular_correlation_function: WL-GCphot-ConfigurationSpace.yaml
+        # Note: This is not yet provided by CLOE
+        # therefore it will load empty dictionaries
+        GCphot-GCspectro:
+          angular_power_spectrum: GCphot-GCspectro-FourierSpace.yaml
+          angular_correlation_function: GCphot-CGspectro-ConfigurationSpace.yaml
+        WL-GCspectro:
+          angular_power_spectrum: WL-GCspectro-FourierSpace.yaml
+          angular_correlation_function: WL-GCspectro-ConfigurationSpace.yaml
       plot_observables_selection: false
       solver: camb
       speed: 500

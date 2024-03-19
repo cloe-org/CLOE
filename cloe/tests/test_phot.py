@@ -568,7 +568,7 @@ class photoinitTestCase(TestCase):
         phot_copy = deepcopy(self.phot)
         xi_ssp = phot_copy.corr_func_3x2pt(
             'Shear-Shear_plus',
-            [1.0, 1.5],
+            [60, 90],
             1,
             1,
         )
@@ -581,7 +581,7 @@ class photoinitTestCase(TestCase):
 
     def test_corr_func_ssm(self):
         phot_copy = deepcopy(self.phot)
-        xi_ssm = phot_copy.corr_func_3x2pt('Shear-Shear_minus', 1.0, 1, 1)
+        xi_ssm = phot_copy.corr_func_3x2pt('Shear-Shear_minus', 60, 1, 1)
         npt.assert_allclose(
             xi_ssm,
             self.xi_ssm_check,
@@ -591,7 +591,7 @@ class photoinitTestCase(TestCase):
 
     def test_corr_func_sp(self):
         phot_copy = deepcopy(self.phot)
-        xi_sp = phot_copy.corr_func_3x2pt('Shear-Position', 1.0, 1, 1)
+        xi_sp = phot_copy.corr_func_3x2pt('Shear-Position', 60, 1, 1)
         npt.assert_allclose(
             xi_sp,
             self.xi_sp_check,
@@ -601,7 +601,7 @@ class photoinitTestCase(TestCase):
 
     def test_corr_func_pp(self):
         phot_copy = deepcopy(self.phot)
-        xi_pp = phot_copy.corr_func_3x2pt('Position-Position', 1.0, 1, 1)
+        xi_pp = phot_copy.corr_func_3x2pt('Position-Position', 60, 1, 1)
         npt.assert_allclose(
             xi_pp,
             self.xi_pp_check,
@@ -614,7 +614,7 @@ class photoinitTestCase(TestCase):
             ValueError,
             self.phot.corr_func_3x2pt,
             'Invalid string',
-            1.0,
+            60,
             1,
             1,
         )
@@ -624,7 +624,7 @@ class photoinitTestCase(TestCase):
             TypeError,
             self.phot.corr_func_3x2pt,
             'Shear-Shear_plus',
-            (1.0, 1.5),
+            (60, 90),
             1,
             1,
         )

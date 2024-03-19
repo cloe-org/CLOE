@@ -56,7 +56,7 @@ info = {
                         'redshifts': ['1.', '1.2', '1.4', '1.65'],
                         'edges': [0.9, 1.1, 1.3, 1.5, 1.8],
                         'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
-                        'scale_cuts_fourier': 'GCspectro-Fourier.yaml',
+                        'scale_cuts_fourier': 'GCspectro-FourierSpace.yaml',
                     },
                 },
                 'observables_selection':

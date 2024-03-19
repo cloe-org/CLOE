@@ -28,7 +28,8 @@ def build_mock_observables(reader=None):
         for j in range(i, reader.numtomo_wl + 1):
             inner_bins[f'n{j}'] = {'ell_range': [ell_range]}
         wl_bins[f'n{i}'] = inner_bins
-    wl_specs = {'statistics': 'angular_power_spectrum', 'bins': wl_bins}
+    wl_specs = {'statistics': 'angular_power_spectrum',
+                'angular_power_spectrum': {'bins': wl_bins}}
 
     xc_phot_bins = {}
     for i in range(1, reader.numtomo_wl + 1):
@@ -37,7 +38,7 @@ def build_mock_observables(reader=None):
             inner_bins[f'n{j}'] = {'ell_range': [ell_range]}
         xc_phot_bins[f'n{i}'] = inner_bins
     xc_phot_specs = {'statistics': 'angular_power_spectrum',
-                     'bins': xc_phot_bins}
+                     'angular_power_spectrum': {'bins': xc_phot_bins}}
 
     gc_phot_bins = {}
     for i in range(1, reader.numtomo_gcphot + 1):
@@ -46,7 +47,7 @@ def build_mock_observables(reader=None):
             inner_bins[f'n{j}'] = {'ell_range': [ell_range]}
         gc_phot_bins[f'n{i}'] = inner_bins
     gc_phot_specs = {'statistics': 'angular_power_spectrum',
-                     'bins': xc_phot_bins}
+                     'angular_power_spectrum': {'bins': xc_phot_bins}}
 
     redshifts = reader.data_dict['GC-Spectro'].keys()
     gc_spectro_configuration_space_bins = {}

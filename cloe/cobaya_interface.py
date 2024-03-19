@@ -51,7 +51,8 @@ class EuclidLikelihood(Likelihood):
         self.observables = \
             observables_selection_specifications_checker(
                 self.observables_selection,
-                self.observables_specifications)
+                self.observables_specifications,
+                self.statistics_photo)
         # Visualization of the observables matrix
         if self.plot_observables_selection:
             self.observables_pf = observables_visualization(
@@ -531,7 +532,8 @@ class EuclidLikelihood(Likelihood):
             self.observables = \
                 observables_selection_specifications_checker(
                     info['likelihood']['Euclid']['observables_selection'],
-                    self.observables_specifications)
+                    self.observables_specifications,
+                    self.statistics_photo)
 
     def logp(self, **params_values):
         r"""Logp.

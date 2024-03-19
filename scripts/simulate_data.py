@@ -128,7 +128,7 @@ info['likelihood'] = {'Euclid':
                             'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
                             'redshifts': ["1.", "1.2", "1.4", "1.65"],
                             'edges': [0.9, 1.1, 1.3, 1.5, 1.8],
-                            'scale_cuts_fourier': 'GCspectro-Fourier.yaml'},
+                            'scale_cuts_fourier': 'GCspectro-FourierSpace.yaml'},
                         'photo': {
                             'ndens_GC': 'niTab-EP10-RB00.dat',
                             'ndens_WL': 'niTab-EP10-RB00.dat',

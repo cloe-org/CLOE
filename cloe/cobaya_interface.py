@@ -336,6 +336,7 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['bias_model'] = self.bias_model
             self.cosmo.cosmo_dic['magbias_model'] = self.magbias_model
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
+            self.cosmo.cosmo_dic['use_Weyl'] = self.use_Weyl
             self.cosmo.cosmo_dic['matrix_transform_phot'] = \
                 self.matrix_transform_phot
             self.cosmo.cosmo_dic['H0'] = self.provider.get_param('H0')
@@ -442,6 +443,8 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['magbias_model'] = self.magbias_model
             self.cosmo.cosmo_dic['use_gamma_MG'] = \
                 info['likelihood']['Euclid']['use_gamma_MG']
+            self.cosmo.cosmo_dic['use_Weyl'] = \
+                info['likelihood']['Euclid']['use_Weyl']
             self.cosmo.cosmo_dic['H0'] = model.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value

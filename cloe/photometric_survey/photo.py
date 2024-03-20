@@ -557,6 +557,12 @@ class Photo:
                  (self.theory['f_K_z_func'](z) /
                   (1 / H0_Mpc)) * integral_arr)
 
+        # Removing the conversion factor between Weyl and matter
+        # power spectra from W_val, when employing the Weyl power
+        # spectrum in a workaround approach
+        if self.theory['use_Weyl']:
+            W_val = self.theory['f_K_z_func'](z) * integral_arr
+
         return W_val
 
     def poly_mag_bias(self, z):
@@ -639,6 +645,12 @@ class Photo:
                  self.theory['MG_sigma'](z, k) *
                  (self.theory['f_K_z_func'](z) /
                   (1 / H0_Mpc)) * integral_arr)
+
+        # Removing the conversion factor between Weyl and matter
+        # power spectra from W_val, when employing the Weyl power
+        # spectrum in a workaround approach
+        if self.theory['use_Weyl']:
+            W_val = self.theory['f_K_z_func'](z) * integral_arr
 
         if self.theory['magbias_model'] == 2:
             # magbias is a list of constants
@@ -822,6 +834,17 @@ class Photo:
             self.power_di_WL = P_di(self.z_grid_for_cl, k_grid, grid=False)
             self._stored_WL = True
 
+            # Updating power_dd_WL and power_di_WL when employing the
+            # Weyl power spectrum in a workaround approach
+            if self.theory['use_Weyl']:
+                Weyl_factor_interp = self.theory['Weyl_matter_ratio']
+                Weyl_factor = \
+                    Weyl_factor_interp(self.z_grid_for_cl, k_grid, grid=False)
+                sqrt_Weyl_factor = np.sqrt(Weyl_factor)
+
+                self.power_dd_WL *= Weyl_factor
+                self.power_di_WL *= sqrt_Weyl_factor
+
     def Cl_GC_phot(self, ells, bin_i, bin_j):
         r"""Cl GC Phot
 
@@ -961,6 +984,17 @@ class Photo:
             self.power_dd_GC = P_dd(self.z_grid_for_cl, k_grid, grid=False)
             self.power_gd_GC = P_gd(self.z_grid_for_cl, k_grid, grid=False)
             self._stored_GC = True
+
+            # Updating power_dd_GC and power_gd_GC when employing the
+            # Weyl power spectrum in a workaround approach
+            if self.theory['use_Weyl']:
+                Weyl_factor_interp = self.theory['Weyl_matter_ratio']
+                Weyl_factor = \
+                    Weyl_factor_interp(self.z_grid_for_cl, k_grid, grid=False)
+                sqrt_Weyl_factor = np.sqrt(Weyl_factor)
+
+                self.power_dd_GC *= Weyl_factor
+                self.power_gd_GC *= sqrt_Weyl_factor
 
     def Cl_cross(self, ells, bin_i, bin_j):
         r"""Cl Cross
@@ -1116,6 +1150,18 @@ class Photo:
             self.power_dd_XC = P_dd(self.z_grid_for_cl, k_grid, grid=False)
             self.power_di_XC = P_di(self.z_grid_for_cl, k_grid, grid=False)
             self._stored_XC = True
+
+            # Updating power_dd_XC, power_di_XC and power_gd_XC when
+            # employing the Weyl power spectrum in a workaround approach
+            if self.theory['use_Weyl']:
+                Weyl_factor_interp = self.theory['Weyl_matter_ratio']
+                Weyl_factor = \
+                    Weyl_factor_interp(self.z_grid_for_cl, k_grid, grid=False)
+                sqrt_Weyl_factor = np.sqrt(Weyl_factor)
+
+                self.power_dd_XC *= Weyl_factor
+                self.power_di_XC *= sqrt_Weyl_factor
+                self.power_gd_XC *= sqrt_Weyl_factor
 
     @staticmethod
     def _eval_prefactor_mag(ell):

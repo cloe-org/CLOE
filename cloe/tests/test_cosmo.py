@@ -71,6 +71,7 @@ class cosmoinitTestCase(TestCase):
         self.growth_rate_MG_check = 0.877252
         self.Pk_delta_MG_check = [3875.837355, 1091.360072]
         self.Pk_cb_MG_check = [3909.994641, 1101.189673]
+        self.Weyl_matter_ratio_test = 2.267094e-15
         self.Pk_halomodel_MG_check = [4033.881642, 1353.201077]
 
     def tearDown(self):
@@ -96,6 +97,7 @@ class cosmoinitTestCase(TestCase):
         self.growth_rate_MG_check = None
         self.Pk_delta_MG_check = None
         self.Pk_cb_MG_check = None
+        self.Weyl_matter_ratio_test = None
         self.Pk_halomodel_MG_check = None
 
     def test_cosmo_init(self):
@@ -517,6 +519,15 @@ class cosmoinitTestCase(TestCase):
             self.fcheck,
             rtol=1e-1,
             err_msg='Error in the omega density calculation',
+        )
+
+    def test_Weyl_matter_ratio(self):
+        test_p = self.cosmo.Weyl_matter_ratio_def(1.0, 0.01)
+        npt.assert_allclose(
+            test_p,
+            self.Weyl_matter_ratio_test,
+            rtol=1e-3,
+            err_msg='Error in Weyl_matter_ratio calculation',
         )
 
     def test_growth_factor_MG(self):

@@ -44,6 +44,8 @@ add_phot_RSD: False
 matrix_transform_phot: False
 # Use MG gamma
 use_gamma_MG: False
+# Use Weyl power spectrum (workaround approach)
+use_Weyl: False
 # Redshift dependent purity correction
 f_out_z_dep: False
 # Include spectroscopic galaxy clustering redshift error

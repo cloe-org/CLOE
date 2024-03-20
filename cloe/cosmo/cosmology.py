@@ -276,6 +276,7 @@ class Cosmology:
                           'fsigma8_z_func': None,
                           'f_z': None,
                           'luminosity_ratio_z_func': None,
+                          'Weyl_matter_ratio': None,
                           # NL_boost
                           'NL_boost': None,
                           # NL flags
@@ -297,6 +298,8 @@ class Cosmology:
                           'magbias_model': 2,
                           # Use Modified Gravity gamma
                           'use_gamma_MG': 0,
+                          # Use Weyl power spectrum (workaround approach)
+                          'use_Weyl': False,
                           # Redshift dependent purity correction
                           'f_out_z_dep': False,
                           # Spectroscopic galaxy clustering redshift error
@@ -1534,6 +1537,49 @@ class Cosmology:
         """
         return 0.0
 
+    def Weyl_matter_ratio_def(self, redshift, k_scale, grid=True):
+        r"""Weyl matter ratio
+
+        Returns the ratio of the linear Weyl power spectrum to
+        the linear matter power spectrum.
+
+        .. math::
+            \Gamma^2(z,k)\equiv P_{\Phi+\Psi}(z,k)/P_{mm}(z,k)
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum.
+        k_scale: float or list or numpy.ndarray
+            wavenumber at which to evaluate the power spectrum.
+        grid: bool, optional
+            If True, use the grid setting in power spectra.
+            If False, set grid to False in power spectra.
+
+        Returns
+        -------
+        \Gamma^2: float or numpy.ndarray
+            Value of the ratio of the linear Weyl power spectrum to
+            the linear matter power spectrum at a given redshift and
+            wavenumber.
+        """
+
+        k_min = min(self.cosmo_dic['k_win'])
+        k_max = max(self.cosmo_dic['k_win'])
+
+        k_scale_array = np.array(k_scale)
+        k_scale_array = np.clip(k_scale_array, k_min, k_max)
+
+        args = [redshift, k_scale_array]
+        if not grid:
+            args.append(False)
+
+        Pk_weyl = self.cosmo_dic['Pk_weyl'].P(*args)
+        Pk_delta = self.cosmo_dic['Pk_delta'].P(*args)
+
+        Gamma2 = Pk_weyl / Pk_delta
+        return Gamma2
+
     def obtain_power_spectra(self):
         """Adds photometric/spectroscopic power spectra to cosmo dictionary.
 
@@ -1839,6 +1885,10 @@ class Cosmology:
         # Update dictionary with bias function and power spectra
         self.create_phot_galbias()
         self.obtain_power_spectra()
+
+        if self.cosmo_dic['use_Weyl']:
+            self.cosmo_dic['Weyl_matter_ratio'] = \
+                self.Weyl_matter_ratio_def
 
         self.cosmo_dic['noise_Pgg_spectro'] = \
             self.pk_source_spectro.noise_Pgg_spectro

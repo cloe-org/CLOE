@@ -31,9 +31,11 @@ info = {
                 'solver': 'camb',
                 'NL_flag_phot_matter': 0,
                 'NL_flag_spectro': 0,
+                'use_magnification_bias_spectro': False,
                 'bias_model': 1,
                 'statistics_spectro': 'multipole_power_spectrum',
                 'add_phot_RSD': False,
+                'matrix_transform_phot': False,
                 'magbias_model': 2,
                 'use_gamma_MG': False,
                 'f_out_z_dep': False,
@@ -42,6 +44,7 @@ info = {
                 {
                     'photo':
                     {
+                        'redshifts': [0.2095, 0.489, 0.619, 0.7335, 0.8445, 0.9595, 1.087, 1.2395, 1.45, 2.038],
                         'luminosity_ratio': 'luminosity_ratio.dat',
                         'IA_model': 'zNLA',
                         'cov_3x2pt': 'CovMat-3x2pt-{:s}-20Bins.npz',

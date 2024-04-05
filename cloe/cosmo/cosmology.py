@@ -298,6 +298,8 @@ class Cosmology:
                           'magbias_model': 2,
                           # Use Modified Gravity gamma
                           'use_gamma_MG': 0,
+                          # use magnification bias for GC spectro
+                          'use_magnification_bias_spectro': 0,
                           # Use Weyl power spectrum (workaround approach)
                           'use_Weyl': False,
                           # Redshift dependent purity correction
@@ -419,6 +421,11 @@ class Cosmology:
                              'f_out_2': 0.0,
                              'f_out_3': 0.0,
                              'f_out_4': 0.0,
+                             # Spectroscopic galaxy magnification bias
+                             'magnification_bias_spectro_bin1': 0.79,
+                             'magnification_bias_spectro_bin2': 0.87,
+                             'magnification_bias_spectro_bin3': 0.96,
+                             'magnification_bias_spectro_bin4': 0.98,
                              # Example BCemu baryon params (fitted to BAHAMAS)
                              'log10Mc_bcemu_bin1': 13.402342835406102,
                              'log10Mc_bcemu_bin2': 13.255603572838046,

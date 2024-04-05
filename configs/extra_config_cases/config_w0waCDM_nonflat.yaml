@@ -16,6 +16,7 @@ Cobaya:
       k_min_extrap: 1.0e-05
       k_samp: 1000
       magbias_model: 2
+      matrix_transform_phot: false
       observables_selection: observables_selection.yaml
       observables_specifications:
         GCphot:
@@ -43,6 +44,7 @@ Cobaya:
       speed: 500
       statistics_spectro: multipole_power_spectrum
       use_gamma_MG: false
+      use_magnification_bias_spectro: false
       z_max: 4.0
       z_min: 0.0
       z_samp: 100

@@ -282,7 +282,6 @@ class Nonlinear:
                 IRres='DST', **rb.select_spectro_parameters(
                     float(z), self.nuis, self.zbins))
              for i, z in enumerate(self.zmeans)])
-
         # Storing in the nonlinear dictionary
         self.nonlinear_dic['P_kmu'] = Pkmu
 

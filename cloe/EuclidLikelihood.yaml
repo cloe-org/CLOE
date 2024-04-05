@@ -13,6 +13,8 @@ solver: camb
 # List of parameters that are
 # only parameters of the likelihood
 params: !defaults [../configs/params]
+# Use magnification bias for GC spectro
+use_magnification_bias_spectro: 0
 # Nonlinear flag selectors
 NL_flag_phot_matter: 0
 NL_flag_spectro: 0

@@ -147,6 +147,12 @@ multiplicative_bias_10: 0.0
 multiplicative_bias_11: 0.0
 multiplicative_bias_12: 0.0
 multiplicative_bias_13: 0.0
+#Spectroscopic magnification bias
+magnification_bias_spectro_bin1: 0.79
+magnification_bias_spectro_bin2: 0.87
+magnification_bias_spectro_bin3: 0.96
+magnification_bias_spectro_bin4: 0.98
+
 # Baryon parameters
 # Bacco
 M1_z0_cen_bacco_bin1: 11.340025775544985

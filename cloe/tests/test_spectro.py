@@ -283,6 +283,51 @@ class specinitTestCase(TestCase, SpectroTestParent):
         npt.assert_equal(len(mock_fftlog.call_args_list), len(ell_arr),
                          err_msg='Unexpected number of calls to fftlog()')
 
+    @patch('cloe.spectroscopic_survey.spectro.Spectro.'
+           'multipole_correlation_function_mag_mag')
+    def test_multipole_correlation_function_mag_mag(self, mock_mag_mag):
+        s_array_lin = np.linspace(1, 10, 10)
+
+        # test a call to the function
+        mock_mag_mag.return_value = np.zeros(10)
+        corr_fun_mag_mag_array = \
+            self.spectro.multipole_correlation_function_mag_mag(s_array_lin,
+                                                                1.0, 0)
+
+        # test that the shape of the returned array matches the expectations,
+        # i.e. same size as the input s array (10 in this case)
+        npt.assert_equal(len(s_array_lin), len(corr_fun_mag_mag_array))
+        # test that the function was called
+        mock_mag_mag.assert_called()
+
+        # verify that the function was called the expected number of
+        # times (i.e. len(s_array))
+        npt.assert_equal(len(mock_mag_mag.call_args_list), 1,
+                         err_msg='Unexpected number of calls to'
+                         f' multipole_correlation_function_mag_mag()')
+
+    @patch('cloe.spectroscopic_survey.spectro.Spectro.'
+           'multipole_correlation_function_dens_mag')
+    def test_multipole_correlation_function_dens_mag(self, mock_dens_mag):
+        s_array_lin = np.linspace(1, 10, 10)
+
+        # test a call to the function
+        mock_dens_mag.return_value = np.zeros(10)
+        corr_fun_dens_mag_array = \
+            self.spectro.multipole_correlation_function_dens_mag(s_array_lin,
+                                                                 1.0, 0)
+        # test that the shape of the returned array matches the expectations,
+        # i.e. same size of the input s array (10 in this case)
+        npt.assert_equal(len(s_array_lin), len(corr_fun_dens_mag_array))
+        # test that the function was called
+        mock_dens_mag.assert_called()
+
+        # verify that function was called the expected number of
+        # times (i.e. lens(s_array))
+        npt.assert_equal(len(mock_dens_mag.call_args_list), 1,
+                         err_msg='Unexpected number of calls to'
+                         f' multipole_correlation_function_dens_mag()')
+
     def test_f_out(self):
         npt.assert_allclose(
             self.spectro_2.multipole_spectra(1.0, 0.1, ms=[1]),

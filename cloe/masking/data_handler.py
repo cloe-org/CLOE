@@ -351,10 +351,10 @@ class Data_handler:
 
         gc_spectro_vec = []
         redshifts = data.data_dict['GC-Spectro'].keys()
-        data.read_GC_spectro_scale_cuts()
 
         if self._obs['specifications']['GCspectro']['statistics'] == \
                 'multipole_power_spectrum':
+            data.read_GC_spectro_scale_cuts()
             for redshift_index, redshift in enumerate(redshifts):
                 k_pk = data.data_dict['GC-Spectro'][f'{redshift}']['k_pk']
                 multipoles = (
@@ -532,10 +532,10 @@ class Data_handler:
         """
         gc_spectro_vec = []
         redshifts = data.data_dict['GC-Spectro'].keys()
-        data.read_GC_spectro_scale_cuts()
 
         if self._obs['specifications']['GCspectro']['statistics'] == \
                 'multipole_power_spectrum':
+            data.read_GC_spectro_scale_cuts()
             for redshift_index, redshift in enumerate(redshifts):
                 k_pk = data.data_dict['GC-Spectro'][f'{redshift}']['k_pk']
                 multipoles = (

@@ -1,6 +1,7 @@
 FROM ubuntu:bionic
 
 LABEL Description="CLOE Docker Image"
+
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 # hadolint ignore=DL3008
@@ -27,26 +28,31 @@ ENV PATH /opt/conda/bin:$PATH
 CMD [ "/bin/bash" ]
 
 # Leave these args here to better use the Docker build cache
-ARG CONDA_VERSION=py311_23.9.0-0
+# renovate: datasource=custom.miniconda_installer
+ARG INSTALLER_URL_LINUX64="https://repo.anaconda.com/miniconda/Miniconda3-py312_24.3.0-0-Linux-x86_64.sh"
+ARG SHA256SUM_LINUX64="96a44849ff17e960eeb8877ecd9055246381c4d4f2d031263b63fa7e2e930af1"
+# renovate: datasource=custom.miniconda_installer
+ARG INSTALLER_URL_S390X="https://repo.anaconda.com/miniconda/Miniconda3-py312_24.3.0-0-Linux-s390x.sh"
+ARG SHA256SUM_S390X="b601cb8e3ea65a4ed1aecd96d4f3d14aca5b590b2e1ab0ec5c04c825f5c5e439"
+# renovate: datasource=custom.miniconda_installer
+ARG INSTALLER_URL_AARCH64="https://repo.anaconda.com/miniconda/Miniconda3-py312_24.3.0-0-Linux-aarch64.sh"
+ARG SHA256SUM_AARCH64="05f70cbc89b6caf84e22db836f7696a16b617992eb23d6102acf7651eb132365"
 
 RUN set -x && \
     UNAME_M="$(uname -m)" && \
     if [ "${UNAME_M}" = "x86_64" ]; then \
-    MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh"; \
-    SHA256SUM="43651393236cb8bb4219dcd429b3803a60f318e5507d8d84ca00dafa0c69f1bb"; \
+        INSTALLER_URL="${INSTALLER_URL_LINUX64}"; \
+        SHA256SUM="${SHA256SUM_LINUX64}"; \
     elif [ "${UNAME_M}" = "s390x" ]; then \
-    MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-s390x.sh"; \
-    SHA256SUM="707c68e25c643c84036a16acdf836a3835ea75ffd2341c05ec2da6db1f3e9963"; \
+        INSTALLER_URL="${INSTALLER_URL_S390X}"; \
+        SHA256SUM="${SHA256SUM_S390X}"; \
     elif [ "${UNAME_M}" = "aarch64" ]; then \
-    MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-aarch64.sh"; \
-    SHA256SUM="1242847b34b23353d429fcbcfb6586f0c373e63070ad7d6371c23ddbb577778a"; \
-    elif [ "${UNAME_M}" = "ppc64le" ]; then \
-    MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-ppc64le.sh"; \
-    SHA256SUM="07b53e411c2e4423bd34c3526d6644b916c4b2143daa8fbcb36b8ead412239b9"; \
+        INSTALLER_URL="${INSTALLER_URL_AARCH64}"; \
+        SHA256SUM="${SHA256SUM_AARCH64}"; \
     fi && \
-    wget "${MINICONDA_URL}" -O miniconda.sh -q && \
+    wget "${INSTALLER_URL}" -O miniconda.sh -q && \
     echo "${SHA256SUM} miniconda.sh" > shasum && \
-    if [ "${CONDA_VERSION}" != "latest" ]; then sha256sum --check --status shasum; fi && \
+    sha256sum --check --status shasum && \
     mkdir -p /opt && \
     bash miniconda.sh -b -p /opt/conda && \
     rm miniconda.sh shasum && \

@@ -507,7 +507,7 @@ class Photo:
 
         Calculates the weak lensing shear kernel for a given tomographic bin.
         Uses broadcasting to compute a 2D-array of integrands and then applies
-        :obj:`integrate.trapz` on the array along one axis
+        :obj:`np.trapz` on the array along one axis.
 
         .. math::
             W_{i}^{\gamma}(\ell, z, k) =
@@ -523,8 +523,8 @@ class Photo:
         z: numpy.ndarray of float
             Redshift at which weight is evaluated.
         bin_i: int
-           Index of desired tomographic bin. Tomographic bin
-           indices start from 1.
+            Index of desired tomographic bin.
+            Tomographic bin indices start from 1
         k: float
             Wavenumber at which to evaluate the Modified Gravity
             :math:`\Sigma(z,k)` function
@@ -532,25 +532,21 @@ class Photo:
         Returns
         -------
         Shear kernel: numpy.ndarray
-           1-D Numpy array of shear kernel values for specified bin
-           at specified scale for the redshifts defined in z
+            1-D Numpy array of shear kernel values for specified bin
+            at specified scale for the redshifts defined in z
         """
-        dz_i = self.theory['nuisance_parameters'][f'dz_{bin_i}_WL']
-        zint_mat = np.linspace(z, z[-1],
-                               self.z_trapz_sampling)
-        zint_mat = zint_mat.T
-        diffz = np.diff(zint_mat)
+
         H0_Mpc = self.theory['H0_Mpc']
         O_m = self.theory['Omm']
 
         n_z_normalized = self.nz_WL.interpolates_n_i(bin_i, z)
 
-        intg_mat = np.array([self.window_integrand(zint_mat[zii],
-                                                   zint_mat[zii, 0],
-                                                   n_z_normalized)
-                             for zii in range(len(zint_mat))])
+        win_eff = self.window_integrand(z[:, None], z, n_z_normalized)
 
-        integral_arr = integrate.trapz(intg_mat, dx=diffz, axis=1)
+        win_eff_tril = np.tril(win_eff)
+        integral_arr = np.trapz(win_eff_tril, z, axis=0)
+        # subtraction of the first triangle
+        integral_arr[1:] -= np.diag(win_eff_tril)[1:] * (z[1:] - z[:-1]) / 2
 
         W_val = (1.5 * H0_Mpc * O_m * (1.0 + z) *
                  self.theory['MG_sigma'](z, k) *
@@ -593,7 +589,7 @@ class Photo:
 
         Calculates the magnification bias kernel for a given tomographic bin.
         Uses broadcasting to compute a 2D-array of integrands and then applies
-        integrate.trapz on the array along one axis.
+        :obj:`np.trapz` on the array along one axis.
 
         .. math::
             W_{i}^{\mu}(\ell, z, k) =
@@ -622,24 +618,21 @@ class Photo:
            values for specified bin
            at specified scale for the redshifts defined in z
         """
-        dz_i = self.theory['nuisance_parameters'][f'dz_{bin_i}_GCphot']
-        zint_mat = np.linspace(z, z[-1],
-                               self.z_trapz_sampling)
-        zint_mat = zint_mat.T
-        diffz = np.diff(zint_mat)
+
         H0_Mpc = self.theory['H0_Mpc']
         O_m = self.theory['Omm']
 
         n_z_normalized = self.nz_GC.interpolates_n_i(bin_i, z)
 
-        intg_mat = np.array([self.window_integrand(zint_mat[zii],
-                                                   zint_mat[zii, 0],
-                                                   n_z_normalized)
-                             for zii in range(len(zint_mat))])
-        if self.theory['magbias_model'] != 2:
-            intg_mat *= self.magbias(zint_mat)
+        win_eff = self.window_integrand(z[:, None], z, n_z_normalized)
+        win_eff_tril = np.tril(win_eff)
 
-        integral_arr = integrate.trapz(intg_mat, dx=diffz, axis=1)
+        if self.theory['magbias_model'] != 2:
+            win_eff_tril *= self.magbias(z)
+
+        integral_arr = np.trapz(win_eff_tril, z, axis=0)
+        # subtraction of the first triangle
+        integral_arr[1:] -= np.diag(win_eff_tril)[1:] * (z[1:] - z[:-1]) / 2
 
         W_val = (1.5 * H0_Mpc * O_m * (1.0 + z) *
                  self.theory['MG_sigma'](z, k) *

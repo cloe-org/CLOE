@@ -126,7 +126,7 @@ class photoinitTestCase(TestCase):
         self.prefac_mag_check = 0.997732426  # expected value for ell=10
         self.xi_ssp_check = [6.326380e-07, 4.395978e-07]
         self.xi_ssm_check = 1.476032e-07
-        self.xi_sp_check = -3.455842e-06
+        self.xi_sp_check = -3.449763e-06
         self.xi_pp_check = 0.005259
 
     def tearDown(self):

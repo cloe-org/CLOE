@@ -86,6 +86,14 @@ class eftinitTestCase(TestCase):
         self.f = 0.7
         self.D = 0.6
 
+        self.Pb1b2_phot_test = 5.319397444374871
+        self.Pb1bG2_phot_test = -16.653791713284814
+        self.Pb2b2_phot_test = 928.6939554015156
+        self.Pb2bG2_phot_test = -127.59701366040896
+        self.PbG2bG2_phot_test = 32.2833850269415
+        self.PZ1bG3_phot_test = -262.90858279662723
+        self.PZ1bG2_phot_test = -657.2714569915681
+
     def tearDown(self):
         self.PEH = None
 
@@ -181,4 +189,17 @@ class eftinitTestCase(TestCase):
             self.Pgg_kmu_test,
             rtol=self.rtol, err_msg='Error in value returned by '
                                     'P_kmu_z'
+        )
+
+    def test_P_realspace_terms_kz(self):
+        self.eft._Pgg_k_terms_L()
+        terms = self.eft.P_realspace_terms_kz()
+        npt.assert_allclose(
+            [t(self.z1, self.k1)[0, 0] for t in terms],
+            [self.Pb1b2_phot_test, self.Pb1bG2_phot_test,
+             self.Pb2b2_phot_test, self.Pb2bG2_phot_test,
+             self.PbG2bG2_phot_test, self.PZ1bG3_phot_test,
+             self.PZ1bG2_phot_test],
+            rtol=self.rtol, err_msg='Error in value returned by '
+                                    'P_realspace_terms_kz '
         )

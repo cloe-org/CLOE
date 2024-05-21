@@ -169,7 +169,7 @@ class Photo:
         if any(obs_sel['GCphot'].values()):
             self.nz_GC = RedshiftDistribution('GCphot', self.nz_dic_GC,
                                               nuisance_dict)
-            self.photobias = [nuisance_dict[f'b{i}_photo']
+            self.photobias = [nuisance_dict[f'b1_photo_bin{i}']
                               for i in self.nz_GC.get_tomographic_bins()]
 
             if self.theory['magbias_model'] <= 2:
@@ -407,7 +407,7 @@ class Photo:
         if self.theory['bias_model'] == 2:
             bias = self.photobias[bin_i - 1]
         elif self.theory['bias_model'] in [1, 3]:
-            bias = self.theory['b_inter'](z)
+            bias = self.theory['b1_inter'](z)
 
         return Hzm_arr * fzm_arr * nzm_arr / bias
 

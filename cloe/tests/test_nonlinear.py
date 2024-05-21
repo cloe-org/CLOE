@@ -183,6 +183,40 @@ class nonlinearinitTestCase(TestCase):
         cls.nl3_extra_b4.set_Pgg_spectro_model()
         cls.nl3_extra_b4.update_dic(cosmo_dic_bar4_extra)
 
+        # Copy cosmo_dic from NL_flag_phot_matter=1
+        # (to test Pgg_phot_halo_NLbias)
+        cosmo_dic_NLbias_halo = cosmo_dic_1.copy()
+        cosmo_dic_NLbias_halo['NL_flag_phot_bias'] = 1
+        # Set values for NL bias parameters
+        nuis = cosmo_dic_NLbias_halo['nuisance_parameters']
+        for b in ['1', '2', 'G2', 'G3']:
+            for i in range(4):
+                nuis[f'b{b}_{i}_poly_photo'] = 1.0
+        for b in ['2', 'G2', 'G3']:
+            for i in range(10):
+                nuis[f'b{b}_photo_bin{i+1}'] = nuis[f'b1_photo_bin{i+1}']
+        # Create instance of Nonlinear class and update its dictionary
+        cls.nl1_nlbias_halo = Nonlinear(cosmo_dic_NLbias_halo)
+        cls.nl1_nlbias_halo.set_Pgg_spectro_model()
+        cls.nl1_nlbias_halo.update_dic(cosmo_dic_NLbias_halo)
+
+        # Copy cosmo_dic from NL_flag_phot_matter=4
+        # (to test Pgg_phot_emu_NLbias)
+        cosmo_dic_NLbias_emu = cosmo_dic_4.copy()
+        cosmo_dic_NLbias_emu['NL_flag_phot_bias'] = 1
+        # Set values for NL bias parameters
+        nuis = cosmo_dic_NLbias_emu['nuisance_parameters']
+        for b in ['1', '2', 'G2', 'G3']:
+            for i in range(4):
+                nuis[f'b{b}_{i}_poly_photo'] = 1.0
+        for b in ['2', 'G2', 'G3']:
+            for i in range(10):
+                nuis[f'b{b}_photo_bin{i+1}'] = nuis[f'b1_photo_bin{i+1}']
+        # Create instance of Nonlinear class and update its dictionary
+        cls.nl1_nlbias_emu = Nonlinear(cosmo_dic_NLbias_emu)
+        cls.nl1_nlbias_emu.set_Pgg_spectro_model()
+        cls.nl1_nlbias_emu.update_dic(cosmo_dic_NLbias_emu)
+
     def setUp(self) -> None:
         # Check values
         self.Pgi_spectro_test = -388.28625
@@ -219,6 +253,12 @@ class nonlinearinitTestCase(TestCase):
         self.Pii_test_NL5 = np.array([2.41430454, 0.89225537, 0.32953085])
         self.Pdeltai_test_NL5 = -265.15569155
         self.Pgi_phot_test_NL5 = -374.92694385
+
+        self.Pgg_phot_test_NLbias_halo = 57979.4343265
+        self.Pgdelta_phot_test_NLbias_halo = 40482.2743869
+
+        self.Pgg_phot_test_NLbias_emu = 57860.2730410
+        self.Pgdelta_phot_test_NLbias_emu = 40398.0054589
 
         self.Pmm_phot_test_NL4_extra_k = 3.4178353
         self.Pmm_phot_test_NL5_extra_kz = 0.61634334
@@ -271,6 +311,8 @@ class nonlinearinitTestCase(TestCase):
         self.fia_test = -0.00909382071134854
         self.bspec = 1.46148
         self.bphot = 1.41406
+        self.bphot_low = 1.09977
+        self.bphot_high = 1.74299
 
     def tearDown(self):
 
@@ -350,6 +392,24 @@ class nonlinearinitTestCase(TestCase):
                     'for NL_flag_phot_matter=5',
         )
 
+        npt.assert_allclose(
+            self.nl1_nlbias_halo.Pgg_phot_def(self.redshift1,
+                                              self.wavenumber1),
+            self.Pgg_phot_test_NLbias_halo,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgg_phot_def '
+                    'for NL_flag_phot_bias=1 and NL_flag_phot_matter=1',
+        )
+
+        npt.assert_allclose(
+            self.nl1_nlbias_emu.Pgg_phot_def(self.redshift1,
+                                             self.wavenumber1),
+            self.Pgg_phot_test_NLbias_emu,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgg_phot_def '
+                    'for NL_flag_phot_bias=1 and NL_flag_phot_matter=4',
+        )
+
     def test_Pgdelta_phot_def(self):
         npt.assert_allclose(
             self.nl1.Pgdelta_phot_def(self.redshift1, self.wavenumber1),
@@ -389,6 +449,24 @@ class nonlinearinitTestCase(TestCase):
             rtol=self.rtol,
             err_msg='Error in value returned by Pgdelta_phot_def '
                     'for NL_flag_phot_matter=5',
+        )
+
+        npt.assert_allclose(
+            self.nl1_nlbias_halo.Pgdelta_phot_def(self.redshift1,
+                                                  self.wavenumber1),
+            self.Pgdelta_phot_test_NLbias_halo,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgdelta_phot_def '
+                    'for NL_flag_phot_bias=1 and NL_flag_phot_matter=1',
+        )
+
+        npt.assert_allclose(
+            self.nl1_nlbias_emu.Pgdelta_phot_def(self.redshift1,
+                                                 self.wavenumber1),
+            self.Pgdelta_phot_test_NLbias_emu,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgdelta_phot_def '
+                    'for NL_flag_phot_bias=1 and NL_flag_phot_matter=4',
         )
 
     def test_Pgg_spectro_def(self):
@@ -716,13 +794,91 @@ class nonlinearinitTestCase(TestCase):
             self.redshift3,
         )
 
-    def test_istf_phot_galbias(self):
-        npt.assert_allclose(
-            self.nl1.misc.istf_phot_galbias(self.redshift1),
-            self.bphot,
-            rtol=self.rtol,
-            err_msg='Error in istf_phot_galbias',
-        )
+    def test_create_phot_galbias_nl(self):
+        self.nl1_nlbias_halo.create_phot_galbias_nl(model=1)
+        bi_vals = [
+            self.nl1_nlbias_halo.theory['b1_inter'](self.redshift1),
+            self.nl1_nlbias_halo.theory['b2_inter'](self.redshift1),
+            self.nl1_nlbias_halo.theory['bG2_inter'](self.redshift1),
+            self.nl1_nlbias_halo.theory['bG3_inter'](self.redshift1)]
+        for bi in bi_vals:
+            npt.assert_allclose(
+                bi,
+                self.bphot,
+                rtol=self.rtol,
+                err_msg='Error in create_phot_galbias_nl with bias_model=1',
+            )
+        # check redshift input below zs edges: returns b(z) at edge
+        bi_vals = [
+            self.nl1_nlbias_halo.theory['b1_inter'](0.1),
+            self.nl1_nlbias_halo.theory['b2_inter'](0.1),
+            self.nl1_nlbias_halo.theory['bG2_inter'](0.1),
+            self.nl1_nlbias_halo.theory['bG3_inter'](0.1)]
+        for bi in bi_vals:
+            npt.assert_allclose(
+                bi,
+                self.bphot_low,
+                rtol=self.rtol,
+                err_msg='Error in create_phot_galbias_nl with bias_model=1',
+            )
+        # check redshift input above zs edges: returns b(z) at edge
+        bi_vals = [
+            self.nl1_nlbias_halo.theory['b1_inter'](3.0),
+            self.nl1_nlbias_halo.theory['b2_inter'](3.0),
+            self.nl1_nlbias_halo.theory['bG2_inter'](3.0),
+            self.nl1_nlbias_halo.theory['bG3_inter'](3.0)]
+        for bi in bi_vals:
+            npt.assert_allclose(
+                bi,
+                self.bphot_high,
+                rtol=self.rtol,
+                err_msg='Error in create_phot_galbias_nl with bias_model=1',
+            )
+        # check vector redshift input: output size and values
+        zs_vec = [self.redshift1, self.redshift1]
+        bi_vals = [
+            self.nl1_nlbias_halo.theory['b1_inter'](zs_vec),
+            self.nl1_nlbias_halo.theory['b2_inter'](zs_vec),
+            self.nl1_nlbias_halo.theory['bG2_inter'](zs_vec),
+            self.nl1_nlbias_halo.theory['bG3_inter'](zs_vec)]
+        for bi in bi_vals:
+            npt.assert_equal(
+                len(bi),
+                len(zs_vec),
+                err_msg=(
+                    'Output size of create_phot_galbias_nl'
+                    'interpolators (array) does not match'
+                    'with input'
+                ),
+            )
+            npt.assert_allclose(
+                bi,
+                desired=[self.bphot, self.bphot],
+                rtol=1e-3,
+                err_msg='Array output create_phot_galbias_nl interpolators',
+            )
+
+    def test_poly_phot_galbias(self):
+        for b in ['1', '2', 'G2', 'G3']:
+            b_val =\
+                self.nl1_nlbias_halo.poly_phot_galbias_nl(f'b{b}')(1.0)
+            z_arr = np.array([1.0, 2.0])
+            b_val_arr =\
+                self.nl1_nlbias_halo.poly_phot_galbias_nl(f'b{b}')(z_arr)
+            # check float redshift input
+            npt.assert_almost_equal(
+                b_val,
+                desired=4.0,
+                decimal=8,
+                err_msg='Error in poly_phot_galbias_nl float redshift case'
+            )
+            # check array redshift input
+            npt.assert_allclose(
+                b_val_arr,
+                desired=[4.0, 15.0],
+                rtol=1e-8,
+                err_msg='Error in poly_phot_galbias_nl redshift array case'
+            )
 
     def test_extrapolation_Pmm_phot_def(self):
         # Test for wavenumber extrapolation with EE2

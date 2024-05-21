@@ -16,23 +16,23 @@
 bins:
   n1: 
     n1: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n2: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n3: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n4: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n5: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n6: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n7: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n8: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n9: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n10: 
       ell_range: [[20, 4000]]
     n11: 
@@ -43,21 +43,21 @@ bins:
       ell_range: [[20, 4000]]
   n2: 
     n2: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n3: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n4: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n5: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n6: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n7: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n8: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n9: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n10: 
       ell_range: [[20, 4000]]
     n11: 
@@ -68,19 +68,19 @@ bins:
       ell_range: [[20, 4000]]
   n3: 
     n3: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n4: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n5: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n6: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n7: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n8: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n9: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n10: 
       ell_range: [[20, 4000]]
     n11: 
@@ -91,17 +91,17 @@ bins:
       ell_range: [[20, 4000]]
   n4: 
     n4: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n5: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n6: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n7: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n8: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n9: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n10: 
       ell_range: [[20, 4000]]
     n11: 
@@ -112,15 +112,15 @@ bins:
       ell_range: [[20, 4000]]
   n5: 
     n5: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n6: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n7: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n8: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n9: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n10: 
       ell_range: [[20, 4000]]
     n11: 
@@ -131,13 +131,13 @@ bins:
       ell_range: [[20, 4000]]
   n6: 
     n6: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n7: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n8: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n9: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n10: 
       ell_range: [[20, 4000]]
     n11: 
@@ -148,11 +148,11 @@ bins:
       ell_range: [[20, 4000]]
   n7: 
     n7: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n8: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n9: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n10: 
       ell_range: [[20, 4000]]
     n11: 
@@ -163,9 +163,9 @@ bins:
       ell_range: [[20, 4000]]
   n8: 
     n8: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n9: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n10: 
       ell_range: [[20, 4000]]
     n11: 
@@ -176,7 +176,7 @@ bins:
       ell_range: [[20, 4000]]
   n9: 
     n9: 
-      ell_range: [[20, 4000]]
+      ell_range: [[10, 5000]]
     n10: 
       ell_range: [[20, 4000]]
     n11: 

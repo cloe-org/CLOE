@@ -128,22 +128,3 @@ class Misc:
             raise ValueError('Spectroscopic galaxy bias cannot be obtained. '
                              'Check that redshift is inside the bin edges'
                              'and valid bi_spectro\'s are provided.')
-
-    def istf_phot_galbias(self, redshift):
-        r"""IST:F Photometric galaxy bias.
-
-        Gets the galaxy bias(es) for the GCphot probes by
-        interpolation at a given redshift.
-
-        Parameters
-        ----------
-        redshift: float or numpy.ndarray
-            Redshift(s) at which to calculate bias
-
-        Returns
-        -------
-        Photometric galaxy bias: float or numpy.ndarray
-            Value(s) of photometric galaxy bias at input redshift(s)
-        """
-
-        return self.theory['b_inter'](redshift)

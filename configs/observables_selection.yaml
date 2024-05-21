@@ -1,7 +1,7 @@
 # This yaml file contains the user selection for
 # the Euclid observables computed theoretically
 # in CLOE.
-# 
+#
 # It takes the form of an upper-triangular matrix
 # with 'True' for the selected observables and
 # 'False' for those which are not requested.

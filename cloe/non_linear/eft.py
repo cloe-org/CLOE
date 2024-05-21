@@ -32,6 +32,7 @@ class EFTofLSS:
 
         self.ks = np.logspace(log10k_min, log10k_max, nk_tot, endpoint=True)
 
+        self.z = cosmo_dic['z_win']
         self.ns = cosmo_dic['ns']
         self.As = cosmo_dic['As']
         self.h = cosmo_dic['H0'] / 100.0
@@ -316,6 +317,23 @@ class EFTofLSS:
         setattr(self, 'loop22_w', loop22_w)
         setattr(self, 'loop13_w', loop13_w)
 
+    def _Pgg_k_terms_L(self):
+        r"""Pgg_k_terms_L
+
+        Computes the terms for the real space loop corrections at redshift z=0,
+        with the linear power spectrum and stores them as attributes of the
+        class.
+        """
+
+        PL = self.linear_power_func.P(0.0, self.ks)
+
+        # Loops on P_L
+        loop22_L = self.fastpt.Pk_22_one_loop_terms_realspace(PL,
+                                                              C_window=0.75)
+        loop13_L = self.fastpt.Pkmu_13_one_loop_terms(self.ks, PL)
+        setattr(self, 'loop22_L', loop22_L)
+        setattr(self, 'loop13_L', loop13_L)
+
     def P_kmu_z(self, redshift, use_growth_rescaling=False, IRres='DST',
                 **kwargs):
         r"""P_kmu_z.
@@ -459,6 +477,50 @@ class EFTofLSS:
 
         return RectBivariateSpline(self.ks, mu, Pkmu)
 
+    def P_realspace_terms_kz(self, D=None):
+        r"""P_realspace_terms_kz
+
+        Computes interpolators for all the Perturbation Theory (PT) terms
+        of the non-linear galaxy bias expansion for Pgg and Pgm in
+        real space at the proper redshift specified by the growth parameters.
+
+        Parameters
+        ----------
+        D(z):             nunmpy.ndarray, growth factor at all redshifts
+
+        Returns
+        -------
+        Tuple of (P_b1b2(k,z), P_b1bG2(k,z),
+        P_b2b2(k,z), P_b2bG2(k,z), P_bG2bG2(k,z),
+        P_Z1bG3(k,z), P_Z1bG2(k,z)) as 2D interpolator
+        """
+        if D is None:
+            if self.use_gamma_MG:
+                D = self.growth_factor_func(self.z)
+            else:
+                D = self.growth_factor_func(self.z, 0.05)
+        # We use D^4 because one-loop terms go as ~ P_lin^2
+        D4 = D**4
+
+        # Compute loop 22 linear and rescale to D**4
+        Pb1b2 = np.array([self.loop22_L[1] * d for d in D4])
+        Pb1bG2 = np.array([self.loop22_L[2] * d for d in D4])
+        Pb2b2 = np.array([self.loop22_L[3] * d for d in D4])
+        Pb2bG2 = np.array([self.loop22_L[4] * d for d in D4])
+        PbG2bG2 = np.array([self.loop22_L[5] * d for d in D4])
+
+        # Compute loop 13 linear and rescale to D**4
+        PZ1bG3 = np.array([self.loop13_L[1] * d for d in D4])
+        PZ1bG2 = np.array([self.loop13_L[2] * d for d in D4])
+
+        return (RectBivariateSpline(self.z, self.ks, Pb1b2),
+                RectBivariateSpline(self.z, self.ks, Pb1bG2),
+                RectBivariateSpline(self.z, self.ks, Pb2b2),
+                RectBivariateSpline(self.z, self.ks, Pb2bG2),
+                RectBivariateSpline(self.z, self.ks, PbG2bG2),
+                RectBivariateSpline(self.z, self.ks, PZ1bG3),
+                RectBivariateSpline(self.z, self.ks, PZ1bG2))
+
 
 class FASTPTPlus(fpts.FASTPT):
     r"""FASTPTPlus.
@@ -470,7 +532,7 @@ class FASTPTPlus(fpts.FASTPT):
     def Pkmu_22_one_loop_terms(self, k, P, P_window=None, C_window=None):
         r"""Pkmu_22_one_loop_terms.
 
-        Computes the mode-coupling loop corrections for the redshift-space
+        Computes the mode-coupling loop corrections for the redshift space
         galaxy power spectrum.
 
         Parameters
@@ -540,7 +602,7 @@ class FASTPTPlus(fpts.FASTPT):
         Pmu8f4 = (21 / 10.0 * J000 + 18 / 5.0 * J1m11 + 6 / 7.0 * J002 +
                   J2m22 + 2 / 5.0 * J1m13 + 3 / 70.0 * J004)
 
-        if self.extrap:
+        if (self.extrap):
             _, Pb1b1 = self.EK.PK_original(Pb1b1)
             _, Pb1b2 = self.EK.PK_original(Pb1b2)
             _, Pb1bG2 = self.EK.PK_original(Pb1bG2)
@@ -580,10 +642,55 @@ class FASTPTPlus(fpts.FASTPT):
                 Pmu4f2bG2, Pmu4f2b1, Pmu4f2b12, Pmu4f2, Pmu6f4, Pmu6f3,
                 Pmu6f3b1, Pmu8f4)
 
+    def Pk_22_one_loop_terms_realspace(self, P, P_window=None, C_window=None):
+        r"""Pk_22_one_loop_terms_realspace.
+
+        Computes only the real-space 1-loop contributions of :math:`P(k)_{22}`.
+        This is used for photometric clustering.
+        In that function :math:`P_{b_2 b_2}` is not renormalized by subtracting
+        its low-k limit (while it is for the equivalent function
+        that is used to compute the spectro redshift-space galaxy
+        power spectrum).
+
+        Parameters
+        ----------
+        k: numpy.ndarray
+            Fourier wavenumbers, log-spaced
+        P: numpy.ndarray
+            Power spectrum
+
+        Returns
+        -------
+        Pb1b1, Pb1b2,.. , PbG2bG2: numpy.ndarray
+            Mode-coupling loop corrections
+        """
+        Power, MAT = self.J_k(P, P_window=P_window, C_window=C_window)
+        J000, J002, J004, J2m22, J1m11, J1m13, J2m20r = MAT
+
+        Pb1b1 = (1219 / 735.0 * J000 + J2m20r / 3.0 + 124 / 35.0 * J1m11 +
+                 2 / 3.0 * J2m22 + 1342 / 1029.0 * J002 + 16 / 35.0 * J1m13 +
+                 64 / 1715.0 * J004)
+        Pb1b2 = 34 / 21.0 * J000 + 2.0 * J1m11 + 8 / 21.0 * J002
+        Pb1bG2 = (-72 / 35.0 * J000 + 8 / 5.0 * (J1m13 - J1m11) +
+                  88 / 49.0 * J002 + 64 / 245.0 * J004)
+        Pb2b2 = 0.5 * J000
+        Pb2bG2 = 4 / 3. * (J002 - J000)
+        PbG2bG2 = 16 / 15. * J000 - 32 / 21. * J002 + 16 / 35. * J004
+
+        if (self.extrap):
+            _, Pb1b1 = self.EK.PK_original(Pb1b1)
+            _, Pb1b2 = self.EK.PK_original(Pb1b2)
+            _, Pb1bG2 = self.EK.PK_original(Pb1bG2)
+            _, Pb2b2 = self.EK.PK_original(Pb2b2)
+            _, Pb2bG2 = self.EK.PK_original(Pb2bG2)
+            _, PbG2bG2 = self.EK.PK_original(PbG2bG2)
+
+        return (Pb1b1, Pb1b2, Pb1bG2, Pb2b2, Pb2bG2, PbG2bG2)
+
     def Pkmu_13_one_loop_terms(self, k, P):
         r"""Pkmu_13_one_loop_terms.
 
-        Computes the propagator loop corrections for the redshift-space galaxy
+        Computes the propagator loop corrections for the redshift space galaxy
         power spectrum.
 
         Parameters
@@ -612,7 +719,7 @@ class FASTPTPlus(fpts.FASTPT):
     def P_dd_13_reg(self, k, P):
         r"""P_dd_13_reg.
 
-        Computes the regularized version of `P_13` for the matter
+        Computes the regularized version of :math:`P_{13}` for the matter
         power spectrum.
 
         Parameters
@@ -625,7 +732,7 @@ class FASTPTPlus(fpts.FASTPT):
         Returns
         -------
         P_bar: numpy.ndarray
-            Regularised version of `P_13` for the matter power spectrum
+            Regularised version of :math:`P_{13}` for the matter power spectrum
         """
 
         N = k.size
@@ -666,7 +773,8 @@ class FASTPTPlus(fpts.FASTPT):
     def P_b1bG3(self, k, P):
         r"""P_b1bG3
 
-        Computes the contribution `P_b1bG3` for the galaxy power spectrum
+        Computes the contribution :math:`P_{b_1 b_{\mathcal{G}_3}}`
+        for the galaxy power spectrum
 
         Parameters
         ----------
@@ -678,7 +786,8 @@ class FASTPTPlus(fpts.FASTPT):
         Returns
         -------
         P_b1bG3: numpy.ndarray
-            `P_b1bG3` contribution to the galaxy power spectrum
+            :math:`P_{b_1 b_{\mathcal{G}_3}}` contribution to the
+            galaxy power spectrum
         """
 
         N = k.size
@@ -721,8 +830,8 @@ class FASTPTPlus(fpts.FASTPT):
     def P_mu2f2_13(self, k, P):
         r"""P_mu2f2_13.
 
-        Computes the contribution `P_mu2f2_13` for the
-        galaxy power spectrum.
+        Computes the contribution :math:`P_{\mu^2 f^2, 13}`
+        for the galaxy power spectrum.
 
         Parameters
         ----------
@@ -734,7 +843,8 @@ class FASTPTPlus(fpts.FASTPT):
         Returns
         -------
         Pb1g3_bar: numpy.ndarray
-            Contribution `P_mu2f2_13` for the galaxy power spectrum
+            Contribution :math:`P_{\mu^2 f^2, 13}` for
+            the galaxy power spectrum
         """
 
         N = k.size
@@ -777,7 +887,7 @@ class FASTPTPlus(fpts.FASTPT):
     def P_tt_13_reg(self, k, P):
         r"""P_tt_13_reg.
 
-        Computes the contribution `P_Z1mu2f` for the galaxy
+        Computes the contribution :math:`P_{Z_1 \mu^2 f}` for the galaxy
         power spectrum.
 
         Parameters
@@ -790,7 +900,7 @@ class FASTPTPlus(fpts.FASTPT):
         Returns
         -------
         P13tt_bar: numpy.ndarray
-            Contribution `P_Z1mu2f` for the galaxy power spectrum
+            Contribution :math:`P_{Z_1 \mu^2 f}` for the galaxy power spectrum
         """
 
         N = k.size
@@ -833,7 +943,7 @@ class FASTPTPlus(fpts.FASTPT):
     def P_mu2fb1_13(self, k, P):
         r"""P_mu2fb1_13.
 
-        Computes the contribution `P_Z1mu2fb1` for the galaxy
+        Computes the contribution :math:`P_{Z_1 \mu^2 f b_1}` for the galaxy
         power spectrum.
 
         Parameters
@@ -846,7 +956,8 @@ class FASTPTPlus(fpts.FASTPT):
         Returns
         -------
         P13_bar: numpy.ndarray
-            Contribution `P_Z1mu2fb1` for the galaxy power spectrum
+            Contribution :math:`P_{Z_1 \mu^2 f b_1}` for the galaxy
+            power spectrum
         """
         N = k.size
         n = np.arange(-N + 1, N)
@@ -887,7 +998,7 @@ class FASTPTPlus(fpts.FASTPT):
     def P_mu4f2_13(self, k, P):
         r"""P_mu4f2_13.
 
-        Computes the contribution `P_Z1mu4f2` for the galaxy
+        Computes the contribution :math:`P_{Z_1 \mu^4 f^2 }` for the galaxy
         power spectrum.
 
         Parameters
@@ -900,7 +1011,8 @@ class FASTPTPlus(fpts.FASTPT):
         Returns
         -------
         P13_bar: numpy.ndarray
-            Contribution `P_Z1mu4f2` for the galaxy power spectrum
+            Contribution :math:`P_{Z_1 \mu^4 f^2 }` for the
+            galaxy power spectrum
         """
         N = k.size
         n = np.arange(-N + 1, N)

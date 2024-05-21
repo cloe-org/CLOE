@@ -46,6 +46,7 @@ class EuclidLikelihood(Likelihood):
         self.k_win = np.logspace(np.log10(self.k_min_extrap),
                                  np.log10(self.k_max_extrap),
                                  self.k_samp)
+
         self.z_win = np.linspace(self.z_min, self.z_max, self.z_samp)
         # Check the selection and specification requirements
         self.observables = \
@@ -326,6 +327,8 @@ class EuclidLikelihood(Likelihood):
         try:
             self.cosmo.cosmo_dic['NL_flag_phot_matter'] = \
                 self.NL_flag_phot_matter
+            self.cosmo.cosmo_dic['NL_flag_phot_bias'] = \
+                self.NL_flag_phot_bias
             self.cosmo.cosmo_dic['NL_flag_spectro'] = self.NL_flag_spectro
             self.cosmo.cosmo_dic['NL_flag_phot_baryon'] = \
                 self.NL_flag_phot_baryon
@@ -425,6 +428,8 @@ class EuclidLikelihood(Likelihood):
         except (TypeError, AttributeError):
             self.cosmo.cosmo_dic['NL_flag_phot_matter'] = \
                 info['likelihood']['Euclid']['NL_flag_phot_matter']
+            self.cosmo.cosmo_dic['NL_flag_phot_bias'] = \
+                info['likelihood']['Euclid']['NL_flag_phot_bias']
             self.cosmo.cosmo_dic['NL_flag_spectro'] = \
                 info['likelihood']['Euclid']['NL_flag_spectro']
             self.cosmo.cosmo_dic['NL_flag_phot_baryon'] = \

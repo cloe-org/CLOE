@@ -242,9 +242,9 @@ class cosmoinitTestCase(TestCase):
         # interpolate a straight-line (b, z) grid to ease the checks
         nuipar = self.cosmo.cosmo_dic['nuisance_parameters']
         zs_means = [1.0, 2.0, 3.0]
-        nuipar['b1_photo'] = 2.0
-        nuipar['b2_photo'] = 4.0
-        nuipar['b3_photo'] = 6.0
+        nuipar['b1_photo_bin1'] = 2.0
+        nuipar['b1_photo_bin2'] = 4.0
+        nuipar['b1_photo_bin3'] = 6.0
         self.cosmo.create_phot_galbias(model=2,
                                        x_values=zs_means,
                                        y_values=[2., 4., 6.])
@@ -293,10 +293,10 @@ class cosmoinitTestCase(TestCase):
 
     def test_poly_phot_galbias(self):
         nuipar = self.cosmo.cosmo_dic['nuisance_parameters']
-        nuipar['b0_poly_photo'] = 1.0
-        nuipar['b1_poly_photo'] = 1.0
-        nuipar['b2_poly_photo'] = 1.0
-        nuipar['b3_poly_photo'] = 1.0
+        nuipar['b1_0_poly_photo'] = 1.0
+        nuipar['b1_1_poly_photo'] = 1.0
+        nuipar['b1_2_poly_photo'] = 1.0
+        nuipar['b1_3_poly_photo'] = 1.0
         b_val = self.cosmo.poly_phot_galbias(1.0)
         z_arr = np.array([1.0, 2.0])
         b_val_arr = self.cosmo.poly_phot_galbias(z_arr)

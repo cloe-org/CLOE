@@ -281,6 +281,7 @@ class Cosmology:
                           'NL_boost': None,
                           # NL flags
                           'NL_flag_phot_matter': 0,
+                          'NL_flag_phot_bias': 0,
                           'NL_flag_spectro': 0,
                           # Baryonic feedback flag
                           'NL_flag_phot_baryon': 0,
@@ -312,25 +313,67 @@ class Cosmology:
                              'nia': -0.41,
                              'bia': 0.0,
                              'pivot_redshift': 0.,
-                             # Photometric galaxy bias (IST:F case)
-                             'b1_photo': 1.03047,
-                             'b2_photo': 1.06699,
-                             'b3_photo': 1.17363,
-                             'b4_photo': 1.23340,
-                             'b5_photo': 1.27510,
-                             'b6_photo': 1.28574,
-                             'b7_photo': 1.39434,
-                             'b8_photo': 1.49170,
-                             'b9_photo': 1.52334,
-                             'b10_photo': 1.54639,
-                             'b11_photo': 1.68682,
-                             'b12_photo': 2.03066,
-                             'b13_photo': 2.57812,
-                             # Photometric galaxy bias (polynomial case)
-                             'b0_poly_photo': 0.830703,
-                             'b1_poly_photo': 1.190547,
-                             'b2_poly_photo': -0.928357,
-                             'b3_poly_photo': 0.423292,
+                             # Linear photometric galaxy bias (IST:F case)
+                             'b1_photo_bin1': 1.03047,
+                             'b1_photo_bin2': 1.06699,
+                             'b1_photo_bin3': 1.17363,
+                             'b1_photo_bin4': 1.23340,
+                             'b1_photo_bin5': 1.27510,
+                             'b1_photo_bin6': 1.28574,
+                             'b1_photo_bin7': 1.39434,
+                             'b1_photo_bin8': 1.49170,
+                             'b1_photo_bin9': 1.52334,
+                             'b1_photo_bin10': 1.54639,
+                             'b1_photo_bin11': 1.68682,
+                             'b1_photo_bin12': 2.03066,
+                             'b1_photo_bin13': 2.57812,
+                             # Linear photometric galaxy bias (polynomial case)
+                             'b1_0_poly_photo': 0.830703,
+                             'b1_1_poly_photo': 1.190547,
+                             'b1_2_poly_photo': -0.928357,
+                             'b1_3_poly_photo': 0.423292,
+                             # Quadratic photometric galaxy bias
+                             'b2_photo_bin1': 0.0,
+                             'b2_photo_bin2': 0.0,
+                             'b2_photo_bin3': 0.0,
+                             'b2_photo_bin4': 0.0,
+                             'b2_photo_bin5': 0.0,
+                             'b2_photo_bin6': 0.0,
+                             'b2_photo_bin7': 0.0,
+                             'b2_photo_bin8': 0.0,
+                             'b2_photo_bin9': 0.0,
+                             'b2_photo_bin10': 0.0,
+                             'b2_photo_bin11': 0.0,
+                             'b2_photo_bin12': 0.0,
+                             'b2_photo_bin13': 0.0,
+                             # Quadratic photometric galaxy bias (poly case)
+                             'b2_0_poly_photo': 0.0,
+                             'b2_1_poly_photo': 0.0,
+                             'b2_2_poly_photo': 0.0,
+                             'b2_3_poly_photo': 0.0,
+                             # Non-local photometric galaxy biases
+                             'bG2_photo_bin1': 0.0, 'bG3_photo_bin1': 0.0,
+                             'bG2_photo_bin2': 0.0, 'bG3_photo_bin2': 0.0,
+                             'bG2_photo_bin3': 0.0, 'bG3_photo_bin3': 0.0,
+                             'bG2_photo_bin4': 0.0, 'bG3_photo_bin4': 0.0,
+                             'bG2_photo_bin5': 0.0, 'bG3_photo_bin5': 0.0,
+                             'bG2_photo_bin6': 0.0, 'bG3_photo_bin6': 0.0,
+                             'bG2_photo_bin7': 0.0, 'bG3_photo_bin7': 0.0,
+                             'bG2_photo_bin8': 0.0, 'bG3_photo_bin8': 0.0,
+                             'bG2_photo_bin9': 0.0, 'bG3_photo_bin9': 0.0,
+                             'bG2_photo_bin10': 0.0, 'bG3_photo_bin10': 0.0,
+                             'bG2_photo_bin11': 0.0, 'bG3_photo_bin11': 0.0,
+                             'bG2_photo_bin12': 0.0, 'bG3_photo_bin12': 0.0,
+                             'bG2_photo_bin13': 0.0, 'bG3_photo_bin13': 0.0,
+                            # Non-local photometric galaxy bias (poly case)
+                             'bG2_0_poly_photo': 0.0,
+                             'bG2_1_poly_photo': 0.0,
+                             'bG2_2_poly_photo': 0.0,
+                             'bG2_3_poly_photo': 0.0,
+                             'bG3_0_poly_photo': 0.0,
+                             'bG3_1_poly_photo': 0.0,
+                             'bG3_2_poly_photo': 0.0,
+                             'bG3_3_poly_photo': 0.0,
                              # Magnification bias
                              'magnification_bias_1': -0.8499,
                              'magnification_bias_2': -1.023,
@@ -753,7 +796,7 @@ class Cosmology:
             D_z_k = np.sqrt(P_z_k / power_interp.P(0.0, ks))
             return D_z_k
         except CosmologyError:
-            w('Computation error in D(z, k)')
+            ('Computation error in D(z, k)')
 
     def growth_rate(self, zs, ks):
         r"""Growth rate.
@@ -1070,7 +1113,7 @@ class Cosmology:
 
         Creates the photometric galaxy bias as
         function/interpolator of the redshift.
-        The function is stored in the cosmo dictionary 'b_inter'.
+        The function is stored in the cosmo dictionary 'b1_inter'.
 
         The bias model is selected from the key 'bias_model'
         in :obj:`cosmo_dic`.
@@ -1103,14 +1146,14 @@ class Cosmology:
             bias_model = model
 
         if bias_model == 1:
-            self.cosmo_dic['b_inter'] \
+            self.cosmo_dic['b1_inter'] \
                 = self.istf_phot_galbias_interpolator(
                     self.cosmo_dic['redshift_bins_means_phot'])
         elif bias_model == 2:
-            self.cosmo_dic['b_inter'] \
+            self.cosmo_dic['b1_inter'] \
                 = rb.linear_interpolator(x_values, y_values)
         elif bias_model == 3:
-            self.cosmo_dic['b_inter'] = self.poly_phot_galbias
+            self.cosmo_dic['b1_inter'] = self.poly_phot_galbias
         else:
             raise ValueError('Parameter bias_model not valid:'
                              f'{bias_model}')
@@ -1134,7 +1177,7 @@ class Cosmology:
 
         nuisance_par = self.cosmo_dic['nuisance_parameters']
 
-        istf_bias_list = [nuisance_par[f'b{idx}_photo']
+        istf_bias_list = [nuisance_par[f'b1_photo_bin{idx}']
                           for idx, vl in
                           enumerate(redshift_means, start=1)]
 
@@ -1156,10 +1199,10 @@ class Cosmology:
             Value(s) of photometric galaxy bias at input redshift(s)
         """
         nuisance = self.cosmo_dic['nuisance_parameters']
-        return nuisance['b0_poly_photo'] + \
-            nuisance['b1_poly_photo'] * redshift + \
-            nuisance['b2_poly_photo'] * np.power(redshift, 2) + \
-            nuisance['b3_poly_photo'] * np.power(redshift, 3)
+        return nuisance['b1_0_poly_photo'] + \
+            nuisance['b1_1_poly_photo'] * redshift + \
+            nuisance['b1_2_poly_photo'] * np.power(redshift, 2) + \
+            nuisance['b1_3_poly_photo'] * np.power(redshift, 3)
 
     def compute_phot_galbias(self, redshift):
         r"""Computes the photometric galaxy bias.
@@ -1182,7 +1225,7 @@ class Cosmology:
             Value(s) of photometric galaxy bias at input redshift(s)
         """
 
-        return self.cosmo_dic['b_inter'](redshift)
+        return self.cosmo_dic['b1_inter'](redshift)
 
     def istf_spectro_galbias(self, redshift):
         """IST:F Spectroscopic galaxy bias interpolator.
@@ -1889,8 +1932,12 @@ class Cosmology:
         # Update nonlinear module, by calling the update_dic method
         # of the nonlinear instance
         self.nonlinear.update_dic(self.cosmo_dic)
-        # Update dictionary with bias function and power spectra
-        self.create_phot_galbias()
+        # Update dictionary with photo bias function
+        # if photo galaxy bias is linear. Otherwise it is done
+        # in the update_dic method of the nonlinear instance
+        if self.cosmo_dic['NL_flag_phot_bias'] == 0:
+            self.create_phot_galbias()
+        # Update dictionary with power spectra
         self.obtain_power_spectra()
 
         if self.cosmo_dic['use_Weyl']:

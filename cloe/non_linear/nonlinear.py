@@ -3,7 +3,6 @@
 This module to computes the nonlinear recipes for the
 photometric and spectroscopic probes.
 """
-
 import numpy as np
 from scipy import interpolate
 import cloe.auxiliary.redshift_bins as rb
@@ -44,9 +43,13 @@ class Nonlinear:
     3: BCemu
     4: Bacco (baryons)
 
-    ``NL_flag_spectro``
-        - 0: linear-only (from Cosmology class)
-        - 1: EFT.
+    NL_flag_phot_bias
+    0: linear bias only (b_1)
+    1: non-linear bias with loop calculations from linear power spectrum
+
+    NL_flag_spectro
+    0: linear-only (from Cosmology class)
+    1: EFT
     """
 
     def __init__(self, cosmo_dic):
@@ -77,6 +80,14 @@ class Nonlinear:
                               'P_NL_extra': None,
                               'option_extra_wavenumber': 'hm_smooth',
                               'option_extra_redshift': 'hm_simple',
+                              'Pk_mu': None,
+                              'Pb1b2_kz': None,
+                              'Pb1bG2_kz': None,
+                              'Pb2b2_kz': None,
+                              'Pb2bG2_kz': None,
+                              'PbG2bG2_kz': None,
+                              'PZ1bG3_kz': None,
+                              'PZ1bG2_kz': None,
                               'option_extra_cosmo': 'hm_smooth',
                               'wavenumber_tanh_slope': 10.0,
                               'wavenumber_tanh_scale': 1.15,
@@ -251,6 +262,10 @@ class Nonlinear:
         if self.theory['NL_flag_spectro'] == 1:
             self.calculate_eft()
 
+        # Compute Pbibj terms of bias expansion if NL_flag_phot_bias is 1
+        if self.theory['NL_flag_phot_bias'] == 1:
+            self.calculate_phot_nl_bias()
+
         # Update of classes for power spectra interpolators
         self.Pgg_phot_model.update_dic(cosmo_dic, self.nonlinear_dic,
                                        self.misc)
@@ -260,6 +275,16 @@ class Nonlinear:
                                        self.misc)
         self.Pgg_spectro_model.update_dic(cosmo_dic, self.nonlinear_dic,
                                           self.misc)
+
+        # Create the interpolators for all the parameters of the
+        # galaxy bias expansion (b1, b2, bG2, bG3)
+        # if the non-linear contribution for photo galaxy bias are asked
+        if self.theory['NL_flag_phot_bias'] == 1:
+            self.create_phot_galbias_nl()
+        else:
+            self.theory['b2_inter'] = None
+            self.theory['bG2_inter'] = None
+            self.theory['bG3_inter'] = None
 
         return self.theory
 
@@ -1701,6 +1726,146 @@ class Nonlinear:
 
         return par_res_dict
 
+    def calculate_phot_nl_bias(self):
+        """Calculates non-linear bias terms to be used for Pgg_phot
+
+        Description
+        """
+        # Initializing EFT object
+        eftobj = EFTofLSS(self.theory)
+        # Computing loops at redshift z=0
+        eftobj._Pgg_k_terms_L()
+        # Creating 2D array of interpolators
+        Pb1b2, Pb1bG2, Pb2b2, Pb2bG2, PbG2bG2, PZ1bG3, PZ1bG2 =\
+            eftobj.P_realspace_terms_kz()
+
+        # Storing in the nonlinear dictionary
+        self.nonlinear_dic['Pb1b2_kz'] = Pb1b2
+        self.nonlinear_dic['Pb1bG2_kz'] = Pb1bG2
+        self.nonlinear_dic['Pb2b2_kz'] = Pb2b2
+        self.nonlinear_dic['Pb2bG2_kz'] = Pb2bG2
+        self.nonlinear_dic['PbG2bG2_kz'] = PbG2bG2
+        self.nonlinear_dic['PZ1bG3_kz'] = PZ1bG3
+        self.nonlinear_dic['PZ1bG2_kz'] = PZ1bG2
+
+    def create_phot_galbias_nl(self, model=None):
+        r"""Creates the photometric non-linear galaxy bias.
+
+        Creates all the parameter of the galaxy
+        bias expansion (b1, b2, bG2, bG3) for
+        photometric GC as function/interpolator of the redshift.
+        The functions are stored in the cosmo dictionaries
+        'b1_inter', 'b2_inter', 'bG2_inter', 'bG3_inter'.
+
+        The redshift evolution model for the bias is selected from the key
+        'bias_model' in theory. For now, there are only 2 possible models
+        the linear interpolation and the 3rd order polynomial.
+
+        Parameters
+        ----------
+        model: integer
+            selection of the bias model.
+            If None, uses the one stored in theory['bias_model']
+        x_values: numpy.ndarray of float
+            x-values for the interpolator.
+        y_values: numpy.ndarray of float
+            y-values for the interpolator.
+
+        Raises
+        ------
+        ValueError
+            If the bias model parameter in the cosmo dictionary
+            is not 1 or 3
+        """
+
+        if model is None:
+            bias_model = self.theory['bias_model']
+        else:
+            bias_model = model
+
+        if bias_model == 1:
+            bias_interpolators = self.istf_phot_galbias_nl_interpolator(
+                    self.theory['redshift_bins_means_phot'])
+            self.theory['b1_inter'] = bias_interpolators[0]
+            self.theory['b2_inter'] = bias_interpolators[1]
+            self.theory['bG2_inter'] = bias_interpolators[2]
+            self.theory['bG3_inter'] = bias_interpolators[3]
+
+        elif bias_model == 3:
+            self.theory['b1_inter'] = self.poly_phot_galbias_nl('b1')
+            self.theory['b2_inter'] = self.poly_phot_galbias_nl('b2')
+            self.theory['bG2_inter'] = self.poly_phot_galbias_nl('bG2')
+            self.theory['bG3_inter'] = self.poly_phot_galbias_nl('bG3')
+        else:
+            raise ValueError('Parameter bias_model cannot be different from'
+                             '1 or 3 for non-linear photometric bias. It is:'
+                             f'{bias_model}')
+
+    def istf_phot_galbias_nl_interpolator(self, redshift_means):
+        r"""IST:F Photometric non-linear galaxy bias interpolators.
+
+        Returns a linear interpolator for each
+        parameter of the galaxy bias expansion for the
+        photometric GC probes at a given redshift.
+
+        Parameters
+        ----------
+        redshift_means: numpy.ndarray of float
+            Array of tomographic redshift bin means for GCphot
+
+        Returns
+        -------
+        b1 interpolator, b2 interpolator,
+        bG2 interpolator, bG3 interpolator: rb.linear_interpolator,
+        rb.linear_interpolator, rb.linear_interpolator,
+        rb.linear_interpolator
+            Linear interpolators of photometric non-linear galaxy
+            bias parameters
+        """
+
+        nuisance_par = self.theory['nuisance_parameters']
+
+        istf_b1_list = [nuisance_par[f'b1_photo_bin{idx}']
+                        for idx, vl in
+                        enumerate(redshift_means, start=1)]
+        istf_b2_list = [nuisance_par[f'b2_photo_bin{idx}']
+                        for idx, vl in
+                        enumerate(redshift_means, start=1)]
+        istf_bG2_list = [nuisance_par[f'bG2_photo_bin{idx}']
+                         for idx, vl in
+                         enumerate(redshift_means, start=1)]
+        istf_bG3_list = [nuisance_par[f'bG3_photo_bin{idx}']
+                         for idx, vl in
+                         enumerate(redshift_means, start=1)]
+
+        return (rb.linear_interpolator(redshift_means, istf_b1_list),
+                rb.linear_interpolator(redshift_means, istf_b2_list),
+                rb.linear_interpolator(redshift_means, istf_bG2_list),
+                rb.linear_interpolator(redshift_means, istf_bG3_list))
+
+    def poly_phot_galbias_nl(self, which_bias):
+        r"""Polynomial photometric non-linear galaxy bias.
+
+        Computes non-linear bias parameters using a 3rd order
+        polynomial function of redshift.
+
+        Parameters
+        ----------
+        redshift: float or numpy.ndarray
+            Redshift(s) at which to calculate bias
+
+        Returns
+        -------
+        Photometric polynomial galaxy biases
+        (b1, b2, bG2, bG3): float or numpy.ndarray
+            Value(s) of photometric galaxy biases at input redshift(s)
+        """
+
+        nuisance = self.theory['nuisance_parameters']
+
+        return np.poly1d([nuisance[f'{which_bias}_{i}_poly_photo']
+                          for i in range(4)])
+
     def Pmm_phot_def(self, redshift, wavenumber):
         r"""Interface for ``Pmm_phot_def``.
 
@@ -1761,11 +1926,13 @@ class Nonlinear:
             self.halo_emu_matrix[self.theory['NL_flag_phot_matter'],
                                  self.theory['NL_flag_phot_baryon']]
 
-        switcher = {1: self.Pgg_phot_model.Pgg_phot_halo,
-                    2: self.Pgg_phot_model.Pgg_phot_emu
+        switcher = {(1, 0): self.Pgg_phot_model.Pgg_phot_halo,
+                    (2, 0): self.Pgg_phot_model.Pgg_phot_emu,
+                    (1, 1): self.Pgg_phot_model.Pgg_phot_halo_NLbias,
+                    (2, 1): self.Pgg_phot_model.Pgg_phot_emu_NLbias,
                     }
         Pgg_phot_func = \
-            switcher.get(flag_halo_emu,
+            switcher.get((flag_halo_emu, self.theory['NL_flag_phot_bias']),
                          "Invalid modeling option")
 
         return Pgg_phot_func(redshift, wavenumber)
@@ -1845,10 +2012,13 @@ class Nonlinear:
             self.halo_emu_matrix[self.theory['NL_flag_phot_matter'],
                                  self.theory['NL_flag_phot_baryon']]
 
-        switcher = {1: self.PgL_phot_model.Pgdelta_phot_halo,
-                    2: self.PgL_phot_model.Pgdelta_phot_emu
+        switcher = {(1, 0): self.PgL_phot_model.Pgdelta_phot_halo,
+                    (2, 0): self.PgL_phot_model.Pgdelta_phot_emu,
+                    (1, 1): self.PgL_phot_model.Pgdelta_phot_halo_NLbias,
+                    (2, 1): self.PgL_phot_model.Pgdelta_phot_emu_NLbias,
                     }
         PgL_phot_func = \
-            switcher.get(flag_halo_emu,
+            switcher.get((flag_halo_emu, self.theory['NL_flag_phot_bias']),
                          "Invalid modeling option")
+
         return PgL_phot_func(redshift, wavenumber)

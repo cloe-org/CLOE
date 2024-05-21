@@ -44,6 +44,10 @@ Cobaya:
       #     False -> 1 set of parameters per redshift bin
       #     True  -> Power law dependence on z
       Baryon_redshift_model: True
+      # Photometric galaxy bias flag
+      #     0 -> linear only
+      #     1 -> Non-linear Fast-PT
+      NL_flag_phot_bias: 0
       # Spectroscopic flag
       #     0 -> linear-only
       #     1 -> EFT
@@ -53,6 +57,7 @@ Cobaya:
       # Bias Model
       #     1 -> linear interpolation
       #     2 -> constant within bins
+      #     3 -> 3rd order polynomial
       bias_model: 1
       # Select statistics for spectroscopic probes (multipole_power_spectrum
       # or multipole_correlation_function)
@@ -67,6 +72,7 @@ Cobaya:
       # Magnification bias model
       #     1 -> linear interpolation
       #     2 -> constant within bins
+      #     3 -> 3rd order polynomial
       magbias_model: 2
       # Use MG gamma
       use_gamma_MG: False

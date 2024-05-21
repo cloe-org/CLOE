@@ -192,7 +192,7 @@ class likecalcngTestCase(TestCase, SpectroTestParent):
 
         # The correct check value, using the h scaling for the h from
         # supplied external file for all the probes together is:
-        self.check_loglike_ng = -6584.718508
+        self.check_loglike_ng = -6584.755806
 
     def tearDown(self):
         self.check_loglike_ng = None

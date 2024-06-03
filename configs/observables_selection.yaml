@@ -18,3 +18,5 @@ GCphot:
   GCspectro: False
 GCspectro:
   GCspectro: True
+CG:
+  CG: False

@@ -16,7 +16,7 @@ class datareaderTestCase(TestCase):
 
     def setUp(self):
         self.data_tester = Reader(mock_data)
-        self.main_key_check = ['GC-Spectro', 'GC-Phot', 'WL', 'XC-Phot']
+        self.main_key_check = ['GC-Spectro', 'GC-Phot', 'WL', 'XC-Phot', 'CG']
         self.nz_key_check = ['n1', 'n2', 'n3', 'n4', 'n5',
                              'n6', 'n7', 'n8', 'n9', 'n10']
         self.fiducial_key_check = ['H0', 'omch2', 'ombh2',

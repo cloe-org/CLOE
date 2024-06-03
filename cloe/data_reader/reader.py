@@ -40,7 +40,7 @@ class Reader:
         self.dat_dir_main = Path(self.root_dir, Path('data'),
                                  Path(self.data['sample']))
         self.data_dict = {'GC-Spectro': None, 'GC-Phot': None, 'WL': None,
-                          'XC-Phot': None}
+                          'XC-Phot': None, 'CG': None}
 
         # Added dictionaries for n(z)
         # Both raw data and interpolated data
@@ -56,6 +56,10 @@ class Reader:
         # Added empty dict to fill in fiducial
         # cosmology data from Spectro OU-level3 files
         self.data_spectro_fiducial_cosmo = {}
+
+        # (ZS): Added empty dict to fill in
+        # fiducial cosmology data from Spec OU-level3 files
+        self.data_CG_fiducial_cosmo = {}
 
         return
 
@@ -384,6 +388,60 @@ class Reader:
                 fits_file.close()
 
         self.data_dict['GC-Spectro'] = GC_spectro_dict
+        return
+
+    def read_CG(self, file_dest='Clusters/'):
+        """Read CG
+
+        Function to read OU-LE3 clusters of galaxies files, based
+        on location provided to Reader class. Adds contents to the data
+        dictionary (Reader.data_dict).
+
+        Parameters
+        ----------
+        file_dest: str
+            Sub-folder of self.data_subdirectory within which to find
+            clusters data.
+        file_names: str
+            General structure of file names. Note: must contain 'z%s' to
+            enable iteration over redshifts.
+        zstr: list
+            List of strings denoting clusters redshift bins.
+        """
+        file_names_CC = self.data['CG']['file_names_CC']
+        file_cov_names_CC = self.data['CG']['file_cov_names_CC']
+        file_names_MoR = self.data['CG']['file_names_MoR']
+        file_cov_names_MoR = self.data['CG']['file_cov_names_MoR']
+        file_names_xi2 = self.data['CG']['file_names_xi2']
+        file_cov_names_xi2 = self.data['CG']['file_cov_names_xi2']
+
+        cur_fname = file_names_CC
+        full_path = Path(self.dat_dir_main, file_dest, cur_fname)
+        cur_cov_fname = file_cov_names_CC
+        full_cov_path = Path(self.dat_dir_main, file_dest, cur_cov_fname)
+        CG_dict = np.loadtxt(Path(full_path))
+        CG_dict_cov = np.loadtxt(Path(full_cov_path))
+        self.data_dict['CG_CC'] = CG_dict
+        self.data_dict['CG_cov_CC'] = CG_dict_cov
+
+        cur_fname = file_names_MoR
+        full_path = Path(self.dat_dir_main, file_dest, cur_fname)
+        cur_cov_fname = file_cov_names_MoR
+        full_cov_path = Path(self.dat_dir_main, file_dest, cur_cov_fname)
+        CG_dict = np.loadtxt(Path(full_path))
+        CG_dict_cov = np.loadtxt(Path(full_cov_path))
+        self.data_dict['CG_MoR'] = CG_dict
+        self.data_dict['CG_cov_MoR'] = CG_dict_cov
+
+        cur_fname = file_names_xi2
+        full_path = Path(self.dat_dir_main, file_dest, cur_fname)
+        cur_cov_fname = file_cov_names_xi2
+        full_cov_path = Path(self.dat_dir_main, file_dest, cur_cov_fname)
+        CG_dict = np.load(Path(full_path))
+        CG_dict_cov = np.load(Path(full_cov_path))
+        self.data_dict['CG_xi2'] = CG_dict
+        self.data_dict['CG_cov_xi2'] = CG_dict_cov
+
         return
 
     def read_phot(self, file_dest='Photometric/data'):

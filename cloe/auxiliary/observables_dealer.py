@@ -147,6 +147,9 @@ def observables_selection_specifications_checker(observables_dict,
             specifications_dict['WL-GCphot']
         if statistics_photo == 'angular_power_spectrum':
             ell_checker(specifications_dict['WL-GCphot'][statistics_photo])
+    if checked_observables_dict['CG']['CG']:
+        merged_dict['specifications']['CG'] = \
+            specifications_dict['CG']
     # At the moment, these quantities below are not computed
     # by CLOE and we are forcing this selection to be False.
     # Therefore, the specifications are not loaded.

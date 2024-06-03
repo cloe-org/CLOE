@@ -41,6 +41,8 @@ statistics_spectro: multipole_power_spectrum
 # Select statistics for photometric probes (angular_power_spectrum
 # or angular_correlation_function)
 statistics_photo: angular_power_spectrum
+# Select statistics for galaxy cluster probes (cluster_counts)
+statistics_clusters: cluster_counts
 # Add RSD to photometric probes
 add_phot_RSD: False
 # Apply a generic matrix transformation to the photo observables (available options: 'BNT', 'BNT-test')
@@ -71,6 +73,7 @@ observables_specifications:
   WL-GCphot:
     angular_power_spectrum: !defaults [../configs/WL-GCphot-FourierSpace]
     angular_correlation_function: !defaults [../configs/WL-GCphot-ConfigurationSpace]
+  CG: !defaults [../configs/CG]
   # Note: This is not yet provided by CLOE
   # therefore it will load empty dictionaries
   GCphot-GCspectro:

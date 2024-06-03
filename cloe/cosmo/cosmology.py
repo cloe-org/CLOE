@@ -130,6 +130,12 @@ class Cosmology:
             Interpolated function for :math:`\sigma_8`
         fsigma8_z_func: function
             Interpolated function for :math:`f \sigma_8`
+        r_win: list
+            List of radii which will be used to evaluate sigmaR
+        sigmaR_z_func: function
+            Interpolated function for sigmaR, depending on z and R
+        sigmaR_z_func_cb: function
+            Interpolated function for sigmaR_cb, depending on z and R
         f_z: function
             Interpolated growth rate function
         H_z_func: function
@@ -275,6 +281,10 @@ class Cosmology:
                           'sigma8_z_func': None,
                           'fsigma8_z_func': None,
                           'f_z': None,
+                          # For galaxy clusters
+                          'r_win': None,
+                          'sigmaR_z_func': None,
+                          'sigmaR_z_func_cb': None,
                           'luminosity_ratio_z_func': None,
                           'Weyl_matter_ratio': None,
                           # NL_boost
@@ -1107,6 +1117,54 @@ class Cosmology:
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['fsigma8'], ext=2)
 
+    def interp_sigmaR(self):
+        r"""Interp fsigma8
+
+        Adds an interpolator for :math:`f\sigma_R` to the dictionary
+        so that it can be evaluated at redshifts
+        not explictly supplied to Cobaya
+
+        Updates 'key' in the cosmo_dic attribute of the class
+        by adding an interpolator object
+        which interpolates :math:`f\sigma_8` as a
+        function of redshift
+        """
+        if self.cosmo_dic['z_win'] is None:
+            raise Exception('Boltzmann code redshift binning has not been '
+                            'supplied to cosmo_dic.')
+        if self.cosmo_dic['r_win'] is None:
+            raise Exception('Boltzmann code radius binning has not been '
+                            'supplied to cosmo_dic.')
+        self.cosmo_dic['sigmaR_z_func'] = \
+            interpolate.RectBivariateSpline(self.cosmo_dic['z_win'],
+                                            self.cosmo_dic['r_win'],
+                                            self.cosmo_dic['sigmaR'],
+                                            kx=1, ky=1)
+
+    def interp_sigmaR_cb(self):
+        r"""Interp sigmaR_cb
+
+        Adds an interpolator for :math:`sigma_R_cb` to the dictionary
+        so that it can be evaluated at redshifts
+        not explictly supplied to Cobaya
+
+        Updates 'key' in the cosmo_dic attribute of the class
+        by adding an interpolator object
+        which interpolates :math:`sigma_R_cb` as a
+        function of redshift
+        """
+        if self.cosmo_dic['z_win'] is None:
+            raise Exception('Boltzmann code redshift binning has not been '
+                            'supplied to cosmo_dic.')
+        if self.cosmo_dic['r_win'] is None:
+            raise Exception('Boltzmann code radius binning has not been '
+                            'supplied to cosmo_dic.')
+        self.cosmo_dic['sigmaR_z_func_cb'] = \
+            interpolate.RectBivariateSpline(self.cosmo_dic['z_win'],
+                                            self.cosmo_dic['r_win'],
+                                            self.cosmo_dic['sigmaR_cb'],
+                                            kx=1, ky=1)
+
     def create_phot_galbias(self, model=None, x_values=[0.0, 4.0],
                             y_values=[1.0, 1.0]):
         r"""Creates the photometric galaxy bias.
@@ -1901,6 +1959,8 @@ class Cosmology:
         self.cosmo_dic['f_K_z12_func'] = self.f_K_z12_wrapper
         self.interp_fsigma8()
         self.interp_sigma8()
+        self.interp_sigmaR()
+        self.interp_sigmaR_cb()
         self.interp_growth_rate()
         self.assign_growth_factor()
         self.interp_angular_dist()

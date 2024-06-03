@@ -40,3 +40,10 @@ spectro:
   cov_is_num: False
   cov_nsim: 3500
   scale_cuts_fourier: GCspectro-FourierSpace.yaml
+CG:
+  file_names_CC: data_CG_CC.dat
+  file_cov_names_CC: data_cov_CG_CC.dat
+  file_names_MoR: data_CG_MoR.dat
+  file_cov_names_MoR: data_cov_CG_MoR.dat
+  file_names_xi2: data_CG_xi2.npy
+  file_cov_names_xi2: data_cov_CG_xi2.npy

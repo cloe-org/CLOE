@@ -74,13 +74,18 @@ def build_mock_observables(reader=None):
         'GCphot': {'GCphot': True, 'GCspectro': False},
         'GCspectro': {'GCspectro': True},
         'add_phot_RSD': False,
-        'matrix_transform_phot': False
+        'matrix_transform_phot': False,
+        'CG': {'CG': False}
     }
     observables['specifications'] = {
         'WL': wl_specs,
         'WL-GCphot': xc_phot_specs,
         'GCphot': gc_phot_specs,
-        'GCspectro': gc_spectro_specs
+        'GCspectro': gc_spectro_specs,
+        'CG': {'CG_probe': 'CC',
+               'CG_xi2_cov_selection': 'CG_nonanalytic_cov',
+               'neutrino_cdm': 'cb',
+               'external_richness_selection_function': 'non_CG_ESF'}
     }
 
     return observables

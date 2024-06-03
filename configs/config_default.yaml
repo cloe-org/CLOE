@@ -107,6 +107,7 @@ Cobaya:
         WL-GCphot:
           angular_power_spectrum: WL-GCphot-FourierSpace.yaml
           angular_correlation_function: WL-GCphot-ConfigurationSpace.yaml
+        CG: CG.yaml
         # Note: This is not yet provided by CLOE
         # therefore it will load empty dictionaries
         GCphot-GCspectro:

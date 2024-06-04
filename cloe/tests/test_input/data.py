@@ -35,7 +35,8 @@ mock_data = {
     'redshifts': ["1.", "1.2", "1.4", "1.65"],
     'cov_is_num': False,
     'Fourier': True,
-    'scale_cuts_fourier': 'GCspectro-Fourier_test.yaml'},
+    'scale_cuts_fourier': 'GCspectro-Fourier_test.yaml',
+    'root_mixing_matrix': 'mm_FS230degCircle_m3_nosm_obsz_z0.9-1.1.fits'},
   'photo': {
     'luminosity_ratio': 'luminosity_ratio.dat',
     'ndens_GC': 'niTab-EP10-RB00.dat',

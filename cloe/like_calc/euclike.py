@@ -158,10 +158,12 @@ class Euclike:
             self.data_ins.read_GC_spectro()
             self.data_spectro_fiducial_cosmo = \
                 self.data_ins.data_spectro_fiducial_cosmo
+            self.mixing_matrix_dict = \
+                self.data_ins.read_GC_spectro_mixing_matrix()
             self.zkeys = self.data_ins.data_dict['GC-Spectro'].keys()
-
             # Spectro class instance
-            self.spec_ins = Spectro(None, list(self.zkeys))
+            self.spec_ins = Spectro(None, list(self.zkeys),
+                                    self.mixing_matrix_dict)
 
         # Read data, instantiate galaxy cluster classes
         # and compute pre-computed quantities

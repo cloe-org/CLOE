@@ -40,6 +40,7 @@ spectro:
   cov_is_num: False
   cov_nsim: 3500
   scale_cuts_fourier: GCspectro-FourierSpace.yaml
+  root_mixing_matrix: mm_FS230degCircle_m3_nosm_obsz_z0.9-1.1.fits
 CG:
   file_names_CC: data_CG_CC.dat
   file_cov_names_CC: data_cov_CG_CC.dat

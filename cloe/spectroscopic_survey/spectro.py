@@ -18,7 +18,7 @@ class Spectro:
     Class for the spectroscopic observables.
     """
 
-    def __init__(self, cosmo_dic, z_str):
+    def __init__(self, cosmo_dic, z_str, mixing_matrix_dict=None):
         """Initialises the class.
 
         Constructor of the class :obj:`Spectro`.
@@ -41,6 +41,8 @@ class Spectro:
         self.dict_m_legendrepol = \
             {m: legendre(m)(self.mu_grid) for m in range(leg_m_max)}
         self.z_arr = np.array(z_str).astype("float")
+
+        self.mixing_matrix_dict = mixing_matrix_dict
 
     def update(self, cosmo_dic):
         r"""Updates method.
@@ -310,6 +312,63 @@ class Spectro:
         spectra = prefactors * integrals
 
         return np.asarray(spectra)
+
+    def convolved_power_spectrum_multipoles(self, redshift):
+        r"""Power spectrum multipoles convolved with the mixing matrix
+
+        Returns the power spectrum multipoles convolved with the mixing matrix
+        stored as class attribute.
+
+        .. math::
+            P_{\ell}^{\rm obs}(k) = \int {\rm d}k^'\,{k^'}^2\,\sum_{\ell^'} \
+            W_{\ell\ell^'}(k,k^')P_{\ell^'}(k^')
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the convolved power spectrum
+            multipoles.
+
+        Returns
+        -------
+        mps: list of numpy.ndarray
+            List containing the convolved power spectrum multipoles of order
+            (0,2,4). The list includes the wavemodes $`k`$ and the three
+            multipoles, in this order.
+        """
+        if self.mixing_matrix_dict is None:
+            raise TypeError('Mixing matrix has not been initialised since no '
+                            'argument "mixing_matrix_dict" was specified when '
+                            'instantiating the Spectro class.')
+
+        kin0 = self.mixing_matrix_dict['kin0']
+        kin2 = self.mixing_matrix_dict['kin2']
+        kin4 = self.mixing_matrix_dict['kin4']
+        kout = self.mixing_matrix_dict['kout']
+
+        multipoles_in = {}
+        for ell in [0, 2, 4]:
+            multipoles_in[f'ell{ell}'] = np.empty(
+                self.mixing_matrix_dict[f'kin{ell}'].shape)
+            if np.all(kin0 == kin2) and np.all(kin0 == kin4):
+                for i, kk in enumerate(kin0):
+                    multipoles_in[f'ell{ell}'][i] = \
+                        self.multipole_spectra(redshift, kk, ms=[ell])
+            else:
+                for i, kk in enumerate(self.mixing_matrix_dict[f'kin{ell}']):
+                    multipoles_in[f'ell{ell}'][i] = \
+                        self.multipole_spectra(redshift, kk, ms=[ell])
+
+        multipoles_out = {}
+        for ell in [0, 2, 4]:
+            multipoles_out[f'ell{ell}'] = np.zeros(kout.shape)
+            for ell_prime in [0, 2, 4]:
+                multipoles_out[f'ell{ell}'] += \
+                    np.dot(self.mixing_matrix_dict[f'W{ell}{ell_prime}'],
+                           multipoles_in[f'ell{ell_prime}'])
+
+        return (kout, multipoles_out['ell0'], multipoles_out['ell2'],
+                multipoles_out['ell4'])
 
     def multipole_correlation_function_mag_mag(self, r_xi, z, ell):
         r"""Evaluates the magnification-magnification correlation function

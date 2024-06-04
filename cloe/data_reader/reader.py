@@ -390,6 +390,42 @@ class Reader:
         self.data_dict['GC-Spectro'] = GC_spectro_dict
         return
 
+    def read_GC_spectro_mixing_matrix(self, file_dest='Spectroscopic/data'):
+        """Reads in the spectroscopic mixing matrix.
+
+        Function to read the OU-LE3 spectroscopic mixing matrices, based
+        on location provided to Reader class. Adds contents to the data
+        dictionary (:obj:`Reader.data_dict`).
+
+        Parameters
+        ----------
+        file_dest: str
+            Sub-folder of :obj:`self.data_subdirectory` within which to find
+            spectroscopic data
+        """
+        root = self.data['spectro']['root_mixing_matrix']
+        full_path = Path(self.dat_dir_main, file_dest, root)
+        fits_file = fits.open(full_path)
+
+        fid_h = self.data_spectro_fiducial_cosmo['H0'] / 100.0
+        kin0 = fits_file['BINS_INPUT'].data['kp0'] * fid_h
+        kin2 = fits_file['BINS_INPUT'].data['kp2'] * fid_h
+        kin4 = fits_file['BINS_INPUT'].data['kp4'] * fid_h
+        kout = fits_file['BINS_OUTPUT'].data['k'] * fid_h
+        mixing_matrix = fits_file['MIXING_MATRIX'].data
+
+        mixing_matrix_dict = {}
+        mixing_matrix_dict['kout'] = kout
+        mixing_matrix_dict['kin0'] = kin0
+        mixing_matrix_dict['kin2'] = kin2
+        mixing_matrix_dict['kin4'] = kin4
+        for i in [0, 2, 4]:
+            for j in [0, 2, 4]:
+                mm = f'W{i}{j}'
+                mixing_matrix_dict[mm] = mixing_matrix[mm]
+
+        return mixing_matrix_dict
+
     def read_CG(self, file_dest='Clusters/'):
         """Read CG
 

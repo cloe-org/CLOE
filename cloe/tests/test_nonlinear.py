@@ -183,6 +183,45 @@ class nonlinearinitTestCase(TestCase):
         cls.nl3_extra_b4.set_Pgg_spectro_model()
         cls.nl3_extra_b4.update_dic(cosmo_dic_bar4_extra)
 
+        # Load cosmology dictionary for tests with NL_flag_phot_matter=1
+        # and IA_flag = 1
+        cosmo_dic_1_tatt = \
+            load_test_pickle('cosmo_test_NLphot1_tatt_dic.pickle')
+        # Create instance of Nonlinear class
+        cls.nl1_tatt = Nonlinear(cosmo_dic_1_tatt)
+
+        # Load cosmology dictionary for tests with NL_flag_phot_matter=2
+        # and IA_flag = 1
+        cosmo_dic_2_tatt = \
+            load_test_pickle('cosmo_test_NLphot2_tatt_dic.pickle')
+        # Create instance of Nonlinear class
+        cls.nl2_tatt = Nonlinear(cosmo_dic_2_tatt)
+
+        # Load cosmology dictionary for tests with NL_flag_phot_matter=3
+        # and IA_flag = 1
+        cosmo_dic_3_tatt = \
+            load_test_pickle('cosmo_test_NLphot3_tatt_dic.pickle')
+        # Create instance of Nonlinear class
+        cls.nl3_tatt = Nonlinear(cosmo_dic_3_tatt)
+
+        # Copy cosmo_dic from NL_flag_phot_matter=3 (to have HMcode2020)
+        # and IA_flag = 1
+        cosmo_dic_4_tatt = cosmo_dic_3_tatt.copy()
+        cosmo_dic_4_tatt['NL_flag_phot_matter'] = 4
+        # Create instance of Nonlinear class and update its dictionary
+        cls.nl4_tatt = Nonlinear(cosmo_dic_4_tatt)
+        cls.nl4_tatt.set_Pgg_spectro_model()
+        cls.nl4_tatt.update_dic(cosmo_dic_4_tatt)
+
+        # Copy cosmo_dic from NL_flag_phot_matter=3 (to have HMcode2020)
+        # and IA_flag = 1
+        cosmo_dic_5_tatt = cosmo_dic_3_tatt.copy()
+        cosmo_dic_5_tatt['NL_flag_phot_matter'] = 5
+        # Create instance of Nonlinear class and update its dictionary
+        cls.nl5_tatt = Nonlinear(cosmo_dic_5_tatt)
+        cls.nl5_tatt.set_Pgg_spectro_model()
+        cls.nl5_tatt.update_dic(cosmo_dic_5_tatt)
+
         # Copy cosmo_dic from NL_flag_phot_matter=1
         # (to test Pgg_phot_halo_NLbias)
         cosmo_dic_NLbias_halo = cosmo_dic_1.copy()
@@ -262,6 +301,31 @@ class nonlinearinitTestCase(TestCase):
 
         self.Pmm_phot_test_NL4_extra_k = 3.4178353
         self.Pmm_phot_test_NL5_extra_kz = 0.61634334
+
+        self.Pii_test_NL1_tatt = \
+            np.array([7.11749416, 6.52936089, 5.24846405])
+        self.Pdeltai_test_NL1_tatt = -277.24173292
+        self.Pgi_phot_test_NL1_tatt = -392.01731165
+
+        self.Pii_test_NL2_tatt = \
+            np.array([7.12113817, 6.52871957, 5.24909852])
+        self.Pdeltai_test_NL2_tatt = -277.64232328
+        self.Pgi_phot_test_NL2_tatt = -392.58369074
+
+        self.Pii_test_NL3_tatt = \
+            np.array([7.12611501, 6.5281627, 5.24907609])
+        self.Pdeltai_test_NL3_tatt = -278.18941671
+        self.Pgi_phot_test_NL3_tatt = -393.35722993
+
+        self.Pii_test_NL4_tatt = \
+            np.array([7.11287427, 6.52525458, 5.24379997])
+        self.Pdeltai_test_NL4_tatt = -276.7730395
+        self.Pgi_phot_test_NL4_tatt = -391.37356994
+
+        self.Pii_test_NL5_tatt = \
+            np.array([7.12395548, 6.52429, 5.24201532])
+        self.Pdeltai_test_NL5_tatt = -277.99105237
+        self.Pgi_phot_test_NL5_tatt = -393.09591271
 
         self.Pmm_phot_test_extra_cosmo = 4300.03416143
 
@@ -350,6 +414,26 @@ class nonlinearinitTestCase(TestCase):
         self.Pii_test_NL5 = None
         self.Pdeltai_test_NL5 = None
         self.Pgi_phot_test_NL5 = None
+
+        self.Pii_test_NL1_tatt = None
+        self.Pdeltai_test_NL1_tatt = None
+        self.Pgi_phot_test_NL1_tatt = None
+
+        self.Pii_test_NL2_tatt = None
+        self.Pdeltai_test_NL2_tatt = None
+        self.Pgi_phot_test_NL2_tatt = None
+
+        self.Pii_test_NL3_tatt = None
+        self.Pdeltai_test_NL3_tatt = None
+        self.Pgi_phot_test_NL3_tatt = None
+
+        self.Pii_test_NL4_tatt = None
+        self.Pdeltai_test_NL4_tatt = None
+        self.Pgi_phot_test_NL4_tatt = None
+
+        self.Pii_test_NL5_tatt = None
+        self.Pdeltai_test_NL5_tatt = None
+        self.Pgi_phot_test_NL5_tatt = None
 
     def test_Pgg_phot_def(self):
         npt.assert_allclose(
@@ -607,6 +691,117 @@ class nonlinearinitTestCase(TestCase):
             err_msg='Error in values returned by Pii_def for '
                     'NL_flag_phot_matter=5')
 
+        test_p1_tatt = self.nl1_tatt.Pii_def(self.redshift1,
+                                             [self.wavenumber1,
+                                              self.wavenumber2,
+                                              self.wavenumber3])
+
+        type_check = isinstance(test_p1_tatt, np.ndarray)
+
+        assert type_check, 'Error in returned data type of Pii_def ' \
+                           'for NL_flag_phot_matter=1 and IA_flag=1'
+
+        assert test_p1_tatt.size == self.arrsize, (
+            'Error in size of array returned by Pii_def for '
+            'NL_flag_phot_matter=1 and IA_flag=1'
+        )
+
+        npt.assert_allclose(
+            test_p1_tatt,
+            self.Pii_test_NL1_tatt,
+            rtol=self.rtol,
+            err_msg='Error in values returned by Pii_def for '
+                    'NL_flag_phot_matter=1 and IA_flag=1',
+        )
+
+        test_p2_tatt = self.nl2_tatt.Pii_def(self.redshift1,
+                                             [self.wavenumber1,
+                                              self.wavenumber2,
+                                              self.wavenumber3])
+
+        type_check = isinstance(test_p2_tatt, np.ndarray)
+
+        assert type_check, 'Error in returned data type of Pii_def ' \
+                           'for NL_flag_phot_matter=2 and IA_flag=1'
+
+        assert test_p2_tatt.size == self.arrsize, (
+            'Error in size of array returned by Pii_def for '
+            'NL_flag_phot_matter=2 and IA_flag=1'
+        )
+
+        npt.assert_allclose(
+            test_p2_tatt,
+            self.Pii_test_NL2_tatt,
+            rtol=self.rtol,
+            err_msg='Error in values returned by Pii_def for '
+                    'NL_flag_phot_matter=2 and IA_flag=1',
+        )
+
+        test_p3_tatt = self.nl3_tatt.Pii_def(self.redshift1,
+                                             [self.wavenumber1,
+                                              self.wavenumber2,
+                                              self.wavenumber3])
+
+        type_check = isinstance(test_p3_tatt, np.ndarray)
+        assert type_check, 'Error in returned data type of Pii_def ' \
+                           'for NL_flag_phot_matter=3 and IA_flag=1'
+
+        assert test_p3_tatt.size == self.arrsize, 'Error in size of array ' \
+                                                  'returned by Pii_def ' \
+                                                  'for NL_flag_phot_matter=3' \
+                                                  'and IA_flag=1'
+
+        npt.assert_allclose(
+            test_p3_tatt,
+            self.Pii_test_NL3_tatt,
+            rtol=self.rtol,
+            err_msg='Error in values returned by Pii_def for '
+                    'NL_flag_phot_matter=3 and IA_flag=1')
+
+        test_p4_tatt = self.nl4_tatt.Pii_def(self.redshift1,
+                                             [self.wavenumber1,
+                                              self.wavenumber2,
+                                              self.wavenumber3])
+
+        type_check = isinstance(test_p4_tatt, np.ndarray)
+
+        assert type_check, 'Error in returned data type of Pii_def ' \
+                           'for NL_flag_phot_matter=4 and IA_flag=1'
+
+        assert test_p4_tatt.size == self.arrsize, (
+            'Error in size of array returned by Pii_def for '
+            'NL_flag_phot_matter=4 and IA_flag=1'
+        )
+
+        npt.assert_allclose(
+            test_p4_tatt,
+            self.Pii_test_NL4_tatt,
+            rtol=self.rtol,
+            err_msg='Error in values returned by Pii_def for '
+                    'NL_flag_phot_matter=4 and IA_flag=1',
+        )
+
+        test_p5_tatt = self.nl5_tatt.Pii_def(self.redshift1,
+                                             [self.wavenumber1,
+                                              self.wavenumber2,
+                                              self.wavenumber3])
+
+        type_check = isinstance(test_p5_tatt, np.ndarray)
+        assert type_check, 'Error in returned data type of Pii_def ' \
+                           'for NL_flag_phot_matter=5 and IA_flag=1'
+
+        assert test_p5_tatt.size == self.arrsize, 'Error in size of array ' \
+                                                  'returned by Pii_def ' \
+                                                  'for NL_flag_phot_matter=5' \
+                                                  'and IA_flag=1'
+
+        npt.assert_allclose(
+            test_p5_tatt,
+            self.Pii_test_NL5_tatt,
+            rtol=self.rtol,
+            err_msg='Error in values returned by Pii_def for '
+                    'NL_flag_phot_matter=5 and IA_flag=1')
+
     def test_Pdeltai_def(self):
         npt.assert_allclose(
             self.nl1.Pdeltai_def(self.redshift1, self.wavenumber1),
@@ -648,6 +843,46 @@ class nonlinearinitTestCase(TestCase):
                     'for NL_flag_phot_matter=5',
         )
 
+        npt.assert_allclose(
+            self.nl1_tatt.Pdeltai_def(self.redshift1, self.wavenumber1),
+            self.Pdeltai_test_NL1_tatt,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pdeltai_def '
+                    'for NL_flag_phot_matter=1 and IA_flag=1',
+        )
+
+        npt.assert_allclose(
+            self.nl2_tatt.Pdeltai_def(self.redshift1, self.wavenumber1),
+            self.Pdeltai_test_NL2_tatt,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pdeltai_def '
+                    'for NL_flag_phot_matter=2 and IA_flag=1',
+        )
+
+        npt.assert_allclose(
+            self.nl3_tatt.Pdeltai_def(self.redshift1, self.wavenumber1),
+            self.Pdeltai_test_NL3_tatt,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pdeltai_def '
+                    'for NL_flag_phot_matter=3 and IA_flag=1',
+        )
+
+        npt.assert_allclose(
+            self.nl4_tatt.Pdeltai_def(self.redshift1, self.wavenumber1),
+            self.Pdeltai_test_NL4_tatt,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pdeltai_def '
+                    'for NL_flag_phot_matter=4 and IA_flag=1',
+        )
+
+        npt.assert_allclose(
+            self.nl5_tatt.Pdeltai_def(self.redshift1, self.wavenumber1),
+            self.Pdeltai_test_NL5_tatt,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pdeltai_def '
+                    'for NL_flag_phot_matter=5 and IA_flag=1',
+        )
+
     def test_Pgi_phot_def(self):
         npt.assert_allclose(
             self.nl1.Pgi_phot_def(self.redshift1, self.wavenumber1),
@@ -687,6 +922,46 @@ class nonlinearinitTestCase(TestCase):
             rtol=self.rtol,
             err_msg='Error in value returned by Pgi_phot_def '
                     'for NL_flag_phot_matter=5',
+        )
+
+        npt.assert_allclose(
+            self.nl1_tatt.Pgi_phot_def(self.redshift1, self.wavenumber1),
+            self.Pgi_phot_test_NL1_tatt,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgi_phot_def '
+                    'for NL_flag_phot_matter=1 and IA_flag=1',
+        )
+
+        npt.assert_allclose(
+            self.nl2_tatt.Pgi_phot_def(self.redshift1, self.wavenumber1),
+            self.Pgi_phot_test_NL2_tatt,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgi_phot_def '
+                    'for NL_flag_phot_matter=2 and IA_flag=1',
+        )
+
+        npt.assert_allclose(
+            self.nl3_tatt.Pgi_phot_def(self.redshift1, self.wavenumber1),
+            self.Pgi_phot_test_NL3_tatt,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgi_phot_def '
+                    'for NL_flag_phot_matter=3 and IA_flag=1',
+        )
+
+        npt.assert_allclose(
+            self.nl4_tatt.Pgi_phot_def(self.redshift1, self.wavenumber1),
+            self.Pgi_phot_test_NL4_tatt,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgi_phot_def '
+                    'for NL_flag_phot_matter=4 and IA_flag=1',
+        )
+
+        npt.assert_allclose(
+            self.nl5_tatt.Pgi_phot_def(self.redshift1, self.wavenumber1),
+            self.Pgi_phot_test_NL5_tatt,
+            rtol=self.rtol,
+            err_msg='Error in value returned by Pgi_phot_def '
+                    'for NL_flag_phot_matter=5 and IA_flag=1',
         )
 
     def test_Pgi_spectro_def(self):

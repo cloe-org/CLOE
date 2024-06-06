@@ -69,9 +69,12 @@ info = {
         'b1_spectro_bin2': 1.6060949,
         'b1_spectro_bin3': 1.7464790,
         'b1_spectro_bin4': 1.8988660,
-        'aia': 1.72,
-        'nia': -0.41,
-        'bia': 0.0,
+        'a1_ia': 1.72,
+        'a2_ia': 2,
+        'b1_ia': 1,
+        'eta1_ia': -0.41,
+        'eta2_ia': 1,
+        'beta1_ia': 0.0,
         # Redshift distributions nuisance parameters: shifts
         'dz_1_GCphot': 0., 'dz_1_WL': 0.,
         'dz_2_GCphot': 0., 'dz_2_WL': 0.,
@@ -107,6 +110,7 @@ info['likelihood'] = {'Euclid':
                          'GCspectro': {'GCspectro': True}
                      },
                      'plot_observables_selection': False,
+                     'IA_flag': 0,
                      'NL_flag_phot_matter': nlflag,
                        # Baryon flag
                       # With this, the user can specify which baryon model they want

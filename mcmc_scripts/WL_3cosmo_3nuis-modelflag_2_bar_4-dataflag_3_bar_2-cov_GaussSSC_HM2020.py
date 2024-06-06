@@ -108,15 +108,15 @@ info['params'] = {
                 'proposal': 0.01,
                 'latex': '\log_{10} M_{c_{1}}'},
         # Intrinsic alignment parameters
-        'aia': {'prior': {'min': -5, 'max': 5.},
+        'a1_ia': {'prior': {'min': -5, 'max': 5.},
                 'ref': {'dist': 'norm', 'loc': 1.72, 'scale': 0.1},
                 'proposal': 0.1,
-                'latex': 'A^\mathrm{IA}'},
-        'nia': {'prior': {'min': -5., 'max': 5.},
+                'latex': 'A1^\mathrm{IA}'},
+        'eta1_ia': {'prior': {'min': -5., 'max': 5.},
                 'ref': {'dist': 'norm', 'loc': -0.41, 'scale': 0.01},
                 'proposal': 0.1,
-                'latex': '\eta^\mathrm{IA}'},
-        'bia': 0.0,
+                'latex': '\eta1^\mathrm{IA}'},
+        'beta1_ia': 0.0,
                   }
 definfo['params'].update(info['params'])
 

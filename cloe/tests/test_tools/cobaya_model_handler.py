@@ -73,6 +73,7 @@ class CobayaModel:
                 'NL_flag_phot_matter':
                     cosmo_inst.cosmo_dic['NL_flag_phot_matter'],
                 'NL_flag_spectro': cosmo_inst.cosmo_dic['NL_flag_spectro'],
+                'IA_flag': cosmo_inst.cosmo_dic['IA_flag'],
                 'solver': 'camb'}}}
         self.info['params'].update(
             cosmo_inst.cosmo_dic['nuisance_parameters'])

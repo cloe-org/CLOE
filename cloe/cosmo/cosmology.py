@@ -183,6 +183,28 @@ class Cosmology:
             Nonlinear matter flag for 3x2pt photometric probes
         NL_flag_spectro: int
             Nonlinear flag for GCspectro
+        IA_flag: int
+            intrinsic alignment model flag
+        a00e: function
+            a00e one-loop term for IA TATT model (arxiv:1708.09247)
+        c00e: function
+            c00e one-loop term for IA TATT model (arxiv:1708.09247)
+        a0e0e: function
+             a0e0 eone-loop term for IA TATT model (arxiv:1708.09247)
+        a0b0b: function
+            a0b0b one-loop term for IA TATT model (arxiv:1708.09247)
+        ae2e2: function
+            ae2e2 one-loop term for IA TATT model (arxiv:1708.09247)
+        ab2b2: function
+            ab2b2 one-loop term for IA TATT model (arxiv:1708.09247)
+        a0e2: function
+            a0e2 one-loop term for IA TATT model (arxiv:1708.09247)
+        b0e2: function
+            b0e2 one-loop term for IA TATT model (arxiv:1708.09247)
+        d0ee2: function
+            d0ee2 one-loop term for IA TATT model (arxiv:1708.09247)
+        d0bb2: function
+            d0bb2 one-loop term for IA TATT model (arxiv:1708.09247)
         bias_model: int
             bias model
         magbias_model: int
@@ -195,7 +217,8 @@ class Cosmology:
             At the moment, we have implemented
             10 constant bias for photo-z
             recipe and 4 for spectro recipe,
-            and 3 IA parameters. The
+            and 3 IA parameters for the NLA model
+            while 5 for the TATT model. The
             initialized values of the fiducial
             cosmology dictionary corresponds to:
 
@@ -206,7 +229,8 @@ class Cosmology:
 
                 * Spectroscopic bias values in arXiv:1910.09273
 
-                * IA values in arXiv:1910.09273
+                * IA values in arXiv:1910.09273 (NLA)
+                and arxiv:1708.09247 (TATT)
 
                 * Additional parameters for GCspectro, as provided by IST:NL
 
@@ -293,6 +317,8 @@ class Cosmology:
                           'NL_flag_phot_matter': 0,
                           'NL_flag_phot_bias': 0,
                           'NL_flag_spectro': 0,
+                          # IA flag
+                          'IA_flag': 0,
                           # Baryonic feedback flag
                           'NL_flag_phot_baryon': 0,
                           # Baryonic feedback z-dependence model flag
@@ -315,13 +341,28 @@ class Cosmology:
                           'use_Weyl': False,
                           # Redshift dependent purity correction
                           'f_out_z_dep': False,
+                          # One-loop order terms for the TATT model
+                          'a00e': None,
+                          'c00e': None,
+                          'a0e0e': None,
+                          'a0b0b': None,
+                          'ae2e2': None,
+                          'ab2b2': None,
+                          'a0e2': None,
+                          'b0e2': None,
+                          'd0ee2': None,
+                          'd0bb2': None,
                           # Spectroscopic galaxy clustering redshift error
                           'GCsp_z_err': False,
                           'nuisance_parameters': {
-                             # Intrinsic alignment
-                             'aia': 1.72,
-                             'nia': -0.41,
-                             'bia': 0.0,
+                             # Intrinsic alignments (NLA and TATT)
+                             # Set a2_ia, b1_ia and eta2_ia to 0 for NLA
+                             'a1_ia': 1.72,
+                             'a2_ia': 2,
+                             'b1_ia': 1,
+                             'eta1_ia': -0.41,
+                             'eta2_ia': 1,
+                             'beta1_ia': 0.0,
                              'pivot_redshift': 0.,
                              # Linear photometric galaxy bias (IST:F case)
                              'b1_photo_bin1': 1.03047,
@@ -1509,13 +1550,13 @@ class Cosmology:
         c1 = 0.0134
         pivot_redshift = \
             self.cosmo_dic['nuisance_parameters']['pivot_redshift']
-        aia = self.cosmo_dic['nuisance_parameters']['aia']
-        nia = self.cosmo_dic['nuisance_parameters']['nia']
-        bia = self.cosmo_dic['nuisance_parameters']['bia']
+        a1_ia = self.cosmo_dic['nuisance_parameters']['a1_ia']
+        eta1_ia = self.cosmo_dic['nuisance_parameters']['eta1_ia']
+        beta1_ia = self.cosmo_dic['nuisance_parameters']['beta1_ia']
         omegam = self.cosmo_dic['Omm']
-        fia = (-aia * c1 * omegam / growth *
-               ((1 + redshift) / (1 + pivot_redshift)) ** nia *
-               self.cosmo_dic['luminosity_ratio_z_func'](redshift) ** bia)
+        fia = (-a1_ia * c1 * omegam / growth *
+               ((1 + redshift) / (1 + pivot_redshift)) ** eta1_ia *
+               self.cosmo_dic['luminosity_ratio_z_func'](redshift) ** beta1_ia)
         return fia
 
     def Pii_def(self, redshift, k_scale):

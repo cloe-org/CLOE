@@ -57,6 +57,7 @@ info = {
                 'NL_flag_spectro': 0,
                 'NL_flag_phot_baryon': 0,
                 'NL_flag_phot_bias': 0,
+                'IA_flag': 0,
                 'Baryon_redshift_model': True,
                 'GCsp_z_err': False,
                 'bias_model': 1,

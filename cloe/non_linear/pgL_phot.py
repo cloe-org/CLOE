@@ -43,8 +43,8 @@ class PgL_phot_model(PowerSpectrum):
             self.theory['Pk_delta'].P(redshift, wavenumber)
         return pval
 
-    def Pgi_phot_halo(self, redshift, wavenumber):
-        r"""Pgi Phot Def
+    def Pgi_phot_halo_nla(self, redshift, wavenumber):
+        r"""Pgi Phot Def NLA
 
         Computes the photometric galaxy-intrinsic power spectrum assuming a
         linear bias and nonlinear alignment model. Uses halo model based codes
@@ -78,8 +78,52 @@ class PgL_phot_model(PowerSpectrum):
             self.nonlinear_dic['Bar_boost'](redshift, wavenumber)[0]
         return pval
 
-    def Pgi_phot_emu(self, redshift, wavenumber):
-        r"""Pgi Phot emu
+    def Pgi_phot_halo_tatt(self, redshift, wavenumber):
+        r"""Pgi Phot Def TATT
+
+        Computes the photometric galaxy-intrinsic power spectrum assuming a
+        linear bias and the tidal alignment tidal torquing intrinsic alignment
+        model. Uses halo model based codes for the matter power spectrum, with
+        baryon effects (if selected) added as a boost, unless the halo model
+        code already includes it.
+
+        .. math::
+            P_{\rm G I}^{\rm photo}(z, k) = b_g^{\rm photo}(z) \
+            \left [ C_{1}P_{\rm \delta\delta}^{\rm NL}(z, k) S_{\rm bar}\
+            (z, k)+C_{1\delta}D(z)^{4}[\rm A_{0|0E}(k)+\rm C_{0|0E}(k)] \
+            +C_{2}D(z)^{4}[\rm A_{0|E2}(k)+B_{0|E2}(k)] \right ]
+
+        Note: either redshift or wavenumber must be a float (ex. simultaneously
+        setting both of them to numpy.ndarray makes the code crash)
+
+        Parameters
+        ----------
+        redshift: float or numpy.ndarray
+            Redshift at which to evaluate the power spectrum.
+        wavenumber: float or list or numpy.ndarray
+            wavenumber(s) at which to evaluate the power spectrum.
+
+        Returns
+        -------
+        pval: float or numpy.ndarray
+            Value of photometric galaxy-intrinsic power spectrum
+            at a given redshift and wavenumber
+        """
+        c1, c1d, c2 = self.misc.normalize_tatt_parameters(redshift)
+        growth = self.theory['D_z_k_func'](redshift, wavenumber)
+
+        pval = self.theory['b1_inter'](redshift) * \
+            (c1 * self.theory['Pk_halomodel_recipe'].P(redshift, wavenumber) *
+             self.nonlinear_dic['Bar_boost'](redshift, wavenumber)[0] +
+             c1d * (growth**4) * (self.theory['a00e'](wavenumber) +
+                                  self.theory['c00e'](wavenumber)) +
+             c2 * (growth**4) * (self.theory['a0e2'](wavenumber) +
+                                 self.theory['b0e2'](wavenumber)))
+
+        return pval
+
+    def Pgi_phot_emu_nla(self, redshift, wavenumber):
+        r"""Pgi Phot emu NLA
 
         Computes the photometric galaxy-intrinsic power spectrum assuming a
         linear bias and nonlinear alignment model. Uses the EuclidEmu2 or
@@ -107,12 +151,56 @@ class PgL_phot_model(PowerSpectrum):
             Value of photometric galaxy-intrinsic power spectrum
             at a given redshift and wavenumber
         """
-
         pval = (self.misc.fia(redshift) *
                 self.theory['b1_inter'](redshift) *
                 self.theory['Pk_delta'].P(redshift, wavenumber) *
                 self.nonlinear_dic['NL_boost'](redshift, wavenumber)[0] *
                 self.nonlinear_dic['Bar_boost'](redshift, wavenumber)[0])
+
+        return pval
+
+    def Pgi_phot_emu_tatt(self, redshift, wavenumber):
+        r"""Pgi Phot emu TATT
+
+        Computes the photometric galaxy-intrinsic power spectrum assuming a
+        linear bias and the tidal alignment tidal torquing intrinsic alignment
+        model. Uses the EuclidEmu2 or the BACCO emulator for the nonlinear
+        boost to the matter power spectrum, with baryon effects (if selected)
+        added as a boost.
+
+        .. math::
+            P_{\rm G I}^{\rm photo}(z, k) = b_g^{\rm photo}(z) \
+            \left [ C_{1}P_{\rm \delta\delta}(z, k) B_{\rm NL}(z, k) \
+            S_{\rm bar}(z, k)+C_{1\delta}D(z)^{4}[\rm A_{0|0E}(k)+\rm \
+            C_{0|0E}(k)]+C_{2}D(z)^{4}[\rm A_{0|E2}(k)+B_{0|E2}(k)] \right ]
+
+        Note: either redshift or wavenumber must be a float (ex. simultaneously
+        setting both of them to numpy.ndarray makes the code crash)
+
+        Parameters
+        ----------
+        redshift: float or numpy.ndarray
+            Redshift at which to evaluate the power spectrum.
+        wavenumber: float or list or numpy.ndarray
+            wavenumber(s) at which to evaluate the power spectrum.
+
+        Returns
+        -------
+        pval: float or numpy.ndarray
+            Value of photometric galaxy-intrinsic power spectrum
+            at a given redshift and wavenumber
+        """
+        c1, c1d, c2 = self.misc.normalize_tatt_parameters(redshift)
+        growth = self.theory['D_z_k_func'](redshift, wavenumber)
+
+        pval = self.theory['b1_inter'](redshift) * \
+            (c1 * self.theory['Pk_delta'].P(redshift, wavenumber) *
+             self.nonlinear_dic['NL_boost'](redshift, wavenumber)[0] *
+             self.nonlinear_dic['Bar_boost'](redshift, wavenumber)[0] +
+             c1d * (growth**4) * (self.theory['a00e'](wavenumber) +
+                                  self.theory['c00e'](wavenumber)) +
+             c2 * (growth**4) * (self.theory['a0e2'](wavenumber) +
+                                 self.theory['b0e2'](wavenumber)))
 
         return pval
 

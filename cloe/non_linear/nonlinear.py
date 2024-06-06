@@ -276,6 +276,15 @@ class Nonlinear:
         self.Pgg_spectro_model.update_dic(cosmo_dic, self.nonlinear_dic,
                                           self.misc)
 
+        # Compute the one-loop terms for the TATT model
+        if self.theory['IA_flag'] == 1:
+            self.theory['a00e'], self.theory['c00e'], \
+                self.theory['a0e0e'], self.theory['a0b0b'], \
+                self.theory['ae2e2'], self.theory['ab2b2'], \
+                self.theory['a0e2'], self.theory['b0e2'], \
+                self.theory['d0ee2'], self.theory['d0bb2'] = \
+                self.misc.ia_tatt_terms(self.theory['k_win'])
+
         # Create the interpolators for all the parameters of the
         # galaxy bias expansion (b1, b2, bG2, bG3)
         # if the non-linear contribution for photo galaxy bias are asked
@@ -1943,16 +1952,34 @@ class Nonlinear:
         Returns the intrinsic-intrinsic power spectrum,
         defined in the defined in the :obj:`pLL_phot` module.
         """
+
         flag_halo_emu = \
             self.halo_emu_matrix[self.theory['NL_flag_phot_matter'],
                                  self.theory['NL_flag_phot_baryon']]
 
-        switcher = {1: self.PLL_phot_model.Pii_halo,
-                    2: self.PLL_phot_model.Pii_emu
-                    }
-        Pii_func = \
-            switcher.get(flag_halo_emu,
-                         "Invalid modeling option")
+        switcher_IA = {0: 'NLA',
+                       1: 'TATT'}
+
+        if switcher_IA.get(self.theory['IA_flag'],
+                           "Invalid modeling option") == 'NLA':
+
+            switcher = {1: self.PLL_phot_model.Pii_halo_nla,
+                        2: self.PLL_phot_model.Pii_emu_nla
+                        }
+            Pii_func = \
+                switcher.get(flag_halo_emu,
+                             "Invalid modeling option")
+        elif switcher_IA.get(self.theory['IA_flag'],
+                             "Invalid modeling option") == 'TATT':
+
+            switcher = {1: self.PLL_phot_model.Pii_ee_halo_tatt,
+                        2: self.PLL_phot_model.Pii_ee_emu_tatt
+                        }
+            Pii_func = \
+                switcher.get(flag_halo_emu,
+                             "Invalid modeling option")
+        else:
+            print("Invalid modeling IA option")
 
         return Pii_func(redshift, wavenumber)
 
@@ -1962,16 +1989,32 @@ class Nonlinear:
         Returns the density-intrinsic power spectrum,
         defined in the defined in the :obj:`pLL_phot` module.
         """
+
         flag_halo_emu = \
             self.halo_emu_matrix[self.theory['NL_flag_phot_matter'],
                                  self.theory['NL_flag_phot_baryon']]
 
-        switcher = {1: self.PLL_phot_model.Pdeltai_halo,
-                    2: self.PLL_phot_model.Pdeltai_emu
-                    }
-        Pdeltai_func = \
-            switcher.get(flag_halo_emu,
-                         "Invalid modeling option")
+        switcher_IA = {0: 'NLA',
+                       1: 'TATT'}
+
+        if switcher_IA.get(self.theory['IA_flag'],
+                           "Invalid modeling option") == 'NLA':
+            switcher = {1: self.PLL_phot_model.Pdeltai_halo_nla,
+                        2: self.PLL_phot_model.Pdeltai_emu_nla
+                        }
+            Pdeltai_func = \
+                switcher.get(flag_halo_emu,
+                             "Invalid modeling option")
+        elif switcher_IA.get(self.theory['IA_flag'],
+                             "Invalid modeling option") == 'TATT':
+            switcher = {1: self.PLL_phot_model.Pdeltai_halo_tatt,
+                        2: self.PLL_phot_model.Pdeltai_emu_tatt
+                        }
+            Pdeltai_func = \
+                switcher.get(flag_halo_emu,
+                             "Invalid modeling option")
+        else:
+            print("Invalid modeling IA option")
 
         return Pdeltai_func(redshift, wavenumber)
 
@@ -1981,16 +2024,32 @@ class Nonlinear:
         Returns the galaxy-intrinsic power spectrum,
         defined in the :obj:`pgL_phot` module
         """
+
         flag_halo_emu = \
             self.halo_emu_matrix[self.theory['NL_flag_phot_matter'],
                                  self.theory['NL_flag_phot_baryon']]
 
-        switcher = {1: self.PgL_phot_model.Pgi_phot_halo,
-                    2: self.PgL_phot_model.Pgi_phot_emu
-                    }
-        Pgi_func = \
-            switcher.get(flag_halo_emu,
-                         "Invalid modeling option")
+        switcher_IA = {0: 'NLA',
+                       1: 'TATT'}
+
+        if switcher_IA.get(self.theory['IA_flag'],
+                           "Invalid modeling option") == 'NLA':
+            switcher = {1: self.PgL_phot_model.Pgi_phot_halo_nla,
+                        2: self.PgL_phot_model.Pgi_phot_emu_nla
+                        }
+            Pgi_func = \
+                switcher.get(flag_halo_emu,
+                             "Invalid modeling option")
+        elif switcher_IA.get(self.theory['IA_flag'],
+                             "Invalid modeling option") == 'TATT':
+            switcher = {1: self.PgL_phot_model.Pgi_phot_halo_tatt,
+                        2: self.PgL_phot_model.Pgi_phot_emu_tatt
+                        }
+            Pgi_func = \
+                switcher.get(flag_halo_emu,
+                             "Invalid modeling option")
+        else:
+            print("Invalid modeling IA option")
 
         return Pgi_func(redshift, wavenumber)
 

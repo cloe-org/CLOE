@@ -29,7 +29,9 @@ info = {
                 'z_max': 4.0,
                 'z_samp': 100,
                 'solver': 'camb',
-                'NL_flag_phot_matter': 0,
+                'NL_flag_phot_matter': 3,
+                'NL_flag_spectro': 0,
+                'IA_flag': 0,
                 'add_phot_RSD': False,
                 'use_gamma_MG': False,
                 'f_out_z_dep': False,
@@ -40,15 +42,15 @@ info = {
                     {
                         'luminosity_ratio': 'luminosity_ratio.dat',
                         'IA_model': 'zNLA',
-                        'cov_3x2pt': 'CovMat-3x2pt-{:s}-20Bins.npz',
-                        'cov_GC': 'CovMat-PosPos-{:s}-20Bins.npz',
-                        'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.npz',
+                        'cov_3x2pt': 'CovMat-3x2pt-{:s}-20Bins.npy',
+                        'cov_GC': 'CovMat-PosPos-{:s}-20Bins.npy',
+                        'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.npy',
                         'cov_model': 'Gauss',
                         'ndens_GC': 'niTab-EP10-RB00.dat',
                         'ndens_WL': 'niTab-EP10-RB00.dat',
-                        'root_GC': 'Cls_{:s}_PosPos.dat',
-                        'root_WL': 'Cls_{:s}_ShearShear.dat',
-                        'root_XC': 'Cls_{:s}_PosShear.dat',
+                        'root_GC': 'Cls_{:s}_PosPos_NL_flag_3.dat',
+                        'root_WL': 'Cls_{:s}_ShearShear_NL_flag_3.dat',
+                        'root_XC': 'Cls_{:s}_PosShear_NL_flag_3.dat',
                     },
                     'sample': 'ExternalBenchmark',
                     'spectro':
@@ -56,7 +58,6 @@ info = {
                         'redshifts': ['1.', '1.2', '1.4', '1.65'],
                         'edges': [0.9, 1.1, 1.3, 1.5, 1.8],
                         'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
-                        'scale_cuts_fourier': 'GCspectro-FourierSpace.yaml',
                     },
                 },
                 'observables_selection':
@@ -338,7 +339,7 @@ info = {
                     },
                     'GCspectro':
                     {
-                        'statistics': 'multipole_power_spectrum',
+                        'statistics': 'legendre_multipole_power_spectrum',
                         'bins':
                         {
                             'n1':
@@ -1126,96 +1127,57 @@ info = {
                 },
             },
         },
-        'output': './chains/chain_3x2pt_w0waCDM',
+        'output': './chains/chain_3x2pt_w0waCDM_NLA',
         'params':
         {
+            'a1_ia':
+            {
+                'latex':'\mathcal{A1_{\rm IA}}',
+                'prior':
+                {
+                    'max': 6,
+                    'min':-3,
+                },
+                'proposal': 0.2,
+                'ref':
+                {
+                    'dist': 'norm',
+                    'loc': 1.72,
+                    'scale': 0.2,
+                },
+            },
+            'eta1_ia':
+            {
+                'latex': '\eta1_{\rm IA}',
+                'prior':
+                {
+                    'max': 15,
+                    'min': -15,
+                },
+                'proposal': 0.2,
+                'ref':
+                {
+                    'dist': 'norm',
+                    'loc': -0.41,
+                    'scale': 0.2,
+                },
+            },
+            'beta1_ia': 0,
             'As':
             {
                 'latex': 'A_\mathrm{s}',
                 'value': 'lambda logA: 1e-10*np.exp(logA)',
             },
-            'H0':
-            {
-                'latex': 'H_0',
-                'prior':
-                {
-                    'max': 100.0,
-                    'min': 40.0,
-                },
-                'proposal': 0.5,
-                'ref':
-                {
-                    'dist': 'norm',
-                    'loc': 67.0,
-                    'scale': 1.0,
-                },
-            },
-            'logA':
-            {
-                'drop': True,
-                'latex': '\log(10^{10} A_\mathrm{s})',
-                'prior':
-                {
-                    'max': 7.0,
-                    'min': 1.6,
-                },
-                'proposal': 0.001,
-                'ref':
-                {
-                    'dist': 'norm',
-                    'loc': 3.05,
-                    'scale': 0.001,
-                },
-            },
+            'H0': 67.0,
+            'logA': 3.05,
             'mnu': 0.06,
             'nnu': 3.046,
-            'ns':
+            'ns': 0.96,
+            'ombh2': 0.0224,
+            'omch2': 0.12,
+            'omegab':
             {
-                'latex': 'n_\mathrm{s}',
-                'prior':
-                {
-                    'max': 1.2,
-                    'min': 0.6,
-                },
-                'proposal': 0.002,
-                'ref':
-                {
-                    'dist': 'norm',
-                    'loc': 0.96,
-                    'scale': 0.004,
-                },
-            },
-            'ombh2':
-            {
-                'latex': '\Omega_\mathrm{b} h^2',
-                'prior':
-                {
-                    'max': 0.1,
-                    'min': 0.005,
-                },
-                'proposal': 0.0001,
-                'ref':
-                {
-                    'dist': 'norm',
-                    'loc': 0.0224,
-                    'scale': 0.0001,
-                },
-            },
-            'omch2':
-            {
-                'latex': '\Omega_\mathrm{c} h^2',
-                'prior':
-                {
-                    'max': 0.99,
-                    'min': 0.001,
-                },
-                'proposal': 0.0005,
-                'ref':
-                {
-                    'dist': 'norm',
-                    'loc': 0.12,
-                    'scale': 0.001,
-                },
+                'latex': '\Omega_\mathrm{b}',
             },
             'omegam':
             {
@@ -1227,56 +1189,23 @@ info = {
                 'latex': '\sigma_8',
             },
             'tau': 0.0925,
-            'w':
-            {
-                'latex': 'w_0',
-                'prior':
-                {
-                    'max': -0.5,
-                    'min': -3.0,
-                },
-                'proposal': 0.5,
-                'ref':
-                {
-                    'dist': 'norm',
-                    'loc': -1,
-                    'scale': 0.5,
-                },
-            },
-            'wa':
-            {
-                'latex': 'w_a',
-                'prior':
-                {
-                    'max': 0.5,
-                    'min': -3.0,
-                },
-                'proposal': 0.1,
-                'ref':
-                {
-                    'dist': 'norm',
-                    'loc': 0,
-                    'scale': 0.1,
-                },
-            },
+            'w': -1,
+            'wa': 0,
             'gamma_MG': 0.55,
             'b10_photo': 1.7429859437184225,
             'b1_photo': 1.0997727037892875,
-            'b1_spectro_bin1': 1.46,
+            'b1_spectro': 1.46,
             'b2_photo': 1.220245876862528,
-            'b1_spectro_bin2': 1.61,
+            'b2_spectro': 1.61,
             'b3_photo': 1.2723993083933989,
-            'b1_spectro_bin3': 1.75,
+            'b3_spectro': 1.75,
             'b4_photo': 1.316624471897739,
-            'b1_spectro_bin4': 1.9,
+            'b4_spectro': 1.9,
             'b5_photo': 1.35812370570578,
             'b6_photo': 1.3998214171814918,
             'b7_photo': 1.4446452851824907,
             'b8_photo': 1.4964959071110084,
             'b9_photo': 1.5652475842498528,
-            'a1_ia': 1.72,
-            'eta1_ia': -0.41,
-            'beta1_ia': 0.0,
             'dz_1_GCphot': 0.0,
             'dz_1_WL': 0.0,
             'dz_2_GCphot': 0.0,
@@ -1336,11 +1265,15 @@ info = {
             {
                 'extra_args':
                 {
-                    'num_nu_massive': 1,
                     'dark_energy_model': 'ppf',
+                    'num_massive_neutrinos': 1,
                 },
                 'stop_at_error': True,
             },
         },
         'timing': True,
 }
+
+write_params_yaml_from_info_dict(info)
+
+updated_info, sampler = run(info)

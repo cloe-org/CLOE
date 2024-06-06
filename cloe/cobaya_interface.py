@@ -394,6 +394,7 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['NL_flag_phot_bias'] = \
                 self.NL_flag_phot_bias
             self.cosmo.cosmo_dic['NL_flag_spectro'] = self.NL_flag_spectro
+            self.cosmo.cosmo_dic['IA_flag'] = self.IA_flag
             self.cosmo.cosmo_dic['NL_flag_phot_baryon'] = \
                 self.NL_flag_phot_baryon
             self.cosmo.cosmo_dic['Baryon_redshift_model'] = \
@@ -504,6 +505,8 @@ class EuclidLikelihood(Likelihood):
                 info['likelihood']['Euclid']['NL_flag_phot_bias']
             self.cosmo.cosmo_dic['NL_flag_spectro'] = \
                 info['likelihood']['Euclid']['NL_flag_spectro']
+            self.cosmo.cosmo_dic['IA_flag'] = \
+                info['likelihood']['Euclid']['IA_flag']
             self.cosmo.cosmo_dic['NL_flag_phot_baryon'] = \
                 info['likelihood']['Euclid']['NL_flag_phot_baryon']
             self.cosmo.cosmo_dic['Baryon_redshift_model'] = \

@@ -52,6 +52,10 @@ Cobaya:
       #     0 -> linear-only
       #     1 -> EFT
       NL_flag_spectro: 0
+      # Intrinsic alignment flag
+      #     0 -> NLA
+      #     1 -> TATT
+      IA_flag: 0
       # Use magnification bias for GC spectro
       use_magnification_bias_spectro: False
       # Bias Model

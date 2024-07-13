@@ -29,6 +29,7 @@ dependencies:
   - gsl==2.7
   - cxx-compiler
   - gfortran
+  - fitsio
   - pip:
     # Domain-specific 3rd-party Python package (from PyPI)
     - cobaya==3.3.1

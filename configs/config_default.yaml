@@ -130,4 +130,13 @@ Cobaya:
       extra_args: {}
       stop_at_error: true
   timing: true
+Cosmosis:
+  # WARNING: at present CosmoSIS can only be used together with CAMB
+  # (i.e. not CLASS).
+  # At present the cosmosis configuration is fully delegated to ini files,
+  # therefore the only Cosmosis-related parameter is the name of the ini
+  # file to be used. There are two possibilites at present:
+  # - run_cosmsosis.ini
+  # - run_cosmosis_with_cobaya.ini
+  ini_file: run_cosmosis.ini
 action: run

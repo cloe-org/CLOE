@@ -67,9 +67,9 @@ def get_choice(options, name, valid, default=None, prefix=''):
     return prefix + choice
 
 def setup(options):
-    # Get CAMB options from the cobaya config file 
+    # Get CAMB options from the config file 
     cloe_config_file = options.get_string(opt, 'cloe_config_file')
-    cloe_config_dict = yaml_handler.yaml_read(cloe_config_file)['Cobaya']
+    cloe_config_dict = yaml_handler.yaml_read(cloe_config_file)['Cosmosis']
     
     mode = 'power'
     # These are parameters for CAMB
@@ -124,7 +124,7 @@ def setup(options):
     more_config['use_ppf_w'] = options.get_bool(opt, 'use_ppf_w', default=False)
     more_config['do_bao'] = options.get_bool(opt, 'do_bao', default=True)
     
-    # Check nonlinear specifications based on cobaya config file
+    # Check nonlinear specifications based on config file
     if cloe_config_dict['likelihood']['Euclid']['NL_flag_phot_matter'] == 0 and cloe_config_dict['likelihood']['Euclid']['NL_flag_spectro'] == 0:
         config['NonLinear'] = 'NonLinear_none'
         more_config["nonlinear_params"] = {}
@@ -556,6 +556,10 @@ def save_matter_power(r, block, more_config):
     # Get growth rates and sigma_8
     sigma_8 = r.get_sigma8()[::-1]
     fsigma_8 = r.get_fsigma8()[::-1]
+    sigmaR = r.get_sigmaR(np.linspace(5, 50, 100), \
+                 var1 = 'delta_tot', var2 = 'delta_tot')[::-1]
+    sigmaR_cb = r.get_sigmaR(np.linspace(5, 50, 100), \
+                 var1 = 'delta_nonu', var2 = 'delta_nonu')[::-1]
     rs_DV, H, DA, F_AP = r.get_BAO(z, p).T
 
     D = compute_growth_factor(r, block, P_tot, k, z, more_config)
@@ -566,6 +570,8 @@ def save_matter_power(r, block, more_config):
     block[names.growth_parameters, "a"] = 1/(1+z)
     block[names.growth_parameters, "sigma_8"] = sigma_8
     block[names.growth_parameters, "fsigma_8"] = fsigma_8
+    block[names.growth_parameters, "sigmaR"] = sigmaR
+    block[names.growth_parameters, "sigmaR_cb"] = sigmaR_cb
     block[names.growth_parameters, "rs_DV"] = rs_DV
     block[names.growth_parameters, "H"] = H
     block[names.growth_parameters, "DA"] = DA

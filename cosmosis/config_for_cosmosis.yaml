@@ -1,7 +1,5 @@
 define: &solver camb
-Cobaya:
-  # Documentation about Cobaya keys can be found at:
-  # https://cobaya.readthedocs.io/en/latest/cosmo_basic_runs.html
+Cosmosis:
   debug: false
   force: true
   # keep params dict empty, as they will be read in from CosmoSIS
@@ -22,7 +20,6 @@ Cobaya:
     Euclid:
       aliases:
       - euclid
-      external: !!python/name:cloe.cobaya_interface.EuclidLikelihood
       # Selected Boltzmann solver
       solver: camb
       # Speed in evaluations/second

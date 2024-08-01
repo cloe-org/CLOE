@@ -35,6 +35,20 @@ class LikelihoodUI_test(TestCase):
                                                      {},
                                                  'data': '/dev/null'}},
                        'theory': {'camb': {}}},
+            'Cosmosis': {},
+            'action': 'run'
+        }
+        self.config_cosmosis = {
+            'backend': 'Cosmosis',
+            'Cobaya': {},
+            'Cosmosis': {'params': 'file.yaml',
+                         'likelihood': {'Euclid': {'NL_flag_phot_matter': 0,
+                                                   'NL_flag_spectro': 0,
+                                                   'observables_selection': {},
+                                                   'observables_specification':
+                                                   {},
+                                                   'data': '/dev/null'}},
+                         'theory': {'camb': {}}},
             'action': 'run'
         }
         self.config_action_invalid = {
@@ -46,6 +60,7 @@ class LikelihoodUI_test(TestCase):
                                                  'observables_specification':
                                                      {},
                                                  'data': '/dev/null'}}},
+            'Cosmosis': {},
             'action': 'invalid'}
         # for testing _update_config(), since it contains a nested dictionary
         # and a plain key/value pair, this should be sufficient to achieve
@@ -103,10 +118,7 @@ class LikelihoodUI_test(TestCase):
     @patch('cloe.auxiliary.yaml_handler.yaml_read_and_check_dict')
     def test_init_backend_cosmosis(self, yaml_read_mock, log_mock):
         yaml_read_mock.return_value = self.config_backend_cosmosis
-        self.assertRaises(NotImplementedError,
-                          LikelihoodUI,
-                          user_config_file=self.file_name)
-        self.assertEqual(yaml_read_mock.call_count, 2)
+        self.assertEqual(yaml_read_mock.call_count, 0)
 
     # test behavior when the requested backend is cobaya
     @patch('cloe.auxiliary.logger.log_info')
@@ -232,9 +244,8 @@ class LikelihoodUI_test(TestCase):
         self.assertEqual(backend, 'Cobaya')
 
     def test_get_and_check_backend_cosmosis(self):
-        self.assertRaises(NotImplementedError,
-                          LikelihoodUI._get_and_check_backend,
-                          self.config_backend_cosmosis)
+        backend = LikelihoodUI._get_and_check_backend(self.config_cosmosis)
+        self.assertEqual(backend, 'Cosmosis')
 
     def test_get_and_check_backend_invalid(self):
         self.assertRaises(ValueError,

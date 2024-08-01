@@ -628,7 +628,7 @@ class Photo:
         win_eff_tril = np.tril(win_eff)
 
         if self.theory['magbias_model'] != 2:
-            win_eff_tril *= self.magbias(z)
+            win_eff_tril *= self.magbias(z[:, None])
 
         integral_arr = np.trapz(win_eff_tril, z, axis=0)
         # subtraction of the first triangle

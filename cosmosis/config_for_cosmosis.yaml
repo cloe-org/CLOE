@@ -83,6 +83,7 @@ Cosmosis:
                             root_mixing_matrix: mm_FS230degCircle_m3_nosm_obsz_z0.9-1.1.fits
                         photo: 
                             redshifts: [0.2095, 0.489, 0.619, 0.7335, 0.8445, 0.9595, 1.087, 1.2395, 1.45, 2.038]
+                            photo_data: standard
                             ndens_GC: niTab-EP10-RB00.dat
                             ndens_WL: niTab-EP10-RB00.dat
                             luminosity_ratio: luminosity_ratio.dat
@@ -91,6 +92,7 @@ Cosmosis:
                             root_GC: Cls_{:s}_PosPos.dat
                             root_WL: Cls_{:s}_ShearShear.dat
                             root_XC: Cls_{:s}_PosShear.dat
+                            root_fits: fs2_cls_{:d}zbins_32ellbins.fits
                             IA_model: zNLA
                             # Photometric covariances root names should contain z{:s} string
                             # to specify how the covariance was calculated

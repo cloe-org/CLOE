@@ -11,6 +11,7 @@ from astropy.io import fits, ascii
 from pathlib import Path
 from scipy import interpolate
 from scipy import integrate
+from euclidlib.photo._le3_pk_wl import angular_power_spectra
 
 
 class ReaderError(Exception):
@@ -493,6 +494,7 @@ class Reader:
             Sub-folder of :obj:`self.data_subdirectory` within which to find
             photometric data
         """
+
         root_GC = self.data['photo']['root_GC']
         root_WL = self.data['photo']['root_WL']
         root_XC = self.data['photo']['root_XC']
@@ -518,56 +520,100 @@ class Reader:
         else:
             scale_var_str = 'thetas'
 
-        GC_phot_dict = {}
-        WL_dict = {}
-        XC_phot_dict = {}
-
-        full_path = Path(self.dat_dir_main, file_dest)
-
-        GC_file = ascii.read(
-            Path(full_path, root_GC.format(IA_model)),
-            encoding='utf-8',
-        )
-        WL_file = ascii.read(
-            Path(full_path, root_WL.format(IA_model)),
-            encoding='utf-8',
-        )
-        XC_file = ascii.read(
-            Path(full_path, root_XC.format(IA_model)),
-            encoding='utf-8',
-        )
-
-        header_GC = GC_file.colnames
-        for i in range(len(header_GC)):
-            GC_phot_dict[header_GC[i]] = GC_file[header_GC[i]].data
-
-        header_WL = WL_file.colnames
-        for i in range(len(header_WL)):
-            WL_dict[header_WL[i]] = WL_file[header_WL[i]].data
-
-        header_XC = XC_file.colnames
-        for i in range(len(header_XC)):
-            XC_phot_dict[header_XC[i]] = XC_file[header_XC[i]].data
-
         self.numtomo_wl = len(self.nz_dict_WL)
         self.numtomo_gcphot = len(self.nz_dict_GC_Phot)
         self.num_bins_wl = int(self.numtomo_wl * (self.numtomo_wl + 1) / 2)
         self.num_bins_xcphot = self.numtomo_wl * self.numtomo_gcphot
         self.num_bins_gcphot = int(self.numtomo_gcphot *
                                    (self.numtomo_gcphot + 1) / 2)
+
+        GC_phot_dict = {}
+        WL_dict = {}
+        XC_phot_dict = {}
+
+        full_path = Path(self.dat_dir_main, file_dest)
+
+        if self.data['photo']['photo_data'] == 'standard':
+
+            GC_file = ascii.read(
+                Path(full_path, root_GC.format(IA_model)),
+                encoding='utf-8',
+            )
+            WL_file = ascii.read(
+                Path(full_path, root_WL.format(IA_model)),
+                encoding='utf-8',
+            )
+            XC_file = ascii.read(
+                Path(full_path, root_XC.format(IA_model)),
+                encoding='utf-8',
+            )
+
+            header_GC = GC_file.colnames
+            for i in range(len(header_GC)):
+                GC_phot_dict[header_GC[i]] = GC_file[header_GC[i]].data
+
+            header_WL = WL_file.colnames
+            for i in range(len(header_WL)):
+                WL_dict[header_WL[i]] = WL_file[header_WL[i]].data
+
+            header_XC = XC_file.colnames
+            for i in range(len(header_XC)):
+                XC_phot_dict[header_XC[i]] = XC_file[header_XC[i]].data
+
+            del (GC_file)
+            del (WL_file)
+            del (XC_file)
+
+        elif self.data['photo']['photo_data'] == 'LE3':
+
+            root_fits = self.data['photo']['root_fits'].format(
+                self.numtomo_wl)
+
+            self.loaded_cls = angular_power_spectra(
+                path=f'{full_path}/{root_fits}',
+                include=None,
+                exclude=None,
+            )
+
+            for zi in range(self.numtomo_gcphot):
+                for zj in range(self.numtomo_wl):
+                    XC_phot_dict[f'P{zi + 1}-E{zj + 1}'] = \
+                        self.loaded_cls[('P', 'G_E', zi, zj)]['CL'].astype(
+                            'float64')
+
+            for zi in range(self.numtomo_wl):
+                for zj in range(zi, self.numtomo_wl):
+                    WL_dict[f'E{zi + 1}-E{zj + 1}'] = \
+                        self.loaded_cls[('G_E', 'G_E', zi, zj)]['CL'].astype(
+                            'float64')
+
+            for zi in range(self.numtomo_gcphot):
+                for zj in range(zi, self.numtomo_gcphot):
+                    GC_phot_dict[f'P{zi + 1}-P{zj + 1}'] = \
+                        self.loaded_cls[('P', 'P', zi, zj)]['CL'].astype(
+                            'float64')
+
+            WL_dict['ells'] = \
+                self.loaded_cls[('G_E', 'G_E', 5, 5)]['L'].astype('float64')
+            XC_phot_dict['ells'] = \
+                self.loaded_cls[('P', 'G_E', 5, 5)]['L'].astype('float64')
+            GC_phot_dict['ells'] = \
+                self.loaded_cls[('P', 'P', 5, 5)]['L'].astype('float64')
+
+        else:
+            raise ValueError(
+                'photo_data must be either "standard" or "LE3"')
+
         self.num_scales_wl = len(WL_dict[scale_var_str])
         self.num_scales_xcphot = len(XC_phot_dict[scale_var_str])
         self.num_scales_gcphot = len(GC_phot_dict[scale_var_str])
 
-        tx2_cov_str = self.data['photo']['cov_3x2pt'].format(self.data[
-            'photo']['cov_model'])
-        tx2_cov = np.load(Path(full_path, tx2_cov_str))['arr_0']
         self.data_dict['WL'] = WL_dict
         self.data_dict['XC-Phot'] = XC_phot_dict
         self.data_dict['GC-Phot'] = GC_phot_dict
-        self.data_dict['3x2pt_cov'] = tx2_cov
 
-        del (GC_file)
-        del (WL_file)
-        del (XC_file)
+        tx2_cov_str = self.data['photo']['cov_3x2pt'].format(self.data[
+            'photo']['cov_model'])
+        tx2_cov = np.load(Path(full_path, tx2_cov_str))['arr_0']
+        self.data_dict['3x2pt_cov'] = tx2_cov
         return

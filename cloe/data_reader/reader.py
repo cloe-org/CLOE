@@ -617,3 +617,91 @@ class Reader:
         tx2_cov = np.load(Path(full_path, tx2_cov_str))['arr_0']
         self.data_dict['3x2pt_cov'] = tx2_cov
         return
+
+    def read_cmbx(self, file_dest='cmbx'):
+        """Read Phot
+
+        Function to read CMB lensing files, based on
+        location provided to Reader class. Adds contents to
+        the data dictionary (Reader.data_dict).
+
+        Parameters
+        ----------
+        file_dest: str
+            Sub-folder of self.data_subdirectory within which to find
+            the CMB lensing data.
+        """
+
+        root_dir = Path(__file__).resolve().parents[2]
+        cmbx_dir = Path(root_dir, 'data', file_dest)
+
+        if 'cmbx' not in self.data:
+            self.data['cmbx'] = {'root_CMBlens': 'Cls_kCMB.dat',
+                                 'root_CMBlensxWL': 'Cls_kCMBxWL.dat',
+                                 'root_CMBlensxGC': 'Cls_kCMBxGC.dat',
+                                 'root_CMBisw': 'Cls_{:s}_ISWxGC.dat',
+                                 'ISW_model': 'zNLA',
+                                 'cov_7x2pt': 'Cov_7x2pt_WL_GC_CMBX.npy'}
+        else:
+            defaults = {
+                'root_CMBlens': 'Cls_kCMB.dat',
+                'root_CMBlensxWL': 'Cls_kCMBxWL.dat',
+                'root_CMBlensxGC': 'Cls_kCMBxGC.dat',
+                'root_CMBisw': 'Cls_{:s}_ISWxGC.dat',
+                'ISW_model': 'zNLA',
+                'cov_7x2pt': 'Cov_7x2pt_WL_GC_CMBX.npy'
+            }
+
+            self.data.setdefault('cmbx', {}).update(
+                {k: v for k, v in defaults.items()
+                 if k not in self.data['cmbx']})
+
+        KK_file = ascii.read(
+            Path(cmbx_dir, self.data['cmbx']['root_CMBlens']),
+            encoding='utf-8',
+        )
+
+        KWL_file = ascii.read(
+            Path(cmbx_dir, self.data['cmbx']['root_CMBlensxWL']),
+            encoding='utf-8',
+        )
+
+        KGC_file = ascii.read(
+            Path(cmbx_dir, self.data['cmbx']['root_CMBlensxGC']),
+            encoding='utf-8',
+        )
+
+        ISWxGC_file = ascii.read(
+            Path(cmbx_dir, self.data['cmbx']['root_CMBisw'].format(
+                self.data['cmbx']['ISW_model'])),
+            encoding='utf-8',
+        )
+
+        kCMB_dict = {}
+        kCMBxWL_dict = {}
+        kCMBxGC_dict = {}
+        ISWxGC_dict = {}
+
+        for dico, datafile in zip(
+                [kCMB_dict, kCMBxWL_dict, kCMBxGC_dict, ISWxGC_dict],
+                [KK_file, KWL_file, KGC_file, ISWxGC_file]
+        ):
+            header = datafile.colnames
+            for i in range(len(header)):
+                dico[header[i]] = datafile[header[i]].data
+
+        self.data_dict['kCMB'] = kCMB_dict
+        self.data_dict['kCMBxWL'] = kCMBxWL_dict
+        self.data_dict['kCMBxGC'] = kCMBxGC_dict
+        self.data_dict['ISWxGC'] = ISWxGC_dict
+
+        cov_7x2_str = self.data['cmbx']['cov_7x2pt']
+        cov_7x2 = np.load(Path(cmbx_dir, cov_7x2_str))
+        self.data_dict['7x2pt_cov'] = cov_7x2
+
+        del (KK_file)
+        del (KWL_file)
+        del (KGC_file)
+        del (ISWxGC_file)
+
+        return

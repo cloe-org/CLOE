@@ -1,0 +1,3 @@
+# This is the default specification file for CMB lensing probe
+statistics: angular_power_spectrum
+ell_range: [[20, 4000]]

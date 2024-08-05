@@ -1,0 +1,3 @@
+[submodule "data/cmbx/so_noise_models"]
+	path = data/cmbx/so_noise_models
+	url = https://github.com/simonsobs/so_noise_models

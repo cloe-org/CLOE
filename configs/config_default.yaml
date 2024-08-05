@@ -120,6 +120,11 @@ Cobaya:
         WL-GCspectro:
           angular_power_spectrum: WL-GCspectro-FourierSpace.yaml
           angular_correlation_function: WL-GCspectro-ConfigurationSpace.yaml
+        # CMBX probes
+        CMBlens: CMBlensing.yaml
+        CMBlens-GCphot: CMBlensing-GCphot.yaml
+        CMBlens-WL: CMBlensing-WL.yaml
+        ISW-GCphot: iSW-GCphot.yaml
   output: chains/my_euclid_experiment
   params: ./model_default.yaml
   sampler:

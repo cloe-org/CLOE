@@ -18,5 +18,15 @@ GCphot:
   GCspectro: False
 GCspectro:
   GCspectro: True
+CMBlens:
+  CMBlens: False
+  WL: False
+  GCphot: False
+  GCspectro: False
+CMBisw:
+  GCphot: False
+  CMBlens: False
+  WL: False
+  GCspectro: False
 CG:
   CG: False

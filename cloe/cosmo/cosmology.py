@@ -265,6 +265,7 @@ class Cosmology:
                           'MG_sigma': None,
                           # Lists
                           'z_win': None,
+                          'z_win_max': None,
                           'k_win': None,
                           'comov_dist': None,
                           'angular_dist': None,
@@ -955,6 +956,7 @@ class Cosmology:
         Adds an interpolator for the growth factor (function of redshift and
         scale) to the cosmo dictionary.
         """
+
         if self.cosmo_dic['use_gamma_MG']:
             z_win = self.cosmo_dic['z_win']
             self.cosmo_dic['D_z_k_func_MG'] = \
@@ -975,7 +977,10 @@ class Cosmology:
         """
 
         self.cosmo_dic['r_z_func'] = interpolate.InterpolatedUnivariateSpline(
-            x=self.cosmo_dic['z_win'], y=self.cosmo_dic['comov_dist'], ext=2)
+            x=self.cosmo_dic['z_win_max'],
+            y=self.cosmo_dic['comov_dist'],
+            ext=2
+        )
 
     def interp_z_of_r(self):
         """Interpolates the redshift.
@@ -996,7 +1001,7 @@ class Cosmology:
         """
         self.cosmo_dic['z_r_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['comov_dist'],
-            y=self.cosmo_dic['z_win'], ext='zeros')
+            y=self.cosmo_dic['z_win_max'], ext='zeros')
 
     def interp_transverse_comoving_dist(self):
         """Interpolates the transverse comoving distance.
@@ -1029,7 +1034,7 @@ class Cosmology:
         transverse comoving distance as a function of the specified
         redshifts.
         """
-        x_int = self.cosmo_dic['z_win']
+        x_int = self.cosmo_dic['z_win_max']
 
         if isinstance(self.cosmo_dic['comov_dist'], tuple):
             comov_dist = np.array(self.cosmo_dic['comov_dist'][0])
@@ -1990,6 +1995,9 @@ class Cosmology:
         # r(z), fsigma8, sigma8, f(z), D_A(z)
         if self.cosmo_dic['z_win'] is None:
             raise Exception('Boltzmann code redshift binning has not been '
+                            'supplied to cosmo_dic.')
+        elif self.cosmo_dic['z_win_max'] is None:
+            raise Exception('Extended redshift binning has not been '
                             'supplied to cosmo_dic.')
         self.interp_H()
         self.interp_H_Mpc()

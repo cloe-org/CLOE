@@ -10,6 +10,7 @@ from cloe.clusters_of_galaxies.CG import CG
 from cloe.data_reader import reader
 from cloe.masking.masking import Masking
 from cloe.masking.data_handler import Data_handler
+from cloe.cmbx_p.cmbx import CMBX
 from cloe.photometric_survey.redshift_distribution \
     import RedshiftDistribution
 from cloe.auxiliary.matrix_transforms import BNT_transform
@@ -39,6 +40,16 @@ class Euclike:
         self.observables = observables
         self.do_photo = (any(observables['selection']['WL'].values()) or
                          any(observables['selection']['GCphot'].values()))
+        try:
+            self.do_cmbx = (
+                any(observables['selection']['CMBlens'].values()) or
+                any(observables['selection']['CMBisw'].values())
+            )
+        except KeyError:
+            self.do_cmbx = False
+
+        # Get the photo probes even when doing CMBX analysis only
+        self.do_photo = self.do_photo or self.do_cmbx
         self.do_spectro = any(observables['selection']['GCspectro'].values())
         self.do_clusters = any(observables['selection']['CG'].values())
 
@@ -153,6 +164,12 @@ class Euclike:
                                             ells_XC=self.scales_XC,
                                             ells_GC_phot=self.scales_GC_phot)
 
+                if self.do_cmbx:
+                    # Read CMB data
+                    self.data_ins.read_cmbx()
+                    # CMBX class instance
+                    self.cmbx_ins = CMBX(self.phot_ins)
+
         if self.do_spectro:
             # Read spectro
             self.data_ins.read_GC_spectro()
@@ -195,6 +212,8 @@ class Euclike:
             # precompute matrix transforms needed for photo data
             self.precompute_matrix_transform_phot()
             phot_data = self.create_photo_data()
+            if self.do_cmbx:
+                phot_data.update(self.create_photoxcmb_data())
         if self.do_spectro:
             spectrodata = self.create_spectro_data()
             spectrocov = self.create_spectro_cov()
@@ -211,6 +230,8 @@ class Euclike:
         elif self.do_photo:
             datafinal = phot_data
             covfinal = {'3x2pt': self.data_ins.data_dict['3x2pt_cov']}
+        if self.do_cmbx:
+            covfinal['7x2pt'] = self.data_ins.data_dict['7x2pt_cov']
 
         self.data_handler_ins = Data_handler(datafinal,
                                              covfinal,
@@ -337,7 +358,8 @@ class Euclike:
                                                     obs='GC-phot')
         datavec_dict['all'] = np.concatenate((datavec_dict['WL'],
                                               datavec_dict['XC-Phot'],
-                                              datavec_dict['GC-Phot']), axis=0)
+                                              datavec_dict['GC-Phot'],
+                                              ), axis=0)
 
         return datavec_dict
 
@@ -447,9 +469,117 @@ class Euclike:
                                                     obs='GC-phot')
 
         photo_theory_vec = np.concatenate(
-            (wl_array, xc_phot_array, gc_phot_array), axis=0)
+            (wl_array, xc_phot_array, gc_phot_array),
+            axis=0)
 
         return photo_theory_vec
+
+    def create_photoxcmb_data(self):
+        """
+        Create data for photoxcmb
+
+        Arranges the photoxcmbx data vector for the
+        likelihood into its final format
+
+        Returns
+        -------
+        datavec_dict: dict
+            returns a dictionary of arrays with the transformed photoxcmbx data
+        """
+        CMBX_dict = {}
+        CMBX_dict['kCMB'] = self.data_ins.data_dict['kCMB']['kCMB-kCMB']
+
+        self.tomo_ind_kCMBxWL = list(
+            self.data_ins.data_dict['kCMBxWL'].keys())[1:]
+        CMBX_dict['kCMBxWL'] = np.array(
+            [self.data_ins.data_dict['kCMBxWL'][key][scale] for scale in range(
+                len(self.data_ins.data_dict['kCMBxWL']['ells']))
+             for key in self.tomo_ind_kCMBxWL])
+
+        self.tomo_ind_kCMBxGC = list(
+            self.data_ins.data_dict['kCMBxGC'].keys())[1:]
+        CMBX_dict['kCMBxGC'] = np.array(
+            [self.data_ins.data_dict['kCMBxGC'][key][scale] for scale in range(
+                len(self.data_ins.data_dict['kCMBxGC']['ells']))
+             for key in self.tomo_ind_kCMBxGC])
+
+        self.tomo_ind_ISWxGC = list(
+            self.data_ins.data_dict['ISWxGC'].keys())[1:]
+        CMBX_dict['ISWxGC'] = np.array(
+            [self.data_ins.data_dict['ISWxGC'][key][scale] for scale in range(
+                len(self.data_ins.data_dict['ISWxGC']['ells']))
+             for key in self.tomo_ind_ISWxGC])
+
+        return CMBX_dict
+
+    def create_photoxcmb_theory(self):
+        r"""Create theory vector
+
+        Create theory vector for CMB lensing auto and cross
+        with WL and GC-photo and ISW cross GCphot as well
+        The cosmology dictionnary is not given as input as it
+        was already updated in the instanciation of the
+        create_photo_theory function
+
+        Returns
+        -------
+        cmbx_theory_vec: numpy.ndarray
+            returns an array  with entries being
+            [kCMBxkCMB, kCMBxWL, kCMBxGC, iSWxGC]
+        """
+        # The binning in ell of CMB lensing is the same
+        # as for the Euclid Photo WL
+        # we could update this for more optimal binning
+
+        # CMB lens class instance
+        self.cmbx_ins.cmbx_update(self.phot_ins)
+
+        # Obtain the theory for kCMB
+        if self.data_handler_ins.use_kCMB:
+            kCMB_array = self.cmbx_ins.Cl_kCMB(
+                self.data_ins.data_dict['kCMB']['ells'])
+        else:
+            kCMB_array = np.zeros(self.data_handler_ins._kCMB_size)
+
+        # Obtain the theory for WL X kCMB
+        # (binning indices start at one)
+        if self.data_handler_ins.use_kCMB_wl:
+            kCMBxWL_array = np.array(
+                [self.cmbx_ins.Cl_kCMB_X_WL(
+                    self.data_ins.data_dict['kCMBxWL']['ells'], bin_i + 1)
+                    for bin_i in range(self.data_ins.numtomo_wl)]
+                                    ).flatten('F')
+        else:
+            kCMBxWL_array = np.zeros(self.data_handler_ins._kCMBxWL_size)
+
+        # Obtain the theory for GC-Phot X kCMB
+        if self.data_handler_ins.use_kCMB_gc:
+            kCMBxGC_array = np.array(
+                [self.cmbx_ins.Cl_kCMB_X_GC_phot(
+                    self.data_ins.data_dict['kCMBxGC']['ells'], bin_i + 1)
+                    for bin_i in range(self.data_ins.numtomo_gcphot)]
+                                    ).flatten('F')
+        else:
+            kCMBxGC_array = np.zeros(self.data_handler_ins._kCMBxGC_size)
+
+        # Obtain the theory for ISWxGC
+        if self.data_handler_ins.use_iswxgc:
+            iswxgc_array = np.array(
+                [self.cmbx_ins.Cl_ISWxGC(
+                    self.data_ins.data_dict['ISWxGC']['ells'], bin_i + 1)
+                    for bin_i in range(self.data_ins.numtomo_gcphot)]
+                                    ).flatten('F')
+        else:
+            iswxgc_array = np.zeros(
+                len(self.data_ins.data_dict['ISWxGC']['ells']) *
+                self.data_ins.numtomo_gcphot
+            )
+
+        cmbx_theory_vec = np.concatenate(
+                (kCMB_array, kCMBxWL_array, kCMBxGC_array, iswxgc_array),
+                axis=0)
+
+        return cmbx_theory_vec
 
     def precompute_matrix_transform_phot(self):
         """Precompute Matrix Transform Phot
@@ -917,6 +1047,10 @@ class Euclike:
 
         if self.do_photo:
             photo_theory_vec = self.create_photo_theory(dictionary)
+            if self.do_cmbx:
+                cmbx_theory_vec = self.create_photoxcmb_theory()
+                photo_theory_vec = np.concatenate(
+                    (photo_theory_vec, cmbx_theory_vec), axis=0)
             self.mask_ins_phot.set_theory_vector(photo_theory_vec)
             masked_data_minus_theory_phot = (
                     self.masked_data_vector_phot -

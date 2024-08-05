@@ -11,6 +11,7 @@ class mock_CAMB_data:
     def __init__(self, rz_interp):
 
         self.rz_interp = rz_interp
+        self.tau_maxvis = 280.3131227977019
 
     def angular_diameter_distance2(self, z1, z2):
         """Angular diameter distance."""
@@ -20,6 +21,11 @@ class mock_CAMB_data:
         )
 
         return add2
+
+    def conformal_time(self, z):
+        """Conformal time at z=0"""
+        assert z == 0
+        return 14142.8258677949
 
 
 class mock_P_obj:
@@ -68,6 +74,11 @@ def update_dict_w_mock(cosmo_dict):
 
     if 'Pdd_phot' in cosmo_dict.keys():
         cosmo_dict['Pk_delta'] = mock_P_obj(cosmo_dict['Pdd_phot'])
+
+    # Todo: this is a place holder,
+    # should update that with the Weyl potential P(k)
+    # if 'Pk_weyl' in cosmo_dict.keys():
+    #     cosmo_dict['Pk_weyl'] = mock_P_obj(cosmo_dict['Pk_weyl'])
 
     if 'r_z_func' in cosmo_dict.keys():
         cosmo_dict['CAMBdata'] = mock_CAMB_data(cosmo_dict['r_z_func'])

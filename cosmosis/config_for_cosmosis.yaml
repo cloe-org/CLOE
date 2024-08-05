@@ -49,6 +49,8 @@ Cosmosis:
       # Select statistics for photometric probes (angular_power_spectrum
       # or angular_correlation_function)
       statistics_photo: angular_power_spectrum
+      # Select statistics for clusters
+      statistics_clusters: cluster_counts
       # Add RSD to photometric probes
       add_phot_RSD: True
       # Apply a generic matrix transformation to the photo observables (available options: 'BNT', 'BNT-test')
@@ -102,6 +104,13 @@ Cosmosis:
                             cov_model: Gauss 
                             cov_is_num: False
                             cov_nsim: 10000
+                        cmbx:
+                            root_CMBlens: Cls_kCMB.dat
+                            root_CMBlensxWL: Cls_kCMBxWL.dat
+                            root_CMBlensxGC: Cls_kCMBxGC.dat
+                            root_CMBisw: Cls_{:s}_ISWxGC.dat
+                            ISW_model: zNLA
+                            cov_7x2pt: Cov_7x2pt_WL_GC_CMBX.npy
                         CG:
                             file_names_CC: data_CG_CC.dat
                             file_cov_names_CC: data_cov_CG_CC.dat
@@ -119,6 +128,16 @@ Cosmosis:
                             GCphot: True
                             GCspectro: False
                           GCspectro:
+                            GCspectro: False
+                          CMBlens:
+                            CMBlens: False
+                            WL: False
+                            GCphot: False
+                            GCspectro: False
+                          CMBisw:
+                            GCphot: False
+                            CMBlens: False
+                            WL: False
                             GCspectro: False
                           CG:
                             CG: False
@@ -951,6 +970,96 @@ Cosmosis:
                       ell_range: [[20, 4000]]
                     n13:
                       ell_range: [[20, 4000]]
+        CMBlensing: 
+           angular_power_spectrum:
+              ell_range: [[20, 4000]]
+        CMBlensing-WL: 
+           angular_power_spectrum:
+              bins:
+                 n1:
+                   ell_range: [[20, 4000]]
+                 n2:
+                   ell_range: [[20, 4000]]
+                 n3:
+                   ell_range: [[20, 4000]]
+                 n4:
+                   ell_range: [[20, 4000]]
+                 n5:
+                   ell_range: [[20, 4000]]
+                 n6:
+                   ell_range: [[20, 4000]]
+                 n7:
+                   ell_range: [[20, 4000]]
+                 n8:
+                   ell_range: [[20, 4000]]
+                 n9:
+                   ell_range: [[20, 4000]]
+                 n10:
+                   ell_range: [[20, 4000]]
+                 n11:
+                   ell_range: [[20, 4000]]
+                 n12:
+                   ell_range: [[20, 4000]]
+                 n13:
+                   ell_range: [[20, 4000]]
+        CMBlensing-GCphot: 
+           angular_power_spectrum:
+              bins:
+                 n1:
+                   ell_range: [[20, 4000]]
+                 n2:
+                   ell_range: [[20, 4000]]
+                 n3:
+                   ell_range: [[20, 4000]]
+                 n4:
+                   ell_range: [[20, 4000]]
+                 n5:
+                   ell_range: [[20, 4000]]
+                 n6:
+                   ell_range: [[20, 4000]]
+                 n7:
+                   ell_range: [[20, 4000]]
+                 n8:
+                   ell_range: [[20, 4000]]
+                 n9:
+                   ell_range: [[20, 4000]]
+                 n10:
+                   ell_range: [[20, 4000]]
+                 n11:
+                   ell_range: [[20, 4000]]
+                 n12:
+                   ell_range: [[20, 4000]]
+                 n13:
+                   ell_range: [[20, 4000]]
+        ISW-GCphot: 
+           angular_power_spectrum:
+              bins:
+                 n1:
+                   ell_range: [[20, 550]]
+                 n2:
+                   ell_range: [[20, 550]]
+                 n3:
+                   ell_range: [[20, 550]]
+                 n4:
+                   ell_range: [[20, 550]]
+                 n5:
+                   ell_range: [[20, 550]]
+                 n6:
+                   ell_range: [[20, 550]]
+                 n7:
+                   ell_range: [[20, 550]]
+                 n8:
+                   ell_range: [[20, 550]]
+                 n9:
+                   ell_range: [[20, 550]]
+                 n10:
+                   ell_range: [[20, 550]]
+                 n11:
+                   ell_range: [[20, 550]]
+                 n12:
+                   ell_range: [[20, 550]]
+                 n13:
+                   ell_range: [[20, 550]]
         CG:
           CG_probe: CC
           CG_xi2_cov_selection: CG_nonanalytic_cov

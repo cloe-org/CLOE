@@ -45,6 +45,7 @@ def setup(options):
     #Get user input from ini file
     config_file = options.get_string(option_section,\
                                      'config_file')
+
     #Load the info on Euclid Likelihood from yaml file
     config_path = config_file
     config_dict = yaml_read(config_path)
@@ -70,6 +71,12 @@ def setup(options):
         if key in ['WL', 'GCphot', 'WL-GCphot']:
             observables['specifications'][key]['statistics'] = \
                 info['statistics_photo']
+
+    # Clusters of galaxies
+    if 'CG' in observables['specifications'].keys():
+        observables['specifications']['CG']['statistics'] = \
+            info['statistics_clusters']
+
     # initialize Euclike class
     likefinal = Euclike(data, observables)
     # initialize cosmo dict
@@ -79,6 +86,20 @@ def setup(options):
                                 info['z_min'], info['z_max'], info['z_samp'])
     cloe_cosmo.cosmo_dic['k_win'] = np.logspace(np.log10(info['k_min_extrap']),
                                  np.log10(info['k_max_extrap']), info['k_samp'])
+
+    a = info['observables_selection']
+    # We redefine upper z bound.
+    # In case we don't need CMB lensing auto spectra then it stays the same
+    cloe_cosmo.cosmo_dic['z_max_cmb'] = 1200
+    cloe_cosmo.cosmo_dic['z_samp_log'] = 20
+    cloe_cosmo.cosmo_dic['z_win_max'] = cloe_cosmo.cosmo_dic['z_win']
+    if info['observables_selection']['CMBlens']['CMBlens']:
+        # Append higher redshifts for the CMB lensing computations
+        cloe_cosmo.cosmo_dic['z_win_max'] = np.logspace(
+            np.log10(cloe_cosmo.cosmo_dic['z_win'][-1]),
+            np.log10(cloe_cosmo.cosmo_dic['z_max_cmb']), cloe_cosmo.cosmo_dic['z_samp_log'])
+        cloe_cosmo.cosmo_dic['z_win_max'] = np.unique(np.append(cloe_cosmo.cosmo_dic['z_win'], cloe_cosmo.cosmo_dic['z_win_max']))
+
     # read in options from yaml dict, store in cosmo dict
     cloe_cosmo.cosmo_dic['NL_flag_phot_matter'] = \
             info['NL_flag_phot_matter']
@@ -118,7 +139,17 @@ def setup(options):
         fid_cosmo.cosmo_dic)
     # Compute the data vectors
     # and initialize possible matrix transforms
-    likefinal.get_masked_data()
+    if not any(info['observables_selection']['CG'].values()):
+        likefinal.get_masked_data()
+    else:
+        if (
+            any(info['observables_selection']['WL'].values()) or
+            any(info['observables_selection']['GCphot'].values()) or
+            any(info['observables_selection']['GCspectro'].values())
+        ):
+            raise ValueError(
+                'Galaxy cluster probes cannot be combined with others.'
+            )
     # Add the luminosity_ratio_z_func to the cosmo_dic after data has been
     # read and stored in the data_ins attribute of Euclike
     cloe_cosmo.cosmo_dic['luminosity_ratio_z_func'] = \
@@ -158,6 +189,14 @@ def set_fiducial_cosmology(likefinal, info):
     fid_cosmo = Cosmology()
     fid_cosmo.cosmo_dic['z_win'] = np.linspace(
                                 info['z_min'], info['z_max'], info['z_samp'])
+    fid_cosmo.cosmo_dic['z_win_max'] = fid_cosmo.cosmo_dic['z_win']
+    fid_cosmo.cosmo_dic['z_samp_log'] = 20
+    fid_cosmo.cosmo_dic['z_max_cmb'] = 1200
+    if info['observables_selection']['CMBlens']['CMBlens']:
+        fid_cosmo.cosmo_dic['z_win_max'] = np.logspace(
+            np.log10(fid_cosmo.cosmo_dic['z_win'][-1]),
+            np.log10(fid_cosmo.cosmo_dic['z_max_cmb']), fid_cosmo.cosmo_dic['z_samp_log'])
+        fid_cosmo.cosmo_dic['z_win_max'] = np.unique(np.append(fid_cosmo.cosmo_dic['z_win'], fid_cosmo.cosmo_dic['z_win_max']))
     fid_cosmo.cosmo_dic['k_win'] = np.logspace(np.log10(info['k_min_extrap']),
                                  np.log10(info['k_max_extrap']), info['k_samp'])
     # Update fiducial cosmo dic with fiducial info from reader
@@ -176,7 +215,7 @@ def set_fiducial_cosmology(likefinal, info):
                            WantCls=False,
                            WantDerivedParameters=False,
                            want_zdrag=False, want_zstar=False,
-                           z_outputs=fid_cosmo.cosmo_dic['z_win'])
+                           z_outputs=fid_cosmo.cosmo_dic['z_win_max'])
     #This function sets up with one massive neutrino and helium set using BBN consistency
     pars.set_cosmology(H0=fid_cosmo.cosmo_dic['H0'], 
                        ombh2=fid_cosmo.cosmo_dic['ombh2'], 
@@ -189,7 +228,7 @@ def set_fiducial_cosmology(likefinal, info):
     pars.InitPower.set_params(As=fid_cosmo.cosmo_dic['As'], 
                               ns=fid_cosmo.cosmo_dic['ns'], 
                               r=0)
-    pars.set_matter_power(redshifts=fid_cosmo.cosmo_dic['z_win'],
+    pars.set_matter_power(redshifts=fid_cosmo.cosmo_dic['z_win_max'],
                           kmax=fid_cosmo.cosmo_dic['k_win'][-1])
     #calculate results for these parameters
     results = camb.get_results(pars)
@@ -201,7 +240,7 @@ def set_fiducial_cosmology(likefinal, info):
         pars.omk
     fid_cosmo.cosmo_dic['comov_dist'] = \
         results.comoving_radial_distance(
-        fid_cosmo.cosmo_dic['z_win'])
+        fid_cosmo.cosmo_dic['z_win_max'])
     fid_cosmo.cosmo_dic['angular_dist'] = \
         results.angular_diameter_distance(
         fid_cosmo.cosmo_dic['z_win'])

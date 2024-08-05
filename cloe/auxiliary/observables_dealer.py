@@ -72,6 +72,33 @@ def observables_selection_checker(observables_dict):
         warnings.warn(
             "Entries ['WL']['GCspectro'] and ['GCphot']['GCspectro'] "
             "are changed to False.")
+    try:
+        if (observables_dict['CMBlens']['WL'] and
+                not observables_dict['WL']['WL']):
+            observables_dict['CMBlens']['CMBlens'] = True
+            observables_dict['WL']['WL'] = True
+            warnings.warn(
+                'Attention: CMB cross correlations requires '
+                'auto correlations as well')
+        if (observables_dict['CMBlens']['GCphot'] and
+                not observables_dict['GCphot']['GCphot']):
+            observables_dict['CMBlens']['CMBlens'] = True
+            observables_dict['GCphot']['GCphot'] = True
+            warnings.warn(
+                'Attention: CMB cross correlations requires '
+                'auto correlations as well')
+        # if observables_dict['CMBisw']['GCphot']:
+        #     observables_dict['GCphot']['GCphot'] = True
+
+        if (observables_dict['CMBlens']['GCspectro'] or
+                observables_dict['CMBisw']['GCspectro']):
+            observables_dict['CMBlens']['GCspectro'] = False
+            observables_dict['CMBisw']['GCspectro'] = False
+            warnings.warn(
+                "Entries ['CMBlens']['GCspectro'] and ['CMBisw']['GCspectro'] "
+                "are changed to False.")
+    except KeyError:
+        pass
     return observables_dict
 
 
@@ -160,4 +187,24 @@ def observables_selection_specifications_checker(observables_dict,
     if checked_observables_dict['WL']['GCspectro']:
         merged_dict['specifications']['WL-GCspectro'] = \
             specifications_dict['WL-GCspectro']
+
+    # Include the CMB lensing and iSW probes and specifications if requested
+    try:
+        if checked_observables_dict['CMBlens']['CMBlens']:
+            merged_dict['specifications']['CMBlens'] = \
+                specifications_dict['CMBlens']
+        if checked_observables_dict['CMBlens']['WL']:
+            merged_dict['specifications']['CMBlens-WL'] = \
+                specifications_dict['CMBlens-WL']
+        if checked_observables_dict['CMBlens']['GCphot']:
+            merged_dict['specifications']['CMBlens-GCphot'] = \
+                specifications_dict['CMBlens-GCphot']
+        if checked_observables_dict['CMBisw']['GCphot']:
+            merged_dict['specifications']['ISW-GCphot'] = \
+                specifications_dict['ISW-GCphot']
+    except KeyError:
+        # Not using the CMB observables
+        checked_observables_dict['CMBlens'] = {
+            'CMBlens': False, 'WL': False, 'GCphot': False}
+        checked_observables_dict['CMBisw'] = {'GCphot': False}
     return merged_dict

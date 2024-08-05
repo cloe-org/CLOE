@@ -19,6 +19,7 @@ class cosmoinitTestCase(TestCase):
         # Define standard test case
         cls.cosmo = Cosmology()
         cls.cosmo.cosmo_dic = load_test_pickle('cosmo_test_dic.pickle')
+        cls.cosmo.cosmo_dic['z_win_max'] = cls.cosmo.cosmo_dic['z_win']
         cls.cosmo.nonlinear.theory['redshift_bins_means_spectro'] = \
             cls.cosmo.cosmo_dic['redshift_bins_means_spectro']
         cls.cosmo.nonlinear.set_Pgg_spectro_model()

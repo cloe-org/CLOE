@@ -25,6 +25,19 @@ class CobayaModel:
         z_max = 4.0
         z_samp = 100
         self.z_win = np.linspace(z_min, z_max, z_samp)
+
+        z_max_cmb = 1200
+        z_samp_log = 20
+        # Append higher redshifts for the CMB lensing computations
+        self.z_win_max = np.logspace(
+            np.log10(self.z_win[-1]),
+            np.log10(z_max_cmb),
+            z_samp_log
+        )
+        self.z_win_max = np.unique(np.append(self.z_win, self.z_win_max))
+        # TODO: Should modify rest of the obsject
+        # to match with cobaya_interface.py
+
         # Note that this k_min does not currently interface with Cobaya
         # Once the Cobaya interface is adjusted to use a set k_min, the same
         # value should be used here.

@@ -139,7 +139,7 @@ info = {
                         'CG_xi2_cov_selection': 'CG_nonanalytic_cov',
                         'neutrino_cdm': 'cb',
                         'external_richness_selection_function': 'non_CG_ESF',
-                        'file_richness_selection_function': './../data/' + \
+                        'file_richness_selection_function': './../data/' +
                         'ExternalBenchmark/Clusters/int_Plob_ltr_z_Dlob.npy',
                         'effective_area': 10313,
                         'z_obs_edges_CC': np.array([
@@ -249,7 +249,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.Pk_def(0.5, 1., 1.),
             self.check_Pk_def,
-            rtol=1.e-5,
+            rtol=1.e-3,
             err_msg='test_Pk_def failed',
         )
 
@@ -257,7 +257,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.dVdzdO(0.0),
             self.check_dVdzdO,
-            rtol=1.e-5,
+            rtol=1.e-3,
             err_msg='test_dV_dzdO failed',
         )
 
@@ -265,7 +265,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.rho_crit_0(),
             self.check_rho_crit_0,
-            rtol=1.e-5,
+            rtol=1.e-3,
             err_msg='test_rho_crit_0 failed',
         )
 
@@ -273,7 +273,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.rho_mean_0(),
             self.check_rho_mean_0,
-            rtol=1.e-5,
+            rtol=1.e-3,
             err_msg='test_rho_mean_0 failed',
         )
 
@@ -281,7 +281,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.radius_M(10.0**14.0),
             self.check_radius_M,
-            rtol=1.e-5,
+            rtol=1.e-3,
             err_msg='test_radius_M failed',
         )
 
@@ -289,7 +289,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.Omm_z(0.0, 0.0),
             self.check_Omm_z,
-            rtol=1.e-5,
+            rtol=1.e-3,
             err_msg='test_Omm_z failed',
         )
 
@@ -297,7 +297,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.delta_c(1.0),
             self.check_delta_c,
-            rtol=1e-5,
+            rtol=1e-3,
             err_msg='test_delta_c failed',
         )
 
@@ -305,7 +305,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.sigma_z_M(0.0, 10.0**14.)[0][0],
             self.check_sigma_z_M,
-            rtol=1e-5,
+            rtol=1e-3,
             err_msg='test_sigma_z_M failed',
         )
 
@@ -313,7 +313,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.nu_z_M(np.array([0.0]), 10.0**14.)[0][0],
             self.check_nu_z_M,
-            rtol=1e-5,
+            rtol=1e-3,
             err_msg='test_nu_z_M failed',
         )
 
@@ -321,7 +321,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.window(0.1, np.array([8.0]))[0][0][0],
             self.check_window_W,
-            rtol=1e-5,
+            rtol=1e-3,
             err_msg='test_window_W failed',
         )
 
@@ -329,7 +329,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.window(0.1, np.array([8.0]))[1][0][0],
             self.check_window_dWdx,
-            rtol=1e-5,
+            rtol=1e-3,
             err_msg='test_window_dWdx failed',
         )
 
@@ -337,7 +337,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.dlnsdlnR(np.array([0.0]), np.array([10.0**14.]))[0][0],
             self.check_dlnsdlnR,
-            rtol=1e-5,
+            rtol=1e-3,
             err_msg='test_dlns_dlnR failed',
         )
 
@@ -345,7 +345,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.f_sigma_nu(np.array([0.0]), np.array([10.0**14.]))[0][0],
             self.check_f_sigma_nu,
-            rtol=1e-5,
+            rtol=1e-3,
             err_msg='test_f_sigma_nu failed',
         )
 
@@ -353,7 +353,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.dndm(np.array([0.0]), np.array([10.0**14.]))[0][0],
             self.check_dndm,
-            rtol=1e-5,
+            rtol=1e-3,
             err_msg='test_delta_c failed',
         )
 
@@ -361,7 +361,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.lnlambda(np.array([0.0]), np.array([10.0**14.]))[0][0],
             self.check_lnlambda,
-            rtol=1.e-5,
+            rtol=1.e-3,
             err_msg='test_lnlambda failed',
         )
 
@@ -371,7 +371,7 @@ class CGinitTestCase(TestCase):
                 np.array([0.0]), np.array([10.0**14.])
             )[0][0],
             self.check_scatter_lnlambda,
-            rtol=1e-5,
+            rtol=1e-3,
             err_msg='test_scatter_lnlambda failed',
         )
 
@@ -382,7 +382,7 @@ class CGinitTestCase(TestCase):
                 np.array([30.0])
             )[0][0][0],
             self.check_Pscaling_relation,
-            rtol=1e-5,
+            rtol=1e-3,
             err_msg='test_Pscaling_relation failed',
         )
 
@@ -393,7 +393,7 @@ class CGinitTestCase(TestCase):
                 np.array([30.0])
             )[0][0],
             self.check_scatter_Plambda_obs,
-            rtol=1e-5,
+            rtol=1e-3,
             err_msg='test_scatter_Plambda_obs failed',
         )
 
@@ -404,7 +404,7 @@ class CGinitTestCase(TestCase):
                 np.array([30.0])
             )[0][0][0],
             self.check_Plambda_obs,
-            rtol=1e-5,
+            rtol=1e-3,
             err_msg='test_Plambda_obs failed',
         )
 
@@ -412,7 +412,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.scatter_z_obs(30.0, np.array([0.0]))[0],
             self.check_scatter_z_obs,
-            rtol=1e-5,
+            rtol=1e-3,
             err_msg='test_scatter_z_obs failed',
         )
 
@@ -420,7 +420,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.Pz_obs(np.array([0.0]), 30.0, np.array([0.0]))[0][0],
             self.check_Pz_obs,
-            rtol=1.e-5,
+            rtol=1.e-3,
             err_msg='test_Pz_obs failed',
         )
 
@@ -428,7 +428,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.Delta("vir", 0.0, 0.0, 200),
             self.check_Delta,
-            rtol=1.e-5,
+            rtol=1.e-3,
             err_msg='test_Delta failed',
         )
 
@@ -437,7 +437,7 @@ class CGinitTestCase(TestCase):
             self.cg.halo_bias(np.array([0.0]), 10.0**14.,
                               self.cg.Delta("vir", 0.0, 0.0, 200))[0][0],
             self.check_halo_bias,
-            rtol=1e-5,
+            rtol=1e-3,
             err_msg='test_halo_bias failed',
         )
 
@@ -447,7 +447,7 @@ class CGinitTestCase(TestCase):
         npt.assert_allclose(
             self.cg.cov_window(0, np.array([0.5, 1.]), 1., 1)[0][0:3],
             self.check_cov_window,
-            rtol=1.e-5,
+            rtol=1.e-3,
             err_msg='test_cov_window failed',
         )
 

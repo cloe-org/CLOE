@@ -48,6 +48,7 @@ class EuclidLikelihood(Likelihood):
                                  self.k_samp)
 
         self.z_win = np.linspace(self.z_min, self.z_max, self.z_samp)
+
         # Check the selection and specification requirements
         self.observables = \
             observables_selection_specifications_checker(
@@ -81,6 +82,17 @@ class EuclidLikelihood(Likelihood):
             self.use_NL = [False, True]
         else:
             self.use_NL = False
+
+        # We redefine upper z bound.
+        # In case we don't need CMB lensing auto spectra then it stays the same
+        self.z_win_max = self.z_win
+        if self.observables_selection['CMBlens']['CMBlens']:
+            # Append higher redshifts for the CMB lensing computations
+            self.z_win_max = np.logspace(
+                np.log10(self.z_win[-1]),
+                np.log10(self.z_max_cmb), self.z_samp_log)
+            self.z_win_max = np.unique(np.append(self.z_win, self.z_win_max))
+
         # Initialize Euclike module
         self.likefinal = Euclike(self.data, self.observables)
         # Here we set the naming convention for the cosmological parameters
@@ -228,7 +240,7 @@ class EuclidLikelihood(Likelihood):
         model_fiducial.add_requirements({
             'omegam': None,
             'Pk_interpolator': {
-                'z': self.z_win,
+                'z': self.z_win_max,
                 'k_max': self.k_max_Boltzmann,
                 'nonlinear': False,
                 'vars_pairs': ([['delta_tot', 'delta_tot'],
@@ -236,7 +248,7 @@ class EuclidLikelihood(Likelihood):
                                 ['Weyl', 'Weyl']])
             },
             'comoving_radial_distance': {
-                'z': self.z_win
+                'z': self.z_win_max
             },
             'angular_diameter_distance': {
                 'z': self.z_win
@@ -275,10 +287,11 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology.cosmo_dic['Omk'] = \
             model_fiducial.provider.get_param(self.pnames['omk'])
         self.fiducial_cosmology.cosmo_dic['z_win'] = self.z_win
+        self.fiducial_cosmology.cosmo_dic['z_win_max'] = self.z_win_max
         self.fiducial_cosmology.cosmo_dic['k_win'] = self.k_win
         self.fiducial_cosmology.cosmo_dic['comov_dist'] = \
             model_fiducial.provider.get_comoving_radial_distance(
-            self.z_win),
+            self.z_win_max),
         self.fiducial_cosmology.cosmo_dic['angular_dist'] = \
             model_fiducial.provider.get_angular_diameter_distance(
             self.z_win),
@@ -351,13 +364,13 @@ class EuclidLikelihood(Likelihood):
         requirements = \
             {'omegam': None,
              'Pk_interpolator':
-                {'z': self.z_win,
+                {'z': self.z_win_max,
                  'k_max': self.k_max_Boltzmann,
                  'nonlinear': self.use_NL,
                  'vars_pairs': ([['delta_tot', 'delta_tot'],
                                  ['delta_nonu', 'delta_nonu'],
                                  ['Weyl', 'Weyl']])},
-                'comoving_radial_distance': {'z': self.z_win},
+                'comoving_radial_distance': {'z': self.z_win_max},
                 'angular_diameter_distance': {'z': self.z_win},
                 'Hubble': {'z': self.z_win, 'units': 'km/s/Mpc'},
                 'sigma8_z': {'z': self.z_win},
@@ -368,7 +381,11 @@ class EuclidLikelihood(Likelihood):
                  "kmax": self.k_max_Boltzmann,
                  "R": self.r_win,
                  "vars_pairs": ([["delta_tot", "delta_tot"],
-                                ["delta_nonu", "delta_nonu"]])}}
+                                ["delta_nonu", "delta_nonu"]])},
+                'Cl': {'pp': 4300},
+                'CAMBdata': None}
+        # TODO CAMBDATA is used only to retrieve the conformal time
+        # to compute z of CMB, maybe there is a better way ?
         if self.solver == 'camb':
             derived = {'omegac': None, 'omnuh2': None, 'omeganu': None,
                        'nnu': None}
@@ -446,7 +463,7 @@ class EuclidLikelihood(Likelihood):
                     self.provider.get_param('omeganu')
                 self.cosmo.cosmo_dic['nnu'] = self.provider.get_param('nnu')
             self.cosmo.cosmo_dic['comov_dist'] = \
-                self.provider.get_comoving_radial_distance(self.z_win)
+                self.provider.get_comoving_radial_distance(self.z_win_max)
             self.cosmo.cosmo_dic['angular_dist'] = \
                 self.provider.get_angular_diameter_distance(self.z_win)
             self.cosmo.cosmo_dic['H'] = self.provider.get_Hubble(self.z_win)
@@ -478,6 +495,7 @@ class EuclidLikelihood(Likelihood):
                     extrap_kmin=self.k_min_extrap,
                     extrap_kmax=self.k_max_extrap)
             self.cosmo.cosmo_dic['z_win'] = self.z_win
+            self.cosmo.cosmo_dic['z_win_max'] = self.z_win_max
             self.cosmo.cosmo_dic['k_win'] = self.k_win
             self.cosmo.cosmo_dic['sigma8'] = self.provider.get_sigma8_z(
                 self.cosmo.cosmo_dic['z_win'])
@@ -497,6 +515,8 @@ class EuclidLikelihood(Likelihood):
                                     for your_key in new_keys}
             self.cosmo.cosmo_dic['nuisance_parameters'].update(
                 **only_nuisance_params)
+            self.cosmo.cosmo_dic['Cl'] = self.provider.get_Cl()
+            self.cosmo.cosmo_dic['CAMBdata'] = self.provider.get_CAMBdata()
 
         except (TypeError, AttributeError):
             self.cosmo.cosmo_dic['NL_flag_phot_matter'] = \
@@ -570,7 +590,7 @@ class EuclidLikelihood(Likelihood):
                 self.cosmo.cosmo_dic['gamma_MG'] = \
                     model.provider.get_param('gamma_MG')
             self.cosmo.cosmo_dic['comov_dist'] = \
-                model.provider.get_comoving_radial_distance(self.z_win)
+                model.provider.get_comoving_radial_distance(self.z_win_max)
             self.cosmo.cosmo_dic['angular_dist'] = \
                 model.provider.get_angular_diameter_distance(self.z_win)
             self.cosmo.cosmo_dic['H'] = model.provider.get_Hubble(self.z_win)
@@ -603,6 +623,7 @@ class EuclidLikelihood(Likelihood):
                     extrap_kmin=self.k_min_extrap,
                     extrap_kmax=self.k_max_extrap)
             self.cosmo.cosmo_dic['z_win'] = self.z_win
+            self.cosmo.cosmo_dic['z_win_max'] = self.z_win_max
             self.cosmo.cosmo_dic['k_win'] = self.k_win
             self.cosmo.cosmo_dic['sigma8'] = model.provider.get_sigma8_z(
                 self.cosmo.cosmo_dic['z_win'])
@@ -621,6 +642,7 @@ class EuclidLikelihood(Likelihood):
                                     for your_key in new_keys}
             self.cosmo.cosmo_dic['nuisance_parameters'].update(
                 **only_nuisance_params)
+            self.cosmo.cosmo_dic['Cl'] = model.provider.get_Cl()
             if 'observables_selection' in info['likelihood']['Euclid']:
                 self.observables_selection = \
                     info['likelihood']['Euclid']['observables_selection']

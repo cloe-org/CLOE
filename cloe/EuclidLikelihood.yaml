@@ -84,5 +84,19 @@ observables_specifications:
   WL-GCspectro:
     angular_power_spectrum: !defaults [../configs/WL-GCspectro-FourierSpace]
     angular_correlation_function: !defaults [../configs/WL-GCspectro-ConfigurationSpace]
+  
+  # CMBX probes
+  CMBlens : !defaults [../configs/CMBlensing]
+  CMBlens-WL : !defaults [../configs/CMBlensing-WL]
+  CMBlens-GCphot : !defaults [../configs/CMBlensing-GCphot]
+  ISW-GCphot: !defaults [../configs/iSW-GCphot.yaml]
+
 # Plot the selected observables during the initialization of the likelihood
 plot_observables_selection: False
+
+
+# Defaults parameters for CMB observables 
+# Upper z bounds for comoving distance integrations up to CMB
+z_max_cmb: 1200
+# Number of log space redshift bins between z_max and z_max_cmb 
+z_samp_log: 20

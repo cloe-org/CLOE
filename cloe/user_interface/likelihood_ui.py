@@ -261,7 +261,13 @@ class LikelihoodUI:
                         obs_spec_dic = field_value
                         sub_fields = ['GCphot', 'GCspectro', 'WL',
                                       'GCphot-GCspectro',
-                                      'WL-GCphot', 'WL-GCspectro', 'CG']
+                                      'WL-GCphot', 'WL-GCspectro',
+                                      'CG',
+                                      'CMBlens',
+                                      'CMBlens-WL',
+                                      'CMBlens-GCphot',
+                                      'ISW-GCphot']
+
                         self._check_and_update_likelihood_fields(obs_spec_dic,
                                                                  sub_fields)
                     elif field == 'GCspectro':

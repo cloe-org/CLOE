@@ -30,6 +30,7 @@ dependencies:
   - cxx-compiler
   - gfortran
   - fitsio
+  - pyqt
   - pip:
     # Domain-specific 3rd-party Python package (from PyPI)
     - cobaya==3.3.1
@@ -42,3 +43,6 @@ dependencies:
     - euclidlib==0.0.5
     # Unit testing and documentation dependencies (from PyPI)
     - pytest-pydocstyle==2.3.2
+    - cosmosis
+    - cosmosis-build-standard-library
+    - qtvscodestyle

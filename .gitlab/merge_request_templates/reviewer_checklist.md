@@ -13,6 +13,8 @@ Reviewers, please check the following points before merging.
 - [ ] Coverage percentage is retained or increased
 - [ ] Quality of new/changed code is acceptable
 - [ ] Quality of new/changed unit tests is acceptable
+- [ ] No data files have been included in the commits
+- [ ] All Jupyter notebook cells have been cleared 
 - [ ] Manual `Check_HTML` job run and API documentation looks good
 - [ ] Manual `Profiling` job run and no unexpected performances issues found
 - [ ] Manual `Verification` job run and results match expectations

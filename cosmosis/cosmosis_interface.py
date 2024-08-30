@@ -54,28 +54,10 @@ def setup(options):
     data = info['data']
     observables = observables_selection_specifications_checker(
                 info['observables_selection'],
-                info['observables_specifications'],
-                info['statistics_photo'])
+                info['observables_specifications'])
     if info['plot_observables_selection']:
         observables_pf = observables_visualization(
              observables['selection'])
-    observables['selection']['add_phot_RSD'] = info['add_phot_RSD']
-    observables['selection']['matrix_transform_phot'] = \
-            info['matrix_transform_phot']
-    if 'GCspectro' in observables['specifications'].keys():
-        observables['specifications']['GCspectro']['statistics'] = \
-            info['statistics_spectro']
-    # set the parameters used to determine what statistics to use
-    # for the photometric probes
-    for key in observables['specifications'].keys():
-        if key in ['WL', 'GCphot', 'WL-GCphot']:
-            observables['specifications'][key]['statistics'] = \
-                info['statistics_photo']
-
-    # Clusters of galaxies
-    if 'CG' in observables['specifications'].keys():
-        observables['specifications']['CG']['statistics'] = \
-            info['statistics_clusters']
 
     # initialize Euclike class
     likefinal = Euclike(data, observables)
@@ -114,7 +96,7 @@ def setup(options):
     cloe_cosmo.cosmo_dic['GCsp_z_err'] = info['GCsp_z_err']
     cloe_cosmo.cosmo_dic['magbias_model'] = info['magbias_model']
     cloe_cosmo.cosmo_dic['matrix_transform_phot'] = \
-                info['matrix_transform_phot']
+                info['observables_selection']['matrix_transform_phot']
     # Adding GCphot and GCspectro redshift bins to cosmo dictionary and setting up
     # the internal class for Pgg_spectro with this information.
     cloe_cosmo.cosmo_dic['redshift_bins_means_phot'] = \

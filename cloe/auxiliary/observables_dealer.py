@@ -128,8 +128,7 @@ def ell_checker(specifications_dict_prob):
 
 
 def observables_selection_specifications_checker(observables_dict,
-                                                 specifications_dict,
-                                                 statistics_photo):
+                                                 specifications_dict):
     """
     Observables selection and specifications checker.
 
@@ -159,21 +158,24 @@ def observables_selection_specifications_checker(observables_dict,
     # add specifications
     if checked_observables_dict['WL']['WL']:
         merged_dict['specifications']['WL'] = specifications_dict['WL']
-        if statistics_photo == 'angular_power_spectrum':
-            ell_checker(specifications_dict['WL'][statistics_photo])
+        statistics_WL = specifications_dict['WL']['statistics']
+        if statistics_WL == 'angular_power_spectrum':
+            ell_checker(specifications_dict['WL'][statistics_WL])
     if checked_observables_dict['GCphot']['GCphot']:
         merged_dict['specifications']['GCphot'] = \
             specifications_dict['GCphot']
-        if statistics_photo == 'angular_power_spectrum':
-            ell_checker(specifications_dict['GCphot'][statistics_photo])
+        statistics_GCphot = specifications_dict['GCphot']['statistics']
+        if statistics_GCphot == 'angular_power_spectrum':
+            ell_checker(specifications_dict['GCphot'][statistics_GCphot])
     if checked_observables_dict['GCspectro']['GCspectro']:
         merged_dict['specifications']['GCspectro'] = \
             specifications_dict['GCspectro']
     if checked_observables_dict['WL']['GCphot']:
         merged_dict['specifications']['WL-GCphot'] = \
             specifications_dict['WL-GCphot']
-        if statistics_photo == 'angular_power_spectrum':
-            ell_checker(specifications_dict['WL-GCphot'][statistics_photo])
+        statistics_XC = specifications_dict['WL-GCphot']['statistics']
+        if statistics_XC == 'angular_power_spectrum':
+            ell_checker(specifications_dict['WL-GCphot'][statistics_XC])
     if checked_observables_dict['CG']['CG']:
         merged_dict['specifications']['CG'] = \
             specifications_dict['CG']

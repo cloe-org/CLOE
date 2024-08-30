@@ -33,6 +33,7 @@
 # sig_z_z: redshift evolution parameter of the scatter of the observed-true redshift PDF
 # sig_z_lambda: richness evolution parameter of the scatter of the observed-true redshift PDF
 
+statistics_clusters: cluster_counts
 CG_probe: CC
 CG_xi2_cov_selection: CG_nonanalytic_cov
 neutrino_cdm: cb
@@ -59,4 +60,3 @@ sig_lambda_exponent: 0.4
 sig_z_norm: 0.
 sig_z_z: 0.025
 sig_z_lambda: 5.e-6
-

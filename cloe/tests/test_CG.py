@@ -61,16 +61,12 @@ info = {
                 'Baryon_redshift_model': True,
                 'GCsp_z_err': False,
                 'bias_model': 1,
-                'statistics_spectro': 'legendre_multipole_power_spectrum',
                 'use_magnification_bias_spectro': 0,
                 'use_Weyl': False,
-                'statistics_clusters': 'cluster_counts',
-                'add_phot_RSD': False,
                 'magbias_model': 2,
                 'use_gamma_MG': False,
                 'f_out_z_dep': False,
                 'plot_observables_selection': False,
-                'matrix_transform_phot': False,
                 'data':
                 {
                     'sample': 'ExternalBenchmark',
@@ -131,10 +127,13 @@ info = {
                     {
                         'GCspectro': False,
                     },
+                    'add_phot_RSD': False,
+                    'matrix_transform_phot': False,
                 },
                 'observables_specifications':
                 {
                     'CG': {
+                        'statistics_clusters': 'cluster_counts',
                         'CG_probe': 'CC',
                         'CG_xi2_cov_selection': 'CG_nonanalytic_cov',
                         'neutrino_cdm': 'cb',

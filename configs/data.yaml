@@ -25,6 +25,8 @@ photo:
   root_WL: Cls_{:s}_ShearShear.dat
   root_XC: Cls_{:s}_PosShear.dat
   root_fits: fs2_cls_{:d}zbins_32ellbins.fits
+  # Fourier needs to be consistent with probe statistics
+  Fourier: True
 sample: ExternalBenchmark
 spectro:
   redshifts:
@@ -43,6 +45,8 @@ spectro:
   cov_nsim: 3500
   scale_cuts_fourier: GCspectro-FourierSpace.yaml
   root_mixing_matrix: mm_FS230degCircle_m3_nosm_obsz_z0.9-1.1.fits
+  # Fourier needs to be consistent with probe statistics
+  Fourier: True
 cmbx:
   root_CMBlens: Cls_kCMB.dat
   root_CMBlensxWL: Cls_kCMBxWL.dat

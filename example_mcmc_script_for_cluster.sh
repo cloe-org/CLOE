@@ -2,16 +2,20 @@
 
 ## Example MCMC script to be run on cluster. This particular script
 ## is executed via a command in the terminal of the following form
-## addqueue -q "NAME_OF_QUEUE" -n 1x32 -s -m 2.5 example_mcmc_script_for_cluster.sh
-## where 1x32 implies a single node with 32 cores and 2.5 refers to the memory in GB.
+## sbatch example_mcmc_script_for_cluster.sh
 ## We note that these instructions can differ from one cluster to another.
 
-cd $SLURM_SUBMIT_DIR
+#SBATCH -A user_name
+#SBATCH -p name_of_cluster
+#SBATCH --nodes=1
+#SBATCH --ntasks=8
+#SBATCH --cpus-per-task=8
+#SBATCH --time=24:00:00
 
-## Change to your own directory
-source /users/sjoudaki/anaconda3/etc/profile.d/conda.sh
+echo $SLURM_JOB_ID > output_file.txt
 
-conda activate cloe
+omp_threads=$SLURM_CPUS_PER_TASK
+export OMP_NUM_THREADS=$omp_threads
 
 ## Here 8 refers to the number of chains
-mpirun -n 8 python mcmc_scripts/runmcmc_spectro.py
+mpirun --map-by node --bind-to none -np 8 ./run_cloe.py configs/config_default.yaml >> output_file.txt

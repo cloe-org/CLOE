@@ -37,14 +37,6 @@ k_samp: 1000
 z_min: 0.0
 z_max: 4.0
 z_samp: 100
-# Select statistics for spectroscopic probes (multipole_power_spectrum
-# or multipole_correlation_function)
-statistics_spectro: multipole_power_spectrum
-# Select statistics for photometric probes (angular_power_spectrum
-# or angular_correlation_function)
-statistics_photo: angular_power_spectrum
-# Select statistics for galaxy cluster probes (cluster_counts)
-statistics_clusters: cluster_counts
 # Add RSD to photometric probes
 add_phot_RSD: False
 # Apply a generic matrix transformation to the photo observables (available options: 'BNT', 'BNT-test')
@@ -66,35 +58,37 @@ observables_specifications:
   WL:
     angular_power_spectrum: !defaults [../configs/WL-FourierSpace]
     angular_correlation_function: !defaults [../configs/WL-ConfigurationSpace]
+    statistics: angular_power_spectrum
   GCphot:
     angular_power_spectrum: !defaults [../configs/GCphot-FourierSpace]
     angular_correlation_function: !defaults [../configs/GCphot-ConfigurationSpace]
+    statistics: angular_power_spectrum
   GCspectro:
     multipole_power_spectrum: !defaults [../configs/GCspectro-FourierSpace]
     multipole_correlation_function: !defaults [../configs/GCspectro-ConfigurationSpace]
+    statistics: multipole_power_spectrum
   WL-GCphot:
     angular_power_spectrum: !defaults [../configs/WL-GCphot-FourierSpace]
     angular_correlation_function: !defaults [../configs/WL-GCphot-ConfigurationSpace]
+    statistics: angular_power_spectrum
   CG: !defaults [../configs/CG]
   # Note: This is not yet provided by CLOE
   # therefore it will load empty dictionaries
   GCphot-GCspectro:
     angular_power_spectrum: !defaults [../configs/GCphot-GCspectro-FourierSpace]
     angular_correlation_function: !defaults [../configs/GCphot-GCspectro-ConfigurationSpace]
+    statistics: angular_power_spectrum
   WL-GCspectro:
     angular_power_spectrum: !defaults [../configs/WL-GCspectro-FourierSpace]
-    angular_correlation_function: !defaults [../configs/WL-GCspectro-ConfigurationSpace]
-  
+    angular_correlation_function: !defaults [../configs/WL-GCspectro-ConfigurationSpace]  
+    statistics: angular_power_spectrum
   # CMBX probes
   CMBlens : !defaults [../configs/CMBlensing]
   CMBlens-WL : !defaults [../configs/CMBlensing-WL]
   CMBlens-GCphot : !defaults [../configs/CMBlensing-GCphot]
   ISW-GCphot: !defaults [../configs/iSW-GCphot.yaml]
-
 # Plot the selected observables during the initialization of the likelihood
 plot_observables_selection: False
-
-
 # Defaults parameters for CMB observables 
 # Upper z bounds for comoving distance integrations up to CMB
 z_max_cmb: 1200

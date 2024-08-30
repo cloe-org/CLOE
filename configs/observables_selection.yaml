@@ -30,3 +30,7 @@ CMBisw:
   GCspectro: False
 CG:
   CG: False
+# Add RSD to photometric probes
+add_phot_RSD: False
+# Apply a generic matrix transformation to the photo observables (available options: 'BNT', 'BNT-test')
+matrix_transform_phot: False

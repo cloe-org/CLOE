@@ -28,16 +28,49 @@ Cobaya:
       # Speed in evaluations/second
       speed: 500
       # Nonlinear flag selectors
+      # Photometric matter flag
+      #     0 -> linear-only
+      #     1 -> Halofit (Takahashi)
+      #     2 -> Mead2016 (includes baryon corrections)
+      #     3 -> Mead2020 (w/o baryon corrections)
+      #     4 -> Euclid Emulator 2
+      #     5 -> BACCO (matter)
       NL_flag_phot_matter: 0
+      # Spectroscopic flag
+      #     0 -> linear-only
+      #     1 -> EFT
       NL_flag_spectro: 0
       # Baryonic feedback flag selector
+      #     0 -> no baryonic feedback
+      #     1 -> Mead2016
+      #     2 -> Mead2020_feedback
+      #     3 -> BCemu
+      #     4 -> BACCO (baryonic feedback)
       NL_flag_phot_baryon: 0
+      # Intrinsic alignment flag
+      #     0 -> NLA
+      #     1 -> TATT
+      IA_flag: 0
+      # Use magnification bias for GC spectro
+      use_magnification_bias_spectro: False
       # Baryonic feedback z_dependence flag selector for BCemu and Bacco emulators
+      #     False -> 1 set of parameters per redshift bin
+      #     True  -> Power law dependence on z
       Baryon_redshift_model: True
-      # Bias Model
+      # Photometric galaxy bias flag
+      #     0 -> linear only
+      #     1 -> Non-linear Fast-PT
+      NL_flag_phot_bias: 0
+      # Redshift dependence of photometric linear galaxy bias
+      #     1 -> linear interpolation
+      #     2 -> constant within bins
+      #     3 -> 3rd order polynomial
       bias_model: 1
-      # Magnification bias model
-      magbias_model: 1
+      # Magnification bias model (redshift dependence)
+      #     1 -> linear interpolation
+      #     2 -> constant within bins
+      #     3 -> 3rd order polynomial
+      magbias_model: 2
       # k values for extrapolation of the matter power spectrum
       k_max_extrap: 500.0
       k_min_extrap: 0.0001
@@ -46,24 +79,12 @@ Cobaya:
       z_min: 0.0
       z_max: 4.0
       z_samp: 100
-      # Select statistics for spectroscopic probes (multipole_power_spectrum
-      # or multipole_correlation_function)
-      statistics_spectro: multipole_power_spectrum
-      # Select statistics for photometric probes (angular_power_spectrum
-      # or angular_correlation_function)
-      statistics_photo: angular_power_spectrum
-      # Select statistics for clusters
-      statistics_clusters: cluster_counts
-      # Add RSD to photometric probes
-      add_phot_RSD: True
-      # Apply a generic matrix transformation to the photo observables (available options: 'BNT', 'BNT-test')
-      matrix_transform_phot: False
       # Use MG gamma
       use_gamma_MG: False
       # Redshift dependent purity correction
       f_out_z_dep: False
       # Include spectroscopic galaxy clustering redshift error
-      GCsp_z_err: True
+      GCsp_z_err: False
       # Plot the selected observables during the initialization of the likelihood
       plot_observables_selection: False
       ##
@@ -86,6 +107,7 @@ Cobaya:
                             cov_nsim: 3500
                             scale_cuts_fourier: GCspectro-FourierSpace.yaml
                             root_mixing_matrix: mm_FS230degCircle_m3_nosm_obsz_z0.9-1.1.fits
+                            Fourier: True
                         photo: 
                             redshifts: [0.2095, 0.489, 0.619, 0.7335, 0.8445, 0.9595, 1.087, 1.2395, 1.45, 2.038]
                             photo_data: standard
@@ -98,6 +120,7 @@ Cobaya:
                             root_WL: Cls_{:s}_ShearShear.dat
                             root_XC: Cls_{:s}_PosShear.dat
                             root_fits: fs2_cls_{:d}zbins_32ellbins.fits
+                            Fourier: True
                             IA_model: zNLA
                             # Photometric covariances root names should contain z{:s} string
                             # to specify how the covariance was calculated
@@ -131,7 +154,7 @@ Cobaya:
                             GCphot: True
                             GCspectro: False
                           GCspectro:
-                            GCspectro: False
+                            GCspectro: True
                           CMBlens:
                             CMBlens: False
                             WL: False
@@ -144,9 +167,15 @@ Cobaya:
                             GCspectro: False
                           CG:
                             CG: False
+                          # Add RSD to photometric probes
+                          add_phot_RSD: False
+                          # Apply a generic matrix transformation to the photo 
+                          # observables (available options: 'BNT', 'BNT-test')
+                          matrix_transform_phot: False
       # Specifications for each of the observables
       observables_specifications:
         GCphot:
+          statistics: angular_power_spectrum
           angular_power_spectrum:
             bins:
               n1:
@@ -345,6 +374,7 @@ Cobaya:
                 n13:
                   ell_range: [[20, 4000]]
         GCspectro:
+          statistics: multipole_power_spectrum
           multipole_correlation_function:
             bins:
               n1: 
@@ -422,6 +452,7 @@ Cobaya:
                     4:
                       k_range: [[0.01, 0.5]]
         WL: 
+           statistics: angular_power_spectrum
            angular_power_spectrum:
               bins:
                  n1:
@@ -620,6 +651,7 @@ Cobaya:
                    n13:
                      ell_range: [[20, 4000]]
         WL-GCphot: 
+           statistics: angular_power_spectrum
            angular_power_spectrum:
               bins:
                  n1:
@@ -1064,6 +1096,7 @@ Cobaya:
                  n13:
                    ell_range: [[20, 550]]
         CG:
+          statistics_clusters: cluster_counts
           CG_probe: CC
           CG_xi2_cov_selection: CG_nonanalytic_cov
           neutrino_cdm: cb
@@ -1092,4 +1125,7 @@ Cobaya:
         # Note: This is not yet provided by CLOE
         # therefore it will load empty dictionaries
         GCphot-GCspectro: 
+          statistics: angular_power_spectrum
         WL-GCspectro: 
+          statistics: angular_power_spectrum
+

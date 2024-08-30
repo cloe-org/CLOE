@@ -53,29 +53,11 @@ class EuclidLikelihood(Likelihood):
         self.observables = \
             observables_selection_specifications_checker(
                 self.observables_selection,
-                self.observables_specifications,
-                self.statistics_photo)
+                self.observables_specifications)
         # Visualization of the observables matrix
         if self.plot_observables_selection:
             self.observables_pf = observables_visualization(
              self.observables['selection'])
-        self.observables['selection']['add_phot_RSD'] = self.add_phot_RSD
-        self.observables['selection']['matrix_transform_phot'] = \
-            self.matrix_transform_phot
-        if 'GCspectro' in self.observables['specifications'].keys():
-            self.observables['specifications']['GCspectro']['statistics'] = \
-                self.statistics_spectro
-        # set the parameters used to determine what statistics to use
-        # for the photometric probes
-        for key in self.observables['specifications'].keys():
-            if key in ['WL', 'GCphot', 'WL-GCphot']:
-                self.observables['specifications'][key]['statistics'] = \
-                    self.statistics_photo
-
-        # Clusters of galaxies
-        if 'CG' in self.observables['specifications'].keys():
-            self.observables['specifications']['CG']['statistics'] = \
-                self.statistics_clusters
 
         # Select which power spectra to require from the Boltzmann solver
         if self.NL_flag_phot_matter > 0:
@@ -385,7 +367,7 @@ class EuclidLikelihood(Likelihood):
                 'Cl': {'pp': 4300},
                 'CAMBdata': None}
         # TODO CAMBDATA is used only to retrieve the conformal time
-        # to compute z of CMB, maybe there is a better way ?
+        # to compute z of CMB, explore if there is a better way.
         if self.solver == 'camb':
             derived = {'omegac': None, 'omnuh2': None, 'omeganu': None,
                        'nnu': None}
@@ -425,7 +407,7 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['use_magnification_bias_spectro'] = \
                 self.use_magnification_bias_spectro
             self.cosmo.cosmo_dic['matrix_transform_phot'] = \
-                self.matrix_transform_phot
+                self.observables['selection']['matrix_transform_phot']
             self.cosmo.cosmo_dic['H0'] = self.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
@@ -536,12 +518,6 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['GCsp_z_err'] = \
                 info['likelihood']['Euclid']['GCsp_z_err']
             self.cosmo.cosmo_dic['bias_model'] = self.bias_model
-            self.cosmo.cosmo_dic['add_phot_RSD'] = \
-                info['likelihood']['Euclid']['add_phot_RSD']
-            self.matrix_transform_phot = \
-                info['likelihood']['Euclid']['matrix_transform_phot']
-            self.cosmo.cosmo_dic['matrix_transform_phot'] = \
-                info['likelihood']['Euclid']['matrix_transform_phot']
             self.cosmo.cosmo_dic['magbias_model'] = self.magbias_model
             self.cosmo.cosmo_dic['use_magnification_bias_spectro'] = \
                 self.use_magnification_bias_spectro
@@ -646,14 +622,19 @@ class EuclidLikelihood(Likelihood):
             if 'observables_selection' in info['likelihood']['Euclid']:
                 self.observables_selection = \
                     info['likelihood']['Euclid']['observables_selection']
+                self.cosmo.cosmo_dic['add_phot_RSD'] = \
+                    self.observables_selection['add_phot_RSD']
+                self.matrix_transform_phot = \
+                    self.observables_selection['matrix_transform_phot']
+                self.cosmo.cosmo_dic['matrix_transform_phot'] = \
+                    self.matrix_transform_phot
             if 'observables_specifications' in info['likelihood']['Euclid']:
                 self.observables_specifications = \
                     info['likelihood']['Euclid']['observables_specifications']
             self.observables = \
                 observables_selection_specifications_checker(
                     info['likelihood']['Euclid']['observables_selection'],
-                    self.observables_specifications,
-                    self.statistics_photo)
+                    self.observables_specifications)
 
     def logp(self, **params_values):
         r"""Logp.

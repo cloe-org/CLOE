@@ -4,14 +4,14 @@
 
 This repository allows the user to obtain model predictions and cosmological parameter constraints for synthetic and real Euclid data. It is developed by the Inter-Science Taskforce for Likelihood (IST:L) within the Euclid Consortium, in close collaboration with all of the Euclid Science Working Groups, Organisational Units, and the Inter-Science Taskforce for Nonlinear effects (IST:NL).
 
-In the latest version of CLOE, the Euclid observables are defined by the following set:
+In the latest version of CLOE, the core Euclid observables are defined by the following set:
 
 - Weak Gravitational Lensing 
 - Photometric Galaxy Clustering
 - Photometric Galaxy-Galaxy Lensing
 - Spectroscopic Galaxy Clustering
 
-CLOE allows the user to consider these probes either separately or in a self-consistent combined analysis. It is also possible to analyze the Euclid data alongside other external datasets. The set of Euclid observables will expand in subsequent versions to include probes such as clusters and cross-correlations with the cosmic microwave background.
+CLOE allows the user to consider these probes either separately or in a self-consistent combined analysis. Additional Euclid observables in CLOE include galaxy cluster probes and cross-correlations with the cosmic microwave background. It is also possible to analyze the Euclid data alongside other external datasets.
 
 Further documentation is found [here](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/index.html)
 
@@ -19,7 +19,7 @@ Further documentation is found [here](http://pf-ist-likelihood.pages.euclid-sgs.
 
 CLOE allows the user to obtain the linear matter power spectrum from either of the [CAMB](https://camb.readthedocs.io/en/latest/) and [CLASS](https://lesgourg.github.io/class_public/class.html) Boltzmann codes.
 
-In order to obtain cosmological parameter constraints, CLOE reads in the redshift distributions and computes the theoretical predictions of the Euclid observables, which are used together with the data and covariance to obtain the likelihood. The likelihood is then evaluated across the parameter space using one of the samplers of [Cobaya](https://cobaya.readthedocs.io/en/latest/) or [CosmoSIS](https://cosmosis.readthedocs.io/en/latest/) to obtain the posterior probability. **The latter is not part of the current v2.0 release.**
+In order to obtain cosmological parameter constraints, CLOE reads in the redshift distributions and computes the theoretical predictions of the Euclid observables, which are used together with the data and covariance to obtain the likelihood. The likelihood is then evaluated across the parameter space using one of the samplers of [Cobaya](https://cobaya.readthedocs.io/en/latest/) or [CosmoSIS](https://cosmosis.readthedocs.io/en/latest/) to obtain the posterior probability.
 
 ## Installation
 

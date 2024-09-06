@@ -40,20 +40,20 @@ neutrino_cdm: cb
 external_richness_selection_function: non_CG_ESF
 file_richness_selection_function: ./../data/ExternalBenchmark/Clusters/int_Plob_ltr_z_Dlob.npy
 effective_area: 15000
-z_obs_edges_CC: []
-Lambda_obs_edges_CC: []
+z_obs_edges_CC: [0.2, 0.4, 0.6, 0.8, 1., 1.2, 1.4, 1.6, 1.8]
+Lambda_obs_edges_CC: [20., 30., 45., 60., 500.]
 
 halo_profile: NFW
 overdensity_type: vir
 overdensity: 200.
-A_l: 0.
-B_l: 0.
-C_l: 0.
-sig_A_l: 0.
+A_l: 33.
+B_l: 1.
+C_l: 0.01
+sig_A_l: 0.2
 sig_B_l: 0.
 sig_C_l: 0.
-M_pivot: 0.
-z_pivot: 0.
+M_pivot: 3.e14
+z_pivot: 0.45
 sig_lambda_norm: 0.9
 sig_lambda_z: 0.1
 sig_lambda_exponent: 0.4

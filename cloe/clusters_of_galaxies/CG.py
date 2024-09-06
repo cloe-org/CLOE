@@ -55,6 +55,11 @@ class CG:
         self.lambda_obs_edges_CC = self.theory[
             'observables_specifications']['CG']['Lambda_obs_edges_CC']
 
+        if isinstance(self.z_obs_edges_CC, list):
+            self.z_obs_edges_CC = np.array(self.z_obs_edges_CC)
+        if isinstance(self.lambda_obs_edges_CC, list):
+            self.lambda_obs_edges_CC = np.array(self.lambda_obs_edges_CC)
+
         self.z_obs_div_CC = len(self.z_obs_edges_CC) - 1
         self.lambda_obs_div_CC = len(self.lambda_obs_edges_CC) - 1
 
@@ -92,8 +97,8 @@ class CG:
         self.sig_C_l = self.theory[
             'observables_specifications']['CG']['sig_C_l']
 
-        self.M_pivot = self.theory[
-            'observables_specifications']['CG']['M_pivot']
+        self.M_pivot = float(self.theory[
+            'observables_specifications']['CG']['M_pivot'])
         self.z_pivot = self.theory[
             'observables_specifications']['CG']['z_pivot']
 

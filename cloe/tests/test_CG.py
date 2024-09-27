@@ -58,6 +58,7 @@ info = {
                 'NL_flag_phot_baryon': 0,
                 'NL_flag_phot_bias': 0,
                 'IA_flag': 0,
+                'IR_resum': 'DST',
                 'Baryon_redshift_model': True,
                 'GCsp_z_err': False,
                 'bias_model': 1,

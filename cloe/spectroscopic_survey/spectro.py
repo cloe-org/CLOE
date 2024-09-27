@@ -333,8 +333,7 @@ class Spectro:
         -------
         mps: list of numpy.ndarray
             List containing the convolved power spectrum multipoles of order
-            (0,2,4). The list includes the wavemodes $`k`$ and the three
-            multipoles, in this order.
+            (0,2,4). The list includes the three multipoles, in this order.
         """
         if self.mixing_matrix_dict is None:
             raise TypeError('Mixing matrix has not been initialised since no '
@@ -367,7 +366,7 @@ class Spectro:
                     np.dot(self.mixing_matrix_dict[f'W{ell}{ell_prime}'],
                            multipoles_in[f'ell{ell_prime}'])
 
-        return (kout, multipoles_out['ell0'], multipoles_out['ell2'],
+        return (multipoles_out['ell0'], multipoles_out['ell2'],
                 multipoles_out['ell4'])
 
     def multipole_correlation_function_mag_mag(self, r_xi, z, ell):

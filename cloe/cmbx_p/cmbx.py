@@ -27,7 +27,6 @@ class CMBX:
 
         # Allows to select the spectra from CAMB directly (faster ?)
         self.use_camb_clkcmb = False
-        print("Use CAMB Cls " + str(self.use_camb_clkcmb))
 
         self.ells_kCMB = []
         self.ells_kCMB_X_WL = []

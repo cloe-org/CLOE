@@ -57,6 +57,11 @@ Cobaya:
       #     0 -> NLA
       #     1 -> TATT
       IA_flag: 0
+      # IR-resummation method
+      #     'DST' -> Discrete sine transform
+      #     'EH' -> Eisenstein-Hu
+      IR_resum: 'DST'      
+      # 
       # Use magnification bias for GC spectro
       use_magnification_bias_spectro: False
       # Redshift dependence of photometric linear galaxy bias
@@ -94,42 +99,49 @@ Cobaya:
       observables_specifications:
         GCphot:
           angular_power_spectrum: GCphot-FourierSpace.yaml
+          pseudo_cl: GCphot-FourierSpace.yaml
           angular_correlation_function: GCphot-ConfigurationSpace.yaml
-          # Select statistics for GCphot (angular_power_spectrum or
-          # angular_correlation_function)
+          # Select statistics for GCphot (angular_power_spectrum,
+          # pseudo_cl, or angular_correlation_function)
           statistics: angular_power_spectrum
         GCspectro:
           multipole_power_spectrum: GCspectro-FourierSpace.yaml
+          convolved_multipole_power_spectrum: GCspectro-FourierSpace.yaml
           multipole_correlation_function: GCspectro-ConfigurationSpace.yaml
-          # Select statistics for GCspectro (multipole_power_spectrum or
+          # Select statistics for GCspectro (multipole_power_spectrum,
+          # convolved_multipole_power_spectrum, or 
           # multipole_correlation_function)
           statistics: multipole_power_spectrum
         WL:
           angular_power_spectrum: WL-FourierSpace.yaml
+          pseudo_cl: WL-FourierSpace.yaml
           angular_correlation_function: WL-ConfigurationSpace.yaml
-          # Select statistics for WL (angular_power_spectrum or
-          # angular_correlation_function)
+          # Select statistics for WL (angular_power_spectrum,
+          # pseudo_cl, or angular_correlation_function)
           statistics: angular_power_spectrum
         WL-GCphot:
           angular_power_spectrum: WL-GCphot-FourierSpace.yaml
+          pseudo_cl: WL-GCphot-FourierSpace.yaml
           angular_correlation_function: WL-GCphot-ConfigurationSpace.yaml
-          # Select statistics for WL-GCphot (angular_power_spectrum or
-          # angular_correlation_function)
+          # Select statistics for WL-GCphot (angular_power_spectrum,
+          # pseudo_cl, or angular_correlation_function)
           statistics: angular_power_spectrum
         CG: CG.yaml
         # Note: GCphot-GCspectro and WL-GCspectro are not yet provided by CLOE
         # and the following will therefore load empty dictionaries
         GCphot-GCspectro:
           angular_power_spectrum: GCphot-GCspectro-FourierSpace.yaml
+          pseudo_cl: GCphot-GCspectro-FourierSpace.yaml
           angular_correlation_function: GCphot-GCspectro-ConfigurationSpace.yaml
-          # Select statistics for GCphot-GCspectro (angular_power_spectrum or
-          # angular_correlation_function)
+          # Select statistics for GCphot-GCspectro (angular_power_spectrum,
+          # pseudo_cl, or angular_correlation_function)
           statistics: angular_power_spectrum
         WL-GCspectro:
           angular_power_spectrum: WL-GCspectro-FourierSpace.yaml
+          pseudo_cl: WL-GCspectro-FourierSpace.yaml
           angular_correlation_function: WL-GCspectro-ConfigurationSpace.yaml
-          # Select statistics for WL-GCspectro (angular_power_spectrum or
-          # angular_correlation_function)
+          # Select statistics for WL-GCspectro (angular_power_spectrum
+          # pseudo_cl, or angular_correlation_function)
           statistics: angular_power_spectrum
         # CMBX probes
         CMBlens: CMBlensing.yaml

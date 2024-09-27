@@ -21,6 +21,8 @@ NL_flag_phot_bias: 0
 NL_flag_spectro: 0
 # Intrinsic alignment model selector
 IA_flag: 0
+# IR-resummation model selector
+IR_resum: 'DST'
 # Baryonic feedback flag selector
 NL_flag_phot_baryon: 0
 # Baryonic feedback z_dependence flag selector for BCemu and Bacco emulators
@@ -57,18 +59,22 @@ observables_selection: !defaults [../configs/observables_selection]
 observables_specifications:
   WL:
     angular_power_spectrum: !defaults [../configs/WL-FourierSpace]
+    pseudo_cl: !defaults [../configs/WL-FourierSpace]
     angular_correlation_function: !defaults [../configs/WL-ConfigurationSpace]
     statistics: angular_power_spectrum
   GCphot:
     angular_power_spectrum: !defaults [../configs/GCphot-FourierSpace]
+    pseudo_cl: !defaults [../configs/GCphot-FourierSpace]
     angular_correlation_function: !defaults [../configs/GCphot-ConfigurationSpace]
     statistics: angular_power_spectrum
   GCspectro:
     multipole_power_spectrum: !defaults [../configs/GCspectro-FourierSpace]
+    convolved_multipole_power_spectrum: !defaults [../configs/GCspectro-FourierSpace]
     multipole_correlation_function: !defaults [../configs/GCspectro-ConfigurationSpace]
     statistics: multipole_power_spectrum
   WL-GCphot:
     angular_power_spectrum: !defaults [../configs/WL-GCphot-FourierSpace]
+    pseudo_cl: !defaults [../configs/WL-GCphot-FourierSpace]
     angular_correlation_function: !defaults [../configs/WL-GCphot-ConfigurationSpace]
     statistics: angular_power_spectrum
   CG: !defaults [../configs/CG]
@@ -76,10 +82,12 @@ observables_specifications:
   # therefore it will load empty dictionaries
   GCphot-GCspectro:
     angular_power_spectrum: !defaults [../configs/GCphot-GCspectro-FourierSpace]
+    pseudo_cl: !defaults [../configs/GCphot-GCspectro-FourierSpace]
     angular_correlation_function: !defaults [../configs/GCphot-GCspectro-ConfigurationSpace]
     statistics: angular_power_spectrum
   WL-GCspectro:
     angular_power_spectrum: !defaults [../configs/WL-GCspectro-FourierSpace]
+    pseudo_cl: !defaults [../configs/WL-GCspectro-FourierSpace]
     angular_correlation_function: !defaults [../configs/WL-GCspectro-ConfigurationSpace]  
     statistics: angular_power_spectrum
   # CMBX probes

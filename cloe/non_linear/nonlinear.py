@@ -313,7 +313,7 @@ class Nonlinear:
         Pkmu = np.array(
             [self.eftobj.P_kmu_z(
                 redshift=z, use_growth_rescaling=use_growth_rescaling,
-                IRres='DST', **rb.select_spectro_parameters(
+                IRres=self.theory['IR_resum'], **rb.select_spectro_parameters(
                     float(z), self.nuis, self.zbins))
              for i, z in enumerate(self.zmeans)])
         # Storing in the nonlinear dictionary

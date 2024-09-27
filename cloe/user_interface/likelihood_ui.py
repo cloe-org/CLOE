@@ -277,6 +277,7 @@ class LikelihoodUI:
                         corr_fun_str =\
                             'multipole_correlation_function'
                         sub_fields = ['multipole_power_spectrum',
+                                      'convolved_multipole_power_spectrum',
                                       corr_fun_str]
                         self._check_and_update_likelihood_fields(dic,
                                                                  sub_fields)
@@ -288,6 +289,7 @@ class LikelihoodUI:
                             or field == 'WL-GCspectro':
                         dic = field_value
                         sub_fields = ['angular_power_spectrum',
+                                      'pseudo_cl',
                                       'angular_correlation_function']
                         self._check_and_update_likelihood_fields(dic,
                                                                  sub_fields)

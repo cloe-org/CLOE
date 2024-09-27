@@ -334,7 +334,7 @@ class Data_handler:
 
         if self._use_wl:
             stat_wl = self._obs['specifications']['WL']['statistics']
-            if stat_wl == 'angular_power_spectrum':
+            if stat_wl in ('angular_power_spectrum', 'pseudo_cl'):
                 scale_var = 'ells'
                 scale_range_var = 'ell_range'
                 num_repetitions_wl = 1
@@ -370,7 +370,7 @@ class Data_handler:
 
         if self._use_xc_phot:
             stat_xc = self._obs['specifications']['WL-GCphot']['statistics']
-            if stat_xc == 'angular_power_spectrum':
+            if stat_xc in ('angular_power_spectrum', 'pseudo_cl'):
                 scale_var = 'ells'
                 scale_range_var = 'ell_range'
             elif stat_xc == 'angular_correlation_function':
@@ -394,7 +394,7 @@ class Data_handler:
 
         if self._use_gc_phot:
             stat_gcphot = self._obs['specifications']['GCphot']['statistics']
-            if stat_gcphot == 'angular_power_spectrum':
+            if stat_gcphot in ('angular_power_spectrum', 'pseudo_cl'):
                 scale_var = 'ells'
                 scale_range_var = 'ell_range'
             elif stat_gcphot == 'angular_correlation_function':
@@ -419,8 +419,9 @@ class Data_handler:
         gc_spectro_vec = []
         redshifts = data.data_dict['GC-Spectro'].keys()
 
-        if self._obs['specifications']['GCspectro']['statistics'] == \
-                'multipole_power_spectrum':
+        if self._obs['specifications']['GCspectro']['statistics'] in \
+                ('multipole_power_spectrum',
+                 'convolved_multipole_power_spectrum'):
             data.read_GC_spectro_scale_cuts()
             for redshift_index, redshift in enumerate(redshifts):
                 k_pk = data.data_dict['GC-Spectro'][f'{redshift}']['k_pk']
@@ -490,7 +491,7 @@ class Data_handler:
 
         if self._use_wl:
             stat_wl = self._obs['specifications']['WL']['statistics']
-            if stat_wl == 'angular_power_spectrum':
+            if stat_wl in ('angular_power_spectrum', 'pseudo_cl'):
                 scale_var = 'ells'
                 scale_range_var = 'ell_range'
                 num_repetitions_wl = 1
@@ -526,7 +527,7 @@ class Data_handler:
 
         if self._use_xc_phot:
             stat_xc = self._obs['specifications']['WL-GCphot']['statistics']
-            if stat_xc == 'angular_power_spectrum':
+            if stat_xc in ('angular_power_spectrum', 'pseudo_cl'):
                 scale_var = 'ells'
                 scale_range_var = 'ell_range'
             elif stat_xc == 'angular_correlation_function':
@@ -550,7 +551,7 @@ class Data_handler:
 
         if self._use_gc_phot:
             stat_gcphot = self._obs['specifications']['GCphot']['statistics']
-            if stat_gcphot == 'angular_power_spectrum':
+            if stat_gcphot in ('angular_power_spectrum', 'pseudo_cl'):
                 scale_var = 'ells'
                 scale_range_var = 'ell_range'
             elif stat_gcphot == 'angular_correlation_function':
@@ -662,8 +663,9 @@ class Data_handler:
         gc_spectro_vec = []
         redshifts = data.data_dict['GC-Spectro'].keys()
 
-        if self._obs['specifications']['GCspectro']['statistics'] == \
-                'multipole_power_spectrum':
+        if self._obs['specifications']['GCspectro']['statistics'] in \
+                ('multipole_power_spectrum',
+                 'convolved_multipole_power_spectrum'):
             data.read_GC_spectro_scale_cuts()
             for redshift_index, redshift in enumerate(redshifts):
                 k_pk = data.data_dict['GC-Spectro'][f'{redshift}']['k_pk']

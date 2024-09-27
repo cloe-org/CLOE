@@ -12,6 +12,7 @@ from pathlib import Path
 from scipy import interpolate
 from scipy import integrate
 from euclidlib.photo._le3_pk_wl import angular_power_spectra
+from euclidlib.photo import mixing_matrices
 
 
 class ReaderError(Exception):
@@ -481,6 +482,25 @@ class Reader:
 
         return
 
+    def read_phot_mixing_matrix(self, file_dest='Photometric/data'):
+        """Reads in the photometric mixing matrix.
+
+        Function to read the OU-LE3 photometric mixing matrices, based
+        on location provided to Reader class. Adds contents to the data
+        dictionary (:obj:`Reader.data_dict`).
+
+        Parameters
+        ----------
+        file_dest: str
+            Sub-folder of :obj:`self.data_subdirectory` within which to find
+            photometric data
+        """
+        root = self.data['photo']['root_mixing_matrix']
+        full_path = Path(self.dat_dir_main, file_dest, root)
+        mixing_matrix = mixing_matrices(full_path)
+
+        return mixing_matrix
+
     def read_phot(self, file_dest='Photometric/data'):
         """Reads in the photometric data.
 
@@ -633,7 +653,7 @@ class Reader:
         """
 
         root_dir = Path(__file__).resolve().parents[2]
-        cmbx_dir = Path(root_dir, 'data', file_dest)
+        cmbx_dir = Path(self.dat_dir_main, file_dest)
 
         if 'cmbx' not in self.data:
             self.data['cmbx'] = {'root_CMBlens': 'Cls_kCMB.dat',

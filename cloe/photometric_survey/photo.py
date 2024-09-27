@@ -13,15 +13,14 @@ from cloe.photometric_survey.redshift_distribution \
 from cloe.auxiliary.redshift_bins import linear_interpolator
 import warnings
 
-# General error class
-
 
 class Photo:
     """
     Class for photometric observables.
     """
 
-    def __init__(self, cosmo_dic, nz_dic_WL, nz_dic_GC, add_RSD=False):
+    def __init__(self, cosmo_dic, nz_dic_WL, nz_dic_GC,
+                 mixing_matrix_dict=None, add_RSD=False):
         """Initialise.
 
         Constructor of the class Photo.
@@ -84,6 +83,12 @@ class Photo:
         self._ells_GC_or_XC = None
 
         self.multiply_bias_cl = False
+
+        if mixing_matrix_dict is not None:
+            self.mixing = mixing_matrix_dict
+            self.mixing_size = \
+                self.mixing["G_E", "G_E", 1, 1]["MM"][0].size
+            self.ells_in = np.array(range(0, self.mixing_size))
 
         # The class might be initialized with no cosmo dictionary, as it is
         # currently done when instantiating Photo from Euclike, for running
@@ -802,6 +807,72 @@ class Photo:
             (1 + self.multbias[bin_j - 1])
 
         return c_final
+
+    def pseudo_Cl_3x2pt(self, obs, ells, bin_i, bin_j):
+        r"""Angular power spectra convolved with the mixing matrix
+
+        Returns the angular power spectrum convolved with the mixing matrix
+        stored as class attribute.
+
+        .. math::
+            \left\langle\tilde{\bf{C}}_{\ell}^{ij}\right\rangle = \
+            \sum_{\ell'} \bf{M}_{\ell \ell'}^{ij} \bf{C}_{\ell'}^{ij}
+
+        Parameters
+        ----------
+        obs: str
+            Type of Pseudo-Cl function. It must be selected from the list
+            ["Shear-Shear", "Shear-Position", "Position-Position"].
+            The match is case-insensitive.
+        ells: numpy.ndarray of float
+            :math:`\ell`-modes at which
+            :math:`\left\langle\tilde{\bf{C}}_{\ell}^{ij}\right\rangle`
+            is evaluated.
+        bin_i: int
+           Index of first tomographic bin. Tomographic bin
+           indices start from 1
+        bin_j: int
+           Index of second tomographic bin. Tomographic bin
+           indices start from 1.
+
+        Returns
+        -------
+        Pseudo-Cl power spectrum: numpy.ndarray of float
+           Values of the pseudo-Cl power spectrum
+        """
+        if self.mixing is None:
+            raise TypeError('Mixing matrix has not been initialised since no '
+                            'argument "mixing_matrix_dict" was specified when '
+                            'instantiating the Photo class.')
+
+        obs = obs.casefold()
+        if obs == 'shear-shear':
+            cells_func = self.Cl_WL
+            obs1 = "G_E"
+            obs2 = "G_E"
+        elif obs == 'shear-position':
+            cells_func = self.Cl_cross
+            obs1 = "P"
+            obs2 = "G_E"
+        elif obs == 'position-position':
+            cells_func = self.Cl_GC_phot
+            obs1 = "P"
+            obs2 = "P"
+        else:
+            raise ValueError('obs parameter must be selected from the '
+                             'following list: ["Shear-Shear", '
+                             '"Shear-Position", '
+                             '"Position-Position"]')
+
+        # For a given observable, obtain the input raw Cls
+        # and then output the transformed pseudo-Cls.
+        cells_in = cells_func(self.ells_in, bin_i, bin_j)
+        cells_out = np.zeros(ells.size)
+        cells_out = \
+            self.mixing[obs1, obs2, bin_i - 1, bin_j - 1]["MM"][0:ells.size] \
+            @ cells_in
+
+        return cells_out
 
     def _evaluate_power_WL(self, force_recompute=False):
         r"""Evaluate Power WL

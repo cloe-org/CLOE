@@ -185,6 +185,8 @@ class Cosmology:
             Nonlinear flag for GCspectro
         IA_flag: int
             intrinsic alignment model flag
+        IR_resum: str
+            IR-resummation model flag
         a00e: function
             a00e one-loop term for IA TATT model (arxiv:1708.09247)
         c00e: function
@@ -320,6 +322,8 @@ class Cosmology:
                           'NL_flag_spectro': 0,
                           # IA flag
                           'IA_flag': 0,
+                          # IR-resummation flag
+                          'IR_resum': 'DST',
                           # Baryonic feedback flag
                           'NL_flag_phot_baryon': 0,
                           # Baryonic feedback z-dependence model flag

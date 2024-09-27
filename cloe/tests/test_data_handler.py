@@ -27,8 +27,9 @@ class datahandlerTestCase(TestCase):
         self.xc_phot_size = 2000
         self.gc_phot_size = 1100
         self.tx2_size = self.wl_size + self.xc_phot_size + self.gc_phot_size
-        if self.observables['specifications']['GCspectro']['statistics'] == \
-                'multipole_power_spectrum':
+        if self.observables['specifications']['GCspectro']['statistics'] in \
+                ('multipole_power_spectrum',
+                 'convolved_multipole_power_spectrum'):
             self.gc_spectro_size = 1500
         elif self.observables['specifications']['GCspectro']['statistics'] == \
                 'multipole_correlation_function':

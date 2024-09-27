@@ -139,7 +139,7 @@ where `<COMMAND>` is the command line you wish to run, e.g. to run the `run_cloe
 docker run --rm cloe bash -cl "python run_cloe.py configs/config_profiling_evaluate_likelihood.yaml"
 ```
 
-##### Jupyter notebook
+##### Jupyter Notebook
 
 It is also possible to launch a Jupyter Notebook using a CLOE Docker container as the backend. To do so run the following:
 
@@ -218,14 +218,14 @@ Instead of directly editing `config_default.py`, it is also possible to add the 
 These example scripts accomplish exactly the same commands as the `run_cloe.py` instructions. The IST:L team has constructed the scripts from an internal notebook that is based on the contents of `config_default.yaml`.
 
 ## Structure of the repository
-*  **cloe**: folder containing the CLOE python package (see the [API documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/index.html) for details)
+*  **cloe**: folder containing the CLOE package in Python (see the [API documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/index.html) for details)
 *  **configs**: folder containing configurations files to specify the cosmological and nuisance parameters with user specifications for scales and redshifts
 *  **data**:  folder containing at the moment, the fiducial data labeled as `ExternalBenchmark` for photometric and spectroscopic probes
 *  **docs**:  folder containing automatically generated documentation
 *  **example**: folder containing  example yaml configuration files for the user
-*  **mcmc scripts**: folder containing example python scripts to run mcmc chains for different combinations of probes with free or fixed nuisance parameters
-*  **notebooks**: folder containing example jupyter notebooks
-*  **scripts**: folder containing  example python scripts to simulate data
+*  **mcmc scripts**: folder containing example Python scripts to run MCMC chains for different combinations of probes with free or fixed nuisance parameters
+*  **notebooks**: folder containing example Jupyter Notebooks
+*  **scripts**: folder containing  example Python scripts to simulate data
 *  ```run_cloe.py```: top level script for running the CLOE user interface
 *  ```setup.py```: top level script for installing or testing the CLOE package
 *  ```LICENCE.txt```: file containing the MIT license CLOE is under

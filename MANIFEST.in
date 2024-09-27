@@ -6,6 +6,7 @@ include data/ExternalBenchmark/Spectroscopic/data/*
 include data/ExternalBenchmark/Clusters/*
 include data/ExternalBenchmark/Clusters/truth_tables/*
 include data/ExternalBenchmark/Clusters/validation_tables/*
+include data/ExternalBenchmark/cmbx/*
 include configs/*
 include configs/models/*
 recursive-include cloe *.yaml

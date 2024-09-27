@@ -363,14 +363,12 @@ class EuclidLikelihood(Likelihood):
                  "kmax": self.k_max_Boltzmann,
                  "R": self.r_win,
                  "vars_pairs": ([["delta_tot", "delta_tot"],
-                                ["delta_nonu", "delta_nonu"]])},
-                'Cl': {'pp': 4300},
-                'CAMBdata': None}
-        # TODO CAMBDATA is used only to retrieve the conformal time
+                                ["delta_nonu", "delta_nonu"]])}}
+        # CAMBdata is used only to retrieve the conformal time
         # to compute z of CMB, explore if there is a better way.
         if self.solver == 'camb':
             derived = {'omegac': None, 'omnuh2': None, 'omeganu': None,
-                       'nnu': None}
+                       'nnu': None, 'Cl': {'pp': 4300}, 'CAMBdata': None}
             requirements = requirements | derived
 
         return requirements
@@ -394,6 +392,7 @@ class EuclidLikelihood(Likelihood):
                 self.NL_flag_phot_bias
             self.cosmo.cosmo_dic['NL_flag_spectro'] = self.NL_flag_spectro
             self.cosmo.cosmo_dic['IA_flag'] = self.IA_flag
+            self.cosmo.cosmo_dic['IR_resum'] = self.IR_resum
             self.cosmo.cosmo_dic['NL_flag_phot_baryon'] = \
                 self.NL_flag_phot_baryon
             self.cosmo.cosmo_dic['Baryon_redshift_model'] = \
@@ -444,6 +443,8 @@ class EuclidLikelihood(Likelihood):
                 self.cosmo.cosmo_dic['Omnu'] = \
                     self.provider.get_param('omeganu')
                 self.cosmo.cosmo_dic['nnu'] = self.provider.get_param('nnu')
+                self.cosmo.cosmo_dic['Cl'] = self.provider.get_Cl()
+                self.cosmo.cosmo_dic['CAMBdata'] = self.provider.get_CAMBdata()
             self.cosmo.cosmo_dic['comov_dist'] = \
                 self.provider.get_comoving_radial_distance(self.z_win_max)
             self.cosmo.cosmo_dic['angular_dist'] = \
@@ -497,8 +498,6 @@ class EuclidLikelihood(Likelihood):
                                     for your_key in new_keys}
             self.cosmo.cosmo_dic['nuisance_parameters'].update(
                 **only_nuisance_params)
-            self.cosmo.cosmo_dic['Cl'] = self.provider.get_Cl()
-            self.cosmo.cosmo_dic['CAMBdata'] = self.provider.get_CAMBdata()
 
         except (TypeError, AttributeError):
             self.cosmo.cosmo_dic['NL_flag_phot_matter'] = \
@@ -509,6 +508,8 @@ class EuclidLikelihood(Likelihood):
                 info['likelihood']['Euclid']['NL_flag_spectro']
             self.cosmo.cosmo_dic['IA_flag'] = \
                 info['likelihood']['Euclid']['IA_flag']
+            self.cosmo.cosmo_dic['IR_resum'] = \
+                info['likelihood']['Euclid']['IR_resum']
             self.cosmo.cosmo_dic['NL_flag_phot_baryon'] = \
                 info['likelihood']['Euclid']['NL_flag_phot_baryon']
             self.cosmo.cosmo_dic['Baryon_redshift_model'] = \

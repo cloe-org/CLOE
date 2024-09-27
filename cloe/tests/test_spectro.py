@@ -19,6 +19,7 @@ class specinitTestCase(TestCase, SpectroTestParent):
 
     @classmethod
     def setUpClass(cls) -> None:
+
         cls.test_dict = load_test_pickle('spectro_test_dic.pickle')
         cls.test_dict_1 = deepcopy(cls.test_dict)
         cls.test_dict_1['GCsp_z_err'] = True
@@ -27,11 +28,17 @@ class specinitTestCase(TestCase, SpectroTestParent):
         cls.test_dict_3 = deepcopy(cls.test_dict)
         cls.test_dict_3['f_out_z_dep'] = True
         cls.test_dict_3['f_out_1'] = 1.0
+        cls.mixing_matrix_dict_spectro = \
+            load_test_pickle('mixmat_spectro.pickle')
 
-        cls.spectro = Spectro(cls.test_dict, ['1.', '1.2', '1.4', '1.65'])
-        cls.spectro_1 = Spectro(cls.test_dict_1, ['1.', '1.2', '1.4', '1.65'])
-        cls.spectro_2 = Spectro(cls.test_dict_2, ['1.', '1.2', '1.4', '1.65'])
-        cls.spectro_3 = Spectro(cls.test_dict_3, ['1.', '1.2', '1.4', '1.65'])
+        cls.spectro = Spectro(cls.test_dict, ['1.', '1.2', '1.4', '1.65'],
+                              cls.mixing_matrix_dict_spectro)
+        cls.spectro_1 = Spectro(cls.test_dict_1, ['1.', '1.2', '1.4', '1.65'],
+                                cls.mixing_matrix_dict_spectro)
+        cls.spectro_2 = Spectro(cls.test_dict_2, ['1.', '1.2', '1.4', '1.65'],
+                                cls.mixing_matrix_dict_spectro)
+        cls.spectro_3 = Spectro(cls.test_dict_3, ['1.', '1.2', '1.4', '1.65'],
+                                cls.mixing_matrix_dict_spectro)
 
     def setUp(self):
         self.test_dict['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
@@ -66,6 +73,13 @@ class specinitTestCase(TestCase, SpectroTestParent):
         self.check_get_k = None
         self.check_get_mu = None
         self.check_gal_redshift_scatter = None
+        self.check_multipole_spectra_integrand_no_z_err = None
+        self.check_multipole_spectra_integrand = None
+        self.check_multipole_spectra_m0 = None
+        self.check_multipole_spectra_m1 = None
+        self.check_multipole_spectra_m2 = None
+        self.check_multipole_spectra_m3 = None
+        self.check_multipole_spectra_m4 = None
 
     def istf_spectro_galbias(self, redshift, bin_edge_list=None):
         """
@@ -160,6 +174,16 @@ class specinitTestCase(TestCase, SpectroTestParent):
             0.1,
             ms=[100],
         )
+
+    @patch('cloe.spectroscopic_survey.spectro.Spectro.multipole_spectra')
+    def test_convolved_multipole_spectra(self, mock_mul_spe):
+        array_shape = np.zeros((3, 98))
+        convolved_mps = self.spectro.convolved_power_spectrum_multipoles(1.0)
+        # test that the shape of the returned array matches the expectations
+        npt.assert_equal(array_shape.shape, np.array(convolved_mps).shape)
+        # test that the convolved_power_spectrum_multipoles() function
+        # was called
+        mock_mul_spe.assert_called()
 
     def test_multipole_spectra_integrand(self):
         mu_grid = np.linspace(-1, 1, 2001)

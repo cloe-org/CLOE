@@ -120,6 +120,7 @@ Cobaya:
                             root_WL: Cls_{:s}_ShearShear.dat
                             root_XC: Cls_{:s}_PosShear.dat
                             root_fits: fs2_cls_{:d}zbins_32ellbins.fits
+                            root_mixing_matrix: fs2_mms_10zbins_32ellbins.fits
                             Fourier: True
                             IA_model: zNLA
                             # Photometric covariances root names should contain z{:s} string

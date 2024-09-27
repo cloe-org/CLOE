@@ -117,6 +117,7 @@ Cosmosis:
                             root_WL: Cls_{:s}_ShearShear.dat
                             root_XC: Cls_{:s}_PosShear.dat
                             root_fits: fs2_cls_{:d}zbins_32ellbins.fits
+                            root_mixing_matrix: fs2_mms_10zbins_32ellbins.fits
                             Fourier: True
                             IA_model: zNLA
                             # Photometric covariances root names should contain z{:s} string
@@ -167,7 +168,7 @@ Cosmosis:
                           # Add RSD to photometric probes
                           add_phot_RSD: False
                           # Apply a generic matrix transformation to the photo 
-                          # observables (available options: 'BNT', 'BNT-test')
+                          # observables (available options: 'False', 'BNT', 'BNT-test')
                           matrix_transform_phot: False
       # Specifications for each of the observables
       observables_specifications:

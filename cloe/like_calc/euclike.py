@@ -55,11 +55,18 @@ class Euclike:
 
         self.data = data
         if self.do_spectro:
-            if observables['specifications']['GCspectro']['statistics'] == \
-                    'multipole_power_spectrum':
+            if observables['specifications']['GCspectro']['statistics'] in \
+                    ('multipole_power_spectrum',
+                     'convolved_multipole_power_spectrum'):
                 self.do_fourier_spectro = True
                 self.str_start_spectro = 'pk'
                 self.scale_var_spectro = 'k_pk'
+                spec_str = 'GCspectro'
+                if observables['specifications'][spec_str]['statistics'] == \
+                        'convolved_multipole_power_spectrum':
+                    self.do_convolved_multipole = True
+                else:
+                    self.do_convolved_multipole = False
             elif observables['specifications']['GCspectro']['statistics'] == \
                     'multipole_correlation_function':
                 self.do_fourier_spectro = False
@@ -67,9 +74,14 @@ class Euclike:
                 self.scale_var_spectro = 'r_xi'
             else:
                 raise ValueError('Unknown statistics_spectro choice. '
-                                 'Use multipole_power_spectrum '
+                                 'Use multipole_power_spectrum, '
+                                 'convolved_multipole_power_spectrum, '
                                  'or multipole_correlation_function')
-            self.data['spectro']['Fourier'] = self.do_fourier_spectro
+            if self.data['spectro']['Fourier'] != self.do_fourier_spectro:
+                raise ValueError('Inconsistent choice of statistics '
+                                 'between the spectroscopic data and '
+                                 'theory vectors')
+
         if self.do_photo:
             # Determine if to use Fourier or configuration space
             photo_obs = ['WL', 'GCphot', 'WL-GCphot']
@@ -77,11 +89,16 @@ class Euclike:
                 if obs_name in observables['specifications'].keys():
                     key = obs_name
                     break
-            if observables['specifications'][key]['statistics'] == \
-                    'angular_power_spectrum':
+            if observables['specifications'][key]['statistics'] in \
+                    ('angular_power_spectrum', 'pseudo_cl'):
                 self.do_fourier_photo = True
                 self.scale_var_photo = 'ells'
                 self.num_wl_obs = 1
+                if observables['specifications'][key]['statistics'] == \
+                        'pseudo_cl':
+                    self.do_pseudo_cl = True
+                else:
+                    self.do_pseudo_cl = False
             elif observables['specifications'][key]['statistics'] == \
                     'angular_correlation_function':
                 self.do_fourier_photo = False
@@ -89,9 +106,13 @@ class Euclike:
                 self.num_wl_obs = 2
             else:
                 raise ValueError('Unknown statistics_photo choice. '
-                                 'Use angular_power_spectrum '
-                                 'or angular_correlation_function')
-            self.data['photo']['Fourier'] = self.do_fourier_photo
+                                 'Use angular_power_spectrum, '
+                                 'pseudo_cl, or '
+                                 'angular_correlation_function')
+            if self.data['photo']['Fourier'] != self.do_fourier_photo:
+                raise ValueError('Inconsistent choice of statistics '
+                                 'between the photometric data and '
+                                 'theory vectors')
 
         self.data_ins = reader.Reader(self.data)
         self.data_ins.compute_luminosity_ratio()
@@ -138,10 +159,14 @@ class Euclike:
             self.matrix_transform_phot = \
                 self.observables['selection']['matrix_transform_phot']
 
+            self.mixing_matrix_dict_phot = \
+                self.data_ins.read_phot_mixing_matrix()
+
             # Photo class instance
             self.phot_ins = Photo(None,
                                   self.data_ins.nz_dict_WL,
                                   self.data_ins.nz_dict_GC_Phot,
+                                  self.mixing_matrix_dict_phot,
                                   add_RSD=add_RSD)
 
             # Temporary placeholder for theta vector
@@ -175,12 +200,12 @@ class Euclike:
             self.data_ins.read_GC_spectro()
             self.data_spectro_fiducial_cosmo = \
                 self.data_ins.data_spectro_fiducial_cosmo
-            self.mixing_matrix_dict = \
+            self.mixing_matrix_dict_spectro = \
                 self.data_ins.read_GC_spectro_mixing_matrix()
             self.zkeys = self.data_ins.data_dict['GC-Spectro'].keys()
             # Spectro class instance
             self.spec_ins = Spectro(None, list(self.zkeys),
-                                    self.mixing_matrix_dict)
+                                    self.mixing_matrix_dict_spectro)
 
         # Read data, instantiate galaxy cluster classes
         # and compute pre-computed quantities
@@ -389,10 +414,17 @@ class Euclike:
 
         # Obtain the theory for WL
         if self.data_handler_ins.use_wl:
-            if self.do_fourier_photo:
+            if (self.do_fourier_photo and (not self.do_pseudo_cl)):
                 wl_array = np.array(
                     [self.phot_ins.Cl_WL(self.scales_WL,
                                          element[0], element[1])
+                     for element in self.indices_diagonal_wl]
+                ).flatten('F')
+            elif (self.do_fourier_photo and self.do_pseudo_cl):
+                wl_array = np.array(
+                    [self.phot_ins.pseudo_Cl_3x2pt('shear-shear',
+                                                   self.scales_WL,
+                                                   element[0], element[1])
                      for element in self.indices_diagonal_wl]
                 ).flatten('F')
             else:
@@ -417,10 +449,17 @@ class Euclike:
 
         # Obtain the theory for XC-Phot
         if self.data_handler_ins.use_xc_phot:
-            if self.do_fourier_photo:
+            if (self.do_fourier_photo and (not self.do_pseudo_cl)):
                 xc_phot_array = np.array(
                     [self.phot_ins.Cl_cross(self.scales_XC,
                                             element[1], element[0])
+                     for element in self.indices_all]
+                ).flatten('F')
+            elif (self.do_fourier_photo and self.do_pseudo_cl):
+                xc_phot_array = np.array(
+                    [self.phot_ins.pseudo_Cl_3x2pt('shear-position',
+                                                   self.scales_XC,
+                                                   element[1], element[0])
                      for element in self.indices_all]
                 ).flatten('F')
             else:
@@ -438,10 +477,17 @@ class Euclike:
 
         # Obtain the theory for GC-Phot
         if self.data_handler_ins.use_gc_phot:
-            if self.do_fourier_photo:
+            if (self.do_fourier_photo and (not self.do_pseudo_cl)):
                 gc_phot_array = np.array(
                     [self.phot_ins.Cl_GC_phot(self.scales_GC_phot,
                                               element[0], element[1])
+                     for element in self.indices_diagonal_gcphot]
+                ).flatten('F')
+            elif (self.do_fourier_photo and self.do_pseudo_cl):
+                gc_phot_array = np.array(
+                    [self.phot_ins.pseudo_Cl_3x2pt('position-position',
+                                                   self.scales_GC_phot,
+                                                   element[0], element[1])
                      for element in self.indices_diagonal_gcphot]
                 ).flatten('F')
             else:
@@ -703,7 +749,7 @@ class Euclike:
             m_ins = [int(str(key)[-1]) for key in
                      self.data_ins.data_dict['GC-Spectro'][z_ins].keys()
                      if key.startswith(self.str_start_spectro)]
-            if self.do_fourier_spectro:
+            if (self.do_fourier_spectro and (not self.do_convolved_multipole)):
                 k_m_matrix = []
                 for scale_ins in (
                         self.data_ins.data_dict['GC-Spectro'][z_ins][
@@ -716,6 +762,11 @@ class Euclike:
                     )
                 k_m_matrices.append(k_m_matrix)
                 theoryvec = np.hstack(k_m_matrices).T.flatten()
+            elif (self.do_fourier_spectro and self.do_convolved_multipole):
+                k_m_matrices.append(
+                    self.spec_ins.convolved_power_spectrum_multipoles(
+                        float(z_ins)))
+                theoryvec = np.array(k_m_matrices).flatten()
             else:
                 k_m_matrices.append(
                     self.spec_ins.multipole_correlation_function(
@@ -725,6 +776,7 @@ class Euclike:
                         m_ins)
                 )
                 theoryvec = np.array(k_m_matrices).flatten()
+
         return theoryvec
 
     def create_spectro_data(self):

@@ -72,8 +72,9 @@ def setup(options):
     a = info['observables_selection']
     # We redefine upper z bound.
     # In case we don't need CMB lensing auto spectra then it stays the same
-    cloe_cosmo.cosmo_dic['z_max_cmb'] = 1200
-    cloe_cosmo.cosmo_dic['z_samp_log'] = 20
+    cloe_cosmo.cosmo_dic['z_max_cmb'] = info['z_max_cmb']
+    cloe_cosmo.cosmo_dic['z_samp'] = info['z_samp']
+    cloe_cosmo.cosmo_dic['z_samp_log'] = info['z_samp_log']
     cloe_cosmo.cosmo_dic['z_win_max'] = cloe_cosmo.cosmo_dic['z_win']
     if info['observables_selection']['CMBlens']['CMBlens']:
         # Append higher redshifts for the CMB lensing computations
@@ -172,8 +173,8 @@ def set_fiducial_cosmology(likefinal, info):
     fid_cosmo.cosmo_dic['z_win'] = np.linspace(
                                 info['z_min'], info['z_max'], info['z_samp'])
     fid_cosmo.cosmo_dic['z_win_max'] = fid_cosmo.cosmo_dic['z_win']
-    fid_cosmo.cosmo_dic['z_samp_log'] = 20
-    fid_cosmo.cosmo_dic['z_max_cmb'] = 1200
+    fid_cosmo.cosmo_dic['z_samp_log'] = info['z_samp_log']
+    fid_cosmo.cosmo_dic['z_max_cmb'] = info['z_max_cmb']
     if info['observables_selection']['CMBlens']['CMBlens']:
         fid_cosmo.cosmo_dic['z_win_max'] = np.logspace(
             np.log10(fid_cosmo.cosmo_dic['z_win'][-1]),
@@ -254,17 +255,17 @@ def set_fiducial_cosmology(likefinal, info):
             var1='delta_tot', var2='delta_tot',
             extrap_kmax=fid_cosmo.cosmo_dic['k_win'][-1])
     fid_cosmo.cosmo_dic['fsigma8'] = \
-        results.get_fsigma8()[::-1]
+        results.get_fsigma8()[::-1][0:info['z_samp']]
     fid_cosmo.cosmo_dic['sigma8'] = \
-        results.get_sigma8()[::-1]
+        results.get_sigma8()[::-1][0:info['z_samp']]
     # For galaxy clusters
     fid_cosmo.cosmo_dic['R'] = fid_cosmo.cosmo_dic['r_win']
     fid_cosmo.cosmo_dic['sigmaR'] = \
         results.get_sigmaR(fid_cosmo.cosmo_dic['r_win'], \
-                   var1 = 'delta_tot', var2 = 'delta_tot')[::-1]
+            var1 = 'delta_tot', var2 = 'delta_tot')[::-1][0:info['z_samp']]
     fid_cosmo.cosmo_dic['sigmaR_cb'] = \
         results.get_sigmaR(fid_cosmo.cosmo_dic['r_win'], \
-                   var1 = 'delta_nonu', var2 = 'delta_nonu')[::-1]
+            var1 = 'delta_nonu', var2 = 'delta_nonu')[::-1][0:info['z_samp']]
     # In order to make the update_cosmo_dic method to work, we need to
     # specify also in this case the information on the GCspectro bins
     fid_cosmo.cosmo_dic['redshift_bins_means_phot'] = \
@@ -277,7 +278,7 @@ def set_fiducial_cosmology(likefinal, info):
         likefinal.data_ins.luminosity_ratio_interpolator
     fid_cosmo.update_cosmo_dic(
         fid_cosmo.cosmo_dic['z_win'], 0.05)
-    
+
     return fid_cosmo
 
 def execute(block, config):
@@ -374,6 +375,7 @@ def execute(block, config):
         cloe_cosmo.cosmo_dic['fsigma8'] = block[growth,'fsigma_8']
         cloe_cosmo.cosmo_dic['sigmaR'] = block[growth,'sigmaR']
         cloe_cosmo.cosmo_dic['sigmaR_cb'] = block[growth,'sigmaR_cb']
+        cloe_cosmo.cosmo_dic['chistar'] = block[distances,'chistar']
         # Extract matter power spectrum from datablock, transform into
         # interpolator class for cosmo_dict
         h3 = block[cosmo,'h0']**3

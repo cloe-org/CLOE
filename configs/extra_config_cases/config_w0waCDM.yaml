@@ -1,6 +1,7 @@
 Cobaya:
   debug: true
   force: true
+  resume: false
   likelihood:
     Euclid:
       NL_flag_phot_matter: 0
@@ -42,7 +43,6 @@ Cobaya:
       plot_observables_selection: false
       solver: camb
       speed: 500
-      statistics_spectro: multipole_power_spectrum
       use_gamma_MG: false
       use_magnification_bias_spectro: false
       z_max: 4.0
@@ -60,3 +60,12 @@ Cobaya:
   timing: true
 action: run
 backend: Cobaya
+Cosmosis:
+  # At present the cosmosis configuration is fully delegated to ini files,
+  # therefore the only Cosmosis-related parameter is the name of the ini
+  # file to be used. There are two possibilites at present:
+  # - run_cosmosis.ini (recommended option)
+  # - run_cosmosis_with_cobaya.ini
+  ini_file: run_cosmosis.ini
+action: run
+

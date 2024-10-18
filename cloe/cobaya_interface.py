@@ -445,6 +445,9 @@ class EuclidLikelihood(Likelihood):
                 self.cosmo.cosmo_dic['nnu'] = self.provider.get_param('nnu')
                 self.cosmo.cosmo_dic['Cl'] = self.provider.get_Cl()
                 self.cosmo.cosmo_dic['CAMBdata'] = self.provider.get_CAMBdata()
+                self.cosmo.cosmo_dic['chistar'] = \
+                    self.cosmo.cosmo_dic['CAMBdata'].conformal_time(0) - \
+                    self.cosmo.cosmo_dic["CAMBdata"].tau_maxvis
             self.cosmo.cosmo_dic['comov_dist'] = \
                 self.provider.get_comoving_radial_distance(self.z_win_max)
             self.cosmo.cosmo_dic['angular_dist'] = \

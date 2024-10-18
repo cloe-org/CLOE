@@ -97,7 +97,7 @@ observables_specifications:
   ISW-GCphot: !defaults [../configs/iSW-GCphot.yaml]
 # Plot the selected observables during the initialization of the likelihood
 plot_observables_selection: False
-# Defaults parameters for CMB observables 
+# Default parameters for CMB observables 
 # Upper z bounds for comoving distance integrations up to CMB
 z_max_cmb: 1200
 # Number of log space redshift bins between z_max and z_max_cmb 

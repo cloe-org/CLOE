@@ -54,13 +54,10 @@ class CMBX:
         # from photo.py instance
         self.theory = self.photo_ins.theory
 
-        # Get the comoving radial distance to CMB and the redshift of the CMB
-        self.chicmb = (
-            self.theory["CAMBdata"].conformal_time(0) -
-            self.theory["CAMBdata"].tau_maxvis
-        )
+        # Get the comoving radial distance to CMB
+        self.chicmb = self.theory['chistar']
 
-        # Get the max comoving distance used for the
+        # Get the max comoving distance
         self.chi_zmax_phot = self.theory["r_z_func"](
             self.photo_ins.z_grid_for_cl[-1])
 

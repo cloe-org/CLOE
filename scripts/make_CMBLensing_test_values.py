@@ -1,11 +1,21 @@
+#!/usr/bin/env python
+
 """
 This script computes the test values used in test_cmbx.py
 """
 
+import numpy as np
+import matplotlib.pyplot as plt
+import time
+import os, sys
+
+likelihood_path = os.path.realpath(os.path.join(os.getcwd(),'..'))
+sys.path.insert(0, likelihood_path)
+
 import cloe
-from cloe.photometric_survey.photo import Photo
 from cloe.cmbx_p.cmbx import CMBX
 from cloe.cobaya_interface import EuclidLikelihood
+from cloe.photometric_survey.photo import Photo
 from astropy import constants as const
 from pathlib import Path
 from scipy import interpolate
@@ -148,7 +158,10 @@ info['likelihood'] = {'Euclid':
                          'GCphot': {'GCphot': True, 'GCspectro': False},
                          'GCspectro': {'GCspectro': True}, 
                          'CMBlens': {'CMBlens': True, 'WL': True, 'GCphot': True, 'GCspectro':False},
-                         'ISW': {'GCphot': False}
+                         'ISW': {'GCphot': False},
+                         'CG': {'CG': False},
+                         'add_phot_RSD' : False,
+                         'matrix_transform_phot' : False
                      },
                      # Plot the selected observables matrx
                      'plot_observables_selection': True,  
@@ -158,7 +171,7 @@ info['likelihood'] = {'Euclid':
                             #0 -> linear-only
                             #1 -> Takahashi
                             #2 -> Mead2020 (w/o baryon corrections)
-                     'NL_flag': 0,
+                     'NL_flag_phot_matter': 0,
                      #
                      #'data': This give specifications for the paths of the input data files
                      'data': { 
@@ -169,8 +182,12 @@ info['likelihood'] = {'Euclid':
                             # GC Spectro root name should contain z{:s} string
                             # to enable iteration over bins
                             'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
-                            'redshifts': ["1.", "1.2", "1.4", "1.65"]},
+                            'redshifts': ["1.", "1.2", "1.4", "1.65"],
+                            'edges': [0.9, 1.1, 1.3, 1.5, 1.8],
+                            'root_mixing_matrix': 'mm_FS230degCircle_m3_nosm_obsz_z0.9-1.1.fits',
+                            'Fourier': True},
                         'photo': {
+                            'redshifts': [0.2095, 0.489, 0.619, 0.7335, 0.8445, 0.9595, 1.087, 1.2395, 1.45, 2.038],
                             'ndens_GC': 'niTab-EP10-RB00.dat',
                             'ndens_WL': 'niTab-EP10-RB00.dat',
                             # Photometric root names should contain z{:s} string
@@ -181,6 +198,10 @@ info['likelihood'] = {'Euclid':
                             'IA_model': 'zNLA',
                             # Photometric covariances root names should contain z{:s} string
                             # to specify how the covariance was calculated
+                            'luminosity_ratio': 'luminosity_ratio.dat',
+                            'photo_data': 'standard',
+                            'Fourier': True,
+                            'root_mixing_matrix': 'fs2_mms_10zbins_32ellbins.fits',
                             'cov_GC': 'CovMat-PosPos-{:s}-20Bins.npy',
                             'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.npy',
                             'cov_3x2': 'CovMat-3x2pt-{:s}-20Bins.npy',

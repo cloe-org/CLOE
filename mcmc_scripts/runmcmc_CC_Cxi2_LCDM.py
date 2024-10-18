@@ -1,14 +1,15 @@
 import sys
 import os
 import numpy as np
-from cloe.auxiliary.likelihood_yaml_handler \
-	import write_params_yaml_from_info_dict
 
 script_path = os.path.realpath(os.getcwd())
 if script_path.endswith('mcmc_scripts'):
     sys.path.append(os.path.realpath(os.path.join(script_path, os.pardir)))
 else:
     sys.path.append(script_path)
+
+from cloe.auxiliary.likelihood_yaml_handler \
+	import write_params_yaml_from_info_dict
 
 from cobaya.run import run
 from cloe.cobaya_interface import EuclidLikelihood
@@ -33,10 +34,8 @@ info = {
                 'NL_flag_phot_matter': 0,
                 'NL_flag_spectro': 0,
                 'bias_model': 1,
-                'statistics_spectro': 'legendre_multipole_power_spectrum',
                 'use_magnification_bias_spectro': 0,
                 'use_Weyl': False,
-                'add_phot_RSD': False,
                 'magbias_model': 2,
                 'use_gamma_MG': False,
                 'f_out_z_dep': False,
@@ -99,6 +98,8 @@ info = {
                     {
                         'GCspectro': False,
                     },                                      
+                    'add_phot_RSD': False,
+                    'matrix_transform_phot': False,
                 },
                 'observables_specifications':
                 {   'CG':
@@ -107,7 +108,7 @@ info = {
                     'CG_probe': 'CC_Cxi2',
                     'CG_xi2_cov_selection': 'CG_nonanalytic_cov',
                     'neutrino_cdm': 'cb',
-                    'external_richness_selection_function': 'non_CG_ESF',
+                    'external_richness_selection_function': 'non_CG_ESF', 
                     'file_richness_selection_function' : 'int_Plob_ltr_z_Dlob.npy',
                     'effective_area': 15000,
                     'z_obs_edges_CC': np.linspace(0.2,1.8,9),
@@ -128,7 +129,7 @@ info = {
                     'sig_lambda_exponent': 0.4,
                     'sig_z_norm': 0.,
                     'sig_z_z': 0.025,
-                    'sig_z_lambda': 5.e-6            
+                    'sig_z_lambda': 5.e-6
                   },
                   'GCphot-GCspectro': None,
                   'WL-GCspectro': None,
@@ -309,7 +310,6 @@ info = {
             'mcmc':
             {
                 'max_tries': 30,
-                'covmat':'/home/user-me/codes/CG_lkl_V2/likelihood-implementation/mcmc_scripts/chains/try1/chain_CC_LCDM.covmat',
             },
         },
         'theory':

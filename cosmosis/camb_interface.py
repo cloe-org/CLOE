@@ -151,7 +151,20 @@ def setup(options):
     more_config['zmin'] = cloe_config_dict['likelihood']['Euclid']['z_min']
     more_config['zmax'] = cloe_config_dict['likelihood']['Euclid']['z_max']
     more_config['nz'] = cloe_config_dict['likelihood']['Euclid']['z_samp']
+    more_config['zmax_cmb'] = 1200
+    more_config['nz_cmb'] = 20
     # more_config.update(get_optional_params(options, opt, ["zmid", "nz_mid"]))
+
+    more_config['zwin'] = np.linspace(
+        more_config["zmin"], more_config["zmax"], more_config["nz"])
+
+    # Append higher redshifts for the CMB lensing computations
+    more_config['zwin_max'] = more_config['zwin']
+    if cloe_config_dict['likelihood']['Euclid']['observables_selection']['CMBlens']['CMBlens']:
+        more_config['zwin_max'] = np.logspace(
+            np.log10(more_config['zwin'][-1]),
+            np.log10(more_config['zmax_cmb']), more_config['nz_cmb'])
+        more_config['zwin_max'] = np.unique(np.append(more_config['zwin'], more_config['zwin_max']))
 
     more_config['zmin_background'] = cloe_config_dict['likelihood']['Euclid']['z_min']
     more_config['zmax_background'] = cloe_config_dict['likelihood']['Euclid']['z_max']
@@ -464,6 +477,19 @@ def save_distances(r, block, more_config):
         s = np.sqrt(p.omk)
         D_M = (D_H / s) * np.sinh(s * D_C / D_H)
 
+    D_C_max = r.comoving_radial_distance(more_config['zwin_max'])
+    H_max = r.h_of_z(more_config['zwin_max'])
+    D_H_max = 1 / H_max[0]
+
+    if p.omk == 0:
+        D_M_max = D_C_max
+    elif p.omk < 0:
+        s = np.sqrt(-p.omk)
+        D_M_max = (D_H_max / s)  * np.sin(s * D_C_max / D_H_max)
+    else:
+        s = np.sqrt(p.omk)
+        D_M_max = (D_H_max / s) * np.sinh(s * D_C_max / D_H_max)
+
     D_L = D_M * (1 + z_background)
     D_A = D_M / (1 + z_background)
     D_V = ((1 + z_background)**2 * z_background * D_A**2 / H)**(1./3.)
@@ -474,8 +500,8 @@ def save_distances(r, block, more_config):
     mu[pos] = 5*np.log10(D_L[pos])+25
     mu[~pos] = -np.inf
 
-    block[names.distances, "D_C"] = D_C
-    block[names.distances, "D_M"] = D_M
+    block[names.distances, "D_C"] = D_C_max
+    block[names.distances, "D_M"] = D_M_max
     block[names.distances, "D_L"] = D_L
     block[names.distances, "D_A"] = D_A
     block[names.distances, "D_V"] = D_V
@@ -489,7 +515,7 @@ def save_distances(r, block, more_config):
 
     if more_config['want_chistar']:
         chistar = (r.conformal_time(0)- r.tau_maxvis)
-        block[names.distances, "CHISTAR"] = chistar
+        block[names.distances, "chistar"] = chistar
 
 
 def compute_growth_factor(r, block, P_tot, k, z, more_config):

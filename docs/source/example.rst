@@ -3,7 +3,7 @@ Interactive use examples
 
 This section provides a simple example of how to run CLOE alongside the software framework of `Cobaya <https://cobaya.readthedocs.io/en/latest/index.html>`_.
 
-For a detailed breakdown of how to run CLOE in this and other ways, see the ``DEMO`` notebook in the CLOE repository. This notebook requires an interactive Python interpreter such as `Jupyter Notebook <https://jupyter.org/>`_.
+For a detailed and most up-to-date breakdown of how to run CLOE in this and other ways, see the ``DEMO`` notebook in the CLOE repository. This notebook requires an interactive Python interpreter such as `Jupyter Notebook <https://jupyter.org/>`_.
 
 From a Python interpreter
 -------------------------
@@ -43,18 +43,6 @@ An external likelihood can be supplied to **Cobaya** directly through a Python i
             'omeganu': None, #DERIVED parameter: Omega neutrino density
             'omnuh2': None, #DERIVED parameter: Omega neutrino density times de reduced Hubble parameter squared
             'omegac': None, #DERIVED parameter: Omega cold dark matter density
-            # (UC): change 'like_selection' based on which observational probe you would like to use.
-            # Choose among:
-            # 1: photometric survey
-            # 2: spectroscopic survey
-            # 12: both surveys
-            'like_selection': 2,
-            # (UC): if you selected the photometric survey (1) or both (12) in 'like_selection'
-            # you may want to choose between:
-            # using Galaxy Clustering photometric and Weak Lensing probes combined assuming they are independent ('full_photo': False)
-            # or Galaxy Clustering photometric, Weak Lensing and the cross-correlation between them ('full_photo': True)
-            # This flag is not used if 'like_selection: 2'
-            'full_photo': False,
             # (UC): galaxy bias parameters:
             # The bias parameters below are currently fixed to the
             # values used by the Inter Science Taskforce: Forcast (IST:F)
@@ -99,11 +87,11 @@ An external likelihood can be supplied to **Cobaya** directly through a Python i
         'sampler': {'evaluate': None},
         # 'packages_path': Cobaya's protected key of the input dictionary.
         # This is the variable you need to update
-        # if you are running Cobaya with cobaya_modules (option (2) above).
-        # If you are using the conda CLOE environment or option (1),
-        # please, comment the line below
+        # if you are using the conda CLOE environment or option (1).
+        # If you are running Cobaya with cobaya_modules (option (2) above),
+        # please uncomment the line below
         #
-        'packages_path': modules_path,
+        #'packages_path': modules_path,
         #
         #'output': Cobaya's protected key of the input dictionary.
         # Where are the results going to be stored, in case that the sampler produce output files?
@@ -161,9 +149,4 @@ For further information, see the ``DEMO`` notebook provided with this package.
 From a Jupyter notebook
 -----------------------
 
-Play with our |link-to-demo| Jupyter notebook.
-
-
-.. |link-to-demo| raw:: html
-
-  <a href="https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/blob/master/notebooks/DEMO.ipynb" target="_blank">DEMO
+Play with `our demo notebook <https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/blob/master/notebooks/DEMO.ipynb>`_.

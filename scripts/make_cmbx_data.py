@@ -74,12 +74,14 @@ info['likelihood'] = {'Euclid':
                          'GCphot': {'GCphot': True, 'GCspectro': False},
                          'GCspectro': {'GCspectro': False},
                          'CMBlens': {'CMBlens': True, 'WL': True, 'GCphot': True, 'GCspectro':False},
-                         'CMBisw': {'GCphot': True}
+                         'CMBisw': {'GCphot': True},
+                         'CG': {'CG': False},
+                         'add_phot_RSD': False,
+                         'matrix_transform_phot' : False,
                      },
                      # Plot the selected observables matrx
                      'plot_observables_selection': True,  
                     # Switch to allow for matrix transformations of theory and data vectors
-                    'matrix_transform_phot' : False, # 'BNT' or 'BNT-test,
                       # Nonlinear flags
                       # With this, the user can specify which nonlinear model they want
                       # For the time-being the available options are: 
@@ -168,6 +170,8 @@ info['likelihood'] = {'Euclid':
                             'root': 'cov_power_galaxies_dk0p004_z{:s}.fits',
                             'redshifts': ["1.", "1.2", "1.4", "1.65"],
                             'edges': [0.9, 1.1, 1.3, 1.5, 1.8],
+                            'Fourier': True,
+                            'root_mixing_matrix': 'mm_FS230degCircle_m3_nosm_obsz_z0.9-1.1.fits',
                             'scale_cuts_fourier': 'GCspectro-Fourier.yaml'},
                         'photo': {
                             'redshifts': [0.2095, 0.489, 0.619, 0.7335, 0.8445, 0.9595, 1.087, 1.2395, 1.45, 2.038],
@@ -178,11 +182,14 @@ info['likelihood'] = {'Euclid':
                             'root_WL': 'Cls_{:s}_ShearShear.dat',
                             'root_XC': 'Cls_{:s}_PosShear.dat',
                             'IA_model': 'zNLA',
+                            'Fourier': True,
+                            'photo_data': 'standard',
+                            'root_mixing_matrix': 'fs2_mms_10zbins_32ellbins.fits',
                             'cov_GC': 'CovMat-PosPos-{:s}-20Bins.npz',
                             'cov_WL': 'CovMat-ShearShear-{:s}-20Bins.npz',
                             'cov_3x2pt': 'CovMat-3x2pt-{:s}-20Bins.npz',
                             'cov_model': 'Gauss'},
-                         'cmbx': {
+                         'ExternalBenchmark/cmbx': {
                                   'root_CMBlens': 'Cls_kCMB.dat',
                                   'root_CMBlensxWL': 'Cls_kCMBxWL.dat',
                                   'root_CMBlensxGC': 'Cls_kCMBxGC.dat',
@@ -238,7 +245,7 @@ for ibin in range(ntomogc):
 #### Save the data 
 
 
-savepath = opj(os.path.dirname(os.path.dirname(cloe.__file__)), 'data', 'cmbx')
+savepath = opj(os.path.dirname(os.path.dirname(cloe.__file__)), 'data/ExternalBenchmark', 'cmbx')
 np.savetxt(opj(savepath, 'Cls_kCMB.dat'), np.array([ells, cl_kk]).T, header='ells     kCMB-kCMB')
 
 

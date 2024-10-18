@@ -11,6 +11,20 @@ b1_photo_bin10: 1.54639
 b1_photo_bin11: 1.68682
 b1_photo_bin12: 2.03066
 b1_photo_bin13: 2.57812
+#
+# Note that the synthetic data was
+# generated using the following values:
+# b1_photo_bin1: 1.0997727037892875
+# b1_photo_bin2: 1.220245876862528
+# b1_photo_bin3: 1.2723993083933989
+# b1_photo_bin4: 1.316624471897739
+# b1_photo_bin5: 1.35812370570578
+# b1_photo_bin6: 1.3998214171814918
+# b1_photo_bin7: 1.4446452851824907
+# b1_photo_bin8: 1.496495907111008
+# b1_photo_bin9: 1.5652475842498528
+# b1_photo_bin10: 1.7429859437184225
+#
 b1_0_poly_photo: 0.830703
 b1_1_poly_photo: 1.190547
 b1_2_poly_photo: -0.928357

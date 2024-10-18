@@ -140,7 +140,9 @@ info['likelihood']['Euclid'] = {
                                         'GCphot': False,
                                         'GCspectro': False},
                                       'GCspectro': {
-                                        'GCspectro': False}
+                                        'GCspectro': False},
+                                     'add_phot_RSD': False,
+                                     'matrix_transform_phot': False,
                                       },
                                    'plot_observables_selection': False,
                                    'NL_flag_phot_matter': flag_model,

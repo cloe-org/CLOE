@@ -1,7 +1,10 @@
-# Choice of the Boltzmann solver. Allowed values are
-# camb (for CAMB) and classy (for CLASS)
-define: &solver camb
+# Choice of backend, either Cobaya or Cosmosis.
 backend: Cobaya
+# Choice of the Boltzmann solver. Allowed values are camb (for
+# CAMB) and classy (for CLASS). Note: At present, the Cobaya 
+# backend can be used together with both CAMB and CLASS, while 
+# the CosmoSIS backend can only be used together with CAMB.
+define: &solver camb
 Cobaya:
   # Documentation about Cobaya keys can be found at:
   # https://cobaya.readthedocs.io/en/latest/cosmo_basic_runs.html
@@ -23,7 +26,11 @@ Cobaya:
       z_min: 0.0
       z_max: 4.0
       z_samp: 100
-      # Flag to make the choice of the sampler visible to cloe
+      # Upper z bounds for comoving distance integrations up to CMB
+      z_max_cmb: 1200
+      # Number of log space redshift bins between z_max and z_max_cmb
+      z_samp_log: 20
+      # Flag to make the choice of the sampler visible to CLOE
       solver: *solver
       # Nonlinear flag selectors
       # Photometric matter flag
@@ -41,7 +48,8 @@ Cobaya:
       #     3 -> BCemu
       #     4 -> BACCO (baryonic feedback)
       NL_flag_phot_baryon: 0
-      # Baryonic feedback z_dependence flag selector for Bacco or BCemu emulators
+      # Baryonic feedback z_dependence flag selector for 
+      # Bacco or BCemu emulators
       #     False -> 1 set of parameters per redshift bin
       #     True  -> Power law dependence on z
       Baryon_redshift_model: True
@@ -61,7 +69,6 @@ Cobaya:
       #     'DST' -> Discrete sine transform
       #     'EH' -> Eisenstein-Hu
       IR_resum: 'DST'      
-      # 
       # Use magnification bias for GC spectro
       use_magnification_bias_spectro: False
       # Redshift dependence of photometric linear galaxy bias
@@ -95,7 +102,10 @@ Cobaya:
       data: data.yaml
       # Selection of the observables to be computed
       observables_selection: observables_selection.yaml
-      # Specifications for each of the observables
+      # Specifications for each of the observables.
+      # Ensure that they are consistent with the choices in data.yaml.
+      # This includes the files for the measurements, covariances, and
+      # mixing matrices, along with distinct keys (such as 'Fourier').
       observables_specifications:
         GCphot:
           angular_power_spectrum: GCphot-FourierSpace.yaml
@@ -159,12 +169,10 @@ Cobaya:
       stop_at_error: true
   timing: true
 Cosmosis:
-  # WARNING: at present CosmoSIS can only be used together with CAMB
-  # (i.e. not CLASS).
   # At present the cosmosis configuration is fully delegated to ini files,
   # therefore the only Cosmosis-related parameter is the name of the ini
   # file to be used. There are two possibilites at present:
-  # - run_cosmsosis.ini
+  # - run_cosmosis.ini (recommended option)
   # - run_cosmosis_with_cobaya.ini
   ini_file: run_cosmosis.ini
 action: run

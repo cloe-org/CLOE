@@ -1,21 +1,26 @@
+# Note: need to first download the 13-bin data if not already
+# in the repository.
 photo:
   redshifts:
-  - 0.2095
-  - 0.489
-  - 0.619
-  - 0.7335
-  - 0.8445
-  - 0.9595
-  - 1.087
-  - 1.2395
-  - 1.45
-  - 2.038
+  - 0.16683
+  - 0.29017
+  - 0.38614
+  - 0.47079
+  - 0.56699
+  - 0.65326
+  - 0.74359
+  - 0.83446
+  - 0.93155
+  - 1.05956
+  - 1.20100
+  - 1.44052
+  - 1.86773
   luminosity_ratio: luminosity_ratio.dat
   IA_model: zNLA
   # Whether to use the (old) benchmark .dat files or OU-LE3-format FITS files
   photo_data: 'standard'
   # Fourier space covariance (cov_3x2pt)
-  cov_3x2pt: CovMat-3x2pt-{:s}-20Bins.npz
+  cov_3x2pt: CovMat-3x2pt-{:s}-32Bins.npz
   # Configuration space covariance (cov_3x2pt)
   # cov_3x2pt: cov_corr_func-3x2pt-Gauss-20Bins.npz
   cov_GC: CovMat-PosPos-{:s}-20Bins.npz
@@ -23,12 +28,12 @@ photo:
   cov_model: Gauss
   cov_is_num: False
   cov_nsim: 10000
-  ndens_GC: niTab-EP10-RB00.dat
-  ndens_WL: niTab-EP10-RB00.dat
+  ndens_GC: nzTabSPV3.dat
+  ndens_WL: nzTabSPV3.dat
   # Fourier space measurements (root_GC/WL/XC)
-  root_GC: Cls_{:s}_PosPos.dat
-  root_WL: Cls_{:s}_ShearShear.dat
-  root_XC: Cls_{:s}_PosShear.dat
+  root_GC: Cls_{:s}_PosPos_C00.dat
+  root_WL: Cls_{:s}_ShearShear_C00.dat
+  root_XC: Cls_{:s}_PosShear_C00.dat
   # Configuration space measurements (root_GC/WL/XC)
   # root_GC: corr_func_zNLA_PosPos.dat
   # root_WL: corr_func_zNLA_ShearShear.dat

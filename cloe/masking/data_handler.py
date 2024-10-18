@@ -353,7 +353,6 @@ class Data_handler:
                     wl_vec[:, zpair] = self._get_masking(scales,
                                                          accepted_scales)
                     zpair += 1
-            wl_vec = np.tile(wl_vec, num_repetitions_wl)
             wl_vec = wl_vec.flatten()
             # the default for np.ndarray.flatten()
             # is leftmost axis as outermost for loop
@@ -401,15 +400,15 @@ class Data_handler:
                 scale_var = 'thetas'
                 scale_range_var = 'theta_range'
             zpair = 0
-            ells = data.data_dict['GC-Phot']['ells']
-            gc_phot_vec = np.zeros((len(ells), zpairs_gcphot))
+            scales = data.data_dict['GC-Phot'][scale_var]
+            gc_phot_vec = np.zeros((len(scales), zpairs_gcphot))
             for i in range(1, data.numtomo_gcphot + 1):
                 for j in range(i, data.numtomo_gcphot + 1):
-                    accepted_ells = np.array(
+                    accepted_scales = np.array(
                         self._obs['specifications']['GCphot'][stat_gcphot]
-                        ['bins'][f'n{i}'][f'n{j}']['ell_range'])
+                        ['bins'][f'n{i}'][f'n{j}'][scale_range_var])
                     gc_phot_vec[:, zpair] = \
-                        self._get_masking(ells, accepted_ells)
+                        self._get_masking(scales, accepted_scales)
                     zpair += 1
             gc_phot_vec = gc_phot_vec.flatten()
         else:
@@ -510,7 +509,6 @@ class Data_handler:
                     wl_vec[:, zpair] = self._get_masking(scales,
                                                          accepted_scales)
                     zpair += 1
-            wl_vec = np.tile(wl_vec, num_repetitions_wl)
             wl_vec = wl_vec.flatten()
             # the default for np.ndarray.flatten()
             # is leftmost axis as outermost for loop

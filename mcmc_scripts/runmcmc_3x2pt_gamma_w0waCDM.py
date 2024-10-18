@@ -1,13 +1,14 @@
 import sys
 import os
-from cloe.auxiliary.likelihood_yaml_handler \
-	import write_params_yaml_from_info_dict
 
 script_path = os.path.realpath(os.getcwd())
 if script_path.endswith('mcmc_scripts'):
     sys.path.append(os.path.realpath(os.path.join(script_path, os.pardir)))
 else:
     sys.path.append(script_path)
+
+from cloe.auxiliary.likelihood_yaml_handler \
+	import write_params_yaml_from_info_dict
 
 from cobaya.run import run
 from cloe.cobaya_interface import EuclidLikelihood
@@ -33,9 +34,6 @@ info = {
                 'NL_flag_spectro': 0,
                 'use_magnification_bias_spectro': False,
                 'bias_model': 1,
-                'statistics_spectro': 'multipole_power_spectrum',
-                'add_phot_RSD': False,
-                'matrix_transform_phot': False,
                 'magbias_model': 2,
                 'use_gamma_MG': False,
                 'f_out_z_dep': False,
@@ -58,6 +56,9 @@ info = {
                         'root_GC': 'Cls_{:s}_PosPos.dat',
                         'root_WL': 'Cls_{:s}_ShearShear.dat',
                         'root_XC': 'Cls_{:s}_PosShear.dat',
+                        'root_mixing_matrix': 'fs2_mms_10zbins_32ellbins.fits',
+                        'photo_data': 'standard',
+                        'Fourier': True,
                     },
                     'sample': 'ExternalBenchmark',
                     'spectro':
@@ -68,6 +69,8 @@ info = {
                         'cov_is_num': False,
                         'cov_nsim': 3500,
                         'scale_cuts_fourier': 'GCspectro-FourierSpace.yaml',
+                        'root_mixing_matrix': 'mm_FS230degCircle_m3_nosm_obsz_z0.9-1.1.fits',
+                        'Fourier': True,
                     },
                 },
                 'observables_selection':
@@ -87,12 +90,20 @@ info = {
                     {
                         'GCspectro': False,
                     },
+                    'CG':
+                    {
+             	        'CG': False,
+                    },
+                'add_phot_RSD': False,
+                'matrix_transform_phot': False,
                 },
                 'observables_specifications':
                 {
                     'GCphot':
                     {
                         'statistics': 'angular_power_spectrum',
+                        'angular_power_spectrum':
+                        {
                         'bins':
                         {
                             'n1':
@@ -345,10 +356,14 @@ info = {
                                     'ell_range': [[20, 4000]],
                                 },
                             },
+                        },
                         },
                     },
                     'GCspectro':
                     {
+                      'statistics': 'multipole_power_spectrum',
+                      'multipole_power_spectrum':
+                      {
                         'bins':
                         {
                             'n1':
@@ -436,12 +451,15 @@ info = {
                                 },
                             },
                         },
+                      },
                     },
                     'WL':
                     {
                         'statistics': 'angular_power_spectrum',
-                        'bins':
+                        'angular_power_spectrum':
                         {
+                          'bins':
+                          {
                             'n1':
                             {
                                 'n1':
@@ -692,11 +710,14 @@ info = {
                                     'ell_range': [[20, 4000]],
                                 },
                             },
+                          },
                         },
                     },
                     'WL-GCphot':
                     {
                         'statistics': 'angular_power_spectrum',
+                        'angular_power_spectrum':
+                        {
                         'bins':
                         {
                             'n1':
@@ -1129,6 +1150,7 @@ info = {
                                     'ell_range': [[20, 4000]],
                                 },
                             },
+                        },
                         },
                     },
                     'GCphot-GCspectro': None,

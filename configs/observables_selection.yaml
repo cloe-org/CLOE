@@ -7,8 +7,11 @@
 # 'False' for those which are not requested.
 #
 # WL: Weak Lensing
-# GCphot: Galaxy Clustering photometric
-# GCspectro: Galaxy Clustering spectroscopic
+# GCphot: Photometric Galaxy Clustering
+# GCspectro: Spectroscopic Galaxy Clustering
+# CMBlens: CMB Lensing
+# CMBisw: ISW
+# CG: Clusters of Galaxies
 WL:
   WL: True
   GCphot: True

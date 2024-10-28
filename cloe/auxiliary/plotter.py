@@ -16,14 +16,6 @@ rc('font', **{'family': 'serif',
 rc('text', usetex=True)
 
 
-class PlotError(Exception):
-    """
-    Class to define Exception Error.
-    """
-
-    pass
-
-
 class Plotter:
     """
     Class to plot observables (angular power spectra and multipoles).

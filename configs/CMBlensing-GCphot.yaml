@@ -1,0 +1,30 @@
+# This is the default specification file for CMB lensing x GCphot
+statistics: angular_power_spectrum
+bins:
+  n1:
+    ell_range: [[20, 4000]]
+  n2:
+    ell_range: [[20, 4000]]
+  n3:
+    ell_range: [[20, 4000]]
+  n4:
+    ell_range: [[20, 4000]]
+  n5:
+    ell_range: [[20, 4000]]
+  n6:
+    ell_range: [[20, 4000]]
+  n7:
+    ell_range: [[20, 4000]]
+  n8:
+    ell_range: [[20, 4000]]
+  n9:
+    ell_range: [[20, 4000]]
+  n10:
+    ell_range: [[20, 4000]]
+  n11:
+    ell_range: [[20, 4000]]
+  n12:
+    ell_range: [[20, 4000]]
+  n13:
+    ell_range: [[20, 4000]]
+

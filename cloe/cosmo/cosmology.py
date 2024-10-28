@@ -130,6 +130,12 @@ class Cosmology:
             Interpolated function for :math:`\sigma_8`
         fsigma8_z_func: function
             Interpolated function for :math:`f \sigma_8`
+        r_win: list
+            List of radii which will be used to evaluate sigmaR
+        sigmaR_z_func: function
+            Interpolated function for sigmaR, depending on z and R
+        sigmaR_z_func_cb: function
+            Interpolated function for sigmaR_cb, depending on z and R
         f_z: function
             Interpolated growth rate function
         H_z_func: function
@@ -177,6 +183,30 @@ class Cosmology:
             Nonlinear matter flag for 3x2pt photometric probes
         NL_flag_spectro: int
             Nonlinear flag for GCspectro
+        IA_flag: int
+            intrinsic alignment model flag
+        IR_resum: str
+            IR-resummation model flag
+        a00e: function
+            a00e one-loop term for IA TATT model (arxiv:1708.09247)
+        c00e: function
+            c00e one-loop term for IA TATT model (arxiv:1708.09247)
+        a0e0e: function
+             a0e0 eone-loop term for IA TATT model (arxiv:1708.09247)
+        a0b0b: function
+            a0b0b one-loop term for IA TATT model (arxiv:1708.09247)
+        ae2e2: function
+            ae2e2 one-loop term for IA TATT model (arxiv:1708.09247)
+        ab2b2: function
+            ab2b2 one-loop term for IA TATT model (arxiv:1708.09247)
+        a0e2: function
+            a0e2 one-loop term for IA TATT model (arxiv:1708.09247)
+        b0e2: function
+            b0e2 one-loop term for IA TATT model (arxiv:1708.09247)
+        d0ee2: function
+            d0ee2 one-loop term for IA TATT model (arxiv:1708.09247)
+        d0bb2: function
+            d0bb2 one-loop term for IA TATT model (arxiv:1708.09247)
         bias_model: int
             bias model
         magbias_model: int
@@ -189,7 +219,8 @@ class Cosmology:
             At the moment, we have implemented
             10 constant bias for photo-z
             recipe and 4 for spectro recipe,
-            and 3 IA parameters. The
+            and 3 IA parameters for the NLA model
+            while 5 for the TATT model. The
             initialized values of the fiducial
             cosmology dictionary corresponds to:
 
@@ -200,7 +231,8 @@ class Cosmology:
 
                 * Spectroscopic bias values in arXiv:1910.09273
 
-                * IA values in arXiv:1910.09273
+                * IA values in arXiv:1910.09273 (NLA)
+                and arxiv:1708.09247 (TATT)
 
                 * Additional parameters for GCspectro, as provided by IST:NL
 
@@ -235,6 +267,7 @@ class Cosmology:
                           'MG_sigma': None,
                           # Lists
                           'z_win': None,
+                          'z_win_max': None,
                           'k_win': None,
                           'comov_dist': None,
                           'angular_dist': None,
@@ -275,12 +308,26 @@ class Cosmology:
                           'sigma8_z_func': None,
                           'fsigma8_z_func': None,
                           'f_z': None,
+                          # For galaxy clusters
+                          'r_win': None,
+                          'sigmaR_z_func': None,
+                          'sigmaR_z_func_cb': None,
                           'luminosity_ratio_z_func': None,
+                          'Weyl_matter_ratio': None,
                           # NL_boost
                           'NL_boost': None,
                           # NL flags
                           'NL_flag_phot_matter': 0,
+                          'NL_flag_phot_bias': 0,
                           'NL_flag_spectro': 0,
+                          # IA flag
+                          'IA_flag': 0,
+                          # IR-resummation flag
+                          'IR_resum': 'DST',
+                          # Baryonic feedback flag
+                          'NL_flag_phot_baryon': 0,
+                          # Baryonic feedback z-dependence model flag
+                          'Baryon_redshift_model': True,
                           # bias model
                           # 1 => linear interpolation,
                           # 2 => constant in bins,
@@ -293,35 +340,96 @@ class Cosmology:
                           'magbias_model': 2,
                           # Use Modified Gravity gamma
                           'use_gamma_MG': 0,
+                          # use magnification bias for GC spectro
+                          'use_magnification_bias_spectro': 0,
+                          # Use Weyl power spectrum (workaround approach)
+                          'use_Weyl': False,
                           # Redshift dependent purity correction
                           'f_out_z_dep': False,
+                          # One-loop order terms for the TATT model
+                          'a00e': None,
+                          'c00e': None,
+                          'a0e0e': None,
+                          'a0b0b': None,
+                          'ae2e2': None,
+                          'ab2b2': None,
+                          'a0e2': None,
+                          'b0e2': None,
+                          'd0ee2': None,
+                          'd0bb2': None,
                           # Spectroscopic galaxy clustering redshift error
                           'GCsp_z_err': False,
                           'nuisance_parameters': {
-                             # Intrinsic alignment
-                             'aia': 1.72,
-                             'nia': -0.41,
-                             'bia': 0.0,
+                             # Intrinsic alignments (NLA and TATT)
+                             # Set a2_ia, b1_ia and eta2_ia to 0 for NLA
+                             'a1_ia': 1.72,
+                             'a2_ia': 2,
+                             'b1_ia': 1,
+                             'eta1_ia': -0.41,
+                             'eta2_ia': 1,
+                             'beta1_ia': 0.0,
                              'pivot_redshift': 0.,
-                             # Photometric galaxy bias (IST:F case)
-                             'b1_photo': 1.03047,
-                             'b2_photo': 1.06699,
-                             'b3_photo': 1.17363,
-                             'b4_photo': 1.23340,
-                             'b5_photo': 1.27510,
-                             'b6_photo': 1.28574,
-                             'b7_photo': 1.39434,
-                             'b8_photo': 1.49170,
-                             'b9_photo': 1.52334,
-                             'b10_photo': 1.54639,
-                             'b11_photo': 1.68682,
-                             'b12_photo': 2.03066,
-                             'b13_photo': 2.57812,
-                             # Photometric galaxy bias (polynomial case)
-                             'b0_poly_photo': 0.830703,
-                             'b1_poly_photo': 1.190547,
-                             'b2_poly_photo': -0.928357,
-                             'b3_poly_photo': 0.423292,
+                             # Linear photometric galaxy bias (IST:F case)
+                             'b1_photo_bin1': 1.03047,
+                             'b1_photo_bin2': 1.06699,
+                             'b1_photo_bin3': 1.17363,
+                             'b1_photo_bin4': 1.23340,
+                             'b1_photo_bin5': 1.27510,
+                             'b1_photo_bin6': 1.28574,
+                             'b1_photo_bin7': 1.39434,
+                             'b1_photo_bin8': 1.49170,
+                             'b1_photo_bin9': 1.52334,
+                             'b1_photo_bin10': 1.54639,
+                             'b1_photo_bin11': 1.68682,
+                             'b1_photo_bin12': 2.03066,
+                             'b1_photo_bin13': 2.57812,
+                             # Linear photometric galaxy bias (polynomial case)
+                             'b1_0_poly_photo': 0.830703,
+                             'b1_1_poly_photo': 1.190547,
+                             'b1_2_poly_photo': -0.928357,
+                             'b1_3_poly_photo': 0.423292,
+                             # Quadratic photometric galaxy bias
+                             'b2_photo_bin1': 0.0,
+                             'b2_photo_bin2': 0.0,
+                             'b2_photo_bin3': 0.0,
+                             'b2_photo_bin4': 0.0,
+                             'b2_photo_bin5': 0.0,
+                             'b2_photo_bin6': 0.0,
+                             'b2_photo_bin7': 0.0,
+                             'b2_photo_bin8': 0.0,
+                             'b2_photo_bin9': 0.0,
+                             'b2_photo_bin10': 0.0,
+                             'b2_photo_bin11': 0.0,
+                             'b2_photo_bin12': 0.0,
+                             'b2_photo_bin13': 0.0,
+                             # Quadratic photometric galaxy bias (poly case)
+                             'b2_0_poly_photo': 0.0,
+                             'b2_1_poly_photo': 0.0,
+                             'b2_2_poly_photo': 0.0,
+                             'b2_3_poly_photo': 0.0,
+                             # Non-local photometric galaxy biases
+                             'bG2_photo_bin1': 0.0, 'bG3_photo_bin1': 0.0,
+                             'bG2_photo_bin2': 0.0, 'bG3_photo_bin2': 0.0,
+                             'bG2_photo_bin3': 0.0, 'bG3_photo_bin3': 0.0,
+                             'bG2_photo_bin4': 0.0, 'bG3_photo_bin4': 0.0,
+                             'bG2_photo_bin5': 0.0, 'bG3_photo_bin5': 0.0,
+                             'bG2_photo_bin6': 0.0, 'bG3_photo_bin6': 0.0,
+                             'bG2_photo_bin7': 0.0, 'bG3_photo_bin7': 0.0,
+                             'bG2_photo_bin8': 0.0, 'bG3_photo_bin8': 0.0,
+                             'bG2_photo_bin9': 0.0, 'bG3_photo_bin9': 0.0,
+                             'bG2_photo_bin10': 0.0, 'bG3_photo_bin10': 0.0,
+                             'bG2_photo_bin11': 0.0, 'bG3_photo_bin11': 0.0,
+                             'bG2_photo_bin12': 0.0, 'bG3_photo_bin12': 0.0,
+                             'bG2_photo_bin13': 0.0, 'bG3_photo_bin13': 0.0,
+                            # Non-local photometric galaxy bias (poly case)
+                             'bG2_0_poly_photo': 0.0,
+                             'bG2_1_poly_photo': 0.0,
+                             'bG2_2_poly_photo': 0.0,
+                             'bG2_3_poly_photo': 0.0,
+                             'bG3_0_poly_photo': 0.0,
+                             'bG3_1_poly_photo': 0.0,
+                             'bG3_2_poly_photo': 0.0,
+                             'bG3_3_poly_photo': 0.0,
                              # Magnification bias
                              'magnification_bias_1': -0.8499,
                              'magnification_bias_2': -1.023,
@@ -412,6 +520,234 @@ class Cosmology:
                              'f_out_2': 0.0,
                              'f_out_3': 0.0,
                              'f_out_4': 0.0,
+                             # Spectroscopic galaxy magnification bias
+                             'magnification_bias_spectro_bin1': 0.79,
+                             'magnification_bias_spectro_bin2': 0.87,
+                             'magnification_bias_spectro_bin3': 0.96,
+                             'magnification_bias_spectro_bin4': 0.98,
+                             # Example BCemu baryon params (fitted to BAHAMAS)
+                             'log10Mc_bcemu_bin1': 13.402342835406102,
+                             'log10Mc_bcemu_bin2': 13.255603572838046,
+                             'log10Mc_bcemu_bin3': 13.39534479993441,
+                             'log10Mc_bcemu_bin4': 13.491189798802624,
+                             'log10Mc_bcemu_bin5': 13.517099731729203,
+                             'log10Mc_bcemu_bin6': 13.431948448938623,
+                             'log10Mc_bcemu_bin7': 13.159142065726643,
+                             'log10Mc_bcemu_bin8': 12.630530198678242,
+                             'log10Mc_bcemu_bin9': 11.768928839012311,
+                             'log10Mc_bcemu_bin10': 11.123969034839764,
+                             'log10Mc_bcemu_bin11': 11.123969034839764,
+                             'log10Mc_bcemu_bin12': 11.123969034839764,
+                             'log10Mc_bcemu_bin13': 11.123969034839764,
+                             'mu_bcemu_bin1': 1.081169575215787,
+                             'mu_bcemu_bin2': 1.0748796706532235,
+                             'mu_bcemu_bin3': 1.257505674386812,
+                             'mu_bcemu_bin4': 1.3953104854720346,
+                             'mu_bcemu_bin5': 1.4707848100185459,
+                             'mu_bcemu_bin6': 1.451326233210004,
+                             'mu_bcemu_bin7': 1.2738670043792995,
+                             'mu_bcemu_bin8': 0.8851923901330802,
+                             'mu_bcemu_bin9': 0.23572246186875243,
+                             'mu_bcemu_bin10': -0.006953332782079408,
+                             'mu_bcemu_bin11': -0.006953332782079408,
+                             'mu_bcemu_bin12': -0.006953332782079408,
+                             'mu_bcemu_bin13': -0.006953332782079408,
+                             'thej_bcemu_bin1': 3.6711008267835776,
+                             'thej_bcemu_bin2': 4.0853297524846175,
+                             'thej_bcemu_bin3': 4.1001870114090835,
+                             'thej_bcemu_bin4': 4.085897535238355,
+                             'thej_bcemu_bin5': 4.062128106370927,
+                             'thej_bcemu_bin6': 4.0416849190138695,
+                             'thej_bcemu_bin7': 4.0405617133891685,
+                             'thej_bcemu_bin8': 4.073797196972992,
+                             'thej_bcemu_bin9': 4.168188042786498,
+                             'thej_bcemu_bin10': 4.567495847826163,
+                             'thej_bcemu_bin11': 4.567495847826163,
+                             'thej_bcemu_bin12': 4.567495847826163,
+                             'thej_bcemu_bin13': 4.567495847826163,
+                             'gamma_bcemu_bin1': 2.732738146480909,
+                             'gamma_bcemu_bin2': 2.794658925091356,
+                             'gamma_bcemu_bin3': 3.008141783989797,
+                             'gamma_bcemu_bin4': 3.2186226058208787,
+                             'gamma_bcemu_bin5': 3.425034377127418,
+                             'gamma_bcemu_bin6': 3.6237277892257937,
+                             'gamma_bcemu_bin7': 3.805233587893605,
+                             'gamma_bcemu_bin8': 3.952453083293017,
+                             'gamma_bcemu_bin9': 4.012632091622541,
+                             'gamma_bcemu_bin10': 3.1454520255604006,
+                             'gamma_bcemu_bin11': 3.1454520255604006,
+                             'gamma_bcemu_bin12': 3.1454520255604006,
+                             'gamma_bcemu_bin13': 3.1454520255604006,
+                             'delta_bcemu_bin1': 6.407442578598766,
+                             'delta_bcemu_bin2': 7.0846518716943025,
+                             'delta_bcemu_bin3': 7.226700228338714,
+                             'delta_bcemu_bin4': 7.343194626402527,
+                             'delta_bcemu_bin5': 7.470370166898234,
+                             'delta_bcemu_bin6': 7.638743359373677,
+                             'delta_bcemu_bin7': 7.891612514615537,
+                             'delta_bcemu_bin8': 8.252389998618296,
+                             'delta_bcemu_bin9': 8.702184867164187,
+                             'delta_bcemu_bin10': 7.994110032082859,
+                             'delta_bcemu_bin11': 7.994110032082859,
+                             'delta_bcemu_bin12': 7.994110032082859,
+                             'delta_bcemu_bin13': 7.994110032082859,
+                             'eta_bcemu_bin1': 0.20680675958346154,
+                             'eta_bcemu_bin2': 0.22813237994091348,
+                             'eta_bcemu_bin3': 0.21989900653826788,
+                             'eta_bcemu_bin4': 0.2090499814223423,
+                             'eta_bcemu_bin5': 0.19645554090162448,
+                             'eta_bcemu_bin6': 0.18238365514915927,
+                             'eta_bcemu_bin7': 0.16686344766458094,
+                             'eta_bcemu_bin8': 0.14883503959461816,
+                             'eta_bcemu_bin9': 0.1240089652119986,
+                             'eta_bcemu_bin10': 0.044931761090432315,
+                             'eta_bcemu_bin11': 0.044931761090432315,
+                             'eta_bcemu_bin12': 0.044931761090432315,
+                             'eta_bcemu_bin13': 0.044931761090432315,
+                             'deta_bcemu_bin1': 0.08189803795251066,
+                             'deta_bcemu_bin2': 0.05028436917683151,
+                             'deta_bcemu_bin3': 0.04842000359519622,
+                             'deta_bcemu_bin4': 0.04869423933122641,
+                             'deta_bcemu_bin5': 0.04959595282843388,
+                             'deta_bcemu_bin6': 0.05011878848954406,
+                             'deta_bcemu_bin7': 0.04907477885822071,
+                             'deta_bcemu_bin8': 0.04681178740273659,
+                             'deta_bcemu_bin9': 0.048062862071344824,
+                             'deta_bcemu_bin10': 0.14550946518064195,
+                             'deta_bcemu_bin11': 0.14550946518064195,
+                             'deta_bcemu_bin12': 0.14550946518064195,
+                             'deta_bcemu_bin13': 0.14550946518064195,
+                             # BCemu params for the redshift parametrization
+                             # (based on arxiv:2108.08863 and test chains)
+                             'log10Mc_bcemu_0': 13.32,
+                             'nu_log10Mc_bcemu': -0.15,
+                             'thej_bcemu_0': 3.5,
+                             'nu_thej_bcemu': 0.0,
+                             'deta_bcemu_0': 0.2,
+                             'nu_deta_bcemu': 0.6,
+                             'mu_bcemu_0': 1.0,
+                             'nu_mu_bcemu': 0.0,
+                             'gamma_bcemu_0': 2.5,
+                             'nu_gamma_bcemu': 0.0,
+                             'delta_bcemu_0': 7.0,
+                             'nu_delta_bcemu': 0.0,
+                             'eta_bcemu_0': 0.2,
+                             'nu_eta_bcemu': 0.0,
+                             # Bacco baryon parameters (fitted to BAHAMAS)
+                             'M_c_bacco_bin1': 14.158079090897681,
+                             'M_c_bacco_bin2': 14.413536974582364,
+                             'M_c_bacco_bin3': 14.513655381066439,
+                             'M_c_bacco_bin4': 14.59501140993621,
+                             'M_c_bacco_bin5': 14.667602932620955,
+                             'M_c_bacco_bin6': 14.736117785720888,
+                             'M_c_bacco_bin7': 14.803902874910724,
+                             'M_c_bacco_bin8': 14.873354165369339,
+                             'M_c_bacco_bin9': 14.947678648592403,
+                             'M_c_bacco_bin10': 15.179943239223197,
+                             'M_c_bacco_bin11': 15.179943239223197,
+                             'M_c_bacco_bin12': 15.179943239223197,
+                             'M_c_bacco_bin13': 15.179943239223197,
+                             'eta_bacco_bin1': -0.34397323435383403,
+                             'eta_bacco_bin2': -0.3823001659654948,
+                             'eta_bacco_bin3': -0.3666759403458338,
+                             'eta_bacco_bin4': -0.34766555599217897,
+                             'eta_bacco_bin5': -0.32723937222645033,
+                             'eta_bacco_bin6': -0.3066851485202732,
+                             'eta_bacco_bin7': -0.28793191687619096,
+                             'eta_bacco_bin8': -0.2761849439738153,
+                             'eta_bacco_bin9': -0.29044476508897765,
+                             'eta_bacco_bin10': -0.3012527587604943,
+                             'eta_bacco_bin11': -0.3012527587604943,
+                             'eta_bacco_bin12': -0.3012527587604943,
+                             'eta_bacco_bin13': -0.3012527587604943,
+                             'beta_bacco_bin1': -0.1401597529600361,
+                             'beta_bacco_bin2': -0.14602731261184787,
+                             'beta_bacco_bin3': -0.15945179021822595,
+                             'beta_bacco_bin4': -0.1717165402260191,
+                             'beta_bacco_bin5': -0.18260340867450087,
+                             'beta_bacco_bin6': -0.1914516575772147,
+                             'beta_bacco_bin7': -0.19665359534532956,
+                             'beta_bacco_bin8': -0.1938633002915493,
+                             'beta_bacco_bin9': -0.16799956045034847,
+                             'beta_bacco_bin10': -0.1180328507054961,
+                             'beta_bacco_bin11': -0.1180328507054961,
+                             'beta_bacco_bin12': -0.1180328507054961,
+                             'beta_bacco_bin13': -0.1180328507054961,
+                             'M1_z0_cen_bacco_bin1': 11.340025775544985,
+                             'M1_z0_cen_bacco_bin2': 11.30961906881156,
+                             'M1_z0_cen_bacco_bin3': 11.366002025818862,
+                             'M1_z0_cen_bacco_bin4': 11.423530231429538,
+                             'M1_z0_cen_bacco_bin5': 11.479266623369345,
+                             'M1_z0_cen_bacco_bin6': 11.529947744472405,
+                             'M1_z0_cen_bacco_bin7': 11.569052829475833,
+                             'M1_z0_cen_bacco_bin8': 11.578833725581436,
+                             'M1_z0_cen_bacco_bin9': 11.496367669453079,
+                             'M1_z0_cen_bacco_bin10': 11.360811343412026,
+                             'M1_z0_cen_bacco_bin11': 11.360811343412026,
+                             'M1_z0_cen_bacco_bin12': 11.360811343412026,
+                             'M1_z0_cen_bacco_bin13': 11.360811343412026,
+                             'theta_inn_bacco_bin1': -0.9790217925155928,
+                             'theta_inn_bacco_bin2': -1.3854647301685985,
+                             'theta_inn_bacco_bin3': -1.3604452515853098,
+                             'theta_inn_bacco_bin4': -1.2949667258085438,
+                             'theta_inn_bacco_bin5': -1.2056425079533284,
+                             'theta_inn_bacco_bin6': -1.0991845011332575,
+                             'theta_inn_bacco_bin7': -0.9805620838281162,
+                             'theta_inn_bacco_bin8': -0.8624918408856748,
+                             'theta_inn_bacco_bin9': -0.7968588249755786,
+                             'theta_inn_bacco_bin10': -0.5312787510657424,
+                             'theta_inn_bacco_bin11': -0.5312787510657424,
+                             'theta_inn_bacco_bin12': -0.5312787510657424,
+                             'theta_inn_bacco_bin13': -0.5312787510657424,
+                             'M_inn_bacco_bin1': 12.472,
+                             'M_inn_bacco_bin2': 11.098133175636903,
+                             'M_inn_bacco_bin3': 10.685545014634902,
+                             'M_inn_bacco_bin4': 10.379401082211185,
+                             'M_inn_bacco_bin5': 10.124549632511826,
+                             'M_inn_bacco_bin6': 9.89485323082124,
+                             'M_inn_bacco_bin7': 9.669674533440968,
+                             'M_inn_bacco_bin8': 9.423522683043274,
+                             'M_inn_bacco_bin9': 9.086255671995564,
+                             'M_inn_bacco_bin10': 8.119132619254136,
+                             'M_inn_bacco_bin11': 8.119132619254136,
+                             'M_inn_bacco_bin12': 8.119132619254136,
+                             'M_inn_bacco_bin13': 8.119132619254136,
+                             'theta_out_bacco_bin1': 0.2672123790126238,
+                             'theta_out_bacco_bin2': 0.21845633941784046,
+                             'theta_out_bacco_bin3': 0.22229391886311567,
+                             'theta_out_bacco_bin4': 0.23124624733764712,
+                             'theta_out_bacco_bin5': 0.24338032280596764,
+                             'theta_out_bacco_bin6': 0.25802109222979985,
+                             'theta_out_bacco_bin7': 0.27483978056155306,
+                             'theta_out_bacco_bin8': 0.29287229590732955,
+                             'theta_out_bacco_bin9': 0.3076030069491944,
+                             'theta_out_bacco_bin10': 0.3569278707998519,
+                             'theta_out_bacco_bin11': 0.3569278707998519,
+                             'theta_out_bacco_bin12': 0.3569278707998519,
+                             'theta_out_bacco_bin13': 0.3569278707998519,
+                             # Bacco params for the redshift parametrization
+                             # (based on arxiv:2011.15018 and test chains )
+                             'M_c_bacco_0': 14,
+                             'nu_M_c_bacco': -0.15,
+                             'eta_bacco_0': -0.3,
+                             'nu_eta_bacco': 0.0,
+                             'beta_bacco_0': -0.22,
+                             'nu_beta_bacco': 0.0,
+                             'M1_z0_cen_bacco_0': 10.5,
+                             'nu_M1_z0_cen_bacco': 0.0,
+                             'theta_inn_bacco_0': -0.86,
+                             'nu_theta_inn_bacco': 0.0,
+                             'M_inn_bacco_0': 13.4,
+                             'nu_M_inn_bacco': 0.0,
+                             'theta_out_bacco_0': 0.25,
+                             'nu_theta_out_bacco': 0.0,
+                             # HMcode2020_feedback parameter
+                             # (from arxiv:2009.01858)
+                             'HMCode_logT_AGN': 7.8,
+                             # HMcode2016 parameters (values for matter-only
+                             # from arxiv:1505.07833)
+                             'HMCode_eta_baryon': 0.603,
+                             'HMCode_A_baryon': 3.13,
                              # 1-point redshift error dispersion for GCspectro
                              'sigma_z': 0.002,
                              # Redshift distribution shifts
@@ -443,8 +779,7 @@ class Cosmology:
         class, based on the value of the nonlinear flag for the
         photometric probes.
         """
-        # This method should be modified when other photometric flags will
-        # be included (e.g. baryonic flag)
+
         if self.cosmo_dic['NL_flag_phot_matter'] == 0:
             return self
         else:
@@ -517,9 +852,8 @@ class Cosmology:
             D_z_k = np.sqrt(P_z_k / power_interp.P(0.0, ks))
             return D_z_k
         except CosmologyError:
-            w('Computation error in D(z, k)')
+            ('Computation error in D(z, k)')
 
-    # This function is deprecated
     def growth_rate(self, zs, ks):
         r"""Growth rate.
 
@@ -626,6 +960,7 @@ class Cosmology:
         Adds an interpolator for the growth factor (function of redshift and
         scale) to the cosmo dictionary.
         """
+
         if self.cosmo_dic['use_gamma_MG']:
             z_win = self.cosmo_dic['z_win']
             self.cosmo_dic['D_z_k_func_MG'] = \
@@ -646,7 +981,10 @@ class Cosmology:
         """
 
         self.cosmo_dic['r_z_func'] = interpolate.InterpolatedUnivariateSpline(
-            x=self.cosmo_dic['z_win'], y=self.cosmo_dic['comov_dist'], ext=2)
+            x=self.cosmo_dic['z_win_max'],
+            y=self.cosmo_dic['comov_dist'],
+            ext=2
+        )
 
     def interp_z_of_r(self):
         """Interpolates the redshift.
@@ -667,7 +1005,7 @@ class Cosmology:
         """
         self.cosmo_dic['z_r_func'] = interpolate.InterpolatedUnivariateSpline(
             x=self.cosmo_dic['comov_dist'],
-            y=self.cosmo_dic['z_win'], ext='zeros')
+            y=self.cosmo_dic['z_win_max'], ext='zeros')
 
     def interp_transverse_comoving_dist(self):
         """Interpolates the transverse comoving distance.
@@ -700,7 +1038,7 @@ class Cosmology:
         transverse comoving distance as a function of the specified
         redshifts.
         """
-        x_int = self.cosmo_dic['z_win']
+        x_int = self.cosmo_dic['z_win_max']
 
         if isinstance(self.cosmo_dic['comov_dist'], tuple):
             comov_dist = np.array(self.cosmo_dic['comov_dist'][0])
@@ -829,13 +1167,61 @@ class Cosmology:
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['fsigma8'], ext=2)
 
+    def interp_sigmaR(self):
+        r"""Interp fsigma8
+
+        Adds an interpolator for :math:`f\sigma_R` to the dictionary
+        so that it can be evaluated at redshifts
+        not explictly supplied to Cobaya
+
+        Updates 'key' in the cosmo_dic attribute of the class
+        by adding an interpolator object
+        which interpolates :math:`f\sigma_8` as a
+        function of redshift
+        """
+        if self.cosmo_dic['z_win'] is None:
+            raise Exception('Boltzmann code redshift binning has not been '
+                            'supplied to cosmo_dic.')
+        if self.cosmo_dic['r_win'] is None:
+            raise Exception('Boltzmann code radius binning has not been '
+                            'supplied to cosmo_dic.')
+        self.cosmo_dic['sigmaR_z_func'] = \
+            interpolate.RectBivariateSpline(self.cosmo_dic['z_win'],
+                                            self.cosmo_dic['r_win'],
+                                            self.cosmo_dic['sigmaR'],
+                                            kx=1, ky=1)
+
+    def interp_sigmaR_cb(self):
+        r"""Interp sigmaR_cb
+
+        Adds an interpolator for :math:`sigma_R_cb` to the dictionary
+        so that it can be evaluated at redshifts
+        not explictly supplied to Cobaya
+
+        Updates 'key' in the cosmo_dic attribute of the class
+        by adding an interpolator object
+        which interpolates :math:`sigma_R_cb` as a
+        function of redshift
+        """
+        if self.cosmo_dic['z_win'] is None:
+            raise Exception('Boltzmann code redshift binning has not been '
+                            'supplied to cosmo_dic.')
+        if self.cosmo_dic['r_win'] is None:
+            raise Exception('Boltzmann code radius binning has not been '
+                            'supplied to cosmo_dic.')
+        self.cosmo_dic['sigmaR_z_func_cb'] = \
+            interpolate.RectBivariateSpline(self.cosmo_dic['z_win'],
+                                            self.cosmo_dic['r_win'],
+                                            self.cosmo_dic['sigmaR_cb'],
+                                            kx=1, ky=1)
+
     def create_phot_galbias(self, model=None, x_values=[0.0, 4.0],
                             y_values=[1.0, 1.0]):
         r"""Creates the photometric galaxy bias.
 
         Creates the photometric galaxy bias as
         function/interpolator of the redshift.
-        The function is stored in the cosmo dictionary 'b_inter'.
+        The function is stored in the cosmo dictionary 'b1_inter'.
 
         The bias model is selected from the key 'bias_model'
         in :obj:`cosmo_dic`.
@@ -868,14 +1254,14 @@ class Cosmology:
             bias_model = model
 
         if bias_model == 1:
-            self.cosmo_dic['b_inter'] \
+            self.cosmo_dic['b1_inter'] \
                 = self.istf_phot_galbias_interpolator(
                     self.cosmo_dic['redshift_bins_means_phot'])
         elif bias_model == 2:
-            self.cosmo_dic['b_inter'] \
+            self.cosmo_dic['b1_inter'] \
                 = rb.linear_interpolator(x_values, y_values)
         elif bias_model == 3:
-            self.cosmo_dic['b_inter'] = self.poly_phot_galbias
+            self.cosmo_dic['b1_inter'] = self.poly_phot_galbias
         else:
             raise ValueError('Parameter bias_model not valid:'
                              f'{bias_model}')
@@ -899,7 +1285,7 @@ class Cosmology:
 
         nuisance_par = self.cosmo_dic['nuisance_parameters']
 
-        istf_bias_list = [nuisance_par[f'b{idx}_photo']
+        istf_bias_list = [nuisance_par[f'b1_photo_bin{idx}']
                           for idx, vl in
                           enumerate(redshift_means, start=1)]
 
@@ -921,10 +1307,10 @@ class Cosmology:
             Value(s) of photometric galaxy bias at input redshift(s)
         """
         nuisance = self.cosmo_dic['nuisance_parameters']
-        return nuisance['b0_poly_photo'] + \
-            nuisance['b1_poly_photo'] * redshift + \
-            nuisance['b2_poly_photo'] * np.power(redshift, 2) + \
-            nuisance['b3_poly_photo'] * np.power(redshift, 3)
+        return nuisance['b1_0_poly_photo'] + \
+            nuisance['b1_1_poly_photo'] * redshift + \
+            nuisance['b1_2_poly_photo'] * np.power(redshift, 2) + \
+            nuisance['b1_3_poly_photo'] * np.power(redshift, 3)
 
     def compute_phot_galbias(self, redshift):
         r"""Computes the photometric galaxy bias.
@@ -947,7 +1333,7 @@ class Cosmology:
             Value(s) of photometric galaxy bias at input redshift(s)
         """
 
-        return self.cosmo_dic['b_inter'](redshift)
+        return self.cosmo_dic['b1_inter'](redshift)
 
     def istf_spectro_galbias(self, redshift):
         """IST:F Spectroscopic galaxy bias interpolator.
@@ -1173,13 +1559,13 @@ class Cosmology:
         c1 = 0.0134
         pivot_redshift = \
             self.cosmo_dic['nuisance_parameters']['pivot_redshift']
-        aia = self.cosmo_dic['nuisance_parameters']['aia']
-        nia = self.cosmo_dic['nuisance_parameters']['nia']
-        bia = self.cosmo_dic['nuisance_parameters']['bia']
+        a1_ia = self.cosmo_dic['nuisance_parameters']['a1_ia']
+        eta1_ia = self.cosmo_dic['nuisance_parameters']['eta1_ia']
+        beta1_ia = self.cosmo_dic['nuisance_parameters']['beta1_ia']
         omegam = self.cosmo_dic['Omm']
-        fia = (-aia * c1 * omegam / growth *
-               ((1 + redshift) / (1 + pivot_redshift)) ** nia *
-               self.cosmo_dic['luminosity_ratio_z_func'](redshift) ** bia)
+        fia = (-a1_ia * c1 * omegam / growth *
+               ((1 + redshift) / (1 + pivot_redshift)) ** eta1_ia *
+               self.cosmo_dic['luminosity_ratio_z_func'](redshift) ** beta1_ia)
         return fia
 
     def Pii_def(self, redshift, k_scale):
@@ -1308,6 +1694,49 @@ class Cosmology:
         Noise contribution for the spectroscopic galaxy power spectrum
         """
         return 0.0
+
+    def Weyl_matter_ratio_def(self, redshift, k_scale, grid=True):
+        r"""Weyl matter ratio
+
+        Returns the ratio of the linear Weyl power spectrum to
+        the linear matter power spectrum.
+
+        .. math::
+            \Gamma^2(z,k)\equiv P_{\Phi+\Psi}(z,k)/P_{mm}(z,k)
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the power spectrum.
+        k_scale: float or list or numpy.ndarray
+            wavenumber at which to evaluate the power spectrum.
+        grid: bool, optional
+            If True, use the grid setting in power spectra.
+            If False, set grid to False in power spectra.
+
+        Returns
+        -------
+        \Gamma^2: float or numpy.ndarray
+            Value of the ratio of the linear Weyl power spectrum to
+            the linear matter power spectrum at a given redshift and
+            wavenumber.
+        """
+
+        k_min = min(self.cosmo_dic['k_win'])
+        k_max = max(self.cosmo_dic['k_win'])
+
+        k_scale_array = np.array(k_scale)
+        k_scale_array = np.clip(k_scale_array, k_min, k_max)
+
+        args = [redshift, k_scale_array]
+        if not grid:
+            args.append(False)
+
+        Pk_weyl = self.cosmo_dic['Pk_weyl'].P(*args)
+        Pk_delta = self.cosmo_dic['Pk_delta'].P(*args)
+
+        Gamma2 = Pk_weyl / Pk_delta
+        return Gamma2
 
     def obtain_power_spectra(self):
         """Adds photometric/spectroscopic power spectra to cosmo dictionary.
@@ -1571,6 +2000,9 @@ class Cosmology:
         if self.cosmo_dic['z_win'] is None:
             raise Exception('Boltzmann code redshift binning has not been '
                             'supplied to cosmo_dic.')
+        elif self.cosmo_dic['z_win_max'] is None:
+            raise Exception('Extended redshift binning has not been '
+                            'supplied to cosmo_dic.')
         self.interp_H()
         self.interp_H_Mpc()
         self.interp_comoving_dist()
@@ -1580,6 +2012,8 @@ class Cosmology:
         self.cosmo_dic['f_K_z12_func'] = self.f_K_z12_wrapper
         self.interp_fsigma8()
         self.interp_sigma8()
+        self.interp_sigmaR()
+        self.interp_sigmaR_cb()
         self.interp_growth_rate()
         self.assign_growth_factor()
         self.interp_angular_dist()
@@ -1611,9 +2045,17 @@ class Cosmology:
         # Update nonlinear module, by calling the update_dic method
         # of the nonlinear instance
         self.nonlinear.update_dic(self.cosmo_dic)
-        # Update dictionary with bias function and power spectra
-        self.create_phot_galbias()
+        # Update dictionary with photo bias function
+        # if photo galaxy bias is linear. Otherwise it is done
+        # in the update_dic method of the nonlinear instance
+        if self.cosmo_dic['NL_flag_phot_bias'] == 0:
+            self.create_phot_galbias()
+        # Update dictionary with power spectra
         self.obtain_power_spectra()
+
+        if self.cosmo_dic['use_Weyl']:
+            self.cosmo_dic['Weyl_matter_ratio'] = \
+                self.Weyl_matter_ratio_def
 
         self.cosmo_dic['noise_Pgg_spectro'] = \
             self.pk_source_spectro.noise_Pgg_spectro

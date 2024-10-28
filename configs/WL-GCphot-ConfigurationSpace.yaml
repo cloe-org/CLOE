@@ -1,0 +1,368 @@
+# This yaml file contains the user specifications 
+# about the scales and redshift/tomographic bins 
+# of the Euclid data to include 
+# in the likelihood analysis.
+# 
+# Probe: WL-GCphot cross-correlation
+# power spectrum
+#
+# WL: Weak Lensing
+# GCphot: Number density fluctuations of 
+# the photometric galaxy sample
+#
+# Note: For a given tomographic bin combination, the range of angular
+# scales can be concatenated as for example
+# theta_range: [[0.001, 0.002], [0.003, 0.15]]
+# To exclude all angular scales, an empty list can be provided
+bins:
+  n1: 
+    n1: 
+      theta_range: [[0.001, 0.15]]
+    n2: 
+      theta_range: [[0.001, 0.15]]
+    n3: 
+      theta_range: [[0.001, 0.15]]
+    n4: 
+      theta_range: [[0.001, 0.15]]
+    n5: 
+      theta_range: [[0.001, 0.15]]
+    n6: 
+      theta_range: [[0.001, 0.15]]
+    n7: 
+      theta_range: [[0.001, 0.15]]
+    n8: 
+      theta_range: [[0.001, 0.15]]
+    n9: 
+      theta_range: [[0.001, 0.15]]
+    n10: 
+      theta_range: [[0.001, 0.15]]
+    n11: 
+      theta_range: [[0.001, 0.15]]
+    n12: 
+      theta_range: [[0.001, 0.15]]
+    n13: 
+      theta_range: [[0.001, 0.15]]
+  n2:
+    n1: 
+      theta_range: [[0.001, 0.15]]
+    n2: 
+      theta_range: [[0.001, 0.15]]
+    n3: 
+      theta_range: [[0.001, 0.15]]
+    n4: 
+      theta_range: [[0.001, 0.15]]
+    n5: 
+      theta_range: [[0.001, 0.15]]
+    n6: 
+      theta_range: [[0.001, 0.15]]
+    n7: 
+      theta_range: [[0.001, 0.15]]
+    n8: 
+      theta_range: [[0.001, 0.15]]
+    n9: 
+      theta_range: [[0.001, 0.15]]
+    n10: 
+      theta_range: [[0.001, 0.15]]
+    n11: 
+      theta_range: [[0.001, 0.15]]
+    n12: 
+      theta_range: [[0.001, 0.15]]
+    n13: 
+      theta_range: [[0.001, 0.15]]
+  n3:
+    n1: 
+      theta_range: [[0.001, 0.15]]
+    n2: 
+      theta_range: [[0.001, 0.15]]
+    n3: 
+      theta_range: [[0.001, 0.15]]
+    n4: 
+      theta_range: [[0.001, 0.15]]
+    n5: 
+      theta_range: [[0.001, 0.15]]
+    n6: 
+      theta_range: [[0.001, 0.15]]
+    n7: 
+      theta_range: [[0.001, 0.15]]
+    n8: 
+      theta_range: [[0.001, 0.15]]
+    n9: 
+      theta_range: [[0.001, 0.15]]
+    n10: 
+      theta_range: [[0.001, 0.15]]
+    n11: 
+      theta_range: [[0.001, 0.15]]
+    n12: 
+      theta_range: [[0.001, 0.15]]
+    n13: 
+      theta_range: [[0.001, 0.15]]
+  n4: 
+    n1: 
+      theta_range: [[0.001, 0.15]]
+    n2: 
+      theta_range: [[0.001, 0.15]]
+    n3: 
+      theta_range: [[0.001, 0.15]]
+    n4: 
+      theta_range: [[0.001, 0.15]]
+    n5: 
+      theta_range: [[0.001, 0.15]]
+    n6: 
+      theta_range: [[0.001, 0.15]]
+    n7: 
+      theta_range: [[0.001, 0.15]]
+    n8: 
+      theta_range: [[0.001, 0.15]]
+    n9: 
+      theta_range: [[0.001, 0.15]]
+    n10: 
+      theta_range: [[0.001, 0.15]]
+    n11: 
+      theta_range: [[0.001, 0.15]]
+    n12: 
+      theta_range: [[0.001, 0.15]]
+    n13: 
+      theta_range: [[0.001, 0.15]]
+  n5: 
+    n1: 
+      theta_range: [[0.001, 0.15]]
+    n2: 
+      theta_range: [[0.001, 0.15]]
+    n3: 
+      theta_range: [[0.001, 0.15]]
+    n4: 
+      theta_range: [[0.001, 0.15]]
+    n5: 
+      theta_range: [[0.001, 0.15]]
+    n6: 
+      theta_range: [[0.001, 0.15]]
+    n7: 
+      theta_range: [[0.001, 0.15]]
+    n8: 
+      theta_range: [[0.001, 0.15]]
+    n9: 
+      theta_range: [[0.001, 0.15]]
+    n10: 
+      theta_range: [[0.001, 0.15]]
+    n11: 
+      theta_range: [[0.001, 0.15]]
+    n12: 
+      theta_range: [[0.001, 0.15]]
+    n13: 
+      theta_range: [[0.001, 0.15]]
+  n6:
+    n1: 
+      theta_range: [[0.001, 0.15]]
+    n2: 
+      theta_range: [[0.001, 0.15]]
+    n3: 
+      theta_range: [[0.001, 0.15]]
+    n4: 
+      theta_range: [[0.001, 0.15]]
+    n5: 
+      theta_range: [[0.001, 0.15]]
+    n6: 
+      theta_range: [[0.001, 0.15]]
+    n7: 
+      theta_range: [[0.001, 0.15]]
+    n8: 
+      theta_range: [[0.001, 0.15]]
+    n9: 
+      theta_range: [[0.001, 0.15]]
+    n10: 
+      theta_range: [[0.001, 0.15]]
+    n11: 
+      theta_range: [[0.001, 0.15]]
+    n12: 
+      theta_range: [[0.001, 0.15]]
+    n13: 
+      theta_range: [[0.001, 0.15]]
+  n7: 
+    n1: 
+      theta_range: [[0.001, 0.15]]
+    n2: 
+      theta_range: [[0.001, 0.15]]
+    n3: 
+      theta_range: [[0.001, 0.15]]
+    n4: 
+      theta_range: [[0.001, 0.15]]
+    n5: 
+      theta_range: [[0.001, 0.15]]
+    n6: 
+      theta_range: [[0.001, 0.15]]
+    n7: 
+      theta_range: [[0.001, 0.15]]
+    n8: 
+      theta_range: [[0.001, 0.15]]
+    n9: 
+      theta_range: [[0.001, 0.15]]
+    n10: 
+      theta_range: [[0.001, 0.15]]
+    n11: 
+      theta_range: [[0.001, 0.15]]
+    n12: 
+      theta_range: [[0.001, 0.15]]
+    n13: 
+      theta_range: [[0.001, 0.15]]
+  n8: 
+    n1: 
+      theta_range: [[0.001, 0.15]]
+    n2: 
+      theta_range: [[0.001, 0.15]]
+    n3: 
+      theta_range: [[0.001, 0.15]]
+    n4: 
+      theta_range: [[0.001, 0.15]]
+    n5: 
+      theta_range: [[0.001, 0.15]]
+    n6: 
+      theta_range: [[0.001, 0.15]]
+    n7: 
+      theta_range: [[0.001, 0.15]]
+    n8: 
+      theta_range: [[0.001, 0.15]]
+    n9: 
+      theta_range: [[0.001, 0.15]]
+    n10: 
+      theta_range: [[0.001, 0.15]]
+    n11: 
+      theta_range: [[0.001, 0.15]]
+    n12: 
+      theta_range: [[0.001, 0.15]]
+    n13: 
+      theta_range: [[0.001, 0.15]]
+  n9: 
+    n1: 
+      theta_range: [[0.001, 0.15]]
+    n2: 
+      theta_range: [[0.001, 0.15]]
+    n3: 
+      theta_range: [[0.001, 0.15]]
+    n4: 
+      theta_range: [[0.001, 0.15]]
+    n5: 
+      theta_range: [[0.001, 0.15]]
+    n6: 
+      theta_range: [[0.001, 0.15]]
+    n7: 
+      theta_range: [[0.001, 0.15]]
+    n8: 
+      theta_range: [[0.001, 0.15]]
+    n9: 
+      theta_range: [[0.001, 0.15]]
+    n10: 
+      theta_range: [[0.001, 0.15]]
+    n11: 
+      theta_range: [[0.001, 0.15]]
+    n12: 
+      theta_range: [[0.001, 0.15]]
+    n13: 
+      theta_range: [[0.001, 0.15]]
+  n10: 
+    n1: 
+      theta_range: [[0.001, 0.15]]
+    n2: 
+      theta_range: [[0.001, 0.15]]
+    n3: 
+      theta_range: [[0.001, 0.15]]
+    n4: 
+      theta_range: [[0.001, 0.15]]
+    n5: 
+      theta_range: [[0.001, 0.15]]
+    n6: 
+      theta_range: [[0.001, 0.15]]
+    n7: 
+      theta_range: [[0.001, 0.15]]
+    n8: 
+      theta_range: [[0.001, 0.15]]
+    n9: 
+      theta_range: [[0.001, 0.15]]
+    n10: 
+      theta_range: [[0.001, 0.15]]
+    n11: 
+      theta_range: [[0.001, 0.15]]
+    n12: 
+      theta_range: [[0.001, 0.15]]
+    n13: 
+      theta_range: [[0.001, 0.15]]
+  n11: 
+    n1: 
+      theta_range: [[0.001, 0.15]]
+    n2: 
+      theta_range: [[0.001, 0.15]]
+    n3: 
+      theta_range: [[0.001, 0.15]]
+    n4: 
+      theta_range: [[0.001, 0.15]]
+    n5: 
+      theta_range: [[0.001, 0.15]]
+    n6: 
+      theta_range: [[0.001, 0.15]]
+    n7: 
+      theta_range: [[0.001, 0.15]]
+    n8: 
+      theta_range: [[0.001, 0.15]]
+    n9: 
+      theta_range: [[0.001, 0.15]]
+    n10: 
+      theta_range: [[0.001, 0.15]]
+    n11: 
+      theta_range: [[0.001, 0.15]]
+    n12: 
+      theta_range: [[0.001, 0.15]]
+    n13: 
+      theta_range: [[0.001, 0.15]]
+  n12: 
+    n1: 
+      theta_range: [[0.001, 0.15]]
+    n2: 
+      theta_range: [[0.001, 0.15]]
+    n3: 
+      theta_range: [[0.001, 0.15]]
+    n4: 
+      theta_range: [[0.001, 0.15]]
+    n5: 
+      theta_range: [[0.001, 0.15]]
+    n6: 
+      theta_range: [[0.001, 0.15]]
+    n7: 
+      theta_range: [[0.001, 0.15]]
+    n8: 
+      theta_range: [[0.001, 0.15]]
+    n9: 
+      theta_range: [[0.001, 0.15]]
+    n10: 
+      theta_range: [[0.001, 0.15]]
+    n11: 
+      theta_range: [[0.001, 0.15]]
+    n12: 
+      theta_range: [[0.001, 0.15]]
+    n13: 
+      theta_range: [[0.001, 0.15]]
+  n13: 
+    n1: 
+      theta_range: [[0.001, 0.15]]
+    n2: 
+      theta_range: [[0.001, 0.15]]
+    n3: 
+      theta_range: [[0.001, 0.15]]
+    n4: 
+      theta_range: [[0.001, 0.15]]
+    n5: 
+      theta_range: [[0.001, 0.15]]
+    n6: 
+      theta_range: [[0.001, 0.15]]
+    n7: 
+      theta_range: [[0.001, 0.15]]
+    n8: 
+      theta_range: [[0.001, 0.15]]
+    n9: 
+      theta_range: [[0.001, 0.15]]
+    n10: 
+      theta_range: [[0.001, 0.15]]
+    n11: 
+      theta_range: [[0.001, 0.15]]
+    n12: 
+      theta_range: [[0.001, 0.15]]
+    n13: 
+      theta_range: [[0.001, 0.15]]

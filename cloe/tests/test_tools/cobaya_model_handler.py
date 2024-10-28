@@ -25,10 +25,24 @@ class CobayaModel:
         z_max = 4.0
         z_samp = 100
         self.z_win = np.linspace(z_min, z_max, z_samp)
+
+        z_max_cmb = 1200
+        z_samp_log = 20
+        # Append higher redshifts for the CMB lensing computations
+        self.z_win_max = np.logspace(
+            np.log10(self.z_win[-1]),
+            np.log10(z_max_cmb),
+            z_samp_log
+        )
+        self.z_win_max = np.unique(np.append(self.z_win, self.z_win_max))
+        # TODO: Should modify rest of the obsject
+        # to match with cobaya_interface.py
+
         # Note that this k_min does not currently interface with Cobaya
         # Once the Cobaya interface is adjusted to use a set k_min, the same
         # value should be used here.
         self.k_max_Boltzmann = 10.0
+        self.k_max_extrap = 500.0
         self.k_min_GC_phot_interp = 0.001
         self.k_max_GC_phot_interp = 50.0
         self.k_samp_GC = 100
@@ -72,13 +86,15 @@ class CobayaModel:
                 'NL_flag_phot_matter':
                     cosmo_inst.cosmo_dic['NL_flag_phot_matter'],
                 'NL_flag_spectro': cosmo_inst.cosmo_dic['NL_flag_spectro'],
+                'IA_flag': cosmo_inst.cosmo_dic['IA_flag'],
                 'solver': 'camb'}}}
         self.info['params'].update(
             cosmo_inst.cosmo_dic['nuisance_parameters'])
         self.info['data'] = mock_data
 
         set_halofit_version(self.info,
-                            cosmo_inst.cosmo_dic['NL_flag_phot_matter'])
+                            cosmo_inst.cosmo_dic['NL_flag_phot_matter'],
+                            cosmo_inst.cosmo_dic['NL_flag_phot_baryon'])
 
     def get_cobaya_model(self):
         """Gets Cobaya model."""
@@ -121,17 +137,20 @@ class CobayaModel:
             self.cosmology.cosmo_dic['z_win'])
         self.cosmology.cosmo_dic['Pk_delta_Boltzmann'] = \
             self.model.provider.get_Pk_interpolator(
-            ("delta_tot", "delta_tot"), nonlinear=False)
+                ("delta_tot", "delta_tot"), nonlinear=False,
+                extrap_kmax=self.k_max_extrap)
         self.cosmology.cosmo_dic['Pk_cb_Boltzmann'] = \
             self.model.provider.get_Pk_interpolator(
-            ("delta_nonu", "delta_nonu"), nonlinear=False)
+                ("delta_nonu", "delta_nonu"), nonlinear=False,
+                extrap_kmax=self.k_max_extrap)
         self.cosmology.cosmo_dic['Pk_weyl'] = \
             self.model.provider.get_Pk_interpolator(
             ("Weyl", "Weyl"), nonlinear=False)
         if self.cosmology.cosmo_dic['NL_flag_phot_matter'] > 0:
             self.cosmology.cosmo_dic['Pk_halomodel_recipe_Boltzmann'] = \
                 self.model.provider.get_Pk_interpolator(
-                ('delta_tot', 'delta_tot'), nonlinear=True)
+                    ('delta_tot', 'delta_tot'), nonlinear=True,
+                    extrap_kmax=self.k_max_extrap)
         self.cosmology.cosmo_dic['fsigma8'] = \
             self.model.provider.get_fsigma8(self.z_win)
         self.cosmology.cosmo_dic['sigma8'] = \

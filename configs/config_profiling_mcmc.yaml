@@ -2,6 +2,7 @@ backend: Cobaya
 Cobaya:
   debug: true
   force: true
+  resume: false
   likelihood:
     Euclid:
       aliases:
@@ -9,10 +10,6 @@ Cobaya:
       external: !!python/name:cloe.cobaya_interface.EuclidLikelihood ''
       NL_flag_phot_matter: 0
       NL_flag_spectro: 0
-      statistics_spectro: legendre_multipole_power_spectrum
-      # Select statistics for photometric probes (angular_power_spectrum or
-      # angular_correlation_function)
-      statistics_photo: angular_power_spectrum
       plot_observables_selection: False
       # The user can overwrite here the values of
       # the fields 'data', 'observables_selection', and 'observables_specifications'
@@ -20,6 +17,61 @@ Cobaya:
       # - by specifying a yaml file
       # - by specifying a dictionary, in yaml format
       # Please note that if specifying a dictionary, all the fields must be present
+      observables_selection: observables_selection.yaml
+      # Specifications for each of the observables.
+      # Ensure that they are consistent with the choices in data.yaml.
+      observables_specifications:
+        GCphot:
+          angular_power_spectrum: GCphot-FourierSpace.yaml
+          pseudo_cl: GCphot-FourierSpace.yaml
+          angular_correlation_function: GCphot-ConfigurationSpace.yaml
+          # Select statistics for GCphot (angular_power_spectrum,
+          # pseudo_cl, or angular_correlation_function)
+          statistics: angular_power_spectrum
+        GCspectro:
+          multipole_power_spectrum: GCspectro-FourierSpace.yaml
+          convolved_multipole_power_spectrum: GCspectro-FourierSpace.yaml
+          multipole_correlation_function: GCspectro-ConfigurationSpace.yaml
+          # Select statistics for GCspectro (multipole_power_spectrum,
+          # convolved_multipole_power_spectrum, or 
+          # multipole_correlation_function)
+          statistics: multipole_power_spectrum
+        WL:
+          angular_power_spectrum: WL-FourierSpace.yaml
+          pseudo_cl: WL-FourierSpace.yaml
+          angular_correlation_function: WL-ConfigurationSpace.yaml
+          # Select statistics for WL (angular_power_spectrum,
+          # pseudo_cl, or angular_correlation_function)
+          statistics: angular_power_spectrum
+        WL-GCphot:
+          angular_power_spectrum: WL-GCphot-FourierSpace.yaml
+          pseudo_cl: WL-GCphot-FourierSpace.yaml
+          angular_correlation_function: WL-GCphot-ConfigurationSpace.yaml
+          # Select statistics for WL-GCphot (angular_power_spectrum,
+          # pseudo_cl, or angular_correlation_function)
+          statistics: angular_power_spectrum
+        CG: CG.yaml
+        # Note: GCphot-GCspectro and WL-GCspectro are not yet provided by CLOE
+        # and the following will therefore load empty dictionaries
+        GCphot-GCspectro:
+          angular_power_spectrum: GCphot-GCspectro-FourierSpace.yaml
+          pseudo_cl: GCphot-GCspectro-FourierSpace.yaml
+          angular_correlation_function: GCphot-GCspectro-ConfigurationSpace.yaml
+          # Select statistics for GCphot-GCspectro (angular_power_spectrum,
+          # pseudo_cl, or angular_correlation_function)
+          statistics: angular_power_spectrum
+        WL-GCspectro:
+          angular_power_spectrum: WL-GCspectro-FourierSpace.yaml
+          pseudo_cl: WL-GCspectro-FourierSpace.yaml
+          angular_correlation_function: WL-GCspectro-ConfigurationSpace.yaml
+          # Select statistics for WL-GCspectro (angular_power_spectrum
+          # pseudo_cl, or angular_correlation_function)
+          statistics: angular_power_spectrum
+        # CMBX probes
+        CMBlens: CMBlensing.yaml
+        CMBlens-GCphot: CMBlensing-GCphot.yaml
+        CMBlens-WL: CMBlensing-WL.yaml
+        ISW-GCphot: iSW-GCphot.yaml
   output: chains/my_euclid_experiment
   params: ./model_test.yaml
   sampler:
@@ -31,3 +83,11 @@ Cobaya:
         num_massive_neutrinos: 1
       stop_at_error: true
   timing: true
+Cosmosis:
+  # At present the cosmosis configuration is fully delegated to ini files,
+  # therefore the only Cosmosis-related parameter is the name of the ini
+  # file to be used. There are two possibilites at present:
+  # - run_cosmosis.ini (recommended option)
+  # - run_cosmosis_with_cobaya.ini
+  ini_file: run_cosmosis.ini
+

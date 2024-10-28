@@ -1,3 +1,6 @@
-aia: 1.72
-nia: -0.41
-bia: 0.0
+a1_ia: 1.72
+a2_ia: 2
+b1_ia: 1
+eta1_ia: -0.41
+eta2_ia: 1
+beta1_ia: 0.0

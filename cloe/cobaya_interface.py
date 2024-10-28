@@ -21,16 +21,6 @@ from cloe.like_calc.euclike import Euclike
 from cloe.auxiliary.observables_dealer import *
 from cloe.auxiliary.params_converter import camb_to_classy
 
-# Error classes
-
-
-class CobayaInterfaceError(Exception):
-    r"""
-    Class to define Exception Error.
-    """
-
-    pass
-
 
 class EuclidLikelihood(Likelihood):
     r"""
@@ -56,7 +46,9 @@ class EuclidLikelihood(Likelihood):
         self.k_win = np.logspace(np.log10(self.k_min_extrap),
                                  np.log10(self.k_max_extrap),
                                  self.k_samp)
+
         self.z_win = np.linspace(self.z_min, self.z_max, self.z_samp)
+
         # Check the selection and specification requirements
         self.observables = \
             observables_selection_specifications_checker(
@@ -66,23 +58,23 @@ class EuclidLikelihood(Likelihood):
         if self.plot_observables_selection:
             self.observables_pf = observables_visualization(
              self.observables['selection'])
-        self.observables['selection']['add_phot_RSD'] = self.add_phot_RSD
-        self.observables['selection']['matrix_transform_phot'] = \
-            self.matrix_transform_phot
-        if 'GCspectro' in self.observables['specifications'].keys():
-            self.observables['specifications']['GCspectro']['statistics'] = \
-                self.statistics_spectro
-        # set the parameters used to determine what statistics to use
-        # for the photometric probes
-        for key in self.observables['specifications'].keys():
-            if key in ['WL', 'GCphot', 'WL-GCphot']:
-                self.observables['specifications'][key]['statistics'] = \
-                    self.statistics_photo
+
         # Select which power spectra to require from the Boltzmann solver
         if self.NL_flag_phot_matter > 0:
             self.use_NL = [False, True]
         else:
             self.use_NL = False
+
+        # We redefine upper z bound.
+        # In case we don't need CMB lensing auto spectra then it stays the same
+        self.z_win_max = self.z_win
+        if self.observables_selection['CMBlens']['CMBlens']:
+            # Append higher redshifts for the CMB lensing computations
+            self.z_win_max = np.logspace(
+                np.log10(self.z_win[-1]),
+                np.log10(self.z_max_cmb), self.z_samp_log)
+            self.z_win_max = np.unique(np.append(self.z_win, self.z_win_max))
+
         # Initialize Euclike module
         self.likefinal = Euclike(self.data, self.observables)
         # Here we set the naming convention for the cosmological parameters
@@ -129,13 +121,33 @@ class EuclidLikelihood(Likelihood):
             self.fiducial_cosmology.cosmo_dic)
         # Compute the data vectors
         # and initialize possible matrix transforms
-        self.likefinal.get_masked_data()
+        if not any(self.observables['selection']['CG'].values()):
+            self.likefinal.get_masked_data()
+        else:
+            if (
+                any(self.observables['selection']['WL'].values()) or
+                any(self.observables['selection']['GCphot'].values()) or
+                any(self.observables['selection']['GCspectro'].values())
+            ):
+                raise ValueError(
+                    'Galaxy cluster probes cannot be combined with others.'
+                )
+
         # Add the luminosity_ratio_z_func to the cosmo_dic after data has been
         # read and stored in the data_ins attribute of Euclike
         self.cosmo.cosmo_dic['luminosity_ratio_z_func'] = \
             self.likefinal.data_ins.luminosity_ratio_interpolator
         # Pass the observables selection to the cosmo dictionary
         self.cosmo.cosmo_dic['obs_selection'] = self.observables['selection']
+        self.cosmo.cosmo_dic['observables_specifications'] =\
+            self.observables['specifications']
+
+        # Sampling in radius for the sigma(R,z) in Mpc
+        # for galaxy clusters
+        self.rmin = 5
+        self.rmax = 50
+        self.r_samp = 100
+        self.r_win = np.linspace(self.rmin, self.rmax, self.r_samp)
 
     def set_fiducial_cosmology(self):
         r"""Sets the fiducial cosmology class.
@@ -149,6 +161,7 @@ class EuclidLikelihood(Likelihood):
         # Update fiducial cosmo dic with fiducial info from reader
         self.fiducial_cosmology.cosmo_dic.update(
             self.likefinal.data_spectro_fiducial_cosmo)
+
         self.info_fiducial = {
             'params': {
                 self.pnames['ombh2']:
@@ -197,11 +210,19 @@ class EuclidLikelihood(Likelihood):
         # self.info_fiducial['params'].update(
         #    self.fiducial_cosmology.cosmo_dic['nuisance_parameters'])
         # Use get_model wrapper for fiducial
+
+        # Sampling in radius for the sigma(R,z) in Mpc
+        # for galaxy clusters
+        self.rmin = 5
+        self.rmax = 50
+        self.r_samp = 100
+        self.r_win = np.linspace(self.rmin, self.rmax, self.r_samp)
+
         model_fiducial = get_model(self.info_fiducial)
         model_fiducial.add_requirements({
             'omegam': None,
             'Pk_interpolator': {
-                'z': self.z_win,
+                'z': self.z_win_max,
                 'k_max': self.k_max_Boltzmann,
                 'nonlinear': False,
                 'vars_pairs': ([['delta_tot', 'delta_tot'],
@@ -209,7 +230,7 @@ class EuclidLikelihood(Likelihood):
                                 ['Weyl', 'Weyl']])
             },
             'comoving_radial_distance': {
-                'z': self.z_win
+                'z': self.z_win_max
             },
             'angular_diameter_distance': {
                 'z': self.z_win
@@ -224,6 +245,18 @@ class EuclidLikelihood(Likelihood):
             },
             'sigma8_z': {
                 'z': self.z_win
+            },
+            # For galaxy clusters
+            "sigma_R": {
+                "z": self.z_win,
+                "kmax": self.k_max_Boltzmann,
+                "R": self.r_win,
+                "vars_pairs": (
+                    [
+                        ["delta_tot", "delta_tot"],
+                        ["delta_nonu", "delta_nonu"]
+                    ]
+                )
             }
         })
 
@@ -236,10 +269,11 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology.cosmo_dic['Omk'] = \
             model_fiducial.provider.get_param(self.pnames['omk'])
         self.fiducial_cosmology.cosmo_dic['z_win'] = self.z_win
+        self.fiducial_cosmology.cosmo_dic['z_win_max'] = self.z_win_max
         self.fiducial_cosmology.cosmo_dic['k_win'] = self.k_win
         self.fiducial_cosmology.cosmo_dic['comov_dist'] = \
             model_fiducial.provider.get_comoving_radial_distance(
-            self.z_win),
+            self.z_win_max),
         self.fiducial_cosmology.cosmo_dic['angular_dist'] = \
             model_fiducial.provider.get_angular_diameter_distance(
             self.z_win),
@@ -269,6 +303,16 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology.cosmo_dic['sigma8'] = \
             model_fiducial.provider.get_sigma8_z(
             self.z_win)
+        # For galaxy clusters
+        self.fiducial_cosmology.cosmo_dic['r_win'] = self.r_win
+        self.fiducial_cosmology.cosmo_dic['R'] = \
+            model_fiducial.provider.get_sigma_R(('delta_tot', 'delta_tot'))[0]
+        self.fiducial_cosmology.cosmo_dic['sigmaR'] = \
+            model_fiducial.provider.get_sigma_R(('delta_tot', 'delta_tot'))[2]
+        self.fiducial_cosmology.cosmo_dic['sigmaR_cb'] = \
+            model_fiducial.provider.get_sigma_R(
+                ('delta_nonu', 'delta_nonu')
+        )[2]
         # In order to make the update_cosmo_dic method to work, we need to
         # specify also in this case the information on the GCspectro bins
         # and Photo bins
@@ -302,20 +346,29 @@ class EuclidLikelihood(Likelihood):
         requirements = \
             {'omegam': None,
              'Pk_interpolator':
-                {'z': self.z_win,
+                {'z': self.z_win_max,
                  'k_max': self.k_max_Boltzmann,
                  'nonlinear': self.use_NL,
                  'vars_pairs': ([['delta_tot', 'delta_tot'],
                                  ['delta_nonu', 'delta_nonu'],
                                  ['Weyl', 'Weyl']])},
-                'comoving_radial_distance': {'z': self.z_win},
+                'comoving_radial_distance': {'z': self.z_win_max},
                 'angular_diameter_distance': {'z': self.z_win},
                 'Hubble': {'z': self.z_win, 'units': 'km/s/Mpc'},
                 'sigma8_z': {'z': self.z_win},
-                'fsigma8': {'z': self.z_win, 'units': None}}
+                'fsigma8': {'z': self.z_win, 'units': None},
+                # For galaxy clusters
+                "sigma_R":
+                {"z": self.z_win,
+                 "kmax": self.k_max_Boltzmann,
+                 "R": self.r_win,
+                 "vars_pairs": ([["delta_tot", "delta_tot"],
+                                ["delta_nonu", "delta_nonu"]])}}
+        # CAMBdata is used only to retrieve the conformal time
+        # to compute z of CMB, explore if there is a better way.
         if self.solver == 'camb':
             derived = {'omegac': None, 'omnuh2': None, 'omeganu': None,
-                       'nnu': None}
+                       'nnu': None, 'Cl': {'pp': 4300}, 'CAMBdata': None}
             requirements = requirements | derived
 
         return requirements
@@ -335,14 +388,25 @@ class EuclidLikelihood(Likelihood):
         try:
             self.cosmo.cosmo_dic['NL_flag_phot_matter'] = \
                 self.NL_flag_phot_matter
+            self.cosmo.cosmo_dic['NL_flag_phot_bias'] = \
+                self.NL_flag_phot_bias
             self.cosmo.cosmo_dic['NL_flag_spectro'] = self.NL_flag_spectro
+            self.cosmo.cosmo_dic['IA_flag'] = self.IA_flag
+            self.cosmo.cosmo_dic['IR_resum'] = self.IR_resum
+            self.cosmo.cosmo_dic['NL_flag_phot_baryon'] = \
+                self.NL_flag_phot_baryon
+            self.cosmo.cosmo_dic['Baryon_redshift_model'] = \
+                self.Baryon_redshift_model
             self.cosmo.cosmo_dic['f_out_z_dep'] = self.f_out_z_dep
             self.cosmo.cosmo_dic['GCsp_z_err'] = self.GCsp_z_err
             self.cosmo.cosmo_dic['bias_model'] = self.bias_model
             self.cosmo.cosmo_dic['magbias_model'] = self.magbias_model
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
+            self.cosmo.cosmo_dic['use_Weyl'] = self.use_Weyl
+            self.cosmo.cosmo_dic['use_magnification_bias_spectro'] = \
+                self.use_magnification_bias_spectro
             self.cosmo.cosmo_dic['matrix_transform_phot'] = \
-                self.matrix_transform_phot
+                self.observables['selection']['matrix_transform_phot']
             self.cosmo.cosmo_dic['H0'] = self.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
@@ -379,8 +443,13 @@ class EuclidLikelihood(Likelihood):
                 self.cosmo.cosmo_dic['Omnu'] = \
                     self.provider.get_param('omeganu')
                 self.cosmo.cosmo_dic['nnu'] = self.provider.get_param('nnu')
+                self.cosmo.cosmo_dic['Cl'] = self.provider.get_Cl()
+                self.cosmo.cosmo_dic['CAMBdata'] = self.provider.get_CAMBdata()
+                self.cosmo.cosmo_dic['chistar'] = \
+                    self.cosmo.cosmo_dic['CAMBdata'].conformal_time(0) - \
+                    self.cosmo.cosmo_dic["CAMBdata"].tau_maxvis
             self.cosmo.cosmo_dic['comov_dist'] = \
-                self.provider.get_comoving_radial_distance(self.z_win)
+                self.provider.get_comoving_radial_distance(self.z_win_max)
             self.cosmo.cosmo_dic['angular_dist'] = \
                 self.provider.get_angular_diameter_distance(self.z_win)
             self.cosmo.cosmo_dic['H'] = self.provider.get_Hubble(self.z_win)
@@ -412,11 +481,20 @@ class EuclidLikelihood(Likelihood):
                     extrap_kmin=self.k_min_extrap,
                     extrap_kmax=self.k_max_extrap)
             self.cosmo.cosmo_dic['z_win'] = self.z_win
+            self.cosmo.cosmo_dic['z_win_max'] = self.z_win_max
             self.cosmo.cosmo_dic['k_win'] = self.k_win
             self.cosmo.cosmo_dic['sigma8'] = self.provider.get_sigma8_z(
                 self.cosmo.cosmo_dic['z_win'])
             self.cosmo.cosmo_dic['fsigma8'] = self.provider.get_fsigma8(
                 self.cosmo.cosmo_dic['z_win'])
+            # For galaxy clusters
+            self.cosmo.cosmo_dic['r_win'] = self.r_win
+            self.cosmo.cosmo_dic['R'] = \
+                self.provider.get_sigma_R(('delta_tot', 'delta_tot'))[0]
+            self.cosmo.cosmo_dic['sigmaR'] = \
+                self.provider.get_sigma_R(('delta_tot', 'delta_tot'))[2]
+            self.cosmo.cosmo_dic['sigmaR_cb'] = \
+                self.provider.get_sigma_R(('delta_nonu', 'delta_nonu'))[2]
             # Filter nuisance parameters for new dict
             new_keys = params_dic.keys() - self.cosmo.cosmo_dic.keys()
             only_nuisance_params = {your_key: params_dic[your_key]
@@ -427,22 +505,30 @@ class EuclidLikelihood(Likelihood):
         except (TypeError, AttributeError):
             self.cosmo.cosmo_dic['NL_flag_phot_matter'] = \
                 info['likelihood']['Euclid']['NL_flag_phot_matter']
+            self.cosmo.cosmo_dic['NL_flag_phot_bias'] = \
+                info['likelihood']['Euclid']['NL_flag_phot_bias']
             self.cosmo.cosmo_dic['NL_flag_spectro'] = \
                 info['likelihood']['Euclid']['NL_flag_spectro']
+            self.cosmo.cosmo_dic['IA_flag'] = \
+                info['likelihood']['Euclid']['IA_flag']
+            self.cosmo.cosmo_dic['IR_resum'] = \
+                info['likelihood']['Euclid']['IR_resum']
+            self.cosmo.cosmo_dic['NL_flag_phot_baryon'] = \
+                info['likelihood']['Euclid']['NL_flag_phot_baryon']
+            self.cosmo.cosmo_dic['Baryon_redshift_model'] = \
+                info['likelihood']['Euclid']['Baryon_redshift_model']
             self.cosmo.cosmo_dic['f_out_z_dep'] = \
                 info['likelihood']['Euclid']['f_out_z_dep']
             self.cosmo.cosmo_dic['GCsp_z_err'] = \
                 info['likelihood']['Euclid']['GCsp_z_err']
             self.cosmo.cosmo_dic['bias_model'] = self.bias_model
-            self.cosmo.cosmo_dic['add_phot_RSD'] = \
-                info['likelihood']['Euclid']['add_phot_RSD']
-            self.matrix_transform_phot = \
-                info['likelihood']['Euclid']['matrix_transform_phot']
-            self.cosmo.cosmo_dic['matrix_transform_phot'] = \
-                info['likelihood']['Euclid']['matrix_transform_phot']
             self.cosmo.cosmo_dic['magbias_model'] = self.magbias_model
+            self.cosmo.cosmo_dic['use_magnification_bias_spectro'] = \
+                self.use_magnification_bias_spectro
             self.cosmo.cosmo_dic['use_gamma_MG'] = \
                 info['likelihood']['Euclid']['use_gamma_MG']
+            self.cosmo.cosmo_dic['use_Weyl'] = \
+                info['likelihood']['Euclid']['use_Weyl']
             self.cosmo.cosmo_dic['H0'] = model.provider.get_param('H0')
             self.cosmo.cosmo_dic['H0_Mpc'] = \
                 self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
@@ -484,7 +570,7 @@ class EuclidLikelihood(Likelihood):
                 self.cosmo.cosmo_dic['gamma_MG'] = \
                     model.provider.get_param('gamma_MG')
             self.cosmo.cosmo_dic['comov_dist'] = \
-                model.provider.get_comoving_radial_distance(self.z_win)
+                model.provider.get_comoving_radial_distance(self.z_win_max)
             self.cosmo.cosmo_dic['angular_dist'] = \
                 model.provider.get_angular_diameter_distance(self.z_win)
             self.cosmo.cosmo_dic['H'] = model.provider.get_Hubble(self.z_win)
@@ -517,19 +603,38 @@ class EuclidLikelihood(Likelihood):
                     extrap_kmin=self.k_min_extrap,
                     extrap_kmax=self.k_max_extrap)
             self.cosmo.cosmo_dic['z_win'] = self.z_win
+            self.cosmo.cosmo_dic['z_win_max'] = self.z_win_max
             self.cosmo.cosmo_dic['k_win'] = self.k_win
             self.cosmo.cosmo_dic['sigma8'] = model.provider.get_sigma8_z(
                 self.cosmo.cosmo_dic['z_win'])
             self.cosmo.cosmo_dic['fsigma8'] = model.provider.get_fsigma8(
                 self.cosmo.cosmo_dic['z_win'])
+            # For galaxy clusters
+            self.cosmo.cosmo_dic['r_win'] = self.r_win
+            self.cosmo.cosmo_dic['R'] = \
+                model.provider.get_sigma_R(('delta_tot', 'delta_tot'))[0]
+            self.cosmo.cosmo_dic['sigmaR'] = \
+                model.provider.get_sigma_R(('delta_tot', 'delta_tot'))[2]
+            self.cosmo.cosmo_dic['sigmaR_cb'] = \
+                model.provider.get_sigma_R(('delta_nonu', 'delta_nonu'))[2]
             new_keys = params_dic.keys() - self.cosmo.cosmo_dic.keys()
             only_nuisance_params = {your_key: params_dic[your_key]
                                     for your_key in new_keys}
             self.cosmo.cosmo_dic['nuisance_parameters'].update(
                 **only_nuisance_params)
+            self.cosmo.cosmo_dic['Cl'] = model.provider.get_Cl()
             if 'observables_selection' in info['likelihood']['Euclid']:
                 self.observables_selection = \
                     info['likelihood']['Euclid']['observables_selection']
+                self.cosmo.cosmo_dic['add_phot_RSD'] = \
+                    self.observables_selection['add_phot_RSD']
+                self.matrix_transform_phot = \
+                    self.observables_selection['matrix_transform_phot']
+                self.cosmo.cosmo_dic['matrix_transform_phot'] = \
+                    self.matrix_transform_phot
+            if 'observables_specifications' in info['likelihood']['Euclid']:
+                self.observables_specifications = \
+                    info['likelihood']['Euclid']['observables_specifications']
             self.observables = \
                 observables_selection_specifications_checker(
                     info['likelihood']['Euclid']['observables_selection'],

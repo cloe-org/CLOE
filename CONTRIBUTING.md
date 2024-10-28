@@ -131,6 +131,8 @@ $ git reset FILE
 
 Finally, you can view the status of the staging area with the command `git status`. This command will list all files currently in the staging area. In addition, it will show untracked files (*i.e.* files that have been modified but not staged).
 
+⚠️ Be sure to only stage the files you intend to commit. For Jupyter notebooks be sure to clear all the cells before staging.
+
 ### Committing
 
 When you are ready to submit changes to files in the staging area to your local repository you can use the `git commit` command as follows:
@@ -140,6 +142,8 @@ $ git commit -m "Short description of the changes made"
 ```
 
 Make sure to provide a clear and concise description of the changes your are committing to the repository. You should make regular commits each of which constitutes a small number of changes as the repository can always be reset to a previous commit.
+
+⚠️ Do not commit any data files! This is bad practice and large files will clog up the commit history and bloat the repo. 
 
 ### Pushing to the Remote Repository
 

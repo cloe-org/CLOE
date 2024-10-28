@@ -5,11 +5,14 @@ Contains class to read external data.
 """
 
 import numpy as np
+import yaml
+import logging
 from astropy.io import fits, ascii
 from pathlib import Path
 from scipy import interpolate
 from scipy import integrate
-from cloe.auxiliary.logger import log_critical
+from euclidlib.photo._le3_pk_wl import angular_power_spectra
+from euclidlib.photo import mixing_matrices
 
 
 class ReaderError(Exception):
@@ -35,11 +38,11 @@ class Reader:
         """
         self.data = data
 
-        root_dir = Path(__file__).resolve().parents[2]
-        self.dat_dir_main = Path(root_dir, Path('data'),
+        self.root_dir = Path(__file__).resolve().parents[2]
+        self.dat_dir_main = Path(self.root_dir, Path('data'),
                                  Path(self.data['sample']))
         self.data_dict = {'GC-Spectro': None, 'GC-Phot': None, 'WL': None,
-                          'XC-Phot': None}
+                          'XC-Phot': None, 'CG': None}
 
         # Added dictionaries for n(z)
         # Both raw data and interpolated data
@@ -49,11 +52,16 @@ class Reader:
         self.nz_dict_GC_Phot_raw = {}
         self.numtomo_gcphot = {}
         self.numtomo_wl = {}
+        self.GC_spectro_scale_cuts = {}
         self.luminosity_ratio_interpolator = None
 
         # Added empty dict to fill in fiducial
         # cosmology data from Spectro OU-level3 files
         self.data_spectro_fiducial_cosmo = {}
+
+        # (ZS): Added empty dict to fill in
+        # fiducial cosmology data from Spec OU-level3 files
+        self.data_CG_fiducial_cosmo = {}
 
         return
 
@@ -179,14 +187,72 @@ class Reader:
                 self.luminosity_ratio['z'],
                 self.luminosity_ratio['luminosity'])
 
+    def read_GC_spectro_scale_cuts(self, config_folder='configs',
+                                   data_folder='Spectroscopic/data'):
+        r"""Reads the spectroscopic scale cuts and converts units.
+
+        Function to read the scale cuts specified in the configuration data.
+        The input is being read and saved as a dictionary within the
+        :obj:`Reader` class.
+        The units from the input file are converted from :math:`\frac{h}{Mpc}`
+        to :math:`\frac{1}{Mpc}` to be consistent with the input of the data
+        vectors. In the rest of the code :math:`\frac{1}{Mpc}` is used.
+
+        Parameters
+        ----------
+        config_folder: str
+            Sub-folder of :obj:`Reader.root_dir` which is the highest-level
+            folder of the likelihood code
+        data_folder: str
+            Sub_folder of :obj:`Reader.dat_dir_main` within which to find
+            the spectroscopic data
+
+        """
+
+        # get file name from data.yaml
+        fname_scale_cuts = self.data['spectro']['scale_cuts_fourier']
+
+        # construct path to the scale cut file
+        path = str(self.root_dir / config_folder / fname_scale_cuts)
+
+        with open(path, 'r') as file:
+            GC_sp_scale_cuts = yaml.load(file.read(), Loader=yaml.FullLoader)
+
+        # read the fiducial cosmological parameters
+        self.read_GC_spectro()
+        h = self.data_spectro_fiducial_cosmo['H0'] / 100.0
+
+        # create the scale cuts dictionary
+        redshifts = self.data_dict['GC-Spectro'].keys()
+        GC_sp_scale_cuts_h = GC_sp_scale_cuts
+
+        for redshift_index, redshift in enumerate(redshifts):
+            k_pk = self.data_dict['GC-Spectro'][f'{redshift}']['k_pk']
+            multipoles = (
+                [key for key in
+                    self.data_dict['GC-Spectro'][f'{redshift}'].keys()
+                    if key.startswith('pk')])
+            for multipole in multipoles:
+                # conversion from h/Mpc to 1/Mpc units (multiply by h)
+                (GC_sp_scale_cuts_h['bins'][f'n{redshift_index+1}']
+                    [f'n{redshift_index+1}']['multipoles'][int(multipole[2:])]
+                    ['k_range'][0]) = [i * h for i in
+                                       (GC_sp_scale_cuts['bins']
+                                        [f'n{redshift_index+1}']
+                                        [f'n{redshift_index+1}']
+                                        ['multipoles'][int(multipole[2:])]
+                                        ['k_range'][0])]
+
+        self.GC_spectro_scale_cuts = GC_sp_scale_cuts_h
+
+        return
+
     def read_GC_spectro(self, file_dest='Spectroscopic/data'):
         """Reads in the spectroscopic data.
 
         Function to read OU-LE3 spectroscopic galaxy clustering files, based
         on location provided to Reader class. Adds contents to the data
-        dictionary (:obj:`Reader.data_dict`). Note: at the moment it is
-        assumed that the Fourier space data is in Mpc/h units while the
-        configuration space data is in Mpc units.
+        dictionary (:obj:`Reader.data_dict`).
 
         Parameters
         ----------
@@ -241,7 +307,8 @@ class Reader:
             fid_cosmo_file.close()
 
         except ReaderError:
-            log_critical('There was an error when reading the fiducial '
+            log = logging.getLogger('CLOE')
+            log.critical('There was an error when reading the fiducial '
                          'data from OU-level3 files in read_GC_spectro')
 
         if self.data['spectro']['Fourier']:
@@ -325,6 +392,115 @@ class Reader:
         self.data_dict['GC-Spectro'] = GC_spectro_dict
         return
 
+    def read_GC_spectro_mixing_matrix(self, file_dest='Spectroscopic/data'):
+        """Reads in the spectroscopic mixing matrix.
+
+        Function to read the OU-LE3 spectroscopic mixing matrices, based
+        on location provided to Reader class. Adds contents to the data
+        dictionary (:obj:`Reader.data_dict`).
+
+        Parameters
+        ----------
+        file_dest: str
+            Sub-folder of :obj:`self.data_subdirectory` within which to find
+            spectroscopic data
+        """
+        root = self.data['spectro']['root_mixing_matrix']
+        full_path = Path(self.dat_dir_main, file_dest, root)
+        fits_file = fits.open(full_path)
+
+        fid_h = self.data_spectro_fiducial_cosmo['H0'] / 100.0
+        kin0 = fits_file['BINS_INPUT'].data['kp0'] * fid_h
+        kin2 = fits_file['BINS_INPUT'].data['kp2'] * fid_h
+        kin4 = fits_file['BINS_INPUT'].data['kp4'] * fid_h
+        kout = fits_file['BINS_OUTPUT'].data['k'] * fid_h
+        mixing_matrix = fits_file['MIXING_MATRIX'].data
+
+        mixing_matrix_dict = {}
+        mixing_matrix_dict['kout'] = kout
+        mixing_matrix_dict['kin0'] = kin0
+        mixing_matrix_dict['kin2'] = kin2
+        mixing_matrix_dict['kin4'] = kin4
+        for i in [0, 2, 4]:
+            for j in [0, 2, 4]:
+                mm = f'W{i}{j}'
+                mixing_matrix_dict[mm] = mixing_matrix[mm]
+
+        return mixing_matrix_dict
+
+    def read_CG(self, file_dest='Clusters/'):
+        """Read CG
+
+        Function to read OU-LE3 clusters of galaxies files, based
+        on location provided to Reader class. Adds contents to the data
+        dictionary (Reader.data_dict).
+
+        Parameters
+        ----------
+        file_dest: str
+            Sub-folder of self.data_subdirectory within which to find
+            clusters data.
+        file_names: str
+            General structure of file names. Note: must contain 'z%s' to
+            enable iteration over redshifts.
+        zstr: list
+            List of strings denoting clusters redshift bins.
+        """
+        file_names_CC = self.data['CG']['file_names_CC']
+        file_cov_names_CC = self.data['CG']['file_cov_names_CC']
+        file_names_MoR = self.data['CG']['file_names_MoR']
+        file_cov_names_MoR = self.data['CG']['file_cov_names_MoR']
+        file_names_xi2 = self.data['CG']['file_names_xi2']
+        file_cov_names_xi2 = self.data['CG']['file_cov_names_xi2']
+
+        cur_fname = file_names_CC
+        full_path = Path(self.dat_dir_main, file_dest, cur_fname)
+        cur_cov_fname = file_cov_names_CC
+        full_cov_path = Path(self.dat_dir_main, file_dest, cur_cov_fname)
+        CG_dict = np.loadtxt(Path(full_path))
+        CG_dict_cov = np.loadtxt(Path(full_cov_path))
+        self.data_dict['CG_CC'] = CG_dict
+        self.data_dict['CG_cov_CC'] = CG_dict_cov
+
+        cur_fname = file_names_MoR
+        full_path = Path(self.dat_dir_main, file_dest, cur_fname)
+        cur_cov_fname = file_cov_names_MoR
+        full_cov_path = Path(self.dat_dir_main, file_dest, cur_cov_fname)
+        CG_dict = np.loadtxt(Path(full_path))
+        CG_dict_cov = np.loadtxt(Path(full_cov_path))
+        self.data_dict['CG_MoR'] = CG_dict
+        self.data_dict['CG_cov_MoR'] = CG_dict_cov
+
+        cur_fname = file_names_xi2
+        full_path = Path(self.dat_dir_main, file_dest, cur_fname)
+        cur_cov_fname = file_cov_names_xi2
+        full_cov_path = Path(self.dat_dir_main, file_dest, cur_cov_fname)
+        CG_dict = np.load(Path(full_path))
+        CG_dict_cov = np.load(Path(full_cov_path))
+        self.data_dict['CG_xi2'] = CG_dict
+        self.data_dict['CG_cov_xi2'] = CG_dict_cov
+
+        return
+
+    def read_phot_mixing_matrix(self, file_dest='Photometric/data'):
+        """Reads in the photometric mixing matrix.
+
+        Function to read the OU-LE3 photometric mixing matrices, based
+        on location provided to Reader class. Adds contents to the data
+        dictionary (:obj:`Reader.data_dict`).
+
+        Parameters
+        ----------
+        file_dest: str
+            Sub-folder of :obj:`self.data_subdirectory` within which to find
+            photometric data
+        """
+        root = self.data['photo']['root_mixing_matrix']
+        full_path = Path(self.dat_dir_main, file_dest, root)
+        mixing_matrix = mixing_matrices(full_path)
+
+        return mixing_matrix
+
     def read_phot(self, file_dest='Photometric/data'):
         """Reads in the photometric data.
 
@@ -338,6 +514,7 @@ class Reader:
             Sub-folder of :obj:`self.data_subdirectory` within which to find
             photometric data
         """
+
         root_GC = self.data['photo']['root_GC']
         root_WL = self.data['photo']['root_WL']
         root_XC = self.data['photo']['root_XC']
@@ -363,148 +540,188 @@ class Reader:
         else:
             scale_var_str = 'thetas'
 
-        GC_phot_dict = {}
-        WL_dict = {}
-        XC_phot_dict = {}
-
-        full_path = Path(self.dat_dir_main, file_dest)
-
-        GC_file = ascii.read(
-            Path(full_path, root_GC.format(IA_model)),
-            encoding='utf-8',
-        )
-        WL_file = ascii.read(
-            Path(full_path, root_WL.format(IA_model)),
-            encoding='utf-8',
-        )
-        XC_file = ascii.read(
-            Path(full_path, root_XC.format(IA_model)),
-            encoding='utf-8',
-        )
-
-        header_GC = GC_file.colnames
-        for i in range(len(header_GC)):
-            GC_phot_dict[header_GC[i]] = GC_file[header_GC[i]].data
-
-        header_WL = WL_file.colnames
-        for i in range(len(header_WL)):
-            WL_dict[header_WL[i]] = WL_file[header_WL[i]].data
-
-        header_XC = XC_file.colnames
-        for i in range(len(header_XC)):
-            XC_phot_dict[header_XC[i]] = XC_file[header_XC[i]].data
-
         self.numtomo_wl = len(self.nz_dict_WL)
         self.numtomo_gcphot = len(self.nz_dict_GC_Phot)
         self.num_bins_wl = int(self.numtomo_wl * (self.numtomo_wl + 1) / 2)
         self.num_bins_xcphot = self.numtomo_wl * self.numtomo_gcphot
         self.num_bins_gcphot = int(self.numtomo_gcphot *
                                    (self.numtomo_gcphot + 1) / 2)
+
+        GC_phot_dict = {}
+        WL_dict = {}
+        XC_phot_dict = {}
+
+        full_path = Path(self.dat_dir_main, file_dest)
+
+        if self.data['photo']['photo_data'] == 'standard':
+
+            GC_file = ascii.read(
+                Path(full_path, root_GC.format(IA_model)),
+                encoding='utf-8',
+            )
+            WL_file = ascii.read(
+                Path(full_path, root_WL.format(IA_model)),
+                encoding='utf-8',
+            )
+            XC_file = ascii.read(
+                Path(full_path, root_XC.format(IA_model)),
+                encoding='utf-8',
+            )
+
+            header_GC = GC_file.colnames
+            for i in range(len(header_GC)):
+                GC_phot_dict[header_GC[i]] = GC_file[header_GC[i]].data
+
+            header_WL = WL_file.colnames
+            for i in range(len(header_WL)):
+                WL_dict[header_WL[i]] = WL_file[header_WL[i]].data
+
+            header_XC = XC_file.colnames
+            for i in range(len(header_XC)):
+                XC_phot_dict[header_XC[i]] = XC_file[header_XC[i]].data
+
+            del (GC_file)
+            del (WL_file)
+            del (XC_file)
+
+        elif self.data['photo']['photo_data'] == 'LE3':
+
+            root_fits = self.data['photo']['root_fits'].format(
+                self.numtomo_wl)
+
+            self.loaded_cls = angular_power_spectra(
+                path=f'{full_path}/{root_fits}',
+                include=None,
+                exclude=None,
+            )
+
+            for zi in range(self.numtomo_gcphot):
+                for zj in range(self.numtomo_wl):
+                    XC_phot_dict[f'P{zi + 1}-E{zj + 1}'] = \
+                        self.loaded_cls[('P', 'G_E', zi, zj)]['CL'].astype(
+                            'float64')
+
+            for zi in range(self.numtomo_wl):
+                for zj in range(zi, self.numtomo_wl):
+                    WL_dict[f'E{zi + 1}-E{zj + 1}'] = \
+                        self.loaded_cls[('G_E', 'G_E', zi, zj)]['CL'].astype(
+                            'float64')
+
+            for zi in range(self.numtomo_gcphot):
+                for zj in range(zi, self.numtomo_gcphot):
+                    GC_phot_dict[f'P{zi + 1}-P{zj + 1}'] = \
+                        self.loaded_cls[('P', 'P', zi, zj)]['CL'].astype(
+                            'float64')
+
+            WL_dict['ells'] = \
+                self.loaded_cls[('G_E', 'G_E', 5, 5)]['L'].astype('float64')
+            XC_phot_dict['ells'] = \
+                self.loaded_cls[('P', 'G_E', 5, 5)]['L'].astype('float64')
+            GC_phot_dict['ells'] = \
+                self.loaded_cls[('P', 'P', 5, 5)]['L'].astype('float64')
+
+        else:
+            raise ValueError(
+                'photo_data must be either "standard" or "LE3"')
+
         self.num_scales_wl = len(WL_dict[scale_var_str])
         self.num_scales_xcphot = len(XC_phot_dict[scale_var_str])
         self.num_scales_gcphot = len(GC_phot_dict[scale_var_str])
 
-        tx2_cov_str = self.data['photo']['cov_3x2pt'].format(self.data[
-            'photo']['cov_model'])
-        tx2_cov = np.load(Path(full_path, tx2_cov_str))
         self.data_dict['WL'] = WL_dict
         self.data_dict['XC-Phot'] = XC_phot_dict
         self.data_dict['GC-Phot'] = GC_phot_dict
-        self.data_dict['3x2pt_cov'] = tx2_cov
 
-        del (GC_file)
-        del (WL_file)
-        del (XC_file)
+        tx2_cov_str = self.data['photo']['cov_3x2pt'].format(self.data[
+            'photo']['cov_model'])
+        tx2_cov = np.load(Path(full_path, tx2_cov_str))['arr_0']
+        self.data_dict['3x2pt_cov'] = tx2_cov
         return
 
-    def _unpack_3x2pt_cov(self, tx2_cov):
-        """Unpacks 3x2pt covariance matrix.
+    def read_cmbx(self, file_dest='cmbx'):
+        """Read Phot
 
-        Unpacks the full 3x2pt covariance matrix and reshapes it in order to
-        have the different probes as the outermost variable, the
-        tomographic bin combination as the intermediate variable, and the
-        multipole as innermost variable.
+        Function to read CMB lensing files, based on
+        location provided to Reader class. Adds contents to
+        the data dictionary (Reader.data_dict).
 
         Parameters
         ----------
-        tx2_cov: numpy.ndarray
-            2-dimensional array containing the 3x2pt covariance matrix
-
-        Returns
-        -------
-        3x2pt covariance: numpy.ndarray
-            2-dimensional array containing the reshaped 3x2pt covariance
-            matrix
+        file_dest: str
+            Sub-folder of self.data_subdirectory within which to find
+            the CMB lensing data.
         """
-        nbins_wl = self.num_bins_wl
-        nbins_xc = self.num_bins_xcphot
-        nbins_gc = self.num_bins_gcphot
-        nbins_tot = nbins_wl + nbins_xc + nbins_gc
 
-        wl_side = nbins_wl * self.num_scales_wl
-        xc_side = nbins_xc * self.num_scales_xcphot
-        gc_side = nbins_gc * self.num_scales_gcphot
+        root_dir = Path(__file__).resolve().parents[2]
+        cmbx_dir = Path(self.dat_dir_main, file_dest)
 
-        new_tx2_cov = np.zeros((tx2_cov.shape[0], tx2_cov.shape[1]))
+        if 'cmbx' not in self.data:
+            self.data['cmbx'] = {'root_CMBlens': 'Cls_kCMB.dat',
+                                 'root_CMBlensxWL': 'Cls_kCMBxWL.dat',
+                                 'root_CMBlensxGC': 'Cls_kCMBxGC.dat',
+                                 'root_CMBisw': 'Cls_{:s}_ISWxGC.dat',
+                                 'ISW_model': 'zNLA',
+                                 'cov_7x2pt': 'Cov_7x2pt_WL_GC_CMBX.npy'}
+        else:
+            defaults = {
+                'root_CMBlens': 'Cls_kCMB.dat',
+                'root_CMBlensxWL': 'Cls_kCMBxWL.dat',
+                'root_CMBlensxGC': 'Cls_kCMBxGC.dat',
+                'root_CMBisw': 'Cls_{:s}_ISWxGC.dat',
+                'ISW_model': 'zNLA',
+                'cov_7x2pt': 'Cov_7x2pt_WL_GC_CMBX.npy'
+            }
 
-        for i in range(nbins_wl):
-            cur_i = int(i * self.num_scales_wl)
-            next_i = int((i + 1) * self.num_scales_wl)
-            for j in range(nbins_wl):
-                cur_j = int(j * self.num_scales_wl)
-                next_j = int((j + 1) * self.num_scales_wl)
-                new_tx2_cov[cur_i:next_i, cur_j:next_j] = \
-                    tx2_cov[i::nbins_tot, j::nbins_tot]
-            for j in range(nbins_xc):
-                cur_j = int(wl_side + j * self.num_scales_xcphot)
-                next_j = int(wl_side + (j + 1) * self.num_scales_xcphot)
-                new_tx2_cov[cur_i:next_i, cur_j:next_j] = \
-                    tx2_cov[i::nbins_tot, (nbins_wl + j)::nbins_tot]
-            for j in range(nbins_gc):
-                cur_j = int(wl_side + xc_side + j * self.num_scales_gcphot)
-                next_j = int(wl_side + xc_side +
-                             (j + 1) * self.num_scales_gcphot)
-                new_tx2_cov[cur_i:next_i, cur_j:next_j] = \
-                    tx2_cov[i::nbins_tot,
-                            (nbins_wl + nbins_xc + j)::nbins_tot]
+            self.data.setdefault('cmbx', {}).update(
+                {k: v for k, v in defaults.items()
+                 if k not in self.data['cmbx']})
 
-        for i in range(nbins_xc):
-            cur_i = int(wl_side + i * self.num_scales_xcphot)
-            next_i = int(wl_side + (i + 1) * self.num_scales_xcphot)
-            for j in range(nbins_xc):
-                cur_j = int(wl_side + j * self.num_scales_xcphot)
-                next_j = int(wl_side + (j + 1) * self.num_scales_xcphot)
-                new_tx2_cov[cur_i:next_i, cur_j:next_j] = \
-                    tx2_cov[(nbins_wl + i)::nbins_tot,
-                            (nbins_wl + j)::nbins_tot]
-            for j in range(nbins_gc):
-                cur_j = int(wl_side + xc_side + j * self.num_scales_gcphot)
-                next_j = int(wl_side + xc_side +
-                             (j + 1) * self.num_scales_gcphot)
-                new_tx2_cov[cur_i:next_i, cur_j:next_j] = \
-                    tx2_cov[(nbins_wl + i)::nbins_tot,
-                            (nbins_wl + nbins_xc + j)::nbins_tot]
+        KK_file = ascii.read(
+            Path(cmbx_dir, self.data['cmbx']['root_CMBlens']),
+            encoding='utf-8',
+        )
 
-        for i in range(nbins_gc):
-            cur_i = int(wl_side + xc_side + i * self.num_scales_gcphot)
-            next_i = int(wl_side + xc_side + (i + 1) * self.num_scales_gcphot)
-            for j in range(nbins_gc):
-                cur_j = int(wl_side + xc_side + j * self.num_scales_gcphot)
-                next_j = int(wl_side + xc_side +
-                             (j + 1) * self.num_scales_gcphot)
-                new_tx2_cov[cur_i:next_i, cur_j:next_j] = \
-                    tx2_cov[(nbins_wl + nbins_xc + i)::nbins_tot,
-                            (nbins_wl + nbins_xc + j)::nbins_tot]
+        KWL_file = ascii.read(
+            Path(cmbx_dir, self.data['cmbx']['root_CMBlensxWL']),
+            encoding='utf-8',
+        )
 
-        new_tx2_cov[wl_side:(wl_side + xc_side), :wl_side] = \
-            new_tx2_cov[:wl_side, wl_side:(wl_side + xc_side)].T
-        new_tx2_cov[(wl_side + xc_side):(wl_side + xc_side + gc_side),
-                    :wl_side] = \
-            new_tx2_cov[:wl_side,
-                        (wl_side + xc_side):(wl_side + xc_side + gc_side)].T
-        new_tx2_cov[(wl_side + xc_side):(wl_side + xc_side + gc_side),
-                    wl_side:(wl_side + xc_side)] = \
-            new_tx2_cov[wl_side:(wl_side + xc_side),
-                        (wl_side + xc_side):(wl_side + xc_side + gc_side)].T
+        KGC_file = ascii.read(
+            Path(cmbx_dir, self.data['cmbx']['root_CMBlensxGC']),
+            encoding='utf-8',
+        )
 
-        return new_tx2_cov
+        ISWxGC_file = ascii.read(
+            Path(cmbx_dir, self.data['cmbx']['root_CMBisw'].format(
+                self.data['cmbx']['ISW_model'])),
+            encoding='utf-8',
+        )
+
+        kCMB_dict = {}
+        kCMBxWL_dict = {}
+        kCMBxGC_dict = {}
+        ISWxGC_dict = {}
+
+        for dico, datafile in zip(
+                [kCMB_dict, kCMBxWL_dict, kCMBxGC_dict, ISWxGC_dict],
+                [KK_file, KWL_file, KGC_file, ISWxGC_file]
+        ):
+            header = datafile.colnames
+            for i in range(len(header)):
+                dico[header[i]] = datafile[header[i]].data
+
+        self.data_dict['kCMB'] = kCMB_dict
+        self.data_dict['kCMBxWL'] = kCMBxWL_dict
+        self.data_dict['kCMBxGC'] = kCMBxGC_dict
+        self.data_dict['ISWxGC'] = ISWxGC_dict
+
+        cov_7x2_str = self.data['cmbx']['cov_7x2pt']
+        cov_7x2 = np.load(Path(cmbx_dir, cov_7x2_str))
+        self.data_dict['7x2pt_cov'] = cov_7x2
+
+        del (KK_file)
+        del (KWL_file)
+        del (KGC_file)
+        del (ISWxGC_file)
+
+        return

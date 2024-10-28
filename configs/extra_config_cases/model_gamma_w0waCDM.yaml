@@ -9,5 +9,6 @@ user_models:
   nuisance_nz: nuisance_nz.yaml
   nuisance_purity: nuisance_purity.yaml
   nuisance_shear_calibration: nuisance_shear_calibration.yaml
+  nonlinearities: nonlinearities.yaml
 user_options:
   overwrite: true

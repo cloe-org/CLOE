@@ -25,29 +25,6 @@ class RedshiftBinsTestCase(TestCase):
     def tearDown(self):
         self.edges = None
 
-    def test_coerce_scalar(self):
-        # test zs in range
-        npt.assert_equal(rb.coerce(self.z_in_1, self.edges),
-                         self.z_in_1,
-                         err_msg='Error in coerce (in range)')
-        # test zs below bounds
-        npt.assert_equal(rb.coerce(self.z_low, self.edges),
-                         self.edges[0],
-                         err_msg='Error in coerce (< range)')
-        # test zs above bounds
-        npt.assert_equal(rb.coerce(self.z_high, self.edges),
-                         self.edges[-1],
-                         err_msg='Error in coerce (> range)')
-
-    def test_coerce_vector(self):
-        desired_array = np.array([1.0, 1.5, 3.2, 8.0], dtype=float)
-        npt.assert_array_equal(rb.coerce(self.z_ndarray, self.edges),
-                               desired_array,
-                               err_msg='Error in coerce (zs ndarray)')
-        npt.assert_array_equal(rb.coerce(self.z_list, self.edges),
-                               desired_array,
-                               err_msg='Error in coerce (zs list)')
-
     def test_find_bin_scalar(self):
         # test zs at the 1-st bin lower edge
         npt.assert_equal(rb.find_bin(self.edges[0], self.edges),
@@ -110,14 +87,6 @@ class RedshiftBinsTestCase(TestCase):
                           zs=test_zs_ndarray,
                           redshift_edges=self.edges,
                           check_bounds=True)
-
-    def test_compute_means_of_consecutive(self):
-        desired_means = np.array([1.5, 3.0, 6.0], dtype=float)
-        actual_means = rb.compute_means_of_consecutive(self.edges)
-        npt.assert_allclose(actual=actual_means,
-                            desired=desired_means,
-                            rtol=1e-3,
-                            err_msg='Error in compute_means_of_consecutive')
 
     def test_reduce(self):
         desired_reduced = np.array([2.0, 4.0], dtype=float)

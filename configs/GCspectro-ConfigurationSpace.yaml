@@ -1,0 +1,52 @@
+# This yaml file contains the user specifications 
+# about the scales and redshift/tomographic bins 
+# of the Euclid data to include 
+# in the likelihood analysis.
+# 
+# Probe: GCspectro auto-correlation 
+# Statistics: Legendre multipole correlation function 
+#
+# GCspectro: Number density fluctuations of the spectroscopic galaxy sample 
+# in redshift space
+# 
+# Note: For a given redshift bin, the range of scales can be concatenated as
+# for example
+# r_range: [[0.01, 0.2], [0.3, 0.5]]
+# To exclude all scales, an empty list can be provided.
+bins:
+  n1: 
+    n1:
+      multipoles:
+        0:
+          r_range: [[1, 200]]
+        2: 
+          r_range: [[1, 200]]
+        4:
+          r_range: [[1, 200]]
+  n2: 
+    n2:
+      multipoles:
+        0:
+          r_range: [[1, 200]]
+        2:
+          r_range: [[1, 200]]
+        4:
+          r_range: [[1, 200]]
+  n3: 
+    n3: 
+      multipoles:
+        0:
+          r_range: [[1, 200]]
+        2:
+          r_range: [[1, 200]]
+        4:
+          r_range: [[1, 200]]
+  n4: 
+    n4:
+      multipoles:
+        0:
+          r_range: [[1, 200]]
+        2:
+          r_range: [[1, 200]]
+        4:
+          r_range: [[1, 200]]

@@ -224,31 +224,74 @@ def update_cobaya_dict_with_halofit_version(cobaya_dict):
     """
 
     NL_flag = cobaya_dict['likelihood']['Euclid']['NL_flag_phot_matter']
-    set_halofit_version(cobaya_dict, NL_flag)
+    Baryon_flag = cobaya_dict['likelihood']['Euclid']['NL_flag_phot_baryon']
+    set_halofit_version(cobaya_dict, NL_flag, Baryon_flag)
 
 
-def set_halofit_version(cobaya_dict: dict, NL_flag: int):
-    """Sets the Halofit version of a Cobaya dictionary according to a flag.
+def set_halofit_version(cobaya_dict: dict, NL_flag: int, Baryon_flag: int):
+    r"""Sets the Halofit version of a cobaya dictionary according to two flags
 
-        We note that despite the name, this flag also considers non-Halofit
-        corrections to the nonlinear matter power spectrum, such as HMCODE.
+    Selection is done via the conversion of the nonlinear and baryonic feedback
+    flags into the overall cobaya_flag.
 
-    | The flag/Halofit relation is as follows:
-    - NL_flag=0: not set (no request for Halofit to the Boltzman solver)
-
-    - NL_flag=1: takahashi \
+    | The flag/Halofit relation depends on the combined cobaya_flag
+    | cobaya_flag=0: not set (no request for Halofit to the Boltzman solver)
+    | cobaya_flag=1: takahashi \
         (Ref: https://arxiv.org/abs/1208.2701)
-
-    - NL_flag=2: mead2016 \
+    | cobaya_flag=2: mead2016 \
         (Ref: https://arxiv.org/abs/1602.02154)
-
-    - NL_flag=3: mead2020 \
+    | cobaya_flag=3: mead2020 \
+        (Ref: https://arxiv.org/abs/2009.01858)
+    | cobaya_flag=4: mead2020_feedback \
         (Ref: https://arxiv.org/abs/2009.01858)
 
-    - NL_flag=4: mead2020_feedback \
-        (Ref: https://arxiv.org/abs/2009.01858)
+    This flag is determined from the following table
 
-    - NL_flag>4: mead2020 (current default version)
+    +--------------------+-----+-----+-----+-----+-----+
+    | NL_flag \ Baryon_flag |  0  |  1  |  2  |  3  |  4  |
+    +--------------------+-----+-----+-----+-----+-----+
+    |          0         |  0  |  0  |  0  |  0  |  0  |
+    +--------------------+-----+-----+-----+-----+-----+
+    |          1         |  1  |  1  |  1  |  1  |  1  |
+    +--------------------+-----+-----+-----+-----+-----+
+    |          2         |  2  |  2  |  4  |  2  |  2  |
+    +--------------------+-----+-----+-----+-----+-----+
+    |          3         |  3  |  2  |  4  |  3  |  3  |
+    +--------------------+-----+-----+-----+-----+-----+
+    |          4         |  3  |  2  |  4  |  3  |  3  |
+    +--------------------+-----+-----+-----+-----+-----+
+    |          5         |  3  |  2  |  4  |  3  |  3  |
+    +--------------------+-----+-----+-----+-----+-----+
+
+    A few additional details:
+
+    When NL_flag=0 nothing is requested from cobaya, as we treat
+    everything with linear theory.
+
+    For halofit (NL_flag=1) we always request halofit (cobaya_flag=1) from
+    cobaya, since that is currently not available externally.
+
+    In all other cases, the priority model to get from cobaya depends on which
+    baryonic feedback model is requested, so e.g. if mead2020_feedback is
+    requested by choosing Baryon_flag=2, we always get that from cobaya
+    (cobaya_flag=4).
+
+    When a matter power spectrum emulator is chosen we always request Mead2020
+    from cobaya for extrapolation (unless we require a different baryonic
+    feedback model). When emulators are selected we always request the same
+    options from cobaya, which is the reason why the two last rows are the same
+    (for EE2 and Bacco as matter models), as are the two last columns (for
+    BCemu and Bacco baryons).
+
+    Finally, note that this function only controls what is requested from
+    cobaya, as the full model used is then built in the nonlinear module based
+    on what the user requested, using the matter power spectrum provided by
+    cobaya as one of its components. For example, while we always request
+    halofit from cobaya when we have halofit as the matter model, the correct
+    baryonic feedback model is then obtained inside the nonlinear module. In
+    addition, when two different versions of HMcode are selected, the matter
+    power spectrum is always calculated inside the nonlinear module, while the
+    baryon correction is taken from cobaya.
 
     Parameters
     ----------
@@ -256,7 +299,27 @@ def set_halofit_version(cobaya_dict: dict, NL_flag: int):
         The Cobaya dictionary
     NL_flag: int
         The nonlinear flag
+    Baryon_flag: int
+        The baryonic feedback model flag
     """
+
+    if (NL_flag == 0 and Baryon_flag > 0):
+        log_warning("You selected a non-zero NL_flag_phot_baryon "
+                    "value, while selecting NL_flag_phot_matter = 0. Selected "
+                    "baryonic feedback model will be ignored and every "
+                    "prediciton will be linear.")
+
+    # Matrix determining value to pass to switcher depending on NL and Bar flag
+    # Rows correpond to different NL_flag (0 to 5), columns to different
+    # Baryon_flag (0 to 4). Assumed to give 0 whenever NL_flag=0
+    NL_Bar_matrix = [[0, 0, 0, 0, 0],
+                     [1, 1, 1, 1, 1],
+                     [2, 2, 4, 2, 2],
+                     [3, 2, 4, 3, 3],
+                     [3, 2, 4, 3, 3],
+                     [3, 2, 4, 3, 3]]
+
+    cobaya_flag = NL_Bar_matrix[NL_flag][Baryon_flag]
 
     def switch_halofit_version_in_camb(flag: int) -> str:
         switcher = {
@@ -279,23 +342,27 @@ def set_halofit_version(cobaya_dict: dict, NL_flag: int):
                              'NL_flag_phot_matter when classy is selected '
                              'are 1 (Halofit) and 2 (HMCode2016)')
 
-    if NL_flag > 0:
+    if cobaya_flag > 0:
         solver = cobaya_dict['likelihood']['Euclid']['solver']
         if solver == 'camb':
-            cobaya_dict['theory']['camb']['extra_args'][
-                'halofit_version'] = switch_halofit_version_in_camb(NL_flag)
+            cobaya_dict['theory']['camb']['extra_args']['halofit_version'] = \
+                switch_halofit_version_in_camb(cobaya_flag)
         elif solver == 'classy':
-            cobaya_dict['theory']['classy']['extra_args'][
-                'non_linear'] = switch_halofit_version_in_classy(NL_flag)
+            cobaya_dict['theory']['classy']['extra_args']['non_linear'] = \
+                switch_halofit_version_in_classy(cobaya_flag)
 
     params = cobaya_dict['params']
-    if NL_flag != 2 and any([par in params.keys() for par in
-                             ['HMCode_A_baryon', 'HMCode_eta_baryon']]):
+    if Baryon_flag != 1 and any([par in params.keys() for par in
+                                 ['HMCode_A_baryon',
+                                  'HMCode_eta_baryon']]) and \
+        (params['HMCode_A_baryon'] != 3.13 or
+         params['HMCode_eta_baryon'] != 0.603):
+        params['HMCode_A_baryon'] = 3.13
+        params['HMCode_eta_baryon'] = 0.603
         log_warning('Parameters [HMCode_A_baryon, HMCode_eta_baryon] are '
-                    'used only for the Mead2016 case (NL_flag = 2).')
-    elif NL_flag != 4 and 'HMCode_logT_AGN' in params.keys():
-        log_warning('Parameter HMCode_logT_AGN is used only '
-                    'for the Mead2020_feedback case (NL_flag = 4).')
+                    'used only for the Mead2016 baryon feedback model '
+                    '(Baryon_flag=1) but have been set to non-default values. '
+                    'Setting them to the default values for matter.')
 
 
 def get_params_dict_without_cosmo_params(params_dict):
@@ -346,52 +413,3 @@ def get_params_dict_without_cosmo_params(params_dict):
         new_params_dict.pop(HMCode_param, None)
 
     return new_params_dict
-
-
-def generate_params_yaml(models=None):
-    r"""Generates :obj:`params.yaml` from a model list.
-
-    Cobaya requests parameters defined in the theory
-    code (i.e: CAMB/CLASS and the :math:`\Lambda` CDM
-    parameters) and also parameters defined by the
-    likelihood (i.e: CLOE and nuisance parameters).
-
-    When invoking Cobaya with CLOE, CLOE will
-    understand cosmology parameters but not any
-    extra parameter (such as nuisance or flags)
-    unless they are defined either in the :obj:`cobaya_interface.py`
-    or in a :obj:`params.yaml` file.
-
-    This function creates the :obj:`params.yaml` file so that
-    Cobaya understands that CLOE requests some
-    extra parameters.
-
-    Parameters
-    ----------
-    models: list of str
-        Strings corresponding to a model.
-        Possible strings: 'nuisance_bias', 'nuisance_ia', 'nuisance_nz',
-        'nuisance_magnification_bias', 'nuisance_shear_calibration',
-        'nonlinearities'
-
-    Notes
-    -----
-    This function is deprecated.
-    """
-
-    models_path = get_default_models_path()
-
-    if models is None:
-        models = ['nuisance_bias', 'nuisance_ia', 'nuisance_nz',
-                  'nuisance_magnification_bias', 'nuisance_shear_calibration',
-                  'nonlinearities']
-    likelihood_params = {}
-
-    for model in models:
-        model_path = str(models_path / model) + '.yaml'
-        model_params = yaml_handler.yaml_read(model_path)
-        likelihood_params.update(model_params)
-
-    params_path = get_default_params_yaml_path()
-    yaml_handler.yaml_write(params_path, likelihood_params, True)
-    log_info('{} written'.format(params_path))

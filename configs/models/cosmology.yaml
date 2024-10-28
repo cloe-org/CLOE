@@ -23,7 +23,7 @@ logA:
     loc: 3.05
     scale: 0.001
 mnu: 0.06
-nnu: 3.046
+nnu: 3.044
 num_nu_massive: 1
 ns:
   latex: n_\mathrm{s}

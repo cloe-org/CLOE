@@ -15,6 +15,7 @@ import cobaya.run
 from cobaya.model import get_model
 from pathlib import Path
 import collections.abc
+import cosmosis
 
 
 class LikelihoodUI:
@@ -56,7 +57,7 @@ class LikelihoodUI:
             defaults_path = defaults_path.joinpath(defaults_dir)
             defaults_config_file = defaults_path.joinpath(defaults_name)
 
-        needed_keys = ['backend', 'Cobaya']
+        needed_keys = ['backend', 'Cobaya', 'Cosmosis']
         self._config_path = defaults_config_file
         self._config =\
             yaml_handler.yaml_read_and_check_dict(self._config_path,
@@ -103,6 +104,10 @@ class LikelihoodUI:
 
         if self._backend == 'Cobaya':
             return self._run_cobaya()
+        elif self._backend == 'Cosmosis':
+            return self._run_cosmosis()
+        else:
+            raise Exception(f'Unsupported backend: {self._backend}')
 
     def _run_cobaya(self):
         r"""Runs CLOE using Cobaya as backend.
@@ -126,6 +131,25 @@ class LikelihoodUI:
         log_info(cobaya_dict)
 
         return cobaya.run(cobaya_dict)
+
+    def _run_cosmosis(self):
+        r"""Runs CLOE using CosmoSIS as backend.
+
+        Returns
+        -------
+        status: int
+          The status of the execution
+        output: astropy.table
+          An astropy table with the samples and likelihoods
+        """
+        cosmosis_dict = self._config['Cosmosis']
+        ini_dir = 'cosmosis'
+        ini_name = cosmosis_dict['ini_file']
+        ini_path = Path(__file__).resolve().parents[2]
+        ini_path = ini_path.joinpath(ini_dir)
+        ini_file = ini_path.joinpath(ini_name)
+        log_info(f'Using Cosmosis as backend, ini file is {ini_file}')
+        return cosmosis.run_cosmosis(ini_file)
 
     def plot(self, settings):
         r"""Main method to plot CLOE observables.
@@ -237,12 +261,40 @@ class LikelihoodUI:
                         obs_spec_dic = field_value
                         sub_fields = ['GCphot', 'GCspectro', 'WL',
                                       'GCphot-GCspectro',
-                                      'WL-GCphot', 'WL-GCspectro']
+                                      'WL-GCphot', 'WL-GCspectro',
+                                      'CG',
+                                      'CMBlens',
+                                      'CMBlens-WL',
+                                      'CMBlens-GCphot',
+                                      'ISW-GCphot']
+
                         self._check_and_update_likelihood_fields(obs_spec_dic,
                                                                  sub_fields)
+                    elif field == 'GCspectro':
+                        dic = field_value
+                        # corr_fun_str defined just to avoid exceeding line
+                        # length
+                        corr_fun_str =\
+                            'multipole_correlation_function'
+                        sub_fields = ['multipole_power_spectrum',
+                                      'convolved_multipole_power_spectrum',
+                                      corr_fun_str]
+                        self._check_and_update_likelihood_fields(dic,
+                                                                 sub_fields)
 
-                    log_info(f'\'{field}\' will be set as:')
-                    log_info(field_value)
+                    elif field == 'GCphot' \
+                            or field == 'WL' \
+                            or field == 'WL-GCphot' \
+                            or field == 'GCphot-GCspectro' \
+                            or field == 'WL-GCspectro':
+                        dic = field_value
+                        sub_fields = ['angular_power_spectrum',
+                                      'pseudo_cl',
+                                      'angular_correlation_function']
+                        self._check_and_update_likelihood_fields(dic,
+                                                                 sub_fields)
+                log_info(f'\'{field}\' will be set as:')
+                log_info(field_value)
 
     def _check_and_update_params_field(self, cobaya_dict):
         """
@@ -340,8 +392,6 @@ class LikelihoodUI:
 
         Raises
         ------
-        NotImplementedError
-            If the specified backend is 'CosmoSIS'
         ValueError
             If the specified backend is not supported
         """
@@ -349,8 +399,7 @@ class LikelihoodUI:
         if backend == 'Cobaya':
             return backend
         elif backend == 'Cosmosis':
-            raise NotImplementedError('Support for the Cosmosis backend is'
-                                      ' not yet implemented')
+            return backend
         else:
             raise ValueError(f'The requested backend is not supported: '
                              f'{backend}')

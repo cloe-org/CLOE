@@ -1,0 +1,57 @@
+# This yaml file contains the user specifications 
+# about the scales and redshift/tomographic bins 
+# of the Euclid data to include 
+# in the likelihood analysis.
+# 
+# Probe: GCspectro auto-correlation 
+# power spectrum
+#
+# GCspectro: Number density fluctuations of 
+# the spectroscopic galaxy sample 
+# in redshift space
+# 
+# Note: For a given redshift bin, 
+# the range of scales (in wavenumber k) can be 
+# concatenated as for example
+# k_range: [[0.01, 0.2], [0.3, 0.5]]
+# To exclude all scales, 
+# an empty list can be provided.
+# The assumed units here are h/Mpc as in the data
+# vector, e.g. 0.01 / h where h = 0.67
+bins:
+  n1: 
+    n1:
+      multipoles:
+        0:
+          k_range: [[0.0015, 3.0]]
+        2: 
+          k_range: [[0.0015, 3.0]]
+        4:
+          k_range: [[0.0015, 3.0]]
+  n2: 
+    n2:
+      multipoles:
+        0:
+          k_range: [[0.0015, 3.0]]
+        2:
+          k_range: [[0.0015, 3.0]]
+        4:
+          k_range: [[0.0015, 3.0]]
+  n3: 
+    n3: 
+      multipoles:
+        0:
+          k_range: [[0.0015, 3.0]]
+        2:
+          k_range: [[0.0015, 3.0]]
+        4:
+          k_range: [[0.0015, 3.0]]
+  n4: 
+    n4:
+      multipoles:
+        0:
+          k_range: [[0.0015, 3.0]]
+        2:
+          k_range: [[0.0015, 3.0]]
+        4:
+          k_range: [[0.0015, 3.0]]

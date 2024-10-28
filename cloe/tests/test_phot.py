@@ -31,30 +31,30 @@ class photoinitTestCase(TestCase):
         cls.nz_dic_GC = nz_dic_GC
         cls.flatnz = mock_cosmo_dic['Flat_nz']
 
+        mixing_matrix_dict_phot = tdh.load_test_pickle('mixmat_phot.pickle')
         cls.phot = photo.Photo(
             None,
             nz_dic_WL,
             nz_dic_GC,
-            add_RSD=False,
-        )
+            mixing_matrix_dict_phot,
+            add_RSD=False)
         cls.phot.set_prefactor(
             ells_WL=cls.ells_WL,
             ells_XC=cls.ells_XC,
-            ells_GC_phot=cls.ells_GC_phot,
-        )
+            ells_GC_phot=cls.ells_GC_phot)
         cls.phot.update(mock_cosmo_dic)
 
-        cls.phot_rsd = photo.Photo(None, nz_dic_WL, nz_dic_GC, add_RSD=True)
+        cls.phot_rsd = photo.Photo(None, nz_dic_WL, nz_dic_GC,
+                                   mixing_matrix_dict_phot, add_RSD=True)
         cls.phot_rsd.set_prefactor(
             ells_WL=cls.ells_WL,
             ells_XC=cls.ells_XC,
-            ells_GC_phot=cls.ells_GC_phot,
-        )
+            ells_GC_phot=cls.ells_GC_phot)
         cls.phot_rsd.update(mock_cosmo_dic)
 
         # Photo module with linear interpolated magnification bias
         cls.phot_magb1 = photo.Photo(None, nz_dic_WL, nz_dic_GC,
-                                     add_RSD=False)
+                                     None, add_RSD=False)
         mock_cosmo_dic_magb1 = deepcopy(mock_cosmo_dic)
         mock_cosmo_dic_magb1['magbias_model'] = 1
         cls.phot_magb1.update(mock_cosmo_dic_magb1)
@@ -62,6 +62,7 @@ class photoinitTestCase(TestCase):
     def setUp(self) -> None:
         self.win_tol = 1e-03
         self.cl_tol = 1e-03
+        self.pcl_tol = 1e-03
         self.xi_tol = 1e-03
         self.integrand_check = -0.948932
         self.wbincheck = 1.102535e-06
@@ -126,8 +127,11 @@ class photoinitTestCase(TestCase):
         self.prefac_mag_check = 0.997732426  # expected value for ell=10
         self.xi_ssp_check = [6.326380e-07, 4.395978e-07]
         self.xi_ssm_check = 1.476032e-07
-        self.xi_sp_check = -3.455842e-06
+        self.xi_sp_check = -3.449763e-06
         self.xi_pp_check = 0.005259
+        self.pcl_ss_check = 1.181198e-10
+        self.pcl_sp_check = 1.713517e-09
+        self.pcl_pp_check = 8.108545e-07
 
     def tearDown(self):
         self.integrand_check = None
@@ -146,6 +150,9 @@ class photoinitTestCase(TestCase):
         self.xi_ssm_check = None
         self.xi_sp_check = None
         self.xi_pp_check = None
+        self.pcl_ss_check = None
+        self.pcl_sp_check = None
+        self.pcl_pp_check = None
         self.prefac_shearia_check = None
         self.prefac_mag_check = None
         self.test_prefactor_rtol = None
@@ -222,19 +229,6 @@ class photoinitTestCase(TestCase):
         npt.assert_string_equal(
             magbias_type,
             "<class 'scipy.interpolate._interpolate.interp1d'>")
-
-    def test_WL_window_slow(self):
-        int_comp = self.phot.WL_window_slow(
-            z=self.phot.z_winterp[10],
-            bin_i=1,
-            k=0.1,
-        )
-        npt.assert_allclose(
-            int_comp,
-            self.wbincheck,
-            rtol=self.win_tol,
-            err_msg='WL_window_slow failed',
-        )
 
     # wab here refers to the product of the two window functions.
     def test_power_exception(self):
@@ -577,21 +571,47 @@ class photoinitTestCase(TestCase):
             self.nz_dic_GC,
         )
 
-    # this function tests a temporary part of code, see #767
-    # def test_CAMBdata_is_None(self):
-    #    temp_cosmo_dic = self.phot.theory.copy()
-    #    temp_cosmo_dic['CAMBdata'] = None
-    #    npt.assert_raises(KeyError,
-    #                      photo.Photo,
-    #                      temp_cosmo_dic,
-    #                      self.nz_dic_WL,
-    #                      self.nz_dic_GC)
+    def test_pseudo_Cl_ss(self):
+        ells = np.array([10.0])
+        phot_copy = deepcopy(self.phot)
+        pcl_ss = phot_copy.pseudo_Cl_3x2pt(
+            'Shear-Shear',
+            ells, 1, 1)
+        npt.assert_allclose(
+            pcl_ss,
+            self.pcl_ss_check,
+            rtol=self.pcl_tol,
+            err_msg='PCL Shear-Shear test failed')
+
+    def test_pseudo_Cl_sp(self):
+        ells = np.array([10.0])
+        phot_copy = deepcopy(self.phot)
+        pcl_sp = phot_copy.pseudo_Cl_3x2pt(
+            'Shear-Position',
+            ells, 1, 1)
+        npt.assert_allclose(
+            pcl_sp,
+            self.pcl_sp_check,
+            rtol=self.pcl_tol,
+            err_msg='Pseudo-Cl Shear-Position test failed')
+
+    def test_pseudo_Cl_pp(self):
+        ells = np.array([10.0])
+        phot_copy = deepcopy(self.phot)
+        pcl_pp = phot_copy.pseudo_Cl_3x2pt(
+            'Position-Position',
+            ells, 1, 1)
+        npt.assert_allclose(
+            pcl_pp,
+            self.pcl_pp_check,
+            rtol=self.pcl_tol,
+            err_msg='Pseudo-Cl Position-Position test failed')
 
     def test_corr_func_ssp(self):
         phot_copy = deepcopy(self.phot)
         xi_ssp = phot_copy.corr_func_3x2pt(
             'Shear-Shear_plus',
-            [1.0, 1.5],
+            [60, 90],
             1,
             1,
         )
@@ -604,7 +624,7 @@ class photoinitTestCase(TestCase):
 
     def test_corr_func_ssm(self):
         phot_copy = deepcopy(self.phot)
-        xi_ssm = phot_copy.corr_func_3x2pt('Shear-Shear_minus', 1.0, 1, 1)
+        xi_ssm = phot_copy.corr_func_3x2pt('Shear-Shear_minus', 60, 1, 1)
         npt.assert_allclose(
             xi_ssm,
             self.xi_ssm_check,
@@ -614,7 +634,7 @@ class photoinitTestCase(TestCase):
 
     def test_corr_func_sp(self):
         phot_copy = deepcopy(self.phot)
-        xi_sp = phot_copy.corr_func_3x2pt('Shear-Position', 1.0, 1, 1)
+        xi_sp = phot_copy.corr_func_3x2pt('Shear-Position', 60, 1, 1)
         npt.assert_allclose(
             xi_sp,
             self.xi_sp_check,
@@ -624,7 +644,7 @@ class photoinitTestCase(TestCase):
 
     def test_corr_func_pp(self):
         phot_copy = deepcopy(self.phot)
-        xi_pp = phot_copy.corr_func_3x2pt('Position-Position', 1.0, 1, 1)
+        xi_pp = phot_copy.corr_func_3x2pt('Position-Position', 60, 1, 1)
         npt.assert_allclose(
             xi_pp,
             self.xi_pp_check,
@@ -637,7 +657,7 @@ class photoinitTestCase(TestCase):
             ValueError,
             self.phot.corr_func_3x2pt,
             'Invalid string',
-            1.0,
+            60,
             1,
             1,
         )
@@ -647,7 +667,7 @@ class photoinitTestCase(TestCase):
             TypeError,
             self.phot.corr_func_3x2pt,
             'Shear-Shear_plus',
-            (1.0, 1.5),
+            (60, 90),
             1,
             1,
         )

@@ -2,8 +2,11 @@
 """FFTLOG MODULE
 
 Class to perform integrals with the FFTLog algorithm.
-Class to implement the FFTLog algorithm to perform the Fourier
-transform of a periodic sequence of logarithmically spaced points.
+Class to implement the  Fast Fourier Transform in logarithmic space (FFTLog)
+algorithm to perform the Fourier transform of a periodic sequence of
+logarithmically spaced points. This is based on the work published in
+`Hamilton (2000) <https://arxiv.org/abs/astro-ph/9905191v4>` and
+`Fang et al. (2020) <https://arxiv.org/abs/1911.11947>`
 """
 
 import numpy as np
@@ -18,7 +21,7 @@ class fftlog(object):
     described in
     `Hamilton (2000) <https://arxiv.org/abs/astro-ph/9905191v4>`__ .
     It decomposes the integrand function using the Fast Fourier Transform;
-    after this decomposition, each term can be integrated analitically.
+    after this decomposition, each term can be integrated analytically.
     """
 
     def __init__(self, x, fx, nu=1.1, N_extrap_begin=0, N_extrap_end=0,
@@ -118,7 +121,7 @@ class fftlog(object):
         -------
         y, Fy: numpy.ndarray, numpy.ndarray
          Logarithmically spaced array, set as
-         ``y[:] = (ell+1)/x[::-1]``, FFTlog transform, evaluated
+         ``y[:] = (ell+1)/x[::-1]``, FFTlog transform evaluated
          over the ``y`` array
         """
         z_ar = self.nu + 1j * self.eta_m
@@ -126,6 +129,82 @@ class fftlog(object):
         # TODO: possible improvement. y can be evaluated once and stored
         h_m = self.c_m * (self.x[0] * y[0])**(-1j * self.eta_m) \
             * utils._g_l(ell, z_ar)
+        # TODO: possible improvement. _g_l can be evaluated once and stored
+
+        Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi) / 4.
+        # here the ordering of N_extrap_begin and N_extrap_end is reversed
+        # since we have moved to Fourier space
+        return (
+            y[self.N_extrap_end:self.N - self.N_extrap_begin],
+            Fy[self.N_extrap_end:self.N - self.N_extrap_begin]
+        )
+
+    def fftlog_first_derivative(self, ell):
+        r"""Performs the fftlog with the first derivative of the Bessel.
+
+        Calculates
+
+        .. math::
+            F(y) = \int_0^\infty \frac{dx}{x} f(x) j'_{\rm \ell}(xy)
+
+        where :math:`j_\ell` is the spherical Bessel function of order
+        :math:`\ell`.
+
+        Parameters
+        ----------
+        ell: int
+            Order of the Bessel function present in the integral
+
+        Returns
+        -------
+        y, Fy: numpy.ndarray, numpy.ndarray
+         Logarithmically spaced array, set as
+         ``y[:] = (ell+1)/x[::-1]``, FFTlog transform evaluated
+         over the ``y`` array
+        """
+        z_ar = self.nu + 1j * self.eta_m
+        y = (ell + 1.) / self.x[::-1]
+        # TODO: possible improvement. y can be evaluated once and stored
+        h_m = self.c_m * (self.x[0] * y[0])**(-1j * self.eta_m) \
+            * utils._g_l_1(ell, z_ar)
+        # TODO: possible improvement. _g_l can be evaluated once and stored
+
+        Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi) / 4.
+        # here the ordering of N_extrap_begin and N_extrap_end is reversed
+        # since we have moved to Fourier space
+        return (
+            y[self.N_extrap_end:self.N - self.N_extrap_begin],
+            Fy[self.N_extrap_end:self.N - self.N_extrap_begin]
+        )
+
+    def fftlog_second_derivative(self, ell):
+        r"""Performs the fftlog with the second derivative of the Bessel.
+
+        Calculates
+
+        .. math::
+            F(y) = \int_0^\infty \frac{dx}{x} f(x) j''_{\rm \ell}(xy)
+
+        where :math:`j_\ell` is the spherical Bessel function of order
+        :math:`\ell`.
+
+        Parameters
+        ----------
+        ell: int
+            Order of the Bessel function present in the integral
+
+        Returns
+        -------
+        y, Fy: numpy.ndarray, numpy.ndarray
+         Logarithmically spaced array, set as
+         ``y[:] = (ell+1)/x[::-1]``, FFTlog transform evaluated
+         over the ``y`` array
+        """
+        z_ar = self.nu + 1j * self.eta_m
+        y = (ell + 1.) / self.x[::-1]
+        # TODO: possible improvement. y can be evaluated once and stored
+        h_m = self.c_m * (self.x[0] * y[0])**(-1j * self.eta_m) \
+            * utils._g_l_2(ell, z_ar)
         # TODO: possible improvement. _g_l can be evaluated once and stored
 
         Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi) / 4.

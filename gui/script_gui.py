@@ -37,7 +37,7 @@ class ConfigGUIWindow(QtWidgets.QMainWindow):
              range(i,10) } for i in range(10)}}
              
         dictionary_GCsp = {
-            "statistics": "legendre_multipole_power_spectrum", "bins":{"n1": {"n1": {"multipoles":
+            "statistics": "multipole_power_spectrum", "bins":{"n1": {"n1": {"multipoles":
         {0:{"k_range": [[float(self.ui.GCsp_k_min.text()), float(self.ui.GCsp_k_max.text())]]},
         2:{"k_range": [[float(self.ui.GCsp_k_min.text()), float(self.ui.GCsp_k_max.text())]]},
         4:{"k_range": [[float(self.ui.GCsp_k_min.text()), float(self.ui.GCsp_k_max.text())]]}}}},
@@ -123,8 +123,8 @@ class ConfigGUIWindow(QtWidgets.QMainWindow):
 
         dictionary_data = {"photo": { "IA_model": "zNLA",
                             "cov_3x2pt": self.ui.Photo_gaussian_covariance_filename.text(),
-                            "cov_GC": "CovMat-PosPos-{:s}-20Bins.npy",
-                            "cov_WL": "CovMat-ShearShear-{:s}-20Bins.npy",
+                            "cov_GC": "CovMat-PosPos-{:s}-20Bins.npz",
+                            "cov_WL": "CovMat-ShearShear-{:s}-20Bins.npz",
                             "cov_model": cov_model,
                             "ndens_GC": "niTab-EP10-RB00.dat",
                             "ndens_WL": "niTab-EP10-RB00.dat",
@@ -138,11 +138,11 @@ class ConfigGUIWindow(QtWidgets.QMainWindow):
                             "root": self.ui.GCsp_covariance_filename.text()}
                             }
 
-        with open('../configs/WL.yaml', 'w') as yaml_file:
+        with open('../configs/WL-FourierSpace.yaml', 'w') as yaml_file:
             yaml.dump(dictionary_WL, yaml_file, default_flow_style=None, sort_keys=False)
-        with open('../configs/GCphot.yaml', 'w') as yaml_file:
+        with open('../configs/GCphot-FourierSpace.yaml', 'w') as yaml_file:
             yaml.dump(dictionary_GCph, yaml_file, default_flow_style=None, sort_keys=False)
-        with open('../configs/GCspectro.yaml', 'w') as yaml_file:
+        with open('../configs/GCspectro-FourierSpace.yaml', 'w') as yaml_file:
             yaml.dump(dictionary_GCsp, yaml_file, default_flow_style=None, sort_keys=False)
         with open('../configs/observables_selection.yaml', 'w') as yaml_file:
             yaml.dump(dictionary_observable_selection, yaml_file, default_flow_style=None,

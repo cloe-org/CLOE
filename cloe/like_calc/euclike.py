@@ -6,20 +6,15 @@ Contains class to compute the Euclid likelihood.
 import numpy as np
 from cloe.photometric_survey.photo import Photo
 from cloe.spectroscopic_survey.spectro import Spectro
+from cloe.clusters_of_galaxies.CG import CG
 from cloe.data_reader import reader
 from cloe.masking.masking import Masking
 from cloe.masking.data_handler import Data_handler
+from cloe.cmbx_p.cmbx import CMBX
 from cloe.photometric_survey.redshift_distribution \
     import RedshiftDistribution
 from cloe.auxiliary.matrix_transforms import BNT_transform
-
-
-class EuclikeError(Exception):
-    r"""
-    Class to define Exception Error.
-    """
-
-    pass
+import copy
 
 
 class Euclike:
@@ -45,25 +40,48 @@ class Euclike:
         self.observables = observables
         self.do_photo = (any(observables['selection']['WL'].values()) or
                          any(observables['selection']['GCphot'].values()))
+        try:
+            self.do_cmbx = (
+                any(observables['selection']['CMBlens'].values()) or
+                any(observables['selection']['CMBisw'].values())
+            )
+        except KeyError:
+            self.do_cmbx = False
+
+        # Get the photo probes even when doing CMBX analysis only
+        self.do_photo = self.do_photo or self.do_cmbx
         self.do_spectro = any(observables['selection']['GCspectro'].values())
+        self.do_clusters = any(observables['selection']['CG'].values())
 
         self.data = data
         if self.do_spectro:
-            if observables['specifications']['GCspectro']['statistics'] == \
-                    'legendre_multipole_power_spectrum':
+            if observables['specifications']['GCspectro']['statistics'] in \
+                    ('multipole_power_spectrum',
+                     'convolved_multipole_power_spectrum'):
                 self.do_fourier_spectro = True
                 self.str_start_spectro = 'pk'
                 self.scale_var_spectro = 'k_pk'
+                spec_str = 'GCspectro'
+                if observables['specifications'][spec_str]['statistics'] == \
+                        'convolved_multipole_power_spectrum':
+                    self.do_convolved_multipole = True
+                else:
+                    self.do_convolved_multipole = False
             elif observables['specifications']['GCspectro']['statistics'] == \
-                    'legendre_multipole_correlation_function':
+                    'multipole_correlation_function':
                 self.do_fourier_spectro = False
                 self.str_start_spectro = 'xi'
                 self.scale_var_spectro = 'r_xi'
             else:
                 raise ValueError('Unknown statistics_spectro choice. '
-                                 'Use legendre_multipole_power_spectrum '
-                                 'or legendre_multipole_correlation_function')
-            self.data['spectro']['Fourier'] = self.do_fourier_spectro
+                                 'Use multipole_power_spectrum, '
+                                 'convolved_multipole_power_spectrum, '
+                                 'or multipole_correlation_function')
+            if self.data['spectro']['Fourier'] != self.do_fourier_spectro:
+                raise ValueError('Inconsistent choice of statistics '
+                                 'between the spectroscopic data and '
+                                 'theory vectors')
+
         if self.do_photo:
             # Determine if to use Fourier or configuration space
             photo_obs = ['WL', 'GCphot', 'WL-GCphot']
@@ -71,11 +89,16 @@ class Euclike:
                 if obs_name in observables['specifications'].keys():
                     key = obs_name
                     break
-            if observables['specifications'][key]['statistics'] == \
-                    'angular_power_spectrum':
+            if observables['specifications'][key]['statistics'] in \
+                    ('angular_power_spectrum', 'pseudo_cl'):
                 self.do_fourier_photo = True
                 self.scale_var_photo = 'ells'
                 self.num_wl_obs = 1
+                if observables['specifications'][key]['statistics'] == \
+                        'pseudo_cl':
+                    self.do_pseudo_cl = True
+                else:
+                    self.do_pseudo_cl = False
             elif observables['specifications'][key]['statistics'] == \
                     'angular_correlation_function':
                 self.do_fourier_photo = False
@@ -83,9 +106,13 @@ class Euclike:
                 self.num_wl_obs = 2
             else:
                 raise ValueError('Unknown statistics_photo choice. '
-                                 'Use angular_power_spectrum '
-                                 'or angular_correlation_function')
-            self.data['photo']['Fourier'] = self.do_fourier_photo
+                                 'Use angular_power_spectrum, '
+                                 'pseudo_cl, or '
+                                 'angular_correlation_function')
+            if self.data['photo']['Fourier'] != self.do_fourier_photo:
+                raise ValueError('Inconsistent choice of statistics '
+                                 'between the photometric data and '
+                                 'theory vectors')
 
         self.data_ins = reader.Reader(self.data)
         self.data_ins.compute_luminosity_ratio()
@@ -132,10 +159,14 @@ class Euclike:
             self.matrix_transform_phot = \
                 self.observables['selection']['matrix_transform_phot']
 
+            self.mixing_matrix_dict_phot = \
+                self.data_ins.read_phot_mixing_matrix()
+
             # Photo class instance
             self.phot_ins = Photo(None,
                                   self.data_ins.nz_dict_WL,
                                   self.data_ins.nz_dict_GC_Phot,
+                                  self.mixing_matrix_dict_phot,
                                   add_RSD=add_RSD)
 
             # Temporary placeholder for theta vector
@@ -158,15 +189,40 @@ class Euclike:
                                             ells_XC=self.scales_XC,
                                             ells_GC_phot=self.scales_GC_phot)
 
+                if self.do_cmbx:
+                    # Read CMB data
+                    self.data_ins.read_cmbx()
+                    # CMBX class instance
+                    self.cmbx_ins = CMBX(self.phot_ins)
+
         if self.do_spectro:
             # Read spectro
             self.data_ins.read_GC_spectro()
             self.data_spectro_fiducial_cosmo = \
                 self.data_ins.data_spectro_fiducial_cosmo
+            self.mixing_matrix_dict_spectro = \
+                self.data_ins.read_GC_spectro_mixing_matrix()
             self.zkeys = self.data_ins.data_dict['GC-Spectro'].keys()
-
             # Spectro class instance
-            self.spec_ins = Spectro(None, list(self.zkeys))
+            self.spec_ins = Spectro(None, list(self.zkeys),
+                                    self.mixing_matrix_dict_spectro)
+
+        # Read data, instantiate galaxy cluster classes
+        # and compute pre-computed quantities
+        if self.do_clusters:
+
+            # Read CG
+            self.data_ins.read_CG()
+            # Transforming data
+            self.CGCCdatafinal = self.create_CG_data()[0]
+            self.CGcovCCfinal = self.create_CG_cov_external()[0]
+            self.CGinvcovCCfinal = 1.0 / self.CGcovCCfinal
+            self.CGMoRdatafinal = self.create_CG_data()[1]
+            self.CGcovMoRfinal = self.create_CG_cov_external()[1]
+            self.CGinvcovMoRfinal = 1.0 / self.CGcovMoRfinal
+            self.CGxi2datafinal = self.create_CG_data()[2]
+            self.CGcovxi2final = self.create_CG_cov_external()[2]
+            self.CGinvcovxi2final = 1.0 / self.CGcovxi2final
 
         # Create data vectors and covariances and mask them
 
@@ -181,6 +237,8 @@ class Euclike:
             # precompute matrix transforms needed for photo data
             self.precompute_matrix_transform_phot()
             phot_data = self.create_photo_data()
+            if self.do_cmbx:
+                phot_data.update(self.create_photoxcmb_data())
         if self.do_spectro:
             spectrodata = self.create_spectro_data()
             spectrocov = self.create_spectro_cov()
@@ -197,6 +255,8 @@ class Euclike:
         elif self.do_photo:
             datafinal = phot_data
             covfinal = {'3x2pt': self.data_ins.data_dict['3x2pt_cov']}
+        if self.do_cmbx:
+            covfinal['7x2pt'] = self.data_ins.data_dict['7x2pt_cov']
 
         self.data_handler_ins = Data_handler(datafinal,
                                              covfinal,
@@ -323,7 +383,8 @@ class Euclike:
                                                     obs='GC-phot')
         datavec_dict['all'] = np.concatenate((datavec_dict['WL'],
                                               datavec_dict['XC-Phot'],
-                                              datavec_dict['GC-Phot']), axis=0)
+                                              datavec_dict['GC-Phot'],
+                                              ), axis=0)
 
         return datavec_dict
 
@@ -353,10 +414,17 @@ class Euclike:
 
         # Obtain the theory for WL
         if self.data_handler_ins.use_wl:
-            if self.do_fourier_photo:
+            if (self.do_fourier_photo and (not self.do_pseudo_cl)):
                 wl_array = np.array(
                     [self.phot_ins.Cl_WL(self.scales_WL,
                                          element[0], element[1])
+                     for element in self.indices_diagonal_wl]
+                ).flatten('F')
+            elif (self.do_fourier_photo and self.do_pseudo_cl):
+                wl_array = np.array(
+                    [self.phot_ins.pseudo_Cl_3x2pt('shear-shear',
+                                                   self.scales_WL,
+                                                   element[0], element[1])
                      for element in self.indices_diagonal_wl]
                 ).flatten('F')
             else:
@@ -381,10 +449,17 @@ class Euclike:
 
         # Obtain the theory for XC-Phot
         if self.data_handler_ins.use_xc_phot:
-            if self.do_fourier_photo:
+            if (self.do_fourier_photo and (not self.do_pseudo_cl)):
                 xc_phot_array = np.array(
                     [self.phot_ins.Cl_cross(self.scales_XC,
                                             element[1], element[0])
+                     for element in self.indices_all]
+                ).flatten('F')
+            elif (self.do_fourier_photo and self.do_pseudo_cl):
+                xc_phot_array = np.array(
+                    [self.phot_ins.pseudo_Cl_3x2pt('shear-position',
+                                                   self.scales_XC,
+                                                   element[1], element[0])
                      for element in self.indices_all]
                 ).flatten('F')
             else:
@@ -402,10 +477,17 @@ class Euclike:
 
         # Obtain the theory for GC-Phot
         if self.data_handler_ins.use_gc_phot:
-            if self.do_fourier_photo:
+            if (self.do_fourier_photo and (not self.do_pseudo_cl)):
                 gc_phot_array = np.array(
                     [self.phot_ins.Cl_GC_phot(self.scales_GC_phot,
                                               element[0], element[1])
+                     for element in self.indices_diagonal_gcphot]
+                ).flatten('F')
+            elif (self.do_fourier_photo and self.do_pseudo_cl):
+                gc_phot_array = np.array(
+                    [self.phot_ins.pseudo_Cl_3x2pt('position-position',
+                                                   self.scales_GC_phot,
+                                                   element[0], element[1])
                      for element in self.indices_diagonal_gcphot]
                 ).flatten('F')
             else:
@@ -433,9 +515,117 @@ class Euclike:
                                                     obs='GC-phot')
 
         photo_theory_vec = np.concatenate(
-            (wl_array, xc_phot_array, gc_phot_array), axis=0)
+            (wl_array, xc_phot_array, gc_phot_array),
+            axis=0)
 
         return photo_theory_vec
+
+    def create_photoxcmb_data(self):
+        """
+        Create data for photoxcmb
+
+        Arranges the photoxcmbx data vector for the
+        likelihood into its final format
+
+        Returns
+        -------
+        datavec_dict: dict
+            returns a dictionary of arrays with the transformed photoxcmbx data
+        """
+        CMBX_dict = {}
+        CMBX_dict['kCMB'] = self.data_ins.data_dict['kCMB']['kCMB-kCMB']
+
+        self.tomo_ind_kCMBxWL = list(
+            self.data_ins.data_dict['kCMBxWL'].keys())[1:]
+        CMBX_dict['kCMBxWL'] = np.array(
+            [self.data_ins.data_dict['kCMBxWL'][key][scale] for scale in range(
+                len(self.data_ins.data_dict['kCMBxWL']['ells']))
+             for key in self.tomo_ind_kCMBxWL])
+
+        self.tomo_ind_kCMBxGC = list(
+            self.data_ins.data_dict['kCMBxGC'].keys())[1:]
+        CMBX_dict['kCMBxGC'] = np.array(
+            [self.data_ins.data_dict['kCMBxGC'][key][scale] for scale in range(
+                len(self.data_ins.data_dict['kCMBxGC']['ells']))
+             for key in self.tomo_ind_kCMBxGC])
+
+        self.tomo_ind_ISWxGC = list(
+            self.data_ins.data_dict['ISWxGC'].keys())[1:]
+        CMBX_dict['ISWxGC'] = np.array(
+            [self.data_ins.data_dict['ISWxGC'][key][scale] for scale in range(
+                len(self.data_ins.data_dict['ISWxGC']['ells']))
+             for key in self.tomo_ind_ISWxGC])
+
+        return CMBX_dict
+
+    def create_photoxcmb_theory(self):
+        r"""Create theory vector
+
+        Create theory vector for CMB lensing auto and cross
+        with WL and GC-photo and ISW cross GCphot as well
+        The cosmology dictionnary is not given as input as it
+        was already updated in the instanciation of the
+        create_photo_theory function
+
+        Returns
+        -------
+        cmbx_theory_vec: numpy.ndarray
+            returns an array  with entries being
+            [kCMBxkCMB, kCMBxWL, kCMBxGC, iSWxGC]
+        """
+        # The binning in ell of CMB lensing is the same
+        # as for the Euclid Photo WL
+        # we could update this for more optimal binning
+
+        # CMB lens class instance
+        self.cmbx_ins.cmbx_update(self.phot_ins)
+
+        # Obtain the theory for kCMB
+        if self.data_handler_ins.use_kCMB:
+            kCMB_array = self.cmbx_ins.Cl_kCMB(
+                self.data_ins.data_dict['kCMB']['ells'])
+        else:
+            kCMB_array = np.zeros(self.data_handler_ins._kCMB_size)
+
+        # Obtain the theory for WL X kCMB
+        # (binning indices start at one)
+        if self.data_handler_ins.use_kCMB_wl:
+            kCMBxWL_array = np.array(
+                [self.cmbx_ins.Cl_kCMB_X_WL(
+                    self.data_ins.data_dict['kCMBxWL']['ells'], bin_i + 1)
+                    for bin_i in range(self.data_ins.numtomo_wl)]
+                                    ).flatten('F')
+        else:
+            kCMBxWL_array = np.zeros(self.data_handler_ins._kCMBxWL_size)
+
+        # Obtain the theory for GC-Phot X kCMB
+        if self.data_handler_ins.use_kCMB_gc:
+            kCMBxGC_array = np.array(
+                [self.cmbx_ins.Cl_kCMB_X_GC_phot(
+                    self.data_ins.data_dict['kCMBxGC']['ells'], bin_i + 1)
+                    for bin_i in range(self.data_ins.numtomo_gcphot)]
+                                    ).flatten('F')
+        else:
+            kCMBxGC_array = np.zeros(self.data_handler_ins._kCMBxGC_size)
+
+        # Obtain the theory for ISWxGC
+        if self.data_handler_ins.use_iswxgc:
+            iswxgc_array = np.array(
+                [self.cmbx_ins.Cl_ISWxGC(
+                    self.data_ins.data_dict['ISWxGC']['ells'], bin_i + 1)
+                    for bin_i in range(self.data_ins.numtomo_gcphot)]
+                                    ).flatten('F')
+        else:
+            iswxgc_array = np.zeros(
+                len(self.data_ins.data_dict['ISWxGC']['ells']) *
+                self.data_ins.numtomo_gcphot
+            )
+
+        cmbx_theory_vec = np.concatenate(
+                (kCMB_array, kCMBxWL_array, kCMBxGC_array, iswxgc_array),
+                axis=0)
+
+        return cmbx_theory_vec
 
     def precompute_matrix_transform_phot(self):
         """Precompute Matrix Transform Phot
@@ -559,7 +749,7 @@ class Euclike:
             m_ins = [int(str(key)[-1]) for key in
                      self.data_ins.data_dict['GC-Spectro'][z_ins].keys()
                      if key.startswith(self.str_start_spectro)]
-            if self.do_fourier_spectro:
+            if (self.do_fourier_spectro and (not self.do_convolved_multipole)):
                 k_m_matrix = []
                 for scale_ins in (
                         self.data_ins.data_dict['GC-Spectro'][z_ins][
@@ -572,6 +762,11 @@ class Euclike:
                     )
                 k_m_matrices.append(k_m_matrix)
                 theoryvec = np.hstack(k_m_matrices).T.flatten()
+            elif (self.do_fourier_spectro and self.do_convolved_multipole):
+                k_m_matrices.append(
+                    self.spec_ins.convolved_power_spectrum_multipoles(
+                        float(z_ins)))
+                theoryvec = np.array(k_m_matrices).flatten()
             else:
                 k_m_matrices.append(
                     self.spec_ins.multipole_correlation_function(
@@ -581,6 +776,7 @@ class Euclike:
                         m_ins)
                 )
                 theoryvec = np.array(k_m_matrices).flatten()
+
         return theoryvec
 
     def create_spectro_data(self):
@@ -647,6 +843,240 @@ class Euclike:
 
         return covfull
 
+    # Create data vectors and covariances
+
+    def create_CG_theory(self, dictionary):
+        """Create CG Theory
+
+        Obtains the theory for the likelihood.
+
+        Parameters
+        ----------
+        dictionary: dict
+            Cosmology dictionary from the Cosmology class
+            which is updated at each sampling step
+
+        dictionary_fiducial: dict
+            Cosmology dictionary from the Cosmology class
+            at the fiducial cosmology
+
+        Returns
+        -------
+        theoryvec: list
+            Returns the theory list with same indexing/format as the data
+        """
+
+        CG_ins = CG(dictionary)
+
+        CG_like_selection = \
+            self.observables['specifications']['CG']['CG_probe']
+
+        self.theoryvecbuf = CG_ins.N_zbin_Lbin_Rbin()
+
+        if CG_like_selection in ['CC', 'CC_CWL', 'CC_Cxi2', 'CC_CWL_Cxi2']:
+            theoryvec_buf = copy.deepcopy(self.theoryvecbuf[0])
+            theoryvec_CC = np.zeros(
+                theoryvec_buf.shape[0] * theoryvec_buf.shape[1]
+            )
+            n = -1
+            for i in range(theoryvec_buf.shape[0]):
+                for j in range(theoryvec_buf.shape[1]):
+                    n = n + 1
+                    theoryvec_CC[n] = theoryvec_buf[i][j]
+
+        if CG_like_selection in ['CC_CWL', 'CC_CWL_Cxi2']:
+            theoryvec_buf = copy.deepcopy(self.theoryvecbuf[1])
+            theoryvec_MoR = np.zeros(
+                theoryvec_buf.shape[0] * theoryvec_buf.shape[1] *
+                theoryvec_buf.shape[2]
+            )
+            n = -1
+            for i in range(theoryvec_buf.shape[0]):
+                for j in range(theoryvec_buf.shape[1]):
+                    for k in range(theoryvec_buf.shape[2]):
+                        n = n + 1
+                        theoryvec_MoR[n] = theoryvec_buf[i][j][k]
+
+        if CG_like_selection in ['CC_Cxi2', 'CC_CWL_Cxi2']:
+            theoryvec_buf = copy.deepcopy(self.theoryvecbuf[2])
+            theoryvec_xi2 = np.zeros(
+                theoryvec_buf.shape[0] * theoryvec_buf.shape[1] *
+                theoryvec_buf.shape[2]
+            )
+            n = -1
+            for i in range(theoryvec_buf.shape[0]):
+                for j in range(theoryvec_buf.shape[1]):
+                    for k in range(theoryvec_buf.shape[2]):
+                        n = n + 1
+                        theoryvec_xi2[n] = theoryvec_buf[i][j][k]
+
+        if CG_like_selection == 'CC':
+            return theoryvec_CC
+        elif CG_like_selection == 'CC_CWL':
+            return theoryvec_CC, theoryvec_MoR
+        elif CG_like_selection == 'CC_Cxi2':
+            return theoryvec_CC, theoryvec_xi2
+        elif CG_like_selection == 'CC_CWL_Cxi2':
+            return theoryvec_CC, theoryvec_MoR, theoryvec_xi2
+
+    def create_CG_cov_analytic(self, CG_xi2_cov_selection):
+        """Create CG cov Theory
+
+        Computes the analytic covariance for the likelihood.
+
+        Parameters
+        ----------
+        dictionary: dict
+            Cosmology dictionary from the Cosmology class
+            which is updated at each sampling step
+
+        dictionary_fiducial: dict
+            Cosmology dictionary from the Cosmology class
+            at the fiducial cosmology
+
+        Returns
+        -------
+        theoryvec: list
+            Returns the theory list with same indexing/format as the data
+        """
+
+        if CG_xi2_cov_selection in ['covCC', 'covCC_covCxi2']:
+            theoryvec_cov_buf = copy.deepcopy(self.theoryvecbuf[3])
+            theoryvec_CC_cov = np.zeros((
+                theoryvec_cov_buf.shape[0] * theoryvec_cov_buf.shape[2],
+                theoryvec_cov_buf.shape[1] * theoryvec_cov_buf.shape[3]
+            ))
+            for i in range(theoryvec_cov_buf.shape[0]):
+                for j in range(theoryvec_cov_buf.shape[2]):
+                    for k in range(theoryvec_cov_buf.shape[1]):
+                        for ll in range(theoryvec_cov_buf.shape[3]):
+                            idx1 = i * theoryvec_cov_buf.shape[2] + j
+                            idx2 = k * theoryvec_cov_buf.shape[3] + ll
+                            theoryvec_CC_cov[idx1][idx2] =\
+                                theoryvec_cov_buf[i, k, j, ll]
+
+        if CG_xi2_cov_selection in ['covxi', 'covCC_covCxi2']:
+            theoryvec_cov_buf = copy.deepcopy(self.theoryvecbuf[4])
+            theoryvec_xi2_cov = np.zeros((
+                theoryvec_cov_buf.shape[0] * theoryvec_cov_buf.shape[2] *
+                theoryvec_cov_buf.shape[4],
+                theoryvec_cov_buf.shape[1] * theoryvec_cov_buf.shape[3] *
+                theoryvec_cov_buf.shape[5]
+            ))
+            for i in range(theoryvec_cov_buf.shape[0]):
+                for j in range(theoryvec_cov_buf.shape[1]):
+                    for k in range(theoryvec_cov_buf.shape[2]):
+                        for ll in range(theoryvec_cov_buf.shape[3]):
+                            for m in range(theoryvec_cov_buf.shape[4]):
+                                for n in range(theoryvec_cov_buf.shape[5]):
+                                    theoryvec_xi2_cov[
+                                        i * theoryvec_cov_buf.shape[2] *
+                                        theoryvec_cov_buf.shape[4] +
+                                        k * theoryvec_cov_buf.shape[4] + m,
+                                        j * theoryvec_cov_buf.shape[3] *
+                                        theoryvec_cov_buf.shape[5] +
+                                        ll * theoryvec_cov_buf.shape[5] + n
+                                    ] = theoryvec_cov_buf[i, j, k, ll, m, n]
+
+        if CG_xi2_cov_selection == 'covCC':
+            return np.linalg.inv(theoryvec_CC_cov)
+        if CG_xi2_cov_selection == 'covCxi2':
+            return np.linalg.inv(theoryvec_xi2_cov)
+        if CG_xi2_cov_selection == 'covCC_covCxi2':
+            return np.linalg.inv(theoryvec_CC_cov), \
+                np.linalg.inv(theoryvec_xi2_cov)
+
+    def create_CG_data(self):
+        """Create CG Data
+
+        Arranges the data vector for the likelihood into its final format
+
+        Returns
+        -------
+        datavec: list
+            Returns the data as a single list
+        """
+
+        datavec_CC = np.zeros(
+            self.data_ins.data_dict['CG_CC'].shape[0] *
+            self.data_ins.data_dict['CG_CC'].shape[1]
+        )
+        n = -1
+        for i in range(self.data_ins.data_dict['CG_CC'].shape[0]):
+            for j in range(self.data_ins.data_dict['CG_CC'].shape[1]):
+                n = n + 1
+                datavec_CC[n] = self.data_ins.data_dict['CG_CC'][i][j]
+
+        datavec_MoR = np.zeros(
+            self.data_ins.data_dict['CG_MoR'].shape[0] *
+            self.data_ins.data_dict['CG_MoR'].shape[1]
+        )
+        n = -1
+        for i in range(self.data_ins.data_dict['CG_MoR'].shape[0]):
+            for j in range(self.data_ins.data_dict['CG_MoR'].shape[1]):
+                n = n + 1
+                datavec_MoR[n] = self.data_ins.data_dict['CG_MoR'][i][j]
+
+        datavec_xi2 = np.zeros(
+            self.data_ins.data_dict['CG_xi2'].shape[0] *
+            self.data_ins.data_dict['CG_xi2'].shape[1] *
+            self.data_ins.data_dict['CG_xi2'].shape[2]
+        )
+        n = -1
+        for i in range(self.data_ins.data_dict['CG_xi2'].shape[0]):
+            for j in range(self.data_ins.data_dict['CG_xi2'].shape[1]):
+                for k in range(self.data_ins.data_dict['CG_xi2'].shape[2]):
+                    n = n + 1
+                    datavec_xi2[n] = self.data_ins.data_dict['CG_xi2'][i][j][k]
+
+        return datavec_CC, datavec_MoR, datavec_xi2
+
+    def create_CG_cov_external(self):
+        """Create CG Cov
+
+        Arranges the external covariance matrix for the likelihood
+        into its final format
+
+        Returns
+        -------
+        covfull: float N x N matrix
+            Returns a single covariance from sub-covariances (split in z)
+        """
+        covfull_CC = np.zeros((
+            self.data_ins.data_dict['CG_cov_CC'].shape[0] *
+            self.data_ins.data_dict['CG_cov_CC'].shape[1]
+        ))
+        n = -1
+        for i in range(self.data_ins.data_dict['CG_cov_CC'].shape[0]):
+            for j in range(self.data_ins.data_dict['CG_cov_CC'].shape[1]):
+                n = n + 1
+                covfull_CC[n] = self.data_ins.data_dict['CG_cov_CC'][i][j]
+
+        covfull_MoR = np.zeros(
+            self.data_ins.data_dict['CG_MoR'].shape[0] *
+            self.data_ins.data_dict['CG_MoR'].shape[1]
+        )
+        n = -1
+        for i in range(self.data_ins.data_dict['CG_MoR'].shape[0]):
+            for j in range(self.data_ins.data_dict['CG_MoR'].shape[1]):
+                n = n + 1
+                covfull_MoR[n] = self.data_ins.data_dict['CG_cov_MoR'][i][j]
+
+        covfull_xi2 = np.zeros(
+            self.data_ins.data_dict['CG_xi2'].shape[0] *
+            self.data_ins.data_dict['CG_xi2'].shape[1] *
+            self.data_ins.data_dict['CG_xi2'].shape[2]
+        )
+        n = -1
+        for i in range(self.data_ins.data_dict['CG_xi2'].shape[0]):
+            for j in range(self.data_ins.data_dict['CG_xi2'].shape[1]):
+                for k in range(self.data_ins.data_dict['CG_xi2'].shape[2]):
+                    n = n + 1
+                    covfull_xi2[n] = \
+                        self.data_ins.data_dict['CG_cov_xi2'][i][j][k]
+
+        return covfull_CC, covfull_MoR, covfull_xi2
+
     def loglike(self, dictionary, npar=None):
         """Natural logarithm of the likelihood.
 
@@ -669,6 +1099,10 @@ class Euclike:
 
         if self.do_photo:
             photo_theory_vec = self.create_photo_theory(dictionary)
+            if self.do_cmbx:
+                cmbx_theory_vec = self.create_photoxcmb_theory()
+                photo_theory_vec = np.concatenate(
+                    (photo_theory_vec, cmbx_theory_vec), axis=0)
             self.mask_ins_phot.set_theory_vector(photo_theory_vec)
             masked_data_minus_theory_phot = (
                     self.masked_data_vector_phot -
@@ -721,7 +1155,157 @@ class Euclike:
         else:
             loglike_spectro = 0.0
 
+        if self.do_clusters:
+            obs = self.observables['specifications']['CG']
+            CG_like_selection = obs['CG_probe']
+            CG_xi2_cov_selection = obs['CG_xi2_cov_selection']
+
+            if CG_like_selection == 'CC':
+                self.CGCCthvec = self.create_CG_theory(
+                    dictionary
+                )
+                dmt = self.CGCCdatafinal - self.CGCCthvec
+                if CG_xi2_cov_selection == 'covCC':
+                    self.CGinvcovCCfinal = \
+                        self.create_CG_cov_analytic(CG_xi2_cov_selection)
+                    loglike_clusters = -0.5 * np.dot(
+                        np.dot(dmt, self.CGinvcovCCfinal), dmt
+                    )
+                elif CG_xi2_cov_selection == 'CG_nonanalytic_cov':
+                    loglike_clusters = \
+                        -0.5 * np.sum((dmt * self.CGinvcovCCfinal)**2.0)
+                else:
+                    err_msg = "Choose CG covariance selection "
+                    err_msg += "\'CG_nonanalytic_cov\' or \'covCC\'"
+                    raise CobayaInterfaceError(err_msg)
+            elif CG_like_selection == 'CC_CWL':
+                createCGtheory = self.create_CG_theory(
+                    dictionary
+                )
+                self.CGCCthvec = createCGtheory[0]
+                self.CGMoRthvec = createCGtheory[1]
+                dmtCC = self.CGCCdatafinal - self.CGCCthvec
+                dmtMoR = self.CGMoRdatafinal - self.CGMoRthvec
+                if CG_xi2_cov_selection == 'covCC':
+                    self.CGinvcovCCfinal = \
+                        self.create_CG_cov_analytic(CG_xi2_cov_selection)
+                    loglike_clusters = - 0.5 * np.dot(
+                        np.dot(dmtCC, self.CGinvcovCCfinal), dmtCC
+                    ) - 0.5 * np.sum((dmtMoR * self.CGinvcovMoRfinal)**2.0)
+                elif CG_xi2_cov_selection == 'CG_nonanalytic_cov':
+                    loglike_clusters = - 0.5 * np.sum(
+                        (dmtCC * self.CGinvcovCCfinal)**2.0
+                    ) - 0.5 * np.sum((dmtMoR * self.CGinvcovMoRfinal)**2.0)
+                else:
+                    err_msg = "Choose CG covariance selection "
+                    err_msg += "\'CG_nonanalytic_cov\' or \'covCC\'"
+                    raise CobayaInterfaceError(err_msg)
+            elif CG_like_selection == 'CC_Cxi2':
+                createCGtheory = self.create_CG_theory(
+                    dictionary
+                )
+                self.CGCCthvec = createCGtheory[0]
+                self.CGxi2thvec = createCGtheory[1]
+                dmtCC = self.CGCCdatafinal - self.CGCCthvec
+                dmtxi2 = self.CGxi2datafinal - self.CGxi2thvec
+                if CG_xi2_cov_selection == 'covCC':
+                    self.CGinvcovCCfinal = \
+                        self.create_CG_cov_analytic(CG_xi2_cov_selection)
+                    loglike_clusters = - 0.5 * np.dot(
+                        np.dot(dmtCC, self.CGinvcovCCfinal), dmtCC
+                    ) - 0.5 * np.sum((dmtxi2 * self.CGinvcovxi2final)**2.0)
+                elif CG_xi2_cov_selection == 'covxi2':
+                    self.xi2invcovCCfinal = \
+                        self.create_CG_cov_analytic(CG_xi2_cov_selection)
+                    loglike_clusters = - 0.5 * np.sum(
+                        (dmtCC * self.CGinvcovCCfinal)**2.0
+                    ) - 0.5 * np.dot(
+                        np.dot(dmtxi2, self.xi2invcovCCfinal), dmtxi2
+                    )
+                elif CG_xi2_cov_selection == 'covCC_covCxi2':
+                    self.CGinvcovCCfinal = \
+                        self.create_CG_cov_analytic(CG_xi2_cov_selection)[0]
+                    self.xi2invcovCCfinal = \
+                        self.create_CG_cov_analytic(CG_xi2_cov_selection)[1]
+                    loglike_clusters = - 0.5 * np.dot(
+                        np.dot(dmtCC, self.CGinvcovCCfinal), dmtCC
+                    ) - 0.5 * np.dot(
+                        np.dot(dmtxi2, self.xi2invcovCCfinal), dmtxi2
+                    )
+                elif CG_xi2_cov_selection == 'CG_nonanalytic_cov':
+                    loglike_clusters = - 0.5 * np.sum(
+                        (dmtCC * self.CGinvcovCCfinal)**2.0
+                    ) - 0.5 * np.sum((dmtxi2 * self.CGinvcovxi2final)**2.0)
+                else:
+                    err_msg = "Choose CG covariance selection "
+                    err_msg += "\'CG_nonanalytic_cov\' or" + \
+                        " \'covCxi2\' or \'covCC\'"
+                    err_msg += "or \'covCC_covCxi2\'"
+                    raise CobayaInterfaceError(err_msg)
+            elif CG_like_selection == 'CC_CWL_Cxi2':
+                createCGtheory = self.create_CG_theory(
+                    dictionary
+                )
+                self.CGCCthvec = createCGtheory[0]
+                self.CGMoRthvec = createCGtheory[1]
+                self.CGxi2thvec = createCGtheory[2]
+                dmtCC = self.CGCCdatafinal - self.CGCCthvec
+                dmtMoR = self.CGMoRdatafinal - self.CGMoRthvec
+                dmtxi2 = self.CGxi2datafinal - self.CGxi2thvec
+                if CG_xi2_cov_selection == 'covCC':
+                    self.CGinvcovCCfinal = \
+                        self.create_CG_cov_analytic(CG_xi2_cov_selection)
+                    loglike_clusters = - 0.5 * np.dot(
+                        np.dot(dmtCC, self.CGinvcovCCfinal), dmtCC
+                    ) - 0.5 * np.sum(
+                        (dmtMoR * self.CGinvcovMoRfinal)**2.0
+                    ) - 0.5 * np.sum((dmtxi2 * self.CGinvcovxi2final)**2.0)
+                elif CG_xi2_cov_selection == 'covCxi2':
+                    self.xi2invcovCCfinal = \
+                        self.create_CG_cov_analytic(CG_xi2_cov_selection)
+                    loglike_clusters = - 0.5 * np.sum(
+                        (dmtCC * self.CGinvcovCCfinal)**2.0
+                    ) - 0.5 * np.sum(
+                        (dmtMoR * self.CGinvcovMoRfinal)**2.0
+                    ) - 0.5 * np.dot(
+                        np.dot(dmtxi2, self.xi2invcovCCfinal),
+                        dmtxi2
+                    )
+                elif CG_xi2_cov_selection == 'covCC_covCxi2':
+                    self.CGinvcovCCfinal = \
+                        self.create_CG_cov_analytic(CG_xi2_cov_selection)[0]
+                    self.xi2invcovCCfinal = \
+                        self.create_CG_cov_analytic(CG_xi2_cov_selection)[1]
+                    loglike_clusters = -0.5 * np.dot(
+                        np.dot(dmtCC, self.CGinvcovCCfinal), dmtCC
+                    ) - 0.5 * np.sum(
+                        (dmtMoR * self.CGinvcovMoRfinal)**2.0
+                    ) - 0.5 * np.dot(
+                        np.dot(dmtxi2, self.xi2invcovCCfinal), dmtxi2
+                    )
+                elif CG_xi2_cov_selection == 'CG_nonanalytic_cov':
+                    loglike_clusters = \
+                        - 0.5 * np.sum((dmtCC * self.CGinvcovCCfinal)**2.0) \
+                        - 0.5 * np.sum(
+                            (dmtMoR * self.CGinvcovMoRfinal)**2.0
+                        ) - 0.5 * np.sum(
+                            (dmtxi2 * self.CGinvcovxi2final)**2.0
+                        )
+                else:
+                    err_msg = "Choose CG covariance selection "
+                    err_msg += "\'CG_nonanalytic_cov\' or \'covCxi2\' or "
+                    err_msg += "\'covCC\' or \'covCC_covCxi2\'"
+                    raise CobayaInterfaceError(err_msg)
+            else:
+                err_msg = "Choose CG like selection "
+                err_msg += "\'CC\' or \'CC_CWL\' or \'CC_Cxi2\' or "
+                err_msg += "\'CC_CWL_Cxi2\'"
+                raise CobayaInterfaceError(err_msg)
+
+        else:
+            loglike_clusters = 0.0
+
         # Total likelihood
-        loglike = loglike_phot + loglike_spectro
+        loglike = loglike_phot + loglike_spectro + loglike_clusters
 
         return loglike

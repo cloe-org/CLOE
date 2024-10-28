@@ -1,12 +1,16 @@
-# Choice of the Boltzmann solver. Allowed values are
-# camb (for CAMB) and classy (for CLASS)
-define: &solver camb
+# Choice of backend, either Cobaya or Cosmosis.
 backend: Cobaya
+# Choice of the Boltzmann solver. Allowed values are camb (for
+# CAMB) and classy (for CLASS). Note: At present, the Cobaya 
+# backend can be used together with both CAMB and CLASS, while 
+# the CosmoSIS backend can only be used together with CAMB.
+define: &solver camb
 Cobaya:
   # Documentation about Cobaya keys can be found at:
   # https://cobaya.readthedocs.io/en/latest/cosmo_basic_runs.html
   debug: true
-  force: true
+  force: false
+  resume: true
   likelihood:
     Euclid:
       aliases:
@@ -22,7 +26,11 @@ Cobaya:
       z_min: 0.0
       z_max: 4.0
       z_samp: 100
-      # Flag to make the choice of the sampler visible to cloe
+      # Upper z bounds for comoving distance integrations up to CMB
+      z_max_cmb: 1200
+      # Number of log space redshift bins between z_max and z_max_cmb
+      z_samp_log: 20
+      # Flag to make the choice of the sampler visible to CLOE
       solver: *solver
       # Nonlinear flag selectors
       # Photometric matter flag
@@ -30,34 +38,53 @@ Cobaya:
       #     1 -> Halofit (Takahashi)
       #     2 -> Mead2016 (includes baryon corrections)
       #     3 -> Mead2020 (w/o baryon corrections)
-      #     4 -> Mead2020_feedback (includes baryon corrections)
-      #     5 -> Euclid Emulator 2
-      #     6 -> BACCO (matter)
+      #     4 -> Euclid Emulator 2
+      #     5 -> BACCO (matter)
       NL_flag_phot_matter: 0
+      # Baryonic feedback flag selector
+      #     0 -> no baryonic feedback
+      #     1 -> Mead2016
+      #     2 -> Mead2020_feedback
+      #     3 -> BCemu
+      #     4 -> BACCO (baryonic feedback)
+      NL_flag_phot_baryon: 0
+      # Baryonic feedback z_dependence flag selector for 
+      # Bacco or BCemu emulators
+      #     False -> 1 set of parameters per redshift bin
+      #     True  -> Power law dependence on z
+      Baryon_redshift_model: True
+      # Photometric galaxy bias flag
+      #     0 -> linear only
+      #     1 -> Non-linear Fast-PT
+      NL_flag_phot_bias: 0
       # Spectroscopic flag
       #     0 -> linear-only
       #     1 -> EFT
       NL_flag_spectro: 0
-      # Bias Model
+      # Intrinsic alignment flag
+      #     0 -> NLA
+      #     1 -> TATT
+      IA_flag: 0
+      # IR-resummation method
+      #     'DST' -> Discrete sine transform
+      #     'EH' -> Eisenstein-Hu
+      IR_resum: 'DST'      
+      # Use magnification bias for GC spectro
+      use_magnification_bias_spectro: False
+      # Redshift dependence of photometric linear galaxy bias
       #     1 -> linear interpolation
       #     2 -> constant within bins
+      #     3 -> 3rd order polynomial
       bias_model: 1
-      # Select statistics for spectroscopic probes (legendre_multipole_power_spectrum
-      # or legendre_multipole_correlation_function)
-      statistics_spectro: legendre_multipole_power_spectrum
-      # Select statistics for photometric probes (angular_power_spectrum or
-      # angular_correlation_function)
-      statistics_photo: angular_power_spectrum
-      # Add RSD to photometric probes
-      add_phot_RSD: False
-      # Apply a generic matrix transformation to the photo observables (available options: 'BNT', 'BNT-test')
-      matrix_transform_phot: False
-      # Magnification bias model
+      # Magnification bias model (redshift dependence)
       #     1 -> linear interpolation
       #     2 -> constant within bins
+      #     3 -> 3rd order polynomial
       magbias_model: 2
       # Use MG gamma
       use_gamma_MG: False
+      # Use Weyl power spectrum (workaround approach)
+      use_Weyl: False
       # Redshift dependent purity correction
       f_out_z_dep: False
       # Include spectroscopic galaxy clustering redshift error
@@ -75,16 +102,62 @@ Cobaya:
       data: data.yaml
       # Selection of the observables to be computed
       observables_selection: observables_selection.yaml
-      # Specifications for each of the observables
+      # Specifications for each of the observables.
+      # Ensure that they are consistent with the choices in data.yaml.
+      # This includes the files for the measurements, covariances, and
+      # mixing matrices, along with distinct keys (such as 'Fourier').
       observables_specifications:
-        GCphot: GCphot.yaml
-        GCspectro: GCspectro.yaml
-        WL: WL.yaml
-        WL-GCphot: WL-GCphot.yaml
-        # Note: This is not yet provided by CLOE
-        # therefore it will load empty dictionaries
-        GCphot-GCspectro: GCphot-GCspectro.yaml
-        WL-GCspectro: WL-GCspectro.yaml
+        GCphot:
+          angular_power_spectrum: GCphot-FourierSpace.yaml
+          pseudo_cl: GCphot-FourierSpace.yaml
+          angular_correlation_function: GCphot-ConfigurationSpace.yaml
+          # Select statistics for GCphot (angular_power_spectrum,
+          # pseudo_cl, or angular_correlation_function)
+          statistics: angular_power_spectrum
+        GCspectro:
+          multipole_power_spectrum: GCspectro-FourierSpace.yaml
+          convolved_multipole_power_spectrum: GCspectro-FourierSpace.yaml
+          multipole_correlation_function: GCspectro-ConfigurationSpace.yaml
+          # Select statistics for GCspectro (multipole_power_spectrum,
+          # convolved_multipole_power_spectrum, or 
+          # multipole_correlation_function)
+          statistics: multipole_power_spectrum
+        WL:
+          angular_power_spectrum: WL-FourierSpace.yaml
+          pseudo_cl: WL-FourierSpace.yaml
+          angular_correlation_function: WL-ConfigurationSpace.yaml
+          # Select statistics for WL (angular_power_spectrum,
+          # pseudo_cl, or angular_correlation_function)
+          statistics: angular_power_spectrum
+        WL-GCphot:
+          angular_power_spectrum: WL-GCphot-FourierSpace.yaml
+          pseudo_cl: WL-GCphot-FourierSpace.yaml
+          angular_correlation_function: WL-GCphot-ConfigurationSpace.yaml
+          # Select statistics for WL-GCphot (angular_power_spectrum,
+          # pseudo_cl, or angular_correlation_function)
+          statistics: angular_power_spectrum
+        CG: CG.yaml
+        # Note: GCphot-GCspectro and WL-GCspectro are not yet provided by CLOE
+        # and the following will therefore load empty dictionaries
+        GCphot-GCspectro:
+          angular_power_spectrum: GCphot-GCspectro-FourierSpace.yaml
+          pseudo_cl: GCphot-GCspectro-FourierSpace.yaml
+          angular_correlation_function: GCphot-GCspectro-ConfigurationSpace.yaml
+          # Select statistics for GCphot-GCspectro (angular_power_spectrum,
+          # pseudo_cl, or angular_correlation_function)
+          statistics: angular_power_spectrum
+        WL-GCspectro:
+          angular_power_spectrum: WL-GCspectro-FourierSpace.yaml
+          pseudo_cl: WL-GCspectro-FourierSpace.yaml
+          angular_correlation_function: WL-GCspectro-ConfigurationSpace.yaml
+          # Select statistics for WL-GCspectro (angular_power_spectrum
+          # pseudo_cl, or angular_correlation_function)
+          statistics: angular_power_spectrum
+        # CMBX probes
+        CMBlens: CMBlensing.yaml
+        CMBlens-GCphot: CMBlensing-GCphot.yaml
+        CMBlens-WL: CMBlensing-WL.yaml
+        ISW-GCphot: iSW-GCphot.yaml
   output: chains/my_euclid_experiment
   params: ./model_default.yaml
   sampler:
@@ -95,4 +168,11 @@ Cobaya:
       extra_args: {}
       stop_at_error: true
   timing: true
+Cosmosis:
+  # At present the cosmosis configuration is fully delegated to ini files,
+  # therefore the only Cosmosis-related parameter is the name of the ini
+  # file to be used. There are two possibilites at present:
+  # - run_cosmosis.ini (recommended option)
+  # - run_cosmosis_with_cobaya.ini
+  ini_file: run_cosmosis.ini
 action: run

@@ -1,0 +1,44 @@
+# This yaml file contains the user specifications 
+# about the scales and redshift/tomographic bins 
+# of the Euclid data to include 
+# in the likelihood analysis.
+# 
+# Probe: GCphot auto-correlation power spectrum
+#
+# GCphot: Number density fluctuations of 
+# the photometric galaxy sample
+#
+# Note: For a given tomographic bin combination, 
+# the range of angular scales (in multipoles ell) 
+# can be concatenated as for example
+# ell_range: [[20, 400], [401, 4000]]
+# To exclude all angular scales, 
+# an empty list can be provided
+statistics: angular_power_spectrum
+bins:
+  n1: 
+    ell_range: [[2, 550]]
+  n2: 
+    ell_range: [[2, 550]]
+  n3: 
+    ell_range: [[2, 550]]
+  n4: 
+    ell_range: [[2, 550]]
+  n5: 
+    ell_range: [[2, 550]]
+  n6: 
+    ell_range: [[2, 550]]
+  n7: 
+    ell_range: [[2, 550]]
+  n8: 
+    ell_range: [[2, 550]]
+  n9: 
+    ell_range: [[2, 550]]
+  n10: 
+    ell_range: [[2, 550]]
+  n11: 
+    ell_range: [[2, 550]]
+  n12: 
+    ell_range: [[2, 550]]
+  n13: 
+    ell_range: [[2, 550]]

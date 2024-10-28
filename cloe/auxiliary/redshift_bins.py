@@ -8,30 +8,6 @@ import numpy as np
 from scipy import interpolate
 
 
-def coerce(zs, redshift_edges, is_sorted=False):
-    """
-    Returns the redshift(s) coerced within the edges.
-
-    Parameters
-    ----------
-    zs: float or numpy.ndarray or list
-        Input redshift(s) to be binned
-    redshift_edges: numpy.ndarray
-        Array of redshift bin edges
-        It has to be 1-dimensional
-    is_sorted: bool (optional)
-        Specifies whether redshift_edges is sorted
-
-    Returns
-    -------
-    Coerced redshifts: float or numpy.ndarray
-        Redshift(s) coerced between edges
-    """
-    min_edge = redshift_edges[0] if is_sorted else min(redshift_edges)
-    max_edge = redshift_edges[-1] if is_sorted else max(redshift_edges)
-    return np.maximum(min_edge, np.minimum(zs, max_edge))
-
-
 def find_bin(zs, redshift_edges, check_bounds=False):
     """
     Returns the redshift bin(s) to which redshift in input belongs.
@@ -79,24 +55,6 @@ def find_bin(zs, redshift_edges, check_bounds=False):
                              ' above the highest bin edge '
                              f'{redshift_edges[-1]}')
     return zs_bin
-
-
-def compute_means_of_consecutive(redshift_edges):
-    """
-    Returns the means of consecutive redshift edges.
-
-    Parameters
-    ----------
-    redshift_edges: numpy.ndarray
-        Array of redshift bins
-        It has to be 1-dimensional and monotonic
-
-    Returns
-    -------
-    Means: numpy.ndarray
-        Means of consecutive redshift edges
-    """
-    return (redshift_edges[1:] + redshift_edges[:-1]) / 2
 
 
 def reduce(z_bins, lower_bound, upper_bound):

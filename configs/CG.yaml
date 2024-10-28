@@ -1,0 +1,62 @@
+# This yaml file contains the user specifications
+# about galaxy clusters.
+# 
+# Probe: galaxy clusters
+# 
+# CG_probe: CC -> cluster counts;
+# CG_xi2_cov_selection: CG_nonanalytic_cov -> don't include the analytic covariance matrix
+# neutrino_cdm: cb -> cold dark matter + baryons
+# external_richness_selection_function: CG_ESF -> use the selection function written on file
+# file_richness_selection_function: selection function file
+# effective_area: effective area covered by the sample
+# z_obs_edges_CC: observed redshift bin edges for cluster counts
+# Lambda_obs_edges_CC: observed mass proxy bin edges for cluster counts
+#
+# halo_profile: NFW -> NFW profile; BMO -> BMO profile
+# overdensity_type:
+#   - vir: for the overdensity calculated at the virial radius;
+#   - crit: with respect to the critical density of the Universe;
+#   - mean: with respect to the background density of the Universe.
+# overdensity: Overdensity value. If a virial density is assumed, this variable is not used.
+# A_l: normalisation of the mass-observable relation
+# B_l: mass slope of the mass-observable relation
+# C_l: redshift slope of the mass-observable relation
+# sig_A_l: normalisation of the intrinsic scatter of the mass-observable relation
+# sig_B_l: mass slope of the intrinsic scatter of the mass-observable relation
+# sig_C_l: redshift slope of the intrinsic scatter of the mass-observable relation
+# M_pivot: mass pivot in the mass-observable relation and in its scatter, in solar masses
+# z_pivot: redshift pivot in the mass-observable relation and in its scatter
+# sig_lambda_norm: normalisation of the scatter of the observed-true richness PDF
+# sig_lambda_z: redshift evolution parameter of the scatter of the observed-true richness PDF
+# sig_lambda_exponent: richness exponent in the scatter of the observed-true richness PDF
+# sig_z_norm: normalisation of the scatter of the observed-true redshift PDF
+# sig_z_z: redshift evolution parameter of the scatter of the observed-true redshift PDF
+# sig_z_lambda: richness evolution parameter of the scatter of the observed-true redshift PDF
+
+statistics_clusters: cluster_counts
+CG_probe: CC
+CG_xi2_cov_selection: CG_nonanalytic_cov
+neutrino_cdm: cb
+external_richness_selection_function: non_CG_ESF
+file_richness_selection_function: ./../data/ExternalBenchmark/Clusters/int_Plob_ltr_z_Dlob.npy
+effective_area: 15000
+z_obs_edges_CC: [0.2, 0.4, 0.6, 0.8, 1., 1.2, 1.4, 1.6, 1.8]
+Lambda_obs_edges_CC: [20., 30., 45., 60., 500.]
+
+halo_profile: NFW
+overdensity_type: vir
+overdensity: 200.
+A_l: 33.
+B_l: 1.
+C_l: 0.01
+sig_A_l: 0.2
+sig_B_l: 0.
+sig_C_l: 0.
+M_pivot: 3.e14
+z_pivot: 0.45
+sig_lambda_norm: 0.9
+sig_lambda_z: 0.1
+sig_lambda_exponent: 0.4
+sig_z_norm: 0.
+sig_z_z: 0.025
+sig_z_lambda: 5.e-6

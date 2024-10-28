@@ -13,9 +13,20 @@ solver: camb
 # List of parameters that are
 # only parameters of the likelihood
 params: !defaults [../configs/params]
+# Use magnification bias for GC spectro
+use_magnification_bias_spectro: 0
 # Nonlinear flag selectors
 NL_flag_phot_matter: 0
+NL_flag_phot_bias: 0
 NL_flag_spectro: 0
+# Intrinsic alignment model selector
+IA_flag: 0
+# IR-resummation model selector
+IR_resum: 'DST'
+# Baryonic feedback flag selector
+NL_flag_phot_baryon: 0
+# Baryonic feedback z_dependence flag selector for BCemu and Bacco emulators
+Baryon_redshift_model: True
 # Bias Model
 bias_model: 1
 # Magnification bias model
@@ -28,18 +39,14 @@ k_samp: 1000
 z_min: 0.0
 z_max: 4.0
 z_samp: 100
-# Select statistics for spectroscopic probes (legendre_multipole_power_spectrum
-# or legendre_multipole_correlation_function)
-statistics_spectro: legendre_multipole_power_spectrum
-# Select statistics for photometric probes (angular_power_spectrum
-# or angular_correlation_function)
-statistics_photo: angular_power_spectrum
 # Add RSD to photometric probes
 add_phot_RSD: False
 # Apply a generic matrix transformation to the photo observables (available options: 'BNT', 'BNT-test')
 matrix_transform_phot: False
 # Use MG gamma
 use_gamma_MG: False
+# Use Weyl power spectrum (workaround approach)
+use_Weyl: False
 # Redshift dependent purity correction
 f_out_z_dep: False
 # Include spectroscopic galaxy clustering redshift error
@@ -50,13 +57,48 @@ data: !defaults [../configs/data]
 observables_selection: !defaults [../configs/observables_selection]
 # Specifications for each of the observables
 observables_specifications:
-  WL: !defaults [../configs/WL]
-  GCphot: !defaults [../configs/GCphot]
-  GCspectro: !defaults [../configs/GCspectro]
-  WL-GCphot: !defaults [../configs/WL-GCphot]
+  WL:
+    angular_power_spectrum: !defaults [../configs/WL-FourierSpace]
+    pseudo_cl: !defaults [../configs/WL-FourierSpace]
+    angular_correlation_function: !defaults [../configs/WL-ConfigurationSpace]
+    statistics: angular_power_spectrum
+  GCphot:
+    angular_power_spectrum: !defaults [../configs/GCphot-FourierSpace]
+    pseudo_cl: !defaults [../configs/GCphot-FourierSpace]
+    angular_correlation_function: !defaults [../configs/GCphot-ConfigurationSpace]
+    statistics: angular_power_spectrum
+  GCspectro:
+    multipole_power_spectrum: !defaults [../configs/GCspectro-FourierSpace]
+    convolved_multipole_power_spectrum: !defaults [../configs/GCspectro-FourierSpace]
+    multipole_correlation_function: !defaults [../configs/GCspectro-ConfigurationSpace]
+    statistics: multipole_power_spectrum
+  WL-GCphot:
+    angular_power_spectrum: !defaults [../configs/WL-GCphot-FourierSpace]
+    pseudo_cl: !defaults [../configs/WL-GCphot-FourierSpace]
+    angular_correlation_function: !defaults [../configs/WL-GCphot-ConfigurationSpace]
+    statistics: angular_power_spectrum
+  CG: !defaults [../configs/CG]
   # Note: This is not yet provided by CLOE
   # therefore it will load empty dictionaries
-  GCphot-GCspectro: !defaults [../configs/GCphot-GCspectro]
-  WL-GCspectro: !defaults [../configs/WL-GCspectro]
+  GCphot-GCspectro:
+    angular_power_spectrum: !defaults [../configs/GCphot-GCspectro-FourierSpace]
+    pseudo_cl: !defaults [../configs/GCphot-GCspectro-FourierSpace]
+    angular_correlation_function: !defaults [../configs/GCphot-GCspectro-ConfigurationSpace]
+    statistics: angular_power_spectrum
+  WL-GCspectro:
+    angular_power_spectrum: !defaults [../configs/WL-GCspectro-FourierSpace]
+    pseudo_cl: !defaults [../configs/WL-GCspectro-FourierSpace]
+    angular_correlation_function: !defaults [../configs/WL-GCspectro-ConfigurationSpace]  
+    statistics: angular_power_spectrum
+  # CMBX probes
+  CMBlens : !defaults [../configs/CMBlensing]
+  CMBlens-WL : !defaults [../configs/CMBlensing-WL]
+  CMBlens-GCphot : !defaults [../configs/CMBlensing-GCphot]
+  ISW-GCphot: !defaults [../configs/iSW-GCphot.yaml]
 # Plot the selected observables during the initialization of the likelihood
 plot_observables_selection: False
+# Default parameters for CMB observables 
+# Upper z bounds for comoving distance integrations up to CMB
+z_max_cmb: 1200
+# Number of log space redshift bins between z_max and z_max_cmb 
+z_samp_log: 20

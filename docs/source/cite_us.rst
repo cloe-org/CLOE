@@ -3,12 +3,14 @@ How to cite this package
 
 If you use CLOE, please cite this repository and the following papers:
 
-Paper 1: Auto and cross correlations of the Euclid observables
+- Theoretical Recipe (Cardone et al. 2024)
 
-Paper 2: The Euclid likelihood code CLOE
+- Code Implementation (Joudaki et al. 2024)
 
-Paper 3: MCMC based forecasts for 3x2pt plus GCsp and 6x2pt
+- Inference and Forecasts (Canas-Herrera et al. 2024)
 
-Paper 4: Impact of systematic uncertainties on the forecasted Euclid constraints
+- Systematic Uncertainties (Blot et al. 2024)
 
-Paper 5: Validation of observables against benchmarks and other public codes
+- Validation and Performance (Martinelli et al. 2024)
+
+- Additional papers by Euclid members (Crocce et al. 2024, Carrillo et al. 2024, Moretti et al. 2024, Goh et al. 2024, Legrand et al. 2024, Fumagalli/Sakr et al. 2024, Sciotti et al. 2024, Salvalaggio/Camacho et al. 2024, and others to be added)

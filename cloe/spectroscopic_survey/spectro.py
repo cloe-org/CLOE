@@ -7,9 +7,10 @@ v2.0 recipes of CLOE.
 
 # Global
 import numpy as np
-from scipy.special import legendre
+from scipy.special import legendre, binom
 from scipy import integrate
-from cloe.fftlog.fftlog import fftlog
+from scipy.interpolate import interp1d
+from cloe.fftlog import fftlog, hankel
 
 
 class Spectro:
@@ -17,7 +18,7 @@ class Spectro:
     Class for the spectroscopic observables.
     """
 
-    def __init__(self, cosmo_dic, z_str):
+    def __init__(self, cosmo_dic, z_str, mixing_matrix_dict=None):
         """Initialises the class.
 
         Constructor of the class :obj:`Spectro`.
@@ -40,6 +41,8 @@ class Spectro:
         self.dict_m_legendrepol = \
             {m: legendre(m)(self.mu_grid) for m in range(leg_m_max)}
         self.z_arr = np.array(z_str).astype("float")
+
+        self.mixing_matrix_dict = mixing_matrix_dict
 
     def update(self, cosmo_dic):
         r"""Updates method.
@@ -206,7 +209,7 @@ class Spectro:
         ----------
         mu_rsd: numpy.ndarray of float
            Cosines of the angles between the wavenumber and
-           line of sight (Alcock–Paczynski distorted)
+           line of sight (Alcock-Paczynski distorted)
            Warning: only mu_rsd = self.mu_grid works (issue 706)
         z: float
             Redshift at which to evaluate power spectrum
@@ -258,6 +261,7 @@ class Spectro:
         noise = \
             self.theory['noise_Pgg_spectro'](z, self.get_k(k, self.mu_grid, z),
                                              self.get_mu(self.mu_grid, z))
+
         galspec += noise
 
         if np.array_equal(mu_rsd, self.mu_grid):
@@ -309,20 +313,383 @@ class Spectro:
 
         return np.asarray(spectra)
 
-    def multipole_correlation_function(self, s, z, ell,
+    def convolved_power_spectrum_multipoles(self, redshift):
+        r"""Power spectrum multipoles convolved with the mixing matrix
+
+        Returns the power spectrum multipoles convolved with the mixing matrix
+        stored as class attribute.
+
+        .. math::
+            P_{\ell}^{\rm obs}(k) = \int {\rm d}k^'\,{k^'}^2\,\sum_{\ell^'} \
+            W_{\ell\ell^'}(k,k^')P_{\ell^'}(k^')
+
+        Parameters
+        ----------
+        redshift: float
+            Redshift at which to evaluate the convolved power spectrum
+            multipoles.
+
+        Returns
+        -------
+        mps: list of numpy.ndarray
+            List containing the convolved power spectrum multipoles of order
+            (0,2,4). The list includes the three multipoles, in this order.
+        """
+        if self.mixing_matrix_dict is None:
+            raise TypeError('Mixing matrix has not been initialised since no '
+                            'argument "mixing_matrix_dict" was specified when '
+                            'instantiating the Spectro class.')
+
+        kin0 = self.mixing_matrix_dict['kin0']
+        kin2 = self.mixing_matrix_dict['kin2']
+        kin4 = self.mixing_matrix_dict['kin4']
+        kout = self.mixing_matrix_dict['kout']
+
+        multipoles_in = {}
+        for ell in [0, 2, 4]:
+            multipoles_in[f'ell{ell}'] = np.empty(
+                self.mixing_matrix_dict[f'kin{ell}'].shape)
+            if np.all(kin0 == kin2) and np.all(kin0 == kin4):
+                for i, kk in enumerate(kin0):
+                    multipoles_in[f'ell{ell}'][i] = \
+                        self.multipole_spectra(redshift, kk, ms=[ell])
+            else:
+                for i, kk in enumerate(self.mixing_matrix_dict[f'kin{ell}']):
+                    multipoles_in[f'ell{ell}'][i] = \
+                        self.multipole_spectra(redshift, kk, ms=[ell])
+
+        multipoles_out = {}
+        for ell in [0, 2, 4]:
+            multipoles_out[f'ell{ell}'] = np.zeros(kout.shape)
+            for ell_prime in [0, 2, 4]:
+                multipoles_out[f'ell{ell}'] += \
+                    np.dot(self.mixing_matrix_dict[f'W{ell}{ell_prime}'],
+                           multipoles_in[f'ell{ell_prime}'])
+
+        return (multipoles_out['ell0'], multipoles_out['ell2'],
+                multipoles_out['ell4'])
+
+    def multipole_correlation_function_mag_mag(self, r_xi, z, ell):
+        r"""Evaluates the magnification-magnification correlation function
+
+        Evaluates the magnification-magnification bias contribution to the
+        spectroscopic galaxy clustering correlation function for the
+        separation values in the :math:`r_\xi` array, at the requested
+        value of redshift :math:`z` and multipole :math:`\ell`.
+
+        .. math::
+            \xi_{\ell}^{\mu\mu}(r;z)=C_{\mu\mu}(\ell) \
+            \frac{9\Omega^2_{m,0}{H^4_0}}{8\pi}[2-5s_{\rm bias}(z)]^2r^3(z) \
+            \int^{1}_{0}f_{\ell}(x,r,z)dx\\
+
+        Parameters
+        ----------
+        r_xi: numpy.ndarray of float
+            Array of :math:`r_\xi` values in Mpc
+        z: float
+            A value of redshift, among {1.00, 1.20, 1.40, 1.65}
+        ell: int
+            A value of :math:`\ell` among {0, 2, 4}
+
+        Returns
+        -------
+        xi_mu_mu: numpy.ndarray of float
+            Array of shape len(r_xi), containing the values
+            of the magnification-magnification correlation function
+            evaluated at the :math:`\ell` and :math:`r_\xi` values provided
+        """
+        # Retrieve magnification bias value corresponding to redshift bin
+        spec_zs = [1.0, 1.2, 1.4, 1.65]
+        nuisance_dict = self.theory['nuisance_parameters']
+        try:
+            spec_bin = spec_zs.index(z) + 1
+            mag_bi = nuisance_dict[f'magnification_bias_spectro_bin{spec_bin}']
+        except ValueError:
+            raise ValueError('Spectroscopic magnification bias cannot '
+                             'be obtained. Check that redshift is '
+                             'inside the bin edges.')
+
+        def K_ell(ell, dx, zx):
+            r"""Evaluates the integral :math:`K_{\ell}(xr)`
+
+            Evaluates :math:`K_{\ell}(xr)` given a value of :math:`ell`,
+            an array of redshifts :math:`zx` and integration steps
+            :math:`x` by performing the integration using fftlog.
+
+            .. math::
+                K_{\ell}(xr) = \int^{\infty}_{0}k^2P_{\delta}{\delta} \
+                [k,z(x_{rad})]\frac{j_{\ell}(xkr)}{xkr} dk\\
+
+            Parameters
+            ----------
+            ell: int
+                A value of :math:`\ell` among {0, 2, 4}
+            dx: numpy.ndarray of float
+                Array of integration steps :math:`x`
+            zx: numpy.ndarray of float
+                Array of redshifts :math:`z(x_rad)` corresponding to the
+                radial comoving distance :math:`x_{rad}`
+
+            Returns
+            -------
+            K_ell_xr: numpy.ndarray of float
+                Array of size len(dx) of the integral :math:`K_{\ell}(xr)`
+            """
+            nu = 1.01
+            # Define the integrand
+            integ = self.theory['Pk_delta'].P(zx, self.theory['k_win']) * \
+                self.theory['k_win'] ** 2
+            # Perform the integration for each step in dx
+            K_ell_xr = np.array([])
+            for i, xx in enumerate(dx):
+                fftlog_integral = fftlog.fftlog(self.theory['k_win'],
+                                                integ[i], nu=nu,
+                                                N_extrap_begin=1000,
+                                                N_extrap_end=1000,
+                                                c_window_width=0.25,
+                                                N_pad=1000)
+                d, Int = fftlog_integral.fftlog(ell)
+                # Interpolate for desired values of dx
+                K_ell_xr = np.append(K_ell_xr, interp1d(d, Int)(xx))
+            return K_ell_xr
+
+        def f_ell(ell, dx, r):
+            r"""Evaluates the integrand :math:`f_{\ell}(x,r,z)`
+
+            Evaluates the intergand :math:`f_{\ell}(x,r,z)` given a value
+            of :math:`ell`, :math:`r_\xi` and step :math:`x` to
+            integrate over.
+
+            .. math::
+                f_{\ell}(x,r) = x^2(1-x^2)[1+z(x_{rad})]^2(xr) \
+                \int^{\infty}_{0}k^2P_{\delta}{\delta}[k,z(x_{rad})] \
+                \frac{j_{\ell}(xkr)}{xkr} dk\\
+
+            Parameters
+            ----------
+            ell: int
+                A value of :math:`\ell` among {0, 2, 4}
+            dx: numpy.ndarray of float
+                Array of integration steps :math:`x`
+            r: float
+                A value of :math:`r_\xi` in Mpc
+
+            Returns
+            -------
+            f_ell: numpy.ndarray of float
+                Array of size len(dx) corresponding to the values
+                of the integrand :math:`f_ell`
+            """
+            # Interpolate the redshift z at the radial comoving distance xr
+            interp_comov_dist = interp1d(self.theory['comov_dist'],
+                                         self.theory['z_win'])
+            comov_dist_z = interp_comov_dist(dx * self.theory['r_z_func'](z))
+            # Calcuate f_ell
+            f_ell = dx ** 2 * (1 - dx) ** 2 * \
+                (1 + comov_dist_z) ** 2 * \
+                K_ell(ell, dx * r, comov_dist_z)
+            return f_ell
+
+        def compute_xi_mu_mu(ell, r):
+            r"""Computes a single value of :math:`xi_mu_mu`
+
+            Evaluates the magnification-magnification bias contribution
+            to the correlation function for a single :math:`r_\xi`, at
+            the requested value of redshift :math:`z` and multipole
+            :math:`\ell`.
+
+            Parameters
+            ----------
+            ell: int
+                A value of :math:`\ell` among {0, 2, 4}
+            r: float
+                A value of :math:`r_\xi` in Mpc
+
+            Returns
+            -------
+            xi_mu_mu: float
+                Value of magnification-magnification correlation function
+                at given :math:`\ell` and :math:`r_\xi`
+            """
+            # Define the step size and x array for integration
+            x_step = [0.004, 0.010, 0.016]
+            try:
+                dx = np.linspace(x_step[int(ell / 2)] / 40.0, 1.0,
+                                 num=10, endpoint=True)
+            except ValueError:
+                raise ValueError('Magnification-magnification bias '
+                                 'cannot be calculated for requested '
+                                 'ell value = 'f'{ell}')
+            # Calculate the integrand f_ell(x,s,z) as an array
+            f_ells = f_ell(ell, dx, r)
+            # Perform the integration
+            integ_f_ell = integrate.simps(f_ells, dx)
+            # Calculate the coefficient C_mu_mu(ell)
+            C_ell = (2 * ell + 1) / 2 * np.math.factorial(ell) / \
+                (2 ** (ell - 1) * np.math.factorial(int(ell / 2)) ** 2)
+            # Calculate xi_mu_mu
+            xi_mu_mu_r = C_ell * 9 * \
+                (self.theory['Omc'] + self.theory['Omb']) ** 2 * \
+                self.theory['H0_Mpc'] ** 4 / (8 * np.pi) * \
+                (2 - 5 * mag_bi) ** 2 * \
+                self.theory['r_z_func'](z) ** 3 * integ_f_ell
+            return xi_mu_mu_r
+
+        # Calculate xi_mu_mu for the array of s
+        xi_mu_mu = np.array([compute_xi_mu_mu(ell, r) for r in r_xi])
+
+        return xi_mu_mu
+
+    def multipole_correlation_function_dens_mag(self, r_xi, z, ell):
+        r"""Evaluate the density-magnification correlation function
+
+        Evaluates the density-magnification bias contribution to the
+        spectroscopic galaxy clustering correlation function for the
+        separation values in the :math:`r_\xi` array, at the requested
+        value of redshift :math:`z` and multipole :math:`\ell`.
+
+        .. math::
+            \xi_{\ell}^{g\mu}(r;z)=-C_{g\mu}(\ell) \
+            \frac{3\Omega_{m,0}{H^2_0}}{4\pi}b(z)s_{\rm bias}(z)^2 \
+            [2-5s_{\rm bias}(z)](1+z)\sum_{n=0}^{\ell/2} \
+            \frac{(-1)^n}{2^n}{\ell \choose n}{2\ell-2n \choose \ell} \
+            \left(\frac{\ell}{2}-n \right)!I^{\ell/2-n+3/2}_{\ell/2-n+1/2} \
+            (r;z)\\
+
+        Parameters
+        ----------
+        r_xi: numpy.ndarray of float
+            Array of :math:`r_\xi` values in Mpc
+        z: float
+            A value of redshift, among {1.00, 1.20, 1.40, 1.65}
+        ell: int
+            A value of :math:`\ell` among {0, 2, 4}
+
+        Returns
+        -------
+        xi_dens_mu: numpy.ndarray of float
+            Array of shape len(r_xi), containing the values of the
+            density-magnification bias correlation function evaluated at the
+            given :math:`\ell` and :math:`r_\xi` values
+        """
+        # Retrieve galaxy and magnification bias corresponding to the redshift
+        spec_zs = [1.0, 1.2, 1.4, 1.65]
+        nuisance_dict = self.theory['nuisance_parameters']
+        try:
+            spec_bin = spec_zs.index(z) + 1
+            mag_bi = nuisance_dict[f'magnification_bias_spectro_bin{spec_bin}']
+            gal_bi = nuisance_dict[f'b1_spectro_bin{spec_bin}']
+        except ValueError:
+            raise ValueError('Spectroscopic galaxay and magnification bias '
+                             'cannot be obtained. Check that redshift is '
+                             'inside the bin edges. ')
+        # Calculate the coefficient C_g_mu(ell)
+        C_gmu = (2 * ell + 1) / 2 * np.pi ** (3 / 2) * \
+            2 ** (3 / 2) / 2 ** (ell / 2)
+        # Calculate the prefactor of xi_g_mu
+        prefactor = -C_gmu * 3 * (self.theory['Omc'] + self.theory['Omb']) * \
+            self.theory['H0_Mpc'] ** 2 / (4 * np.pi) * 2 * gal_bi * \
+            (2 - 5 * mag_bi) * (1 + z) * r_xi ** 2
+
+        def I_n_l(nx, r_xi):
+            r"""Evaluate I_n_l(r,z)
+
+            Performs the integration to return I_n_l(r,z) within the
+            equation of :math:`\xi_\ell^{g\mu}`, for a given :math:`n`
+            and array :math:`r_\xi`, using the Hankel transform method.
+
+            .. math::
+                I_n^{\ell}(r,z)=\frac{1}{2\pi^2}\int_0^{\infty \
+                k^2P_{\delta\delta}(k,z)\frac{j_\ell(kr)}{(kr)^n}\\
+
+            Parameters
+            ----------
+            nx: int
+                A value of :math:`n` among {0, 1, 2}
+            r_xi: numpy.ndarray of float
+                Array of :math:`r_\xi` values in Mpc
+
+            Returns
+            -------
+            fx: float
+                A value of the summation
+            """
+            nu = 1.01
+            # Define the integrand
+            integ = self.theory['Pk_delta'].P(z, self.theory['k_win']) / \
+                self.theory['k_win'] ** (nx + 1)
+            # Perform the integration
+            hankel_integral = hankel.hankel(self.theory['k_win'],
+                                            integ, nu=nu,
+                                            N_extrap_begin=1500,
+                                            N_extrap_end=1500,
+                                            c_window_width=0.25,
+                                            N_pad=1000)
+            d, Int = hankel_integral.hankel(nx + 1)
+            # Interpolate for desired values of s
+            interp_int = interp1d(d, Int)(r_xi)
+            I_n_l = 1 / (2 * np.pi ** 2) * np.sqrt(np.pi / 2) * \
+                1 / (r_xi ** (nx + 2)) * interp_int
+            return I_n_l
+
+        def sum_fact(ell, nx):
+            r"""Evaluate the summation expression
+
+            Evaluates the summation expression within the equation of
+            :math:`xi_\ell^{g\mu}`, given a value of :math:`\ell` and
+            :math:`r_\xi`.
+
+            .. math::
+                \sum_{n=0}^{\ell/2}\frac{(-1)^n}{2^n}{\ell \choose n} \
+                {2\ell-2n \choose \ell}\left(\frac{\ell}{2}-n \right)!\\
+
+            Parameters
+            ----------
+            ell: int
+                A value of :math:`\ell` among {0, 2, 4}
+            nx: int
+                A value of :math:`n` among {0, 1, 2}
+
+            Returns
+            -------
+            fx: float
+                A value of the summation
+            """
+            fx = (-1) ** nx / (2 ** nx) * binom(ell, nx) * \
+                binom(2 * ell - 2 * nx, ell) * \
+                np.math.factorial(int(ell / 2 - nx))
+            return fx
+
+        # Calculate xi_g_mu according to ell value
+        if ell == 0:
+            xi_g_mu = prefactor * I_n_l(0, r_xi)
+        elif ell == 2:
+            xi_g_mu = prefactor * (sum_fact(ell, 0) * I_n_l(1, r_xi) +
+                                   sum_fact(ell, 1) * I_n_l(0, r_xi))
+        elif ell == 4:
+            xi_g_mu = prefactor * (sum_fact(ell, 0) * I_n_l(2, r_xi) +
+                                   sum_fact(ell, 1) * I_n_l(1, r_xi) +
+                                   sum_fact(ell, 2) * I_n_l(0, r_xi))
+        else:
+            raise ValueError('Density-magnification bias '
+                             'cannot be calculated for requested '
+                             'ell value = ' f'{ell}')
+        return xi_g_mu
+
+    def multipole_correlation_function(self, r_xi, z, ell,
                                        k_min=5e-5,
                                        k_max=50,
                                        k_num_points=2048):
         r"""Evaluates the multipole correlation function.
 
         Evaluates the multipole correlation function for the separation values
-        contained in the :math:`s` array, at the requested values of redshift
-        :math:`z` and multipole :math:`\ell`.
+        contained in the :math:`r_\xi` array, at the requested values of
+        redshift :math:`z` and multipole :math:`\ell`.
 
         Parameters
         ----------
-        s: numpy.array of float
-            Array of :math:`s` values in Mpc/h
+        r_xi: numpy.ndarray of float
+          Array of :math:`r_\xi` values in Mpc
         z: float
             Value of redshift, among {1.00, 1.20, 1.40, 1.65}
         ell: int or array of int
@@ -340,9 +707,9 @@ class Spectro:
         Returns
         -------
         Multipole correlation function: numpy.ndarray of float
-            Array of shape (len(ell), len(s)), containing the values of the
+            Array of shape (len(ell), len(r_xi)), containing the values of the
             multipole correlation function evaluated in correspondence of the
-            :math:`\ell` and :math:`s` values provided as input
+            :math:`\ell` and :math:`r_\xi` values provided as input
         """
         # vectorize input ell if it is a scalar
         if np.isscalar(ell):
@@ -357,14 +724,24 @@ class Spectro:
                                  for k in k_grid])
 
         # perform the Hankel transform
-        transformed_lin = np.empty((len(ell), len(s)))
+        transformed_lin = np.empty((len(ell), len(r_xi)))
         volume_factor = (k_grid**3) / (2 * (np.pi**2))
         for id in range(len(ell)):
             y_array = volume_factor * pk_arrays[id] * np.real(1j**ell[id])
-            transformer = fftlog(k_grid, y_array)
-            s_grid, transformed_log = transformer.fftlog(ell[id])
+            transformer = fftlog.fftlog(k_grid, y_array)
+            r_grid, transformed_log = transformer.fftlog(ell[id])
             # interpolate to get the linearly-spaced values of the multipole
             # correlation function from the log-spaced ones.
-            transformed_lin[id] = np.interp(s, s_grid, transformed_log)
+            transformed_lin[id] = np.interp(r_xi, r_grid, transformed_log)
+
+        # add magnification bias contribution
+        if self.theory['use_magnification_bias_spectro']:
+            for id, ells in enumerate(ell):
+                xi_dens_mag = \
+                    self.multipole_correlation_function_dens_mag(r_xi, z, ells)
+                xi_mag_mag = \
+                    self.multipole_correlation_function_mag_mag(r_xi, z, ells)
+                transformed_lin[id] += 2 * xi_dens_mag
+                transformed_lin[id] += xi_mag_mag
 
         return transformed_lin

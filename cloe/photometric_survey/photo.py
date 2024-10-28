@@ -13,23 +13,14 @@ from cloe.photometric_survey.redshift_distribution \
 from cloe.auxiliary.redshift_bins import linear_interpolator
 import warnings
 
-# General error class
-
-
-class PhotoError(Exception):
-    r"""
-    Class to define Exception Error.
-    """
-
-    pass
-
 
 class Photo:
     """
     Class for photometric observables.
     """
 
-    def __init__(self, cosmo_dic, nz_dic_WL, nz_dic_GC, add_RSD=False):
+    def __init__(self, cosmo_dic, nz_dic_WL, nz_dic_GC,
+                 mixing_matrix_dict=None, add_RSD=False):
         """Initialise.
 
         Constructor of the class Photo.
@@ -92,6 +83,12 @@ class Photo:
         self._ells_GC_or_XC = None
 
         self.multiply_bias_cl = False
+
+        if mixing_matrix_dict is not None:
+            self.mixing = mixing_matrix_dict
+            self.mixing_size = \
+                self.mixing["G_E", "G_E", 1, 1]["MM"][0].size
+            self.ells_in = np.array(range(0, self.mixing_size))
 
         # The class might be initialized with no cosmo dictionary, as it is
         # currently done when instantiating Photo from Euclike, for running
@@ -177,7 +174,7 @@ class Photo:
         if any(obs_sel['GCphot'].values()):
             self.nz_GC = RedshiftDistribution('GCphot', self.nz_dic_GC,
                                               nuisance_dict)
-            self.photobias = [nuisance_dict[f'b{i}_photo']
+            self.photobias = [nuisance_dict[f'b1_photo_bin{i}']
                               for i in self.nz_GC.get_tomographic_bins()]
 
             if self.theory['magbias_model'] <= 2:
@@ -415,7 +412,7 @@ class Photo:
         if self.theory['bias_model'] == 2:
             bias = self.photobias[bin_i - 1]
         elif self.theory['bias_model'] in [1, 3]:
-            bias = self.theory['b_inter'](z)
+            bias = self.theory['b1_inter'](z)
 
         return Hzm_arr * fzm_arr * nzm_arr / bias
 
@@ -515,7 +512,7 @@ class Photo:
 
         Calculates the weak lensing shear kernel for a given tomographic bin.
         Uses broadcasting to compute a 2D-array of integrands and then applies
-        :obj:`integrate.trapz` on the array along one axis
+        :obj:`np.trapz` on the array along one axis.
 
         .. math::
             W_{i}^{\gamma}(\ell, z, k) =
@@ -531,8 +528,8 @@ class Photo:
         z: numpy.ndarray of float
             Redshift at which weight is evaluated.
         bin_i: int
-           Index of desired tomographic bin. Tomographic bin
-           indices start from 1.
+            Index of desired tomographic bin.
+            Tomographic bin indices start from 1
         k: float
             Wavenumber at which to evaluate the Modified Gravity
             :math:`\Sigma(z,k)` function
@@ -540,30 +537,32 @@ class Photo:
         Returns
         -------
         Shear kernel: numpy.ndarray
-           1-D Numpy array of shear kernel values for specified bin
-           at specified scale for the redshifts defined in z
+            1-D Numpy array of shear kernel values for specified bin
+            at specified scale for the redshifts defined in z
         """
-        dz_i = self.theory['nuisance_parameters'][f'dz_{bin_i}_WL']
-        zint_mat = np.linspace(z, z[-1],
-                               self.z_trapz_sampling)
-        zint_mat = zint_mat.T
-        diffz = np.diff(zint_mat)
+
         H0_Mpc = self.theory['H0_Mpc']
         O_m = self.theory['Omm']
 
         n_z_normalized = self.nz_WL.interpolates_n_i(bin_i, z)
 
-        intg_mat = np.array([self.window_integrand(zint_mat[zii],
-                                                   zint_mat[zii, 0],
-                                                   n_z_normalized)
-                             for zii in range(len(zint_mat))])
+        win_eff = self.window_integrand(z[:, None], z, n_z_normalized)
 
-        integral_arr = integrate.trapz(intg_mat, dx=diffz, axis=1)
+        win_eff_tril = np.tril(win_eff)
+        integral_arr = np.trapz(win_eff_tril, z, axis=0)
+        # subtraction of the first triangle
+        integral_arr[1:] -= np.diag(win_eff_tril)[1:] * (z[1:] - z[:-1]) / 2
 
         W_val = (1.5 * H0_Mpc * O_m * (1.0 + z) *
                  self.theory['MG_sigma'](z, k) *
                  (self.theory['f_K_z_func'](z) /
                   (1 / H0_Mpc)) * integral_arr)
+
+        # Removing the conversion factor between Weyl and matter
+        # power spectra from W_val, when employing the Weyl power
+        # spectrum in a workaround approach
+        if self.theory['use_Weyl']:
+            W_val = self.theory['f_K_z_func'](z) * integral_arr
 
         return W_val
 
@@ -595,7 +594,7 @@ class Photo:
 
         Calculates the magnification bias kernel for a given tomographic bin.
         Uses broadcasting to compute a 2D-array of integrands and then applies
-        integrate.trapz on the array along one axis.
+        :obj:`np.trapz` on the array along one axis.
 
         .. math::
             W_{i}^{\mu}(\ell, z, k) =
@@ -624,79 +623,37 @@ class Photo:
            values for specified bin
            at specified scale for the redshifts defined in z
         """
-        dz_i = self.theory['nuisance_parameters'][f'dz_{bin_i}_GCphot']
-        zint_mat = np.linspace(z, z[-1],
-                               self.z_trapz_sampling)
-        zint_mat = zint_mat.T
-        diffz = np.diff(zint_mat)
+
         H0_Mpc = self.theory['H0_Mpc']
         O_m = self.theory['Omm']
 
         n_z_normalized = self.nz_GC.interpolates_n_i(bin_i, z)
 
-        intg_mat = np.array([self.window_integrand(zint_mat[zii],
-                                                   zint_mat[zii, 0],
-                                                   n_z_normalized)
-                             for zii in range(len(zint_mat))])
-        if self.theory['magbias_model'] != 2:
-            intg_mat *= self.magbias(zint_mat)
+        win_eff = self.window_integrand(z[:, None], z, n_z_normalized)
+        win_eff_tril = np.tril(win_eff)
 
-        integral_arr = integrate.trapz(intg_mat, dx=diffz, axis=1)
+        if self.theory['magbias_model'] != 2:
+            win_eff_tril *= self.magbias(z[:, None])
+
+        integral_arr = np.trapz(win_eff_tril, z, axis=0)
+        # subtraction of the first triangle
+        integral_arr[1:] -= np.diag(win_eff_tril)[1:] * (z[1:] - z[:-1]) / 2
 
         W_val = (1.5 * H0_Mpc * O_m * (1.0 + z) *
                  self.theory['MG_sigma'](z, k) *
                  (self.theory['f_K_z_func'](z) /
                   (1 / H0_Mpc)) * integral_arr)
 
+        # Removing the conversion factor between Weyl and matter
+        # power spectra from W_val, when employing the Weyl power
+        # spectrum in a workaround approach
+        if self.theory['use_Weyl']:
+            W_val = self.theory['f_K_z_func'](z) * integral_arr
+
         if self.theory['magbias_model'] == 2:
             # magbias is a list of constants
             W_val *= self.magbias[bin_i - 1]
 
-        return W_val
-
-    def WL_window_slow(self, z, bin_i, k=0.0001):
-        r"""WL window slow.
-
-        Calculates the weak lensing shear kernel for a given tomographic bin.
-
-        .. math::
-            W_{i}^{\gamma}(z, k) =
-            \frac{3}{2}\left ( \frac{H_0}{c}\right )^2
-            \Omega_{{\rm m},0} (1 + z) \Sigma(z, k)
-            f_K\left[\tilde{r}(z)\right]
-            \int_{z}^{z_{\rm max}}{{\rm d}z^{\prime} n_{i}^{\rm L}(z^{\prime})
-            \frac{f_K\left[\tilde{r}(z^{\prime}) - \tilde{r}(z)\right]}
-            {f_K\left[\tilde{r}(z^{\prime})\right]}}\\
-
-        Parameters
-        ----------
-        z: float
-            Redshift at which kernel is being evaluated.
-        bin_i: int
-           Index of desired tomographic bin. Tomographic bin
-           indices start from 1.
-        k: float
-            Wavenumber at which to evaluate the Modified Gravity
-            :math:`\Sigma(z,k)` function
-
-        Returns
-        -------
-        Shear kernel: float
-           Value of shear kernel for specified bin at specified redshift
-           and scale
-        """
-        H0_Mpc = self.theory['H0_Mpc']
-        O_m = self.theory['Omm']
-
-        n_z_normalized = self.nz_WL.interpolates_n_i(bin_i, self.z_winterp)
-
-        W_val = ((1.5 * H0_Mpc * O_m * (1.0 + z) *
-                  self.theory['MG_sigma'](z, k) * (
-                  self.theory['f_K_z_func'](z) /
-                  (1 / H0_Mpc)) * integrate.quad(self.window_integrand,
-                                                 a=z,
-                                                 b=self.wl_int_z_max[bin_i],
-                                                 args=(z, n_z_normalized))[0]))
         return W_val
 
     def IA_window(self, z, bin_i):
@@ -851,6 +808,72 @@ class Photo:
 
         return c_final
 
+    def pseudo_Cl_3x2pt(self, obs, ells, bin_i, bin_j):
+        r"""Angular power spectra convolved with the mixing matrix
+
+        Returns the angular power spectrum convolved with the mixing matrix
+        stored as class attribute.
+
+        .. math::
+            \left\langle\tilde{\bf{C}}_{\ell}^{ij}\right\rangle = \
+            \sum_{\ell'} \bf{M}_{\ell \ell'}^{ij} \bf{C}_{\ell'}^{ij}
+
+        Parameters
+        ----------
+        obs: str
+            Type of Pseudo-Cl function. It must be selected from the list
+            ["Shear-Shear", "Shear-Position", "Position-Position"].
+            The match is case-insensitive.
+        ells: numpy.ndarray of float
+            :math:`\ell`-modes at which
+            :math:`\left\langle\tilde{\bf{C}}_{\ell}^{ij}\right\rangle`
+            is evaluated.
+        bin_i: int
+           Index of first tomographic bin. Tomographic bin
+           indices start from 1
+        bin_j: int
+           Index of second tomographic bin. Tomographic bin
+           indices start from 1.
+
+        Returns
+        -------
+        Pseudo-Cl power spectrum: numpy.ndarray of float
+           Values of the pseudo-Cl power spectrum
+        """
+        if self.mixing is None:
+            raise TypeError('Mixing matrix has not been initialised since no '
+                            'argument "mixing_matrix_dict" was specified when '
+                            'instantiating the Photo class.')
+
+        obs = obs.casefold()
+        if obs == 'shear-shear':
+            cells_func = self.Cl_WL
+            obs1 = "G_E"
+            obs2 = "G_E"
+        elif obs == 'shear-position':
+            cells_func = self.Cl_cross
+            obs1 = "P"
+            obs2 = "G_E"
+        elif obs == 'position-position':
+            cells_func = self.Cl_GC_phot
+            obs1 = "P"
+            obs2 = "P"
+        else:
+            raise ValueError('obs parameter must be selected from the '
+                             'following list: ["Shear-Shear", '
+                             '"Shear-Position", '
+                             '"Position-Position"]')
+
+        # For a given observable, obtain the input raw Cls
+        # and then output the transformed pseudo-Cls.
+        cells_in = cells_func(self.ells_in, bin_i, bin_j)
+        cells_out = np.zeros(ells.size)
+        cells_out = \
+            self.mixing[obs1, obs2, bin_i - 1, bin_j - 1]["MM"][0:ells.size] \
+            @ cells_in
+
+        return cells_out
+
     def _evaluate_power_WL(self, force_recompute=False):
         r"""Evaluate Power WL
 
@@ -874,6 +897,17 @@ class Photo:
             self.power_ii_WL = P_ii(self.z_grid_for_cl, k_grid, grid=False)
             self.power_di_WL = P_di(self.z_grid_for_cl, k_grid, grid=False)
             self._stored_WL = True
+
+            # Updating power_dd_WL and power_di_WL when employing the
+            # Weyl power spectrum in a workaround approach
+            if self.theory['use_Weyl']:
+                Weyl_factor_interp = self.theory['Weyl_matter_ratio']
+                Weyl_factor = \
+                    Weyl_factor_interp(self.z_grid_for_cl, k_grid, grid=False)
+                sqrt_Weyl_factor = np.sqrt(Weyl_factor)
+
+                self.power_dd_WL *= Weyl_factor
+                self.power_di_WL *= sqrt_Weyl_factor
 
     def Cl_GC_phot(self, ells, bin_i, bin_j):
         r"""Cl GC Phot
@@ -1014,6 +1048,17 @@ class Photo:
             self.power_dd_GC = P_dd(self.z_grid_for_cl, k_grid, grid=False)
             self.power_gd_GC = P_gd(self.z_grid_for_cl, k_grid, grid=False)
             self._stored_GC = True
+
+            # Updating power_dd_GC and power_gd_GC when employing the
+            # Weyl power spectrum in a workaround approach
+            if self.theory['use_Weyl']:
+                Weyl_factor_interp = self.theory['Weyl_matter_ratio']
+                Weyl_factor = \
+                    Weyl_factor_interp(self.z_grid_for_cl, k_grid, grid=False)
+                sqrt_Weyl_factor = np.sqrt(Weyl_factor)
+
+                self.power_dd_GC *= Weyl_factor
+                self.power_gd_GC *= sqrt_Weyl_factor
 
     def Cl_cross(self, ells, bin_i, bin_j):
         r"""Cl Cross
@@ -1169,6 +1214,18 @@ class Photo:
             self.power_dd_XC = P_dd(self.z_grid_for_cl, k_grid, grid=False)
             self.power_di_XC = P_di(self.z_grid_for_cl, k_grid, grid=False)
             self._stored_XC = True
+
+            # Updating power_dd_XC, power_di_XC and power_gd_XC when
+            # employing the Weyl power spectrum in a workaround approach
+            if self.theory['use_Weyl']:
+                Weyl_factor_interp = self.theory['Weyl_matter_ratio']
+                Weyl_factor = \
+                    Weyl_factor_interp(self.z_grid_for_cl, k_grid, grid=False)
+                sqrt_Weyl_factor = np.sqrt(Weyl_factor)
+
+                self.power_dd_XC *= Weyl_factor
+                self.power_di_XC *= sqrt_Weyl_factor
+                self.power_gd_XC *= sqrt_Weyl_factor
 
     @staticmethod
     def _eval_prefactor_mag(ell):
@@ -1338,7 +1395,7 @@ class Photo:
         ell_factor = (2 * ell + 5) / (2 * ell + 1)
         return z_r_interp(ell_factor * r)
 
-    def corr_func_3x2pt(self, obs, theta_deg, bin_i, bin_j):
+    def corr_func_3x2pt(self, obs, theta_arcmin, bin_i, bin_j):
         r"""Generic 3x2pt correlation function.
 
         Computes the specified 3x2pt configuration space correlation function,
@@ -1361,9 +1418,9 @@ class Photo:
             Type of correlation function. It must be selected from the list
             ["Shear-Shear_plus", "Shear-Shear_minus", "Shear-Position",
             "Position-Position"]. The match is case-insensitive
-        theta_deg: float or numpy.ndarray of float
+        theta_arcmin: float or numpy.ndarray of float
             :math:`\theta` values at which the correlation function
-            is computed. To be specified in degrees
+            is computed. To be specified in arcmins
         bin_i: int
             Index of first tomographic bin
         bin_j: int
@@ -1394,18 +1451,18 @@ class Photo:
                              '"Shear-Shear_minus", "Shear-Position", '
                              '"Position-Position"]')
 
-        if isinstance(theta_deg, np.ndarray):
+        if isinstance(theta_arcmin, np.ndarray):
             pass
-        elif isinstance(theta_deg, list):
-            theta_deg = np.array(theta_deg)
-        elif isinstance(theta_deg, (float, int)):
-            theta_deg = np.array([theta_deg])
+        elif isinstance(theta_arcmin, list):
+            theta_arcmin = np.array(theta_arcmin)
+        elif isinstance(theta_arcmin, (float, int)):
+            theta_arcmin = np.array([theta_arcmin])
         else:
-            raise TypeError('theta_deg argument must be a int, float, list or '
-                            'numpy.ndarray')
+            raise TypeError('theta_arcmin argument must be a int, float, list'
+                            ' or numpy.ndarray')
 
-        theta_rad = np.deg2rad(theta_deg)
-        xi_arr = np.empty(theta_deg.size)
+        theta_rad = np.deg2rad(theta_arcmin / 60)
+        xi_arr = np.empty(theta_arcmin.size)
 
         cells_int = cells_func(self.ells_int, bin_i, bin_j).flatten()
         cells_interp = interpolate.interp1d(self.ells_int, cells_int,

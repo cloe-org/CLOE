@@ -27,11 +27,22 @@ dependencies:
   # Additional non-Python dependencies
   - camb==1.5.0
   - gsl==2.7
+  - cxx-compiler
+  - gfortran
+  - fitsio
+  - pyqt
   - pip:
     # Domain-specific 3rd-party Python package (from PyPI)
     - cobaya==3.3.1
+    - deepdish==0.3.7
     # - classy #Uncomment this line to include CLASS in the cloe environment
-    - baccoemu==2.1.0
+    - git+https://bitbucket.org/rangulo/baccoemu.git@7e0ca8b
+    - BCemu==1.1
     - euclidemu2==1.2.1
+    - pyhmcode==1.0.0
+    - euclidlib==0.0.5
     # Unit testing and documentation dependencies (from PyPI)
     - pytest-pydocstyle==2.3.2
+    - cosmosis
+    - cosmosis-build-standard-library
+    - qtvscodestyle

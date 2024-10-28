@@ -1,6 +1,7 @@
 Cobaya:
   debug: true
   force: true
+  resume: false
   likelihood:
     Euclid:
       NL_flag_phot_matter: 0
@@ -16,19 +17,34 @@ Cobaya:
       k_min_extrap: 1.0e-05
       k_samp: 1000
       magbias_model: 2
+      matrix_transform_phot: false
       observables_selection: observables_selection.yaml
       observables_specifications:
-        GCphot: GCphot.yaml
-        GCphot-GCspectro: GCphot-GCspectro.yaml
-        GCspectro: GCspectro.yaml
-        WL: WL.yaml
-        WL-GCphot: WL-GCphot.yaml
-        WL-GCspectro: WL-GCspectro.yaml
+        GCphot:
+          angular_power_spectrum: GCphot-FourierSpace.yaml
+          angular_correlation_function: GCphot-ConfigurationSpace.yaml
+        GCspectro:
+          multipole_power_spectrum: GCspectro-FourierSpace.yaml
+          multipole_correlation_function: GCspectro-ConfigurationSpace.yaml
+        WL:
+          angular_power_spectrum: WL-FourierSpace.yaml
+          angular_correlation_function: WL-ConfigurationSpace.yaml
+        WL-GCphot:
+          angular_power_spectrum: WL-GCphot-FourierSpace.yaml
+          angular_correlation_function: WL-GCphot-ConfigurationSpace.yaml
+        # Note: This is not yet provided by CLOE
+        # therefore it will load empty dictionaries
+        GCphot-GCspectro:
+          angular_power_spectrum: GCphot-GCspectro-FourierSpace.yaml
+          angular_correlation_function: GCphot-CGspectro-ConfigurationSpace.yaml
+        WL-GCspectro:
+          angular_power_spectrum: WL-GCspectro-FourierSpace.yaml
+          angular_correlation_function: WL-GCspectro-ConfigurationSpace.yaml
       plot_observables_selection: false
       solver: camb
       speed: 500
-      statistics_spectro: legendre_multipole_power_spectrum
       use_gamma_MG: false
+      use_magnification_bias_spectro: false
       z_max: 4.0
       z_min: 0.0
       z_samp: 100
@@ -44,3 +60,11 @@ Cobaya:
   timing: true
 action: run
 backend: Cobaya
+Cosmosis:
+  # At present the cosmosis configuration is fully delegated to ini files,
+  # therefore the only Cosmosis-related parameter is the name of the ini
+  # file to be used. There are two possibilites at present:
+  # - run_cosmosis.ini (recommended option)
+  # - run_cosmosis_with_cobaya.ini
+  ini_file: run_cosmosis.ini
+action: run

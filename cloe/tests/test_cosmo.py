@@ -19,6 +19,7 @@ class cosmoinitTestCase(TestCase):
         # Define standard test case
         cls.cosmo = Cosmology()
         cls.cosmo.cosmo_dic = load_test_pickle('cosmo_test_dic.pickle')
+        cls.cosmo.cosmo_dic['z_win_max'] = cls.cosmo.cosmo_dic['z_win']
         cls.cosmo.nonlinear.theory['redshift_bins_means_spectro'] = \
             cls.cosmo.cosmo_dic['redshift_bins_means_spectro']
         cls.cosmo.nonlinear.set_Pgg_spectro_model()
@@ -53,15 +54,15 @@ class cosmoinitTestCase(TestCase):
         self.fK12check = [1454.728042, 2538.164745, 3369.714525]
         self.fK12check_curv_neg = [2897.029977, 1600.91614, 691.969792]
         self.fK12check_curv_pos = 1886.960791
-        self.Pgg_phot_test = 50899.825923
-        self.Pgg_phot_test_interpolation = 50877.507301
-        self.Pgdelta_phot_test = 38553.567529
-        self.Pgdelta_phot_test_interpolation = 38538.420539
+        self.Pgg_phot_test = 58392.759202
+        self.Pgg_phot_test_interpolation = 58332.02434
+        self.Pgdelta_phot_test = 41294.412017
+        self.Pgdelta_phot_test_interpolation = 41253.453724
         self.Pgg_spectro_test = 82548.320427
         self.Pgdelta_spectro_test = 59890.445816
         self.Pii_test = 2.417099
         self.Pdeltai_test = -265.680094
-        self.Pgi_phot_test = -350.751905
+        self.Pgi_phot_test = -375.687484
         self.Pgi_spectro_test = -388.28625
         self.MG_mu_test = 1.0
         self.MG_sigma_test = 1.0
@@ -71,6 +72,7 @@ class cosmoinitTestCase(TestCase):
         self.growth_rate_MG_check = 0.877252
         self.Pk_delta_MG_check = [3875.837355, 1091.360072]
         self.Pk_cb_MG_check = [3909.994641, 1101.189673]
+        self.Weyl_matter_ratio_test = 2.267094e-15
         self.Pk_halomodel_MG_check = [4033.881642, 1353.201077]
 
     def tearDown(self):
@@ -96,6 +98,7 @@ class cosmoinitTestCase(TestCase):
         self.growth_rate_MG_check = None
         self.Pk_delta_MG_check = None
         self.Pk_cb_MG_check = None
+        self.Weyl_matter_ratio_test = None
         self.Pk_halomodel_MG_check = None
 
     def test_cosmo_init(self):
@@ -240,9 +243,9 @@ class cosmoinitTestCase(TestCase):
         # interpolate a straight-line (b, z) grid to ease the checks
         nuipar = self.cosmo.cosmo_dic['nuisance_parameters']
         zs_means = [1.0, 2.0, 3.0]
-        nuipar['b1_photo'] = 2.0
-        nuipar['b2_photo'] = 4.0
-        nuipar['b3_photo'] = 6.0
+        nuipar['b1_photo_bin1'] = 2.0
+        nuipar['b1_photo_bin2'] = 4.0
+        nuipar['b1_photo_bin3'] = 6.0
         self.cosmo.create_phot_galbias(model=2,
                                        x_values=zs_means,
                                        y_values=[2., 4., 6.])
@@ -291,10 +294,10 @@ class cosmoinitTestCase(TestCase):
 
     def test_poly_phot_galbias(self):
         nuipar = self.cosmo.cosmo_dic['nuisance_parameters']
-        nuipar['b0_poly_photo'] = 1.0
-        nuipar['b1_poly_photo'] = 1.0
-        nuipar['b2_poly_photo'] = 1.0
-        nuipar['b3_poly_photo'] = 1.0
+        nuipar['b1_0_poly_photo'] = 1.0
+        nuipar['b1_1_poly_photo'] = 1.0
+        nuipar['b1_2_poly_photo'] = 1.0
+        nuipar['b1_3_poly_photo'] = 1.0
         b_val = self.cosmo.poly_phot_galbias(1.0)
         z_arr = np.array([1.0, 2.0])
         b_val_arr = self.cosmo.poly_phot_galbias(z_arr)
@@ -517,6 +520,15 @@ class cosmoinitTestCase(TestCase):
             self.fcheck,
             rtol=1e-1,
             err_msg='Error in the omega density calculation',
+        )
+
+    def test_Weyl_matter_ratio(self):
+        test_p = self.cosmo.Weyl_matter_ratio_def(1.0, 0.01)
+        npt.assert_allclose(
+            test_p,
+            self.Weyl_matter_ratio_test,
+            rtol=1e-3,
+            err_msg='Error in Weyl_matter_ratio calculation',
         )
 
     def test_growth_factor_MG(self):

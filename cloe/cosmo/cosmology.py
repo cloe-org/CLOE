@@ -908,7 +908,9 @@ class Cosmology:
         """
         z_win = self.cosmo_dic['z_win']
         if self.cosmo_dic['use_gamma_MG']:
-            growth = self.matter_density(z_win)**self.cosmo_dic['gamma_MG']
+            growth = self.matter_density(z_win)**self.cosmo_dic['gamma_MG'] + \
+                     (self.cosmo_dic['gamma_MG'] + 4.0 / 7.0) * \
+                     self.cosmo_dic['Omk']
         else:
             fs8 = self.cosmo_dic['fsigma8_z_func'](z_win)
             s8 = self.cosmo_dic['sigma8_z_func'](z_win)

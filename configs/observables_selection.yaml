@@ -10,7 +10,7 @@
 # GCphot: Photometric Galaxy Clustering
 # GCspectro: Spectroscopic Galaxy Clustering
 # CMBlens: CMB Lensing
-# CMBisw: ISW
+# CMBisw: ISW Effect
 # CG: Clusters of Galaxies
 WL:
   WL: True
@@ -27,9 +27,9 @@ CMBlens:
   GCphot: False
   GCspectro: False
 CMBisw:
-  GCphot: False
   CMBlens: False
   WL: False
+  GCphot: False
   GCspectro: False
 CG:
   CG: False

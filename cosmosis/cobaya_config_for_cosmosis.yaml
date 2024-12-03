@@ -182,9 +182,9 @@ Cobaya:
                             GCphot: False
                             GCspectro: False
                           CMBisw:
-                            GCphot: False
                             CMBlens: False
                             WL: False
+                            GCphot: False
                             GCspectro: False
                           CG:
                             CG: False

@@ -1,12 +1,17 @@
 Cobaya:
   debug: true
-  force: true
-  resume: false
+  force: false
+  resume: true 
   likelihood:
     Euclid:
+      Baryon_redshift_model: true
+      GCsp_z_err: false
+      IA_flag: 0
+      IR_resum: DST
+      NL_flag_phot_baryon: 0
+      NL_flag_phot_bias: 0
       NL_flag_phot_matter: 0
       NL_flag_spectro: 0
-      add_phot_RSD: false
       aliases:
       - euclid
       bias_model: 1
@@ -17,39 +22,58 @@ Cobaya:
       k_min_extrap: 1.0e-05
       k_samp: 1000
       magbias_model: 2
-      matrix_transform_phot: false
       observables_selection: observables_selection.yaml
       observables_specifications:
+        CG: CG.yaml
+        CMBlens: CMBlensing.yaml
+        CMBlens-GCphot: CMBlensing-GCphot.yaml
+        CMBlens-WL: CMBlensing-WL.yaml
         GCphot:
-          angular_power_spectrum: GCphot-FourierSpace.yaml
           angular_correlation_function: GCphot-ConfigurationSpace.yaml
-        GCspectro:
-          multipole_power_spectrum: GCspectro-FourierSpace.yaml
-          multipole_correlation_function: GCspectro-ConfigurationSpace.yaml
-        WL:
-          angular_power_spectrum: WL-FourierSpace.yaml
-          angular_correlation_function: WL-ConfigurationSpace.yaml
-        WL-GCphot:
-          angular_power_spectrum: WL-GCphot-FourierSpace.yaml
-          angular_correlation_function: WL-GCphot-ConfigurationSpace.yaml
-        # Note: This is not yet provided by CLOE
-        # therefore it will load empty dictionaries
+          angular_power_spectrum: GCphot-FourierSpace.yaml
+          pseudo_cl: GCphot-FourierSpace.yaml
+          statistics: angular_power_spectrum
         GCphot-GCspectro:
+          angular_correlation_function: GCphot-GCspectro-ConfigurationSpace.yaml
           angular_power_spectrum: GCphot-GCspectro-FourierSpace.yaml
-          angular_correlation_function: GCphot-CGspectro-ConfigurationSpace.yaml
+          pseudo_cl: GCphot-GCspectro-FourierSpace.yaml
+          statistics: angular_power_spectrum
+        GCspectro:
+          convolved_multipole_power_spectrum: GCspectro-FourierSpace.yaml
+          multipole_correlation_function: GCspectro-ConfigurationSpace.yaml
+          multipole_power_spectrum: GCspectro-FourierSpace.yaml
+          statistics: multipole_power_spectrum
+        ISW-GCphot: iSW-GCphot.yaml
+        WL:
+          angular_correlation_function: WL-ConfigurationSpace.yaml
+          angular_power_spectrum: WL-FourierSpace.yaml
+          pseudo_cl: WL-FourierSpace.yaml
+          statistics: angular_power_spectrum
+        WL-GCphot:
+          angular_correlation_function: WL-GCphot-ConfigurationSpace.yaml
+          angular_power_spectrum: WL-GCphot-FourierSpace.yaml
+          pseudo_cl: WL-GCphot-FourierSpace.yaml
+          statistics: angular_power_spectrum
         WL-GCspectro:
-          angular_power_spectrum: WL-GCspectro-FourierSpace.yaml
           angular_correlation_function: WL-GCspectro-ConfigurationSpace.yaml
+          angular_power_spectrum: WL-GCspectro-FourierSpace.yaml
+          pseudo_cl: WL-GCspectro-FourierSpace.yaml
+          statistics: angular_power_spectrum
       plot_observables_selection: false
+      print_theory: false
       solver: camb
       speed: 500
+      use_Weyl: false
       use_gamma_MG: false
       use_magnification_bias_spectro: false
       z_max: 4.0
+      z_max_cmb: 1200
       z_min: 0.0
       z_samp: 100
+      z_samp_log: 20
   output: chains/my_euclid_experiment_LCDM_nonflat
   params: ./extra_config_cases/model_LCDM_nonflat.yaml
+  resume: true
   sampler:
     mcmc:
       max_tries: 100000
@@ -58,14 +82,7 @@ Cobaya:
       extra_args: {}
       stop_at_error: true
   timing: true
-action: run
-backend: Cobaya
 Cosmosis:
-  # At present the cosmosis configuration is fully delegated to ini files,
-  # therefore the only Cosmosis-related parameter is the name of the ini
-  # file to be used. There are two possibilites at present:
-  # - run_cosmosis.ini (recommended option)
-  # - run_cosmosis_with_cobaya.ini
   ini_file: run_cosmosis.ini
 action: run
-
+backend: Cobaya

@@ -51,6 +51,8 @@ use_Weyl: False
 f_out_z_dep: False
 # Include spectroscopic galaxy clustering redshift error
 GCsp_z_err: False
+# Print theory predictions to file
+print_theory: False
 # Information about where the data is stored
 data: !defaults [../configs/data]
 # Selection of the observables to be computed

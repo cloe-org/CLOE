@@ -36,13 +36,15 @@ class Misc:
         self.theory = cosmo_dic
 
         # This parameter sets the FAST-PT quantities needed in initialization
-        to_do = ['IA']
-        pad_factor = 1
-        n_pad = int(pad_factor * len(self.theory['k_win']))
-        self.f_pt = fpt.FASTPT(self.theory['k_win'], to_do=to_do,
-                               low_extrap=-5,
-                               high_extrap=3,
-                               n_pad=n_pad)
+        if self.theory['IA_flag'] == 1:
+            to_do = ['IA']
+            pad_factor = 1
+            n_pad = int(pad_factor * len(self.theory['k_win']))
+            self.f_pt = fpt.FASTPT(self.theory['k_win'],
+                                   to_do=to_do,
+                                   low_extrap=-5,
+                                   high_extrap=3,
+                                   n_pad=n_pad)
 
     def fia(self, redshift, wavenumber=0.001):
         r"""Intrinsic alignment function.

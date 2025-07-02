@@ -18,6 +18,12 @@
 #   - crit: with respect to the critical density of the Universe;
 #   - mean: with respect to the background density of the Universe.
 # overdensity: Overdensity value. If a virial density is assumed, this variable is not used.
+# bias: it can be either a float or a string. In the latter case, it indicates the author of the halo bias function. Possibilities: tinker10, castro23
+# two_halo: if not False, include the 2-halo term in the galaxy cluster density profiles. Possibilities are: sum, max, False
+# trunc_fact: truncation factor in the BMO profile
+# offcentering: if True, the offcentering of cluster profiles is considered
+# rms_off: the rms of the miscentring projected distance (effective if offcentering is True)
+# f_off: the fraction of miscentred clusters (effective if offcentering is True)
 # A_l: normalisation of the mass-observable relation
 # B_l: mass slope of the mass-observable relation
 # C_l: redshift slope of the mass-observable relation
@@ -46,6 +52,13 @@ Lambda_obs_edges_CC: [20., 30., 45., 60., 500.]
 halo_profile: NFW
 overdensity_type: vir
 overdensity: 200.
+bias: tinker10
+two_halo: False
+trunc_fact: 3.
+offcentering: False
+rms_off: 0.
+f_off: 0.
+
 A_l: 33.
 B_l: 1.
 C_l: 0.01

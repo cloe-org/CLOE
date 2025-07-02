@@ -150,6 +150,12 @@ info = {
                         'halo_profile': 'BMO',
                         'overdensity_type': 'vir',
                         'overdensity': 200.,
+                        'bias': 'tinker10',
+                        'two_halo': False,
+                        'trunc_fact': 3.,
+                        'offcentering': True,
+                        'rms_off': 0.2,
+                        'f_off': 0.3,
                         'A_l': 52.0,
                         'B_l': 0.9,
                         'C_l': 0.5,
@@ -217,8 +223,19 @@ class CGinitTestCase(TestCase):
         self.check_scatter_z_obs = 0.00014999999999999912
         self.check_Pz_obs = 2659.6152026762334
         self.check_Delta = 103.2914180724695
-        self.check_halo_bias = 1.6605423679967524
+        self.check_halo_bias = 1.83878
         self.check_cov_window = np.array([5.158245, 4.531227, 3.920613])
+        self.check_rho_crit_z = 4.03977e+11
+        self.check_sigma_crit = [[2996.976764]]
+        self.check_F_NFW = 0.694256
+        self.check_G_NFW = 0.464593
+        self.check_F_BMO = 1.520692
+        self.check_G_BMO = 0.19818
+        self.check_surface_mass_density_cen = [[[3.222237]]]
+        self.check_surface_mass_density = [[[3.286796]]]
+        self.check_excess_surface_mass_density = [[[17.052748]]]
+        self.check_surface_mass_density_2h = [[[7.007686]]]
+        self.check_excess_surface_mass_density_2h = [[[1.067228]]]
 
     def tearDown(self):
         self.check_Pk_def = None
@@ -245,6 +262,17 @@ class CGinitTestCase(TestCase):
         self.check_Delta = None
         self.check_halo_bias = None
         self.check_cov_window = None
+        self.check_rho_crit_z = None
+        self.check_sigma_crit = None
+        self.check_F_NFW = None
+        self.check_G_NFW = None
+        self.check_F_BMO = None
+        self.check_G_BMO = None
+        self.check_surface_mass_density_cen = None
+        self.check_surface_mass_density = None
+        self.check_excess_surface_mass_density = None
+        self.check_surface_mass_density_2h = None
+        self.check_excess_surface_mass_density_2h = None
 
     def test_Pk_def(self):
         npt.assert_allclose(
@@ -427,7 +455,7 @@ class CGinitTestCase(TestCase):
 
     def test_Delta(self):
         npt.assert_allclose(
-            self.cg.Delta("vir", 0.0, 0.0, 200),
+            self.cg.get_Delta("vir", 0.0, 0.0, 200),
             self.check_Delta,
             rtol=1.e-3,
             err_msg='test_Delta failed',
@@ -435,11 +463,121 @@ class CGinitTestCase(TestCase):
 
     def test_halo_bias(self):
         npt.assert_allclose(
-            self.cg.halo_bias(np.array([0.0]), 10.0**14.,
-                              self.cg.Delta("vir", 0.0, 0.0, 200))[0][0],
+            self.cg.halo_bias(np.array([0.0]), 10.0**14.)[0][0],
             self.check_halo_bias,
             rtol=1e-3,
             err_msg='test_halo_bias failed',
+        )
+
+    def test_rho_crit_z(self):
+        npt.assert_allclose(
+            self.cg.rho_crit_z(1.),
+            self.check_rho_crit_z,
+            rtol=1e-3,
+            err_msg='test_rho_crit_z failed',
+        )
+
+    def test_sigma_crit(self):
+        npt.assert_allclose(
+            self.cg.sigma_crit(np.array([0.5]), 1.),
+            self.check_sigma_crit,
+            rtol=1e-3,
+            err_msg='test_sigma_crit failed',
+        )
+
+    def test_F_NFW(self):
+        npt.assert_allclose(
+            self.cg.F_NFW(0.5),
+            self.check_F_NFW,
+            rtol=1e-3,
+            err_msg='test_F_NFW failed',
+        )
+
+    def test_G_NFW(self):
+        npt.assert_allclose(
+            self.cg.G_NFW(1.5),
+            self.check_G_NFW,
+            rtol=1e-3,
+            err_msg='test_G_NFW failed',
+        )
+
+    def test_F_BMO(self):
+        npt.assert_allclose(
+            self.cg.F_BMO(0.5),
+            self.check_F_BMO,
+            rtol=1e-3,
+            err_msg='test_F_BMO failed',
+        )
+
+    def test_G_BMO(self):
+        npt.assert_allclose(
+            self.cg.G_BMO(1.5),
+            self.check_G_BMO,
+            rtol=1e-3,
+            err_msg='test_G_BMO failed',
+        )
+
+    def test_surface_mass_density_cen(self):
+        npt.assert_allclose(
+            self.cg.surface_mass_density_cen(
+                np.array([1.5]),
+                np.array([0.5]),
+                4.,
+                np.array([1.e14])
+            ),
+            self.check_surface_mass_density_cen,
+            rtol=1e-3,
+            err_msg='test_surface_mass_density_cen failed',
+        )
+
+    def test_surface_mass_density(self):
+        npt.assert_allclose(
+            self.cg.surface_mass_density(
+                np.array([1.5]),
+                np.array([0.5]),
+                4.,
+                np.array([1.e14])
+            ),
+            self.check_surface_mass_density,
+            rtol=1e-3,
+            err_msg='test_surface_mass_density failed',
+        )
+
+    def test_excess_surface_mass_density(self):
+        npt.assert_allclose(
+            self.cg.excess_surface_mass_density(
+                np.array([1.5]),
+                np.array([0.5]),
+                4.,
+                np.array([1.e14])
+            ),
+            self.check_excess_surface_mass_density,
+            rtol=1e-3,
+            err_msg='test_excess_surface_mass_density failed',
+        )
+
+    def test_surface_mass_density_2h(self):
+        npt.assert_allclose(
+            self.cg.surface_mass_density_2h(
+                np.array([1.5]),
+                np.array([0.5]),
+                np.array([1.e14])
+            ),
+            self.check_surface_mass_density_2h,
+            rtol=1e-3,
+            err_msg='test_surface_mass_density_2h failed',
+        )
+
+    def test_excess_surface_mass_density_2h(self):
+        npt.assert_allclose(
+            self.cg.excess_surface_mass_density_2h(
+                np.array([1.5]),
+                np.array([0.5]),
+                np.array([1.e14])
+            ),
+            self.check_excess_surface_mass_density_2h,
+            rtol=1e-3,
+            err_msg='test_excess_surface_mass_density_2h failed',
         )
 
     def test_cov_window(self):

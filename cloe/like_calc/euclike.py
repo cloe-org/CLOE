@@ -529,7 +529,7 @@ class Euclike:
 
         Returns
         -------
-        datavec_dict: dict
+        CMBX data vector: dict
             returns a dictionary of arrays with the transformed photoxcmbx data
         """
         CMBX_dict = {}
@@ -1097,6 +1097,7 @@ class Euclike:
             loglike = Ln(likelihood) for the Euclid observables
         """
 
+        print_theory = dictionary['print_theory']
         if self.do_photo:
             photo_theory_vec = self.create_photo_theory(dictionary)
             if self.do_cmbx:
@@ -1307,5 +1308,26 @@ class Euclike:
 
         # Total likelihood
         loglike = loglike_phot + loglike_spectro + loglike_clusters
+
+        if print_theory:
+            print('Printing the theory vector and exiting!')
+            if self.do_photo:
+                np.savetxt('photo_theory.dat', photo_theory_vec)
+            if self.do_spectro:
+                np.savetxt('spectro_theory.dat', spectro_theory_vec)
+            if self.do_clusters:
+                if CG_like_selection == 'CC':
+                    np.savetxt('CC_theory.dat', self.CGCCthvec)
+                if CG_like_selection == 'CC_CWL':
+                    np.savetxt('CC_theory.dat', self.CGCCthvec)
+                    np.savetxt('CWL_theory.dat', self.CGMoRthvec)
+                if CG_like_selection == 'CC_Cxi2':
+                    np.savetxt('CC_theory.dat', self.CGCCthvec)
+                    np.savetxt('Cxi2_theory.dat', self.CGxi2thvec)
+                if CG_like_selection == 'CC_CWL_Cxi2':
+                    np.savetxt('CC_theory.dat', self.CGCCthvec)
+                    np.savetxt('CWL_theory.dat', self.CGMoRthvec)
+                    np.savetxt('Cxi2_theory.dat', self.CGxi2thvec)
+            exit()
 
         return loglike

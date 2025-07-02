@@ -87,14 +87,18 @@ def setup(options):
     cloe_cosmo.cosmo_dic['NL_flag_phot_matter'] = \
             info['NL_flag_phot_matter']
     cloe_cosmo.cosmo_dic['NL_flag_spectro'] = info['NL_flag_spectro']
+    cloe_cosmo.cosmo_dic['IA_flag'] = info['IA_flag']
     cloe_cosmo.cosmo_dic['bias_model'] = info['bias_model']
     cloe_cosmo.cosmo_dic['use_gamma_MG'] = info['use_gamma_MG']
     cloe_cosmo.cosmo_dic['NL_flag_phot_baryon'] = \
                 info['NL_flag_phot_baryon']
+    cloe_cosmo.cosmo_dic['NL_flag_phot_bias'] = \
+                info['NL_flag_phot_bias']
     cloe_cosmo.cosmo_dic['Baryon_redshift_model'] = \
                 info['Baryon_redshift_model']
     cloe_cosmo.cosmo_dic['f_out_z_dep'] = info['f_out_z_dep']
     cloe_cosmo.cosmo_dic['GCsp_z_err'] = info['GCsp_z_err']
+    cloe_cosmo.cosmo_dic['print_theory'] = info['print_theory']
     cloe_cosmo.cosmo_dic['magbias_model'] = info['magbias_model']
     cloe_cosmo.cosmo_dic['matrix_transform_phot'] = \
                 info['observables_selection']['matrix_transform_phot']

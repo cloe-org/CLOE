@@ -228,7 +228,7 @@ These example scripts accomplish exactly the same commands as the `run_cloe.py` 
 *  **scripts**: folder containing  example Python scripts to simulate data
 *  ```run_cloe.py```: top level script for running the CLOE user interface
 *  ```setup.py```: top level script for installing or testing the CLOE package
-*  ```LICENCE.txt```: file containing the MIT license CLOE is under
+*  ```LICENCE.txt```: file containing the LGPL license CLOE is under
 
 
 ## Unit and verification tests

@@ -232,6 +232,8 @@ info['likelihood'] = {'Euclid':
                      'use_gamma_MG': False,
                      # Use redshift-dependent purity for GCspectro or not
                      'f_out_z_dep': False,
+                     # Print theory predictions
+                     'print_theory' : False,
                      # Add spectroscopic redshift errors
                      'GCsp_z_err' : True,
                      #'data': This give specifications for the paths of the input data files

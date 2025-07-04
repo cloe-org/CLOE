@@ -22,7 +22,6 @@ Cobaya:
       k_min_extrap: 1.0e-05
       k_samp: 1000
       magbias_model: 2
-      matrix_transform_phot: false
       observables_selection: observables_selection.yaml
       observables_specifications:
         CG: CG.yaml
@@ -87,11 +86,3 @@ Cosmosis:
   ini_file: run_cosmosis.ini
 action: run
 backend: Cobaya
-Cosmosis:
-  # At present the cosmosis configuration is fully delegated to ini files,
-  # therefore the only Cosmosis-related parameter is the name of the ini
-  # file to be used. There are two possibilites at present:
-  # - run_cosmosis.ini (recommended option)
-  # - run_cosmosis_with_cobaya.ini
-  ini_file: run_cosmosis.ini
-action: run

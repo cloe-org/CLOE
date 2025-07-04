@@ -399,6 +399,7 @@ class EuclidLikelihood(Likelihood):
                 self.Baryon_redshift_model
             self.cosmo.cosmo_dic['f_out_z_dep'] = self.f_out_z_dep
             self.cosmo.cosmo_dic['GCsp_z_err'] = self.GCsp_z_err
+            self.cosmo.cosmo_dic['print_theory'] = self.print_theory
             self.cosmo.cosmo_dic['bias_model'] = self.bias_model
             self.cosmo.cosmo_dic['magbias_model'] = self.magbias_model
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
@@ -521,6 +522,8 @@ class EuclidLikelihood(Likelihood):
                 info['likelihood']['Euclid']['f_out_z_dep']
             self.cosmo.cosmo_dic['GCsp_z_err'] = \
                 info['likelihood']['Euclid']['GCsp_z_err']
+            self.cosmo.cosmo_dic['print_theory'] = \
+                info['likelihood']['Euclid']['print_theory']
             self.cosmo.cosmo_dic['bias_model'] = self.bias_model
             self.cosmo.cosmo_dic['magbias_model'] = self.magbias_model
             self.cosmo.cosmo_dic['use_magnification_bias_spectro'] = \

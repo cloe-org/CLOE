@@ -187,6 +187,8 @@ class Cosmology:
             intrinsic alignment model flag
         IR_resum: str
             IR-resummation model flag
+        print_theory: bool
+            Print theory predictions to file
         a00e: function
             a00e one-loop term for IA TATT model (arxiv:1708.09247)
         c00e: function
@@ -344,6 +346,8 @@ class Cosmology:
                           'use_magnification_bias_spectro': 0,
                           # Use Weyl power spectrum (workaround approach)
                           'use_Weyl': False,
+                          # Print theory predictions
+                          'print_theory': False,
                           # Redshift dependent purity correction
                           'f_out_z_dep': False,
                           # One-loop order terms for the TATT model
@@ -908,7 +912,9 @@ class Cosmology:
         """
         z_win = self.cosmo_dic['z_win']
         if self.cosmo_dic['use_gamma_MG']:
-            growth = self.matter_density(z_win)**self.cosmo_dic['gamma_MG']
+            growth = self.matter_density(z_win)**self.cosmo_dic['gamma_MG'] + \
+                     (self.cosmo_dic['gamma_MG'] + 4.0 / 7.0) * \
+                     self.cosmo_dic['Omk']
         else:
             fs8 = self.cosmo_dic['fsigma8_z_func'](z_win)
             s8 = self.cosmo_dic['sigma8_z_func'](z_win)

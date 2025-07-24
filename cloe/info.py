@@ -20,7 +20,7 @@ __description__ = 'Cosmology Likelihood for Observables in Euclid'
 __requires__ = ['numpy', 'scipy', 'camb', 'astropy']
 
 # Default package properties
-__license__ = 'GPL-3.0'
+__license__ = 'LGPL-3.0'
 __about__ = ('{} \n\n Author: {} \n Email: {} \n Year: {} \n {} \n\n'
              ''.format(__name__, __author__, __email__, __year__,
                        __description__))

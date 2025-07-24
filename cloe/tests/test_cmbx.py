@@ -1,7 +1,7 @@
 """UNIT TESTS FOR CMBX code
 
 This module contains unit tests for the code written by the CMBX lensing team.
-=======
+==============================================================================
 
 The pickles are computed using the notebook
 "Gererate test spectro, phot and like_calc pickles.ipynb"

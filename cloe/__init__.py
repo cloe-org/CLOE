@@ -4,7 +4,7 @@
 
 The Cosmology Likelihood for Observables in Euclid (CLOE)
 is a software package developed by the Euclid Consortium.
-This documentation provides a description of the modules 
+This documentation provides a description of the modules
 implemented in CLOE.
 
 """

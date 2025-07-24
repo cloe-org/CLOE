@@ -27,6 +27,14 @@ To build the package in a dedicated `Conda environment <https://docs.conda.io/pr
 	conda activate cloe
 	pip install .
 
+In order to use CLOE with CosmoSIS, one subsequently needs to add the line
+
+.. code-block:: python
+
+    cloe_parameters = "cloe_parameters"
+
+in ``cosmosis/datablock/cosmosis_py/section_names.py`` where CosmoSIS is installed.
+No additional steps are required to use CLOE with Cobaya.
 
 **Stand-alone build**
 
@@ -97,9 +105,11 @@ It is also possible to launch a Jupyter Notebook using a CLOE Docker container a
 Troubleshooting
 ---------------
         
-- Users of Mac computers with Apple chips often encouter issues when trying to install ``classy`` using pip.
+- Users of Mac computers with Apple chips often encouter issues when trying to install CLASS (``classy``) using conda/pip.
 
-We first note that ``classy`` is not a requirement for CLOE to work. As such, if you are happy using CAMB as a Boltzmann solver, you can simply skip the installation of ``classy``.  If you need to install it, you can download CLASS and edit the Makefile with one of the two following options:
+We first note that ``classy`` is not a requirement for CLOE to work. As such, including it in the CLOE conda environment 
+is optional and if you are happy using CAMB as a Boltzmann solver, you can simply skip the installation of ``classy``.  
+If you need to install it, but unable to do so via conda/pip, you can download CLASS and edit the Makefile with one of the two following options:
 
 1. deactivate OpenMP or
 2. change the C compiler to gcc.
@@ -121,4 +131,3 @@ Then, compiling with ``make`` (or ``make -j``, check the CLASS documentation) wi
         module load gnu9
         module load anaconda
         module load openmpi4/4.1.1
-

@@ -35,7 +35,7 @@ dependencies:
     # Domain-specific 3rd-party Python package (from PyPI)
     - cobaya==3.3.1
     - deepdish==0.3.7
-    # - classy #Uncomment this line to include CLASS in the cloe environment
+    # - classy # Uncomment this line to include CLASS in the CLOE environment
     - git+https://bitbucket.org/rangulo/baccoemu.git@7e0ca8b
     - BCemu==1.1
     - euclidemu2==1.2.1

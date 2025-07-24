@@ -1,5 +1,5 @@
 Contributing
-==================
+============
 
 Read our |link-to-contrib|
 for details on how to contribute to the development of this package.

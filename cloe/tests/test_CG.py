@@ -61,6 +61,7 @@ info = {
                 'IR_resum': 'DST',
                 'Baryon_redshift_model': True,
                 'GCsp_z_err': False,
+                'print_theory': False,
                 'bias_model': 1,
                 'use_magnification_bias_spectro': 0,
                 'use_Weyl': False,

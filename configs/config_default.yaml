@@ -89,6 +89,8 @@ Cobaya:
       f_out_z_dep: False
       # Include spectroscopic galaxy clustering redshift error
       GCsp_z_err: False
+      # Print theoretical predictions to file at single point in parameter space
+      print_theory: False
       # Plot the selected observables during the initialization of the likelihood
       plot_observables_selection: False
       ##

@@ -92,6 +92,8 @@ Cobaya:
       f_out_z_dep: False
       # Include spectroscopic galaxy clustering redshift error
       GCsp_z_err: False
+      # Print theory predictions
+      print_theory: False
       # Plot the selected observables during the initialization of the likelihood
       plot_observables_selection: False
       ##
@@ -182,9 +184,9 @@ Cobaya:
                             GCphot: False
                             GCspectro: False
                           CMBisw:
-                            GCphot: False
                             CMBlens: False
                             WL: False
+                            GCphot: False
                             GCspectro: False
                           CG:
                             CG: False

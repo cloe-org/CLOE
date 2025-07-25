@@ -634,7 +634,11 @@ class Reader:
 
         tx2_cov_str = self.data['photo']['cov_3x2pt'].format(self.data[
             'photo']['cov_model'])
-        tx2_cov = np.load(Path(full_path, tx2_cov_str))['arr_0']
+        if tx2_cov_str.endswith('npz'):
+            tx2_cov = np.load(Path(full_path, tx2_cov_str))['arr_0']
+        else:
+            tx2_cov = np.load(Path(full_path, tx2_cov_str))
+
         self.data_dict['3x2pt_cov'] = tx2_cov
         return
 

@@ -5,7 +5,7 @@ This folder contains the files neccessary to run CLOE with `CosmoSIS`, an altern
 There are two ways to run CLOE with `CosmoSIS`: the main difference between them being whether the user wants to call the Boltzmann solver (A) from `CosmoSIS`, or (B) from `Cobaya`. 
 We consider (A) to be the primary approach. In both cases, the user does not need to interact with `Cobaya`.
 
-**Note: We first encourage you to include a minor change in the CosmoSIS source code. Add a line under the section `[nuisance parameters]`:
+**Note:** We first encourage you to include a minor change in the CosmoSIS source code. Add a line under the section `[nuisance parameters]`:
 ```
 cloe_parameters = "cloe_parameters"
 ```
@@ -19,19 +19,20 @@ Users can also run this notebook to check that they have a working configuration
 
 The following files have been separated based on the aforementioned 2 scenarios:
 
-## Scenario A
+## Scenario A (recommended)
 
 Should the user choose to run the pipeline as in Scenario (A), i.e., separating the Boltzmann solver and likelihood calculations, the files of concern are:
 
 ### run_cosmosis.ini
-This file is the top-level parameter file containing the pipeline specifications to run CLOE through `CosmoSIS`. The user starts running the `CosmoSIS` pipeline (without MPI in this case) by executing the command 
+This file is the top-level parameter file containing the pipeline specifications to run CLOE through `CosmoSIS`. It is invoked when changing `backend` to `Cosmosis` in `config_default.yaml`.
+The user can also run the `CosmoSIS` pipeline by (without MPI in this case) executing the command 
 
 ```bash
 cosmosis run_cosmosis.ini
 ```
 
 This file has been arranged in the format typical of `CosmoSIS` parameter files, with options to specify the path of the file containing the parameters to sample over, 
-the sampler to use, the output file path and format, and the modules that make up the pipeline. Here two modules are specified: the Boltzmann solver (we set `[camb]` as an example) and `[euclid]`, 
+the sampler to use, the output file path and format, and the modules that make up the pipeline. Here, two modules are specified: the Boltzmann solver (we set `[camb]` as an example) and `[euclid]`, 
 which is the CLOE module. For the `[camb]` module we use the pubilc release of the CAMB Boltzmann solver and the `camb_interface.py` script within this folder.
 
 The `[euclid]` module takes in the path of the `CosmoSIS`-CLOE interface script and the path of the yaml configuration file as parameters. 
@@ -73,7 +74,8 @@ Should the user choose to run the pipeline as in Scenario (B), i.e., calling `Co
 
 ### run_cosmosis_with_cobaya.ini
 This file is the top-level parameter file containing the pipeline specifications to run CLOE through `CosmoSIS`, with Cobaya being run in the background. 
-The user starts running the `CosmoSIS` pipeline (without MPI in this case) by executing the command 
+The user can modify `config_default.yaml` to have it invoked instead of `run_cosmosis.ini` when using `Cosmosis` as the `backend`.
+The user can also run the `CosmoSIS` pipeline (without MPI in this case) by executing the command 
 
 ```bash
 cosmosis run_cosmosis_with_cobaya.ini

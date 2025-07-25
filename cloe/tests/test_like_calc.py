@@ -24,6 +24,7 @@ class likecalcTestCase(TestCase, SpectroTestParent):
         mock_cosmo_dic['noise_Pgg_spectro'] = \
             np.vectorize(self.noise_Pgg_spectro)
         # self.fiducial_dict = fid_mock_dic
+        mock_cosmo_dic['print_theory'] = False
         self.test_dict = mock_cosmo_dic
         # init Euclike
         mock_obs = build_mock_observables()
@@ -99,6 +100,7 @@ class likecalcBNT_TestCase(TestCase, SpectroTestParent):
         mock_cosmo_dic['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
         mock_cosmo_dic['noise_Pgg_spectro'] = \
             np.vectorize(self.noise_Pgg_spectro)
+        mock_cosmo_dic['print_theory'] = False
         # self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic
         # The correct check value, using the h scaling for the h from
@@ -177,6 +179,7 @@ class likecalcngTestCase(TestCase, SpectroTestParent):
         mock_cosmo_dic['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
         mock_cosmo_dic['noise_Pgg_spectro'] = \
             np.vectorize(self.noise_Pgg_spectro)
+        mock_cosmo_dic['print_theory'] = False
 
         # self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic

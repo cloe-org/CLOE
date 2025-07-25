@@ -206,14 +206,10 @@ class CMBX:
         # k values yet. At the moment of writing this, the growth
         # factor is scale independent
 
-        if self.theory["use_gamma_MG"]:
-            window_ISW = 3 * self.theory["H0"] ** 2 * \
-                self.theory["Omm"] / self.theory["c"] ** 3 * \
-                (-self.theory['f_z'](z) + 1)
-        else:
-            window_ISW = 3 * self.theory["H0"] ** 2 * \
-                self.theory["Omm"] / self.theory["c"] ** 3 * \
-                (-self.theory['f_z'](z) + 1)
+        window_ISW = 3 * self.theory["H0"] ** 2 * \
+            self.theory["Omm"] / self.theory["c"] ** 3 * \
+            (-self.theory['f_z'](z) + 1) * self.theory["f_K_z_func"](z)**2 * \
+            self.theory["H_z_func"](z)
 
         return window_ISW
 

@@ -2,16 +2,22 @@
 
 # CLOE: Cosmology Likelihood for Observables in Euclid
 
+![Logo](./docs/other/cloelogo_notext.pdf)
+
 This repository allows the user to obtain model predictions and cosmological parameter constraints for synthetic and real Euclid data. It is developed by the Inter-Science Taskforce for Likelihood (IST:L) within the Euclid Consortium, in close collaboration with all of the Euclid Science Working Groups, Organisational Units, and the Inter-Science Taskforce for Nonlinear effects (IST:NL).
 
-In the latest version of CLOE, the core Euclid observables are defined by the following set:
+In the latest version of CLOE, the cosmological observables are defined by the following set:
 
-- Weak Gravitational Lensing 
-- Photometric Galaxy Clustering
-- Photometric Galaxy-Galaxy Lensing
-- Spectroscopic Galaxy Clustering
+- Cosmic shear tomography
+- Photometric galaxy clustering tomography
+- Photometric galaxy-galaxy lensing tomography
+- Spectroscopic / Redshift-space galaxy clustering
+- Cross-correlations with the cosmic microwave background
+- Galaxy cluster probes
 
-CLOE allows the user to consider these probes either separately or in a self-consistent combined analysis. Additional Euclid observables in CLOE include galaxy cluster probes and cross-correlations with the cosmic microwave background. It is also possible to analyze the Euclid data alongside other external datasets.
+CLOE allows the user to consider these probes either separately or in a self-consistent combined analysis.
+It is also possible to analyze the Euclid data alongside other external datasets within the
+Cobaya and CosmoSIS platforms.
 
 Further documentation is found [here](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/index.html)
 
@@ -218,17 +224,21 @@ Instead of directly editing `config_default.py`, it is also possible to add the 
 These example scripts accomplish exactly the same commands as the `run_cloe.py` instructions. The IST:L team has constructed the scripts from an internal notebook that is based on the contents of `config_default.yaml`.
 
 ## Structure of the repository
-*  **cloe**: folder containing the CLOE package in Python (see the [API documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/index.html) for details)
-*  **configs**: folder containing configurations files to specify the cosmological and nuisance parameters with user specifications for scales and redshifts
-*  **data**:  folder containing at the moment, the fiducial data labeled as `ExternalBenchmark` for photometric and spectroscopic probes
-*  **docs**:  folder containing automatically generated documentation
-*  **example**: folder containing  example yaml configuration files for the user
-*  **mcmc scripts**: folder containing example Python scripts to run MCMC chains for different combinations of probes with free or fixed nuisance parameters
-*  **notebooks**: folder containing example Jupyter Notebooks
-*  **scripts**: folder containing  example Python scripts to simulate data
+*  **cloe**: folder containing the CLOE source code and unit tests in Python (see the [API documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/index.html) for details)
+*  **configs**: folder containing configuration files in YAML, which allow the user to choose analysis settings such as the cosmological probes, summary statistics, scale cuts, parameter space, and systematic uncertainties. 
+*  **cosmosis**: folder containing the CLOE source code in Python and configuration files in INI for its CosmoSIS interface
+*  **data**: folder containing the data products (be it real or synthetic)
+*  **docs**: folder containing automatically generated documentation
+*  **example**: folder containing example YAML configuration files
+*  **gui**: folder containing the graphical user interface
+*  **mcmc scripts**: folder containing example Python scripts to run MCMC chains for different combinations of probes, cosmological parameters, and treatments of systematic uncertainties
+*  **notebooks**: folder containing demonstration and validation Jupyter Notebooks
+*  **scripts**: folder containing example Python scripts to simulate data
+*  ```environment.yml```: file specifying the CLOE conda environment
+*  ```example_mcmc_script_for_cluster.sh```: example shell script for submitting jobs on a computing cluster
 *  ```run_cloe.py```: top level script for running the CLOE user interface
-*  ```setup.py```: top level script for installing or testing the CLOE package
-*  ```LICENCE.txt```: file containing the MIT license CLOE is under
+*  ```setup.py```: top level script for installing or testing CLOE
+*  ```LICENCE.txt```: file containing the LGPL license of CLOE
 
 
 ## Unit and verification tests
@@ -256,3 +266,4 @@ jupyter-notebook notebooks/DEMO.ipyng
 ```
 
 This notebook currently allows the user to compute the model predictions and likelihood given synthetic Euclid data.
+ 

@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - docsbranch
-      - master
+      - main
 
 jobs:
   build-push:
@@ -15,13 +15,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Figure out whether we are on master (-> latest) or docsbranch (-> docsbranch)
+      # Figure out whether we are on main (-> latest) or docsbranch (-> docsbranch)
       - name: Determine tag
         run: |
-          if [ "$GITHUB_REF" = "refs/heads/master" ]; then
+          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
             echo "IMAGE_TAG=latest" >> $GITHUB_ENV
           else
-            echo "IMAGE_TAG=ci-debug" >> $GITHUB_ENV
+            echo "IMAGE_TAG=docsbranch" >> $GITHUB_ENV
           fi
 
       - name: Log in to GHCR

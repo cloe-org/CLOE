@@ -31,7 +31,7 @@ You can find instructions on the [Git website](https://git-scm.com) for how to i
 
 ### Cloning
 
-When working with a Git repository it is essential to keep up to date with developments on the `master` branch. To this end, developers should *clone* the contents of the remote (*i.e.* online) repository rather than simply downloading it. This will ensure that the full development history is available.
+When working with a Git repository it is essential to keep up to date with developments on the `main` branch. To this end, developers should *clone* the contents of the remote (*i.e.* online) repository rather than simply downloading it. This will ensure that the full development history is available.
 
 To clone a repository (*i.e.* make a local copy of the remote repository) use the `git clone` command. For example to clone this repository:
 
@@ -39,7 +39,7 @@ To clone a repository (*i.e.* make a local copy of the remote repository) use th
 $ git clone https://github.com/cloe-euclid/CLOE.git
 ```
 
-This will copy the contents of the `master` branch to your computer.
+This will copy the contents of the `main` branch to your computer.
 
 ### Remote vs Local
 
@@ -65,9 +65,9 @@ $ git pull
 
 ### Branching
 
-Once you have an up-to-date copy of the repository you should create a branch, which should be linked to an open issue. In general an issue should be opened any time you believe something needs to be changed or added to the master branch (*i.e.* a bug fix, a new feature, *etc.*). This will provide context for the repository maintainers when reviewing your merge request.
+Once you have an up-to-date copy of the repository you should create a branch, which should be linked to an open issue. In general an issue should be opened any time you believe something needs to be changed or added to the main branch (*i.e.* a bug fix, a new feature, *etc.*). This will provide context for the repository maintainers when reviewing your merge request.
 
-**You should always avoid making direct commits to the master branch.**
+**You should always avoid making direct commits to the main branch.**
 
 You can view existing branches with the `git branch` command. For example to list all branches on the local and remote repositories:
 
@@ -151,16 +151,16 @@ where `origin` is the name of the remote repository and `BRANCH_NAME` is the nam
 
 ### Merging
 
-Once all of the changes related to a given issue have been pushed to the remote repository a merge request can be made. To do this simply select your branch and press the merge request button. You will need to submit a short description of the changes that will be made to `master` and assign an individual and milestone (if applicable) to the request. After this, the merge request will be reviewed by one of the repository reviewers. At this stage the reviewer may request further changes or point out potential issues. The developer can simply continue working on a local branch and pushing changes to the corresponding remote branch, which remains attached to the merge request. If the proposed changes fail to meet the required standards or the reviewer believes that these changes should not be merged into the master branch then the merge request can be closed (*i.e.* rejected). If accepted, however, your changes will be merged into the master branch and your remote branch will be deleted.
+Once all of the changes related to a given issue have been pushed to the remote repository a merge request can be made. To do this simply select your branch and press the merge request button. You will need to submit a short description of the changes that will be made to `main` and assign an individual and milestone (if applicable) to the request. After this, the merge request will be reviewed by one of the repository reviewers. At this stage the reviewer may request further changes or point out potential issues. The developer can simply continue working on a local branch and pushing changes to the corresponding remote branch, which remains attached to the merge request. If the proposed changes fail to meet the required standards or the reviewer believes that these changes should not be merged into the main branch then the merge request can be closed (*i.e.* rejected). If accepted, however, your changes will be merged into the main branch and your remote branch will be deleted.
 
 ### Clean Up
 
 Following a successful merge request you should do the following:
 
-1. Re-sync your local master with the remote master.
+1. Re-sync your local main with the remote main.
 
 ```bash
-$ git checkout master
+$ git checkout main
 $ git pull
 ```
 

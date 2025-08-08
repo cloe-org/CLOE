@@ -1,9 +1,10 @@
 """NONLINEAR
 
-This module to computes the nonlinear recipes for the
+This module computes the nonlinear recipes for the
 photometric and spectroscopic probes.
 """
 import numpy as np
+import warnings
 from scipy import interpolate
 import cloe.auxiliary.redshift_bins as rb
 from cloe.non_linear.miscellanous import Misc
@@ -12,7 +13,11 @@ from cloe.non_linear.pgg_phot import Pgg_phot_model
 from cloe.non_linear.pgL_phot import PgL_phot_model
 from cloe.non_linear.pLL_phot import PLL_phot_model
 from cloe.non_linear.eft import EFTofLSS
-import pyhmcode as hmcode
+try:
+    import pyhmcode as hmcode
+except ImportError:
+    hmcode = None
+    warnings.warn("standalone pyhmcode import failed")
 import copy
 from pathlib import Path
 import sys

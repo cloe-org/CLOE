@@ -1,7 +1,7 @@
 """PHOTO
 
-This module computes the photometric quantities following the v2.0 recipes
-of CLOE.
+This module computes the photometric quantities according
+to the theoretical recipe of CLOE.
 """
 
 # General imports
@@ -16,7 +16,7 @@ import warnings
 
 class Photo:
     """
-    Class for photometric observables.
+    Class for the photometric observables.
     """
 
     def __init__(self, cosmo_dic, nz_dic_WL, nz_dic_GC,
@@ -569,7 +569,7 @@ class Photo:
     def poly_mag_bias(self, z):
         r"""Polynomial magnification bias.
 
-        Computes bias using a 3rd order polynomial function of redshift.
+        Computes the bias using a 3rd order polynomial function of redshift.
 
         Parameters
         ----------
@@ -660,7 +660,7 @@ class Photo:
         r"""IA window.
 
         Calculates the intrinsic alignment (IA) weight function for a
-        given tomographic bin
+        given tomographic bin:
 
         .. math::
             W_{i}^{\rm IA}(z) = \frac{n_i^{\rm L}(z)}{\bar{n}_i^{\rm L}}\
@@ -717,7 +717,7 @@ class Photo:
     def Cl_WL(self, ells, bin_i, bin_j):
         r"""Cl WL
 
-        Calculates angular power spectrum for weak lensing,
+        Calculates the angular power spectrum for weak lensing,
         for the supplied bins:
 
         .. math::

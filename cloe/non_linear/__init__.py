@@ -2,11 +2,9 @@
 
 """NONLINEAR MODULE
 
-This module contains the nonlinear recipes implemented by the Euclid
-Inter-Science Taskforce for Nonlinearities (IST:NL).
-The module :obj:`miscellaneous` is a
-temporary module that mimics the current linear implementation made by
-IST:L and will be substituted by the nonlinear recipes from IST:NL.
+This module contains the nonlinear recipe.
+The submodule :obj:`miscellaneous` is a temporary
+module that mimics the current linear implementation.
 
 """
 

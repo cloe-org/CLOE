@@ -1,0 +1,90 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main, docsbranch ]
+    paths:
+      - 'cloe/**'
+      - 'configs/**'
+      - 'environment.yml'
+      - 'setup.cfg'
+      - '.github/workflows/ci.yml'
+      - 'setup.py'
+  pull_request:
+    branches: [ main, docsbranch ]
+    paths:
+      - 'cloe/**'
+      - 'configs/**'
+      - 'environment.yml'
+      - 'setup.cfg'
+      - '.github/workflows/ci.yml'
+      - 'setup.py'
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: latest
+      PYTHONUNBUFFERED: 1
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Pull image & run tests
+        run: |
+          IMAGE=ghcr.io/testarnyttnamn/cloecode:latest
+          echo "→ Pulling $IMAGE"
+          docker pull "$IMAGE"
+
+          echo "→ Running pytest inside $IMAGE"
+          docker run --rm \
+            -v "${{ github.workspace }}":/src \
+            -w /src \
+            "$IMAGE" \
+            bash -lc "conda activate cloe && \
+                       pytest --verbose \
+                              --pycodestyle \
+                              --pydocstyle \
+                              --junitxml=pytest.xml \
+                              --cov=./ \
+                              --cov-report=term \
+                              --cov-report=xml:coverage.xml \
+                              --cov-report=lcov:coverage.lcov"
+
+      - name: Upload JUnit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-report
+          path: pytest.xml
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            coverage.xml
+            coverage.lcov
+
+      - name: Send coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}    # only needed if your repo is private
+          fail_ci_if_error: true
+
+      - name: Send coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        with:
+          path-to-lcov: coverage.lcov
+          github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -14,6 +14,15 @@
 
 import sys
 import os
+import numpydoc.numpydoc as _numpydoc_module
+
+# patch numpydoc to avoid TypeError when signature is not a string
+_original_clean = _numpydoc_module._clean_text_signature
+def _safe_clean_text_signature(sig):
+    if not isinstance(sig, str):
+        return ''
+    return _original_clean(sig)
+_numpydoc_module._clean_text_signature = _safe_clean_text_signature
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -39,9 +48,32 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
-    'sphinx.ext.intersphinx',
     'sphinx.ext.autosectionlabel',
     'numpydoc'
+]
+
+autosummary_generate = True
+autosummary_imported_members = True
+
+# mock imports
+autodoc_mock_imports = [
+    "matplotlib",
+    "numpy",
+    "scipy",
+    "astropy",
+    "yaml",
+    "euclidlib",
+    "getdist",
+    "fastpt",
+    "pyhmcode",
+    "cobaya",
+    "mpi4py",
+    "camb",
+    "fitsio",
+    "pandas",
+    "seaborn",
+    "tensorflow",
+    "cosmosis.datablock",
 ]
 
 # Make sure the target is unique
@@ -54,7 +86,14 @@ autoclass_content = 'both'
 autodoc_member_order = 'bysource'
 
 # Include private class methods
-autodoc_default_flags = ['members', 'private-members']
+# autodoc_default_flags = ['members', 'private-members']
+autodoc_default_options = {
+    'members'       : True,
+    'private-members': True,
+    'undoc-members' : True,
+    'inherited-members' : True,
+    'show-inheritance': True,
+}
 
 # Suppress class members in toctree.
 numpydoc_show_class_members = False

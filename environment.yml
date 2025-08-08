@@ -5,6 +5,7 @@ dependencies:
   # Default Python version for CLOE
   - python=3.9
   - pip==23.1.2
+  - setuptools
   # Standard 3rd-party Python packages (from conda-forge)
   - astropy==5.3
   - jupyter==1.0.0

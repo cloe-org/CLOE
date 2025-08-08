@@ -45,20 +45,23 @@ Structure of CLOE
 The CLOE repository has the following structure:
 
 - ``cloe``: CLOE source code and unit tests in Python
-- ``configs``: CLOE configuration files in YAML
 - ``cosmosis``: CLOE source code in Python and configuration files in INI for its CosmoSIS interface.
+- ``configs``: CLOE configuration files in YAML
 - ``data``: data products (be it real or synthetic)
 - ``docs``: CLOE Sphinx documentation
-- ``example``: example YAML files
 - ``gui``: CLOE graphical user interface
+- ``example``: example YAML files
 - ``mcmc scripts``: example Python scripts to run MCMC chains
 - ``notebooks``: CLOE demonstration and validation Jupyter Notebooks
 - ``scripts``: example Python scripts to simulate data
 - ``environment.yml``: CLOE conda environment
+- ``readthedocs.yml``: Read the Docs configuration file
 - ``example_mcmc_script_for_cluster.sh``: example shell script to submit jobs on computing cluster
 - ``run_cloe.py``: top level script for running the CLOE user interface
 - ``setup.py``: top level script for installing or testing CLOE
-- ``LICENCE.txt``: file containing the LGPL license of CLOE
+- ``Dockerfile``: CLOE Docker image
+- ``CONTRIBUTING.md``: CLOE contribution guidelines
+- ``LICENCE``: file containing the LGPL license of CLOE
 
 
 CLOE Features, Benchmarking, and Use Illustration

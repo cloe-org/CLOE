@@ -3,7 +3,7 @@
 <img src="./docs/other/cloelogo_notext.png" alt="Logo" width="300" />
 
 [![CI](https://github.com/cloe-euclid/cloe/actions/workflows/ci.yml/badge.svg)](https://github.com/cloe-euclid/cloe/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/cloe-euclid/cloe/branch/master/graph/badge.svg)](https://codecov.io/gh/cloe-euclid/cloe)
+[![codecov](https://codecov.io/gh/cloe-euclid/cloe/branch/main/graph/badge.svg)](https://codecov.io/gh/cloe-euclid/cloe)
 [![License: LGPL-3.0](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0.en.html)
 [![Documentation](https://readthedocs.org/projects/cloe-euclid/badge/?version=latest)](https://cloe-euclid.readthedocs.io/en/latest/)
 

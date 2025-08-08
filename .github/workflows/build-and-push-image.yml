@@ -1,0 +1,39 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - ci-debug
+      - master
+
+jobs:
+  build-push:
+    if: false
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Figure out whether we're on master (-> latest) or ci-debug (-> ci-debug)
+      - name: Determine tag
+        run: |
+          if [ "$GITHUB_REF" = "refs/heads/master" ]; then
+            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+          else
+            echo "IMAGE_TAG=ci-debug" >> $GITHUB_ENV
+          fi
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build & push image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/testarnyttnamn/testnamemaster:${{ env.IMAGE_TAG }}

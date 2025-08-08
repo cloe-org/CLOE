@@ -1,0 +1,7 @@
+sphinx
+sphinx_mdinclude
+numpy
+scipy
+docutils
+sphinx_rtd_theme
+numpydoc

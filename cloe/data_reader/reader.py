@@ -720,7 +720,11 @@ class Reader:
         self.data_dict['ISWxGC'] = ISWxGC_dict
 
         cov_7x2_str = self.data['cmbx']['cov_7x2pt']
-        cov_7x2 = np.load(Path(cmbx_dir, cov_7x2_str))
+        if cov_7x2_str.endswith('npz'):
+            cov_7x2 = np.load(Path(cmbx_dir, cov_7x2_str))['arr_0']
+        else:
+            cov_7x2 = np.load(Path(cmbx_dir, cov_7x2_str))
+
         self.data_dict['7x2pt_cov'] = cov_7x2
 
         del (KK_file)

@@ -102,13 +102,11 @@ To run the verification tests locally:
 
 	python -m pytest cloe/tests/verification
 
-Note that these tests require the development tools.
-
 
 Dependencies
 ------------
 
-You can find the code dependencies listed `here <https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/blob/master/environment.yml>`_.
+You can find the code dependencies listed `here <https://github.com/testarnyttnamn/testnamemaster/blob/master/environment.yml>`_.
 
 
 Is There a Demonstration of How to Use CLOE?

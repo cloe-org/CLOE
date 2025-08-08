@@ -1,10 +1,14 @@
-[![pipeline status](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/badges/master/pipeline.svg)](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/commits/master) [![coverage report](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/badges/master/coverage.svg)](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/commits/master)
+# CLOE: Cosmology Likelihood for Observables in *Euclid*
 
-# CLOE: Cosmology Likelihood for Observables in Euclid
+<img src="./docs/other/cloelogo_notext.png" alt="Logo" width="300" />
 
-![Logo](./docs/other/cloelogo_notext.pdf)
+[![CI](https://github.com/testarnyttnamn/testnamemaster/actions/workflows/ci.yml/badge.svg)](https://github.com/testarnyttnamn/testnamemaster/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/testarnyttnamn/testnamemaster/branch/master/graph/badge.svg)](https://codecov.io/gh/testarnyttnamn/testnamemaster)
+[![License: LGPL-3.0](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0.en.html)
+[![Documentation](https://readthedocs.org/projects/testnamemaster/badge/?version=latest)](https://testnamemaster.readthedocs.io/en/latest/)
 
-This repository allows the user to obtain model predictions and cosmological parameter constraints for synthetic and real Euclid data. It is developed by the Inter-Science Taskforce for Likelihood (IST:L) within the Euclid Consortium, in close collaboration with all of the Euclid Science Working Groups, Organisational Units, and the Inter-Science Taskforce for Nonlinear effects (IST:NL).
+This repository allows the user to obtain model predictions and cosmological parameter constraints for synthetic and real *Euclid* data. 
+It is developed by members of the Euclid Consortium (EC).
 
 In the latest version of CLOE, the cosmological observables are defined by the following set:
 
@@ -16,31 +20,22 @@ In the latest version of CLOE, the cosmological observables are defined by the f
 - Galaxy cluster probes
 
 CLOE allows the user to consider these probes either separately or in a self-consistent combined analysis.
-It is also possible to analyze the Euclid data alongside other external datasets within the
-Cobaya and CosmoSIS platforms.
+It is also possible to analyze the *Euclid* data alongside other external datasets within the
+[Cobaya](https://cobaya.readthedocs.io/en/latest/) and [CosmoSIS](https://cosmosis.readthedocs.io/en/latest/) platforms.
+CLOE moreover allows the user to obtain the linear matter power spectrum and background expansion from either of the [CAMB](https://camb.readthedocs.io/en/latest/) and [CLASS](https://lesgourg.github.io/class_public/class.html) Boltzmann codes.
 
-Further documentation is found [here](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/index.html)
-
-## Integration of CLOE with other codes
-
-CLOE allows the user to obtain the linear matter power spectrum from either of the [CAMB](https://camb.readthedocs.io/en/latest/) and [CLASS](https://lesgourg.github.io/class_public/class.html) Boltzmann codes.
-
-In order to obtain cosmological parameter constraints, CLOE reads in the redshift distributions and computes the theoretical predictions of the Euclid observables, which are used together with the data and covariance to obtain the likelihood. The likelihood is then evaluated across the parameter space using one of the samplers of [Cobaya](https://cobaya.readthedocs.io/en/latest/) or [CosmoSIS](https://cosmosis.readthedocs.io/en/latest/) to obtain the posterior probability.
+Further documentation is found in the [CLOE Read the Docs](https://testnamemaster.readthedocs.io/).
+The full development history is available to EC members [here](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation).
 
 ## Installation
 
-**git clone CLOE**
+Clone the CLOE repository through the following command:
 
 ```shell
-git clone https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation.git
+git clone https://github.com/testarnyttnamn/testnamemaster.git
 ```
-We provide below different options for installation: [with conda](#conda), or [with pip](#pip), or [with docker](#docker). In the [troubleshooting](#troubles) section you can find a list of  suggestions to solve issues that we encountered so far, which may help you with the installation.
 
-### 1. Installation with a conda environment <a name="conda"></a>
-
-**Option a) (recommended)**
-
-Use the `environment.yml` that we provide, which includes all the required dependencies with fixed versions that have been tested with CLOE:
+Next, create a Conda environment using `environment.yml` that we provide, which includes all the required dependencies with fixed versions that have been tested with CLOE:
 
 ```shell
 conda env create -f environment.yml
@@ -48,167 +43,56 @@ conda activate cloe
 pip install .
 ```
 
-**Option b)** 
-
-If our environment does not work on your cluster (ex. it gets stuck), but you have anaconda, we recommend to create your own environment as follows: 
-
-```shell
-conda create -n cloe python=3.9 
-source activate cloe
-```
-
-Then, install all the following packages, in this order either with pip or with conda (depending on what works on your cluster):
+If our environment does not work on your cluster, we provide additional installation instructions in the [CLOE Read the Docs](https://testnamemaster.readthedocs.io/).
+Lastly, in order to use CLOE with CosmoSIS, one needs to add the line
 
 ```shell
-pip install astropy
-pip install jupyter
-pip install matplotlib
-conda install mpi4py
-conda install numpy
-conda install scipy
-conda install seaborn
-conda install tensorflow
-pip install fast-pt
-pip install camb
-pip install gsl
-pip install cobaya
-pip install baccoemu
-pip install euclidemu2
-pip install pytest
-pip install pytest-cov
-pip install pytest-pycodestyle
-pip install pytest-pydocstyle
-pip install sphinx
-pip install sphinx-rtd-theme
-pip install numpydoc
+cloe_parameters = "cloe_parameters"
 ```
 
-### 2. Installation with pip <a name="pip"></a>
-
-If you do not have anaconda, you would have to install manually on your cluster all the packages listed in Option b) written above, with pip.
-
-### 3. CLOE Docker image <a name="docker"></a>
-
-The CLOE Docker image comes with CLOE and all dependencies pre-installed. In order to use this image you will need to have [Docker](https://www.docker.com/) installed on the relevant machine.
-
-#### Pull the Docker Image
-
-Log into the Euclid GitLab container registry,
-
-```shell
-docker login gitlab.euclid-sgs.uk:4567
-```
-
-pull the latest CLOE Docker image
-
-```shell
-docker pull gitlab.euclid-sgs.uk:4567/pf-ist-likelihood/likelihood-implementation/cloe
-```
-
-and tag an alias called `cloe` to avoid writing the full image name for every command.
-
-```shell
-docker tag gitlab.euclid-sgs.uk:4567/pf-ist-likelihood/likelihood-implementation/cloe cloe
-```
-
-No further installation or set up is required.
-
-#### Run a Docker container
-
-##### Interactive container 
-
-An interactive CLOE Docker container can be launched as follows.
-
-```shell
-docker run -it --rm cloe
-```
-
-Inside the container you will need to activate the `cloe` environment.
-
-```shell
-conda activate cloe
-```
-
-All the CLOE package materials can be found in `/home`. 
-
-##### Detached container
-
-CLOE can be run in a non-interactive (i.e. detached) container as follows:
-
-```shell
-docker run --rm cloe bash -cl "<COMMAND>"
-```
-
-where `<COMMAND>` is the command line you wish to run, e.g. to run the `run_cloe.py` script.
-
-```shell
-docker run --rm cloe bash -cl "python run_cloe.py configs/config_profiling_evaluate_likelihood.yaml"
-```
-
-##### Jupyter Notebook
-
-It is also possible to launch a Jupyter Notebook using a CLOE Docker container as the backend. To do so run the following:
-
-```shell
-docker run -p 8888:8888 --rm cloe bash -cl "notebook"
-```
-
-### 4. Optional dependencies
-
-The following optional packages can be installed to provide CLOE with additional functionality:
-
-| Package                                    | Notes                                                                                             |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| [classy](https://pypi.org/project/classy/) | To use [CLASS](https://lesgourg.github.io/class_public/class.html) as a Boltzmann solver for CLOE |
-
-## Troubleshooting <a name="troubles"></a>
-
-### Problems installing openmpi4/4.1.1
-
-Try installing (loading, depending on cluster) the following packages in this order: 
-
-```shell
-module load gnu9
-module load anaconda
-module load openmpi4/4.1.1
-```
-
-### Problems with classy
-Users of Mac computers with Apple chips often encouter issues when trying to install `classy` using `pip`. First of all, `classy` is not a requirement for CLOE to work, if you are happy using CAMB as a Boltzmann solver you can simply skip the installation of `classy`. If you need to install it, you can download CLASS and edit the Makefile with one of the two following options:
-
-1. deactivate OpenMP or
-2. change the C compiler to `gcc`.
-
-Then, compiling with `make` (or `make -j`, check the CLASS documentation) will also generate the python wrapper `classy`.
-
-### Problems with other specific packages
-Users have sometimes encountered issues installing some of the packages (euclidemu2). Before debugging, try to use "conda install" instead of "pip install" (or viceversa, depending on what gives error).
-
-### Problems with pip
-If pip install does not work, either try 'conda install' or try the following:
-```shell
-git clone https://github.com/astropy/extension-helpers.git
-cd extension-helpers
-pip install .
-```
+in `cosmosis/datablock/cosmosis_py/section_names.py` where CosmoSIS is installed. No additional steps are required for Cobaya.
 
 ## Running CLOE
 
-To run CLOE, execute:
+### With YAML file
+
+CLOE can be run through the following command that uses the configuration YAML file:
 
 ```shell
 python run_cloe.py configs/config_default.yaml
 ```
 
-The output is written in a folder called `chains` that is generated at runtime.
+A shorthand version of this is `./run_cloe.py`. 
 
-### Using CLOE with external datasets such as Planck
+### With Python script
 
-The CLOE conda environment does not include the Planck likelihood (`clik`) and the user will therefore need to separately install it to consider a combined analysis of Euclid and Planck.
+CLOE can alternatively be run through a Python script, examples of which are provided in the `mcmc_scripts` directory. 
+In a combined analysis of the 3×2pt observables and redshift-space galaxy clustering in ΛCDM, the user would thereby execute:
 
-Once the Planck likelihood is installed, the following lines can be included in the `likelihood` field of `config_default.yaml` (in the same way as Euclid):
+```shell
+python mcmc_scripts/runmcmc_3x2pt+GCsp_LCDM.py
+```
 
-.. code-block:: python
+In either of these cases, the user can perform the run on a computing cluster through the example script provided in `example_mcmc_script_for_cluster.sh`. 
+In both cases, the output is written to a folder called `chains` that is generated at runtime. 
+These chains can then be used to obtain the marginalized parameter constraints and contours using public tools such as [GetDist](http://getdist.readthedocs.io/).
+
+## Graphical User Interface
+
+We have created a Graphical User Interface (GUI) to assist users in running CLOE. This GUI targets beginner users in particular, by allowing them to rapidly produce CLOE-compatible configurations. To this end, the GUI is not designed to perform a Monte Carlo run, but rather allows the user to generate the configuration files needed for such a run. The GUI is also not meant to replace the configuration files in the `configs` directory, but rather provides an interactive way to guide users in the creation of these files.
+
+The GUI is activated by executing `gui/script_gui.py`.
+
+The primary limitation of the GUI is that it provides less fine-grained control over CLOE options compared to the direct usage of the configuration files. As a result, more advanced users will likely prefer to either directly modify the example configuration files that we have provided or create entirely new files themselves. Users also have the possibility to modify the GUI-generated configuration files at the command line.
+
+## Using CLOE with External Datasets
+
+CLOE can be used together with external datasets as part of the Cobaya and CosmoSIS platforms. Note however that some of these external datasets require a separate installation. 
+In particular, the CLOE conda environment does not include the Planck likelihood and the user will therefore need to separately install it to consider a combined analysis of Euclid and Planck.
+
+Once the Planck likelihood is installed, the `likelihood` block for CLOE with Cobaya and the `pipeline` block for CLOE with CosmoSIS will need to be updated in the standard way for the use of this dataset on the Cobaya/CosmoSIS platforms.
+
+As a concrete example, in the case of Cobaya, the following lines can be included in `config_default.yaml` (in the same way as *Euclid*):
 
 	likelihood:
   		planck_2018_lowl.TT_clik:
@@ -218,30 +102,32 @@ Once the Planck likelihood is installed, the following lines can be included in 
   		planck_2018_highl_plik.TTTEEE:
     		clik_file: /your/path/to/plc_3.0/hi_l/plik/plik_rd12_HM_v22b_TTTEEE.clik
 
-If the Planck likelihood is installed via `cobaya-install` (which is a feature of Cobaya and not CosmoSIS), then the `clik_file` lines above need to be removed.
+If the *Planck* likelihood is installed via `cobaya-install` (which is a feature of Cobaya and not CosmoSIS), then the `clik_file` lines above need to be removed.
 
 Instead of directly editing `config_default.py`, it is also possible to add the corresponding call in the `likelihood` block within the `info` dictionary of the example run scripts provided in the `mcmc_scripts` directory of CLOE. 
-These example scripts accomplish exactly the same commands as the `run_cloe.py` instructions. The IST:L team has constructed the scripts from an internal notebook that is based on the contents of `config_default.yaml`.
+These example scripts accomplish exactly the same commands as the `run_cloe.py` instructions. The CLOE team has constructed the scripts from an internal notebook that is based on the contents of `config_default.yaml`.
 
 ## Structure of the repository
 *  **cloe**: folder containing the CLOE source code and unit tests in Python (see the [API documentation](http://pf-ist-likelihood.pages.euclid-sgs.uk/likelihood-implementation/index.html) for details)
-*  **configs**: folder containing configuration files in YAML, which allow the user to choose analysis settings such as the cosmological probes, summary statistics, scale cuts, parameter space, and systematic uncertainties. 
 *  **cosmosis**: folder containing the CLOE source code in Python and configuration files in INI for its CosmoSIS interface
+*  **configs**: folder containing configuration files in YAML, which allow the user to choose analysis settings such as the cosmological probes, summary statistics, scale cuts, parameter space, and systematic uncertainties. 
 *  **data**: folder containing the data products (be it real or synthetic)
 *  **docs**: folder containing automatically generated documentation
-*  **example**: folder containing example YAML configuration files
 *  **gui**: folder containing the graphical user interface
+*  **example**: folder containing example YAML configuration files
 *  **mcmc scripts**: folder containing example Python scripts to run MCMC chains for different combinations of probes, cosmological parameters, and treatments of systematic uncertainties
 *  **notebooks**: folder containing demonstration and validation Jupyter Notebooks
 *  **scripts**: folder containing example Python scripts to simulate data
 *  ```environment.yml```: file specifying the CLOE conda environment
+*  ```readthedocs.yml```: Read the Docs configuration file
 *  ```example_mcmc_script_for_cluster.sh```: example shell script for submitting jobs on a computing cluster
 *  ```run_cloe.py```: top level script for running the CLOE user interface
 *  ```setup.py```: top level script for installing or testing CLOE
-*  ```LICENCE.txt```: file containing the LGPL license of CLOE
+*  ```Dockerfile```: CLOE Docker image
+*  ```CONTRIBUTING.md```: CLOE contribution guidelines
+*  ```LICENSE```: file containing the LGPL license of CLOE
 
-
-## Unit and verification tests
+## Unit and Verification Tests
 
 To run the unit tests locally:
 
@@ -255,15 +141,19 @@ To run the verification tests locally:
 python -m pytest cloe/tests/verification
 ```
 
-Note that these tests require the development tools.
+## Demonstration of How to Use CLOE
 
-## Demonstration of how to use CLOE
-
-Learn how to use CLOE with our demo. You can launch it with Jupyter Notebook:
+Learn how to use CLOE with our Jupyter Notebooks. These can be launched in the following way, here in the case of the demo notebook:
 
 ```shell
 jupyter-notebook notebooks/DEMO.ipyng
 ```
 
-This notebook currently allows the user to compute the model predictions and likelihood given synthetic Euclid data.
- 
+This notebook illustrates how to compute the theory predictions and likelihood for the primary probes given synthetic Euclid data.
+More broadly, CLOE contains a variety of Jupyter Notebooks in the `notebooks` directory that demonstrate its use and perform distinct validations. 
+
+## License and Credits
+
+CLOE is released by the Euclid Consortium. It is open source and available under terms consistent with our license based on [LGPL](https://www.gnu.org/licenses/lgpl-3.0).
+If you use CLOE, please cite this repository and the CLOE papers (found [here](https://testnamemaster.readthedocs.io/en/latest/cite_us.html)). 
+In addition, please cite the associated papers and adhere to the corresponding licenses of codes that CLOE utilizes (such as `CAMB`, `CLASS`, `HMCODE`, `BACCO`, and `FAST-PT`).

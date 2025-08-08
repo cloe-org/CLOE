@@ -1,7 +1,4 @@
-# Euclid IST:L Contribution Guidelines
-
-> Authors: Samuel Farrens, Dida Markovic  
-> Last Updated: 15/12/2022
+# CLOE Contribution Guidelines
 
 ## Contents
 

@@ -42,7 +42,7 @@ class CMBX:
         already done in the theory dictionnary of the photo_ins object.
 
         It also updates the redshift window to z_win_max, following the
-        update done in cobaya_interface.py
+        update done in cobaya_interface.py.
 
         Parameters
         ----------
@@ -155,7 +155,7 @@ class CMBX:
 
         Returns the window function of the CMB lensing convergence kappa.
         Comment: not implementing the modified gravity Sigma(k,z)
-            function used in the Euclid WL window
+            function used in the Euclid WL window.
 
         .. math::
             W^{\kappa \mathrm{CMB}}(z) =

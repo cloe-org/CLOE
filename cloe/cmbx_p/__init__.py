@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""CMB observables module
+"""CMB CROSS-CORRELATIONS MODULE
 
 """
 

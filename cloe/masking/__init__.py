@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-r"""MASKING PACKAGE
+r"""MASKING MODULE
 
 This module contains methods for implementing the masking of the
 data vector and of the covariance matrix such that

@@ -383,11 +383,11 @@ for a select combination of tomographic bins:
     plt.legend(fontsize=14, frameon=True, framealpha=0.8, edgecolor='gray')
     
     plt.tight_layout()
-    plt.savefig("lensingplot.pdf", dpi=300)
+    plt.savefig("lensingplot.png", dpi=300)
     plt.show()
 
 
-.. image:: ../other/lensingplot.pdf
+.. image:: ../other/lensingplot.png
   :width: 670
   :alt: Lensingplot
 
@@ -418,10 +418,10 @@ combination of tomographic bins through the ``Cl_GC_phot`` method in ``Photo``:
     
     plt.legend(fontsize=14, frameon=True, framealpha=0.8, edgecolor='gray')
     plt.tight_layout()
-    plt.savefig("galaxyplot.pdf", dpi=300)
+    plt.savefig("galaxyplot.png", dpi=300)
     plt.show()
 
-.. image:: ../other/galaxyplot.pdf
+.. image:: ../other/galaxyplot.png
   :width: 670
   :alt: Galaxyplot
 
@@ -463,10 +463,10 @@ multipole power spectrum (monopole, quadrupole, hexadecapole) as a function of w
     
     plt.legend(fontsize=14, frameon=True, framealpha=0.8, edgecolor='gray', ncol=2)
     plt.tight_layout()
-    plt.savefig("multipole_spectra_plot.pdf", dpi=300)
+    plt.savefig("multipole_spectra_plot.png", dpi=300)
     plt.show()
 
-.. image:: ../other/multipole_spectra_plot.pdf
+.. image:: ../other/multipole_spectra_plot.png
   :width: 670
   :alt: Multipoleplot
 
@@ -504,10 +504,10 @@ we can make a plot of the cross-correlation between photometric galaxy positions
     
     plt.legend(fontsize=14, frameon=True, framealpha=0.8, edgecolor='gray')
     plt.tight_layout()
-    plt.savefig("cmblensing_galaxy_crossplot.pdf", dpi=300)
+    plt.savefig("cmblensing_galaxy_crossplot.png", dpi=300)
     plt.show()
 
-.. image:: ../other/cmblensing_galaxy_crossplot.pdf
+.. image:: ../other/cmblensing_galaxy_crossplot.png
   :width: 670
   :alt: CMBXplot
 
@@ -568,10 +568,10 @@ This allows us to make a plot of the posterior probability:
     
     plt.tight_layout()
     
-    plt.savefig("neutrinoplot.pdf")
+    plt.savefig("neutrinoplot.png")
     plt.show()
 
-.. image:: ../other/neutrinoplot.pdf
+.. image:: ../other/neutrinoplot.png
   :width: 640
   :alt: Neutrinoplot
 

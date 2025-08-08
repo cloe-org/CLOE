@@ -1,6 +1,6 @@
 """NONLINEAR
 
-This module to computes the nonlinear recipes for the
+This module computes the nonlinear recipes for the
 photometric and spectroscopic probes.
 """
 import numpy as np

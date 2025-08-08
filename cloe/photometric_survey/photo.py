@@ -1,7 +1,7 @@
 """PHOTO
 
-This module computes the photometric quantities following the
-theoretical recipe of CLOE.
+This module computes the photometric quantities according
+to the theoretical recipe of CLOE.
 """
 
 # General imports

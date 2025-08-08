@@ -3,7 +3,7 @@ EFT MODULE
 
 This module computes several nonlinear spectra using the `PBJ code`
 for the Joint analysis of Power Spectrum and Bispectrum,
-adapted from arXiv:2207.14784 / 2306.09275, ported to CLOE by IST:NL.
+adapted from arXiv:2207.14784 / 2306.09275, ported to CLOE.
 """
 
 import numpy as np

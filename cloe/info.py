@@ -14,8 +14,7 @@ __version__ = '.'.join(str(c) for c in version_info)
 __author__ = 'Euclid'
 __email__ = 'mellier@iap.fr'
 __year__ = '2025'
-__url__ = ('https://gitlab.euclid-sgs.uk/pf-ist-likelihood/'
-           'likelihood-implementation')
+__url__ = ('https://github.com/cloe-euclid/CLOE')
 __description__ = 'Cosmology Likelihood for Observables in Euclid'
 __requires__ = ['numpy', 'scipy', 'camb', 'astropy']
 

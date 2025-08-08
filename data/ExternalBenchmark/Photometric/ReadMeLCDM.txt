@@ -51,7 +51,7 @@ ni(z) is non normalized
 11.	W10(z)
 
 Photometric galaxy clustering kernel function W_{i}^{G}(z) in Mpc^{-1} (including fiducial bias)
-We follow the defintion in the IST:L document on overleaf
+We follow the defintion in the CLOE recipe paper
 ni(z) is now normalized
 
 ----------------------------------------------------------------
@@ -65,7 +65,7 @@ ni(z) is now normalized
 11.	W10(z)
 
 Shear only kernel function W_{i}^{\gamma}(z) in Mpc^{-1}
-We follow the defintion in the IST:L document on overleaf
+We follow the defintion in the CLOE recipe paper
 ni(z) is now normalized
 
 ----------------------------------------------------------------

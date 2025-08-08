@@ -36,4 +36,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/testarnyttnamn/cloecode:${{ env.IMAGE_TAG }}
+          tags: ghcr.io/cloe-euclid/cloe:${{ env.IMAGE_TAG }}

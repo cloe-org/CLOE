@@ -4,14 +4,13 @@
 
 1. [Introduction](#introduction)
 1. [Git Development Guidelines](#git-development-guidelines)
-1. [IST:NL Development Guidelines](#istnl-development-guidelines)
 1. [Style choices](#style-choices)
 
 ## Introduction
 
-These guidelines aim to help you contribute to the development of the CLOE IST:L package. Before attempting to make any changes to the code please do the following:
+These guidelines aim to help you contribute to the development of the CLOE package. Before attempting to make any changes to the code please do the following:
 
-- Get authorisation from the IST:L leads to implement the changes you have in mind.
+- Get authorisation from the CLOE leads to implement the changes you have in mind.
 - Read and adhere to the guidelines provided in this document.
 
 ## Git Development Guidelines
@@ -34,24 +33,22 @@ You can find instructions on the [Git website](https://git-scm.com) for how to i
 
 When working with a Git repository it is essential to keep up to date with developments on the `master` branch. To this end, developers should *clone* the contents of the remote (*i.e.* online) repository rather than simply downloading it. This will ensure that the full development history is available.
 
-To clone a repository (*i.e.* make a local copy of the remote repository) use the `git clone` command. For example to clone this IST likelihood repository:
+To clone a repository (*i.e.* make a local copy of the remote repository) use the `git clone` command. For example to clone this repository:
 
 ```bash
-$ git clone https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation.git
+$ git clone https://github.com/cloe-euclid/CLOE.git
 ```
 
 This will copy the contents of the `master` branch to your computer.
 
-> **Note:** Before cloning you should set up an SSH key for the GitLab repository ([see instructions](https://docs.gitlab.com/ce/ssh/README.html)).
-
 ### Remote vs Local
 
-After cloning the repository you will be able to make modifications on your local copy and track updates on the *remote* (*i.e.* the online GitLab repository). You can display the current remote settings using the `git remote` command. For the pipeline you should see the following output:
+After cloning the repository you will be able to make modifications on your local copy and track updates on the *remote* (*i.e.* the online repository). You can display the current remote settings using the `git remote` command. For the pipeline you should see the following output:
 
 ```bash
 $ git remote -v
-origin	https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation (fetch)
-origin	https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation (push)
+origin	https://github.com/cloe-euclid/CLOE (fetch)
+origin	https://github.com/cloe-euclid/CLOE (push)
 ```
 
 `origin` is the remote repository name and has the same address for both `fetch` and `push` commands.
@@ -154,7 +151,7 @@ where `origin` is the name of the remote repository and `BRANCH_NAME` is the nam
 
 ### Merging
 
-Once all of the changes related to a given issue have been pushed to the remote repository a merge request can be made. To do this simply select your branch on GitLab and press the merge request button. You will need to submit a short description of the changes that will be made to `master` and assign an individual and milestone (if applicable) to the request. After this, the merge request will be reviewed by one of the repository reviewers. At this stage the reviewer may request further changes or point out potential issues. The developer can simply continue working on a local branch and pushing changes to the corresponding remote branch, which remains attached to the merge request. If the proposed changes fail to meet the required standards or the reviewer believes that these changes should not be merged into the master branch then the merge request can be closed (*i.e.* rejected). If accepted, however, your changes will be merged into the master branch and your remote branch will be deleted.
+Once all of the changes related to a given issue have been pushed to the remote repository a merge request can be made. To do this simply select your branch and press the merge request button. You will need to submit a short description of the changes that will be made to `master` and assign an individual and milestone (if applicable) to the request. After this, the merge request will be reviewed by one of the repository reviewers. At this stage the reviewer may request further changes or point out potential issues. The developer can simply continue working on a local branch and pushing changes to the corresponding remote branch, which remains attached to the merge request. If the proposed changes fail to meet the required standards or the reviewer believes that these changes should not be merged into the master branch then the merge request can be closed (*i.e.* rejected). If accepted, however, your changes will be merged into the master branch and your remote branch will be deleted.
 
 ### Clean Up
 
@@ -187,110 +184,14 @@ Upon detecting a (potential) bug, developers should open an issue in the `Develo
 
 In this issue, the developers should clearly specify if they:
 a. Plan to open a Merge Request to fix the bug themselves. If so, they can self-assign the issue and link any corresponding Merge Request to the issue.
-b. Leave the issue for someone else to resolve. In this case the IST:L leads should assign the task to another developer.
+b. Leave the issue for someone else to resolve. In this case the CLOE leads should assign the task to another developer.
 
 ### Newline warnings
 
 Before merging, please ensure that there are no `\No newline at end of file` warnings.
 
 
-## IST:NL Development Guidelines
-
-This section provides guidelines on how the [IST:NL repository](https://gitlab.euclid-sgs.uk/pf-ist-nonlinear/likelihood-implementation) should be managed as a *fork* (or *downstream repository*) of the IST:L repository (or *upstream repository*). These guidelines are designed to avoid issues with IST:L.
-
-### Forking
-
-In order to maintain a stable link to the upstream repository (*i.e.* the main IST:L repository), it recommended to create a *fork*. This can be done by simply clicking the `fork` button on the top right of the IST:L repository. This will create an identical copy of the repository with a new address.
-
-### Mirroring
-
-This fork will quickly diverge from the upstream if left alone. By setting up a mirror to the upstream master branch the downstream master branch can be kept in sync. This way any changes made to the upstream master will automatically flow down to the downstream master.
-
-> **Note:** this will happen on regular intervals (every x minutes) so there may be a minor delay.
-
-To set up a mirror to the upstream, the IST:NL leads should contact the IST:L leads and request that this be activated. The mirror must be setup by someone with maintainer rights on the upstream repository and this person must also be given access to the downstream repository.
-
-### Protecting the Master Branch
-
-Changes to the downstream master will not flow upstream. Therefore, it is advised that write access to the downstream master be deactivated for all users. This will avoid conflicts with the upstream master.
-
-(The only exception to this are the maintainers, who manage the mirroring. They must retain push access to the IST:NL master in order for the mirroring to work. Even though they technically have access, they should *never* push to the IST:NL master.)
-
-### Downstream Development
-
-The development in the downstream repository must adhere to the following guidelines:
-
-- New features, modules, *etc.* can be developed downstream provided they do not modify the current upstream API.
-- Downstream branches can be created and merged into other downstream branches with internal reviews.
-- Downstream merge requests have to be managed and reviewed by the downstream team but should maintain the same quality standards.
-- Downstream issues and wiki can be managed independently by the downstream team.
-
-### Upstream Development
-
-Changes that should be carried out in the upstream repository include:
-
-- Changes to the current architecture.
-- Changes to the current API.
-- Bug fixes.
-- Generic routines that are not specific to the downstream development objectives such as file IO, basic cosmology routines, *etc.* Downstream managers should identify these cases.
-
-The preference that these changes to be done in the upstream is to avoid duplication of issues between the upstream and the downstream.
-
-Downstream developers that do not have access to the upstream repository should contact the IST:L leads to either request access or to request specific features.
-
-### Upstream Merge Requests
-
-Once downstream content is sufficiently mature a merge request can be made from a downstream branch to the upstream master. Note that the merge request will be opened in the upstream repository and reviewed by the upstream team.
-
-Downstream managers should ensure that the merge request adheres to the following guidelines:
-
-- Ensure that the merge request points to the upstream master and not the downstream master. This should be the default behaviour for a fork.
-- Ensure that the merge request includes all the latest upstream commits. Mirroring only guarantees this until a downstream branch is created, any additional commits will need to be manually merged from the remote master to ensure all updates are included.
-
-  ```bash
-  $ git pull origin master
-  ```
-- New unit tests should be added by the downstream team to maintain the current code coverage.
-- All existing and new CI tests must still pass.
-- The same API documentation style and standards should be adopted.
-
-Once the merge request is opened, the upstream team can carry out a *consistency* review before merging to the upstream master. After merging, the changes will flow to the downstream master. Any downstream branch still open should pull these commits.
-
-### Repository Handling
-
-Developers planning to work on both the upstream and the downstream repositories may wish to avoid cloning both. The easiest way to manage this is to do the following:
-
-- Clone the downstream repository:
-
-  ```bash
-  $ git clone DOWNSTREAM_URL
-  ```
-
-- Add the upstream to the list of remotes:
-
-  ```bash
-  $ git remote add upstream UPSTREAM_URL
-  $ git remote -v
-  ```
-
-- Use explicit push and pull commands *e.g.*:
-
-  ```bash
-  # Push to a downstream branch
-  $ git push origin BRANCH_NAME
-
-  # Push to an upstream branch
-  $ git push upstream BRANCH_NAME
-  ```
-
-- Avoid pushing to either downstream or upstream master branches! This should be disabled for all downstream users and only possible for upstream maintainers, but should be avoided regardless.
-
-- Pulling from either the downstream or the upstream master branches should be equivalent if the mirroring has been activated. When in doubt, however, pull from the upstream to ensure that you have all the latest commits.
-
-
 ## Style choices
-
-
 
 #### **General guidelines**
 

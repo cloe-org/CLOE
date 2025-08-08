@@ -26,4 +26,4 @@ In addition, please cite the associated papers and adhere to the corresponding l
 
 .. |link-to-license| raw:: html
 
-  <a href="https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/blob/master/LICENSE.txt" target="_blank">license</a>
+  <a href="https://github.com/cloe-euclid/CLOE/blob/main/LICENSE" target="_blank">license</a>

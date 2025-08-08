@@ -4,6 +4,7 @@
 
 [![CI](https://github.com/testarnyttnamn/testnamemaster/actions/workflows/ci.yml/badge.svg)](https://github.com/testarnyttnamn/testnamemaster/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/testarnyttnamn/testnamemaster/branch/master/graph/badge.svg)](https://codecov.io/gh/testarnyttnamn/testnamemaster)
+[![Coverage Status](https://coveralls.io/repos/github/testarnyttnamn/cloecode/badge.svg)](https://coveralls.io/github/testarnyttnamn/cloecode)
 [![License: LGPL-3.0](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0.en.html)
 [![Documentation](https://readthedocs.org/projects/testnamemaster/badge/?version=latest)](https://testnamemaster.readthedocs.io/en/latest/)
 

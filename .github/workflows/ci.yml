@@ -2,7 +2,7 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ master, docsbranch ]
+    branches: [ main, docsbranch ]
     paths:
       - 'cloe/**'
       - 'configs/**'
@@ -11,7 +11,7 @@ on:
       - '.github/workflows/ci.yml'
       - 'setup.py'
   pull_request:
-    branches: [ master, docsbranch ]
+    branches: [ main, docsbranch ]
     paths:
       - 'cloe/**'
       - 'configs/**'

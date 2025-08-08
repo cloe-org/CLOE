@@ -41,7 +41,7 @@ jobs:
 
       - name: Pull image & run tests
         run: |
-          IMAGE=ghcr.io/testarnyttnamn/cloecode:latest
+          IMAGE=ghcr.io/cloe-euclid/cloe:latest
           echo "→ Pulling $IMAGE"
           docker pull "$IMAGE"
 

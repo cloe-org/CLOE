@@ -236,7 +236,7 @@ class Cosmology:
                 * IA values in arXiv:1910.09273 (NLA)
                 and arxiv:1708.09247 (TATT)
 
-                * Additional parameters for GCspectro, as provided by IST:NL
+                * Additional parameters for GCspectro
 
             This dictionary also stores the choice of likelihood
             to be evaluated, i.e. photometric, spectroscopic, or 3x2pt.

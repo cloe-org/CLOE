@@ -106,7 +106,7 @@ To run the verification tests locally:
 Dependencies
 ------------
 
-You can find the code dependencies listed `here <https://github.com/testarnyttnamn/testnamemaster/blob/master/environment.yml>`_.
+You can find the code dependencies listed `here <https://github.com/cloe-euclid/cloe/blob/main/environment.yml>`_.
 
 
 Is There a Demonstration of How to Use CLOE?
@@ -143,4 +143,4 @@ Analogous demonstration notebooks are given by
 - Spectroscopic galaxy clustering: ``DEMO_ISTNL_spectro.ipynb``, ``eft_multipoles.ipynb`` 
 - NLA and TATT IA models: ``DEMO_ISTNL_photo_IA_NLA.ipynb``, ``DEMO_ISTNL_photo_IA_TATT.ipynb``. 
 
-More information about the structure of the repository can be found in the `README <https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/blob/master/README.md>`_.
+More information about the structure of the repository can be found in the `README <https://github.com/cloe-euclid/CLOE/blob/main/README.md>`_.

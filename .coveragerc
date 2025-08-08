@@ -1,5 +1,5 @@
 [run]
-omit = ./likelihood/info.py
+source = cloe
 
 [report]
 show_missing = True

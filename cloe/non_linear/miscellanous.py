@@ -3,7 +3,7 @@ MISCELLANEOUS
 
 This module contains functions from :obj:`cosmology.py` that are
 required in the nonlinear module (only temporary to mimic the
-linear implementation made by IST:L).
+linear implementation).
 """
 
 import numpy as np

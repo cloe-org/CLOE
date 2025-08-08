@@ -2,7 +2,7 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ master, ci-debug ]
+    branches: [ master, docsbranch ]
     paths:
       - 'cloe/**'
       - 'configs/**'
@@ -11,7 +11,7 @@ on:
       - '.github/workflows/ci.yml'
       - 'setup.py'
   pull_request:
-    branches: [ master, ci-debug ]
+    branches: [ master, docsbranch ]
     paths:
       - 'cloe/**'
       - 'configs/**'
@@ -41,7 +41,7 @@ jobs:
 
       - name: Pull image & run tests
         run: |
-          IMAGE=ghcr.io/testarnyttnamn/testnamemaster:latest
+          IMAGE=ghcr.io/testarnyttnamn/cloecode:latest
           echo "→ Pulling $IMAGE"
           docker pull "$IMAGE"
 

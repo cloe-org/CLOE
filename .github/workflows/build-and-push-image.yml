@@ -3,7 +3,7 @@ name: Build and Push Docker Image
 on:
   push:
     branches:
-      - ci-debug
+      - docsbranch
       - master
 
 jobs:
@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Figure out whether we're on master (-> latest) or ci-debug (-> ci-debug)
+      # Figure out whether we're on master (-> latest) or docsbranch (-> docsbranch)
       - name: Determine tag
         run: |
           if [ "$GITHUB_REF" = "refs/heads/master" ]; then
@@ -36,4 +36,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/testarnyttnamn/testnamemaster:${{ env.IMAGE_TAG }}
+          tags: ghcr.io/testarnyttnamn/cloecode:${{ env.IMAGE_TAG }}

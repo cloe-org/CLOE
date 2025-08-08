@@ -2,11 +2,10 @@
 
 """CLOE PACKAGE
 
-*Cosmology Likelihood for Observables in Euclid* (CLOE)
-is a package developed by the Euclid Consortium
-(IST:L, IST:NL, WL/GC/TH/CMBX/CG SWGs) to compute
-the *Euclid* likelihood. This documentation provides
-a description of the modules implemented in CLOE.
+The Cosmology Likelihood for Observables in Euclid (CLOE)
+is a software package developed by the Euclid Consortium.
+This documentation provides a description of the modules
+implemented in CLOE.
 
 """
 

@@ -16,12 +16,12 @@ dependencies:
   - seaborn==0.12.2
   - tensorflow==2.11.1
   # Unit testing and documentation dependencies (from conda-forge)
-  - numpydoc==1.5.0
+  - numpydoc==1.6.0
   - pytest==7.3.2
   - pytest-cov==4.1.0
   - pytest-pycodestyle==2.3.1
-  - sphinx==6.2.1
-  - sphinx-rtd-theme==1.2.2
+  - sphinx==7.3.7
+  - sphinx-rtd-theme==3.0.2
   # Domain-specific 3rd-party Python packages (from conda-forge)
   - fast-pt==3.1.1
   # Additional non-Python dependencies
@@ -35,7 +35,7 @@ dependencies:
     # Domain-specific 3rd-party Python package (from PyPI)
     - cobaya==3.3.1
     - deepdish==0.3.7
-    # - classy #Uncomment this line to include CLASS in the cloe environment
+    # - classy # Uncomment this line to include CLASS in the CLOE environment
     - git+https://bitbucket.org/rangulo/baccoemu.git@7e0ca8b
     - BCemu==1.1
     - euclidemu2==1.2.1

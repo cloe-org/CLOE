@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Figure out whether we're on master (-> latest) or docsbranch (-> docsbranch)
+      # Figure out whether we are on master (-> latest) or docsbranch (-> docsbranch)
       - name: Determine tag
         run: |
           if [ "$GITHUB_REF" = "refs/heads/master" ]; then

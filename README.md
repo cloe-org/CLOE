@@ -108,7 +108,7 @@ Instead of directly editing `config_default.py`, it is also possible to add the 
 These example scripts accomplish exactly the same commands as the `run_cloe.py` instructions. The CLOE team has constructed the scripts from an internal notebook that is based on the contents of `config_default.yaml`.
 
 ## Structure of the repository
-*  **cloe**: folder containing the CLOE source code and unit tests in Python (see the [API documentation](https://cloe-euclid.readthedocs.io) for details)
+*  **cloe**: folder containing the CLOE source code and unit tests in Python (see the [API documentation](https://cloe-euclid.readthedocs.io/en/latest/api/index.html) for details)
 *  **cosmosis**: folder containing the CLOE source code in Python and configuration files in INI for its CosmoSIS interface
 *  **configs**: folder containing configuration files in YAML, which allow the user to choose analysis settings such as the cosmological probes, summary statistics, scale cuts, parameter space, and systematic uncertainties. 
 *  **data**: folder containing the data products (be it real or synthetic)
@@ -141,7 +141,7 @@ To run the verification tests locally:
 python -m pytest cloe/tests/verification
 ```
 
-## Demonstration of How to Use CLOE
+## Demonstration and Validation Notebooks
 
 Learn how to use CLOE with our Jupyter Notebooks. These can be launched in the following way, here in the case of the demo notebook:
 

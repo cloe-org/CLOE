@@ -239,6 +239,7 @@ Further note that the cell below can also be executed before sampling the likeli
                                     'eta1_ia': -0.41,
                                     'eta2_ia': 1,
                                     'beta1_ia': 0.0,
+                                    'pivot_redshift': 0.0,
                                     # Photometric redshift distribution shift parameters
                                     'dz_1_GCphot': 0.0, 'dz_1_WL': 0.0,
                                     'dz_2_GCphot': 0.0, 'dz_2_WL': 0.0,
@@ -323,7 +324,7 @@ Further note that the cell below can also be executed before sampling the likeli
                                   'root_CMBlensxGC': 'Cls_kCMBxGC.dat',
                                   'root_CMBisw': 'Cls_{:s}_ISWxGC.dat',
                                   'ISW_model': 'zNLA',
-                                  'cov_7x2pt': 'Cov_7x2pt_WL_GC_CMBX.npy'}}
+                                  'cov_7x2pt': 'Cov_7x2pt_WL_GC_CMBX.npz'}}
                         }}
 
 

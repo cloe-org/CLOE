@@ -8,7 +8,7 @@ The CLOE repository can be cloned through the following command:
 
 .. code-block:: bash
 
-	git clone https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation.git
+	git clone https://github.com/cloe-euclid/CLOE.git
 
 
 Installing CLOE
@@ -38,7 +38,7 @@ No additional steps are required to use CLOE with Cobaya.
 
 **Stand-alone build**
 
-Alternatively, the CLOE package can be built by cloning this repository using git and installing the versions of the dependencies listed in `environment.yml <https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/blob/master/environment.yml>`_ 
+Alternatively, the CLOE package can be built by cloning this repository using git and installing the versions of the dependencies listed in `environment.yml <https://github.com/cloe-euclid/CLOE/blob/main/environment.yml>`_ 
 using your favourite tool for installing python packages. Then, install CLOE by running
 
 .. code-block:: bash
@@ -48,9 +48,10 @@ using your favourite tool for installing python packages. Then, install CLOE by 
 
 **Docker image**
 
-The CLOE Docker image comes with CLOE and all dependencies pre-installed. In order to use this image you will need to have Docker installed on the relevant machine.
+The CLOE Docker image comes with CLOE and all dependencies pre-installed. It is currently only available for Euclid Consortium members with access to the private GitLab server.
+In order to use this image, you will need to have Docker installed on the relevant machine.
 
-First, log into the Euclid GitLab container registry,
+First, log into the Euclid container registry,
 
 .. code-block:: bash
 

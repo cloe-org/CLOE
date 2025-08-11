@@ -212,7 +212,7 @@ info['likelihood'] = {'Euclid':
                             'root_CMBlensxGC': 'Cls_kCMBxGC.dat',                              
                             'ISW_model': 'zNLA',
                             'root_CMBisw': 'Cls_{:s}_ISWxGC.dat',
-                            'cov_7x2pt': 'Cov_7x2pt_WL_GC_CMBX.npy',}
+                            'cov_7x2pt': 'Cov_7x2pt_WL_GC_CMBX.npz',}
                      }
                     }}
 

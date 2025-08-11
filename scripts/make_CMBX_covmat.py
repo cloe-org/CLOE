@@ -278,7 +278,7 @@ info['likelihood'] = {'Euclid':
                                   # 'root_CMBisw': 'Cls_{:s}_ISWxGC.dat',
                                   'root_CMBisw': 'Cls_zNLA_ISWxGC.dat',
                                   'ISW_model': 'zNLA',
-                                  'cov_7x2pt': 'Cov_7x2pt_WL_GC_CMBX.npy'}}
+                                  'cov_7x2pt': 'Cov_7x2pt_WL_GC_CMBX.npz'}}
                     }}
 
 model = get_model(info)

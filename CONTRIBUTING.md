@@ -10,7 +10,7 @@
 
 These guidelines aim to help you contribute to the development of the CLOE package. Before attempting to make any changes to the code please do the following:
 
-- Get authorisation from the CLOE leads to implement the changes you have in mind.
+- Get authorisation to implement the changes you have in mind.
 - Read and adhere to the guidelines provided in this document.
 
 ## Git Development Guidelines
@@ -65,7 +65,7 @@ $ git pull
 
 ### Branching
 
-Once you have an up-to-date copy of the repository you should create a branch, which should be linked to an open issue. In general an issue should be opened any time you believe something needs to be changed or added to the main branch (*i.e.* a bug fix, a new feature, *etc.*). This will provide context for the repository maintainers when reviewing your merge request.
+Once you have an up-to-date copy of the repository you should create a branch, which should be linked to an open issue. In general an issue should be opened any time you believe something needs to be changed or added to the main branch (*i.e.* a bug fix, a new feature, *etc.*). This will provide context for the repository maintainers when reviewing your merge request (MR).
 
 **You should always avoid making direct commits to the main branch.**
 
@@ -183,8 +183,8 @@ $ git remote prune origin
 Upon detecting a (potential) bug, developers should open an issue in the `Development` column with the `bug` label. This should be done as soon as possible to avoid bugs being overlooked or forgotten.
 
 In this issue, the developers should clearly specify if they:
-a. Plan to open a Merge Request to fix the bug themselves. If so, they can self-assign the issue and link any corresponding Merge Request to the issue.
-b. Leave the issue for someone else to resolve. In this case the CLOE leads should assign the task to another developer.
+a. Plan to open a merge request to fix the bug themselves. If so, they can self-assign the issue and link any corresponding merge request to the issue.
+b. Leave the issue for someone else to resolve. In this case the task will be assigned to another developer.
 
 ### Newline warnings
 
@@ -197,13 +197,13 @@ Before merging, please ensure that there are no `\No newline at end of file` war
 
 - Existing python packages such as e.g. `numpy`, `scipy` or `astropy` should be used whenever possible.
 - The code should follow [PEP8 rules](https://peps.python.org/pep-0008/) to pass the CI tests.
-- Try to avoid (as much as possible) using hardcoded parameters. If you do so please add them to the list of hardcoded parameters ([link to the list to be created](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation/-/issues/698#note_83137)). Reviewers should always check if there is good reason for it or not.
-- Comments (i.e. lines starting with `#`) may be written in the code only if they are useful for the developers. They should never be targeted at the user and never be printed. Reviewers should check what comments are useful for a given merge request (MR).
+- Try to avoid using hardcoded parameters. If you do so please document them. Reviewers should always check if there is good reason for it.
+- Comments (i.e. lines starting with `#`) may be written in the code only if they are useful for the developers. They should never be targeted at the user and never be printed. Reviewers should check what comments are useful for a given merge request.
 - Comments/docstrings should be written in third person (e.g. `Returns` instead of `Return`)
 - In accordance with the ECEB Style Guide for Euclid Publications, the convention for the language is British English.
 - Do not use all capital letters in comments and printouts.
-- Try to avoid as much as possible excluding code from coverage report with `#pragma: no cover`. It is fine to exclude certain things that cannot easily be included in unit tests (e.g. plotting routines). Reviewers should assess for a given MR if a given exclusion is justified.
-- Try to avoid as much as possible using lambda functions. Developers need to justify why they are included in a piece of code. Reviewers should check that the use is indeed justified.
+- Try to avoid excluding code from coverage report with `#pragma: no cover`. It is fine to exclude certain things that cannot easily be included in unit tests (e.g. plotting routines). Reviewers should assess if a given exclusion is justified in the MR.
+- Try to avoid using lambda functions. Developers need to justify why they are included in a piece of code. Reviewers should check that the use is indeed justified.
 - Do not use relative imports and always use absolute imports
 
    _Example_: 
@@ -256,7 +256,7 @@ cobaya.
 ##### Variables 
 
 * Keep all variable names lowercase and separate words/terms with a `_` (e.g. `my_var` not `MyVar`).
-* Try to avoid (as much as possible) using single letter variable names. The same applies to the corresponding docstring.
+* Try to avoid using single letter variable names. The same applies to the corresponding docstring.
 
 _A few examples for CLOE:_  
 

@@ -6,6 +6,10 @@
 # with 'True' for the selected observables and
 # 'False' for those which are not requested.
 #
+# Note that no cross-correlations with GCspectro
+# are currently enabled and that CMBisw can only
+# be correlated with GCphot.
+#
 # WL: Weak Lensing
 # GCphot: Photometric Galaxy Clustering
 # GCspectro: Spectroscopic Galaxy Clustering

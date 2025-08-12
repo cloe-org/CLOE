@@ -114,10 +114,9 @@ These example scripts accomplish exactly the same commands as the `run_cloe.py` 
 *  **data**: folder containing the data products (be it real or synthetic)
 *  **docs**: folder containing automatically generated documentation
 *  **gui**: folder containing the graphical user interface
-*  **example**: folder containing example YAML configuration files
 *  **mcmc scripts**: folder containing example Python scripts to run MCMC chains for different combinations of probes, cosmological parameters, and treatments of systematic uncertainties
 *  **notebooks**: folder containing demonstration and validation Jupyter Notebooks
-*  **scripts**: folder containing example Python scripts to simulate data
+*  **scripts**: folder containing example Python scripts to simulate data and example YAML files
 *  ```environment.yml```: file specifying the CLOE conda environment
 *  ```readthedocs.yml```: Read the Docs configuration file
 *  ```example_mcmc_script_for_cluster.sh```: example shell script for submitting jobs on a computing cluster

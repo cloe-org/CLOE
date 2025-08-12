@@ -133,7 +133,7 @@ that demonstrate its use and perform distinct validations. Two examples constitu
 - The notebook ``cosmosis_validation.ipynb`` illustrates the agreement of the log-likelihood
   and intermediate quantities between CLOE’s CosmoSIS and Cobaya backends. 
 
-Analogous demonstration notebooks are given by
+Analogous demonstration and validation notebooks are given by
 
 - CMB cross-correlations: ``CMBX_Probes.ipynb``
 - Clusters of galaxies probes: ``DEMO_Clusters_of_Galaxies.ipynb`` 

@@ -12,8 +12,9 @@ from inspect import signature
 from cloe.cosmo.cosmology import Cosmology
 from cloe.tests.test_tools.test_data_handler import load_test_pickle
 
+
 def _force_grid_false(pksrc):
-    """Wrap pk_source_phot methods to call with grid=False (test-only)."""
+    """Wrap pk_source_phot methods to return (Nz, Nk) arrays, test-only."""
     if pksrc is None:
         return
 
@@ -22,17 +23,38 @@ def _force_grid_false(pksrc):
             return
         f = getattr(pksrc, name)
         try:
-            if "grid" in signature(f).parameters:
-                def g(z, k, _f=f, **kw):
-                    return _f(z, k, grid=False, **kw)
-                setattr(pksrc, name, g)
+            has_grid = "grid" in signature(f).parameters
         except Exception:
-            # If introspection fails, leave as-is.
-            pass
+            has_grid = False
+
+        def g(z, k, _f=f):
+            out = _f(z, k, grid=False) if has_grid else _f(z, k)
+            arr = np.asarray(out)
+
+            # expected sizes from inputs
+            if isinstance(z, np.ndarray):
+                Nz = z.shape[0] if z.ndim > 1 else z.size
+            else:
+                Nz = 1
+            Nk = k.size if isinstance(k, np.ndarray) else 1
+
+            if arr.ndim == 1:
+                arr = np.tile(arr.reshape(1, -1), (Nz, 1))
+            elif arr.ndim == 2:
+                r, c = arr.shape
+                if (r, c) == (Nk, Nz):
+                    arr = arr.T
+                if arr.shape[0] >= Nz and arr.shape[1] >= Nk:
+                    arr = arr[:Nz, :Nk]
+            return arr
+
+        setattr(pksrc, name, g)
 
     for n in ("Pmm_phot_def", "Pgg_phot_def", "Pgdelta_phot_def",
-              "Pii_def", "Pdeltai_def", "Pgi_phot_def", "Pgi_spectro_def"):
+              "Pii_def", "Pdeltai_def", "Pgi_phot_def",
+              "Pgi_spectro_def"):
         _wrap(n)
+
 
 class cosmoinitTestCase(TestCase):
 
@@ -51,7 +73,7 @@ class cosmoinitTestCase(TestCase):
         cls.cosmo.nonlinear.theory['redshift_bins_means_spectro'] = \
             cls.cosmo.cosmo_dic['redshift_bins_means_spectro']
         cls.cosmo.nonlinear.set_Pgg_spectro_model()
-        _force_grid_false(cls.cosmo.pk_source_phot)
+        _force_grid_false(getattr(cls.cosmo, 'pk_source_phot', None))
         # Define test case for negative curvature
         cls.cosmo_curv_neg = Cosmology()
         cls.cosmo_curv_neg.cosmo_dic = (
@@ -63,7 +85,7 @@ class cosmoinitTestCase(TestCase):
         sela.setdefault('WL', {})['GCphot'] = True
         sela.setdefault('WL', {})['WL'] = True
         sela.setdefault('WL', {})['GCspectro'] = True
-        _force_grid_false(cls.cosmo_curv_neg.pk_source_phot)
+        _force_grid_false(getattr(cls.cosmo, 'pk_source_phot', None))
         # Define test case for positive curvature
         cls.cosmo_curv_pos = Cosmology()
         cls.cosmo_curv_pos.cosmo_dic = (
@@ -75,7 +97,7 @@ class cosmoinitTestCase(TestCase):
         selb.setdefault('WL', {})['GCphot'] = True
         selb.setdefault('WL', {})['WL'] = True
         selb.setdefault('WL', {})['GCspectro'] = True
-        _force_grid_false(cls.cosmo_curv_pos.pk_source_phot)
+        _force_grid_false(getattr(cls.cosmo_curv_neg, 'pk_source_phot', None))
         # Define test case for gamma parametrization
         cls.cosmo_gamma = Cosmology()
         cls.cosmo_gamma.cosmo_dic = (
@@ -87,7 +109,7 @@ class cosmoinitTestCase(TestCase):
         selc.setdefault('WL', {})['GCphot'] = True
         selc.setdefault('WL', {})['WL'] = True
         selc.setdefault('WL', {})['GCspectro'] = True
-        _force_grid_false(cls.cosmo_gamma.pk_source_phot)
+        _force_grid_false(getattr(cls.cosmo_curv_neg, 'pk_source_phot', None))
         # Define test case for nonlinear model
         cls.cosmo_NL = Cosmology()
         cls.cosmo_NL.cosmo_dic = (
@@ -99,7 +121,7 @@ class cosmoinitTestCase(TestCase):
         seld.setdefault('WL', {})['GCphot'] = True
         seld.setdefault('WL', {})['WL'] = True
         seld.setdefault('WL', {})['GCspectro'] = True
-        _force_grid_false(cls.cosmo_NL.pk_source_phot)
+        _force_grid_false(getattr(cls.cosmo_NL, 'pk_source_phot', None))
 
     def setUp(self) -> None:
         # Check values

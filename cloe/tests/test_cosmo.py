@@ -314,7 +314,31 @@ class cosmoinitTestCase(TestCase):
         )
 
     def test_update_cosmo_dic(self):
-        self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.002)
+        sel = self.cosmo.cosmo_dic.setdefault('obs_selection', {})
+        wl = sel.setdefault('WL', {})
+        gcphot = sel.setdefault('GCphot', {})
+
+        old = {
+            'WL_WL': wl.get('WL', False),
+            'WL_GCphot': wl.get('GCphot', False),
+            'WL_GCspectro': wl.get('GCspectro', False),
+            'GCphot_GCphot': gcphot.get('GCphot', False),
+        }
+
+        wl['WL'] = False
+        wl['GCphot'] = False
+        wl['GCspectro'] = False
+        gcphot['GCphot'] = False
+
+        try:
+            self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.002)
+        finally:
+            # Restore flags for subsequent tests
+            wl['WL'] = old['WL_WL']
+            wl['GCphot'] = old['WL_GCphot']
+            wl['GCspectro'] = old['WL_GCspectro']
+            gcphot['GCphot'] = old['GCphot_GCphot']
+
         keyDfound = 'D_z_k' in self.cosmo.cosmo_dic
         npt.assert_equal(keyDfound, True, err_msg='D_z_k not calculated')
 

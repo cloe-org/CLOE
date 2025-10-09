@@ -17,6 +17,10 @@ To this end, first import the necessary libraries and modules:
     import numpy as np
     from matplotlib import pyplot as plt
     import copy
+    import os, sys
+    # Add parent of CWD to Python's import path
+    project_root = os.path.realpath(os.path.join(os.getcwd(), '..'))
+    sys.path.insert(0, project_root)
     # Cobaya's model wrapper
     from cobaya.model import get_model
     # Cobaya's run method
@@ -431,6 +435,8 @@ given the cosmology dictionary and set of spectroscopic redshifts:
 
 .. code:: python
 
+    like.cosmo.cosmo_dic['obs_selection']['GCspectro']['GCspectro'] = True
+    like.cosmo.update_cosmo_dic(like.cosmo.cosmo_dic['z_win'], 0.05)
     spectro = Spectro(like.cosmo.cosmo_dic, info['likelihood']['Euclid']['data']['spectro']['redshifts'])
 
 This allows us to use the ``multipole_spectra`` method in ``Spectro`` to  make a plot of the redshift-space 

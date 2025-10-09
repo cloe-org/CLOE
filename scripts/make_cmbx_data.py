@@ -201,13 +201,13 @@ info['likelihood'] = {'Euclid':
 
 
 model = get_model(info)
-
+model.add_requirements({'Cl': {'pp': 4300}})
 
 # Evaluate the likelihood on the fiducial cosmology
 logposterior = model.logposterior({})
 
 like = model.likelihood['Euclid']
-
+like.cosmo.cosmo_dic['Cl'] = model.provider.get_Cl()
 
 photo = Photo(like.cosmo.cosmo_dic, like.likefinal.data_ins.nz_dict_WL, like.likefinal.data_ins.nz_dict_GC_Phot)
 photo.update(like.cosmo.cosmo_dic)

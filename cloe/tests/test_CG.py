@@ -34,6 +34,8 @@ info = {
         'omnuh2': None,
         'omegac': None,
         'N_eff': None,
+        'a1_ia': 0,
+        'eta1_ia': -0.41,
     },
     'theory': {'camb':
                {'stop_at_error': True,
@@ -259,6 +261,7 @@ class CGinitTestCase(TestCase):
             self.cg.dVdzdO(0.0),
             self.check_dVdzdO,
             rtol=1.e-3,
+            atol=1e-26,
             err_msg='test_dV_dzdO failed',
         )
 

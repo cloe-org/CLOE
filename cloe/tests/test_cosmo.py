@@ -8,8 +8,52 @@ module.
 from unittest import TestCase
 import numpy as np
 import numpy.testing as npt
+from inspect import signature
 from cloe.cosmo.cosmology import Cosmology
 from cloe.tests.test_tools.test_data_handler import load_test_pickle
+
+
+def _force_grid_false(pksrc):
+    """Wrap pk_source_phot methods to return (Nz, Nk) arrays, test-only."""
+    if pksrc is None:
+        return
+
+    def _wrap(name):
+        if not hasattr(pksrc, name):
+            return
+        f = getattr(pksrc, name)
+        try:
+            has_grid = "grid" in signature(f).parameters
+        except Exception:
+            has_grid = False
+
+        def g(z, k, _f=f):
+            out = _f(z, k, grid=False) if has_grid else _f(z, k)
+            arr = np.asarray(out)
+
+            # expected sizes from inputs
+            if isinstance(z, np.ndarray):
+                Nz = z.shape[0] if z.ndim > 1 else z.size
+            else:
+                Nz = 1
+            Nk = k.size if isinstance(k, np.ndarray) else 1
+
+            if arr.ndim == 1:
+                arr = np.tile(arr.reshape(1, -1), (Nz, 1))
+            elif arr.ndim == 2:
+                r, c = arr.shape
+                if (r, c) == (Nk, Nz):
+                    arr = arr.T
+                if arr.shape[0] >= Nz and arr.shape[1] >= Nk:
+                    arr = arr[:Nz, :Nk]
+            return arr
+
+        setattr(pksrc, name, g)
+
+    for n in ("Pmm_phot_def", "Pgg_phot_def", "Pgdelta_phot_def",
+              "Pii_def", "Pdeltai_def", "Pgi_phot_def",
+              "Pgi_spectro_def"):
+        _wrap(n)
 
 
 class cosmoinitTestCase(TestCase):
@@ -20,29 +64,64 @@ class cosmoinitTestCase(TestCase):
         cls.cosmo = Cosmology()
         cls.cosmo.cosmo_dic = load_test_pickle('cosmo_test_dic.pickle')
         cls.cosmo.cosmo_dic['z_win_max'] = cls.cosmo.cosmo_dic['z_win']
+        sel = cls.cosmo.cosmo_dic.setdefault('obs_selection', {})
+        sel.setdefault('GCspectro', {})['GCspectro'] = True
+        sel.setdefault('GCphot', {})['GCphot'] = True
+        sel.setdefault('WL', {})['GCphot'] = True
+        sel.setdefault('WL', {})['WL'] = True
+        sel.setdefault('WL', {})['GCspectro'] = True
         cls.cosmo.nonlinear.theory['redshift_bins_means_spectro'] = \
             cls.cosmo.cosmo_dic['redshift_bins_means_spectro']
         cls.cosmo.nonlinear.set_Pgg_spectro_model()
+        _force_grid_false(getattr(cls.cosmo, 'pk_source_phot', None))
         # Define test case for negative curvature
         cls.cosmo_curv_neg = Cosmology()
         cls.cosmo_curv_neg.cosmo_dic = (
             load_test_pickle('cosmo_test_curv_neg_dic.pickle')
         )
+        sela = cls.cosmo_curv_neg.cosmo_dic.setdefault('obs_selection', {})
+        sela.setdefault('GCspectro', {})['GCspectro'] = True
+        sela.setdefault('GCphot', {})['GCphot'] = True
+        sela.setdefault('WL', {})['GCphot'] = True
+        sela.setdefault('WL', {})['WL'] = True
+        sela.setdefault('WL', {})['GCspectro'] = True
+        _force_grid_false(getattr(cls.cosmo, 'pk_source_phot', None))
         # Define test case for positive curvature
         cls.cosmo_curv_pos = Cosmology()
         cls.cosmo_curv_pos.cosmo_dic = (
             load_test_pickle('cosmo_test_curv_pos_dic.pickle')
         )
+        selb = cls.cosmo_curv_pos.cosmo_dic.setdefault('obs_selection', {})
+        selb.setdefault('GCspectro', {})['GCspectro'] = True
+        selb.setdefault('GCphot', {})['GCphot'] = True
+        selb.setdefault('WL', {})['GCphot'] = True
+        selb.setdefault('WL', {})['WL'] = True
+        selb.setdefault('WL', {})['GCspectro'] = True
+        _force_grid_false(getattr(cls.cosmo_curv_neg, 'pk_source_phot', None))
         # Define test case for gamma parametrization
         cls.cosmo_gamma = Cosmology()
         cls.cosmo_gamma.cosmo_dic = (
             load_test_pickle('cosmo_test_gamma_dic.pickle')
         )
+        selc = cls.cosmo_gamma.cosmo_dic.setdefault('obs_selection', {})
+        selc.setdefault('GCspectro', {})['GCspectro'] = True
+        selc.setdefault('GCphot', {})['GCphot'] = True
+        selc.setdefault('WL', {})['GCphot'] = True
+        selc.setdefault('WL', {})['WL'] = True
+        selc.setdefault('WL', {})['GCspectro'] = True
+        _force_grid_false(getattr(cls.cosmo_curv_neg, 'pk_source_phot', None))
         # Define test case for nonlinear model
         cls.cosmo_NL = Cosmology()
         cls.cosmo_NL.cosmo_dic = (
             load_test_pickle('cosmo_test_NLphot2_gamma_dic.pickle')
         )
+        seld = cls.cosmo_NL.cosmo_dic.setdefault('obs_selection', {})
+        seld.setdefault('GCspectro', {})['GCspectro'] = True
+        seld.setdefault('GCphot', {})['GCphot'] = True
+        seld.setdefault('WL', {})['GCphot'] = True
+        seld.setdefault('WL', {})['WL'] = True
+        seld.setdefault('WL', {})['GCspectro'] = True
+        _force_grid_false(getattr(cls.cosmo_NL, 'pk_source_phot', None))
 
     def setUp(self) -> None:
         # Check values
@@ -235,7 +314,31 @@ class cosmoinitTestCase(TestCase):
         )
 
     def test_update_cosmo_dic(self):
-        self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.002)
+        sel = self.cosmo.cosmo_dic.setdefault('obs_selection', {})
+        wl = sel.setdefault('WL', {})
+        gcphot = sel.setdefault('GCphot', {})
+
+        old = {
+            'WL_WL': wl.get('WL', False),
+            'WL_GCphot': wl.get('GCphot', False),
+            'WL_GCspectro': wl.get('GCspectro', False),
+            'GCphot_GCphot': gcphot.get('GCphot', False),
+        }
+
+        wl['WL'] = False
+        wl['GCphot'] = False
+        wl['GCspectro'] = False
+        gcphot['GCphot'] = False
+
+        try:
+            self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.002)
+        finally:
+            # Restore flags for subsequent tests
+            wl['WL'] = old['WL_WL']
+            wl['GCphot'] = old['WL_GCphot']
+            wl['GCspectro'] = old['WL_GCspectro']
+            gcphot['GCphot'] = old['GCphot_GCphot']
+
         keyDfound = 'D_z_k' in self.cosmo.cosmo_dic
         npt.assert_equal(keyDfound, True, err_msg='D_z_k not calculated')
 

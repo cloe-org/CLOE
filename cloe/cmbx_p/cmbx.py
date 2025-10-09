@@ -25,7 +25,7 @@ class CMBX:
         """
         self.photo_ins = photo_ins
 
-        # Allows to select the spectra from CAMB directly (faster ?)
+        # Allows to select the spectra from CAMB directly
         self.use_camb_clkcmb = False
 
         self.ells_kCMB = []

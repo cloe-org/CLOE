@@ -20,6 +20,12 @@ class cosmoinitTestCase(TestCase):
         cls.cosmo = Cosmology()
         cls.cosmo.cosmo_dic = load_test_pickle('cosmo_test_dic.pickle')
         cls.cosmo.cosmo_dic['z_win_max'] = cls.cosmo.cosmo_dic['z_win']
+        sel = cls.cosmo.cosmo_dic.setdefault('obs_selection', {})
+        sel.setdefault('GCspectro', {})['GCspectro'] = True
+        sel.setdefault('GCphot', {})['GCphot'] = True
+        sel.setdefault('WL', {})['GCphot'] = True
+        sel.setdefault('WL', {})['WL'] = True
+        sel.setdefault('WL', {})['GCspectro'] = True
         cls.cosmo.nonlinear.theory['redshift_bins_means_spectro'] = \
             cls.cosmo.cosmo_dic['redshift_bins_means_spectro']
         cls.cosmo.nonlinear.set_Pgg_spectro_model()
@@ -28,21 +34,45 @@ class cosmoinitTestCase(TestCase):
         cls.cosmo_curv_neg.cosmo_dic = (
             load_test_pickle('cosmo_test_curv_neg_dic.pickle')
         )
+        sela = cls.cosmo_curv_neg.cosmo_dic.setdefault('obs_selection', {})
+        sela.setdefault('GCspectro', {})['GCspectro'] = True
+        sela.setdefault('GCphot', {})['GCphot'] = True
+        sela.setdefault('WL', {})['GCphot'] = True
+        sela.setdefault('WL', {})['WL'] = True
+        sela.setdefault('WL', {})['GCspectro'] = True
         # Define test case for positive curvature
         cls.cosmo_curv_pos = Cosmology()
         cls.cosmo_curv_pos.cosmo_dic = (
             load_test_pickle('cosmo_test_curv_pos_dic.pickle')
         )
+        selb = cls.cosmo_curv_pos.cosmo_dic.setdefault('obs_selection', {})
+        selb.setdefault('GCspectro', {})['GCspectro'] = True
+        selb.setdefault('GCphot', {})['GCphot'] = True
+        selb.setdefault('WL', {})['GCphot'] = True
+        selb.setdefault('WL', {})['WL'] = True
+        selb.setdefault('WL', {})['GCspectro'] = True
         # Define test case for gamma parametrization
         cls.cosmo_gamma = Cosmology()
         cls.cosmo_gamma.cosmo_dic = (
             load_test_pickle('cosmo_test_gamma_dic.pickle')
         )
+        selc = cls.cosmo_gamma.cosmo_dic.setdefault('obs_selection', {})
+        selc.setdefault('GCspectro', {})['GCspectro'] = True
+        selc.setdefault('GCphot', {})['GCphot'] = True
+        selc.setdefault('WL', {})['GCphot'] = True
+        selc.setdefault('WL', {})['WL'] = True
+        selc.setdefault('WL', {})['GCspectro'] = True
         # Define test case for nonlinear model
         cls.cosmo_NL = Cosmology()
         cls.cosmo_NL.cosmo_dic = (
             load_test_pickle('cosmo_test_NLphot2_gamma_dic.pickle')
         )
+        seld = cls.cosmo_NL.cosmo_dic.setdefault('obs_selection', {})
+        seld.setdefault('GCspectro', {})['GCspectro'] = True
+        seld.setdefault('GCphot', {})['GCphot'] = True
+        seld.setdefault('WL', {})['GCphot'] = True
+        seld.setdefault('WL', {})['WL'] = True
+        seld.setdefault('WL', {})['GCspectro'] = True
 
     def setUp(self) -> None:
         # Check values

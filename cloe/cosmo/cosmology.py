@@ -1559,8 +1559,8 @@ class Cosmology:
             growth = self.cosmo_dic['D_z_k_func'](redshift, k_scale)
 
         if (isinstance(redshift, (list, np.ndarray)) and
-                isinstance(wavenumber, (list, np.ndarray))):
-            redshift = np.repeat(redshift[:, np.newaxis], len(wavenumber), 1)
+                isinstance(k_scale, (list, np.ndarray))):
+            redshift = np.repeat(redshift[:, np.newaxis], len(k_scale), 1)
 
         c1 = 0.0134
         pivot_redshift = \
@@ -1765,65 +1765,68 @@ class Cosmology:
 
         k_win = self.cosmo_dic['k_win']
         z_win = self.cosmo_dic['z_win']
+        z_win_transpose = z_win.reshape(-1, 1)
 
         spe_bin_edges = np.array([0.90, 1.10, 1.30, 1.50, 1.80])
         z_win_spectro = rb.reduce(z_win, spe_bin_edges[0], spe_bin_edges[-1])
 
         pksrc_phot = self.pk_source_phot
         pksrc_spectro = self.pk_source_spectro
-        pmm_phot = np.array([pksrc_phot.Pmm_phot_def(zz, k_win)
-                             for zz in z_win])
-        pgg_phot = np.array([pksrc_phot.Pgg_phot_def(zz, k_win)
-                             for zz in z_win])
-        pgdelta_phot = np.array([pksrc_phot.Pgdelta_phot_def(zz, k_win)
-                                 for zz in z_win])
-        pii = np.array([pksrc_phot.Pii_def(zz, k_win)
-                        for zz in z_win])
-        pdeltai = np.array([pksrc_phot.Pdeltai_def(zz, k_win)
-                            for zz in z_win])
-        pgi_phot = np.array([pksrc_phot.Pgi_phot_def(zz, k_win)
-                             for zz in z_win])
-        pgi_spectro = np.array([pksrc_phot.Pgi_spectro_def(zz, k_win)
-                                for zz in z_win_spectro])
 
-        self.cosmo_dic['Pgg_spectro'] = pksrc_spectro.Pgg_spectro_def
-        self.cosmo_dic['Pgdelta_spectro'] = pksrc_spectro.Pgdelta_spectro_def
+        if self.cosmo_dic['obs_selection']['GCspectro']['GCspectro']:
+            self.cosmo_dic['Pgg_spectro'] = pksrc_spectro.Pgg_spectro_def
 
-        self.cosmo_dic['Pmm_phot'] = \
-            interpolate.RectBivariateSpline(z_win,
-                                            k_win,
-                                            pmm_phot,
-                                            kx=1, ky=1)
-        self.cosmo_dic['Pgg_phot'] = \
-            interpolate.RectBivariateSpline(z_win,
-                                            k_win,
-                                            pgg_phot,
-                                            kx=1, ky=1)
-        self.cosmo_dic['Pgdelta_phot'] = \
-            interpolate.RectBivariateSpline(z_win,
-                                            k_win,
-                                            pgdelta_phot,
-                                            kx=1, ky=1)
-        self.cosmo_dic['Pii'] = \
-            interpolate.RectBivariateSpline(z_win,
-                                            k_win,
-                                            pii,
-                                            kx=1, ky=1)
-        self.cosmo_dic['Pdeltai'] = \
-            interpolate.RectBivariateSpline(z_win,
-                                            k_win,
-                                            pdeltai,
-                                            kx=1, ky=1)
-        self.cosmo_dic['Pgi_phot'] = \
-            interpolate.RectBivariateSpline(z_win,
-                                            k_win,
-                                            pgi_phot,
-                                            kx=1, ky=1)
-        self.cosmo_dic['Pgi_spectro'] = \
-            interpolate.RectBivariateSpline(z_win_spectro,
-                                            k_win,
-                                            pgi_spectro,
-                                            kx=1, ky=1)
+        if self.cosmo_dic['obs_selection']['WL']['WL']:
+            pmm_phot = pksrc_phot.Pmm_phot_def(z_win_transpose, k_win)
+            pii = pksrc_phot.Pii_def(z_win_transpose, k_win)
+            pdeltai = pksrc_phot.Pdeltai_def(z_win_transpose, k_win)
+            self.cosmo_dic['Pmm_phot'] = \
+                interpolate.RectBivariateSpline(z_win,
+                                                k_win,
+                                                pmm_phot,
+                                                kx=1, ky=1)
+            self.cosmo_dic['Pii'] = \
+                interpolate.RectBivariateSpline(z_win,
+                                                k_win,
+                                                pii,
+                                                kx=1, ky=1)
+            self.cosmo_dic['Pdeltai'] = \
+                interpolate.RectBivariateSpline(z_win,
+                                                k_win,
+                                                pdeltai,
+                                                kx=1, ky=1)
+
+        if self.cosmo_dic['obs_selection']['GCphot']['GCphot']:
+            pgg_phot = pksrc_phot.Pgg_phot_def(z_win_transpose, k_win)
+            self.cosmo_dic['Pgg_phot'] = \
+                interpolate.RectBivariateSpline(z_win,
+                                                k_win,
+                                                pgg_phot,
+                                                kx=1, ky=1)
+
+        if self.cosmo_dic['obs_selection']['WL']['GCphot']:
+            pgdelta_phot = pksrc_phot.Pgdelta_phot_def(z_win_transpose, k_win)
+            pgi_phot = pksrc_phot.Pgi_phot_def(z_win_transpose, k_win)
+            self.cosmo_dic['Pgdelta_phot'] = \
+                interpolate.RectBivariateSpline(z_win,
+                                                k_win,
+                                                pgdelta_phot,
+                                                kx=1, ky=1)
+            self.cosmo_dic['Pgi_phot'] = \
+                interpolate.RectBivariateSpline(z_win,
+                                                k_win,
+                                                pgi_phot,
+                                                kx=1, ky=1)
+
+        if self.cosmo_dic['obs_selection']['WL']['GCspectro']:
+            pgi_spectro = pksrc_phot.Pgi_spectro_def(z_win_transpose_s, k_win)
+            self.cosmo_dic['Pgdelta_spectro'] = \
+                pksrc_spectro.Pgdelta_spectro_def
+            self.cosmo_dic['Pgi_spectro'] = \
+                interpolate.RectBivariateSpline(z_win_spectro,
+                                                k_win,
+                                                pgi_spectro,
+                                                kx=1, ky=1)
         return
 
     def rescaled_linear_power_MG(self, redshift, wavenumber):
@@ -2063,5 +2066,6 @@ class Cosmology:
             self.cosmo_dic['Weyl_matter_ratio'] = \
                 self.Weyl_matter_ratio_def
 
-        self.cosmo_dic['noise_Pgg_spectro'] = \
-            self.pk_source_spectro.noise_Pgg_spectro
+        if self.cosmo_dic['obs_selection']['GCspectro']['GCspectro']:
+            self.cosmo_dic['noise_Pgg_spectro'] = \
+                self.pk_source_spectro.noise_Pgg_spectro

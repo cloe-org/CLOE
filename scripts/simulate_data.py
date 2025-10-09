@@ -111,7 +111,7 @@ info = {
 info['likelihood'] = {'Euclid':
                      {'external': EuclidLikelihood,
                      'observables_selection': {
-                         'WL': {'WL': True, 'GCphot': False, 'GCspectro': False},
+                         'WL': {'WL': True, 'GCphot': True, 'GCspectro': False},
                          'GCphot': {'GCphot': True, 'GCspectro': False},
                          'GCspectro': {'GCspectro': True},
                          'CG': {'CG': False},
@@ -286,14 +286,11 @@ matXC = []
 for bin_i in range(1, nbin + 1):
     for bin_j in range(1, nbin + 1):
         if (bin_j >= bin_i):
-            cl_GC = np.array([photo.Cl_GC_phot(cur_ell, bin_i, bin_j) for
-                              cur_ell in ells])
-            cl_WL = np.array([photo.Cl_WL(cur_ell, bin_i, bin_j) for
-                              cur_ell in ells])
+            cl_GC = photo.Cl_GC_phot(ells, bin_i, bin_j)
+            cl_WL = photo.Cl_WL(ells, bin_i, bin_j)
             matGC.append(cl_GC)
             matWL.append(cl_WL)
-        cl_cross = np.array([photo.Cl_cross(cur_ell, bin_j, bin_i) for
-                             cur_ell in ells])
+        cl_cross = photo.Cl_cross(ells, bin_j, bin_i)
         matXC.append(cl_cross)
 
 matGC = np.array(matGC).T

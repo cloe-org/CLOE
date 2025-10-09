@@ -139,7 +139,7 @@ class EuclidLikelihood(Likelihood):
             self.likefinal.data_ins.luminosity_ratio_interpolator
         # Pass the observables selection to the cosmo dictionary
         self.cosmo.cosmo_dic['obs_selection'] = self.observables['selection']
-        self.cosmo.cosmo_dic['observables_specifications'] =\
+        self.cosmo.cosmo_dic['observables_specifications'] = \
             self.observables['specifications']
 
         # Sampling in radius for the sigma(R,z) in Mpc
@@ -158,6 +158,11 @@ class EuclidLikelihood(Likelihood):
         """
         # This will work if CAMB is installed globally
         self.fiducial_cosmology = Cosmology()
+        # Pass the observables selection to the cosmo dictionary
+        self.fiducial_cosmology.cosmo_dic['obs_selection'] = \
+            self.observables['selection']
+        self.fiducial_cosmology.cosmo_dic['observables_specifications'] = \
+            self.observables['specifications']
         # Update fiducial cosmo dic with fiducial info from reader
         self.fiducial_cosmology.cosmo_dic.update(
             self.likefinal.data_spectro_fiducial_cosmo)
@@ -365,11 +370,14 @@ class EuclidLikelihood(Likelihood):
                  "vars_pairs": ([["delta_tot", "delta_tot"],
                                 ["delta_nonu", "delta_nonu"]])}}
         # CAMBdata is used only to retrieve the conformal time
-        # to compute z of CMB, explore if there is a better way.
         if self.solver == 'camb':
             derived = {'omegac': None, 'omnuh2': None, 'omeganu': None,
-                       'nnu': None, 'Cl': {'pp': 4300}, 'CAMBdata': None}
+                       'nnu': None, 'CAMBdata': None}
             requirements = requirements | derived
+            # CMB lensing from CAMB rather than CLOE (not needed)
+            # if self.observables_selection['CMBlens']['CMBlens']:
+            #     derived_cmb = {'Cl': {'pp': 4300}}
+            #     requirements = requirements | derived_cmb
 
         return requirements
 
@@ -444,7 +452,9 @@ class EuclidLikelihood(Likelihood):
                 self.cosmo.cosmo_dic['Omnu'] = \
                     self.provider.get_param('omeganu')
                 self.cosmo.cosmo_dic['nnu'] = self.provider.get_param('nnu')
-                self.cosmo.cosmo_dic['Cl'] = self.provider.get_Cl()
+                # When CMB lensing is from CAMB rather than CLOE (not needed)
+                # if self.observables_selection['CMBlens']['CMBlens']:
+                #     self.cosmo.cosmo_dic['Cl'] = self.provider.get_Cl()
                 self.cosmo.cosmo_dic['CAMBdata'] = self.provider.get_CAMBdata()
                 self.cosmo.cosmo_dic['chistar'] = \
                     self.cosmo.cosmo_dic['CAMBdata'].conformal_time(0) - \
@@ -625,7 +635,6 @@ class EuclidLikelihood(Likelihood):
                                     for your_key in new_keys}
             self.cosmo.cosmo_dic['nuisance_parameters'].update(
                 **only_nuisance_params)
-            self.cosmo.cosmo_dic['Cl'] = model.provider.get_Cl()
             if 'observables_selection' in info['likelihood']['Euclid']:
                 self.observables_selection = \
                     info['likelihood']['Euclid']['observables_selection']
@@ -635,6 +644,9 @@ class EuclidLikelihood(Likelihood):
                     self.observables_selection['matrix_transform_phot']
                 self.cosmo.cosmo_dic['matrix_transform_phot'] = \
                     self.matrix_transform_phot
+                # When CMB lensing is from CAMB rather than CLOE (not needed)
+                # if self.observables_selection['CMBlens']['CMBlens']:
+                #     self.cosmo.cosmo_dic['Cl'] = model.provider.get_Cl()
             if 'observables_specifications' in info['likelihood']['Euclid']:
                 self.observables_specifications = \
                     info['likelihood']['Euclid']['observables_specifications']

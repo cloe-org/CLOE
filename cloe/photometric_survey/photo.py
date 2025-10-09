@@ -50,16 +50,15 @@ class Photo:
         z_wmin3 = 1e-3
         z_wmax = 4.0
         self.z_wsamp = 1000
-        self.z_trapz_sampling = 500
+        # self.z_trapz_sampling = 500
         self.z_winterp = np.logspace(z_wlogmin,
                                      np.log10(z_wmax),
                                      self.z_wsamp)
         self.z_winterp[0] = z_wmin1
         self.z_winterp[1] = z_wmin2
         self.z_winterp[2] = z_wmin3
-        # Number of bins should be generalized, hard-coded for now
 
-        # Cl integral z step (TODO: take from the accuracy module)
+        # Cl integral z step
         int_step = 0.01
         self.z_grid_for_cl = np.arange(self.cl_int_z_min, z_wmax, int_step)
 

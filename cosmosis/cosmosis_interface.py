@@ -174,6 +174,11 @@ def set_fiducial_cosmology(likefinal, info):
     """
     # This will work if CAMB is installed globally
     fid_cosmo = Cosmology()
+    # Pass the observables selection to the cosmo dictionary
+    fid_cosmo.cosmo_dic['obs_selection'] = \
+        info['observables_selection']
+    fid_cosmo.cosmo_dic['observables_specifications'] = \
+        info['observables_specifications']
     fid_cosmo.cosmo_dic['z_win'] = np.linspace(
                                 info['z_min'], info['z_max'], info['z_samp'])
     fid_cosmo.cosmo_dic['z_win_max'] = fid_cosmo.cosmo_dic['z_win']

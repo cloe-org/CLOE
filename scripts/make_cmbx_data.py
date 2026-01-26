@@ -238,8 +238,7 @@ for ibin in range(ntomogc):
 #### Save the data 
 
 
-savepath = opj(os.path.dirname(os.path.dirname(cloe.__file__)), 'data', 'cmbx')
-np.savetxt(opj(savepath, 'Cls_kCMB.dat'), np.array([ells, cl_kk]).T, header='ells     kCMB-kCMB')
+savepath = opj(os.path.dirname(os.path.dirname(cloe.__file__)), 'data', 'ExternalBenchmark')np.savetxt(opj(savepath, 'Cls_kCMB.dat'), np.array([ells, cl_kk]).T, header='ells     kCMB-kCMB')
 
 
 header = 'ells'

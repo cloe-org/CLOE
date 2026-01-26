@@ -5,6 +5,9 @@
 # - CMB lensing (with SO noise curve) and its cross-correlation with GCphot and WL
 # - ISWxGCphot (with Planck's noise up to l= and then SO), assuming that its covariance with other probes is null
 
+# To download the SO noise curves, run the command `git submodule update --init --recursive` from the main CLOE directory.
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 import time 
@@ -276,8 +279,7 @@ phot_ins.update(like.cosmo.cosmo_dic)
 
 cmbx_ins = CMBX(phot_ins)
 cmbx_ins.cmbx_update(phot_ins)
-savepath = opj(os.path.dirname(os.path.dirname(cloe.__file__)), 'data', 'cmbx')
-
+savepath = opj(os.path.dirname(os.path.dirname(cloe.__file__)), 'data', 'ExternalBenchmark')
 
 # We assume that all probes are defined with the same ell binning except for ISW
 

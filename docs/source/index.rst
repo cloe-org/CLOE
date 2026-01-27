@@ -39,7 +39,5 @@ cross-correlations of galaxy positions and shapes with the cosmic microwave back
    :caption: Reference
 
    api/index
-   cite_us
    changelog
-   contributing
-
+   cite_us

@@ -2,9 +2,9 @@ Changelog
 =========
 
 There have been multiple internal releases of CLOE within the
-Euclid Consortium, and the most recent stable version is ``v2.1.1``.
-Here, we provide a brief overview of the development history,
-which has thus far consisted in over 300 code mergers.
+Euclid Consortium. Here, we provide a brief overview of the
+development history, which has thus far consisted in over
+300 code mergers.
 
 CLOE ``Version 1.0``
 --------------------
@@ -55,30 +55,23 @@ for the nonlinear matter power spectrum and the EFTOFLSS model for the nonlinear
 power spectrum. The patches ``v2.0.1`` and ``v2.0.2`` primarily incorporate a third-order polynomial in 
 redshift for the magnification bias, spectroscopic redshift errors, and the CosmoSIS backend. 
 We note that ``v2.0.2`` is the version of the code used to perform the parameter inference in Euclid 
-Collaboration: Cañas Herrera et al. (2025). 
+Collaboration: Cañas-Herrera et al. (2026). 
 
 CLOE ``Version 2.1`` 
 --------------------
 
-This most recent stable version of the code was internally 
-released to the Euclid Consortium in October 2024. 
-There was a subsequent minor patch ``v2.1.1`` in July 2025.
+This version of CLOE includes code developed until August 2024,
+which is when the Euclid Inter-Science Taskforce: Likelihood completed its tenure.
 
-It includes the window convolution for both the photometric and spectroscopic 
-probes, i.e. summary statistics in the form of 3×2pt pseudo-Cℓ and
-window-convolved multipole power spectra. It moreover includes the 
-FFTLog implementation, a unified treatment of Cobaya and CosmoSIS via
-the CLOE overlayer, and the ability to read in data files in
-the Euclid OU-LE3 format via EuclidLib. This version of
-CLOE moreover includes an optimization of the integration
-strategy for the weak lensing and magnification kernels 
-(resulting in a factor of six speed improvement), along with bug
-fixes pertaining to the magnification bias, data handler 
-module, Conda environment, measurement units, and 
-checkpointing of Monte Carlo runs. This version also includes the
-masking of the configuration space probes, removal of 
-deprecated code, and updates to notebooks and scripts for 
-compatibility with the latest version of CLOE. 
+It includes the FFTLog implementation, a unified treatment of
+Cobaya and CosmoSIS via the CLOE overlayer, and the ability to read in data files in
+the Euclid OU-LE3 format via EuclidLib. This version of CLOE moreover includes an
+optimization of the integration strategy for the weak lensing and magnification
+kernels (resulting in a factor of six speed improvement), along with bug fixes pertaining
+to the magnification bias, Conda environment, and measurement units.
+This version also includes the masking of the configuration space probes and the window
+convolution for the spectroscopic galaxy clustering, i.e. summary statistics in the form
+of window-convolved multipole power spectra. 
 
 In addition, this CLOE version includes
 the baryonic feedback emulators of BACCO and BCemu,
@@ -93,6 +86,19 @@ in the form of CMB cross-correlations and cluster counts.
 These additional probes have the same functionalities as the
 primary probes in that they can be run using either Cobaya
 or CosmoSIS, and using either CAMB or CLASS. 
-The patch ``v2.1.1`` primarily incorporates the feature to 
-write the theory predictions to file, minor bug fixes, and 
-enhancements to the Sphinx documentation.
+
+The minor patch ``v2.1.1`` includes a bug fix for the ISW calculation
+in November 2024, and ``v2.1.2`` includes an additional distinct branch
+of the code used in Euclid Collaboration: Goh et al. (2026).
+
+Further developments
+--------------------
+
+The main branch of CLOE includes further developments beyond the latest tagged release.
+This includes the feature to write the theory predictions to file, enhancements to the Sphinx
+documentation, and bug fixes pertaining to the data handler module and checkpointing of Monte Carlo
+runs. This further includes the window convolution for the photometric probes, i.e. summary
+statistics in the form of 3×2pt pseudo-:math:`C_\ell`, as well as the vectorization of the matter, IA, and
+galaxy auto- and cross-power spectra. In addition, this includes the removal of deprecated code, refinements
+to notebooks and scripts for compatibility with the latest version of CLOE, and minor technical
+updates required for the migration from GitLab to GitHub.

@@ -3,7 +3,7 @@
 <img src="./docs/other/cloelogo_notext.png" alt="Logo" width="300" />
 
 [![CI](https://github.com/cloe-org/cloe/actions/workflows/ci.yml/badge.svg)](https://github.com/cloe-org/cloe/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/cloe-org/cloe/branch/main/graph/badge.svg?token=6d834ba5-670c-4b8e-af08-12956d5913da)](https://codecov.io/gh/cloe-org/cloe)
+[![codecov](https://codecov.io/gh/cloe-org/cloe/branch/main/graph/badge.svg?token=26c55a1c-87b4-4666-be68-7c3269a5ce86)](https://codecov.io/gh/cloe-org/cloe)
 [![License: LGPL-3.0](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0.en.html)
 [![Documentation](https://readthedocs.org/projects/cloe-euclid/badge/?version=latest)](https://cloe-euclid.readthedocs.io/en/latest/)
 

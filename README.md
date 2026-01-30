@@ -5,7 +5,7 @@
 [![CI](https://github.com/cloe-org/cloe/actions/workflows/ci.yml/badge.svg)](https://github.com/cloe-org/cloe/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/cloe-org/cloe/branch/main/graph/badge.svg?token=6d834ba5-670c-4b8e-af08-12956d5913da)](https://codecov.io/gh/cloe-org/cloe)
 [![License: LGPL-3.0](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0.en.html)
-[![Documentation](https://readthedocs.org/projects/cloe-org/badge/?version=latest)](https://cloe-org.readthedocs.io/en/latest/)
+[![Documentation](https://readthedocs.org/projects/cloe-euclid/badge/?version=latest)](https://cloe-euclid.readthedocs.io/en/latest/)
 
 This repository allows the user to obtain model predictions and cosmological parameter constraints for synthetic and real *Euclid* data. 
 It is developed by members of the Euclid Consortium (EC).
@@ -24,7 +24,7 @@ It is also possible to analyze the *Euclid* data alongside other external datase
 [Cobaya](https://cobaya.readthedocs.io/en/latest/) and [CosmoSIS](https://cosmosis.readthedocs.io/en/latest/) platforms.
 CLOE moreover allows the user to obtain the linear matter power spectrum and background expansion from either of the [CAMB](https://camb.readthedocs.io/en/latest/) and [CLASS](https://lesgourg.github.io/class_public/class.html) Boltzmann codes.
 
-Further documentation is found in the [CLOE Read the Docs](https://cloe-org.readthedocs.io/).
+Further documentation is found in the [CLOE Read the Docs](https://cloe-euclid.readthedocs.io/).
 The full development history is available to EC members [here](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation).
 
 ## Installation
@@ -43,7 +43,7 @@ conda activate cloe
 pip install .
 ```
 
-If our environment does not work on your cluster, we provide additional installation instructions in the [CLOE Read the Docs](https://cloe-org.readthedocs.io/).
+If our environment does not work on your cluster, we provide additional installation instructions in the [CLOE Read the Docs](https://cloe-euclid.readthedocs.io/).
 Lastly, in order to use CLOE with CosmoSIS, one needs to add the line
 
 ```shell
@@ -108,7 +108,7 @@ Instead of directly editing `config_default.py`, it is also possible to add the 
 These example scripts accomplish exactly the same commands as the `run_cloe.py` instructions. The CLOE team has constructed the scripts from an internal notebook that is based on the contents of `config_default.yaml`.
 
 ## Structure of the repository
-*  **cloe**: folder containing the CLOE source code and unit tests in Python (see the [API documentation](https://cloe-org.readthedocs.io/en/latest/api/index.html) for details)
+*  **cloe**: folder containing the CLOE source code and unit tests in Python (see the [API documentation](https://cloe-euclid.readthedocs.io/en/latest/api/index.html) for details)
 *  **cosmosis**: folder containing the CLOE source code in Python and configuration files in INI for its CosmoSIS interface
 *  **configs**: folder containing configuration files in YAML, which allow the user to choose analysis settings such as the cosmological probes, summary statistics, scale cuts, parameter space, and systematic uncertainties. 
 *  **data**: folder containing the data products (be it real or synthetic)
@@ -154,5 +154,5 @@ More broadly, CLOE contains a variety of Jupyter Notebooks in the `notebooks` di
 ## License and Credits
 
 CLOE is released by the Euclid Consortium. It is open source and available under terms consistent with our license based on [LGPL](https://www.gnu.org/licenses/lgpl-3.0).
-If you use CLOE, please cite this repository and the CLOE papers (found [here](https://cloe-org.readthedocs.io/en/latest/cite_us.html)). 
+If you use CLOE, please cite this repository and the CLOE papers (found [here](https://cloe-euclid.readthedocs.io/en/latest/cite_us.html)). 
 In addition, please cite the associated papers and adhere to the corresponding licenses of codes that CLOE utilizes (such as `CAMB`, `CLASS`, `HMCODE`, `BACCO`, and `FAST-PT`).

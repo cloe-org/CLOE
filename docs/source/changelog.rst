@@ -65,7 +65,7 @@ which is when the Euclid Inter-Science Taskforce: Likelihood completed its tenur
 
 It includes the FFTLog implementation, a unified treatment of
 Cobaya and CosmoSIS via the CLOE overlayer, and the ability to read in data files in
-the Euclid OU-LE3 format via EuclidLib. This version of CLOE moreover includes an
+the Euclid OU-LE3 format via euclidlib. This version of CLOE moreover includes an
 optimization of the integration strategy for the weak lensing and magnification
 kernels (resulting in a factor of six speed improvement), along with bug fixes pertaining
 to the magnification bias, Conda environment, and measurement units.

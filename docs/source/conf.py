@@ -114,7 +114,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'CLOE'
-copyright = u'2025 Euclid Consortium'
+copyright = u'2026 CLOE Contributors'
 author = u'Euclid Consortium'
 
 # The version info for the project you're documenting, acts as replacement for

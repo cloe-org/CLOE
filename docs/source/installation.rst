@@ -8,7 +8,7 @@ The CLOE repository can be cloned through the following command:
 
 .. code-block:: bash
 
-	git clone https://github.com/cloe-euclid/CLOE.git
+	git clone https://github.com/cloe-org/CLOE.git
 
 
 Installing CLOE
@@ -38,7 +38,7 @@ No additional steps are required to use CLOE with Cobaya.
 
 **Stand-alone build**
 
-Alternatively, the CLOE package can be built by cloning this repository using git and installing the versions of the dependencies listed in `environment.yml <https://github.com/cloe-euclid/CLOE/blob/main/environment.yml>`_ 
+Alternatively, the CLOE package can be built by cloning this repository using git and installing the versions of the dependencies listed in `environment.yml <https://github.com/cloe-org/CLOE/blob/main/environment.yml>`_ 
 using your favourite tool for installing python packages. Then, install CLOE by running
 
 .. code-block:: bash

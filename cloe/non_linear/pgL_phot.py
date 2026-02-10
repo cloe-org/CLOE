@@ -88,10 +88,17 @@ class PgL_phot_model(PowerSpectrum):
         code already includes it.
 
         .. math::
-            P_{\rm G I}^{\rm photo}(z, k) = b_g^{\rm photo}(z) \
-            \left [ C_{1}P_{\rm \delta\delta}^{\rm NL}(z, k) S_{\rm bar}\
-            (z, k)+C_{1\delta}D(z)^{4}[\rm A_{0|0E}(k)+\rm C_{0|0E}(k)] \
-            +C_{2}D(z)^{4}[\rm A_{0|E2}(k)+B_{0|E2}(k)] \right ]
+            \begin{aligned}
+            P_{\mathrm{GI}}^{\mathrm{photo}}(z, k)
+            &= b_g^{\mathrm{photo}}(z)\Bigl[
+               C_{1}\,P_{\delta\delta}^{\mathrm{NL}}(z, k)\,
+               S_{\mathrm{bar}}(z, k) \\
+            &\quad + C_{1\delta}\,D(z)^{4}
+               \left[A_{0|0E}(k) + C_{0|0E}(k)\right] \\
+            &\quad + C_{2}\,D(z)^{4}
+               \left[A_{0|E2}(k) + B_{0|E2}(k)\right]
+               \Bigr].
+            \end{aligned}
 
         Note: either redshift or wavenumber must be a float (ex. simultaneously
         setting both of them to numpy.ndarray makes the code crash)
@@ -169,10 +176,17 @@ class PgL_phot_model(PowerSpectrum):
         added as a boost.
 
         .. math::
-            P_{\rm G I}^{\rm photo}(z, k) = b_g^{\rm photo}(z) \
-            \left [ C_{1}P_{\rm \delta\delta}(z, k) B_{\rm NL}(z, k) \
-            S_{\rm bar}(z, k)+C_{1\delta}D(z)^{4}[\rm A_{0|0E}(k)+\rm \
-            C_{0|0E}(k)]+C_{2}D(z)^{4}[\rm A_{0|E2}(k)+B_{0|E2}(k)] \right ]
+            \begin{aligned}
+            P_{\mathrm{GI}}^{\mathrm{photo}}(z, k)
+            &= b_g^{\mathrm{photo}}(z)\Bigl[
+               C_{1}\,P_{\delta\delta}(z, k)\,B_{\mathrm{NL}}(z, k)\,
+               S_{\mathrm{bar}}(z, k) \\
+            &\quad + C_{1\delta}\,D(z)^{4}
+               \left[A_{0|0E}(k) + C_{0|0E}(k)\right] \\
+            &\quad + C_{2}\,D(z)^{4}
+               \left[A_{0|E2}(k) + B_{0|E2}(k)\right]
+               \Bigr].
+            \end{aligned}
 
         Note: either redshift or wavenumber must be a float (ex. simultaneously
         setting both of them to numpy.ndarray makes the code crash)

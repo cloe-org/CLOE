@@ -1174,9 +1174,9 @@ class Cosmology:
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['fsigma8'], ext=2)
 
     def interp_sigmaR(self):
-        r"""Interpolates :math:`f\sigma_R`.
+        r"""Interpolates :math:`\sigma_R`.
 
-        Adds an interpolator for :math:`f\sigma_R` to the dictionary
+        Adds an interpolator for :math:`\sigma_R` to the dictionary
         so that it can be evaluated at redshifts
         not explictly supplied to Cobaya
 
@@ -1198,7 +1198,7 @@ class Cosmology:
                                             kx=1, ky=1)
 
     def interp_sigmaR_cb(self):
-        r"""Interpolates :math:`f\sigma_{R,\mathrm{cb}}`.
+        r"""Interpolates :math:`\sigma_{R,\mathrm{cb}}`.
 
         Adds an interpolator for :math:`\sigma_{R,\mathrm{cb}}`
         to the dictionary so that it can be evaluated at redshifts

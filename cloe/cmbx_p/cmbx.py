@@ -106,11 +106,12 @@ class CMBX:
         in the class instance, to be used in other private methods.
         The following prefactors are evaluated.
 
-        * :obj:
-          `shearIA_kCMB_X_WL` (from the ells_kCMB_X_WL input array): \
+        * :obj:`shearIA_kCMB_X_WL` (from the ``ells_kCMB_X_WL`` input
+          array):
           :math:`\sqrt{(\ell+2)!/(\ell-2)!}/(\ell+1/2)^2`
-        * :obj:
-          `mag_kCMB_X_GC_phot` (from the ells_kCMB_X_GC_phot input array): \
+
+        * :obj:`mag_kCMB_X_GC_phot` (from the ``ells_kCMB_X_GC_phot`` input
+          array):
           :math:`\ell(\ell+1)/(\ell+1/2)^2`
 
         The prefactors are evaluated using the functions
@@ -151,11 +152,11 @@ class CMBX:
             self.ells_ISW_X_GC = ells_ISW_X_GC
 
     def kCMB_window(self, zinterp):
-        r"""Window for kCMB
+        r"""CMB lensing window
 
         Returns the window function of the CMB lensing convergence kappa.
-        Comment: not implementing the modified gravity Sigma(k,z)
-            function used in the Euclid WL window.
+        Comment: not implementing the modified gravity
+        :math:`\Sigma(k,z)` function used in the Euclid WL window.
 
         .. math::
             W^{\kappa \mathrm{CMB}}(z) =
@@ -220,11 +221,11 @@ class CMBX:
         The integral is done over two redshift bins.
 
         - In the first half, from z=0 up to the zmax of the galaxy photo
-        observables, we use the same integration as the one used for the
-        galaxies, with same matter power spectrum
+          observables, we use the same integration as the one used for the
+          galaxies, with same matter power spectrum
 
         - In the second half, from the zmax to the zcmb, the integral is
-        done using the Weyl potential
+          done using the Weyl potential
 
         .. math::
             C^{\kappa_{CMB}}(\ell) = c \int \frac{dz}{H(z)r^2(z)}\

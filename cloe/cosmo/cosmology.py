@@ -227,14 +227,14 @@ class Cosmology:
             cosmology dictionary corresponds to:
 
                 * Photo-z values corresponding to
-                :math:`b_{(x,i)}=\sqrt{1+\bar{b}_{(x,i)}}`
-
-                There are 3 bias options (linear, constant, polynomial)
+                  :math:`b_{(x,i)}=\sqrt{1+\bar{b}_{(x,i)}}`
+  
+                  There are 3 bias options (linear, constant, polynomial)
 
                 * Spectroscopic bias values in arXiv:1910.09273
 
                 * IA values in arXiv:1910.09273 (NLA)
-                and arxiv:1708.09247 (TATT)
+                  and arxiv:1708.09247 (TATT)
 
                 * Additional parameters for GCspectro
 

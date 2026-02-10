@@ -5,8 +5,8 @@ Class to perform integrals with the FFTLog algorithm.
 Class to implement the  Fast Fourier Transform in logarithmic space (FFTLog)
 algorithm to perform the Fourier transform of a periodic sequence of
 logarithmically spaced points. This is based on the work published in
-`Hamilton (2000) <https://arxiv.org/abs/astro-ph/9905191v4>` and
-`Fang et al. (2020) <https://arxiv.org/abs/1911.11947>`
+`Hamilton (2000) <https://arxiv.org/abs/astro-ph/9905191v4>`__ and
+`Fang et al. (2020) <https://arxiv.org/abs/1911.11947>`__.
 """
 
 import numpy as np

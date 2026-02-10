@@ -6,15 +6,14 @@ from scipy import integrate
 
 
 class CMBX:
-    """Class for CMBX observable and XCorr with Euclid photometric observables
-
-    (GC phot and WL)
+    """Class for CMBX observables and XCorr with Euclid photometric
+       observables (GC phot and WL).
     """
 
     def __init__(self, photo_ins):
-        """Initialize
+        """Initialize a CMBX instance.
 
-        Constructor of the class CMBX
+        This is the constructor for :class:`CMBX`.
 
         Parameters
         ----------
@@ -115,7 +114,7 @@ class CMBX:
           :math:`\ell(\ell+1)/(\ell+1/2)^2`
 
         The prefactors are evaluated using the functions
-        :meth:`_eval_prefactor_mag()`, :meth:`_eval_prefactor_shearia()`,
+        :meth:`_eval_prefactor_mag()`, :meth:`_eval_prefactor_shearia()`.
 
         Parameters
         ----------
@@ -424,20 +423,24 @@ class CMBX:
             self._stored_kCMB_X_GC = True
 
     def Cl_kCMB_X_WL(self, ells, bin_i):
-        r"""Cl kCMB X WL
+        r"""Cl kCMB x WL
 
         Calculates angular power spectrum for cross-correlation
-        between weak lensing and CMB lensing, for the supplied bin.
+        between CMB lensing and galaxy lensing, for the supplied bin.
         Includes intrinsic alignments.
 
         .. math::
-            C_{i}^{\rm L \kappa_{CMB}}(\ell) = c \int \frac{dz}{H(z)r^2(z)}\
-            \left\lbrace W_{i}^{\gamma}\left[ k_{\ell}(z), z \right ]\
-            W^{\kappa_{CMB}}(z)P_{\rm \delta\delta}\
-            \left[ k_{\ell}(z), z \right]\\
-            +\,W_{i}^{\rm{IA}}(z)
-            W^{\kappa_{CMB}}(z)P^{\rm{photo}}_{\rm \delta\rm{I}}\
-            \left[ k_{\ell}(z), z \right] \right\rbrace \\
+            \begin{aligned}
+            C_{i}^{\mathrm{L}\kappa_{\mathrm{CMB}}}(\ell)
+            &= c \int \frac{\mathrm{d}z}{H(z)\,r^2(z)}
+            \Bigl\{
+              W_{i}^{\gamma}(z)\,W^{\kappa_{\mathrm{CMB}}}(z)\,
+              P_{\delta\delta}\!\left[k_{\ell}(z), z\right] \\
+            &\quad
+              +\, W_{i}^{\mathrm{IA}}(z)\,W^{\kappa_{\mathrm{CMB}}}(z)\,
+              P_{\delta I}^{\mathrm{photo}}\!\left[k_{\ell}(z), z\right]
+            \Bigr\}.
+            \end{aligned}
 
         Parameters
         ----------
@@ -451,8 +454,9 @@ class CMBX:
 
         Returns
         -------
-        Angular cross-correlation between CMB lensing and
-           weak lensing: numpy.ndarray of float
+        numpy.ndarray of float
+            Angular cross-correlation between CMB lensing and galaxy
+            lensing.
         """
 
         same_ells = np.array_equal(ells, self.ells_kCMB_X_WL)
@@ -494,9 +498,9 @@ class CMBX:
         return c_final
 
     def _evaluate_power_kCMB_X_WL(self, force_recompute=False):
-        r"""Evaluate Power kCMB X WL
+        r"""Evaluate Power kCMB x WL
 
-        Evaluates and store the matter power spectra for kCMB X WL.
+        Evaluates and stores the matter power spectra for kCMB x WL.
 
         Parameters
         ----------
@@ -627,10 +631,10 @@ class CMBX:
     def _eval_prefactor_ISW(ell):
         r"""Computes the ISW prefactor in Limber approximation.
 
-        The prefactor is computed as follows.
+        The prefactor is computed as follows:
 
         .. math::
-            \frac{1} / (\ell + 1/2)^2
+            \frac{1}{(\ell + 1/2)^2}
 
         Parameters
         ----------

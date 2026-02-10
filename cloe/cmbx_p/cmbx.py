@@ -6,8 +6,10 @@ from scipy import integrate
 
 
 class CMBX:
-    """Class for CMBX observables and XCorr with Euclid photometric
-       observables (GC phot and WL).
+    """CMBX observables and cross-correlations.
+
+    Class for CMBX observables and XCorr with Euclid photometric
+    observables (GC phot and WL).
     """
 
     def __init__(self, photo_ins):

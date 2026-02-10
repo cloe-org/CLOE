@@ -228,7 +228,7 @@ class Cosmology:
 
                 * Photo-z values corresponding to
                   :math:`b_{(x,i)}=\sqrt{1+\bar{b}_{(x,i)}}`
-  
+
                   There are 3 bias options (linear, constant, polynomial)
 
                 * Spectroscopic bias values in arXiv:1910.09273

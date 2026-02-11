@@ -35,8 +35,8 @@ def convert_params(params, theory, mode):
     mode: str
         Selected Boltzmann solver. Can be either `'camb'` or `'classy'`
 
-    Raise
-    -----
+    Raises
+    ------
     ValueError
         If mode is neither camb or classy
     """
@@ -54,8 +54,8 @@ def classy_set_params(params, theory):
 
     Resets the parameters dictionary in a CLASS-like format.
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     params: dict
         Parameters section of the info dictionary
     theory: dict

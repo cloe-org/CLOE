@@ -78,8 +78,8 @@ class Reader:
         file_name: str
             Name of the redshift distribution files
 
-        Return
-        ------
+        Returns
+        -------
         Raw redshift distribution: dict
             Dictionary containing raw redshift distribution data
         """
@@ -113,8 +113,8 @@ class Reader:
         file_name: str
             Name of the luminosity file
 
-        Return
-        ------
+        Returns
+        -------
         Raw luminosity ratio: dict
             Dictionary containing raw luminosity ratio data
         """

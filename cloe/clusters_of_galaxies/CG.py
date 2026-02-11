@@ -387,10 +387,12 @@ class CG:
         Parameters
         ----------
         z: float or numpy.ndarray
-                   Redshift at which to evaluate :math:`dlns\dlnR(z,M)`
+                   Redshift at which to evaluate
+                   :math:`\mathrm{d}\ln\sigma/\mathrm{d}\ln R(z, M)`
         M: float or numpy.ndarray
-               Mass at which to evaluate :math:`dlns\dlnR(z,M)`
-               Units: M:math:`\odot`
+               Mass at which to evaluate
+               :math:`\mathrm{d}\ln\sigma/\mathrm{d}\ln R(z, M)`
+               Units: :math:`M_\odot`
 
         Returns
         -------

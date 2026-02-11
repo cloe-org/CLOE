@@ -276,10 +276,17 @@ class Spectro:
         Note: we name :math:`\ell = m` in the code.
 
         .. math::
-            P_{{\rm obs},\ell}(k';z)=(1-f_{out})^2\frac{1}{[q_\perp(z)]^2 \
-            q_\parallel(z)} \frac{2\ell+1}{2}\int^1_{-1} L_\ell(\mu_k') \
-            P_{\rm gg}^{\rm spectro}\left[k(k',\mu_k'),\mu_k(\mu_k') \
-            {;z}\right]\,{\rm d}\mu_k'\\
+            \begin{aligned}
+            P_{\mathrm{obs},\ell}(k'; z)
+            &= (1 - f_{\mathrm{out}})^2
+            \frac{1}{\left[q_\perp(z)\right]^2\,q_\parallel(z)}
+            \frac{2\ell+1}{2}
+            \int_{-1}^{1} \mathrm{d}\mu_k'\,
+            L_\ell(\mu_k')\,
+            P_{\mathrm{gg}}^{\mathrm{spectro}}
+            \!\left[k\!\left(k',\mu_k'\right),
+            \mu_k\!\left(\mu_k'\right); z\right].
+            \end{aligned}
 
         Parameters
         ----------

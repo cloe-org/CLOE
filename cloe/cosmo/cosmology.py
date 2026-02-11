@@ -227,14 +227,14 @@ class Cosmology:
             cosmology dictionary corresponds to:
 
                 * Photo-z values corresponding to
-                :math:`b_{(x,i)}=\sqrt{1+\bar{b}_{(x,i)}}`
+                  :math:`b_{(x,i)}=\sqrt{1+\bar{b}_{(x,i)}}`
 
-                There are 3 bias options (linear, constant, polynomial)
+                  There are 3 bias options (linear, constant, polynomial)
 
                 * Spectroscopic bias values in arXiv:1910.09273
 
                 * IA values in arXiv:1910.09273 (NLA)
-                and arxiv:1708.09247 (TATT)
+                  and arxiv:1708.09247 (TATT)
 
                 * Additional parameters for GCspectro
 
@@ -1174,9 +1174,9 @@ class Cosmology:
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['fsigma8'], ext=2)
 
     def interp_sigmaR(self):
-        r"""Interp fsigma8
+        r"""Interpolates :math:`\sigma_R`.
 
-        Adds an interpolator for :math:`f\sigma_R` to the dictionary
+        Adds an interpolator for :math:`\sigma_R` to the dictionary
         so that it can be evaluated at redshifts
         not explictly supplied to Cobaya
 
@@ -1198,15 +1198,15 @@ class Cosmology:
                                             kx=1, ky=1)
 
     def interp_sigmaR_cb(self):
-        r"""Interp sigmaR_cb
+        r"""Interpolates :math:`\sigma_{R,\mathrm{cb}}`.
 
-        Adds an interpolator for :math:`sigma_R_cb` to the dictionary
-        so that it can be evaluated at redshifts
+        Adds an interpolator for :math:`\sigma_{R,\mathrm{cb}}`
+        to the dictionary so that it can be evaluated at redshifts
         not explictly supplied to Cobaya
 
         Updates 'key' in the cosmo_dic attribute of the class
         by adding an interpolator object
-        which interpolates :math:`sigma_R_cb` as a
+        which interpolates :math:`\sigma_{R,\mathrm{cb}}` as a
         function of redshift
         """
         if self.cosmo_dic['z_win'] is None:

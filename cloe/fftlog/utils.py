@@ -99,8 +99,9 @@ def _g_m_vals(mu, q):
     .. math::
         \frac{\Gamma((\mu+1+q)/2)}{\Gamma((\mu+1-q)/2)}
 
-    Switching to asymptotic form when |Im(q)| + |mu| > cut = 200, as done
-    in FAST-PT.
+    Switching to asymptotic form when
+    :math:`|\mathrm{Im}(q)| + |\mu| > 200`,
+    as done in FAST-PT.
 
     Parameters
     ----------

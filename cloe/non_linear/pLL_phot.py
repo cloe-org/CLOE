@@ -165,11 +165,18 @@ class PLL_phot_model(PowerSpectrum):
         model based codes for the matter power spectrum.
 
         .. math::
-            P_{\rm II}^{EE}(z, k) = C_{1}^{2}P_{\rm \delta\delta}^{\rm NL}\
-            (z, k) S_{\rm bar}(z, k)+2C_{1}C_{1\delta}D(z)^{4}[\rm A_{0|0E}\
-            (k)+\rm C_{0|0E}(k)]+C_{1\delta}^{2}D(z)^{4}\rm A_{0E|0E}(k)+\\
-            C_{2}^{2}D(z)^{4}\rm A_{E2|E2}(k)+2C_{1}C_{2}D(z)^{4}[\rm \
-            A_{0|E2}(k)+B_{0|E2}(k)]+2C_{1\delta}C_{2}D(z)^{4}D_{0E|E2}(k)
+            \begin{aligned}
+            P_{\mathrm{II}}^{EE}(z, k)
+            &= C_{1}^{2}\,P_{\delta\delta}^{\mathrm{NL}}(z, k)\,
+               S_{\mathrm{bar}}(z, k) \\
+            &\quad + 2C_{1}C_{1\delta}\,D(z)^{4}
+               \left[A_{0|0E}(k) + C_{0|0E}(k)\right] \\
+            &\quad + C_{1\delta}^{2}\,D(z)^{4}\,A_{0E|0E}(k)
+               + C_{2}^{2}\,D(z)^{4}\,A_{E2|E2}(k) \\
+            &\quad + 2C_{1}C_{2}\,D(z)^{4}
+               \left[A_{0|E2}(k) + B_{0|E2}(k)\right]
+               + 2C_{1\delta}C_{2}\,D(z)^{4}\,D_{0E|E2}(k).
+            \end{aligned}
 
         Note: either redshift or wavenumber must be a float (ex. simultaneously
         setting both of them to numpy.ndarray makes the code crash)
@@ -250,12 +257,18 @@ class PLL_phot_model(PowerSpectrum):
         matter power spectrum.
 
         .. math::
-            P_{\rm II}^{EE}(z, k) = C_{1}^{2}P_{\rm \delta\delta}(z, k)\
-            B_{\rm NL}(z, k) S_{\rm bar}(z, k)\
-            +2C_{1}C_{1\delta}D(z)^{4}[\rm A_{0|0E}(k)+\rm C_{0|0E}(k)]\
-            +C_{1\delta}^{2}D(z)^{4}\rm A_{0E|0E}(k)+\\C_{2}^{2}D(z)^{4}\rm\
-            A_{E2|E2}(k)+2C_{1}C_{2}D(z)^{4}[\rm A_{0|E2}(k)+B_{0|E2}(k)]\
-            +2C_{1\delta}C_{2}D(z)^{4}D_{0E|E2}(k)
+            \begin{aligned}
+            P_{\mathrm{II}}^{EE}(z, k)
+            &= C_{1}^{2}\,P_{\delta\delta}(z, k)\,B_{\mathrm{NL}}(z, k)\,
+               S_{\mathrm{bar}}(z, k) \\
+            &\quad + 2C_{1}C_{1\delta}\,D(z)^{4}
+               \left[A_{0|0E}(k) + C_{0|0E}(k)\right] \\
+            &\quad + C_{1\delta}^{2}\,D(z)^{4}\,A_{0E|0E}(k)
+               + C_{2}^{2}\,D(z)^{4}\,A_{E2|E2}(k) \\
+            &\quad + 2C_{1}C_{2}\,D(z)^{4}
+               \left[A_{0|E2}(k) + B_{0|E2}(k)\right]
+               + 2C_{1\delta}C_{2}\,D(z)^{4}\,D_{0E|E2}(k).
+            \end{aligned}
 
         Note: either redshift or wavenumber must be a float (ex. simultaneously
         setting both of them to numpy.ndarray makes the code crash)
@@ -360,9 +373,15 @@ class PLL_phot_model(PowerSpectrum):
         for the matter power spectrum.
 
         .. math::
-            P_{\rm \delta I}(z, k) = C_{1}P_{\rm \delta\delta}(z, k)^{\rm NL}\
-            (z, k) S_{\rm bar}(z, k)+C_{1\delta}D(z)^{4}[\rm A_{0|0E}(k)+\rm \
-            C_{0|0E}(k)]+C_{2}D(z)^{4}[\rm A_{0|E2}(k)+B_{0|E2}(k)]
+            \begin{aligned}
+            P_{\delta I}(z, k)
+            &= C_{1}\,P_{\delta\delta}^{\mathrm{NL}}(z, k)\,
+               S_{\mathrm{bar}}(z, k) \\
+            &\quad + C_{1\delta}\,D(z)^{4}
+               \left[A_{0|0E}(k) + C_{0|0E}(k)\right] \\
+            &\quad + C_{2}\,D(z)^{4}
+               \left[A_{0|E2}(k) + B_{0|E2}(k)\right].
+            \end{aligned}
 
         Note: either redshift or wavenumber must be a float (ex. simultaneously
         setting both of them to numpy.ndarray makes the code crash)
@@ -435,10 +454,15 @@ class PLL_phot_model(PowerSpectrum):
         emulator for the nonlinear boost to the matter power spectrum.
 
         .. math::
-            P_{\rm \delta I}(z, k) = C_{1}P_{\rm \delta\delta}(z, k)\
-            B_{\rm NL}(z, k) S_{\rm bar}(z, k)+C_{1\delta}D(z)^{4}\
-            [\rm A_{0|0E}(k)+\rm C_{0|0E}(k)]+C_{2}D(z)^{4}[\rm \
-            A_{0|E2}(k)+B_{0|E2}(k)]
+            \begin{aligned}
+            P_{\delta I}(z, k)
+            &= C_{1}\,P_{\delta\delta}(z, k)\,B_{\mathrm{NL}}(z, k)\,
+               S_{\mathrm{bar}}(z, k) \\
+            &\quad + C_{1\delta}\,D(z)^{4}
+               \left[A_{0|0E}(k) + C_{0|0E}(k)\right] \\
+            &\quad + C_{2}\,D(z)^{4}
+               \left[A_{0|E2}(k) + B_{0|E2}(k)\right].
+            \end{aligned}
 
         Note: either redshift or wavenumber must be a float (ex. simultaneously
         setting both of them to numpy.ndarray makes the code crash)

@@ -186,7 +186,6 @@ html_theme = 'sphinx_rtd_theme'
 # html_theme_options = {}
 html_theme_options = {
     'collapse_navigation': True,
-    'display_version': True,
     'navigation_depth': 3,
 }
 

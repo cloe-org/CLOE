@@ -120,18 +120,16 @@ class EuclidLikelihood(Likelihood):
         self.likefinal.fiducial_cosmo_quantities_dic.update(
             self.fiducial_cosmology.cosmo_dic)
         # Compute the data vectors
-        # and initialize possible matrix transforms
-        if not any(self.observables['selection']['CG'].values()):
+        # and initialize possible matrix transforms.
+        # Skip only when CG runs alone.
+        has_CG = any(self.observables['selection']['CG'].values())
+        has_other = (
+            any(self.observables['selection']['WL'].values()) or
+            any(self.observables['selection']['GCphot'].values()) or
+            any(self.observables['selection']['GCspectro'].values())
+        )
+        if not (has_CG and not has_other):
             self.likefinal.get_masked_data()
-        else:
-            if (
-                any(self.observables['selection']['WL'].values()) or
-                any(self.observables['selection']['GCphot'].values()) or
-                any(self.observables['selection']['GCspectro'].values())
-            ):
-                raise ValueError(
-                    'Galaxy cluster probes cannot be combined with others.'
-                )
 
         # Add the luminosity_ratio_z_func to the cosmo_dic after data has been
         # read and stored in the data_ins attribute of Euclike

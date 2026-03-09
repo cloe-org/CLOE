@@ -390,10 +390,8 @@ class Photo:
         RSD GCphot window function: numpy.ndarray
             Window function for RSD component of photometric galaxy clustering.
         """
-        if isinstance(ell, (int, float)):
-            ell = [ell]
-        if isinstance(z, (int, float)):
-            z = [z]
+        ell = np.atleast_1d(ell)
+        z = np.atleast_1d(z)
 
         tdist = self.theory['f_K_z_func'](z)
         zm_arr = np.array([[self.z_minus1(ll, tdist) for ll in ell],
@@ -401,7 +399,12 @@ class Photo:
                            [self.z_plus1(ll, tdist) for ll in ell]])
 
         Hzm_arr = self.theory['H_z_func_Mpc'](zm_arr)
-        fzm_arr = self.theory['f_z'](zm_arr)
+        if self.theory["GCph_do_nisb"]:
+            kappox = ((ell + 1 / 2)[None, :] /
+                      self.theory["r_z_func"](z)[:, None])
+            fz = self.theory["f_cb_z_k_func"](zm_arr, kappox)[None, :, :]
+        else:
+            fz = self.theory['f_z'](zm_arr)
         nzm_arr = self.nz_GC.evaluates_n_i_z(bin_i, zm_arr)
 
         if self.theory['bias_model'] == 2:
@@ -409,7 +412,7 @@ class Photo:
         elif self.theory['bias_model'] in [1, 3]:
             bias = self.theory['b1_inter'](z)
 
-        return Hzm_arr * fzm_arr * nzm_arr / bias
+        return Hzm_arr * fz * nzm_arr / bias
 
     def _unpack_RSD_kernel(self, ell, *args):
         r"""Obtains the RSD kernel for GCphot or XCphot.

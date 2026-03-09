@@ -228,8 +228,8 @@ class EuclidLikelihood(Likelihood):
                 'vars_pairs': ([['delta_tot', 'delta_tot'],
                                 ['delta_nonu', 'delta_nonu'],
                                 ['Weyl', 'Weyl'],
-                                ["delta_nonu","delta_nu"],
-                                ["delta_nu","delta_nu"]])
+                                ["delta_nonu", "delta_nu"],
+                                ["delta_nu", "delta_nu"]])
             },
             'comoving_radial_distance': {
                 'z': self.z_win_max
@@ -416,6 +416,7 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['GCsp_z_err'] = self.GCsp_z_err
             self.cosmo.cosmo_dic['bias_model'] = self.bias_model
             self.cosmo.cosmo_dic['magbias_model'] = self.magbias_model
+            self.cosmo.cosmo_dic['GCph_do_nisb'] = self.GCph_do_nisb
             self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
             self.cosmo.cosmo_dic['use_Weyl'] = self.use_Weyl
             self.cosmo.cosmo_dic['use_magnification_bias_spectro'] = \
@@ -545,6 +546,8 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['magbias_model'] = self.magbias_model
             self.cosmo.cosmo_dic['use_magnification_bias_spectro'] = \
                 self.use_magnification_bias_spectro
+            self.cosmo.cosmo_dic['GCph_do_nisb'] = \
+                info['likelihood']['Euclid']['GCph_do_nisb']
             self.cosmo.cosmo_dic['use_gamma_MG'] = \
                 info['likelihood']['Euclid']['use_gamma_MG']
             self.cosmo.cosmo_dic['use_Weyl'] = \

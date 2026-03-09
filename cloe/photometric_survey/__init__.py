@@ -7,7 +7,6 @@ observables.
 
 """
 
-__all__ = ['photo',
-           'redshift_distribution']  # list submodules
+__all__ = ["photo", "redshift_distribution"]  # list submodules
 
 from . import *

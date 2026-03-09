@@ -112,7 +112,9 @@ class Ui_MainWindow(object):
         self.WL_multiplicative_bias_include = QtWidgets.QCheckBox(self.tab_10)
         self.WL_multiplicative_bias_include.setGeometry(QtCore.QRect(250, 350, 171, 23))
         self.WL_multiplicative_bias_include.setChecked(True)
-        self.WL_multiplicative_bias_include.setObjectName("WL_multiplicative_bias_include")
+        self.WL_multiplicative_bias_include.setObjectName(
+            "WL_multiplicative_bias_include"
+        )
         self.label_3 = QtWidgets.QLabel(self.tab_10)
         self.label_3.setGeometry(QtCore.QRect(20, 150, 201, 31))
         font = QtGui.QFont()
@@ -180,9 +182,13 @@ class Ui_MainWindow(object):
         self.GCph_model_A_select.setObjectName("GCph_model_A_select")
         self.tabWidget.addTab(self.tab_2, "")
         self.GCph_magnification_bias_include = QtWidgets.QCheckBox(self.tab_12)
-        self.GCph_magnification_bias_include.setGeometry(QtCore.QRect(190, 320, 181, 23))
+        self.GCph_magnification_bias_include.setGeometry(
+            QtCore.QRect(190, 320, 181, 23)
+        )
         self.GCph_magnification_bias_include.setChecked(True)
-        self.GCph_magnification_bias_include.setObjectName("GCph_magnification_bias_include")
+        self.GCph_magnification_bias_include.setObjectName(
+            "GCph_magnification_bias_include"
+        )
         self.ini_save_button_3 = QtWidgets.QPushButton(self.tab_12)
         self.ini_save_button_3.setGeometry(QtCore.QRect(10, 380, 141, 25))
         self.ini_save_button_3.setObjectName("ini_save_button_3")
@@ -241,9 +247,13 @@ class Ui_MainWindow(object):
         self.label_12.setGeometry(QtCore.QRect(10, 70, 161, 17))
         self.label_12.setObjectName("label_12")
         self.GCsp_purity_z_correction_include = QtWidgets.QCheckBox(self.tab_11)
-        self.GCsp_purity_z_correction_include.setGeometry(QtCore.QRect(260, 320, 281, 23))
+        self.GCsp_purity_z_correction_include.setGeometry(
+            QtCore.QRect(260, 320, 281, 23)
+        )
         self.GCsp_purity_z_correction_include.setChecked(True)
-        self.GCsp_purity_z_correction_include.setObjectName("GCsp_purity_z_correction_include")
+        self.GCsp_purity_z_correction_include.setObjectName(
+            "GCsp_purity_z_correction_include"
+        )
         self.GCsp_redshifts = QtWidgets.QLineEdit(self.tab_11)
         self.GCsp_redshifts.setGeometry(QtCore.QRect(10, 100, 113, 25))
         self.GCsp_redshifts.setObjectName("GCsp_redshifts")
@@ -559,7 +569,9 @@ class Ui_MainWindow(object):
         self.label_45.setObjectName("label_45")
         self.gridLayout_3.addWidget(self.label_45, 4, 0, 1, 1)
         self.Photo_gaussian_covariance_filename = QtWidgets.QLineEdit(self.layoutWidget)
-        self.Photo_gaussian_covariance_filename.setObjectName("Photo_gaussian_covariance_filename")
+        self.Photo_gaussian_covariance_filename.setObjectName(
+            "Photo_gaussian_covariance_filename"
+        )
         self.gridLayout_3.addWidget(self.Photo_gaussian_covariance_filename, 9, 0, 1, 1)
         self.label_47 = QtWidgets.QLabel(self.layoutWidget)
         self.label_47.setObjectName("label_47")
@@ -641,15 +653,31 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "CLOE GUI"))
         self.Max_l_WL.setText(_translate("MainWindow", "4000"))
         self.label_2.setText(_translate("MainWindow", "Maximum multipole"))
-        self.Min_l_WL.setToolTip(_translate("MainWindow", "<html><head/><body><p>Minimum value of the multipole to be included for the Weak Lensing probe</p></body></html>"))
+        self.Min_l_WL.setToolTip(
+            _translate(
+                "MainWindow",
+                "<html><head/><body><p>Minimum value of the multipole to be included for the Weak Lensing probe</p></body></html>",
+            )
+        )
         self.Min_l_WL.setText(_translate("MainWindow", "20"))
         self.ini_save_button_2.setText(_translate("MainWindow", "Modify each bin"))
-        self.label_8.setText(_translate("MainWindow", "Path to where the Source Redshifts distribution is located"))
+        self.label_8.setText(
+            _translate(
+                "MainWindow",
+                "Path to where the Source Redshifts distribution is located",
+            )
+        )
         self.label_21.setText(_translate("MainWindow", "Mean Redshift shifts"))
         self.label.setText(_translate("MainWindow", "Minimum multipole"))
         self.include_WL.setText(_translate("MainWindow", "Include WL"))
-        self.WL_mean_redshift_include.setText(_translate("MainWindow", "Free parameters"))
-        self.source_redshift_path.setText(_translate("MainWindow", "data/ExternalBenchmark/Photometric/niTAB-EP10-RB00.dat"))
+        self.WL_mean_redshift_include.setText(
+            _translate("MainWindow", "Free parameters")
+        )
+        self.source_redshift_path.setText(
+            _translate(
+                "MainWindow", "data/ExternalBenchmark/Photometric/niTAB-EP10-RB00.dat"
+            )
+        )
         self.WL_BIA_fiducial.setText(_translate("MainWindow", "0"))
         self.WL_AIA_include.setText(_translate("MainWindow", "Free parameter"))
         self.WL_EtaIA_fiducial.setText(_translate("MainWindow", "-0.41"))
@@ -660,35 +688,63 @@ class Ui_MainWindow(object):
         self.WL_AIA_fiducial.setText(_translate("MainWindow", "1.72"))
         self.label_6.setText(_translate("MainWindow", "EtaIA"))
         self.label_7.setText(_translate("MainWindow", "Shear multiplicative bias"))
-        self.WL_multiplicative_bias_include.setText(_translate("MainWindow", "Free parameters"))
+        self.WL_multiplicative_bias_include.setText(
+            _translate("MainWindow", "Free parameters")
+        )
         self.label_3.setText(_translate("MainWindow", "Intrinsic Alignment"))
-        self.tabWidget_3.setTabText(self.tabWidget_3.indexOf(self.tab_10), _translate("MainWindow", "WL"))
+        self.tabWidget_3.setTabText(
+            self.tabWidget_3.indexOf(self.tab_10), _translate("MainWindow", "WL")
+        )
         self.label_19.setText(_translate("MainWindow", "Maximum multipole"))
         self.include_GCph.setText(_translate("MainWindow", "Include GCph"))
-        self.lens_redshift_path.setText(_translate("MainWindow", "data/ExternalBenchmark/Photometric/niTAB-EP10-RB00.dat"))
+        self.lens_redshift_path.setText(
+            _translate(
+                "MainWindow", "data/ExternalBenchmark/Photometric/niTAB-EP10-RB00.dat"
+            )
+        )
         self.GCph_binned_bias_select.setText(_translate("MainWindow", "Select model"))
-        self.GCph_binned_bias_include.setText(_translate("MainWindow", "Free parameters"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Binned"))
+        self.GCph_binned_bias_include.setText(
+            _translate("MainWindow", "Free parameters")
+        )
+        self.tabWidget.setTabText(
+            self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Binned")
+        )
         self.GCph_model_A_include.setText(_translate("MainWindow", "Free parameters"))
         self.GCph_model_A_select.setText(_translate("MainWindow", "Select model"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Model A"))
-        self.GCph_magnification_bias_include.setText(_translate("MainWindow", "Free parameters"))
+        self.tabWidget.setTabText(
+            self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Model A")
+        )
+        self.GCph_magnification_bias_include.setText(
+            _translate("MainWindow", "Free parameters")
+        )
         self.ini_save_button_3.setText(_translate("MainWindow", "Modify each bin"))
-        self.GCph_mean_redshift_include.setText(_translate("MainWindow", "Free parameters"))
+        self.GCph_mean_redshift_include.setText(
+            _translate("MainWindow", "Free parameters")
+        )
         self.label_18.setText(_translate("MainWindow", "Minimum multipole"))
         self.label_22.setText(_translate("MainWindow", "Mean Redshift shifts"))
         self.label_15.setText(_translate("MainWindow", "Photometric Galaxy Bias"))
         self.Max_l_GCph.setText(_translate("MainWindow", "4000"))
         self.Min_l_GCph.setText(_translate("MainWindow", "20"))
-        self.label_17.setText(_translate("MainWindow", "Path to where the Lens Redshifts distribution is located"))
+        self.label_17.setText(
+            _translate(
+                "MainWindow", "Path to where the Lens Redshifts distribution is located"
+            )
+        )
         self.GCph_RDS_include.setText(_translate("MainWindow", "Include RSD"))
         self.label_24.setText(_translate("MainWindow", "Magnification Bias"))
-        self.tabWidget_3.setTabText(self.tabWidget_3.indexOf(self.tab_12), _translate("MainWindow", "GCph"))
+        self.tabWidget_3.setTabText(
+            self.tabWidget_3.indexOf(self.tab_12), _translate("MainWindow", "GCph")
+        )
         self.GGL_include.setText(_translate("MainWindow", "Include GGL"))
-        self.tabWidget_3.setTabText(self.tabWidget_3.indexOf(self.tab_13), _translate("MainWindow", "GGL"))
+        self.tabWidget_3.setTabText(
+            self.tabWidget_3.indexOf(self.tab_13), _translate("MainWindow", "GGL")
+        )
         self.GCsp_k_min.setText(_translate("MainWindow", "1e-3"))
         self.label_12.setText(_translate("MainWindow", "Redshifts"))
-        self.GCsp_purity_z_correction_include.setText(_translate("MainWindow", "Redshift dependent correction"))
+        self.GCsp_purity_z_correction_include.setText(
+            _translate("MainWindow", "Redshift dependent correction")
+        )
         self.GCsp_redshifts.setText(_translate("MainWindow", "1., 1.2, 1.4, 1.65"))
         self.GCsp_purity_include.setText(_translate("MainWindow", "Free parameter(s)"))
         self.label_27.setText(_translate("MainWindow", "Spectroscopic Galaxy Bias"))
@@ -698,15 +754,25 @@ class Ui_MainWindow(object):
         self.label_10.setText(_translate("MainWindow", "Minimum k (h/Mpc)"))
         self.GCsp_k_max.setText(_translate("MainWindow", "0.2"))
         self.GCsp_EFT_model_select.setText(_translate("MainWindow", "Select model"))
-        self.tabWidget_2.setTabText(self.tabWidget_2.indexOf(self.tab_4), _translate("MainWindow", "EFT"))
-        self.GCsp_linear_model_include.setText(_translate("MainWindow", "Free parameters"))
+        self.tabWidget_2.setTabText(
+            self.tabWidget_2.indexOf(self.tab_4), _translate("MainWindow", "EFT")
+        )
+        self.GCsp_linear_model_include.setText(
+            _translate("MainWindow", "Free parameters")
+        )
         self.GCsp_linear_model_select.setText(_translate("MainWindow", "Select model"))
         self.ini_save_button_4.setText(_translate("MainWindow", "Modify each bin"))
-        self.tabWidget_2.setTabText(self.tabWidget_2.indexOf(self.tab_5), _translate("MainWindow", "Linear"))
+        self.tabWidget_2.setTabText(
+            self.tabWidget_2.indexOf(self.tab_5), _translate("MainWindow", "Linear")
+        )
         self.GCsp_edges.setText(_translate("MainWindow", "0.9, 1.1, 1.3, 1.5, 1.9"))
         self.label_16.setText(_translate("MainWindow", "Edges"))
-        self.tabWidget_3.setTabText(self.tabWidget_3.indexOf(self.tab_11), _translate("MainWindow", "GCsp"))
-        self.CosmoParams.setTabText(self.CosmoParams.indexOf(self.WL), _translate("MainWindow", "Observables"))
+        self.tabWidget_3.setTabText(
+            self.tabWidget_3.indexOf(self.tab_11), _translate("MainWindow", "GCsp")
+        )
+        self.CosmoParams.setTabText(
+            self.CosmoParams.indexOf(self.WL), _translate("MainWindow", "Observables")
+        )
         self.label_53.setText(_translate("MainWindow", "Parameter"))
         self.label_54.setText(_translate("MainWindow", "Fiducial"))
         self.label_55.setText(_translate("MainWindow", "Min Prior"))
@@ -747,39 +813,63 @@ class Ui_MainWindow(object):
         self.cosmo_OmegaK_fiducial.setText(_translate("MainWindow", "0.0"))
         self.label_66.setText(_translate("MainWindow", "γMG"))
         self.cosmo_gammaMG_fiducial.setText(_translate("MainWindow", "0.545"))
-        self.CosmoParams.setTabText(self.CosmoParams.indexOf(self.tab_6), _translate("MainWindow", "Cosmological Parameters"))
+        self.CosmoParams.setTabText(
+            self.CosmoParams.indexOf(self.tab_6),
+            _translate("MainWindow", "Cosmological Parameters"),
+        )
         self.comboBox.setItemText(0, _translate("MainWindow", "Linear"))
         self.comboBox.setItemText(1, _translate("MainWindow", "Halofit"))
         self.comboBox.setItemText(2, _translate("MainWindow", "HMCode"))
         self.label_39.setText(_translate("MainWindow", "Model"))
-        self.CosmoParams.setTabText(self.CosmoParams.indexOf(self.tab_9), _translate("MainWindow", "Non-linear"))
+        self.CosmoParams.setTabText(
+            self.CosmoParams.indexOf(self.tab_9), _translate("MainWindow", "Non-linear")
+        )
         self.label_51.setText(_translate("MainWindow", "Photometric data Settings"))
         self.label_52.setText(_translate("MainWindow", "Spectroscopic data Settings"))
         self.label_46.setText(_translate("MainWindow", "GGL filename"))
         self.Photo_SSC_include.setText(_translate("MainWindow", "Include SSC"))
-        self.Photo_data_root.setText(_translate("MainWindow", "data/ExternalBenchmark/Photometric/"))
+        self.Photo_data_root.setText(
+            _translate("MainWindow", "data/ExternalBenchmark/Photometric/")
+        )
         self.label_45.setText(_translate("MainWindow", "GCph filename"))
-        self.Photo_gaussian_covariance_filename.setText(_translate("MainWindow", "CovMat-3x2pt-zNLA-20Bins.npz"))
-        self.label_47.setText(_translate("MainWindow", "Photometric Gaussian Covariance filename"))
+        self.Photo_gaussian_covariance_filename.setText(
+            _translate("MainWindow", "CovMat-3x2pt-zNLA-20Bins.npz")
+        )
+        self.label_47.setText(
+            _translate("MainWindow", "Photometric Gaussian Covariance filename")
+        )
         self.GGL_filename.setText(_translate("MainWindow", "Cls_zNLA_PosShear.dat"))
-        self.label_48.setText(_translate("MainWindow", "Photometric Super Sample Covariance Path"))
+        self.label_48.setText(
+            _translate("MainWindow", "Photometric Super Sample Covariance Path")
+        )
         self.Photo_apply_BNT.setText(_translate("MainWindow", "Apply BNT"))
         self.WL_filename.setText(_translate("MainWindow", "Cls_zNLA_ShearShear.dat"))
         self.label_14.setText(_translate("MainWindow", "WL filename"))
         self.GCph_filename.setText(_translate("MainWindow", "Cls_zNLA_PosPos.dat"))
         self.label_44.setText(_translate("MainWindow", "Photometric data root"))
         self.label_50.setText(_translate("MainWindow", "Spectroscopic data root"))
-        self.Spectro_data_root.setText(_translate("MainWindow", "data/ExternalBenchmark/Spectroscopic/data/"))
+        self.Spectro_data_root.setText(
+            _translate("MainWindow", "data/ExternalBenchmark/Spectroscopic/data/")
+        )
         self.label_29.setText(_translate("MainWindow", "GSsp data path"))
-        self.GCsp_filename.setText(_translate("MainWindow", "power_galaxies_dk0p004.dat"))
-        self.label_49.setText(_translate("MainWindow", "Spectroscopic Gaussian Covariance filename"))
-        self.GCsp_covariance_filename.setText(_translate("MainWindow", "cov_power_galaxies_dk0p004.fits"))
-        self.CosmoParams.setTabText(self.CosmoParams.indexOf(self.tab_8), _translate("MainWindow", "Analysis"))
+        self.GCsp_filename.setText(
+            _translate("MainWindow", "power_galaxies_dk0p004.dat")
+        )
+        self.label_49.setText(
+            _translate("MainWindow", "Spectroscopic Gaussian Covariance filename")
+        )
+        self.GCsp_covariance_filename.setText(
+            _translate("MainWindow", "cov_power_galaxies_dk0p004.fits")
+        )
+        self.CosmoParams.setTabText(
+            self.CosmoParams.indexOf(self.tab_8), _translate("MainWindow", "Analysis")
+        )
         self.ini_save_button.setText(_translate("MainWindow", "Produce yaml files"))
 
 
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()

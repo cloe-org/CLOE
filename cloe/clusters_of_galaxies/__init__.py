@@ -7,6 +7,6 @@ galaxy cluster observables.
 
 """
 
-__all__ = ['CG']  # list submodules
+__all__ = ["CG"]  # list submodules
 
 from . import *

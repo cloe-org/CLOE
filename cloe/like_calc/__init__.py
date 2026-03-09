@@ -8,6 +8,6 @@ photometric and spectroscopic probes.
 
 """
 
-__all__ = ['euclike']  # list submodules
+__all__ = ["euclike"]  # list submodules
 
 from . import *

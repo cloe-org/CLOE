@@ -64,7 +64,7 @@ class cmbxinitTestCase(TestCase):
 
         mock_cosmo_dic = tdh.load_test_pickle("cmbx_test_dic.pickle")
         mock_cosmo_dic["CAMBdata"] = mock_camb_data()
-        mock_cosmo_dic['use_Weyl'] = False
+        mock_cosmo_dic["use_Weyl"] = False
 
         nz_dic_WL = tdh.load_test_npy("nz_dict_WL.npy").item()
         nz_dic_GC = tdh.load_test_npy("nz_dict_GC_phot.npy").item()

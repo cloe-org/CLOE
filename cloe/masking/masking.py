@@ -8,8 +8,7 @@ import numpy
 
 
 class Masking:
-    r"""Masking of the data vector and of the covariance matrix.
-    """
+    r"""Masking of the data vector and of the covariance matrix."""
 
     def __init__(self):
         r"""Constructor.
@@ -45,12 +44,16 @@ class Masking:
           If the matrix is not a square matrix
         """
         if len(matrix.shape) != 2:
-            raise TypeError(f'The size of the input array is'
-                            f' {len(matrix.shape)}, while a 2-d array was'
-                            f' expected')
+            raise TypeError(
+                f"The size of the input array is"
+                f" {len(matrix.shape)}, while a 2-d array was"
+                f" expected"
+            )
         if matrix.shape[0] != matrix.shape[1]:
-            raise TypeError(f'the input matrix is not a square matrix, it has'
-                            f' size {matrix.shape[0]}x{matrix.shape[1]}')
+            raise TypeError(
+                f"the input matrix is not a square matrix, it has"
+                f" size {matrix.shape[0]}x{matrix.shape[1]}"
+            )
         self._covariance_matrix = matrix
         self._masked_covariance_matrix = None
 
@@ -109,9 +112,9 @@ class Masking:
           If the masking vector is not set or the data vector is not set
         """
         if self._masking_vector is None:
-            raise TypeError(f'The masking vector is not set')
+            raise TypeError(f"The masking vector is not set")
         if self._data_vector is None:
-            raise TypeError(f'The data vector is not set')
+            raise TypeError(f"The data vector is not set")
 
         if self._masked_data_vector is None:
             self._masked_data_vector = self._data_vector[self._masking_vector]
@@ -136,13 +139,12 @@ class Masking:
           If the masking vector is not set or the theory vector is not set
         """
         if self._masking_vector is None:
-            raise TypeError(f'The masking vector is not set')
+            raise TypeError(f"The masking vector is not set")
         if self._theory_vector is None:
-            raise TypeError(f'The theory vector is not set')
+            raise TypeError(f"The theory vector is not set")
 
         if self._masked_theory_vector is None:
-            self._masked_theory_vector = (
-                self._theory_vector[self._masking_vector])
+            self._masked_theory_vector = self._theory_vector[self._masking_vector]
 
         return self._masked_theory_vector
 
@@ -165,14 +167,13 @@ class Masking:
           If the masking vector is not set or the covariance matrix is not set
         """
         if self._masking_vector is None:
-            raise TypeError(f'The masking vector is not set')
+            raise TypeError(f"The masking vector is not set")
         if self._covariance_matrix is None:
-            raise TypeError(f'The covariance matrix is not set')
+            raise TypeError(f"The covariance matrix is not set")
 
         if self._masked_covariance_matrix is None:
-            self._masked_covariance_matrix = (
-                self._covariance_matrix
-                [self._masking_vector][:, self._masking_vector]
-            )
+            self._masked_covariance_matrix = self._covariance_matrix[
+                self._masking_vector
+            ][:, self._masking_vector]
 
         return self._masked_covariance_matrix

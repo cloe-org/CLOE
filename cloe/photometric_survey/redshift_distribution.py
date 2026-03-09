@@ -42,7 +42,7 @@ class RedshiftDistribution:
             interp_n.ext = 1
 
         self.bins = [i + 1 for i in range(len(nz_dict))]
-        self.dz_dict = {i: nuisance_dict[f'dz_{i}_{probe}'] for i in self.bins}
+        self.dz_dict = {i: nuisance_dict[f"dz_{i}_{probe}"] for i in self.bins}
         # The uncertainties due to blending can be included
         # in future devel, by for example following MacCrann et al. (2021)
         # self.F_dict = {i: nuisance_dict[f'F_{i}_{probe}'] for i in bins}
@@ -76,7 +76,7 @@ class RedshiftDistribution:
         Redshift distribution: numpy.ndarray of float, or float
             The evaluated redshift distribution
         """
-        ni = self.nz_dict[f'n{bin_i}']
+        ni = self.nz_dict[f"n{bin_i}"]
         dz_i = self.dz_dict[bin_i]
         # Task 734: check the difference in this implementation
         # vs explicitly returning zero if (zs - dz_i) is out of bounds
@@ -100,7 +100,7 @@ class RedshiftDistribution:
             The interpolated redshift distribution for bin i
         """
         values = self.evaluates_n_i_z(bin_i, zs)
-        return InterpolatedUnivariateSpline(zs, values, ext='zeros')
+        return InterpolatedUnivariateSpline(zs, values, ext="zeros")
 
     def get_tomographic_bins(self):
         """Gets the list of tomographic bins.

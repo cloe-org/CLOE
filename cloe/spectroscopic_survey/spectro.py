@@ -38,8 +38,9 @@ class Spectro:
         mu_samp = 2001
         self.mu_grid = np.linspace(mu_min, mu_max, mu_samp)
         leg_m_max = 10
-        self.dict_m_legendrepol = \
-            {m: legendre(m)(self.mu_grid) for m in range(leg_m_max)}
+        self.dict_m_legendrepol = {
+            m: legendre(m)(self.mu_grid) for m in range(leg_m_max)
+        }
         self.z_arr = np.array(z_str).astype("float")
 
         self.mixing_matrix_dict = mixing_matrix_dict
@@ -75,7 +76,7 @@ class Spectro:
         Perpendicular scaling factor: float
            Value of the perpendicular scaling factor at given redshift
         """
-        return self.theory['d_z_func'](z) / self.theory['fid_d_z_func'](z)
+        return self.theory["d_z_func"](z) / self.theory["fid_d_z_func"](z)
 
     def scaling_factor_parall(self, z):
         r"""Parallel scaling factor.
@@ -95,7 +96,7 @@ class Spectro:
         Parallel scaling factor: float
            Value of the the parallel scaling factor at a given redshift
         """
-        return self.theory['fid_H_z_func'](z) / self.theory['H_z_func'](z)
+        return self.theory["fid_H_z_func"](z) / self.theory["H_z_func"](z)
 
     def get_k(self, k_prime, mu_prime, z):
         r"""Gets wavenumber.
@@ -123,9 +124,10 @@ class Spectro:
            Value of the scalar wavenumber  at given redshift
            cosine of the angle and fiducial wavenumber
         """
-        return k_prime * (self.scaling_factor_parall(z)**(-2) * mu_prime**2 +
-                          self.scaling_factor_perp(z)**(-2) *
-                          (1 - mu_prime**2))**(1. / 2)
+        return k_prime * (
+            self.scaling_factor_parall(z) ** (-2) * mu_prime**2
+            + self.scaling_factor_perp(z) ** (-2) * (1 - mu_prime**2)
+        ) ** (1.0 / 2)
 
     def get_mu(self, mu_prime, z):
         r"""Gets cosine of the angle.
@@ -153,10 +155,15 @@ class Spectro:
            and fiducial wavenumber
         """
 
-        return mu_prime * self.scaling_factor_parall(z)**(-1) * (
-            self.scaling_factor_parall(z)**(-2) * mu_prime**2 +
-            self.scaling_factor_perp(z)**(-2) *
-            (1 - mu_prime**2))**(-1. / 2)
+        return (
+            mu_prime
+            * self.scaling_factor_parall(z) ** (-1)
+            * (
+                self.scaling_factor_parall(z) ** (-2) * mu_prime**2
+                + self.scaling_factor_perp(z) ** (-2) * (1 - mu_prime**2)
+            )
+            ** (-1.0 / 2)
+        )
 
     def gal_redshift_scatter(self, k, mu_rsd, z):
         r"""Unbiased scatter in the measured galaxy redshifts.
@@ -189,10 +196,10 @@ class Spectro:
             and redshift.
         """
 
-        sigma_z = self.theory['nuisance_parameters']['sigma_z']
-        sigma_r = self.theory['c'] * sigma_z / self.theory['fid_H_z_func'](z)
+        sigma_z = self.theory["nuisance_parameters"]["sigma_z"]
+        sigma_r = self.theory["c"] * sigma_z / self.theory["fid_H_z_func"](z)
 
-        return np.exp(-k**2 * mu_rsd**2 * sigma_r**2)
+        return np.exp(-(k**2) * mu_rsd**2 * sigma_r**2)
 
     def multipole_spectra_integrand(self, mu_rsd, z, k, ms):
         r"""Multipole power spectrum integrand.
@@ -224,43 +231,47 @@ class Spectro:
             Integrand (over :math:`\mu_k'` between [-1,1])
             of multipole power spectrum expansion, for all m.
         """
-        if self.theory['Pgg_spectro'] is None:
-            raise Exception('Pgg_spectro is not defined inside the cosmo dic. '
-                            'Run update_cosmo_dic() method first.')
+        if self.theory["Pgg_spectro"] is None:
+            raise Exception(
+                "Pgg_spectro is not defined inside the cosmo dic. "
+                "Run update_cosmo_dic() method first."
+            )
 
-        galspec = \
-            self.theory['Pgg_spectro'](z, self.get_k(k, mu_rsd, z),
-                                       self.get_mu(mu_rsd, z))
+        galspec = self.theory["Pgg_spectro"](
+            z, self.get_k(k, mu_rsd, z), self.get_mu(mu_rsd, z)
+        )
 
-        if self.theory['GCsp_z_err']:
+        if self.theory["GCsp_z_err"]:
             # Get redshift error correction term
-            z_err = self.gal_redshift_scatter(self.get_k(k, mu_rsd, z),
-                                              self.get_mu(mu_rsd, z), z)
+            z_err = self.gal_redshift_scatter(
+                self.get_k(k, mu_rsd, z), self.get_mu(mu_rsd, z), z
+            )
 
             # Multiply by redshift error correction
             galspec *= z_err
 
         # Find the outlier fraction value in the nuisance_parameters dictionary
-        if self.theory['f_out_z_dep']:
+        if self.theory["f_out_z_dep"]:
             if np.where(np.isclose(self.z_arr, z))[0].size == 1:
                 iz = int(np.where(np.isclose(self.z_arr, z))[0])
             else:
-                raise Exception('Problem matching redshift to bin center in'
-                                'multipole_spectra')
+                raise Exception(
+                    "Problem matching redshift to bin center in" "multipole_spectra"
+                )
             # redshift-dependent case
-            f_out = self.theory['nuisance_parameters']['f_out_' + str(iz + 1)]
+            f_out = self.theory["nuisance_parameters"]["f_out_" + str(iz + 1)]
         else:
             # redshift-independent case
-            f_out = self.theory['nuisance_parameters']['f_out']
+            f_out = self.theory["nuisance_parameters"]["f_out"]
 
         outlier_factor = (1.0 - f_out) ** 2.0
 
         galspec *= outlier_factor
 
         # Add shot-noise contributions (after the systematics!)
-        noise = \
-            self.theory['noise_Pgg_spectro'](z, self.get_k(k, self.mu_grid, z),
-                                             self.get_mu(self.mu_grid, z))
+        noise = self.theory["noise_Pgg_spectro"](
+            z, self.get_k(k, self.mu_grid, z), self.get_mu(self.mu_grid, z)
+        )
 
         galspec += noise
 
@@ -299,15 +310,18 @@ class Spectro:
         if ms is None:
             ms = [0, 2, 4]
 
-        constant = 1.0 / self.scaling_factor_parall(z) / \
-            self.scaling_factor_perp(z) ** 2.0 / 2.0
+        constant = (
+            1.0
+            / self.scaling_factor_parall(z)
+            / self.scaling_factor_perp(z) ** 2.0
+            / 2.0
+        )
 
         prefactors = np.array([constant * (2.0 * m + 1.0) for m in ms])
 
-        integrals = \
-            integrate.simps(self.multipole_spectra_integrand(self.mu_grid,
-                                                             z, k, ms),
-                            self.mu_grid)
+        integrals = integrate.simps(
+            self.multipole_spectra_integrand(self.mu_grid, z, k, ms), self.mu_grid
+        )
 
         spectra = prefactors * integrals
 
@@ -337,38 +351,48 @@ class Spectro:
             multipoles, in this order.
         """
         if self.mixing_matrix_dict is None:
-            raise TypeError('Mixing matrix has not been initialised since no '
-                            'argument "mixing_matrix_dict" was specified when '
-                            'instantiating the Spectro class.')
+            raise TypeError(
+                "Mixing matrix has not been initialised since no "
+                'argument "mixing_matrix_dict" was specified when '
+                "instantiating the Spectro class."
+            )
 
-        kin0 = self.mixing_matrix_dict['kin0']
-        kin2 = self.mixing_matrix_dict['kin2']
-        kin4 = self.mixing_matrix_dict['kin4']
-        kout = self.mixing_matrix_dict['kout']
+        kin0 = self.mixing_matrix_dict["kin0"]
+        kin2 = self.mixing_matrix_dict["kin2"]
+        kin4 = self.mixing_matrix_dict["kin4"]
+        kout = self.mixing_matrix_dict["kout"]
 
         multipoles_in = {}
         for ell in [0, 2, 4]:
-            multipoles_in[f'ell{ell}'] = np.empty(
-                self.mixing_matrix_dict[f'kin{ell}'].shape)
+            multipoles_in[f"ell{ell}"] = np.empty(
+                self.mixing_matrix_dict[f"kin{ell}"].shape
+            )
             if np.all(kin0 == kin2) and np.all(kin0 == kin4):
                 for i, kk in enumerate(kin0):
-                    multipoles_in[f'ell{ell}'][i] = \
-                        self.multipole_spectra(redshift, kk, ms=[ell])
+                    multipoles_in[f"ell{ell}"][i] = self.multipole_spectra(
+                        redshift, kk, ms=[ell]
+                    )
             else:
-                for i, kk in enumerate(self.mixing_matrix_dict[f'kin{ell}']):
-                    multipoles_in[f'ell{ell}'][i] = \
-                        self.multipole_spectra(redshift, kk, ms=[ell])
+                for i, kk in enumerate(self.mixing_matrix_dict[f"kin{ell}"]):
+                    multipoles_in[f"ell{ell}"][i] = self.multipole_spectra(
+                        redshift, kk, ms=[ell]
+                    )
 
         multipoles_out = {}
         for ell in [0, 2, 4]:
-            multipoles_out[f'ell{ell}'] = np.zeros(kout.shape)
+            multipoles_out[f"ell{ell}"] = np.zeros(kout.shape)
             for ell_prime in [0, 2, 4]:
-                multipoles_out[f'ell{ell}'] += \
-                    np.dot(self.mixing_matrix_dict[f'W{ell}{ell_prime}'],
-                           multipoles_in[f'ell{ell_prime}'])
+                multipoles_out[f"ell{ell}"] += np.dot(
+                    self.mixing_matrix_dict[f"W{ell}{ell_prime}"],
+                    multipoles_in[f"ell{ell_prime}"],
+                )
 
-        return (kout, multipoles_out['ell0'], multipoles_out['ell2'],
-                multipoles_out['ell4'])
+        return (
+            kout,
+            multipoles_out["ell0"],
+            multipoles_out["ell2"],
+            multipoles_out["ell4"],
+        )
 
     def multipole_correlation_function_mag_mag(self, r_xi, z, ell):
         r"""Evaluates the magnification-magnification correlation function
@@ -401,14 +425,16 @@ class Spectro:
         """
         # Retrieve magnification bias value corresponding to redshift bin
         spec_zs = [1.0, 1.2, 1.4, 1.65]
-        nuisance_dict = self.theory['nuisance_parameters']
+        nuisance_dict = self.theory["nuisance_parameters"]
         try:
             spec_bin = spec_zs.index(z) + 1
-            mag_bi = nuisance_dict[f'magnification_bias_spectro_bin{spec_bin}']
+            mag_bi = nuisance_dict[f"magnification_bias_spectro_bin{spec_bin}"]
         except ValueError:
-            raise ValueError('Spectroscopic magnification bias cannot '
-                             'be obtained. Check that redshift is '
-                             'inside the bin edges.')
+            raise ValueError(
+                "Spectroscopic magnification bias cannot "
+                "be obtained. Check that redshift is "
+                "inside the bin edges."
+            )
 
         def K_ell(ell, dx, zx):
             r"""Evaluates the integral :math:`K_{\ell}(xr)`
@@ -438,17 +464,22 @@ class Spectro:
             """
             nu = 1.01
             # Define the integrand
-            integ = self.theory['Pk_delta'].P(zx, self.theory['k_win']) * \
-                self.theory['k_win'] ** 2
+            integ = (
+                self.theory["Pk_delta"].P(zx, self.theory["k_win"])
+                * self.theory["k_win"] ** 2
+            )
             # Perform the integration for each step in dx
             K_ell_xr = np.array([])
             for i, xx in enumerate(dx):
-                fftlog_integral = fftlog.fftlog(self.theory['k_win'],
-                                                integ[i], nu=nu,
-                                                N_extrap_begin=1000,
-                                                N_extrap_end=1000,
-                                                c_window_width=0.25,
-                                                N_pad=1000)
+                fftlog_integral = fftlog.fftlog(
+                    self.theory["k_win"],
+                    integ[i],
+                    nu=nu,
+                    N_extrap_begin=1000,
+                    N_extrap_end=1000,
+                    c_window_width=0.25,
+                    N_pad=1000,
+                )
                 d, Int = fftlog_integral.fftlog(ell)
                 # Interpolate for desired values of dx
                 K_ell_xr = np.append(K_ell_xr, interp1d(d, Int)(xx))
@@ -482,13 +513,17 @@ class Spectro:
                 of the integrand :math:`f_ell`
             """
             # Interpolate the redshift z at the radial comoving distance xr
-            interp_comov_dist = interp1d(self.theory['comov_dist'],
-                                         self.theory['z_win'])
-            comov_dist_z = interp_comov_dist(dx * self.theory['r_z_func'](z))
+            interp_comov_dist = interp1d(
+                self.theory["comov_dist"], self.theory["z_win"]
+            )
+            comov_dist_z = interp_comov_dist(dx * self.theory["r_z_func"](z))
             # Calcuate f_ell
-            f_ell = dx ** 2 * (1 - dx) ** 2 * \
-                (1 + comov_dist_z) ** 2 * \
-                K_ell(ell, dx * r, comov_dist_z)
+            f_ell = (
+                dx**2
+                * (1 - dx) ** 2
+                * (1 + comov_dist_z) ** 2
+                * K_ell(ell, dx * r, comov_dist_z)
+            )
             return f_ell
 
         def compute_xi_mu_mu(ell, r):
@@ -515,25 +550,38 @@ class Spectro:
             # Define the step size and x array for integration
             x_step = [0.004, 0.010, 0.016]
             try:
-                dx = np.linspace(x_step[int(ell / 2)] / 40.0, 1.0,
-                                 num=10, endpoint=True)
+                dx = np.linspace(
+                    x_step[int(ell / 2)] / 40.0, 1.0, num=10, endpoint=True
+                )
             except ValueError:
-                raise ValueError('Magnification-magnification bias '
-                                 'cannot be calculated for requested '
-                                 'ell value = 'f'{ell}')
+                raise ValueError(
+                    "Magnification-magnification bias "
+                    "cannot be calculated for requested "
+                    "ell value = "
+                    f"{ell}"
+                )
             # Calculate the integrand f_ell(x,s,z) as an array
             f_ells = f_ell(ell, dx, r)
             # Perform the integration
             integ_f_ell = integrate.simps(f_ells, dx)
             # Calculate the coefficient C_mu_mu(ell)
-            C_ell = (2 * ell + 1) / 2 * np.math.factorial(ell) / \
-                (2 ** (ell - 1) * np.math.factorial(int(ell / 2)) ** 2)
+            C_ell = (
+                (2 * ell + 1)
+                / 2
+                * np.math.factorial(ell)
+                / (2 ** (ell - 1) * np.math.factorial(int(ell / 2)) ** 2)
+            )
             # Calculate xi_mu_mu
-            xi_mu_mu_r = C_ell * 9 * \
-                (self.theory['Omc'] + self.theory['Omb']) ** 2 * \
-                self.theory['H0_Mpc'] ** 4 / (8 * np.pi) * \
-                (2 - 5 * mag_bi) ** 2 * \
-                self.theory['r_z_func'](z) ** 3 * integ_f_ell
+            xi_mu_mu_r = (
+                C_ell
+                * 9
+                * (self.theory["Omc"] + self.theory["Omb"]) ** 2
+                * self.theory["H0_Mpc"] ** 4
+                / (8 * np.pi)
+                * (2 - 5 * mag_bi) ** 2
+                * self.theory["r_z_func"](z) ** 3
+                * integ_f_ell
+            )
             return xi_mu_mu_r
 
         # Calculate xi_mu_mu for the array of s
@@ -575,22 +623,32 @@ class Spectro:
         """
         # Retrieve galaxy and magnification bias corresponding to the redshift
         spec_zs = [1.0, 1.2, 1.4, 1.65]
-        nuisance_dict = self.theory['nuisance_parameters']
+        nuisance_dict = self.theory["nuisance_parameters"]
         try:
             spec_bin = spec_zs.index(z) + 1
-            mag_bi = nuisance_dict[f'magnification_bias_spectro_bin{spec_bin}']
-            gal_bi = nuisance_dict[f'b1_spectro_bin{spec_bin}']
+            mag_bi = nuisance_dict[f"magnification_bias_spectro_bin{spec_bin}"]
+            gal_bi = nuisance_dict[f"b1_spectro_bin{spec_bin}"]
         except ValueError:
-            raise ValueError('Spectroscopic galaxay and magnification bias '
-                             'cannot be obtained. Check that redshift is '
-                             'inside the bin edges. ')
+            raise ValueError(
+                "Spectroscopic galaxay and magnification bias "
+                "cannot be obtained. Check that redshift is "
+                "inside the bin edges. "
+            )
         # Calculate the coefficient C_g_mu(ell)
-        C_gmu = (2 * ell + 1) / 2 * np.pi ** (3 / 2) * \
-            2 ** (3 / 2) / 2 ** (ell / 2)
+        C_gmu = (2 * ell + 1) / 2 * np.pi ** (3 / 2) * 2 ** (3 / 2) / 2 ** (ell / 2)
         # Calculate the prefactor of xi_g_mu
-        prefactor = -C_gmu * 3 * (self.theory['Omc'] + self.theory['Omb']) * \
-            self.theory['H0_Mpc'] ** 2 / (4 * np.pi) * 2 * gal_bi * \
-            (2 - 5 * mag_bi) * (1 + z) * r_xi ** 2
+        prefactor = (
+            -C_gmu
+            * 3
+            * (self.theory["Omc"] + self.theory["Omb"])
+            * self.theory["H0_Mpc"] ** 2
+            / (4 * np.pi)
+            * 2
+            * gal_bi
+            * (2 - 5 * mag_bi)
+            * (1 + z)
+            * r_xi**2
+        )
 
         def I_n_l(nx, r_xi):
             r"""Evaluate I_n_l(r,z)
@@ -617,20 +675,30 @@ class Spectro:
             """
             nu = 1.01
             # Define the integrand
-            integ = self.theory['Pk_delta'].P(z, self.theory['k_win']) / \
-                self.theory['k_win'] ** (nx + 1)
+            integ = self.theory["Pk_delta"].P(z, self.theory["k_win"]) / self.theory[
+                "k_win"
+            ] ** (nx + 1)
             # Perform the integration
-            hankel_integral = hankel.hankel(self.theory['k_win'],
-                                            integ, nu=nu,
-                                            N_extrap_begin=1500,
-                                            N_extrap_end=1500,
-                                            c_window_width=0.25,
-                                            N_pad=1000)
+            hankel_integral = hankel.hankel(
+                self.theory["k_win"],
+                integ,
+                nu=nu,
+                N_extrap_begin=1500,
+                N_extrap_end=1500,
+                c_window_width=0.25,
+                N_pad=1000,
+            )
             d, Int = hankel_integral.hankel(nx + 1)
             # Interpolate for desired values of s
             interp_int = interp1d(d, Int)(r_xi)
-            I_n_l = 1 / (2 * np.pi ** 2) * np.sqrt(np.pi / 2) * \
-                1 / (r_xi ** (nx + 2)) * interp_int
+            I_n_l = (
+                1
+                / (2 * np.pi**2)
+                * np.sqrt(np.pi / 2)
+                * 1
+                / (r_xi ** (nx + 2))
+                * interp_int
+            )
             return I_n_l
 
         def sum_fact(ell, nx):
@@ -656,31 +724,40 @@ class Spectro:
             fx: float
                 A value of the summation
             """
-            fx = (-1) ** nx / (2 ** nx) * binom(ell, nx) * \
-                binom(2 * ell - 2 * nx, ell) * \
-                np.math.factorial(int(ell / 2 - nx))
+            fx = (
+                (-1) ** nx
+                / (2**nx)
+                * binom(ell, nx)
+                * binom(2 * ell - 2 * nx, ell)
+                * np.math.factorial(int(ell / 2 - nx))
+            )
             return fx
 
         # Calculate xi_g_mu according to ell value
         if ell == 0:
             xi_g_mu = prefactor * I_n_l(0, r_xi)
         elif ell == 2:
-            xi_g_mu = prefactor * (sum_fact(ell, 0) * I_n_l(1, r_xi) +
-                                   sum_fact(ell, 1) * I_n_l(0, r_xi))
+            xi_g_mu = prefactor * (
+                sum_fact(ell, 0) * I_n_l(1, r_xi) + sum_fact(ell, 1) * I_n_l(0, r_xi)
+            )
         elif ell == 4:
-            xi_g_mu = prefactor * (sum_fact(ell, 0) * I_n_l(2, r_xi) +
-                                   sum_fact(ell, 1) * I_n_l(1, r_xi) +
-                                   sum_fact(ell, 2) * I_n_l(0, r_xi))
+            xi_g_mu = prefactor * (
+                sum_fact(ell, 0) * I_n_l(2, r_xi)
+                + sum_fact(ell, 1) * I_n_l(1, r_xi)
+                + sum_fact(ell, 2) * I_n_l(0, r_xi)
+            )
         else:
-            raise ValueError('Density-magnification bias '
-                             'cannot be calculated for requested '
-                             'ell value = ' f'{ell}')
+            raise ValueError(
+                "Density-magnification bias "
+                "cannot be calculated for requested "
+                "ell value = "
+                f"{ell}"
+            )
         return xi_g_mu
 
-    def multipole_correlation_function(self, r_xi, z, ell,
-                                       k_min=5e-5,
-                                       k_max=50,
-                                       k_num_points=2048):
+    def multipole_correlation_function(
+        self, r_xi, z, ell, k_min=5e-5, k_max=50, k_num_points=2048
+    ):
         r"""Evaluates the multipole correlation function.
 
         Evaluates the multipole correlation function for the separation values
@@ -721,14 +798,13 @@ class Spectro:
 
         # evaluate multipole spectra in correspondence of the points in k_grid.
         # This instruction produces one pk_array for each input ell value
-        pk_arrays = np.transpose([self.multipole_spectra(z, k, ell)
-                                 for k in k_grid])
+        pk_arrays = np.transpose([self.multipole_spectra(z, k, ell) for k in k_grid])
 
         # perform the Hankel transform
         transformed_lin = np.empty((len(ell), len(r_xi)))
         volume_factor = (k_grid**3) / (2 * (np.pi**2))
         for id in range(len(ell)):
-            y_array = volume_factor * pk_arrays[id] * np.real(1j**ell[id])
+            y_array = volume_factor * pk_arrays[id] * np.real(1j ** ell[id])
             transformer = fftlog.fftlog(k_grid, y_array)
             r_grid, transformed_log = transformer.fftlog(ell[id])
             # interpolate to get the linearly-spaced values of the multipole
@@ -736,12 +812,12 @@ class Spectro:
             transformed_lin[id] = np.interp(r_xi, r_grid, transformed_log)
 
         # add magnification bias contribution
-        if self.theory['use_magnification_bias_spectro']:
+        if self.theory["use_magnification_bias_spectro"]:
             for id, ells in enumerate(ell):
-                xi_dens_mag = \
-                    self.multipole_correlation_function_dens_mag(r_xi, z, ells)
-                xi_mag_mag = \
-                    self.multipole_correlation_function_mag_mag(r_xi, z, ells)
+                xi_dens_mag = self.multipole_correlation_function_dens_mag(
+                    r_xi, z, ells
+                )
+                xi_mag_mag = self.multipole_correlation_function_mag_mag(r_xi, z, ells)
                 transformed_lin[id] += 2 * xi_dens_mag
                 transformed_lin[id] += xi_mag_mag
 

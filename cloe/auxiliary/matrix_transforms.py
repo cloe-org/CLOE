@@ -42,18 +42,26 @@ class VectorizeMatrix(object):
         self.N = N
 
     def _u_vector_operator(self, i, j):
-        return np.array([1 if a == j * self.N + i - 1 / 2 * j * (j + 1) else 0
-                        for a in range(self.N * (self.N + 1) // 2)])[:, None]
+        return np.array(
+            [
+                1 if a == j * self.N + i - 1 / 2 * j * (j + 1) else 0
+                for a in range(self.N * (self.N + 1) // 2)
+            ]
+        )[:, None]
 
     def _t_vector_operator(self, i, j):
-        return np.array([1 if ((a == i and b == j) or (a == j and b == i))
-                        else 0 for a in range(self.N)
-                        for b in range(self.N)])[:, None]
+        return np.array(
+            [
+                1 if ((a == i and b == j) or (a == j and b == i)) else 0
+                for a in range(self.N)
+                for b in range(self.N)
+            ]
+        )[:, None]
 
     def _e_vector_operator(self, i, j):
-        return np.dot(np.identity(self.N)[:, i:i + 1],
-                      np.identity(self.N)[j:j + 1, :]).reshape((self.N *
-                                                                self.N, 1))
+        return np.dot(
+            np.identity(self.N)[:, i : i + 1], np.identity(self.N)[j : j + 1, :]
+        ).reshape((self.N * self.N, 1))
 
     def duplication_matrix(self):
         """
@@ -68,10 +76,14 @@ class VectorizeMatrix(object):
 
         """
 
-        return np.sum([np.dot(self._u_vector_operator(i, j),
-                       self._t_vector_operator(i, j).T)
-                       for j in range(self.N)
-                       for i in range(j, self.N)], axis=0).T
+        return np.sum(
+            [
+                np.dot(self._u_vector_operator(i, j), self._t_vector_operator(i, j).T)
+                for j in range(self.N)
+                for i in range(j, self.N)
+            ],
+            axis=0,
+        ).T
 
     def elimination_matrix(self):
         """
@@ -85,13 +97,17 @@ class VectorizeMatrix(object):
              elimination matrix
         """
 
-        return np.sum([np.dot(self._u_vector_operator(i, j),
-                      self._e_vector_operator(i, j).T)
-                      for j in range(self.N)
-                      for i in range(j, self.N)], axis=0)
+        return np.sum(
+            [
+                np.dot(self._u_vector_operator(i, j), self._e_vector_operator(i, j).T)
+                for j in range(self.N)
+                for i in range(j, self.N)
+            ],
+            axis=0,
+        )
 
 
-class BNT_transform():
+class BNT_transform:
     """
     Class BNT_transform
 
@@ -105,8 +121,7 @@ class BNT_transform():
     release documentation.
     """
 
-    def __init__(self, z_array, comoving_dist, n_i_z_array,
-                 test_unity=False):
+    def __init__(self, z_array, comoving_dist, n_i_z_array, test_unity=False):
         """
         Initialize
 
@@ -155,11 +170,12 @@ class BNT_transform():
         if self.test_unity is True:
             return BNT_matrix
         else:
-            BNT_matrix[1, 0] = -1.
+            BNT_matrix[1, 0] = -1.0
             for i in range(2, self.Nz_bins):
-                mat = np.array([[A_list[i - 1], A_list[i - 2]],
-                               [B_list[i - 1], B_list[i - 2]]])
-                A = -1. * np.array([A_list[i], B_list[i]])
+                mat = np.array(
+                    [[A_list[i - 1], A_list[i - 2]], [B_list[i - 1], B_list[i - 2]]]
+                )
+                A = -1.0 * np.array([A_list[i], B_list[i]])
                 soln = np.dot(np.linalg.inv(mat), A)
                 BNT_matrix[i, i - 1] = soln[0]
                 BNT_matrix[i, i - 2] = soln[1]
@@ -190,11 +206,11 @@ class BNT_transform():
         Vec = VectorizeMatrix(self.Nz_bins)
         D_mat = Vec.duplication_matrix()
         E_mat = Vec.elimination_matrix()
-        C_slash_mat = (np.kron(self.N_mat_ell, D_mat) @ observed_array)
+        C_slash_mat = np.kron(self.N_mat_ell, D_mat) @ observed_array
         B_kron = np.kron(self.BNT_matrix, self.BNT_matrix)
         B_kron_Ell = np.kron(self.N_mat_ell, B_kron)
         Ell_mat = np.kron(self.N_mat_ell, E_mat)
-        transformed_array = (Ell_mat @ B_kron_Ell @ C_slash_mat)
+        transformed_array = Ell_mat @ B_kron_Ell @ C_slash_mat
         return transformed_array
 
     def apply_vectorized_nonsymmetric_BNT(self, N_ell_bins, observed_array):
@@ -220,9 +236,6 @@ class BNT_transform():
 
         self.N_mat_ell = np.identity(N_ell_bins)
         self.N_mat_z = np.identity(self.Nz_bins)
-        A_slash_mat = \
-            np.kron(self.N_mat_ell,
-                    np.kron(self.N_mat_z, self.BNT_matrix)
-                    )
+        A_slash_mat = np.kron(self.N_mat_ell, np.kron(self.N_mat_z, self.BNT_matrix))
         transformed_array = A_slash_mat @ observed_array
         return transformed_array

@@ -19,12 +19,11 @@ import cosmosis
 
 
 class LikelihoodUI:
-    r"""Top level user interface class for running CLOE.
+    r"""Top level user interface class for running CLOE."""
 
-    """
-
-    def __init__(self, user_config_file=None, defaults_config_file=None,
-                 user_dict=None):
+    def __init__(
+        self, user_config_file=None, defaults_config_file=None, user_dict=None
+    ):
         r"""Constructor.
 
         Loads the default configuration for running CLOE, then (if provided)
@@ -51,40 +50,38 @@ class LikelihoodUI:
             and :obj:`defaults_config_file`
         """
         if defaults_config_file is None:
-            defaults_dir = 'configs'
-            defaults_name = 'config_default.yaml'
+            defaults_dir = "configs"
+            defaults_name = "config_default.yaml"
             defaults_path = Path(__file__).resolve().parents[2]
             defaults_path = defaults_path.joinpath(defaults_dir)
             defaults_config_file = defaults_path.joinpath(defaults_name)
 
-        needed_keys = ['backend', 'Cobaya', 'Cosmosis']
+        needed_keys = ["backend", "Cobaya", "Cosmosis"]
         self._config_path = defaults_config_file
-        self._config =\
-            yaml_handler.yaml_read_and_check_dict(self._config_path,
-                                                  needed_keys)
+        self._config = yaml_handler.yaml_read_and_check_dict(
+            self._config_path, needed_keys
+        )
 
         if user_config_file is not None:
-            log_info(f'Opening user config file: {user_config_file}')
+            log_info(f"Opening user config file: {user_config_file}")
 
-            user_config = \
-                yaml_handler.yaml_read_and_check_dict(user_config_file,
-                                                      needed_keys)
+            user_config = yaml_handler.yaml_read_and_check_dict(
+                user_config_file, needed_keys
+            )
             self._config = self._update_config(
-                orig_config=self._config,
-                update_config=user_config
+                orig_config=self._config, update_config=user_config
             )
 
         if user_dict is not None:
             self._config = self._update_config(
-                orig_config=self._config,
-                update_config=user_dict
+                orig_config=self._config, update_config=user_dict
             )
 
-        log_info('Selected configuration:')
+        log_info("Selected configuration:")
         log_info(self._config)
 
         self._backend = self._get_and_check_backend(self._config)
-        log_info(f'Selected backend: {self._backend}')
+        log_info(f"Selected backend: {self._backend}")
 
     def run(self):
         r"""Main method to run CLOE.
@@ -102,12 +99,12 @@ class LikelihoodUI:
            implemented backend
         """
 
-        if self._backend == 'Cobaya':
+        if self._backend == "Cobaya":
             return self._run_cobaya()
-        elif self._backend == 'Cosmosis':
+        elif self._backend == "Cosmosis":
             return self._run_cosmosis()
         else:
-            raise Exception(f'Unsupported backend: {self._backend}')
+            raise Exception(f"Unsupported backend: {self._backend}")
 
     def _run_cobaya(self):
         r"""Runs CLOE using Cobaya as backend.
@@ -120,14 +117,14 @@ class LikelihoodUI:
           This is the very same thing that is returned by the :obj:`run()`
           method of Cobaya
         """
-        cobaya_dict = self._config['Cobaya']
-        likelihood_euclid_dict = cobaya_dict['likelihood']['Euclid']
+        cobaya_dict = self._config["Cobaya"]
+        likelihood_euclid_dict = cobaya_dict["likelihood"]["Euclid"]
 
         self._check_and_update_likelihood_fields(likelihood_euclid_dict)
         self._check_and_update_params_field(cobaya_dict)
         lyh.update_cobaya_dict_with_halofit_version(cobaya_dict)
 
-        log_info('Updated Cobaya info dictionary:')
+        log_info("Updated Cobaya info dictionary:")
         log_info(cobaya_dict)
 
         return cobaya.run(cobaya_dict)
@@ -142,13 +139,13 @@ class LikelihoodUI:
         output: astropy.table
           An astropy table with the samples and likelihoods
         """
-        cosmosis_dict = self._config['Cosmosis']
-        ini_dir = 'cosmosis'
-        ini_name = cosmosis_dict['ini_file']
+        cosmosis_dict = self._config["Cosmosis"]
+        ini_dir = "cosmosis"
+        ini_name = cosmosis_dict["ini_file"]
         ini_path = Path(__file__).resolve().parents[2]
         ini_path = ini_path.joinpath(ini_dir)
         ini_file = ini_path.joinpath(ini_name)
-        log_info(f'Using Cosmosis as backend, ini file is {ini_file}')
+        log_info(f"Using Cosmosis as backend, ini file is {ini_file}")
         return cosmosis.run_cosmosis(ini_file)
 
     def plot(self, settings):
@@ -164,7 +161,7 @@ class LikelihoodUI:
            routines
         """
 
-        if self._backend == 'Cobaya':
+        if self._backend == "Cobaya":
             return self._plot_cobaya(settings)
 
     def _plot_cobaya(self, settings):
@@ -176,8 +173,8 @@ class LikelihoodUI:
            Name of the :obj:`yaml` configuration file for the plotting
            routines
         """
-        cobaya_dict = self._config['Cobaya']
-        likelihood_euclid_dict = cobaya_dict['likelihood']['Euclid']
+        cobaya_dict = self._config["Cobaya"]
+        likelihood_euclid_dict = cobaya_dict["likelihood"]["Euclid"]
 
         self._check_and_update_likelihood_fields(likelihood_euclid_dict)
         self._check_and_update_params_field(cobaya_dict)
@@ -189,14 +186,13 @@ class LikelihoodUI:
         like = EuclidLikelihood()
         like.initialize()
         like.passing_requirements(model, cobaya_dict, **model.provider.params)
-        like.cosmo.update_cosmo_dic(like.cosmo.cosmo_dic['z_win'], 0.05)
+        like.cosmo.update_cosmo_dic(like.cosmo.cosmo_dic["z_win"], 0.05)
 
         if settings is None:
             plotter = Plotter(like.cosmo.cosmo_dic, like.likefinal.data)
         else:
             settings = yaml_handler.yaml_read(settings)
-            plotter = Plotter(like.cosmo.cosmo_dic, like.likefinal.data,
-                              settings)
+            plotter = Plotter(like.cosmo.cosmo_dic, like.likefinal.data, settings)
 
         plotter.output_Cl_WL()
         plotter.output_Cl_phot()
@@ -218,12 +214,11 @@ class LikelihoodUI:
 
         parent_path = Path(__file__).resolve().parents[2]
 
-        if self._backend == 'Cobaya':
-            chain_path = parent_path / self._config[self._backend]['output']
+        if self._backend == "Cobaya":
+            chain_path = parent_path / self._config[self._backend]["output"]
             triangle_plot_cobaya(str(chain_path))
 
-    def _check_and_update_likelihood_fields(self, likelihood_sub_dict,
-                                            fields=None):
+    def _check_and_update_likelihood_fields(self, likelihood_sub_dict, fields=None):
         """
         Checks and updates the fields in the likelihood sub dictionary.
 
@@ -236,62 +231,71 @@ class LikelihoodUI:
         """
 
         if fields is None:
-            fields = ['data', 'observables_selection',
-                      'observables_specifications']
+            fields = ["data", "observables_selection", "observables_specifications"]
 
         for field in fields:
             if field not in likelihood_sub_dict:
-                log_debug(f'Sub-field \'{field}\' not found')
-                log_info(f'\'{field}\' will be initialized as specified '
-                         'in EuclidLikelihood.yaml')
+                log_debug(f"Sub-field '{field}' not found")
+                log_info(
+                    f"'{field}' will be initialized as specified "
+                    "in EuclidLikelihood.yaml"
+                )
             else:
                 field_value = likelihood_sub_dict[field]
                 if type(field_value) is str:
-                    log_debug(f'Field \'{field}\' is a string')
-                    log_info(f'\'{field}\' will be initialized as specified'
-                             f' in the file {field_value}')
+                    log_debug(f"Field '{field}' is a string")
+                    log_info(
+                        f"'{field}' will be initialized as specified"
+                        f" in the file {field_value}"
+                    )
                     configs_path = lyh.get_default_configs_path()
                     field_path = configs_path / Path(field_value)
                     field_dict = yaml_handler.yaml_read(field_path)
                     log_info(field_dict)
                     likelihood_sub_dict[field] = field_dict
                 elif type(field_value) is dict:
-                    log_debug(f'Field \'{field}\' is a dict')
-                    if field == 'observables_specifications':
+                    log_debug(f"Field '{field}' is a dict")
+                    if field == "observables_specifications":
                         obs_spec_dic = field_value
-                        sub_fields = ['GCphot', 'GCspectro', 'WL',
-                                      'GCphot-GCspectro',
-                                      'WL-GCphot', 'WL-GCspectro',
-                                      'CG',
-                                      'CMBlens',
-                                      'CMBlens-WL',
-                                      'CMBlens-GCphot',
-                                      'ISW-GCphot']
+                        sub_fields = [
+                            "GCphot",
+                            "GCspectro",
+                            "WL",
+                            "GCphot-GCspectro",
+                            "WL-GCphot",
+                            "WL-GCspectro",
+                            "CG",
+                            "CMBlens",
+                            "CMBlens-WL",
+                            "CMBlens-GCphot",
+                            "ISW-GCphot",
+                        ]
 
-                        self._check_and_update_likelihood_fields(obs_spec_dic,
-                                                                 sub_fields)
-                    elif field == 'GCspectro':
+                        self._check_and_update_likelihood_fields(
+                            obs_spec_dic, sub_fields
+                        )
+                    elif field == "GCspectro":
                         dic = field_value
                         # corr_fun_str defined just to avoid exceeding line
                         # length
-                        corr_fun_str =\
-                            'multipole_correlation_function'
-                        sub_fields = ['multipole_power_spectrum',
-                                      corr_fun_str]
-                        self._check_and_update_likelihood_fields(dic,
-                                                                 sub_fields)
+                        corr_fun_str = "multipole_correlation_function"
+                        sub_fields = ["multipole_power_spectrum", corr_fun_str]
+                        self._check_and_update_likelihood_fields(dic, sub_fields)
 
-                    elif field == 'GCphot' \
-                            or field == 'WL' \
-                            or field == 'WL-GCphot' \
-                            or field == 'GCphot-GCspectro' \
-                            or field == 'WL-GCspectro':
+                    elif (
+                        field == "GCphot"
+                        or field == "WL"
+                        or field == "WL-GCphot"
+                        or field == "GCphot-GCspectro"
+                        or field == "WL-GCspectro"
+                    ):
                         dic = field_value
-                        sub_fields = ['angular_power_spectrum',
-                                      'angular_correlation_function']
-                        self._check_and_update_likelihood_fields(dic,
-                                                                 sub_fields)
-                log_info(f'\'{field}\' will be set as:')
+                        sub_fields = [
+                            "angular_power_spectrum",
+                            "angular_correlation_function",
+                        ]
+                        self._check_and_update_likelihood_fields(dic, sub_fields)
+                log_info(f"'{field}' will be set as:")
                 log_info(field_value)
 
     def _check_and_update_params_field(self, cobaya_dict):
@@ -315,32 +319,34 @@ class LikelihoodUI:
             If the selected Boltzmann solver is neither CAMB or CLASS
         """
 
-        params = cobaya_dict['params']
+        params = cobaya_dict["params"]
         if type(params) is str:
-            log_debug(f'Field \'params\' is a string: the model path')
+            log_debug(f"Field 'params' is a string: the model path")
             model_path = self._get_model_path_from_cobaya_dict(cobaya_dict)
-            log_info(f'Selected model path: {model_path}')
+            log_info(f"Selected model path: {model_path}")
 
-            log_info(f'Updating \'params\' in the Cobaya info dictionary')
+            log_info(f"Updating 'params' in the Cobaya info dictionary")
             lyh.update_cobaya_params_from_model_yaml(cobaya_dict, model_path)
         elif type(params) is dict:
-            log_debug(f'Field \'params\' is a dict')
-            log_info(f'\'params\' will be set as:')
+            log_debug(f"Field 'params' is a dict")
+            log_info(f"'params' will be set as:")
             log_info(params)
         else:
-            raise ValueError('key \'params\' in the input yaml configuration '
-                             'must be a either a string (the model yaml path)'
-                             'or a dict (the params dictionary)')
+            raise ValueError(
+                "key 'params' in the input yaml configuration "
+                "must be a either a string (the model yaml path)"
+                "or a dict (the params dictionary)"
+            )
 
-        if 'camb' in cobaya_dict['theory'].keys():
-            solver = 'camb'
-        elif 'classy' in cobaya_dict['theory'].keys():
-            solver = 'classy'
+        if "camb" in cobaya_dict["theory"].keys():
+            solver = "camb"
+        elif "classy" in cobaya_dict["theory"].keys():
+            solver = "classy"
         else:
-            raise KeyError('Boltzmann solvers must be chosen between '
-                           'CAMB and CLASS')
-        parconv.convert_params(cobaya_dict['params'],
-                               cobaya_dict['theory'][solver], solver)
+            raise KeyError("Boltzmann solvers must be chosen between " "CAMB and CLASS")
+        parconv.convert_params(
+            cobaya_dict["params"], cobaya_dict["theory"][solver], solver
+        )
 
     def _get_model_path_from_cobaya_dict(self, cobaya_dict):
         """Gets the full model path from the Cobaya dictionary.
@@ -364,10 +370,12 @@ class LikelihoodUI:
             is not a string
         """
 
-        model_file = cobaya_dict['params']
+        model_file = cobaya_dict["params"]
         if type(model_file) is not str:
-            raise ValueError('key \'params\' in the input yaml configuration '
-                             'must be a string, the model yaml file path')
+            raise ValueError(
+                "key 'params' in the input yaml configuration "
+                "must be a string, the model yaml file path"
+            )
 
         return self._config_path.parents[0].joinpath(model_file)
 
@@ -393,14 +401,13 @@ class LikelihoodUI:
         ValueError
             If the specified backend is not supported
         """
-        backend = config['backend']
-        if backend == 'Cobaya':
+        backend = config["backend"]
+        if backend == "Cobaya":
             return backend
-        elif backend == 'Cosmosis':
+        elif backend == "Cosmosis":
             return backend
         else:
-            raise ValueError(f'The requested backend is not supported: '
-                             f'{backend}')
+            raise ValueError(f"The requested backend is not supported: " f"{backend}")
 
     def get_and_check_action(self):
         """Gets and checks the action key.
@@ -425,15 +432,17 @@ class LikelihoodUI:
             If the specified action is not within the list of currently
             available actions.
         """
-        available_actions = ['run', 'process', 'plot']
+        available_actions = ["run", "process", "plot"]
 
-        action = self._config['action']
+        action = self._config["action"]
         if action in available_actions:
             return action
         else:
-            raise ValueError(f'The specified action is not supported: '
-                             f'{action}. The supported actions are: '
-                             f'{available_actions}.')
+            raise ValueError(
+                f"The specified action is not supported: "
+                f"{action}. The supported actions are: "
+                f"{available_actions}."
+            )
 
     @staticmethod
     def _update_config(orig_config, update_config):
@@ -453,8 +462,8 @@ class LikelihoodUI:
         """
         for key, val in update_config.items():
             if isinstance(val, collections.abc.Mapping):
-                orig_config[key] = (
-                    LikelihoodUI._update_config(orig_config.get(key, {}), val)
+                orig_config[key] = LikelihoodUI._update_config(
+                    orig_config.get(key, {}), val
                 )
             else:
                 orig_config[key] = val

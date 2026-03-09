@@ -34,7 +34,7 @@ def yaml_read(file_name):
     untrusted sources.
     """
 
-    with open(file_name, 'r') as file:
+    with open(file_name, "r") as file:
         return yaml.load(file.read(), Loader=yaml.FullLoader)
 
 
@@ -67,11 +67,11 @@ def yaml_read_and_check_dict(file_name, needed_keys: list):
     dictionary = yaml_read(file_name)
 
     if type(dictionary) is not dict:
-        raise TypeError(f'File {file_name} not formatted as dictionary')
+        raise TypeError(f"File {file_name} not formatted as dictionary")
 
     for key in needed_keys:
         if key not in dictionary:
-            raise KeyError(f'key \'{key}\' not found in {file_name}')
+            raise KeyError(f"key '{key}' not found in {file_name}")
 
     return dictionary
 
@@ -103,15 +103,15 @@ def yaml_write(file_name, config, overwrite=False):
     """
 
     if type(config) is not dict:
-        raise TypeError('Input configuration is not a dict: {config}')
+        raise TypeError("Input configuration is not a dict: {config}")
 
     file_exists = exists(file_name)
     if file_exists and not overwrite:
-        raise RuntimeError(f'File {file_name} already exists.\n')
+        raise RuntimeError(f"File {file_name} already exists.\n")
     elif file_exists and overwrite:
-        warn(f'Overwriting file {file_name}.')
+        warn(f"Overwriting file {file_name}.")
 
-    with open(file_name, 'w', encoding='utf8') as file:
+    with open(file_name, "w", encoding="utf8") as file:
         file.write(
             yaml.dump(config, default_flow_style=False),
         )

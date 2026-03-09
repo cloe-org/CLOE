@@ -19,33 +19,29 @@ class specinitTestCase(TestCase, SpectroTestParent):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.test_dict = load_test_pickle('spectro_test_dic.pickle')
+        cls.test_dict = load_test_pickle("spectro_test_dic.pickle")
         cls.test_dict_1 = deepcopy(cls.test_dict)
-        cls.test_dict_1['GCsp_z_err'] = True
+        cls.test_dict_1["GCsp_z_err"] = True
         cls.test_dict_2 = deepcopy(cls.test_dict)
-        cls.test_dict_2['f_out'] = 1.0
+        cls.test_dict_2["f_out"] = 1.0
         cls.test_dict_3 = deepcopy(cls.test_dict)
-        cls.test_dict_3['f_out_z_dep'] = True
-        cls.test_dict_3['f_out_1'] = 1.0
+        cls.test_dict_3["f_out_z_dep"] = True
+        cls.test_dict_3["f_out_1"] = 1.0
 
-        cls.spectro = Spectro(cls.test_dict, ['1.', '1.2', '1.4', '1.65'])
-        cls.spectro_1 = Spectro(cls.test_dict_1, ['1.', '1.2', '1.4', '1.65'])
-        cls.spectro_2 = Spectro(cls.test_dict_2, ['1.', '1.2', '1.4', '1.65'])
-        cls.spectro_3 = Spectro(cls.test_dict_3, ['1.', '1.2', '1.4', '1.65'])
+        cls.spectro = Spectro(cls.test_dict, ["1.", "1.2", "1.4", "1.65"])
+        cls.spectro_1 = Spectro(cls.test_dict_1, ["1.", "1.2", "1.4", "1.65"])
+        cls.spectro_2 = Spectro(cls.test_dict_2, ["1.", "1.2", "1.4", "1.65"])
+        cls.spectro_3 = Spectro(cls.test_dict_3, ["1.", "1.2", "1.4", "1.65"])
 
     def setUp(self):
-        self.test_dict['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
-        self.test_dict['noise_Pgg_spectro'] = \
-            np.vectorize(self.noise_Pgg_spectro)
-        self.test_dict_1['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
-        self.test_dict_1['noise_Pgg_spectro'] = \
-            np.vectorize(self.noise_Pgg_spectro)
-        self.test_dict_2['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
-        self.test_dict_2['noise_Pgg_spectro'] = \
-            np.vectorize(self.noise_Pgg_spectro)
-        self.test_dict_3['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
-        self.test_dict_3['noise_Pgg_spectro'] = \
-            np.vectorize(self.noise_Pgg_spectro)
+        self.test_dict["Pgg_spectro"] = np.vectorize(self.Pgg_spectro_def)
+        self.test_dict["noise_Pgg_spectro"] = np.vectorize(self.noise_Pgg_spectro)
+        self.test_dict_1["Pgg_spectro"] = np.vectorize(self.Pgg_spectro_def)
+        self.test_dict_1["noise_Pgg_spectro"] = np.vectorize(self.noise_Pgg_spectro)
+        self.test_dict_2["Pgg_spectro"] = np.vectorize(self.Pgg_spectro_def)
+        self.test_dict_2["noise_Pgg_spectro"] = np.vectorize(self.noise_Pgg_spectro)
+        self.test_dict_3["Pgg_spectro"] = np.vectorize(self.Pgg_spectro_def)
+        self.test_dict_3["noise_Pgg_spectro"] = np.vectorize(self.noise_Pgg_spectro)
 
         self.check_multipole_spectra_m0 = 12292.776078
         self.check_multipole_spectra_m1 = 0.0
@@ -94,12 +90,12 @@ class specinitTestCase(TestCase, SpectroTestParent):
         if bin_edge_list is None:
             bin_edge_list = [0.90, 1.10, 1.30, 1.50, 1.80]
 
-        nuisance_dic = self.test_dict['nuisance_parameters']
+        nuisance_dic = self.test_dict["nuisance_parameters"]
         istf_bias_list = [
-            nuisance_dic['b1_spectro_bin1'],
-            nuisance_dic['b1_spectro_bin2'],
-            nuisance_dic['b1_spectro_bin3'],
-            nuisance_dic['b1_spectro_bin4']
+            nuisance_dic["b1_spectro_bin1"],
+            nuisance_dic["b1_spectro_bin2"],
+            nuisance_dic["b1_spectro_bin3"],
+            nuisance_dic["b1_spectro_bin4"],
         ]
 
         if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
@@ -117,7 +113,7 @@ class specinitTestCase(TestCase, SpectroTestParent):
             self.spectro.multipole_spectra(1.0, 0.1, ms=[0]),
             self.check_multipole_spectra_m0,
             rtol=1e-05,
-            err_msg='Multipole spectrum m = 0 failed',
+            err_msg="Multipole spectrum m = 0 failed",
         )
 
     def test_multipole_spectra_m1(self):
@@ -125,7 +121,7 @@ class specinitTestCase(TestCase, SpectroTestParent):
             self.spectro.multipole_spectra(1.0, 0.1, ms=[1]),
             self.check_multipole_spectra_m1,
             atol=1e-10,
-            err_msg='Multipole spectrum m = 1 failed',
+            err_msg="Multipole spectrum m = 1 failed",
         )
 
     def test_multipole_spectra_m2(self):
@@ -133,7 +129,7 @@ class specinitTestCase(TestCase, SpectroTestParent):
             self.spectro.multipole_spectra(1.0, 0.1, ms=[2]),
             self.check_multipole_spectra_m2,
             rtol=2e-04,
-            err_msg='Multipole spectrum m = 2 failed',
+            err_msg="Multipole spectrum m = 2 failed",
         )
 
     def test_multipole_spectra_m3(self):
@@ -141,7 +137,7 @@ class specinitTestCase(TestCase, SpectroTestParent):
             self.spectro.multipole_spectra(1.0, 0.1, ms=[3]),
             self.check_multipole_spectra_m3,
             atol=1e-10,
-            err_msg='Multipole spectrum m = 3 failed',
+            err_msg="Multipole spectrum m = 3 failed",
         )
 
     def test_multipole_spectra_m4(self):
@@ -149,7 +145,7 @@ class specinitTestCase(TestCase, SpectroTestParent):
             self.spectro.multipole_spectra(1.0, 0.1, ms=[4]),
             self.check_multipole_spectra_m4,
             rtol=1e-05,
-            err_msg='Multipole spectrum m = 4 failed',
+            err_msg="Multipole spectrum m = 4 failed",
         )
 
     def test_multipole_spectra_m100(self):
@@ -163,30 +159,26 @@ class specinitTestCase(TestCase, SpectroTestParent):
 
     def test_multipole_spectra_integrand(self):
         mu_grid = np.linspace(-1, 1, 2001)
-        integrand = (
-            self.spectro_1.multipole_spectra_integrand(mu_grid, 1.0, 0.1, [2])
-        )
+        integrand = self.spectro_1.multipole_spectra_integrand(mu_grid, 1.0, 0.1, [2])
         idx = np.where(mu_grid == 0.7)
         value = integrand[0][idx]
         npt.assert_allclose(
             value,
             self.check_multipole_spectra_integrand,
             rtol=1e-05,
-            err_msg='Multipole spectra integrand failed',
+            err_msg="Multipole spectra integrand failed",
         )
 
     def test_multipole_spectra_integrand_no_z_err(self):
         mu_grid = np.linspace(-1, 1, 2001)
-        integrand = (
-            self.spectro.multipole_spectra_integrand(mu_grid, 1.0, 0.1, [2])
-        )
+        integrand = self.spectro.multipole_spectra_integrand(mu_grid, 1.0, 0.1, [2])
         idx = np.where(mu_grid == 0.7)
         value = integrand[0][idx]
         npt.assert_allclose(
             value,
             self.check_multipole_spectra_integrand_no_z_err,
             rtol=1e-05,
-            err_msg='Multipole spectra integrand no z err failed',
+            err_msg="Multipole spectra integrand no z err failed",
         )
 
     def test_scaling_factor_perp(self):
@@ -194,7 +186,7 @@ class specinitTestCase(TestCase, SpectroTestParent):
             self.spectro.scaling_factor_perp(0.01),
             self.check_scaling_factor_perp,
             rtol=1e-03,
-            err_msg='Scaling Factor Perp failed',
+            err_msg="Scaling Factor Perp failed",
         )
 
     def test_scaling_factor_parall(self):
@@ -202,7 +194,7 @@ class specinitTestCase(TestCase, SpectroTestParent):
             self.spectro.scaling_factor_parall(0.01),
             self.check_scaling_factor_parall,
             rtol=1e-03,
-            err_msg='Scaling Factor Parall failed',
+            err_msg="Scaling Factor Parall failed",
         )
 
     def test_get_k(self):
@@ -210,7 +202,7 @@ class specinitTestCase(TestCase, SpectroTestParent):
             self.spectro.get_k(0.001, 1, 0.01),
             self.check_get_k,
             rtol=1e-03,
-            err_msg='get_k failed',
+            err_msg="get_k failed",
         )
 
     def test_get_mu(self):
@@ -218,21 +210,21 @@ class specinitTestCase(TestCase, SpectroTestParent):
             self.spectro.get_mu(1, 0.01),
             self.check_get_mu,
             rtol=1e-03,
-            err_msg='get_mu failed',
+            err_msg="get_mu failed",
         )
 
     def test_gal_redshift_scatter(self):
         npt.assert_allclose(
-            self.spectro.gal_redshift_scatter(self.check_get_k,
-                                              self.check_get_mu,
-                                              0.01),
+            self.spectro.gal_redshift_scatter(
+                self.check_get_k, self.check_get_mu, 0.01
+            ),
             self.check_gal_redshift_scatter,
             rtol=1e-05,
-            err_msg='Gal Redshift Scatter failed',
+            err_msg="Gal Redshift Scatter failed",
         )
 
-    @patch('cloe.fftlog.fftlog.fftlog.fftlog')
-    @patch('cloe.spectroscopic_survey.spectro.Spectro.multipole_spectra')
+    @patch("cloe.fftlog.fftlog.fftlog.fftlog")
+    @patch("cloe.spectroscopic_survey.spectro.Spectro.multipole_spectra")
     def test_multipole_correlation_function(self, mock_mul_spe, mock_fftlog):
         s_array_lin = np.linspace(1, 10, 10)
         s_array_log = np.logspace(np.log(0.1), np.log(100), 10)
@@ -242,8 +234,9 @@ class specinitTestCase(TestCase, SpectroTestParent):
         # k_grid parametrization
         mock_mul_spe.return_value = [0]
         mock_fftlog.return_value = s_array_log, pk_array_log
-        corr_fun_array = \
-            self.spectro.multipole_correlation_function(s_array_lin, 1.0, 0)
+        corr_fun_array = self.spectro.multipole_correlation_function(
+            s_array_lin, 1.0, 0
+        )
 
         # test that the shape of the returned array matches the expectations,
         # i.e. n arrays with the same size of the input s array, where n is
@@ -263,36 +256,40 @@ class specinitTestCase(TestCase, SpectroTestParent):
         k_num_points = 2**8  # this is non-default
         mock_mul_spe.return_value = [0, 0, 0]  # must be same size as ell_arr
         mock_fftlog.return_value = s_array_log, pk_array_log
-        corr_fun_array = \
-            self.spectro.multipole_correlation_function(s_array_lin, 1.0,
-                                                        ell_arr,
-                                                        k_min, k_max,
-                                                        k_num_points)
+        corr_fun_array = self.spectro.multipole_correlation_function(
+            s_array_lin, 1.0, ell_arr, k_min, k_max, k_num_points
+        )
         # test that the shape of the returned array matches the expectations,
         # i.e. n arrays with the same size of the input s array, where n is
         # the number of ell values provided as input (1 in this case)
-        npt.assert_equal((len(ell_arr), len(s_array_lin)),
-                         corr_fun_array.shape)
+        npt.assert_equal((len(ell_arr), len(s_array_lin)), corr_fun_array.shape)
         # verify that multipole_spectra() was called the expected number of
         # times (i.e. k_num_points)
-        npt.assert_equal(len(mock_mul_spe.call_args_list), k_num_points,
-                         err_msg='Unexpected number of calls to'
-                         f' multipole_spectra()')
+        npt.assert_equal(
+            len(mock_mul_spe.call_args_list),
+            k_num_points,
+            err_msg="Unexpected number of calls to" f" multipole_spectra()",
+        )
         # verify that fftlog() was called the expected number of times
         # (i.e. len(ell_arr))
-        npt.assert_equal(len(mock_fftlog.call_args_list), len(ell_arr),
-                         err_msg='Unexpected number of calls to fftlog()')
+        npt.assert_equal(
+            len(mock_fftlog.call_args_list),
+            len(ell_arr),
+            err_msg="Unexpected number of calls to fftlog()",
+        )
 
-    @patch('cloe.spectroscopic_survey.spectro.Spectro.'
-           'multipole_correlation_function_mag_mag')
+    @patch(
+        "cloe.spectroscopic_survey.spectro.Spectro."
+        "multipole_correlation_function_mag_mag"
+    )
     def test_multipole_correlation_function_mag_mag(self, mock_mag_mag):
         s_array_lin = np.linspace(1, 10, 10)
 
         # test a call to the function
         mock_mag_mag.return_value = np.zeros(10)
-        corr_fun_mag_mag_array = \
-            self.spectro.multipole_correlation_function_mag_mag(s_array_lin,
-                                                                1.0, 0)
+        corr_fun_mag_mag_array = self.spectro.multipole_correlation_function_mag_mag(
+            s_array_lin, 1.0, 0
+        )
 
         # test that the shape of the returned array matches the expectations,
         # i.e. same size as the input s array (10 in this case)
@@ -302,20 +299,25 @@ class specinitTestCase(TestCase, SpectroTestParent):
 
         # verify that the function was called the expected number of
         # times (i.e. len(s_array))
-        npt.assert_equal(len(mock_mag_mag.call_args_list), 1,
-                         err_msg='Unexpected number of calls to'
-                         f' multipole_correlation_function_mag_mag()')
+        npt.assert_equal(
+            len(mock_mag_mag.call_args_list),
+            1,
+            err_msg="Unexpected number of calls to"
+            f" multipole_correlation_function_mag_mag()",
+        )
 
-    @patch('cloe.spectroscopic_survey.spectro.Spectro.'
-           'multipole_correlation_function_dens_mag')
+    @patch(
+        "cloe.spectroscopic_survey.spectro.Spectro."
+        "multipole_correlation_function_dens_mag"
+    )
     def test_multipole_correlation_function_dens_mag(self, mock_dens_mag):
         s_array_lin = np.linspace(1, 10, 10)
 
         # test a call to the function
         mock_dens_mag.return_value = np.zeros(10)
-        corr_fun_dens_mag_array = \
-            self.spectro.multipole_correlation_function_dens_mag(s_array_lin,
-                                                                 1.0, 0)
+        corr_fun_dens_mag_array = self.spectro.multipole_correlation_function_dens_mag(
+            s_array_lin, 1.0, 0
+        )
         # test that the shape of the returned array matches the expectations,
         # i.e. same size of the input s array (10 in this case)
         npt.assert_equal(len(s_array_lin), len(corr_fun_dens_mag_array))
@@ -324,16 +326,19 @@ class specinitTestCase(TestCase, SpectroTestParent):
 
         # verify that function was called the expected number of
         # times (i.e. lens(s_array))
-        npt.assert_equal(len(mock_dens_mag.call_args_list), 1,
-                         err_msg='Unexpected number of calls to'
-                         f' multipole_correlation_function_dens_mag()')
+        npt.assert_equal(
+            len(mock_dens_mag.call_args_list),
+            1,
+            err_msg="Unexpected number of calls to"
+            f" multipole_correlation_function_dens_mag()",
+        )
 
     def test_f_out(self):
         npt.assert_allclose(
             self.spectro_2.multipole_spectra(1.0, 0.1, ms=[1]),
             0.0,
             atol=1e-10,
-            err_msg='Test redshift independent f_out failed',
+            err_msg="Test redshift independent f_out failed",
         )
 
     def test_f_out_z_dep(self):
@@ -341,7 +346,7 @@ class specinitTestCase(TestCase, SpectroTestParent):
             self.spectro_3.multipole_spectra(1.0, 0.1, ms=[1]),
             0.0,
             atol=1e-10,
-            err_msg='Test redshift dependent f_out failed',
+            err_msg="Test redshift dependent f_out failed",
         )
 
     def test_f_out_z_exception(self):

@@ -172,6 +172,6 @@ calculation of cosmological quantities not provided by Boltzmann codes.
             likelihood is calculated.
 """
 
-__all__ = ['cosmology']  # list submodules
+__all__ = ["cosmology"]  # list submodules
 
 from . import *

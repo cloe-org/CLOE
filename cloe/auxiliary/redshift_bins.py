@@ -47,13 +47,17 @@ def find_bin(zs, redshift_edges, check_bounds=False):
     if check_bounds is True:
         zs_bin_array = np.asarray(zs_bin)
         if 0 in zs_bin_array:
-            raise ValueError('Some input redshift value'
-                             ' below the lowest bin edge '
-                             f'{redshift_edges[0]}')
+            raise ValueError(
+                "Some input redshift value"
+                " below the lowest bin edge "
+                f"{redshift_edges[0]}"
+            )
         elif len(redshift_edges) in zs_bin_array:
-            raise ValueError('Some input redshift value'
-                             ' above the highest bin edge '
-                             f'{redshift_edges[-1]}')
+            raise ValueError(
+                "Some input redshift value"
+                " above the highest bin edge "
+                f"{redshift_edges[-1]}"
+            )
     return zs_bin
 
 
@@ -104,9 +108,9 @@ def linear_interpolator(x_values, y_values):
     Interpolator: numpy.ndarray of float
         Linear interpolator
     """
-    return interpolate.interp1d(x_values, y_values,
-                                fill_value=(y_values[0], y_values[-1]),
-                                bounds_error=False)
+    return interpolate.interp1d(
+        x_values, y_values, fill_value=(y_values[0], y_values[-1]), bounds_error=False
+    )
 
 
 def select_spectro_parameters(redshift, nuis_dict, bin_edges=None):
@@ -149,48 +153,58 @@ def select_spectro_parameters(redshift, nuis_dict, bin_edges=None):
 
     try:
         z_bin = find_bin(redshift, bin_edges, False)
-        b1 = np.array([nuis_dict[f'b1_spectro_bin{i}']
-                       for i in np.nditer(z_bin)])
-        b2 = np.array([nuis_dict[f'b2_spectro_bin{i}']
-                       for i in np.nditer(z_bin)])
-        bG2 = np.array([nuis_dict[f'bG2_spectro_bin{i}']
-                        for i in np.nditer(z_bin)])
-        bG3 = np.array([nuis_dict[f'bG3_spectro_bin{i}']
-                        for i in np.nditer(z_bin)])
-        c0 = np.array([nuis_dict[f'c0_spectro_bin{i}']
-                       for i in np.nditer(z_bin)])
-        c2 = np.array([nuis_dict[f'c2_spectro_bin{i}']
-                       for i in np.nditer(z_bin)])
-        c4 = np.array([nuis_dict[f'c4_spectro_bin{i}']
-                       for i in np.nditer(z_bin)])
-        ck4 = np.array([nuis_dict[f'ck4_spectro_bin{i}']
-                        for i in np.nditer(z_bin)])
-        aP = np.array([nuis_dict[f'aP_spectro_bin{i}']
-                       for i in np.nditer(z_bin)])
-        e0k2 = np.array([nuis_dict[f'e0k2_spectro_bin{i}']
-                         for i in np.nditer(z_bin)])
-        e2k2 = np.array([nuis_dict[f'e2k2_spectro_bin{i}']
-                         for i in np.nditer(z_bin)])
-        Psn = np.array([nuis_dict[f'Psn_spectro_bin{i}']
-                       for i in np.nditer(z_bin)])
+        b1 = np.array([nuis_dict[f"b1_spectro_bin{i}"] for i in np.nditer(z_bin)])
+        b2 = np.array([nuis_dict[f"b2_spectro_bin{i}"] for i in np.nditer(z_bin)])
+        bG2 = np.array([nuis_dict[f"bG2_spectro_bin{i}"] for i in np.nditer(z_bin)])
+        bG3 = np.array([nuis_dict[f"bG3_spectro_bin{i}"] for i in np.nditer(z_bin)])
+        c0 = np.array([nuis_dict[f"c0_spectro_bin{i}"] for i in np.nditer(z_bin)])
+        c2 = np.array([nuis_dict[f"c2_spectro_bin{i}"] for i in np.nditer(z_bin)])
+        c4 = np.array([nuis_dict[f"c4_spectro_bin{i}"] for i in np.nditer(z_bin)])
+        ck4 = np.array([nuis_dict[f"ck4_spectro_bin{i}"] for i in np.nditer(z_bin)])
+        aP = np.array([nuis_dict[f"aP_spectro_bin{i}"] for i in np.nditer(z_bin)])
+        e0k2 = np.array([nuis_dict[f"e0k2_spectro_bin{i}"] for i in np.nditer(z_bin)])
+        e2k2 = np.array([nuis_dict[f"e2k2_spectro_bin{i}"] for i in np.nditer(z_bin)])
+        Psn = np.array([nuis_dict[f"Psn_spectro_bin{i}"] for i in np.nditer(z_bin)])
         if np.isscalar(redshift):
             par_dict = {
-                'b1': b1[0], 'b2': b2[0], 'bG2': bG2[0], 'bG3': bG3[0],
-                'c0': c0[0], 'c2': c2[0], 'c4': c4[0], 'ck4': ck4[0],
-                'aP': aP[0], 'e0k2': e0k2[0], 'e2k2': e2k2[0], 'Psn': Psn[0]
+                "b1": b1[0],
+                "b2": b2[0],
+                "bG2": bG2[0],
+                "bG3": bG3[0],
+                "c0": c0[0],
+                "c2": c2[0],
+                "c4": c4[0],
+                "ck4": ck4[0],
+                "aP": aP[0],
+                "e0k2": e0k2[0],
+                "e2k2": e2k2[0],
+                "Psn": Psn[0],
             }
         else:
             par_dict = {
-                'b1': b1, 'b2': b2, 'bG2': bG2, 'bG3': bG3,
-                'c0': c0, 'c2': c2, 'c4': c4, 'ck4': ck4,
-                'aP': aP, 'e0k2': e0k2, 'e2k2': e2k2, 'Psn': Psn
+                "b1": b1,
+                "b2": b2,
+                "bG2": bG2,
+                "bG3": bG3,
+                "c0": c0,
+                "c2": c2,
+                "c4": c4,
+                "ck4": ck4,
+                "aP": aP,
+                "e0k2": e0k2,
+                "e2k2": e2k2,
+                "Psn": Psn,
             }
         return par_dict
     except ValueError:
-        raise ValueError('Spectroscopic galaxy bias cannot be obtained. '
-                         'Check that redshift is inside the bin edges and '
-                         'valid bi_spec\'s are provided.')
+        raise ValueError(
+            "Spectroscopic galaxy bias cannot be obtained. "
+            "Check that redshift is inside the bin edges and "
+            "valid bi_spec's are provided."
+        )
     except KeyError:
-        raise KeyError('Input nuisance parameter dictionary does not '
-                       'contain one or more of the expected GCspectro '
-                       'parameters.')
+        raise KeyError(
+            "Input nuisance parameter dictionary does not "
+            "contain one or more of the expected GCspectro "
+            "parameters."
+        )

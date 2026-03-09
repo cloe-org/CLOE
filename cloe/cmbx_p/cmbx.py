@@ -57,13 +57,12 @@ class CMBX:
 
         # Get the comoving radial distance to CMB and the redshift of the CMB
         self.chicmb = (
-            self.theory["CAMBdata"].conformal_time(0) -
-            self.theory["CAMBdata"].tau_maxvis
+            self.theory["CAMBdata"].conformal_time(0)
+            - self.theory["CAMBdata"].tau_maxvis
         )
 
         # Get the max comoving distance used for the
-        self.chi_zmax_phot = self.theory["r_z_func"](
-            self.photo_ins.z_grid_for_cl[-1])
+        self.chi_zmax_phot = self.theory["r_z_func"](self.photo_ins.z_grid_for_cl[-1])
 
         # Defining the upscaled redshift sampling here instead
         # if init function.
@@ -73,8 +72,7 @@ class CMBX:
             np.log10(photo_ins.z_winterp[-1]), np.log10(self.zmax), z_wsamp_up
         )
 
-        self.z_winterp_large = np.unique(
-            np.append(photo_ins.z_winterp, z_winterp_up))
+        self.z_winterp_large = np.unique(np.append(photo_ins.z_winterp, z_winterp_up))
 
         # Window for integrating CMB lensing XCorr with GC and WL
         self.interpwinkcmb_small = self.kCMB_window(self.photo_ins.z_winterp)
@@ -146,8 +144,8 @@ class CMBX:
 
         # ISW_X_GC
         if ells_ISW_X_GC is not None:
-            self.photo_ins._prefactor_dict["ISW_X_GC"] = (
-                self._eval_prefactor_ISW(ells_ISW_X_GC)
+            self.photo_ins._prefactor_dict["ISW_X_GC"] = self._eval_prefactor_ISW(
+                ells_ISW_X_GC
             )
             self.photo_ins._prefactor_dict["mag_ISW_X_GC"] = (
                 self.photo_ins._eval_prefactor_mag(ells_ISW_X_GC)
@@ -182,9 +180,14 @@ class CMBX:
 
         H0_Mpc = self.theory["H0_Mpc"]
         O_m = self.theory["Omm"]
-        W_kcmb = 1.5 * H0_Mpc * O_m * (1.0 + zinterp) * \
-            (self.theory["r_z_func"](zinterp) / (1 / H0_Mpc)) * \
-            (1.0 - (self.theory["r_z_func"](zinterp) / self.chicmb))
+        W_kcmb = (
+            1.5
+            * H0_Mpc
+            * O_m
+            * (1.0 + zinterp)
+            * (self.theory["r_z_func"](zinterp) / (1 / H0_Mpc))
+            * (1.0 - (self.theory["r_z_func"](zinterp) / self.chicmb))
+        )
 
         return W_kcmb
 
@@ -211,13 +214,21 @@ class CMBX:
         # factor is scale independent
 
         if self.theory["use_gamma_MG"]:
-            window_ISW = 3 * self.theory["H0"] ** 2 * \
-                self.theory["Omm"] / self.theory["c"] ** 3 * \
-                (-self.theory['f_z'](z) + 1)
+            window_ISW = (
+                3
+                * self.theory["H0"] ** 2
+                * self.theory["Omm"]
+                / self.theory["c"] ** 3
+                * (-self.theory["f_z"](z) + 1)
+            )
         else:
-            window_ISW = 3 * self.theory["H0"] ** 2 * \
-                self.theory["Omm"] / self.theory["c"] ** 3 * \
-                (-self.theory['f_z'](z) + 1)
+            window_ISW = (
+                3
+                * self.theory["H0"] ** 2
+                * self.theory["Omm"]
+                / self.theory["c"] ** 3
+                * (-self.theory["f_z"](z) + 1)
+            )
 
         return window_ISW
 
@@ -258,13 +269,14 @@ class CMBX:
             self.ells_kCMB = ells
 
         if self.use_camb_clkcmb:
-            return self.theory["Cl"]["pp"][int(ells)] * ells**2 * \
-                (ells + 1.0) ** 2 / 4
+            return self.theory["Cl"]["pp"][int(ells)] * ells**2 * (ells + 1.0) ** 2 / 4
         else:
             if self.zmax <= 200:
-                raise ValueError("To get accurate CMB lensing autopower"
-                                 " spectrum, zmax should be higher than 200,"
-                                 f"but it's {self.zmax}.")
+                raise ValueError(
+                    "To get accurate CMB lensing autopower"
+                    " spectrum, zmax should be higher than 200,"
+                    f"but it's {self.zmax}."
+                )
 
             # First part: integration from chi_zmax_phot to chicmb
             # Get the window function of CMB lensing
@@ -278,8 +290,8 @@ class CMBX:
             ks_arr = (ell_col + 0.5) / chis
 
             # Set to zero k values out of range of interpolation
-            k_min = min(self.theory['k_win'])
-            k_max = max(self.theory['k_win'])
+            k_min = min(self.theory["k_win"])
+            k_max = max(self.theory["k_win"])
             w = np.where((ks_arr < k_min) | (ks_arr > k_max), 0.0, 1.0)
 
             if self.theory["NL_flag_phot_matter"] == 0:
@@ -328,8 +340,7 @@ class CMBX:
             k_grid = (ell_col + 0.5) / self.photo_ins.f_K_z_grid
 
             P_dd = self.theory["Pmm_phot"]
-            self.power_dd_kCMB = P_dd(
-                self.photo_ins.z_grid_for_cl, k_grid, grid=False)
+            self.power_dd_kCMB = P_dd(self.photo_ins.z_grid_for_cl, k_grid, grid=False)
             self._stored_kCMB = True
 
     def Cl_kCMB_X_GC_phot(self, ells, bin_i):
@@ -361,8 +372,7 @@ class CMBX:
         """
 
         same_ells = np.array_equal(ells, self.ells_kCMB_X_GC_phot)
-        precomputed_mag = \
-            "mag_kCMB_X_GC_phot" in self.photo_ins._prefactor_dict.keys()
+        precomputed_mag = "mag_kCMB_X_GC_phot" in self.photo_ins._prefactor_dict.keys()
 
         if not precomputed_mag or not same_ells:
             self.cmbx_set_prefactor(ells_kCMB_X_GC_phot=ells)
@@ -494,8 +504,11 @@ class CMBX:
         pandwijk = pandw_dk + pandw_ik
 
         c_int_arr = self.photo_ins.Cl_generic_integrand(pandwijk)
-        c_final = prefactor_wl * self.theory["c"] * \
-            integrate.trapz(c_int_arr, self.photo_ins.z_grid_for_cl)
+        c_final = (
+            prefactor_wl
+            * self.theory["c"]
+            * integrate.trapz(c_int_arr, self.photo_ins.z_grid_for_cl)
+        )
         c_final *= 1 + self.photo_ins.multbias[bin_i - 1]
 
         return c_final
@@ -562,8 +575,7 @@ class CMBX:
 
         same_ells = np.array_equal(ells, self.ells_ISW_X_GC)
         precomputed_ISW = "ISW_X_GC" in self.photo_ins._prefactor_dict.keys()
-        precomputed_mag = \
-            "mag_ISW_X_GC" in self.photo_ins._prefactor_dict.keys()
+        precomputed_mag = "mag_ISW_X_GC" in self.photo_ins._prefactor_dict.keys()
 
         if not precomputed_ISW or not precomputed_mag or not same_ells:
             self.cmbx_set_prefactor(ells_ISW_X_GC=ells)
@@ -599,8 +611,11 @@ class CMBX:
         pandwijk = pandw_iswgal + pandw_iswmag
 
         c_int_arr = self.photo_ins.Cl_generic_integrand(pandwijk)
-        c_final = prefactor_ISW * self.theory["c"] * \
-            integrate.trapz(c_int_arr, self.photo_ins.z_grid_for_cl)
+        c_final = (
+            prefactor_ISW
+            * self.theory["c"]
+            * integrate.trapz(c_int_arr, self.photo_ins.z_grid_for_cl)
+        )
 
         return c_final
 

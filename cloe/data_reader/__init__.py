@@ -7,6 +7,6 @@ in the likelihood calculations, *e.g.* OU-level 3 redshift distributions
 and data vectors for the photometric and spectroscopic probes.
 """
 
-__all__ = ['reader']  # list submodules
+__all__ = ["reader"]  # list submodules
 
 from . import *

@@ -41,10 +41,10 @@ def _log_extrap(x, N_extrap_begin, N_extrap_end):
     """
 
     low_x = high_x = []
-    if (N_extrap_begin):
+    if N_extrap_begin:
         dlnx_low = np.log(x[1] / x[0])
         low_x = x[0] * np.exp(dlnx_low * np.arange(-N_extrap_end, 0))
-    if (N_extrap_end):
+    if N_extrap_end:
         dlnx_high = np.log(x[-1] / x[-2])
         high_x = x[-1] * np.exp(dlnx_high * np.arange(1, N_extrap_end + 1))
 
@@ -86,8 +86,7 @@ def _c_window(n, n_cut):
     n_r = n[n[:] > n_right]
     theta_right = (n[-1] - n_r) / float(n[-1] - n_right - 1)
     W = np.ones(n.size)
-    W[n[:] > n_right] = theta_right - 1 / (2 * np.pi) \
-        * np.sin(2 * np.pi * theta_right)
+    W[n[:] > n_right] = theta_right - 1 / (2 * np.pi) * np.sin(2 * np.pi * theta_right)
     return W
 
 
@@ -117,7 +116,7 @@ def _g_m_vals(mu, q):
     g_m: numpy.ndarray
         Array containing the evaluated function
     """
-    if (mu + 1 + q.real[0] == 0):
+    if mu + 1 + q.real[0] == 0:
         print("gamma(0) encountered. Please change another nu value!")
         exit()
     imag_q = np.imag(q)
@@ -125,18 +124,18 @@ def _g_m_vals(mu, q):
     cut = 200
     cut_criterion_array = np.absolute(np.imag(q)) - np.absolute(mu)
     asym_q = q[cut_criterion_array > cut]
-    asym_plus = (mu + 1 + asym_q) / 2.
-    asym_minus = (mu + 1 - asym_q) / 2.
+    asym_plus = (mu + 1 + asym_q) / 2.0
+    asym_minus = (mu + 1 - asym_q) / 2.0
 
-    q_good_bool_array = q[(cut_criterion_array <= cut) &
-                          (q != mu + 1 + 0.0j)]
+    q_good_bool_array = q[(cut_criterion_array <= cut) & (q != mu + 1 + 0.0j)]
     q_good = q_good_bool_array
 
-    alpha_plus = (mu + 1 + q_good) / 2.
-    alpha_minus = (mu + 1 - q_good) / 2.
+    alpha_plus = (mu + 1 + q_good) / 2.0
+    alpha_minus = (mu + 1 - q_good) / 2.0
 
-    g_m[(cut_criterion_array <= cut) &
-        (q != mu + 1 + 0.0j)] = gamma(alpha_plus) / gamma(alpha_minus)
+    g_m[(cut_criterion_array <= cut) & (q != mu + 1 + 0.0j)] = gamma(
+        alpha_plus
+    ) / gamma(alpha_minus)
 
     # asymptotic form, taken from
     # https://github.com/JoeMcEwen/FAST-PT/blob/master/fastpt/gamma_funcs.py
@@ -146,16 +145,16 @@ def _g_m_vals(mu, q):
     # to improve readibility, the argument of the exponential has been divided
     # in more terms and then summed
     term1 = (asym_plus - 0.5) * np.log(asym_plus)
-    term2 = - (asym_minus - 0.5) * np.log(asym_minus)
-    term3 = - asym_q
-    term4 = 1. / 12 * (1. / asym_plus - 1. / asym_minus)
-    term5 = 1. / 360. * (1. / asym_minus**3 - 1. / asym_plus**3)
-    term6 = 1 / 1260 * (1. / asym_plus**5 - 1. / asym_minus**5)
+    term2 = -(asym_minus - 0.5) * np.log(asym_minus)
+    term3 = -asym_q
+    term4 = 1.0 / 12 * (1.0 / asym_plus - 1.0 / asym_minus)
+    term5 = 1.0 / 360.0 * (1.0 / asym_minus**3 - 1.0 / asym_plus**3)
+    term6 = 1 / 1260 * (1.0 / asym_plus**5 - 1.0 / asym_minus**5)
     exp_arg = term1 + term2 + term3 + term4 + term5 + term6
 
     g_m[cut_criterion_array > cut] = np.exp(exp_arg)
 
-    g_m[np.where(q == mu + 1 + 0.0j)[0]] = 0. + 0.0j
+    g_m[np.where(q == mu + 1 + 0.0j)[0]] = 0.0 + 0.0j
     return g_m
 
 
@@ -180,7 +179,7 @@ def _g_l(ell, z_array):
     gl: numpy.ndarray
         Computed values of the _g_l function
     """
-    gl = 2.**z_array * _g_m_vals(ell + 0.5, z_array - 1.5)
+    gl = 2.0**z_array * _g_m_vals(ell + 0.5, z_array - 1.5)
     return gl
 
 
@@ -205,8 +204,7 @@ def _g_l_1(ell, z_array):
     gl: numpy.ndarray
         Computed values of the _g_l function
     """
-    gl = -2.**(z_array - 1) * (z_array - 1) * \
-        _g_m_vals(ell + 0.5, z_array - 2.5)
+    gl = -(2.0 ** (z_array - 1)) * (z_array - 1) * _g_m_vals(ell + 0.5, z_array - 2.5)
     return gl
 
 
@@ -231,6 +229,10 @@ def _g_l_2(ell, z_array):
     gl: numpy.ndarray
         Computed values of the _g_l function
     """
-    gl = 2.**(z_array - 2) * (z_array - 1) * (z_array - 2) * \
-        _g_m_vals(ell + 0.5, z_array - 3.5)
+    gl = (
+        2.0 ** (z_array - 2)
+        * (z_array - 1)
+        * (z_array - 2)
+        * _g_m_vals(ell + 0.5, z_array - 3.5)
+    )
     return gl

@@ -51,9 +51,9 @@ class Pgg_spectro_model(PowerSpectrum):
             for galaxy clustering spectroscopic
         """
         bias = self.misc.istf_spectro_galbias(redshift)
-        growth = self.theory['f_z'](redshift)
-        power = self.theory['Pk_delta'].P(redshift, wavenumber)
-        pval = (bias + growth * mu_rsd ** 2.0) ** 2.0 * power
+        growth = self.theory["f_z"](redshift)
+        power = self.theory["Pk_delta"].P(redshift, wavenumber)
+        pval = (bias + growth * mu_rsd**2.0) ** 2.0 * power
         return pval
 
     def Pgg_spectro_eft(self, redshift, wavenumber, mu_rsd):
@@ -79,8 +79,7 @@ class Pgg_spectro_model(PowerSpectrum):
             wavenumber and cosine values for the spectroscopic probe
         """
         zbin = find_bin(redshift, self.zbins, check_bounds=True)
-        pval = self.nonlinear_dic['P_kmu'][zbin - 1](wavenumber, mu_rsd,
-                                                     grid=False)
+        pval = self.nonlinear_dic["P_kmu"][zbin - 1](wavenumber, mu_rsd, grid=False)
         return pval
 
     def noise_Pgg_spectro(self, redshift, wavenumber, mu_rsd):
@@ -107,12 +106,12 @@ class Pgg_spectro_model(PowerSpectrum):
         Noise contribution for the spectroscopic galaxy power spectrum at a
         given redshift, wavenumber and angle to the line of sight
         """
-        nuisance_dict = self.theory['nuisance_parameters']
+        nuisance_dict = self.theory["nuisance_parameters"]
         params = select_spectro_parameters(redshift, nuisance_dict, self.zbins)
-        aP = params['aP'] if 'aP' in params.keys() else 0.0
-        e0k2 = params['e0k2'] if 'e0k2' in params.keys() else 0.0
-        e2k2 = params['e2k2'] if 'e2k2' in params.keys() else 0.0
-        Psn = params['Psn'] if 'Psn' in params.keys() else 0.0
+        aP = params["aP"] if "aP" in params.keys() else 0.0
+        e0k2 = params["e0k2"] if "e0k2" in params.keys() else 0.0
+        e2k2 = params["e2k2"] if "e2k2" in params.keys() else 0.0
+        Psn = params["Psn"] if "Psn" in params.keys() else 0.0
         noise = Psn * ((1.0 + aP) + (e0k2 + e2k2 * mu_rsd**2) * wavenumber**2)
         return noise
 
@@ -149,8 +148,7 @@ class Pgg_spectro_model(PowerSpectrum):
             for galaxy clustering spectroscopic
         """
         bias = self.misc.istf_spectro_galbias(redshift)
-        growth = self.theory['f_z'](redshift)
-        power = self.theory['Pk_delta'].P(redshift, wavenumber)
-        pval = ((bias + growth * mu_rsd ** 2.0) *
-                (1.0 + growth * mu_rsd ** 2.0)) * power
+        growth = self.theory["f_z"](redshift)
+        power = self.theory["Pk_delta"].P(redshift, wavenumber)
+        pval = ((bias + growth * mu_rsd**2.0) * (1.0 + growth * mu_rsd**2.0)) * power
         return pval

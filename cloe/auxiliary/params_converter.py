@@ -4,20 +4,21 @@ Functions to switch between the naming convention of CAMB/CLASS.
 """
 
 camb_to_classy = {
-    'tau': 'tau_reio',
-    'ombh2': 'omega_b',
-    'omch2': 'omega_cdm',
-    'num_nu_massless': 'N_ur',
-    'num_nu_massive': 'N_ncdm',
-    'mnu': 'm_ncdm',
-    'omnuh2': 'omega_ncdm',
-    'omk': 'Omega_k',
-    'w': 'w0_fld',
-    'wa': 'wa_fld',
-    'As': 'A_s',
-    'ns': 'n_s',
-    'HMCode_A_baryon': 'c_min',
-    'HMCode_eta_baryon': 'eta_0'}
+    "tau": "tau_reio",
+    "ombh2": "omega_b",
+    "omch2": "omega_cdm",
+    "num_nu_massless": "N_ur",
+    "num_nu_massive": "N_ncdm",
+    "mnu": "m_ncdm",
+    "omnuh2": "omega_ncdm",
+    "omk": "Omega_k",
+    "w": "w0_fld",
+    "wa": "wa_fld",
+    "As": "A_s",
+    "ns": "n_s",
+    "HMCode_A_baryon": "c_min",
+    "HMCode_eta_baryon": "eta_0",
+}
 
 
 def convert_params(params, theory, mode):
@@ -40,13 +41,12 @@ def convert_params(params, theory, mode):
     ValueError
         If mode is neither camb or classy
     """
-    if mode == 'classy':
+    if mode == "classy":
         classy_set_params(params, theory)
-    elif mode == 'camb':
+    elif mode == "camb":
         camb_set_params(params, theory)
     else:
-        raise ValueError('Only available Boltzmann solvers are '
-                         'CAMB and CLASS')
+        raise ValueError("Only available Boltzmann solvers are " "CAMB and CLASS")
 
 
 def classy_set_params(params, theory):
@@ -64,20 +64,22 @@ def classy_set_params(params, theory):
     for camb_param, classy_param in camb_to_classy.items():
         if camb_param in params.keys():
             params[classy_param] = params.pop(camb_param)
-    if 'nnu' in params.keys():
+    if "nnu" in params.keys():
         nrad = 4.41e-3
-        params['N_ur'] = ((params.pop('nnu') - nrad) *
-                          (3.0 - params['N_ncdm']) / 3.0 + nrad)
-    if 'use_ppf' in params.keys():
-        use_ppf = params.pop('use_ppf')
-        theory['extra_args']['use_ppf'] = 'yes' if use_ppf else 'no'
-    if 'Omega_Lambda' not in params.keys():
-        params['Omega_Lambda'] = 0.0
-    if 'omegab' in params.keys():
-        if isinstance(params['omegab'], dict):
-            if 'derived' in params['omegab']:
-                params['omegab']['derived'] = \
-                    params['omegab']['derived'].replace('ombh2', 'omega_b')
+        params["N_ur"] = (params.pop("nnu") - nrad) * (
+            3.0 - params["N_ncdm"]
+        ) / 3.0 + nrad
+    if "use_ppf" in params.keys():
+        use_ppf = params.pop("use_ppf")
+        theory["extra_args"]["use_ppf"] = "yes" if use_ppf else "no"
+    if "Omega_Lambda" not in params.keys():
+        params["Omega_Lambda"] = 0.0
+    if "omegab" in params.keys():
+        if isinstance(params["omegab"], dict):
+            if "derived" in params["omegab"]:
+                params["omegab"]["derived"] = params["omegab"]["derived"].replace(
+                    "ombh2", "omega_b"
+                )
 
 
 def camb_set_params(params, theory):
@@ -96,16 +98,16 @@ def camb_set_params(params, theory):
     for classy_param, camb_param in classy_to_camb.items():
         if classy_param in params.keys():
             params[camb_param] = params.pop(classy_param)
-    if 'num_nu_massless' in params.keys():
-        theory['extra_args']['num_nu_massless'] = params.pop('num_nu_massless')
-    if 'num_nu_massive' in params.keys():
-        theory['extra_args']['num_nu_massive'] = params.pop('num_nu_massive')
-    if 'use_ppf' in params.keys():
-        use_ppf = params.pop('use_ppf')
-        theory['extra_args']['dark_energy_model'] = (
-            'ppf' if use_ppf else 'fluid')
-    if 'omegab' in params.keys():
-        if isinstance(params['omegab'], dict):
-            if 'derived' in params['omegab']:
-                params['omegab']['derived'] = \
-                    params['omegab']['derived'].replace('omega_b', 'ombh2')
+    if "num_nu_massless" in params.keys():
+        theory["extra_args"]["num_nu_massless"] = params.pop("num_nu_massless")
+    if "num_nu_massive" in params.keys():
+        theory["extra_args"]["num_nu_massive"] = params.pop("num_nu_massive")
+    if "use_ppf" in params.keys():
+        use_ppf = params.pop("use_ppf")
+        theory["extra_args"]["dark_energy_model"] = "ppf" if use_ppf else "fluid"
+    if "omegab" in params.keys():
+        if isinstance(params["omegab"], dict):
+            if "derived" in params["omegab"]:
+                params["omegab"]["derived"] = params["omegab"]["derived"].replace(
+                    "omega_b", "ombh2"
+                )

@@ -33,7 +33,7 @@ class PLL_phot_model(PowerSpectrum):
             Value of matter-matter power spectrum
             at a given redshift and wavenumber for photometric probes
         """
-        pval = self.theory['Pk_delta'].P(redshift, wavenumber)
+        pval = self.theory["Pk_delta"].P(redshift, wavenumber)
         return pval
 
     def Pmm_phot_halo(self, redshift, wavenumber):
@@ -60,8 +60,10 @@ class PLL_phot_model(PowerSpectrum):
             Value of matter-matter power spectrum
             at a given redshift and wavenumber for photometric probes
         """
-        pval = self.theory['Pk_halomodel_recipe'].P(redshift, wavenumber) * \
-            self.nonlinear_dic['Bar_boost'](redshift, wavenumber)[0]
+        pval = (
+            self.theory["Pk_halomodel_recipe"].P(redshift, wavenumber)
+            * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
+        )
         return pval
 
     def Pmm_phot_emu(self, redshift, wavenumber):
@@ -88,9 +90,11 @@ class PLL_phot_model(PowerSpectrum):
             Value of matter-matter power spectrum
             at a given redshift and wavenumber for photometric probes
         """
-        pval = (self.theory['Pk_delta'].P(redshift, wavenumber) *
-                self.nonlinear_dic['NL_boost'](redshift, wavenumber)[0] *
-                self.nonlinear_dic['Bar_boost'](redshift, wavenumber)[0])
+        pval = (
+            self.theory["Pk_delta"].P(redshift, wavenumber)
+            * self.nonlinear_dic["NL_boost"](redshift, wavenumber)[0]
+            * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
+        )
         return pval
 
     def Pii_def(self, redshift, wavenumber):
@@ -118,8 +122,9 @@ class PLL_phot_model(PowerSpectrum):
             Value of intrinsic alignment power spectrum
             at a given redshift and wavenumber
         """
-        pval = self.misc.fia(redshift)**2.0 * \
-            self.theory['Pk_delta'].P(redshift, wavenumber)
+        pval = self.misc.fia(redshift) ** 2.0 * self.theory["Pk_delta"].P(
+            redshift, wavenumber
+        )
         return pval
 
     def Pii_halo_nla(self, redshift, wavenumber):
@@ -152,9 +157,11 @@ class PLL_phot_model(PowerSpectrum):
             Value of intrinsic alignment power spectrum
             at a given redshift and wavenumber
         """
-        pval = self.misc.fia(redshift)**2.0 * \
-            self.theory['Pk_halomodel_recipe'].P(redshift, wavenumber) * \
-            self.nonlinear_dic['Bar_boost'](redshift, wavenumber)[0]
+        pval = (
+            self.misc.fia(redshift) ** 2.0
+            * self.theory["Pk_halomodel_recipe"].P(redshift, wavenumber)
+            * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
+        )
         return pval
 
     def Pii_ee_halo_tatt(self, redshift, wavenumber):
@@ -188,19 +195,26 @@ class PLL_phot_model(PowerSpectrum):
             at a given redshift and wavenumber
         """
         c1, c1d, c2 = self.misc.normalize_tatt_parameters(redshift)
-        growth = self.theory['D_z_k_func'](redshift, wavenumber)
+        growth = self.theory["D_z_k_func"](redshift, wavenumber)
 
-        pval = c1**2.0 * self.theory['Pk_halomodel_recipe'].\
-            P(redshift, wavenumber) * \
-            self.nonlinear_dic['Bar_boost'](redshift, wavenumber)[0] \
-            + 2.0 * c1 * c1d * (growth**4) * \
-            (self.theory['a00e'](wavenumber) + self.theory['c00e']
-             (wavenumber)) + c1d**2.0 * (growth**4) * \
-            self.theory['a0e0e'](wavenumber) + c2**2.0 * (growth**4) * \
-            self.theory['ae2e2'](wavenumber) + 2.0 * c1 * c2 * (growth**4) * \
-            (self.theory['a0e2'](wavenumber) +
-             self.theory['b0e2'](wavenumber)) + 2.0 * c1d * c2 * \
-            (growth**4) * self.theory['d0ee2'](wavenumber)
+        pval = (
+            c1**2.0
+            * self.theory["Pk_halomodel_recipe"].P(redshift, wavenumber)
+            * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
+            + 2.0
+            * c1
+            * c1d
+            * (growth**4)
+            * (self.theory["a00e"](wavenumber) + self.theory["c00e"](wavenumber))
+            + c1d**2.0 * (growth**4) * self.theory["a0e0e"](wavenumber)
+            + c2**2.0 * (growth**4) * self.theory["ae2e2"](wavenumber)
+            + 2.0
+            * c1
+            * c2
+            * (growth**4)
+            * (self.theory["a0e2"](wavenumber) + self.theory["b0e2"](wavenumber))
+            + 2.0 * c1d * c2 * (growth**4) * self.theory["d0ee2"](wavenumber)
+        )
 
         return pval
 
@@ -234,10 +248,12 @@ class PLL_phot_model(PowerSpectrum):
             Value of intrinsic alignment power spectrum
             at a given redshift and wavenumber
         """
-        pval = (self.misc.fia(redshift)**2.0 *
-                self.theory['Pk_delta'].P(redshift, wavenumber) *
-                self.nonlinear_dic['NL_boost'](redshift, wavenumber)[0] *
-                self.nonlinear_dic['Bar_boost'](redshift, wavenumber)[0])
+        pval = (
+            self.misc.fia(redshift) ** 2.0
+            * self.theory["Pk_delta"].P(redshift, wavenumber)
+            * self.nonlinear_dic["NL_boost"](redshift, wavenumber)[0]
+            * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
+        )
 
         return pval
 
@@ -274,18 +290,29 @@ class PLL_phot_model(PowerSpectrum):
             at a given redshift and wavenumber
         """
         c1, c1d, c2 = self.misc.normalize_tatt_parameters(redshift)
-        growth = self.theory['D_z_k_func'](redshift, wavenumber)
+        growth = self.theory["D_z_k_func"](redshift, wavenumber)
 
-        pval = (c1**2.0 * self.theory['Pk_delta'].P(redshift, wavenumber) *
-                self.nonlinear_dic['NL_boost'](redshift, wavenumber)[0] *
-                self.nonlinear_dic['Bar_boost'](redshift, wavenumber)[0]) + \
-            2.0 * c1 * c1d * (growth**4) * (self.theory['a00e'](wavenumber) +
-                                            self.theory['c00e'](wavenumber)) +\
-            c1d**2.0 * (growth**4) * self.theory['a0e0e'](wavenumber) + \
-            c2**2.0 * (growth**4) * self.theory['ae2e2'](wavenumber) + 2.0 * \
-            c1 * c2 * (growth**4) * (self.theory['a0e2'](wavenumber) +
-                                     self.theory['b0e2'](wavenumber)) +\
-            2.0 * c1d * c2 * (growth**4) * self.theory['d0ee2'](wavenumber)
+        pval = (
+            (
+                c1**2.0
+                * self.theory["Pk_delta"].P(redshift, wavenumber)
+                * self.nonlinear_dic["NL_boost"](redshift, wavenumber)[0]
+                * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
+            )
+            + 2.0
+            * c1
+            * c1d
+            * (growth**4)
+            * (self.theory["a00e"](wavenumber) + self.theory["c00e"](wavenumber))
+            + c1d**2.0 * (growth**4) * self.theory["a0e0e"](wavenumber)
+            + c2**2.0 * (growth**4) * self.theory["ae2e2"](wavenumber)
+            + 2.0
+            * c1
+            * c2
+            * (growth**4)
+            * (self.theory["a0e2"](wavenumber) + self.theory["b0e2"](wavenumber))
+            + 2.0 * c1d * c2 * (growth**4) * self.theory["d0ee2"](wavenumber)
+        )
 
         return pval
 
@@ -314,8 +341,7 @@ class PLL_phot_model(PowerSpectrum):
             Value of density-intrinsic power spectrum
             at a given redshift and wavenumber
         """
-        pval = self.misc.fia(redshift) * \
-            self.theory['Pk_delta'].P(redshift, wavenumber)
+        pval = self.misc.fia(redshift) * self.theory["Pk_delta"].P(redshift, wavenumber)
         return pval
 
     def Pdeltai_halo_nla(self, redshift, wavenumber):
@@ -347,9 +373,11 @@ class PLL_phot_model(PowerSpectrum):
             Value of density-intrinsic power spectrum
             at a given redshift and wavenumber
         """
-        pval = self.misc.fia(redshift) * \
-            self.theory['Pk_halomodel_recipe'].P(redshift, wavenumber) * \
-            self.nonlinear_dic['Bar_boost'](redshift, wavenumber)[0]
+        pval = (
+            self.misc.fia(redshift)
+            * self.theory["Pk_halomodel_recipe"].P(redshift, wavenumber)
+            * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
+        )
         return pval
 
     def Pdeltai_halo_tatt(self, redshift, wavenumber):
@@ -381,14 +409,19 @@ class PLL_phot_model(PowerSpectrum):
             at a given redshift and wavenumber
         """
         c1, c1d, c2 = self.misc.normalize_tatt_parameters(redshift)
-        growth = self.theory['D_z_k_func'](redshift, wavenumber)
+        growth = self.theory["D_z_k_func"](redshift, wavenumber)
 
-        pval = c1 * self.theory['Pk_halomodel_recipe'].P(redshift, wavenumber)\
-            * self.nonlinear_dic['Bar_boost'](redshift, wavenumber)[0]\
-            + c1d * (growth**4) * (self.theory['a00e'](wavenumber) +
-                                   self.theory['c00e'](wavenumber))\
-            + c2 * (growth**4) * (self.theory['a0e2'](wavenumber) +
-                                  self.theory['b0e2'](wavenumber))
+        pval = (
+            c1
+            * self.theory["Pk_halomodel_recipe"].P(redshift, wavenumber)
+            * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
+            + c1d
+            * (growth**4)
+            * (self.theory["a00e"](wavenumber) + self.theory["c00e"](wavenumber))
+            + c2
+            * (growth**4)
+            * (self.theory["a0e2"](wavenumber) + self.theory["b0e2"](wavenumber))
+        )
         return pval
 
     def Pdeltai_emu_nla(self, redshift, wavenumber):
@@ -420,10 +453,12 @@ class PLL_phot_model(PowerSpectrum):
             Value of density-intrinsic power spectrum
             at a given redshift and wavenumber
         """
-        pval = (self.misc.fia(redshift) *
-                self.theory['Pk_delta'].P(redshift, wavenumber) *
-                self.nonlinear_dic['NL_boost'](redshift, wavenumber)[0] *
-                self.nonlinear_dic['Bar_boost'](redshift, wavenumber)[0])
+        pval = (
+            self.misc.fia(redshift)
+            * self.theory["Pk_delta"].P(redshift, wavenumber)
+            * self.nonlinear_dic["NL_boost"](redshift, wavenumber)[0]
+            * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
+        )
 
         return pval
 
@@ -457,15 +492,21 @@ class PLL_phot_model(PowerSpectrum):
             at a given redshift and wavenumber
         """
         c1, c1d, c2 = self.misc.normalize_tatt_parameters(redshift)
-        growth = self.theory['D_z_k_func'](redshift, wavenumber)
+        growth = self.theory["D_z_k_func"](redshift, wavenumber)
 
-        pval = (c1 * self.theory['Pk_delta'].P(redshift, wavenumber) *
-                self.nonlinear_dic['NL_boost'](redshift, wavenumber)[0] *
-                self.nonlinear_dic['Bar_boost'](redshift, wavenumber)[0]) + \
-            c1d * (growth**4) * (self.theory['a00e'](wavenumber) +
-                                 self.theory['c00e'](wavenumber)) \
-            + c2 * (growth**4) * \
-            (self.theory['a0e2'](wavenumber) +
-             self.theory['b0e2'](wavenumber))
+        pval = (
+            (
+                c1
+                * self.theory["Pk_delta"].P(redshift, wavenumber)
+                * self.nonlinear_dic["NL_boost"](redshift, wavenumber)[0]
+                * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
+            )
+            + c1d
+            * (growth**4)
+            * (self.theory["a00e"](wavenumber) + self.theory["c00e"](wavenumber))
+            + c2
+            * (growth**4)
+            * (self.theory["a0e2"](wavenumber) + self.theory["b0e2"](wavenumber))
+        )
 
         return pval

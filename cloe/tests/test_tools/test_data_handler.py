@@ -11,7 +11,7 @@ from os.path import join
 from pathlib import Path
 
 # Set default path for unit test data
-default_path = join(Path(__file__).resolve().parents[1], 'test_input')
+default_path = join(Path(__file__).resolve().parents[1], "test_input")
 
 
 def load_test_npy(file_name, path=None):
@@ -39,12 +39,12 @@ def load_test_npy(file_name, path=None):
 
     file_path = join(path, file_name)
 
-    if file_name.endswith('.npy'):
+    if file_name.endswith(".npy"):
         return np.load(file_path, allow_pickle=True)
-    elif file_name.endswith('.dat'):
+    elif file_name.endswith(".dat"):
         return np.loadtxt(file_path)
     else:
-        raise ValueError('Unknown file extension for Numpy test data.')
+        raise ValueError("Unknown file extension for Numpy test data.")
 
 
 def load_test_pickle(file_name, path=None):
@@ -69,7 +69,7 @@ def load_test_pickle(file_name, path=None):
     if not path:
         path = default_path
 
-    with open(join(path, file_name), 'rb') as pickle_file:
+    with open(join(path, file_name), "rb") as pickle_file:
         unpickled_object = pickle.load(pickle_file)
 
     return unpickled_object
@@ -93,5 +93,5 @@ def save_test_pickle(file_name, object, path=None):
     if not path:
         path = default_path
 
-    with open(join(path, file_name), 'wb') as pickle_file:
+    with open(join(path, file_name), "wb") as pickle_file:
         pickle.dump(object, pickle_file)

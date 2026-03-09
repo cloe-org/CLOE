@@ -7,6 +7,6 @@ spectroscopic observables.
 
 """
 
-__all__ = ['spectro']  # list submodules
+__all__ = ["spectro"]  # list submodules
 
 from . import *

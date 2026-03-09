@@ -19,4 +19,4 @@ def run_is_interactive():
         Returns :obj:`True` if the code runs with an interactive interface
         (e.g. Python shell, jupyter notebook, etc.), :obj:`False` otherwise
     """
-    return not (hasattr(main, '__file__'))
+    return not (hasattr(main, "__file__"))

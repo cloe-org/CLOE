@@ -30,8 +30,16 @@ class hankel(object):
     Please refer to the :obj:`fftlog` class for more details.
     """
 
-    def __init__(self, x, fx, nu=1.1, N_extrap_begin=0, N_extrap_end=0,
-                 c_window_width=0.25, N_pad=0):
+    def __init__(
+        self,
+        x,
+        fx,
+        nu=1.1,
+        N_extrap_begin=0,
+        N_extrap_end=0,
+        c_window_width=0.25,
+        N_pad=0,
+    ):
         """List of parameters.
 
         Parameters
@@ -53,8 +61,15 @@ class hankel(object):
             Number of zero-padded points at the beginning and
             end of ``f_x array``
         """
-        self.fftlog = fftlog(x, fx * (x**(5 / 2)), nu, N_extrap_begin,
-                             N_extrap_end, c_window_width, N_pad)
+        self.fftlog = fftlog(
+            x,
+            fx * (x ** (5 / 2)),
+            nu,
+            N_extrap_begin,
+            N_extrap_end,
+            c_window_width,
+            N_pad,
+        )
 
     def hankel(self, n):
         r"""Hankel.

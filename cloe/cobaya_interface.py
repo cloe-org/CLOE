@@ -4,7 +4,6 @@ Contains the interface with Cobaya. It defines the Euclid Likelihood and
 inherits from the Cobaya likelihood :py:mod:`cobaya.likelihood.Likelihood`.
 """
 
-
 # General import
 import numpy as np
 from astropy import constants as const
@@ -12,6 +11,7 @@ import warnings
 
 # Cobaya import of general Likelihood class
 from cobaya.likelihood import Likelihood
+
 # Import cobaya model wrapper for fiducial model (TEMPORARY)
 from cobaya.model import get_model
 
@@ -38,26 +38,25 @@ class EuclidLikelihood(Likelihood):
 
         """
         self.k_max_Boltzmann = 50.0
-        if self.k_min_extrap < 1E-5:
-            warnings.warn(
-                'WARNING: the requested extrapolated k_min is too low. \
-                k_min_extrap changed to 1E-5')
-            self.k_min_extrap = 1E-5
-        self.k_win = np.logspace(np.log10(self.k_min_extrap),
-                                 np.log10(self.k_max_extrap),
-                                 self.k_samp)
+        if self.k_min_extrap < 1e-5:
+            warnings.warn("WARNING: the requested extrapolated k_min is too low. \
+                k_min_extrap changed to 1E-5")
+            self.k_min_extrap = 1e-5
+        self.k_win = np.logspace(
+            np.log10(self.k_min_extrap), np.log10(self.k_max_extrap), self.k_samp
+        )
 
         self.z_win = np.linspace(self.z_min, self.z_max, self.z_samp)
 
         # Check the selection and specification requirements
-        self.observables = \
-            observables_selection_specifications_checker(
-                self.observables_selection,
-                self.observables_specifications)
+        self.observables = observables_selection_specifications_checker(
+            self.observables_selection, self.observables_specifications
+        )
         # Visualization of the observables matrix
         if self.plot_observables_selection:
             self.observables_pf = observables_visualization(
-             self.observables['selection'])
+                self.observables["selection"]
+            )
 
         # Select which power spectra to require from the Boltzmann solver
         if self.NL_flag_phot_matter > 0:
@@ -68,11 +67,11 @@ class EuclidLikelihood(Likelihood):
         # We redefine upper z bound.
         # In case we don't need CMB lensing auto spectra then it stays the same
         self.z_win_max = self.z_win
-        if self.observables_selection['CMBlens']['CMBlens']:
+        if self.observables_selection["CMBlens"]["CMBlens"]:
             # Append higher redshifts for the CMB lensing computations
             self.z_win_max = np.logspace(
-                np.log10(self.z_win[-1]),
-                np.log10(self.z_max_cmb), self.z_samp_log)
+                np.log10(self.z_win[-1]), np.log10(self.z_max_cmb), self.z_samp_log
+            )
             self.z_win_max = np.unique(np.append(self.z_win, self.z_win_max))
 
         # Initialize Euclike module
@@ -80,27 +79,30 @@ class EuclidLikelihood(Likelihood):
         # Here we set the naming convention for the cosmological parameters
         # accepted by the selected Boltzmann solver
         if not self.solver:
-            warnings.warn('Boltzmann solver not specified at instantiation '
-                          'of EuclidLikelihood class. Default set to CAMB')
-            self.solver = 'camb'
-        if self.solver == 'camb':
-            self.pnames = \
-                dict(zip(camb_to_classy.keys(), camb_to_classy.keys()))
-        elif self.solver == 'classy':
-            self.pnames = \
-                dict(zip(camb_to_classy.keys(), camb_to_classy.values()))
+            warnings.warn(
+                "Boltzmann solver not specified at instantiation "
+                "of EuclidLikelihood class. Default set to CAMB"
+            )
+            self.solver = "camb"
+        if self.solver == "camb":
+            self.pnames = dict(zip(camb_to_classy.keys(), camb_to_classy.keys()))
+        elif self.solver == "classy":
+            self.pnames = dict(zip(camb_to_classy.keys(), camb_to_classy.values()))
         # Initialize Cosmology class for sampling
         self.cosmo = Cosmology()
         # Adding GCspectro redshift bins to cosmo dictionary and setting up
         # the internal class for Pgg_spectro with this information.
-        self.cosmo.nonlinear.theory['redshift_bins_means_spectro'] = \
-            self.data['spectro']['edges']
+        self.cosmo.nonlinear.theory["redshift_bins_means_spectro"] = self.data[
+            "spectro"
+        ]["edges"]
         self.cosmo.nonlinear.set_Pgg_spectro_model()
-        self.cosmo.cosmo_dic['redshift_bins_means_spectro'] = \
-            self.data['spectro']['edges']
+        self.cosmo.cosmo_dic["redshift_bins_means_spectro"] = self.data["spectro"][
+            "edges"
+        ]
         # Adding Redshift bins means for the photo catalogue
-        self.cosmo.cosmo_dic['redshift_bins_means_phot'] = \
-            self.data['photo']['redshifts']
+        self.cosmo.cosmo_dic["redshift_bins_means_phot"] = self.data["photo"][
+            "redshifts"
+        ]
         # Initialize the fiducial model
         self.set_fiducial_cosmology()
         # "Here we add the fiducial Hubble function (fid_H_z_func),
@@ -109,38 +111,44 @@ class EuclidLikelihood(Likelihood):
         # to the cosmo dictionary
         # These quantities
         # are requested in different parts of the spectro and photo class.
-        self.cosmo.cosmo_dic['fid_d_z_func'] = \
-            self.fiducial_cosmology.cosmo_dic['d_z_func']
-        self.cosmo.cosmo_dic['fid_r_z_func'] = \
-            self.fiducial_cosmology.cosmo_dic['r_z_func']
-        self.cosmo.cosmo_dic['fid_H_z_func'] = \
-            self.fiducial_cosmology.cosmo_dic['H_z_func']
+        self.cosmo.cosmo_dic["fid_d_z_func"] = self.fiducial_cosmology.cosmo_dic[
+            "d_z_func"
+        ]
+        self.cosmo.cosmo_dic["fid_r_z_func"] = self.fiducial_cosmology.cosmo_dic[
+            "r_z_func"
+        ]
+        self.cosmo.cosmo_dic["fid_H_z_func"] = self.fiducial_cosmology.cosmo_dic[
+            "H_z_func"
+        ]
         # Create a separate dictionary with fiducial cosmo quantities that are
         # available at initialization, before cosmo_dic is created.
         self.likefinal.fiducial_cosmo_quantities_dic.update(
-            self.fiducial_cosmology.cosmo_dic)
+            self.fiducial_cosmology.cosmo_dic
+        )
         # Compute the data vectors
         # and initialize possible matrix transforms
-        if not any(self.observables['selection']['CG'].values()):
+        if not any(self.observables["selection"]["CG"].values()):
             self.likefinal.get_masked_data()
         else:
             if (
-                any(self.observables['selection']['WL'].values()) or
-                any(self.observables['selection']['GCphot'].values()) or
-                any(self.observables['selection']['GCspectro'].values())
+                any(self.observables["selection"]["WL"].values())
+                or any(self.observables["selection"]["GCphot"].values())
+                or any(self.observables["selection"]["GCspectro"].values())
             ):
                 raise ValueError(
-                    'Galaxy cluster probes cannot be combined with others.'
+                    "Galaxy cluster probes cannot be combined with others."
                 )
 
         # Add the luminosity_ratio_z_func to the cosmo_dic after data has been
         # read and stored in the data_ins attribute of Euclike
-        self.cosmo.cosmo_dic['luminosity_ratio_z_func'] = \
+        self.cosmo.cosmo_dic["luminosity_ratio_z_func"] = (
             self.likefinal.data_ins.luminosity_ratio_interpolator
+        )
         # Pass the observables selection to the cosmo dictionary
-        self.cosmo.cosmo_dic['obs_selection'] = self.observables['selection']
-        self.cosmo.cosmo_dic['observables_specifications'] =\
-            self.observables['specifications']
+        self.cosmo.cosmo_dic["obs_selection"] = self.observables["selection"]
+        self.cosmo.cosmo_dic["observables_specifications"] = self.observables[
+            "specifications"
+        ]
 
         # Sampling in radius for the sigma(R,z) in Mpc
         # for galaxy clusters
@@ -160,49 +168,43 @@ class EuclidLikelihood(Likelihood):
         self.fiducial_cosmology = Cosmology()
         # Update fiducial cosmo dic with fiducial info from reader
         self.fiducial_cosmology.cosmo_dic.update(
-            self.likefinal.data_spectro_fiducial_cosmo)
+            self.likefinal.data_spectro_fiducial_cosmo
+        )
 
         self.info_fiducial = {
-            'params': {
-                self.pnames['ombh2']:
-                    self.fiducial_cosmology.cosmo_dic['ombh2'],
-                self.pnames['omch2']:
-                    self.fiducial_cosmology.cosmo_dic['omch2'],
-                self.pnames['omnuh2']:
-                    self.fiducial_cosmology.cosmo_dic['omnuh2'],
-                self.pnames['omk']: self.fiducial_cosmology.cosmo_dic['Omk'],
-                'H0': self.fiducial_cosmology.cosmo_dic['H0'],
-                self.pnames['tau']: self.fiducial_cosmology.cosmo_dic['tau'],
-                self.pnames['mnu']: self.fiducial_cosmology.cosmo_dic['mnu'],
-                self.pnames['ns']: self.fiducial_cosmology.cosmo_dic['ns'],
-                self.pnames['As']: self.fiducial_cosmology.cosmo_dic['As'],
-                self.pnames['w']: self.fiducial_cosmology.cosmo_dic['w'],
-                self.pnames['wa']: self.fiducial_cosmology.cosmo_dic['wa']
+            "params": {
+                self.pnames["ombh2"]: self.fiducial_cosmology.cosmo_dic["ombh2"],
+                self.pnames["omch2"]: self.fiducial_cosmology.cosmo_dic["omch2"],
+                self.pnames["omnuh2"]: self.fiducial_cosmology.cosmo_dic["omnuh2"],
+                self.pnames["omk"]: self.fiducial_cosmology.cosmo_dic["Omk"],
+                "H0": self.fiducial_cosmology.cosmo_dic["H0"],
+                self.pnames["tau"]: self.fiducial_cosmology.cosmo_dic["tau"],
+                self.pnames["mnu"]: self.fiducial_cosmology.cosmo_dic["mnu"],
+                self.pnames["ns"]: self.fiducial_cosmology.cosmo_dic["ns"],
+                self.pnames["As"]: self.fiducial_cosmology.cosmo_dic["As"],
+                self.pnames["w"]: self.fiducial_cosmology.cosmo_dic["w"],
+                self.pnames["wa"]: self.fiducial_cosmology.cosmo_dic["wa"],
             },
-            'theory': {
-                self.solver: {
-                    'stop_at_error': True,
-                    'extra_args': {}
-                }
-            },
+            "theory": {self.solver: {"stop_at_error": True, "extra_args": {}}},
             # Likelihood: we load the likelihood as an external function
-            'likelihood': {
-                'one': None
-            }
+            "likelihood": {"one": None},
         }
-        if self.solver == 'camb':
-            (self.info_fiducial['theory']['camb']['extra_args']
-             ['num_massive_neutrinos']) = 1
-            self.info_fiducial['params']['nnu'] = \
-                self.fiducial_cosmology.cosmo_dic['nnu']
-        elif self.solver == 'classy':
+        if self.solver == "camb":
+            (
+                self.info_fiducial["theory"]["camb"]["extra_args"][
+                    "num_massive_neutrinos"
+                ]
+            ) = 1
+            self.info_fiducial["params"]["nnu"] = self.fiducial_cosmology.cosmo_dic[
+                "nnu"
+            ]
+        elif self.solver == "classy":
             nrad = 4.41e-3
-            self.info_fiducial['params']['N_ncdm'] = 1
-            self.info_fiducial['params']['N_ur'] = \
-                ((self.fiducial_cosmology.cosmo_dic['nnu'] - nrad) *
-                 (3.0 - self.info_fiducial['params']['N_ncdm']) / 3.0 +
-                 nrad)
-            self.info_fiducial['params']['Omega_Lambda'] = 0.0
+            self.info_fiducial["params"]["N_ncdm"] = 1
+            self.info_fiducial["params"]["N_ur"] = (
+                self.fiducial_cosmology.cosmo_dic["nnu"] - nrad
+            ) * (3.0 - self.info_fiducial["params"]["N_ncdm"]) / 3.0 + nrad
+            self.info_fiducial["params"]["Omega_Lambda"] = 0.0
 
         # Update fiducial cobaya dictionary with the IST-F
         # Fiducial values of biases
@@ -219,128 +221,139 @@ class EuclidLikelihood(Likelihood):
         self.r_win = np.linspace(self.rmin, self.rmax, self.r_samp)
 
         model_fiducial = get_model(self.info_fiducial)
-        model_fiducial.add_requirements({
-            'omegam': None,
-            'Pk_interpolator': {
-                'z': self.z_win_max,
-                'k_max': self.k_max_Boltzmann,
-                'nonlinear': False,
-                'vars_pairs': ([['delta_tot', 'delta_tot'],
-                                ['delta_nonu', 'delta_nonu'],
-                                ['Weyl', 'Weyl'],
-                                ["delta_nonu", "delta_nu"],
-                                ["delta_nu", "delta_nu"]])
-            },
-            'comoving_radial_distance': {
-                'z': self.z_win_max
-            },
-            'angular_diameter_distance': {
-                'z': self.z_win
-            },
-            'Hubble': {
-                'z': self.z_win,
-                'units': 'km/s/Mpc'
-            },
-            'fsigma8': {
-                'z': self.z_win,
-                'units': None
-            },
-            'sigma8_z': {
-                'z': self.z_win
-            },
-            # For galaxy clusters
-            "sigma_R": {
-                "z": self.z_win,
-                "kmax": self.k_max_Boltzmann,
-                "R": self.r_win,
-                "vars_pairs": (
-                    [
-                        ["delta_tot", "delta_tot"],
-                        ["delta_nonu", "delta_nonu"]
-                    ]
-                )
+        model_fiducial.add_requirements(
+            {
+                "omegam": None,
+                "Pk_interpolator": {
+                    "z": self.z_win_max,
+                    "k_max": self.k_max_Boltzmann,
+                    "nonlinear": False,
+                    "vars_pairs": (
+                        [
+                            ["delta_tot", "delta_tot"],
+                            ["delta_nonu", "delta_nonu"],
+                            ["Weyl", "Weyl"],
+                            ["delta_nonu", "delta_nu"],
+                            ["delta_nu", "delta_nu"],
+                        ]
+                    ),
+                },
+                "comoving_radial_distance": {"z": self.z_win_max},
+                "angular_diameter_distance": {"z": self.z_win},
+                "Hubble": {"z": self.z_win, "units": "km/s/Mpc"},
+                "fsigma8": {"z": self.z_win, "units": None},
+                "sigma8_z": {"z": self.z_win},
+                # For galaxy clusters
+                "sigma_R": {
+                    "z": self.z_win,
+                    "kmax": self.k_max_Boltzmann,
+                    "R": self.r_win,
+                    "vars_pairs": (
+                        [["delta_tot", "delta_tot"], ["delta_nonu", "delta_nonu"]]
+                    ),
+                },
             }
-        })
+        )
 
         # Evaluation of posterior, required by Cobaya
         model_fiducial.logposterior({})
 
         # Update fiducial cosmology dictionary
-        self.fiducial_cosmology.cosmo_dic['Omm'] = \
-            model_fiducial.provider.get_param('omegam')
-        self.fiducial_cosmology.cosmo_dic['Omk'] = \
-            model_fiducial.provider.get_param(self.pnames['omk'])
-        self.fiducial_cosmology.cosmo_dic['z_win'] = self.z_win
-        self.fiducial_cosmology.cosmo_dic['z_win_max'] = self.z_win_max
-        self.fiducial_cosmology.cosmo_dic['k_win'] = self.k_win
-        self.fiducial_cosmology.cosmo_dic['comov_dist'] = \
-            model_fiducial.provider.get_comoving_radial_distance(
-            self.z_win_max),
-        self.fiducial_cosmology.cosmo_dic['angular_dist'] = \
-            model_fiducial.provider.get_angular_diameter_distance(
-            self.z_win),
-        self.fiducial_cosmology.cosmo_dic['H'] = \
-            model_fiducial.provider.get_Hubble(
-            self.z_win),
-        self.fiducial_cosmology.cosmo_dic['H_Mpc'] = \
-            model_fiducial.provider.get_Hubble(
-            self.z_win, units='1/Mpc'),
-        self.fiducial_cosmology.cosmo_dic['Pk_delta_Boltzmann'] = \
+        self.fiducial_cosmology.cosmo_dic["Omm"] = model_fiducial.provider.get_param(
+            "omegam"
+        )
+        self.fiducial_cosmology.cosmo_dic["Omk"] = model_fiducial.provider.get_param(
+            self.pnames["omk"]
+        )
+        self.fiducial_cosmology.cosmo_dic["z_win"] = self.z_win
+        self.fiducial_cosmology.cosmo_dic["z_win_max"] = self.z_win_max
+        self.fiducial_cosmology.cosmo_dic["k_win"] = self.k_win
+        self.fiducial_cosmology.cosmo_dic["comov_dist"] = (
+            model_fiducial.provider.get_comoving_radial_distance(self.z_win_max),
+        )
+        self.fiducial_cosmology.cosmo_dic["angular_dist"] = (
+            model_fiducial.provider.get_angular_diameter_distance(self.z_win),
+        )
+        self.fiducial_cosmology.cosmo_dic["H"] = (
+            model_fiducial.provider.get_Hubble(self.z_win),
+        )
+        self.fiducial_cosmology.cosmo_dic["H_Mpc"] = (
+            model_fiducial.provider.get_Hubble(self.z_win, units="1/Mpc"),
+        )
+        self.fiducial_cosmology.cosmo_dic["Pk_delta_Boltzmann"] = (
             model_fiducial.provider.get_Pk_interpolator(
-            ('delta_tot', 'delta_tot'), nonlinear=False,
-            extrap_kmin=self.k_min_extrap,
-            extrap_kmax=self.k_max_extrap)
-        self.fiducial_cosmology.cosmo_dic['Pk_cb_Boltzmann'] = \
+                ("delta_tot", "delta_tot"),
+                nonlinear=False,
+                extrap_kmin=self.k_min_extrap,
+                extrap_kmax=self.k_max_extrap,
+            )
+        )
+        self.fiducial_cosmology.cosmo_dic["Pk_cb_Boltzmann"] = (
             model_fiducial.provider.get_Pk_interpolator(
-            ('delta_nonu', 'delta_nonu'), nonlinear=False,
-            extrap_kmin=self.k_min_extrap,
-            extrap_kmax=self.k_max_extrap)
-        self.fiducial_cosmology.cosmo_dic['Pk_nunu_Boltzmann'] = \
+                ("delta_nonu", "delta_nonu"),
+                nonlinear=False,
+                extrap_kmin=self.k_min_extrap,
+                extrap_kmax=self.k_max_extrap,
+            )
+        )
+        self.fiducial_cosmology.cosmo_dic["Pk_nunu_Boltzmann"] = (
             model_fiducial.provider.get_Pk_interpolator(
-            ('delta_nu', 'delta_nu'), nonlinear=False,
-            extrap_kmin=self.k_min_extrap,
-            extrap_kmax=self.k_max_extrap)
-        self.fiducial_cosmology.cosmo_dic['Pk_nunonu_Boltzmann'] = \
+                ("delta_nu", "delta_nu"),
+                nonlinear=False,
+                extrap_kmin=self.k_min_extrap,
+                extrap_kmax=self.k_max_extrap,
+            )
+        )
+        self.fiducial_cosmology.cosmo_dic["Pk_nunonu_Boltzmann"] = (
             model_fiducial.provider.get_Pk_interpolator(
-            ('delta_nu', 'delta_nonu'), nonlinear=False,
-            extrap_kmin=self.k_min_extrap,
-            extrap_kmax=self.k_max_extrap)
-        self.fiducial_cosmology.cosmo_dic['Pk_weyl'] = \
+                ("delta_nu", "delta_nonu"),
+                nonlinear=False,
+                extrap_kmin=self.k_min_extrap,
+                extrap_kmax=self.k_max_extrap,
+            )
+        )
+        self.fiducial_cosmology.cosmo_dic["Pk_weyl"] = (
             model_fiducial.provider.get_Pk_interpolator(
-            ('Weyl', 'Weyl'), nonlinear=False,
-            extrap_kmax=self.k_max_extrap),
-        self.fiducial_cosmology.cosmo_dic['fsigma8'] = \
-            model_fiducial.provider.get_fsigma8(
-            self.z_win)
-        self.fiducial_cosmology.cosmo_dic['sigma8'] = \
-            model_fiducial.provider.get_sigma8_z(
-            self.z_win)
+                ("Weyl", "Weyl"), nonlinear=False, extrap_kmax=self.k_max_extrap
+            ),
+        )
+        self.fiducial_cosmology.cosmo_dic["fsigma8"] = (
+            model_fiducial.provider.get_fsigma8(self.z_win)
+        )
+        self.fiducial_cosmology.cosmo_dic["sigma8"] = (
+            model_fiducial.provider.get_sigma8_z(self.z_win)
+        )
         # For galaxy clusters
-        self.fiducial_cosmology.cosmo_dic['r_win'] = self.r_win
-        self.fiducial_cosmology.cosmo_dic['R'] = \
-            model_fiducial.provider.get_sigma_R(('delta_tot', 'delta_tot'))[0]
-        self.fiducial_cosmology.cosmo_dic['sigmaR'] = \
-            model_fiducial.provider.get_sigma_R(('delta_tot', 'delta_tot'))[2]
-        self.fiducial_cosmology.cosmo_dic['sigmaR_cb'] = \
-            model_fiducial.provider.get_sigma_R(
-                ('delta_nonu', 'delta_nonu')
-        )[2]
+        self.fiducial_cosmology.cosmo_dic["r_win"] = self.r_win
+        self.fiducial_cosmology.cosmo_dic["R"] = model_fiducial.provider.get_sigma_R(
+            ("delta_tot", "delta_tot")
+        )[0]
+        self.fiducial_cosmology.cosmo_dic["sigmaR"] = (
+            model_fiducial.provider.get_sigma_R(("delta_tot", "delta_tot"))[2]
+        )
+        self.fiducial_cosmology.cosmo_dic["sigmaR_cb"] = (
+            model_fiducial.provider.get_sigma_R(("delta_nonu", "delta_nonu"))[2]
+        )
         # In order to make the update_cosmo_dic method to work, we need to
         # specify also in this case the information on the GCspectro bins
         # and Photo bins
-        self.fiducial_cosmology.cosmo_dic['redshift_bins_means_spectro'] = \
-            self.data['spectro']['edges']
-        self.fiducial_cosmology.nonlinear.theory[
-            'redshift_bins_means_spectro'] = \
-            self.data['spectro']['edges']
-        self.fiducial_cosmology.cosmo_dic['redshift_bins_means_phot'] = \
-            self.data['photo']['redshifts']
+        self.fiducial_cosmology.cosmo_dic["redshift_bins_means_spectro"] = self.data[
+            "spectro"
+        ]["edges"]
+        self.fiducial_cosmology.nonlinear.theory["redshift_bins_means_spectro"] = (
+            self.data["spectro"]["edges"]
+        )
+        self.fiducial_cosmology.cosmo_dic["redshift_bins_means_phot"] = self.data[
+            "photo"
+        ]["redshifts"]
         self.fiducial_cosmology.nonlinear.set_Pgg_spectro_model()
         # Update dictionary with interpolators
-        self.fiducial_cosmology.cosmo_dic['luminosity_ratio_z_func'] = \
+        self.fiducial_cosmology.cosmo_dic["luminosity_ratio_z_func"] = (
             self.likefinal.data_ins.luminosity_ratio_interpolator
+        )
         self.fiducial_cosmology.update_cosmo_dic(
-            self.fiducial_cosmology.cosmo_dic['z_win'], 0.05)
+            self.fiducial_cosmology.cosmo_dic["z_win"], 0.05
+        )
 
     def get_requirements(self):
         r"""Gets requirements.
@@ -355,36 +368,43 @@ class EuclidLikelihood(Likelihood):
              calculated by the theory code
 
         """
-        requirements = \
-            {'omegam': None,
-             'Pk_interpolator':
-                {'z': self.z_win_max,
-                 'k_max': self.k_max_Boltzmann,
-                 'nonlinear': self.use_NL,
-                 'vars_pairs': ([['delta_tot', 'delta_tot'],
-                                 ['delta_nonu', 'delta_nonu'],
-                                 ['Weyl', 'Weyl'],
-                                 ["delta_nonu","delta_nu"],
-                                 ["delta_nu","delta_nu"]])},
-                'comoving_radial_distance': {'z': self.z_win_max},
-                'angular_diameter_distance': {'z': self.z_win},
-                'Hubble': {'z': self.z_win, 'units': 'km/s/Mpc'},
-                'sigma8_z': {'z': self.z_win},
-                'fsigma8': {'z': self.z_win, 'units': None},
-                # For galaxy clusters
-                "sigma_R":
-                {"z": self.z_win,
-                 "kmax": self.k_max_Boltzmann,
-                 "R": self.r_win,
-                 "vars_pairs": ([["delta_tot", "delta_tot"],
-                                ["delta_nonu", "delta_nonu"]])},
-                'Cl': {'pp': 4300},
-                'CAMBdata': None}
+        requirements = {
+            "omegam": None,
+            "Pk_interpolator": {
+                "z": self.z_win_max,
+                "k_max": self.k_max_Boltzmann,
+                "nonlinear": self.use_NL,
+                "vars_pairs": (
+                    [
+                        ["delta_tot", "delta_tot"],
+                        ["delta_nonu", "delta_nonu"],
+                        ["Weyl", "Weyl"],
+                        ["delta_nonu", "delta_nu"],
+                        ["delta_nu", "delta_nu"],
+                    ]
+                ),
+            },
+            "comoving_radial_distance": {"z": self.z_win_max},
+            "angular_diameter_distance": {"z": self.z_win},
+            "Hubble": {"z": self.z_win, "units": "km/s/Mpc"},
+            "sigma8_z": {"z": self.z_win},
+            "fsigma8": {"z": self.z_win, "units": None},
+            # For galaxy clusters
+            "sigma_R": {
+                "z": self.z_win,
+                "kmax": self.k_max_Boltzmann,
+                "R": self.r_win,
+                "vars_pairs": (
+                    [["delta_tot", "delta_tot"], ["delta_nonu", "delta_nonu"]]
+                ),
+            },
+            "Cl": {"pp": 4300},
+            "CAMBdata": None,
+        }
         # TODO CAMBDATA is used only to retrieve the conformal time
         # to compute z of CMB, explore if there is a better way.
-        if self.solver == 'camb':
-            derived = {'omegac': None, 'omnuh2': None, 'omeganu': None,
-                       'nnu': None}
+        if self.solver == "camb":
+            derived = {"omegac": None, "omnuh2": None, "omeganu": None, "nnu": None}
             requirements = requirements | derived
 
         return requirements
@@ -402,276 +422,323 @@ class EuclidLikelihood(Likelihood):
         """
 
         try:
-            self.cosmo.cosmo_dic['NL_flag_phot_matter'] = \
-                self.NL_flag_phot_matter
-            self.cosmo.cosmo_dic['NL_flag_phot_bias'] = \
-                self.NL_flag_phot_bias
-            self.cosmo.cosmo_dic['NL_flag_spectro'] = self.NL_flag_spectro
-            self.cosmo.cosmo_dic['IA_flag'] = self.IA_flag
-            self.cosmo.cosmo_dic['NL_flag_phot_baryon'] = \
-                self.NL_flag_phot_baryon
-            self.cosmo.cosmo_dic['Baryon_redshift_model'] = \
-                self.Baryon_redshift_model
-            self.cosmo.cosmo_dic['f_out_z_dep'] = self.f_out_z_dep
-            self.cosmo.cosmo_dic['GCsp_z_err'] = self.GCsp_z_err
-            self.cosmo.cosmo_dic['bias_model'] = self.bias_model
-            self.cosmo.cosmo_dic['magbias_model'] = self.magbias_model
-            self.cosmo.cosmo_dic['GCph_do_nisb'] = self.GCph_do_nisb
-            self.cosmo.cosmo_dic['use_gamma_MG'] = self.use_gamma_MG
-            self.cosmo.cosmo_dic['use_Weyl'] = self.use_Weyl
-            self.cosmo.cosmo_dic['use_magnification_bias_spectro'] = \
+            self.cosmo.cosmo_dic["NL_flag_phot_matter"] = self.NL_flag_phot_matter
+            self.cosmo.cosmo_dic["NL_flag_phot_bias"] = self.NL_flag_phot_bias
+            self.cosmo.cosmo_dic["NL_flag_spectro"] = self.NL_flag_spectro
+            self.cosmo.cosmo_dic["IA_flag"] = self.IA_flag
+            self.cosmo.cosmo_dic["NL_flag_phot_baryon"] = self.NL_flag_phot_baryon
+            self.cosmo.cosmo_dic["Baryon_redshift_model"] = self.Baryon_redshift_model
+            self.cosmo.cosmo_dic["f_out_z_dep"] = self.f_out_z_dep
+            self.cosmo.cosmo_dic["GCsp_z_err"] = self.GCsp_z_err
+            self.cosmo.cosmo_dic["bias_model"] = self.bias_model
+            self.cosmo.cosmo_dic["magbias_model"] = self.magbias_model
+            self.cosmo.cosmo_dic["GCph_do_nisb"] = self.GCph_do_nisb
+            self.cosmo.cosmo_dic["use_gamma_MG"] = self.use_gamma_MG
+            self.cosmo.cosmo_dic["use_Weyl"] = self.use_Weyl
+            self.cosmo.cosmo_dic["use_magnification_bias_spectro"] = (
                 self.use_magnification_bias_spectro
-            self.cosmo.cosmo_dic['matrix_transform_phot'] = \
-                self.observables['selection']['matrix_transform_phot']
-            self.cosmo.cosmo_dic['H0'] = self.provider.get_param('H0')
-            self.cosmo.cosmo_dic['H0_Mpc'] = \
-                self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
-            self.cosmo.cosmo_dic['tau'] = \
-                self.provider.get_param(self.pnames['tau'])
-            self.cosmo.cosmo_dic['As'] = \
-                self.provider.get_param(self.pnames['As'])
-            self.cosmo.cosmo_dic['ns'] = \
-                self.provider.get_param(self.pnames['ns'])
-            self.cosmo.cosmo_dic['omch2'] = \
-                self.provider.get_param(self.pnames['omch2'])
-            self.cosmo.cosmo_dic['ombh2'] = \
-                self.provider.get_param(self.pnames['ombh2'])
-            self.cosmo.cosmo_dic['Omk'] = \
-                self.provider.get_param(self.pnames['omk'])
+            )
+            self.cosmo.cosmo_dic["matrix_transform_phot"] = self.observables[
+                "selection"
+            ]["matrix_transform_phot"]
+            self.cosmo.cosmo_dic["H0"] = self.provider.get_param("H0")
+            self.cosmo.cosmo_dic["H0_Mpc"] = (
+                self.cosmo.cosmo_dic["H0"] / const.c.to("km/s").value
+            )
+            self.cosmo.cosmo_dic["tau"] = self.provider.get_param(self.pnames["tau"])
+            self.cosmo.cosmo_dic["As"] = self.provider.get_param(self.pnames["As"])
+            self.cosmo.cosmo_dic["ns"] = self.provider.get_param(self.pnames["ns"])
+            self.cosmo.cosmo_dic["omch2"] = self.provider.get_param(
+                self.pnames["omch2"]
+            )
+            self.cosmo.cosmo_dic["ombh2"] = self.provider.get_param(
+                self.pnames["ombh2"]
+            )
+            self.cosmo.cosmo_dic["Omk"] = self.provider.get_param(self.pnames["omk"])
             try:
-                self.cosmo.cosmo_dic['mnu'] = \
-                    self.provider.get_param(self.pnames['mnu'])
+                self.cosmo.cosmo_dic["mnu"] = self.provider.get_param(
+                    self.pnames["mnu"]
+                )
             except KeyError:
-                self.cosmo.cosmo_dic['omnuh2'] = \
-                    self.provider.get_param(self.pnames['omnuh2'])
-            self.cosmo.cosmo_dic['w'] = \
-                self.provider.get_param(self.pnames['w'])
-            self.cosmo.cosmo_dic['wa'] = \
-                self.provider.get_param(self.pnames['wa'])
-            self.cosmo.cosmo_dic['Omm'] = self.provider.get_param('omegam')
+                self.cosmo.cosmo_dic["omnuh2"] = self.provider.get_param(
+                    self.pnames["omnuh2"]
+                )
+            self.cosmo.cosmo_dic["w"] = self.provider.get_param(self.pnames["w"])
+            self.cosmo.cosmo_dic["wa"] = self.provider.get_param(self.pnames["wa"])
+            self.cosmo.cosmo_dic["Omm"] = self.provider.get_param("omegam")
             if self.use_gamma_MG:
-                self.cosmo.cosmo_dic['gamma_MG'] = \
-                    self.provider.get_param('gamma_MG')
-            if self.solver == 'camb':
-                self.cosmo.cosmo_dic['Omc'] = self.provider.get_param('omegac')
-                self.cosmo.cosmo_dic['omnuh2'] = \
-                    self.provider.get_param('omnuh2')
-                self.cosmo.cosmo_dic['Omnu'] = \
-                    self.provider.get_param('omeganu')
-                self.cosmo.cosmo_dic['nnu'] = self.provider.get_param('nnu')
-            self.cosmo.cosmo_dic['comov_dist'] = \
+                self.cosmo.cosmo_dic["gamma_MG"] = self.provider.get_param("gamma_MG")
+            if self.solver == "camb":
+                self.cosmo.cosmo_dic["Omc"] = self.provider.get_param("omegac")
+                self.cosmo.cosmo_dic["omnuh2"] = self.provider.get_param("omnuh2")
+                self.cosmo.cosmo_dic["Omnu"] = self.provider.get_param("omeganu")
+                self.cosmo.cosmo_dic["nnu"] = self.provider.get_param("nnu")
+            self.cosmo.cosmo_dic["comov_dist"] = (
                 self.provider.get_comoving_radial_distance(self.z_win_max)
-            self.cosmo.cosmo_dic['angular_dist'] = \
+            )
+            self.cosmo.cosmo_dic["angular_dist"] = (
                 self.provider.get_angular_diameter_distance(self.z_win)
-            self.cosmo.cosmo_dic['H'] = self.provider.get_Hubble(self.z_win)
-            self.cosmo.cosmo_dic['H_Mpc'] = \
-                self.provider.get_Hubble(self.z_win, units='1/Mpc')
-            self.cosmo.cosmo_dic['Pk_delta_Boltzmann'] = \
+            )
+            self.cosmo.cosmo_dic["H"] = self.provider.get_Hubble(self.z_win)
+            self.cosmo.cosmo_dic["H_Mpc"] = self.provider.get_Hubble(
+                self.z_win, units="1/Mpc"
+            )
+            self.cosmo.cosmo_dic["Pk_delta_Boltzmann"] = (
                 self.provider.get_Pk_interpolator(
-                ('delta_tot', 'delta_tot'), nonlinear=False,
+                    ("delta_tot", "delta_tot"),
+                    nonlinear=False,
+                    extrap_kmin=self.k_min_extrap,
+                    extrap_kmax=self.k_max_extrap,
+                )
+            )
+            self.cosmo.cosmo_dic["Pk_cb_Boltzmann"] = self.provider.get_Pk_interpolator(
+                ("delta_nonu", "delta_nonu"),
+                nonlinear=False,
                 extrap_kmin=self.k_min_extrap,
-                extrap_kmax=self.k_max_extrap)
-            self.cosmo.cosmo_dic['Pk_cb_Boltzmann'] = \
+                extrap_kmax=self.k_max_extrap,
+            )
+            self.cosmo.cosmo_dic["Pk_nunu_Boltzmann"] = (
                 self.provider.get_Pk_interpolator(
-                ('delta_nonu', 'delta_nonu'), nonlinear=False,
-                extrap_kmin=self.k_min_extrap,
-                extrap_kmax=self.k_max_extrap)
-            self.cosmo.cosmo_dic['Pk_nunu_Boltzmann'] = \
+                    ("delta_nu", "delta_nu"),
+                    nonlinear=False,
+                    extrap_kmin=self.k_min_extrap,
+                    extrap_kmax=self.k_max_extrap,
+                )
+            )
+            self.cosmo.cosmo_dic["Pk_nunonu_Boltzmann"] = (
                 self.provider.get_Pk_interpolator(
-                ('delta_nu', 'delta_nu'), nonlinear=False,
-                extrap_kmin=self.k_min_extrap,
-                extrap_kmax=self.k_max_extrap)
-            self.cosmo.cosmo_dic['Pk_nunonu_Boltzmann'] = \
-                self.provider.get_Pk_interpolator(
-                ('delta_nu', 'delta_nonu'), nonlinear=False,
-                extrap_kmin=self.k_min_extrap,
-                extrap_kmax=self.k_max_extrap)
-            self.cosmo.cosmo_dic['Pk_weyl'] = \
-                self.provider.get_Pk_interpolator(
-                ('Weyl', 'Weyl'), nonlinear=False,
-                extrap_kmax=self.k_max_extrap)
+                    ("delta_nu", "delta_nonu"),
+                    nonlinear=False,
+                    extrap_kmin=self.k_min_extrap,
+                    extrap_kmax=self.k_max_extrap,
+                )
+            )
+            self.cosmo.cosmo_dic["Pk_weyl"] = self.provider.get_Pk_interpolator(
+                ("Weyl", "Weyl"), nonlinear=False, extrap_kmax=self.k_max_extrap
+            )
             if self.NL_flag_phot_matter > 0:
-                self.cosmo.cosmo_dic['Pk_halomodel_recipe_Boltzmann'] = \
+                self.cosmo.cosmo_dic["Pk_halomodel_recipe_Boltzmann"] = (
                     self.provider.get_Pk_interpolator(
-                    ('delta_tot', 'delta_tot'), nonlinear=True,
+                        ("delta_tot", "delta_tot"),
+                        nonlinear=True,
+                        extrap_kmin=self.k_min_extrap,
+                        extrap_kmax=self.k_max_extrap,
+                    )
+                )
+                self.cosmo.cosmo_dic["Pk_weyl_NL"] = self.provider.get_Pk_interpolator(
+                    ("Weyl", "Weyl"),
+                    nonlinear=True,
                     extrap_kmin=self.k_min_extrap,
-                    extrap_kmax=self.k_max_extrap)
-                self.cosmo.cosmo_dic['Pk_weyl_NL'] = \
-                    self.provider.get_Pk_interpolator(
-                    ('Weyl', 'Weyl'), nonlinear=True,
-                    extrap_kmin=self.k_min_extrap,
-                    extrap_kmax=self.k_max_extrap)
-            self.cosmo.cosmo_dic['z_win'] = self.z_win
-            self.cosmo.cosmo_dic['z_win_max'] = self.z_win_max
-            self.cosmo.cosmo_dic['k_win'] = self.k_win
-            self.cosmo.cosmo_dic['sigma8'] = self.provider.get_sigma8_z(
-                self.cosmo.cosmo_dic['z_win'])
-            self.cosmo.cosmo_dic['fsigma8'] = self.provider.get_fsigma8(
-                self.cosmo.cosmo_dic['z_win'])
+                    extrap_kmax=self.k_max_extrap,
+                )
+            self.cosmo.cosmo_dic["z_win"] = self.z_win
+            self.cosmo.cosmo_dic["z_win_max"] = self.z_win_max
+            self.cosmo.cosmo_dic["k_win"] = self.k_win
+            self.cosmo.cosmo_dic["sigma8"] = self.provider.get_sigma8_z(
+                self.cosmo.cosmo_dic["z_win"]
+            )
+            self.cosmo.cosmo_dic["fsigma8"] = self.provider.get_fsigma8(
+                self.cosmo.cosmo_dic["z_win"]
+            )
             # For galaxy clusters
-            self.cosmo.cosmo_dic['r_win'] = self.r_win
-            self.cosmo.cosmo_dic['R'] = \
-                self.provider.get_sigma_R(('delta_tot', 'delta_tot'))[0]
-            self.cosmo.cosmo_dic['sigmaR'] = \
-                self.provider.get_sigma_R(('delta_tot', 'delta_tot'))[2]
-            self.cosmo.cosmo_dic['sigmaR_cb'] = \
-                self.provider.get_sigma_R(('delta_nonu', 'delta_nonu'))[2]
+            self.cosmo.cosmo_dic["r_win"] = self.r_win
+            self.cosmo.cosmo_dic["R"] = self.provider.get_sigma_R(
+                ("delta_tot", "delta_tot")
+            )[0]
+            self.cosmo.cosmo_dic["sigmaR"] = self.provider.get_sigma_R(
+                ("delta_tot", "delta_tot")
+            )[2]
+            self.cosmo.cosmo_dic["sigmaR_cb"] = self.provider.get_sigma_R(
+                ("delta_nonu", "delta_nonu")
+            )[2]
             # Filter nuisance parameters for new dict
             new_keys = params_dic.keys() - self.cosmo.cosmo_dic.keys()
-            only_nuisance_params = {your_key: params_dic[your_key]
-                                    for your_key in new_keys}
-            self.cosmo.cosmo_dic['nuisance_parameters'].update(
-                **only_nuisance_params)
-            self.cosmo.cosmo_dic['Cl'] = self.provider.get_Cl()
-            self.cosmo.cosmo_dic['CAMBdata'] = self.provider.get_CAMBdata()
+            only_nuisance_params = {
+                your_key: params_dic[your_key] for your_key in new_keys
+            }
+            self.cosmo.cosmo_dic["nuisance_parameters"].update(**only_nuisance_params)
+            self.cosmo.cosmo_dic["Cl"] = self.provider.get_Cl()
+            self.cosmo.cosmo_dic["CAMBdata"] = self.provider.get_CAMBdata()
 
         except (TypeError, AttributeError):
-            self.cosmo.cosmo_dic['NL_flag_phot_matter'] = \
-                info['likelihood']['Euclid']['NL_flag_phot_matter']
-            self.cosmo.cosmo_dic['NL_flag_phot_bias'] = \
-                info['likelihood']['Euclid']['NL_flag_phot_bias']
-            self.cosmo.cosmo_dic['NL_flag_spectro'] = \
-                info['likelihood']['Euclid']['NL_flag_spectro']
-            self.cosmo.cosmo_dic['IA_flag'] = \
-                info['likelihood']['Euclid']['IA_flag']
-            self.cosmo.cosmo_dic['NL_flag_phot_baryon'] = \
-                info['likelihood']['Euclid']['NL_flag_phot_baryon']
-            self.cosmo.cosmo_dic['Baryon_redshift_model'] = \
-                info['likelihood']['Euclid']['Baryon_redshift_model']
-            self.cosmo.cosmo_dic['f_out_z_dep'] = \
-                info['likelihood']['Euclid']['f_out_z_dep']
-            self.cosmo.cosmo_dic['GCsp_z_err'] = \
-                info['likelihood']['Euclid']['GCsp_z_err']
-            self.cosmo.cosmo_dic['bias_model'] = self.bias_model
-            self.cosmo.cosmo_dic['magbias_model'] = self.magbias_model
-            self.cosmo.cosmo_dic['use_magnification_bias_spectro'] = \
+            self.cosmo.cosmo_dic["NL_flag_phot_matter"] = info["likelihood"]["Euclid"][
+                "NL_flag_phot_matter"
+            ]
+            self.cosmo.cosmo_dic["NL_flag_phot_bias"] = info["likelihood"]["Euclid"][
+                "NL_flag_phot_bias"
+            ]
+            self.cosmo.cosmo_dic["NL_flag_spectro"] = info["likelihood"]["Euclid"][
+                "NL_flag_spectro"
+            ]
+            self.cosmo.cosmo_dic["IA_flag"] = info["likelihood"]["Euclid"]["IA_flag"]
+            self.cosmo.cosmo_dic["NL_flag_phot_baryon"] = info["likelihood"]["Euclid"][
+                "NL_flag_phot_baryon"
+            ]
+            self.cosmo.cosmo_dic["Baryon_redshift_model"] = info["likelihood"][
+                "Euclid"
+            ]["Baryon_redshift_model"]
+            self.cosmo.cosmo_dic["f_out_z_dep"] = info["likelihood"]["Euclid"][
+                "f_out_z_dep"
+            ]
+            self.cosmo.cosmo_dic["GCsp_z_err"] = info["likelihood"]["Euclid"][
+                "GCsp_z_err"
+            ]
+            self.cosmo.cosmo_dic["bias_model"] = self.bias_model
+            self.cosmo.cosmo_dic["magbias_model"] = self.magbias_model
+            self.cosmo.cosmo_dic["use_magnification_bias_spectro"] = (
                 self.use_magnification_bias_spectro
-            self.cosmo.cosmo_dic['GCph_do_nisb'] = \
-                info['likelihood']['Euclid']['GCph_do_nisb']
-            self.cosmo.cosmo_dic['use_gamma_MG'] = \
-                info['likelihood']['Euclid']['use_gamma_MG']
-            self.cosmo.cosmo_dic['use_Weyl'] = \
-                info['likelihood']['Euclid']['use_Weyl']
-            self.cosmo.cosmo_dic['H0'] = model.provider.get_param('H0')
-            self.cosmo.cosmo_dic['H0_Mpc'] = \
-                self.cosmo.cosmo_dic['H0'] / const.c.to('km/s').value
-            self.cosmo.cosmo_dic['tau'] = \
-                model.provider.get_param(self.pnames['tau'])
-            self.cosmo.cosmo_dic['As'] = \
-                model.provider.get_param(self.pnames['As'])
-            self.cosmo.cosmo_dic['ns'] = \
-                model.provider.get_param(self.pnames['ns'])
-            self.cosmo.cosmo_dic['omch2'] = \
-                model.provider.get_param(self.pnames['omch2'])
-            self.cosmo.cosmo_dic['ombh2'] = \
-                model.provider.get_param(self.pnames['ombh2'])
-            self.cosmo.cosmo_dic['Omk'] = \
-                model.provider.get_param(self.pnames['omk'])
+            )
+            self.cosmo.cosmo_dic["GCph_do_nisb"] = info["likelihood"]["Euclid"][
+                "GCph_do_nisb"
+            ]
+            self.cosmo.cosmo_dic["use_gamma_MG"] = info["likelihood"]["Euclid"][
+                "use_gamma_MG"
+            ]
+            self.cosmo.cosmo_dic["use_Weyl"] = info["likelihood"]["Euclid"]["use_Weyl"]
+            self.cosmo.cosmo_dic["H0"] = model.provider.get_param("H0")
+            self.cosmo.cosmo_dic["H0_Mpc"] = (
+                self.cosmo.cosmo_dic["H0"] / const.c.to("km/s").value
+            )
+            self.cosmo.cosmo_dic["tau"] = model.provider.get_param(self.pnames["tau"])
+            self.cosmo.cosmo_dic["As"] = model.provider.get_param(self.pnames["As"])
+            self.cosmo.cosmo_dic["ns"] = model.provider.get_param(self.pnames["ns"])
+            self.cosmo.cosmo_dic["omch2"] = model.provider.get_param(
+                self.pnames["omch2"]
+            )
+            self.cosmo.cosmo_dic["ombh2"] = model.provider.get_param(
+                self.pnames["ombh2"]
+            )
+            self.cosmo.cosmo_dic["Omk"] = model.provider.get_param(self.pnames["omk"])
             try:
-                self.cosmo.cosmo_dic['mnu'] = \
-                    model.provider.get_param(self.pnames['mnu'])
+                self.cosmo.cosmo_dic["mnu"] = model.provider.get_param(
+                    self.pnames["mnu"]
+                )
             except KeyError:
-                self.cosmo.cosmo_dic['omnuh2'] = \
-                    model.provider.get_param(self.pnames['omnuh2'])
-            self.cosmo.cosmo_dic['mnu'] = \
-                model.provider.get_param(self.pnames['mnu'])
-            self.cosmo.cosmo_dic['w'] = \
-                model.provider.get_param(self.pnames['w'])
-            self.cosmo.cosmo_dic['wa'] = \
-                model.provider.get_param(self.pnames['wa'])
-            self.cosmo.cosmo_dic['Omm'] = model.provider.get_param('omegam')
-            if self.solver == 'camb':
-                self.cosmo.cosmo_dic['Omc'] = \
-                    model.provider.get_param('omegac')
-                self.cosmo.cosmo_dic['omnuh2'] = \
-                    model.provider.get_param('omnuh2')
-                self.cosmo.cosmo_dic['Omnu'] = \
-                    model.provider.get_param('omeganu')
-                self.cosmo.cosmo_dic['nnu'] = model.provider.get_param('nnu')
-            self.cosmo.cosmo_dic['Omm'] = model.provider.get_param('omegam')
-            if info['likelihood']['Euclid']['use_gamma_MG']:
-                self.cosmo.cosmo_dic['gamma_MG'] = \
-                    model.provider.get_param('gamma_MG')
-            self.cosmo.cosmo_dic['comov_dist'] = \
+                self.cosmo.cosmo_dic["omnuh2"] = model.provider.get_param(
+                    self.pnames["omnuh2"]
+                )
+            self.cosmo.cosmo_dic["mnu"] = model.provider.get_param(self.pnames["mnu"])
+            self.cosmo.cosmo_dic["w"] = model.provider.get_param(self.pnames["w"])
+            self.cosmo.cosmo_dic["wa"] = model.provider.get_param(self.pnames["wa"])
+            self.cosmo.cosmo_dic["Omm"] = model.provider.get_param("omegam")
+            if self.solver == "camb":
+                self.cosmo.cosmo_dic["Omc"] = model.provider.get_param("omegac")
+                self.cosmo.cosmo_dic["omnuh2"] = model.provider.get_param("omnuh2")
+                self.cosmo.cosmo_dic["Omnu"] = model.provider.get_param("omeganu")
+                self.cosmo.cosmo_dic["nnu"] = model.provider.get_param("nnu")
+            self.cosmo.cosmo_dic["Omm"] = model.provider.get_param("omegam")
+            if info["likelihood"]["Euclid"]["use_gamma_MG"]:
+                self.cosmo.cosmo_dic["gamma_MG"] = model.provider.get_param("gamma_MG")
+            self.cosmo.cosmo_dic["comov_dist"] = (
                 model.provider.get_comoving_radial_distance(self.z_win_max)
-            self.cosmo.cosmo_dic['angular_dist'] = \
+            )
+            self.cosmo.cosmo_dic["angular_dist"] = (
                 model.provider.get_angular_diameter_distance(self.z_win)
-            self.cosmo.cosmo_dic['H'] = model.provider.get_Hubble(self.z_win)
-            self.cosmo.cosmo_dic['H_Mpc'] = \
-                model.provider.get_Hubble(self.z_win, units='1/Mpc')
-            self.cosmo.cosmo_dic['Pk_delta_Boltzmann'] = \
+            )
+            self.cosmo.cosmo_dic["H"] = model.provider.get_Hubble(self.z_win)
+            self.cosmo.cosmo_dic["H_Mpc"] = model.provider.get_Hubble(
+                self.z_win, units="1/Mpc"
+            )
+            self.cosmo.cosmo_dic["Pk_delta_Boltzmann"] = (
                 model.provider.get_Pk_interpolator(
-                ('delta_tot', 'delta_tot'), nonlinear=False,
-                extrap_kmin=self.k_min_extrap,
-                extrap_kmax=self.k_max_extrap)
-            self.cosmo.cosmo_dic['Pk_cb_Boltzmann'] = \
-                model.provider.get_Pk_interpolator(
-                ('delta_nonu', 'delta_nonu'), nonlinear=False,
-                extrap_kmin=self.k_min_extrap,
-                extrap_kmax=self.k_max_extrap)
-            self.cosmo.cosmo_dic['Pk_nunu_Boltzmann'] = \
-                model.provider.get_Pk_interpolator(
-                ('delta_nu', 'delta_nu'), nonlinear=False,
-                extrap_kmin=self.k_min_extrap,
-                extrap_kmax=self.k_max_extrap)
-            self.cosmo.cosmo_dic['Pk_nunonu_Boltzmann'] = \
-                model.provider.get_Pk_interpolator(
-                ('delta_nu', 'delta_nonu'), nonlinear=False,
-                extrap_kmin=self.k_min_extrap,
-                extrap_kmax=self.k_max_extrap)
-            self.cosmo.cosmo_dic['Pk_weyl'] = \
-                model.provider.get_Pk_interpolator(
-                ('Weyl', 'Weyl'), nonlinear=False,
-                extrap_kmin=self.k_min_extrap,
-                extrap_kmax=self.k_max_extrap)
-            if info['likelihood']['Euclid']['NL_flag_phot_matter'] > 0:
-                self.cosmo.cosmo_dic['Pk_halomodel_recipe_Boltzmann'] = \
-                    model.provider.get_Pk_interpolator(
-                    ('delta_tot', 'delta_tot'), nonlinear=True,
+                    ("delta_tot", "delta_tot"),
+                    nonlinear=False,
                     extrap_kmin=self.k_min_extrap,
-                    extrap_kmax=self.k_max_extrap)
-                self.cosmo.cosmo_dic['Pk_weyl_NL'] = \
-                    model.provider.get_Pk_interpolator(
-                    ('Weyl', 'Weyl'), nonlinear=True,
+                    extrap_kmax=self.k_max_extrap,
+                )
+            )
+            self.cosmo.cosmo_dic["Pk_cb_Boltzmann"] = (
+                model.provider.get_Pk_interpolator(
+                    ("delta_nonu", "delta_nonu"),
+                    nonlinear=False,
                     extrap_kmin=self.k_min_extrap,
-                    extrap_kmax=self.k_max_extrap)
-            self.cosmo.cosmo_dic['z_win'] = self.z_win
-            self.cosmo.cosmo_dic['z_win_max'] = self.z_win_max
-            self.cosmo.cosmo_dic['k_win'] = self.k_win
-            self.cosmo.cosmo_dic['sigma8'] = model.provider.get_sigma8_z(
-                self.cosmo.cosmo_dic['z_win'])
-            self.cosmo.cosmo_dic['fsigma8'] = model.provider.get_fsigma8(
-                self.cosmo.cosmo_dic['z_win'])
+                    extrap_kmax=self.k_max_extrap,
+                )
+            )
+            self.cosmo.cosmo_dic["Pk_nunu_Boltzmann"] = (
+                model.provider.get_Pk_interpolator(
+                    ("delta_nu", "delta_nu"),
+                    nonlinear=False,
+                    extrap_kmin=self.k_min_extrap,
+                    extrap_kmax=self.k_max_extrap,
+                )
+            )
+            self.cosmo.cosmo_dic["Pk_nunonu_Boltzmann"] = (
+                model.provider.get_Pk_interpolator(
+                    ("delta_nu", "delta_nonu"),
+                    nonlinear=False,
+                    extrap_kmin=self.k_min_extrap,
+                    extrap_kmax=self.k_max_extrap,
+                )
+            )
+            self.cosmo.cosmo_dic["Pk_weyl"] = model.provider.get_Pk_interpolator(
+                ("Weyl", "Weyl"),
+                nonlinear=False,
+                extrap_kmin=self.k_min_extrap,
+                extrap_kmax=self.k_max_extrap,
+            )
+            if info["likelihood"]["Euclid"]["NL_flag_phot_matter"] > 0:
+                self.cosmo.cosmo_dic["Pk_halomodel_recipe_Boltzmann"] = (
+                    model.provider.get_Pk_interpolator(
+                        ("delta_tot", "delta_tot"),
+                        nonlinear=True,
+                        extrap_kmin=self.k_min_extrap,
+                        extrap_kmax=self.k_max_extrap,
+                    )
+                )
+                self.cosmo.cosmo_dic["Pk_weyl_NL"] = model.provider.get_Pk_interpolator(
+                    ("Weyl", "Weyl"),
+                    nonlinear=True,
+                    extrap_kmin=self.k_min_extrap,
+                    extrap_kmax=self.k_max_extrap,
+                )
+            self.cosmo.cosmo_dic["z_win"] = self.z_win
+            self.cosmo.cosmo_dic["z_win_max"] = self.z_win_max
+            self.cosmo.cosmo_dic["k_win"] = self.k_win
+            self.cosmo.cosmo_dic["sigma8"] = model.provider.get_sigma8_z(
+                self.cosmo.cosmo_dic["z_win"]
+            )
+            self.cosmo.cosmo_dic["fsigma8"] = model.provider.get_fsigma8(
+                self.cosmo.cosmo_dic["z_win"]
+            )
             # For galaxy clusters
-            self.cosmo.cosmo_dic['r_win'] = self.r_win
-            self.cosmo.cosmo_dic['R'] = \
-                model.provider.get_sigma_R(('delta_tot', 'delta_tot'))[0]
-            self.cosmo.cosmo_dic['sigmaR'] = \
-                model.provider.get_sigma_R(('delta_tot', 'delta_tot'))[2]
-            self.cosmo.cosmo_dic['sigmaR_cb'] = \
-                model.provider.get_sigma_R(('delta_nonu', 'delta_nonu'))[2]
+            self.cosmo.cosmo_dic["r_win"] = self.r_win
+            self.cosmo.cosmo_dic["R"] = model.provider.get_sigma_R(
+                ("delta_tot", "delta_tot")
+            )[0]
+            self.cosmo.cosmo_dic["sigmaR"] = model.provider.get_sigma_R(
+                ("delta_tot", "delta_tot")
+            )[2]
+            self.cosmo.cosmo_dic["sigmaR_cb"] = model.provider.get_sigma_R(
+                ("delta_nonu", "delta_nonu")
+            )[2]
             new_keys = params_dic.keys() - self.cosmo.cosmo_dic.keys()
-            only_nuisance_params = {your_key: params_dic[your_key]
-                                    for your_key in new_keys}
-            self.cosmo.cosmo_dic['nuisance_parameters'].update(
-                **only_nuisance_params)
-            self.cosmo.cosmo_dic['Cl'] = model.provider.get_Cl()
-            if 'observables_selection' in info['likelihood']['Euclid']:
-                self.observables_selection = \
-                    info['likelihood']['Euclid']['observables_selection']
-                self.cosmo.cosmo_dic['add_phot_RSD'] = \
-                    self.observables_selection['add_phot_RSD']
-                self.matrix_transform_phot = \
-                    self.observables_selection['matrix_transform_phot']
-                self.cosmo.cosmo_dic['matrix_transform_phot'] = \
+            only_nuisance_params = {
+                your_key: params_dic[your_key] for your_key in new_keys
+            }
+            self.cosmo.cosmo_dic["nuisance_parameters"].update(**only_nuisance_params)
+            self.cosmo.cosmo_dic["Cl"] = model.provider.get_Cl()
+            if "observables_selection" in info["likelihood"]["Euclid"]:
+                self.observables_selection = info["likelihood"]["Euclid"][
+                    "observables_selection"
+                ]
+                self.cosmo.cosmo_dic["add_phot_RSD"] = self.observables_selection[
+                    "add_phot_RSD"
+                ]
+                self.matrix_transform_phot = self.observables_selection[
+                    "matrix_transform_phot"
+                ]
+                self.cosmo.cosmo_dic["matrix_transform_phot"] = (
                     self.matrix_transform_phot
-            if 'observables_specifications' in info['likelihood']['Euclid']:
-                self.observables_specifications = \
-                    info['likelihood']['Euclid']['observables_specifications']
-            self.observables = \
-                observables_selection_specifications_checker(
-                    info['likelihood']['Euclid']['observables_selection'],
-                    self.observables_specifications)
+                )
+            if "observables_specifications" in info["likelihood"]["Euclid"]:
+                self.observables_specifications = info["likelihood"]["Euclid"][
+                    "observables_specifications"
+                ]
+            self.observables = observables_selection_specifications_checker(
+                info["likelihood"]["Euclid"]["observables_selection"],
+                self.observables_specifications,
+            )
 
     def logp(self, **params_values):
         r"""Logp.
@@ -694,14 +761,16 @@ class EuclidLikelihood(Likelihood):
         info = None
         self.passing_requirements(model, info, **params_values)
         # Update cosmo_dic to interpolators
-        self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic['z_win'], 0.05)
+        self.cosmo.update_cosmo_dic(self.cosmo.cosmo_dic["z_win"], 0.05)
         # Compute number of sampled parameters
         npar = 0
         for key in self.provider.model.sampled_dependence.keys():
-            if any(isinstance(
-                    self.provider.model.sampled_dependence[key][i],
-                    EuclidLikelihood) for i in
-                    range(len(self.provider.model.sampled_dependence[key]))):
+            if any(
+                isinstance(
+                    self.provider.model.sampled_dependence[key][i], EuclidLikelihood
+                )
+                for i in range(len(self.provider.model.sampled_dependence[key]))
+            ):
                 npar += 1
         loglike = self.likefinal.loglike(self.cosmo.cosmo_dic, npar)
         return loglike

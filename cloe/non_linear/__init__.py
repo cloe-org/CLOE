@@ -10,12 +10,14 @@ IST:L and will be substituted by the nonlinear recipes from IST:NL.
 
 """
 
-__all__ = ['miscellanous',
-           'power_spectrum',
-           'pgg_spectro',
-           'pgg_phot',
-           'pgL_phot',
-           'pLL_phot',
-           'nonlinear']  # list submodules
+__all__ = [
+    "miscellanous",
+    "power_spectrum",
+    "pgg_spectro",
+    "pgg_phot",
+    "pgL_phot",
+    "pLL_phot",
+    "nonlinear",
+]  # list submodules
 
 from . import *

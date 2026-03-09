@@ -17,10 +17,10 @@ class eftinitTestCase(TestCase):
     def setUpClass(cls) -> None:
 
         # Load cosmology dictionary for tests
-        cosmo_dic = load_test_pickle('cosmo_test_NLspectro1_dic.pickle')
+        cosmo_dic = load_test_pickle("cosmo_test_NLspectro1_dic.pickle")
         # Create instance of EFTofLSS class
         cls.eft = EFTofLSS(cosmo_dic)
-        cls.eft.PL = cosmo_dic['Pk_cb'].P(0.0, cls.eft.ks)
+        cls.eft.PL = cosmo_dic["Pk_cb"].P(0.0, cls.eft.ks)
         cls.PEH = cls.eft.CallEH_NW(0.0)
 
     def setUp(self) -> None:
@@ -68,12 +68,25 @@ class eftinitTestCase(TestCase):
         self.PZ1mu2fb1_test = [6870.017380, -339.109592]
         self.PZ1mu2f2_test = [-3767.607958, 185.735360]
         self.PZ1mu4f2_test = [3102.409421, -153.374232]
-        self.Pgg_kmu_test = [[144746.768191, 242578.11107],
-                             [56833.028809, 93288.221193],
-                             [24680.05168, 43745.442421]]
-        self.nuis = {'b1': 2.0, 'b2': 0.5, 'bG2': -0.7, 'bG3': 1.2,
-                     'c0': 1.0, 'c2': 1.0, 'c4': 1.0, 'ck4': 10.,
-                     'aP': 1.0, 'e0k2': -1.2, 'e2k2': -5.3, 'Psn': 1000.0}
+        self.Pgg_kmu_test = [
+            [144746.768191, 242578.11107],
+            [56833.028809, 93288.221193],
+            [24680.05168, 43745.442421],
+        ]
+        self.nuis = {
+            "b1": 2.0,
+            "b2": 0.5,
+            "bG2": -0.7,
+            "bG3": 1.2,
+            "c0": 1.0,
+            "c2": 1.0,
+            "c4": 1.0,
+            "ck4": 10.0,
+            "aP": 1.0,
+            "e0k2": -1.2,
+            "e2k2": -5.3,
+            "Psn": 1000.0,
+        }
         self.index = 500
         self.lamb = 0.25
         self.rtol = 1e-3
@@ -102,7 +115,7 @@ class eftinitTestCase(TestCase):
             self.eft.CallEH_NW(0.0)[self.index],
             self.PEH_test,
             rtol=self.rtol,
-            err_msg='Error in value returned by CallEH_NW',
+            err_msg="Error in value returned by CallEH_NW",
         )
 
     def test_gaussianFiltering(self):
@@ -110,76 +123,128 @@ class eftinitTestCase(TestCase):
             self.eft._gaussianFiltering(self.lamb, 0.0)[self.index],
             self.Pnw_GS1D_test,
             rtol=self.rtol,
-            err_msg='Error in value returned by _gaussianFiltering'
+            err_msg="Error in value returned by _gaussianFiltering",
         )
 
     def test_IRresum(self):
-        Pnw, Pw, Sigma2, dSigma2 = self.eft.IRresum(IRres='DST')
+        Pnw, Pw, Sigma2, dSigma2 = self.eft.IRresum(IRres="DST")
         npt.assert_allclose(
             [Pnw[self.index], Pw[self.index], Sigma2, dSigma2],
             [self.Pnw_test, self.Pw_test, self.Sigma2_test, self.dSigma2_test],
             rtol=self.rtol,
-            err_msg='Error in value returned by IRresum'
+            err_msg="Error in value returned by IRresum",
         )
 
     def test_muxdamp(self):
-        Sig2mu, RSDdamp = self.eft._muxdamp(self.mu1, self.Sigma2_test,
-                                            self.dSigma2_test, self.f)
+        Sig2mu, RSDdamp = self.eft._muxdamp(
+            self.mu1, self.Sigma2_test, self.dSigma2_test, self.f
+        )
         npt.assert_allclose(
             [Sig2mu, RSDdamp[self.index, 0]],
             [self.Sig2mu_test, self.RSDdamp_test],
-            rtol=self.rtol, err_msg='Error in value returned by _muxdamp'
+            rtol=self.rtol,
+            err_msg="Error in value returned by _muxdamp",
         )
 
     def test_Pgg_kmu_terms(self):
         self.eft._Pgg_kmu_terms(redshift=0.0)
         npt.assert_allclose(
             [term[self.index] for term in self.eft.loop22_nw],
-            [self.Pb1b1_test[0], self.Pb1b2_test[0], self.Pb1bG2_test[0],
-             self.Pb2b2_test[0], self.Pb2bG2_test[0], self.PbG2bG2_test[0],
-             self.Pmu2fb1_test[0], self.Pmu2fb2_test[0], self.Pmu2fbG2_test[0],
-             self.Pmu2f2b12_test[0], self.Pmu2fb12_test[0],
-             self.Pmu2fb1b2_test[0], self.Pmu2fb1bG2_test[0],
-             self.Pmu2f2b1_test[0], self.Pmu2f2b2_test[0],
-             self.Pmu2f2bG2_test[0], self.Pmu4f4_test[0], self.Pmu4f3_test[0],
-             self.Pmu4f3b1_test[0], self.Pmu4f2b2_test[0],
-             self.Pmu4f2bG2_test[0], self.Pmu4f2b1_test[0],
-             self.Pmu4f2b12_test[0], self.Pmu4f2_test[0], self.Pmu6f4_test[0],
-             self.Pmu6f3_test[0], self.Pmu6f3b1_test[0], self.Pmu8f4_test[0]],
-            rtol=self.rtol, err_msg='Error in value returned by '
-                                    '_Pgg_kmu_terms: nw 22 '
+            [
+                self.Pb1b1_test[0],
+                self.Pb1b2_test[0],
+                self.Pb1bG2_test[0],
+                self.Pb2b2_test[0],
+                self.Pb2bG2_test[0],
+                self.PbG2bG2_test[0],
+                self.Pmu2fb1_test[0],
+                self.Pmu2fb2_test[0],
+                self.Pmu2fbG2_test[0],
+                self.Pmu2f2b12_test[0],
+                self.Pmu2fb12_test[0],
+                self.Pmu2fb1b2_test[0],
+                self.Pmu2fb1bG2_test[0],
+                self.Pmu2f2b1_test[0],
+                self.Pmu2f2b2_test[0],
+                self.Pmu2f2bG2_test[0],
+                self.Pmu4f4_test[0],
+                self.Pmu4f3_test[0],
+                self.Pmu4f3b1_test[0],
+                self.Pmu4f2b2_test[0],
+                self.Pmu4f2bG2_test[0],
+                self.Pmu4f2b1_test[0],
+                self.Pmu4f2b12_test[0],
+                self.Pmu4f2_test[0],
+                self.Pmu6f4_test[0],
+                self.Pmu6f3_test[0],
+                self.Pmu6f3b1_test[0],
+                self.Pmu8f4_test[0],
+            ],
+            rtol=self.rtol,
+            err_msg="Error in value returned by " "_Pgg_kmu_terms: nw 22 ",
         )
         npt.assert_allclose(
             [term[self.index] for term in self.eft.loop22_w],
-            [self.Pb1b1_test[1], self.Pb1b2_test[1], self.Pb1bG2_test[1],
-             self.Pb2b2_test[1], self.Pb2bG2_test[1], self.PbG2bG2_test[1],
-             self.Pmu2fb1_test[1], self.Pmu2fb2_test[1], self.Pmu2fbG2_test[1],
-             self.Pmu2f2b12_test[1], self.Pmu2fb12_test[1],
-             self.Pmu2fb1b2_test[1], self.Pmu2fb1bG2_test[1],
-             self.Pmu2f2b1_test[1], self.Pmu2f2b2_test[1],
-             self.Pmu2f2bG2_test[1], self.Pmu4f4_test[1], self.Pmu4f3_test[1],
-             self.Pmu4f3b1_test[1], self.Pmu4f2b2_test[1],
-             self.Pmu4f2bG2_test[1], self.Pmu4f2b1_test[1],
-             self.Pmu4f2b12_test[1], self.Pmu4f2_test[1], self.Pmu6f4_test[1],
-             self.Pmu6f3_test[1], self.Pmu6f3b1_test[1], self.Pmu8f4_test[1]],
-            rtol=self.rtol, err_msg='Error in value returned by '
-                                    '_Pgg_kmu_terms: w 22 '
+            [
+                self.Pb1b1_test[1],
+                self.Pb1b2_test[1],
+                self.Pb1bG2_test[1],
+                self.Pb2b2_test[1],
+                self.Pb2bG2_test[1],
+                self.PbG2bG2_test[1],
+                self.Pmu2fb1_test[1],
+                self.Pmu2fb2_test[1],
+                self.Pmu2fbG2_test[1],
+                self.Pmu2f2b12_test[1],
+                self.Pmu2fb12_test[1],
+                self.Pmu2fb1b2_test[1],
+                self.Pmu2fb1bG2_test[1],
+                self.Pmu2f2b1_test[1],
+                self.Pmu2f2b2_test[1],
+                self.Pmu2f2bG2_test[1],
+                self.Pmu4f4_test[1],
+                self.Pmu4f3_test[1],
+                self.Pmu4f3b1_test[1],
+                self.Pmu4f2b2_test[1],
+                self.Pmu4f2bG2_test[1],
+                self.Pmu4f2b1_test[1],
+                self.Pmu4f2b12_test[1],
+                self.Pmu4f2_test[1],
+                self.Pmu6f4_test[1],
+                self.Pmu6f3_test[1],
+                self.Pmu6f3b1_test[1],
+                self.Pmu8f4_test[1],
+            ],
+            rtol=self.rtol,
+            err_msg="Error in value returned by " "_Pgg_kmu_terms: w 22 ",
         )
         npt.assert_allclose(
             [term[self.index] for term in self.eft.loop13_nw],
-            [self.PZ1b1_test[0], self.PZ1bG3_test[0], self.PZ1bG2_test[0],
-             self.PZ1mu2f_test[0], self.PZ1mu2fb1_test[0],
-             self.PZ1mu2f2_test[0], self.PZ1mu4f2_test[0]],
-            rtol=self.rtol, err_msg='Error in value returned by '
-                                    '_Pgg_kmu_terms: nw 13 '
+            [
+                self.PZ1b1_test[0],
+                self.PZ1bG3_test[0],
+                self.PZ1bG2_test[0],
+                self.PZ1mu2f_test[0],
+                self.PZ1mu2fb1_test[0],
+                self.PZ1mu2f2_test[0],
+                self.PZ1mu4f2_test[0],
+            ],
+            rtol=self.rtol,
+            err_msg="Error in value returned by " "_Pgg_kmu_terms: nw 13 ",
         )
         npt.assert_allclose(
             [term[self.index] for term in self.eft.loop13_w],
-            [self.PZ1b1_test[1], self.PZ1bG3_test[1], self.PZ1bG2_test[1],
-             self.PZ1mu2f_test[1], self.PZ1mu2fb1_test[1],
-             self.PZ1mu2f2_test[1], self.PZ1mu4f2_test[1]],
-            rtol=self.rtol, err_msg='Error in value returned by '
-                                    '_Pgg_kmu_terms: w 13 '
+            [
+                self.PZ1b1_test[1],
+                self.PZ1bG3_test[1],
+                self.PZ1bG2_test[1],
+                self.PZ1mu2f_test[1],
+                self.PZ1mu2fb1_test[1],
+                self.PZ1mu2f2_test[1],
+                self.PZ1mu4f2_test[1],
+            ],
+            rtol=self.rtol,
+            err_msg="Error in value returned by " "_Pgg_kmu_terms: w 13 ",
         )
 
     def test_P_kmu_z(self):
@@ -187,8 +252,8 @@ class eftinitTestCase(TestCase):
         npt.assert_allclose(
             interp([self.k1, self.k2, self.k3], [self.mu1, self.mu2]),
             self.Pgg_kmu_test,
-            rtol=self.rtol, err_msg='Error in value returned by '
-                                    'P_kmu_z'
+            rtol=self.rtol,
+            err_msg="Error in value returned by " "P_kmu_z",
         )
 
     def test_P_realspace_terms_kz(self):
@@ -196,10 +261,15 @@ class eftinitTestCase(TestCase):
         terms = self.eft.P_realspace_terms_kz()
         npt.assert_allclose(
             [t(self.z1, self.k1)[0, 0] for t in terms],
-            [self.Pb1b2_phot_test, self.Pb1bG2_phot_test,
-             self.Pb2b2_phot_test, self.Pb2bG2_phot_test,
-             self.PbG2bG2_phot_test, self.PZ1bG3_phot_test,
-             self.PZ1bG2_phot_test],
-            rtol=self.rtol, err_msg='Error in value returned by '
-                                    'P_realspace_terms_kz '
+            [
+                self.Pb1b2_phot_test,
+                self.Pb1bG2_phot_test,
+                self.Pb2b2_phot_test,
+                self.Pb2bG2_phot_test,
+                self.PbG2bG2_phot_test,
+                self.PZ1bG3_phot_test,
+                self.PZ1bG2_phot_test,
+            ],
+            rtol=self.rtol,
+            err_msg="Error in value returned by " "P_realspace_terms_kz ",
         )

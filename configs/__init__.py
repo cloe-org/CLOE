@@ -1,6 +1,4 @@
-"""Config yaml Storage Module
-
-"""
+"""Config yaml Storage Module"""
 
 __all__ = []  # list submodules
 

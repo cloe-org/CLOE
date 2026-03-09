@@ -6,6 +6,6 @@ This module implements the top level user interface of CLOE.
 
 """
 
-__all__ = ['likelihood_ui']  # list submodules
+__all__ = ["likelihood_ui"]  # list submodules
 
 from . import *

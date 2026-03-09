@@ -42,9 +42,9 @@ class SpectroTestParent:
 
         """
         bias = self.istf_spectro_galbias(redshift)
-        growth = self.test_dict['f_z'](redshift)
-        power = self.test_dict['Pk_delta'].P(redshift, k_scale)
-        pval = (bias + growth * mu_rsd ** 2.0) ** 2.0 * power
+        growth = self.test_dict["f_z"](redshift)
+        power = self.test_dict["Pk_delta"].P(redshift, k_scale)
+        pval = (bias + growth * mu_rsd**2.0) ** 2.0 * power
         return pval
 
     def noise_Pgg_spectro(self, redshift, k_scale, mu_rsd):

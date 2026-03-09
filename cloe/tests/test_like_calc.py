@@ -19,17 +19,15 @@ class likecalcTestCase(TestCase, SpectroTestParent):
 
     def setUp(self):
 
-        mock_cosmo_dic = load_test_pickle('like_calc_test_dic.pickle')
-        mock_cosmo_dic['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
-        mock_cosmo_dic['noise_Pgg_spectro'] = \
-            np.vectorize(self.noise_Pgg_spectro)
+        mock_cosmo_dic = load_test_pickle("like_calc_test_dic.pickle")
+        mock_cosmo_dic["Pgg_spectro"] = np.vectorize(self.Pgg_spectro_def)
+        mock_cosmo_dic["noise_Pgg_spectro"] = np.vectorize(self.noise_Pgg_spectro)
         # self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic
         # init Euclike
         mock_obs = build_mock_observables()
         self.like_tt = Euclike(mock_data, mock_obs)
-        self.like_tt.fiducial_cosmo_quantities_dic.update(
-            self.test_dict)
+        self.like_tt.fiducial_cosmo_quantities_dic.update(self.test_dict)
         self.like_tt.get_masked_data()
         # The correct check value, using the h scaling for the h from
         # supplied external file for all the probes together is:
@@ -66,10 +64,10 @@ class likecalcTestCase(TestCase, SpectroTestParent):
             bin_edge_list = [0.90, 1.10, 1.30, 1.50, 1.80]
 
         istf_bias_list = [
-            self.test_dict['nuisance_parameters']['b1_spectro_bin1'],
-            self.test_dict['nuisance_parameters']['b1_spectro_bin2'],
-            self.test_dict['nuisance_parameters']['b1_spectro_bin3'],
-            self.test_dict['nuisance_parameters']['b1_spectro_bin4']
+            self.test_dict["nuisance_parameters"]["b1_spectro_bin1"],
+            self.test_dict["nuisance_parameters"]["b1_spectro_bin2"],
+            self.test_dict["nuisance_parameters"]["b1_spectro_bin3"],
+            self.test_dict["nuisance_parameters"]["b1_spectro_bin4"],
         ]
 
         if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
@@ -87,7 +85,7 @@ class likecalcTestCase(TestCase, SpectroTestParent):
             self.like_tt.loglike(self.test_dict, 1),
             self.check_loglike,
             rtol=1e-06,
-            err_msg='Loglike failed',
+            err_msg="Loglike failed",
         )
 
 
@@ -95,10 +93,9 @@ class likecalcBNT_TestCase(TestCase, SpectroTestParent):
 
     def setUp(self):
 
-        mock_cosmo_dic = load_test_pickle('like_calc_test_dic.pickle')
-        mock_cosmo_dic['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
-        mock_cosmo_dic['noise_Pgg_spectro'] = \
-            np.vectorize(self.noise_Pgg_spectro)
+        mock_cosmo_dic = load_test_pickle("like_calc_test_dic.pickle")
+        mock_cosmo_dic["Pgg_spectro"] = np.vectorize(self.Pgg_spectro_def)
+        mock_cosmo_dic["noise_Pgg_spectro"] = np.vectorize(self.noise_Pgg_spectro)
         # self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic
         # The correct check value, using the h scaling for the h from
@@ -136,10 +133,10 @@ class likecalcBNT_TestCase(TestCase, SpectroTestParent):
             bin_edge_list = [0.90, 1.10, 1.30, 1.50, 1.80]
 
         istf_bias_list = [
-            self.test_dict['nuisance_parameters']['b1_spectro_bin1'],
-            self.test_dict['nuisance_parameters']['b1_spectro_bin2'],
-            self.test_dict['nuisance_parameters']['b1_spectro_bin3'],
-            self.test_dict['nuisance_parameters']['b1_spectro_bin4']
+            self.test_dict["nuisance_parameters"]["b1_spectro_bin1"],
+            self.test_dict["nuisance_parameters"]["b1_spectro_bin2"],
+            self.test_dict["nuisance_parameters"]["b1_spectro_bin3"],
+            self.test_dict["nuisance_parameters"]["b1_spectro_bin4"],
         ]
 
         if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
@@ -155,17 +152,16 @@ class likecalcBNT_TestCase(TestCase, SpectroTestParent):
     def test_loglike_BNT_unity(self):
         # init Euclike
         self.mock_obs = build_mock_observables()
-        mock_data['cov_model'] = 'Gauss'
-        self.mock_obs['selection']['matrix_transform_phot'] = 'BNT-test'
+        mock_data["cov_model"] = "Gauss"
+        self.mock_obs["selection"]["matrix_transform_phot"] = "BNT-test"
         self.like_tt = Euclike(mock_data, self.mock_obs)
-        self.like_tt.fiducial_cosmo_quantities_dic.update(
-            self.test_dict)
+        self.like_tt.fiducial_cosmo_quantities_dic.update(self.test_dict)
         self.like_tt.get_masked_data()
         npt.assert_allclose(
             self.like_tt.loglike(self.test_dict, 1),
             self.check_loglike,
             rtol=1e-06,
-            err_msg='Loglike failed',
+            err_msg="Loglike failed",
         )
 
 
@@ -173,21 +169,19 @@ class likecalcngTestCase(TestCase, SpectroTestParent):
 
     def setUp(self):
 
-        mock_cosmo_dic = load_test_pickle('like_calc_test_dic.pickle')
-        mock_cosmo_dic['Pgg_spectro'] = np.vectorize(self.Pgg_spectro_def)
-        mock_cosmo_dic['noise_Pgg_spectro'] = \
-            np.vectorize(self.noise_Pgg_spectro)
+        mock_cosmo_dic = load_test_pickle("like_calc_test_dic.pickle")
+        mock_cosmo_dic["Pgg_spectro"] = np.vectorize(self.Pgg_spectro_def)
+        mock_cosmo_dic["noise_Pgg_spectro"] = np.vectorize(self.noise_Pgg_spectro)
 
         # self.fiducial_dict = fid_mock_dic
         self.test_dict = mock_cosmo_dic
         # init Euclike
         mock_obs = build_mock_observables()
         self.mock_data_ng = copy.deepcopy(mock_data)
-        self.mock_data_ng['spectro']['cov_is_num'] = True
-        self.mock_data_ng['spectro']['cov_nsim'] = 3500
+        self.mock_data_ng["spectro"]["cov_is_num"] = True
+        self.mock_data_ng["spectro"]["cov_nsim"] = 3500
         self.like_tt_ng = Euclike(self.mock_data_ng, mock_obs)
-        self.like_tt_ng.fiducial_cosmo_quantities_dic.update(
-            self.test_dict)
+        self.like_tt_ng.fiducial_cosmo_quantities_dic.update(self.test_dict)
         self.like_tt_ng.get_masked_data()
 
         # The correct check value, using the h scaling for the h from
@@ -225,10 +219,10 @@ class likecalcngTestCase(TestCase, SpectroTestParent):
             bin_edge_list = [0.90, 1.10, 1.30, 1.50, 1.80]
 
         istf_bias_list = [
-            self.test_dict['nuisance_parameters']['b1_spectro_bin1'],
-            self.test_dict['nuisance_parameters']['b1_spectro_bin2'],
-            self.test_dict['nuisance_parameters']['b1_spectro_bin3'],
-            self.test_dict['nuisance_parameters']['b1_spectro_bin4']
+            self.test_dict["nuisance_parameters"]["b1_spectro_bin1"],
+            self.test_dict["nuisance_parameters"]["b1_spectro_bin2"],
+            self.test_dict["nuisance_parameters"]["b1_spectro_bin3"],
+            self.test_dict["nuisance_parameters"]["b1_spectro_bin4"],
         ]
 
         if bin_edge_list[0] <= redshift < bin_edge_list[-1]:
@@ -246,10 +240,10 @@ class likecalcngTestCase(TestCase, SpectroTestParent):
             self.like_tt_ng.loglike(self.test_dict, 10),
             self.check_loglike_ng,
             rtol=1e-06,
-            err_msg='Non-gaussian loglike failed',
+            err_msg="Non-gaussian loglike failed",
         )
 
     def test_spectro_cov_nsim(self):
-        self.mock_data_ng['spectro']['cov_nsim'] = 1
+        self.mock_data_ng["spectro"]["cov_nsim"] = 1
         npt.assert_raises(ValueError, self.like_tt_ng.get_masked_data)
-        self.mock_data_ng['spectro']['cov_nsim'] = 3500
+        self.mock_data_ng["spectro"]["cov_nsim"] = 3500

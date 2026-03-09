@@ -72,14 +72,10 @@ class Pgg_phot_model(PowerSpectrum):
         """
         bterm = self.theory["b1_inter"](redshift) ** 2.0
         if self.theory["GCph_do_nisb"]:
-            pnoBFM =\
-                self.theory["Pk_cb_linearnu_recipe"].P(redshift, wavenumber)
+            pnoBFM = self.theory["Pk_cb_linearnu_recipe"].P(redshift, wavenumber)
         else:
-            pnoBFM =\
-                self.theory["Pk_halomodel_recipe"].P(redshift, wavenumber)
-        pval = (bterm *
-                pnoBFM *
-                self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0])
+            pnoBFM = self.theory["Pk_halomodel_recipe"].P(redshift, wavenumber)
+        pval = bterm * pnoBFM * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
         return pval
 
     def Pgg_phot_emu(self, redshift, wavenumber):
@@ -111,20 +107,17 @@ class Pgg_phot_model(PowerSpectrum):
         """
         bterm = self.theory["b1_inter"](redshift) ** 2.0
         pnoBFM = (
-            self.theory["Pk_delta"].P(redshift, wavenumber) *
-            self.nonlinear_dic["NL_boost"](redshift, wavenumber)[0]
+            self.theory["Pk_delta"].P(redshift, wavenumber)
+            * self.nonlinear_dic["NL_boost"](redshift, wavenumber)[0]
         )
         if self.theory["GCph_do_nisb"]:
             # do linear neutrino recepie
-            f_cb = ((self.theory["Omb"] + self.theory["Omc"]) /
-                    self.theory["Omm"])
+            f_cb = (self.theory["Omb"] + self.theory["Omc"]) / self.theory["Omm"]
             f_nu = 1 - f_cb
             t2 = self.theory["Pk_nunonu_Boltzmann"].P(redshift, wavenumber)
             t3 = self.theory["Pk_nunu_Boltzmann"].P(redshift, wavenumber)
             pnoBFM = (pnoBFM - 2 * f_cb * f_nu * t2 - f_nu**2 * t3) / f_cb**2
-        pval = (bterm *
-                pnoBFM *
-                self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0])
+        pval = bterm * pnoBFM * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
         return pval
 
     def _add_NLbias_contributions_gg(self, Pnl, redshift, wavenumber):
@@ -158,29 +151,22 @@ class Pgg_phot_model(PowerSpectrum):
         bG2 = self.theory["bG2_inter"](redshift)
         bG3 = self.theory["bG3_inter"](redshift)
 
-        Pb1b2 =\
-            self.nonlinear_dic["Pb1b2_kz"](redshift, wavenumber, grid=False)
-        Pb1bG2 =\
-            self.nonlinear_dic["Pb1bG2_kz"](redshift, wavenumber, grid=False)
-        Pb2b2 =\
-            self.nonlinear_dic["Pb2b2_kz"](redshift, wavenumber, grid=False)
-        Pb2bG2 =\
-            self.nonlinear_dic["Pb2bG2_kz"](redshift, wavenumber, grid=False)
-        PbG2bG2 =\
-            self.nonlinear_dic["PbG2bG2_kz"](redshift, wavenumber, grid=False)
-        PZ1bG3 =\
-            self.nonlinear_dic["PZ1bG3_kz"](redshift, wavenumber, grid=False)
-        PZ1bG2 =\
-            self.nonlinear_dic["PZ1bG2_kz"](redshift, wavenumber, grid=False)
+        Pb1b2 = self.nonlinear_dic["Pb1b2_kz"](redshift, wavenumber, grid=False)
+        Pb1bG2 = self.nonlinear_dic["Pb1bG2_kz"](redshift, wavenumber, grid=False)
+        Pb2b2 = self.nonlinear_dic["Pb2b2_kz"](redshift, wavenumber, grid=False)
+        Pb2bG2 = self.nonlinear_dic["Pb2bG2_kz"](redshift, wavenumber, grid=False)
+        PbG2bG2 = self.nonlinear_dic["PbG2bG2_kz"](redshift, wavenumber, grid=False)
+        PZ1bG3 = self.nonlinear_dic["PZ1bG3_kz"](redshift, wavenumber, grid=False)
+        PZ1bG2 = self.nonlinear_dic["PZ1bG2_kz"](redshift, wavenumber, grid=False)
 
         return (
-            (b1**2.0) * Pnl +
-            (b1 * b2) * Pb1b2 +
-            (b1 * bG2) * (Pb1bG2 + PZ1bG2) +
-            (b1 * bG3) * PZ1bG3 +
-            (b2**2.0) * Pb2b2 +
-            (b2 * bG2) * Pb2bG2 +
-            (bG2**2.0) * PbG2bG2
+            (b1**2.0) * Pnl
+            + (b1 * b2) * Pb1b2
+            + (b1 * bG2) * (Pb1bG2 + PZ1bG2)
+            + (b1 * bG3) * PZ1bG3
+            + (b2**2.0) * Pb2b2
+            + (b2 * bG2) * Pb2bG2
+            + (bG2**2.0) * PbG2bG2
         )
 
     def Pgg_phot_halo_NLbias(self, redshift, wavenumber):
@@ -225,8 +211,8 @@ class Pgg_phot_model(PowerSpectrum):
         """
 
         Pmm = (
-            self.theory["Pk_halomodel_recipe"].P(redshift, wavenumber) *
-            self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
+            self.theory["Pk_halomodel_recipe"].P(redshift, wavenumber)
+            * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
         )
 
         pval = self._add_NLbias_contributions_gg(Pmm, redshift, wavenumber)
@@ -276,9 +262,9 @@ class Pgg_phot_model(PowerSpectrum):
         """
 
         Pmm = (
-            self.theory["Pk_delta"].P(redshift, wavenumber) *
-            self.nonlinear_dic["NL_boost"](redshift, wavenumber)[0] *
-            self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
+            self.theory["Pk_delta"].P(redshift, wavenumber)
+            * self.nonlinear_dic["NL_boost"](redshift, wavenumber)[0]
+            * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
         )
 
         pval = self._add_NLbias_contributions_gg(Pmm, redshift, wavenumber)

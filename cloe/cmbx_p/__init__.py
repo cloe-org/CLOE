@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""CMB observables module
+"""CMB observables module"""
 
-"""
-
-__all__ = ['cmbx']
+__all__ = ["cmbx"]
 
 from . import *  # list submodules

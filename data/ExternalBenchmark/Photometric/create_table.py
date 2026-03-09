@@ -2,26 +2,27 @@ from fitsio import FITS
 import os
 import gc
 
+
 def gather_cls(path):
 
     # Read in the FITS PCl file
     fits = FITS(path)
 
     # Initialize the dictionary with multipole values
-    dic = {'ELLS':fits[1][:]}
+    dic = {"ELLS": fits[1][:]}
 
     # Loop through the hdus and create dictionary elements for each hdu
-    for i in range(2,len(fits)):
+    for i in range(2, len(fits)):
 
         hdr = fits[i].read_header()
-        fields = hdr['EXTNAME'].strip().split('-')
-        bins = hdr['BIN_COMB'].strip().split('-')
-        naxis = hdr['NAXIS']
+        fields = hdr["EXTNAME"].strip().split("-")
+        bins = hdr["BIN_COMB"].strip().split("-")
+        naxis = hdr["NAXIS"]
 
-        if naxis==1:
-            dic['%s%s-%s%s'%(fields[0], bins[0], fields[1], bins[1])] = fits[i][:]
-        elif naxis==2:
-            dic['%s%s-%s%s'%(fields[0], bins[0], fields[1], bins[1])] = fits[i][:,:]
+        if naxis == 1:
+            dic["%s%s-%s%s" % (fields[0], bins[0], fields[1], bins[1])] = fits[i][:]
+        elif naxis == 2:
+            dic["%s%s-%s%s" % (fields[0], bins[0], fields[1], bins[1])] = fits[i][:, :]
 
     # trying to clean
     fits.close()
@@ -40,31 +41,31 @@ def gather_mixmats(path):
     dic = {}
 
     # Loop through the hdus and create dictionary elements for each hdu
-    for i in range(1,len(fits)):
+    for i in range(1, len(fits)):
 
         hdr = fits[i].read_header()
-        extname = hdr['EXTNAME'].strip()
-        if extname[1]=='Z':
-            field1 = 'ZERO'
-        if extname[1]=='P':
-            field1 = 'PLUS'
-        if extname[1]=='M':
-            field1 = 'MINUS'
-        if extname[len(extname)-3]=='E':
-            field2 = 'ZERO'
-        if extname[len(extname)-3]=='L':
-            field2 = 'PLUS'
-        if extname[len(extname)-3]=='N':
-            field2 = 'MINUS'
+        extname = hdr["EXTNAME"].strip()
+        if extname[1] == "Z":
+            field1 = "ZERO"
+        if extname[1] == "P":
+            field1 = "PLUS"
+        if extname[1] == "M":
+            field1 = "MINUS"
+        if extname[len(extname) - 3] == "E":
+            field2 = "ZERO"
+        if extname[len(extname) - 3] == "L":
+            field2 = "PLUS"
+        if extname[len(extname) - 3] == "N":
+            field2 = "MINUS"
 
-        bins = hdr['BIN_COMB'].strip().split('-')
+        bins = hdr["BIN_COMB"].strip().split("-")
 
-        dic['%s%s-%s%s'%(field1, bins[0], field2, bins[1])] = fits[i][:,:]
+        dic["%s%s-%s%s" % (field1, bins[0], field2, bins[1])] = fits[i][:, :]
 
     fits.close()
     return dic
 
-                        
+
 def read_cls(paths):
     """
     Reads the outputs from PK-WL's pseudo power spectra estimator.
@@ -96,7 +97,7 @@ def read_cls(paths):
     # Plots E-Mode autopower spectrum for bin 1:
     >>> plt.plot(Cls['ELLS'], Cls['E1-E1'])
     >>> plt.show()
-    
+
     """
     cls = {}
 
@@ -104,7 +105,7 @@ def read_cls(paths):
         if os.path.isfile(ipath):
             cls.update(gather_cls(ipath))
         else:
-            print("File %s does not exist" %(ipath))
+            print("File %s does not exist" % (ipath))
 
     return cls
 
@@ -131,7 +132,7 @@ def read_mixmats(paths):
 
     Notes
     -------
-    For more details on the Mixing Matrices, please check Brown, Castro, Taylor (2005) 
+    For more details on the Mixing Matrices, please check Brown, Castro, Taylor (2005)
         https://arxiv.org/abs/astro-ph/0410394
     ZERO is usually associated with spin-0 fields such as galaxy clustering
     MINUS/PLUS are associated with spin-2 fields such as cosmic shear
@@ -146,7 +147,7 @@ def read_mixmats(paths):
     # Plots M^++ for bin 1:
     >>> plt.imshow(MM['PLUS1-PLUS1'])
     >>> plt.show()
-    
+
     """
 
     mm = {}
@@ -155,7 +156,6 @@ def read_mixmats(paths):
         if os.path.isfile(os.path.join(ipath)):
             mm.update(gather_mixmats(ipath))
         else:
-            print("File %s does not exist" %(ipath))
+            print("File %s does not exist" % (ipath))
 
     return mm
-

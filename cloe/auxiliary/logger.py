@@ -9,7 +9,7 @@ import pprint
 from datetime import datetime
 
 
-def open_logger(name='CLOE'):
+def open_logger(name="CLOE"):
     """Opens an instance of :obj:`logging.Logger`.
 
     Parameters
@@ -25,13 +25,14 @@ def open_logger(name='CLOE'):
     """
     logging.captureWarnings(True)
 
-    formatter = logging.Formatter(fmt='%(asctime)s [%(name)s] '
-                                      '%(levelname)s - %(message)s',
-                                  datefmt='%Y-%m-%d %H:%M:%S',)
+    formatter = logging.Formatter(
+        fmt="%(asctime)s [%(name)s] " "%(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
 
     date_time = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-    filename = '{0}-{1}.log'.format(name, date_time)
-    fh = logging.FileHandler(filename=filename, mode='w')
+    filename = "{0}-{1}.log".format(name, date_time)
+    fh = logging.FileHandler(filename=filename, mode="w")
     fh.setLevel(logging.INFO)
     fh.setFormatter(formatter)
 
@@ -39,7 +40,7 @@ def open_logger(name='CLOE'):
     log.setLevel(logging.INFO)
     log.addHandler(fh)
 
-    warnings_log = logging.getLogger('py.warnings')
+    warnings_log = logging.getLogger("py.warnings")
     warnings_log.addHandler(fh)
 
     return log
@@ -71,8 +72,11 @@ def set_logging_level(log, level):
         log.setLevel(logging.INFO)
         log.warning("Unknown logging verbose level: {}".format(level))
 
-    log.info("Logging verbose level: {}".format(
-        logging.getLevelName(log.getEffectiveLevel())))
+    log.info(
+        "Logging verbose level: {}".format(
+            logging.getLevelName(log.getEffectiveLevel())
+        )
+    )
 
 
 def log_debug(message):
@@ -84,7 +88,7 @@ def log_debug(message):
     message: str
         Message to be logged
     """
-    log = logging.getLogger('CLOE')
+    log = logging.getLogger("CLOE")
     log.debug(message)
 
 
@@ -97,9 +101,9 @@ def log_info(message):
     message: str or dict
         Message to be logged
     """
-    log = logging.getLogger('CLOE')
+    log = logging.getLogger("CLOE")
     if type(message) is dict:
-        message = '\n' + pprint.pformat(message)
+        message = "\n" + pprint.pformat(message)
     log.info(message)
 
 
@@ -112,7 +116,7 @@ def log_warning(message):
     message: str
         Message to be logged
     """
-    log = logging.getLogger('CLOE')
+    log = logging.getLogger("CLOE")
     log.warning(message)
 
 
@@ -125,7 +129,7 @@ def log_error(message):
     message: str
         Message to be logged
     """
-    log = logging.getLogger('CLOE')
+    log = logging.getLogger("CLOE")
     log.error(message)
 
 
@@ -138,7 +142,7 @@ def log_critical(message):
     message: str
         Message to be logged
     """
-    log = logging.getLogger('CLOE')
+    log = logging.getLogger("CLOE")
     log.critical(message)
 
 
@@ -166,11 +170,11 @@ def catch_error(exception, log=None):
     log : logging.Logger, optional
         Logging structure instance (default is ``None``)
     """
-    err_txt = 'ERROR'
+    err_txt = "ERROR"
 
-    stream_txt = '{0}: {1}\n'.format(err_txt, exception)
+    stream_txt = "{0}: {1}\n".format(err_txt, exception)
     sys.stderr.write(stream_txt)
 
     if not isinstance(log, type(None)):
-        log_txt = 'ERROR: {0}\n'.format(exception)
+        log_txt = "ERROR: {0}\n".format(exception)
         log.exception(log_txt)

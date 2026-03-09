@@ -8,8 +8,7 @@ of CLOE.
 import numpy as np
 from scipy import integrate, interpolate
 from scipy.special import jv
-from cloe.photometric_survey.redshift_distribution \
-    import RedshiftDistribution
+from cloe.photometric_survey.redshift_distribution import RedshiftDistribution
 from cloe.auxiliary.redshift_bins import linear_interpolator
 import warnings
 
@@ -52,9 +51,7 @@ class Photo:
         z_wmax = 4.0
         self.z_wsamp = 1000
         self.z_trapz_sampling = 500
-        self.z_winterp = np.logspace(z_wlogmin,
-                                     np.log10(z_wmax),
-                                     self.z_wsamp)
+        self.z_winterp = np.logspace(z_wlogmin, np.log10(z_wmax), self.z_wsamp)
         self.z_winterp[0] = z_wmin1
         self.z_winterp[1] = z_wmin2
         self.z_winterp[2] = z_wmin3
@@ -69,9 +66,9 @@ class Photo:
         self.nint = 128
         self.ells_int = np.append(
             np.linspace(2.0, 9.0, 8),
-            np.logspace(1.0, np.log10(self.ell_max + 1), self.nint - 8))
-        self.ells_dense = \
-            np.linspace(2, self.ell_max, self.ell_max - 1).astype(int)
+            np.logspace(1.0, np.log10(self.ell_max + 1), self.nint - 8),
+        )
+        self.ells_dense = np.linspace(2, self.ell_max, self.ell_max - 1).astype(int)
 
         self.bessel_dict = {}
         self._prefactor_dict = {}
@@ -102,11 +99,9 @@ class Photo:
         cosmo_dic: dict
             Cosmological dictionary from Cosmology class.
         """
-        nuisance_dict = cosmo_dic['nuisance_parameters']
-        self.nz_GC = RedshiftDistribution('GCphot', self.nz_dic_GC,
-                                          nuisance_dict)
-        self.nz_WL = RedshiftDistribution('WL', self.nz_dic_WL,
-                                          nuisance_dict)
+        nuisance_dict = cosmo_dic["nuisance_parameters"]
+        self.nz_GC = RedshiftDistribution("GCphot", self.nz_dic_GC, nuisance_dict)
+        self.nz_WL = RedshiftDistribution("WL", self.nz_dic_WL, nuisance_dict)
         return None
 
     def update(self, cosmo_dic):
@@ -130,8 +125,8 @@ class Photo:
             Cosmological dictionary from :obj:`cosmology` class
         """
         self.theory = cosmo_dic
-        nuisance_dict = self.theory['nuisance_parameters']
-        obs_sel = self.theory['obs_selection']
+        nuisance_dict = self.theory["nuisance_parameters"]
+        obs_sel = self.theory["obs_selection"]
 
         # Commenting this part out as we are temporarily not using the
         # angular diameter distance obtained from CAMB, but we are coding
@@ -139,17 +134,19 @@ class Photo:
         # self.vadd2 = np.vectorize(
         #         self.theory['CAMBdata'].angular_diameter_distance2)
 
-        if self.theory['bias_model'] == 2:
+        if self.theory["bias_model"] == 2:
             self.multiply_bias_cl = True
 
-        if self.theory['f_K_z_func'] is None:
-            raise KeyError('No interpolated function for transverse comoving '
-                           'distance exists in cosmo_dic.')
+        if self.theory["f_K_z_func"] is None:
+            raise KeyError(
+                "No interpolated function for transverse comoving "
+                "distance exists in cosmo_dic."
+            )
 
-        self.f_K_z_grid = self.theory['f_K_z_func'](self.z_grid_for_cl)
-        self.H_z_grid = self.theory['H_z_func'](self.z_grid_for_cl)
+        self.f_K_z_grid = self.theory["f_K_z_func"](self.z_grid_for_cl)
+        self.H_z_grid = self.theory["H_z_func"](self.z_grid_for_cl)
 
-        z_wmax = self.theory['z_win'][-1]
+        z_wmax = self.theory["z_win"][-1]
 
         # holders for power spectra in Limber approximation
         self.power_dd_WL = []
@@ -166,25 +163,28 @@ class Photo:
         self._stored_GC = False
         self._stored_XC = False
 
-        if any(obs_sel['GCphot'].values()):
-            self.nz_GC = RedshiftDistribution('GCphot', self.nz_dic_GC,
-                                              nuisance_dict)
-            self.photobias = [nuisance_dict[f'b1_photo_bin{i}']
-                              for i in self.nz_GC.get_tomographic_bins()]
+        if any(obs_sel["GCphot"].values()):
+            self.nz_GC = RedshiftDistribution("GCphot", self.nz_dic_GC, nuisance_dict)
+            self.photobias = [
+                nuisance_dict[f"b1_photo_bin{i}"]
+                for i in self.nz_GC.get_tomographic_bins()
+            ]
 
-            if self.theory['magbias_model'] <= 2:
-                self.magbias = [nuisance_dict[f'magnification_bias_{i}']
-                                for i in self.nz_GC.get_tomographic_bins()]
-                if self.theory['magbias_model'] == 1:
-                    self.magbias = \
-                        linear_interpolator(
-                            self.theory['redshift_bins_means_phot'],
-                            self.magbias)
-            elif self.theory['magbias_model'] == 3:
+            if self.theory["magbias_model"] <= 2:
+                self.magbias = [
+                    nuisance_dict[f"magnification_bias_{i}"]
+                    for i in self.nz_GC.get_tomographic_bins()
+                ]
+                if self.theory["magbias_model"] == 1:
+                    self.magbias = linear_interpolator(
+                        self.theory["redshift_bins_means_phot"], self.magbias
+                    )
+            elif self.theory["magbias_model"] == 3:
                 self.magbias = self.poly_mag_bias
             else:
-                raise ValueError('magbias_model flag can only be selected '
-                                 'from the values (1,2,3)')
+                raise ValueError(
+                    "magbias_model flag can only be selected " "from the values (1,2,3)"
+                )
 
             # z_wtom is the number of tomographic bins + 1
             z_wtom_gc = 1 + self.nz_GC.get_num_tomographic_bins()
@@ -194,38 +194,36 @@ class Photo:
             self.interpwingal[:, 0] = self.z_winterp
             self.interpwinmag[:, 0] = self.z_winterp
             for tom_i in range(1, z_wtom_gc):
-                self.interpwingal[:, tom_i] = self.GC_window(self.z_winterp,
-                                                             tom_i)
+                self.interpwingal[:, tom_i] = self.GC_window(self.z_winterp, tom_i)
                 self.interpwinmag[:, tom_i] = self.magnification_window(
-                    self.z_winterp, tom_i)
+                    self.z_winterp, tom_i
+                )
             if self.add_RSD and self._ells_GC_or_XC is not None:
                 self.interpwinrsd = np.zeros(
-                    shape=(z_wtom_gc, 3, len(self._ells_GC_or_XC),
-                           self.z_wsamp))
+                    shape=(z_wtom_gc, 3, len(self._ells_GC_or_XC), self.z_wsamp)
+                )
                 self.interpwinrsd[0, :, :, :] = self.z_winterp
                 for tom_i in range(1, z_wtom_gc):
-                    self.interpwinrsd[tom_i, :, :, :] = \
-                        self.GC_window_RSD(self.z_winterp,
-                                           self._ells_GC_or_XC, tom_i)
-        if any(obs_sel['WL'].values()):
-            self.nz_WL = RedshiftDistribution('WL', self.nz_dic_WL,
-                                              nuisance_dict)
-            self.multbias = [nuisance_dict[f'multiplicative_bias_{i}']
-                             for i in self.nz_WL.get_tomographic_bins()]
+                    self.interpwinrsd[tom_i, :, :, :] = self.GC_window_RSD(
+                        self.z_winterp, self._ells_GC_or_XC, tom_i
+                    )
+        if any(obs_sel["WL"].values()):
+            self.nz_WL = RedshiftDistribution("WL", self.nz_dic_WL, nuisance_dict)
+            self.multbias = [
+                nuisance_dict[f"multiplicative_bias_{i}"]
+                for i in self.nz_WL.get_tomographic_bins()
+            ]
             # z_wtom is the number of tomographic bins + 1
             z_wtom_wl = 1 + self.nz_WL.get_num_tomographic_bins()
 
-            self.wl_int_z_max = {i: z_wmax
-                                 for i in self.nz_WL.get_tomographic_bins()}
+            self.wl_int_z_max = {i: z_wmax for i in self.nz_WL.get_tomographic_bins()}
             self.interpwin = np.zeros(shape=(self.z_wsamp, z_wtom_wl))
             self.interpwinia = np.zeros(shape=(self.z_wsamp, z_wtom_wl))
             self.interpwin[:, 0] = self.z_winterp
             self.interpwinia[:, 0] = self.z_winterp
             for tom_i in range(1, z_wtom_wl):
-                self.interpwin[:, tom_i] = self.WL_window(self.z_winterp,
-                                                          tom_i)
-                self.interpwinia[:, tom_i] = self.IA_window(self.z_winterp,
-                                                            tom_i)
+                self.interpwin[:, tom_i] = self.WL_window(self.z_winterp, tom_i)
+                self.interpwinia[:, tom_i] = self.IA_window(self.z_winterp, tom_i)
 
     def _set_bessel_tables(self, theta_rad):
         r"""Sets tables for Bessel functions.
@@ -239,18 +237,17 @@ class Photo:
             Values of the angular separation (in radians) at which the Bessel
             functions have to be evaluated
         """
-        bessel0_grid = np.array([jv(0, self.ells_dense * th)
-                                 for th in theta_rad])
-        bessel2_grid = np.array([jv(2, self.ells_dense * th)
-                                 for th in theta_rad])
-        bessel4_grid = np.array([jv(4, self.ells_dense * th)
-                                 for th in theta_rad])
+        bessel0_grid = np.array([jv(0, self.ells_dense * th) for th in theta_rad])
+        bessel2_grid = np.array([jv(2, self.ells_dense * th) for th in theta_rad])
+        bessel4_grid = np.array([jv(4, self.ells_dense * th) for th in theta_rad])
         self.bessel_dict[0] = bessel0_grid
         self.bessel_dict[2] = bessel2_grid
         self.bessel_dict[4] = bessel4_grid
-        warnings.warn('Bessel tables have been set with the specified angular '
-                      'separations. Computing 3x2pt correlation functions at '
-                      'different angles will lead to unexpected outputs.')
+        warnings.warn(
+            "Bessel tables have been set with the specified angular "
+            "separations. Computing 3x2pt correlation functions at "
+            "different angles will lead to unexpected outputs."
+        )
 
     def set_prefactor(self, ells_WL=None, ells_XC=None, ells_GC_phot=None):
         r"""Computes the prefactors for the WL XC and GCphot :math:`C(\ell)`'s.
@@ -298,40 +295,41 @@ class Photo:
 
         # WL
         if ells_WL is not None:
-            self._prefactor_dict['shearIA_WL'] = \
-                (self._eval_prefactor_shearia(ells_WL))**2
+            self._prefactor_dict["shearIA_WL"] = (
+                self._eval_prefactor_shearia(ells_WL)
+            ) ** 2
             self.ells_WL = ells_WL
 
         # XC
         if ells_XC is not None:
-            self._prefactor_dict['shearIA_XC'] = \
-                self._eval_prefactor_shearia(ells_XC)
-            self._prefactor_dict['mag_XC'] = \
-                self._eval_prefactor_mag(ells_XC)
+            self._prefactor_dict["shearIA_XC"] = self._eval_prefactor_shearia(ells_XC)
+            self._prefactor_dict["mag_XC"] = self._eval_prefactor_mag(ells_XC)
             self.ells_XC = ells_XC
 
         # GCphot
         if ells_GC_phot is not None:
-            self._prefactor_dict['mag_GCphot'] = \
-                self._eval_prefactor_mag(ells_GC_phot)
-            self._prefactor_dict['L0_GCphot'] = \
-                self._eval_prefactor_l_0(ells_GC_phot)
-            self._prefactor_dict['Lplus1_GCphot'] = \
-                self._eval_prefactor_l_plus1(ells_GC_phot)
-            self._prefactor_dict['Lminus1_GCphot'] = \
-                self._eval_prefactor_l_minus1(ells_GC_phot)
+            self._prefactor_dict["mag_GCphot"] = self._eval_prefactor_mag(ells_GC_phot)
+            self._prefactor_dict["L0_GCphot"] = self._eval_prefactor_l_0(ells_GC_phot)
+            self._prefactor_dict["Lplus1_GCphot"] = self._eval_prefactor_l_plus1(
+                ells_GC_phot
+            )
+            self._prefactor_dict["Lminus1_GCphot"] = self._eval_prefactor_l_minus1(
+                ells_GC_phot
+            )
             self.ells_GC_phot = ells_GC_phot
 
         if self.add_RSD:
             if ells_GC_phot is not None and ells_XC is not None:
-                self._ells_GC_or_XC = \
-                        np.union1d(self.ells_GC_phot, self.ells_XC)
-                self._prefactor_dict['L0_GC_or_XC'] = \
-                    self._eval_prefactor_l_0(self._ells_GC_or_XC)
-                self._prefactor_dict['Lplus1_GC_or_XC'] = \
-                    self._eval_prefactor_l_plus1(self._ells_GC_or_XC)
-                self._prefactor_dict['Lminus1_GC_or_XC'] = \
+                self._ells_GC_or_XC = np.union1d(self.ells_GC_phot, self.ells_XC)
+                self._prefactor_dict["L0_GC_or_XC"] = self._eval_prefactor_l_0(
+                    self._ells_GC_or_XC
+                )
+                self._prefactor_dict["Lplus1_GC_or_XC"] = self._eval_prefactor_l_plus1(
+                    self._ells_GC_or_XC
+                )
+                self._prefactor_dict["Lminus1_GC_or_XC"] = (
                     self._eval_prefactor_l_minus1(self._ells_GC_or_XC)
+                )
 
     def GC_window(self, z, bin_i):
         r"""GC window.
@@ -356,7 +354,7 @@ class Photo:
         """
 
         n_z_normalized = self.nz_GC.evaluates_n_i_z(bin_i, z)
-        window_GC = n_z_normalized * self.theory['H_z_func_Mpc'](z)
+        window_GC = n_z_normalized * self.theory["H_z_func_Mpc"](z)
 
         return window_GC
 
@@ -393,24 +391,27 @@ class Photo:
         ell = np.atleast_1d(ell)
         z = np.atleast_1d(z)
 
-        tdist = self.theory['f_K_z_func'](z)
-        zm_arr = np.array([[self.z_minus1(ll, tdist) for ll in ell],
-                           np.full((len(ell), len(z)), z),
-                           [self.z_plus1(ll, tdist) for ll in ell]])
+        tdist = self.theory["f_K_z_func"](z)
+        zm_arr = np.array(
+            [
+                [self.z_minus1(ll, tdist) for ll in ell],
+                np.full((len(ell), len(z)), z),
+                [self.z_plus1(ll, tdist) for ll in ell],
+            ]
+        )
 
-        Hzm_arr = self.theory['H_z_func_Mpc'](zm_arr)
+        Hzm_arr = self.theory["H_z_func_Mpc"](zm_arr)
         if self.theory["GCph_do_nisb"]:
-            kappox = ((ell + 1 / 2)[None, :] /
-                      self.theory["r_z_func"](z)[:, None])
+            kappox = (ell + 1 / 2)[None, :] / self.theory["r_z_func"](z)[:, None]
             fz = self.theory["f_cb_z_k_func"](zm_arr, kappox)[None, :, :]
         else:
-            fz = self.theory['f_z'](zm_arr)
+            fz = self.theory["f_z"](zm_arr)
         nzm_arr = self.nz_GC.evaluates_n_i_z(bin_i, zm_arr)
 
-        if self.theory['bias_model'] == 2:
+        if self.theory["bias_model"] == 2:
             bias = self.photobias[bin_i - 1]
-        elif self.theory['bias_model'] in [1, 3]:
-            bias = self.theory['b1_inter'](z)
+        elif self.theory["bias_model"] in [1, 3]:
+            bias = self.theory["b1_inter"](z)
 
         return Hzm_arr * fz * nzm_arr / bias
 
@@ -437,24 +438,26 @@ class Photo:
         """
         if self._ells_GC_or_XC is not None:
             idx = np.where(self._ells_GC_or_XC == ell)[0][0]
-            prefactor_Lminus1 = self._prefactor_dict['Lminus1_GC_or_XC'][idx]
-            prefactor_L0 = self._prefactor_dict['L0_GC_or_XC'][idx]
-            prefactor_Lplus1 = self._prefactor_dict['Lplus1_GC_or_XC'][idx]
-            kerngalrsd = \
-                [prefactor_Lminus1 * self.interpwinrsd[bin, 0, idx, :] +
-                 prefactor_L0 * self.interpwinrsd[bin, 1, idx, :] +
-                 prefactor_Lplus1 * self.interpwinrsd[bin, 2, idx, :]
-                 for bin in args]
+            prefactor_Lminus1 = self._prefactor_dict["Lminus1_GC_or_XC"][idx]
+            prefactor_L0 = self._prefactor_dict["L0_GC_or_XC"][idx]
+            prefactor_Lplus1 = self._prefactor_dict["Lplus1_GC_or_XC"][idx]
+            kerngalrsd = [
+                prefactor_Lminus1 * self.interpwinrsd[bin, 0, idx, :]
+                + prefactor_L0 * self.interpwinrsd[bin, 1, idx, :]
+                + prefactor_Lplus1 * self.interpwinrsd[bin, 2, idx, :]
+                for bin in args
+            ]
         else:
             prefactor_Lminus1 = self._eval_prefactor_l_minus1(ell)
             prefactor_L0 = self._eval_prefactor_l_0(ell)
             prefactor_Lplus1 = self._eval_prefactor_l_plus1(ell)
-            kernrsd = [self.GC_window_RSD(self.z_winterp, ell, bin)
-                       for bin in args]
-            kerngalrsd = [prefactor_Lminus1 * kern[0, 0, :] +
-                          prefactor_L0 * kern[1, 0, :] +
-                          prefactor_Lplus1 * kern[2, 0, :]
-                          for kern in kernrsd]
+            kernrsd = [self.GC_window_RSD(self.z_winterp, ell, bin) for bin in args]
+            kerngalrsd = [
+                prefactor_Lminus1 * kern[0, 0, :]
+                + prefactor_L0 * kern[1, 0, :]
+                + prefactor_Lplus1 * kern[2, 0, :]
+                for kern in kernrsd
+            ]
 
         return np.array(kerngalrsd)
 
@@ -494,14 +497,19 @@ class Photo:
         #         z,
         #         zprime) /
         #     self.theory['d_z_func'](zprime))
-        curv = self.theory['Omk']
+        curv = self.theory["Omk"]
 
         if curv == 0.0:
-            wint = nz(zprime) * (1.0 - (self.theory['r_z_func'](z) /
-                                 self.theory['r_z_func'](zprime)))
+            wint = nz(zprime) * (
+                1.0 - (self.theory["r_z_func"](z) / self.theory["r_z_func"](zprime))
+            )
         else:
-            wint = (nz(zprime) * self.theory['f_K_z12_func'](
-                z, zprime) / (1.0 + zprime) / self.theory['d_z_func'](zprime))
+            wint = (
+                nz(zprime)
+                * self.theory["f_K_z12_func"](z, zprime)
+                / (1.0 + zprime)
+                / self.theory["d_z_func"](zprime)
+            )
 
         return wint
 
@@ -539,8 +547,8 @@ class Photo:
             at specified scale for the redshifts defined in z
         """
 
-        H0_Mpc = self.theory['H0_Mpc']
-        O_m = self.theory['Omm']
+        H0_Mpc = self.theory["H0_Mpc"]
+        O_m = self.theory["Omm"]
 
         n_z_normalized = self.nz_WL.interpolates_n_i(bin_i, z)
 
@@ -551,16 +559,21 @@ class Photo:
         # subtraction of the first triangle
         integral_arr[1:] -= np.diag(win_eff_tril)[1:] * (z[1:] - z[:-1]) / 2
 
-        W_val = (1.5 * H0_Mpc * O_m * (1.0 + z) *
-                 self.theory['MG_sigma'](z, k) *
-                 (self.theory['f_K_z_func'](z) /
-                  (1 / H0_Mpc)) * integral_arr)
+        W_val = (
+            1.5
+            * H0_Mpc
+            * O_m
+            * (1.0 + z)
+            * self.theory["MG_sigma"](z, k)
+            * (self.theory["f_K_z_func"](z) / (1 / H0_Mpc))
+            * integral_arr
+        )
 
         # Removing the conversion factor between Weyl and matter
         # power spectra from W_val, when employing the Weyl power
         # spectrum in a workaround approach
-        if self.theory['use_Weyl']:
-            W_val = self.theory['f_K_z_func'](z) * integral_arr
+        if self.theory["use_Weyl"]:
+            W_val = self.theory["f_K_z_func"](z) * integral_arr
 
         return W_val
 
@@ -579,12 +592,13 @@ class Photo:
         Magnification bias: float or numpy.ndarray
             Value(s) of magnification bias at input redshift(s)
         """
-        nuisance = self.theory['nuisance_parameters']
+        nuisance = self.theory["nuisance_parameters"]
         bias = (
-            nuisance['b0_mag_poly'] +
-            nuisance['b1_mag_poly'] * z +
-            nuisance['b2_mag_poly'] * np.power(z, 2) +
-            nuisance['b3_mag_poly'] * np.power(z, 3))
+            nuisance["b0_mag_poly"]
+            + nuisance["b1_mag_poly"] * z
+            + nuisance["b2_mag_poly"] * np.power(z, 2)
+            + nuisance["b3_mag_poly"] * np.power(z, 3)
+        )
         return bias
 
     def magnification_window(self, z, bin_i, k=0.0001):
@@ -622,33 +636,38 @@ class Photo:
            at specified scale for the redshifts defined in z
         """
 
-        H0_Mpc = self.theory['H0_Mpc']
-        O_m = self.theory['Omm']
+        H0_Mpc = self.theory["H0_Mpc"]
+        O_m = self.theory["Omm"]
 
         n_z_normalized = self.nz_GC.interpolates_n_i(bin_i, z)
 
         win_eff = self.window_integrand(z[:, None], z, n_z_normalized)
         win_eff_tril = np.tril(win_eff)
 
-        if self.theory['magbias_model'] != 2:
+        if self.theory["magbias_model"] != 2:
             win_eff_tril *= self.magbias(z[:, None])
 
         integral_arr = np.trapz(win_eff_tril, z, axis=0)
         # subtraction of the first triangle
         integral_arr[1:] -= np.diag(win_eff_tril)[1:] * (z[1:] - z[:-1]) / 2
 
-        W_val = (1.5 * H0_Mpc * O_m * (1.0 + z) *
-                 self.theory['MG_sigma'](z, k) *
-                 (self.theory['f_K_z_func'](z) /
-                  (1 / H0_Mpc)) * integral_arr)
+        W_val = (
+            1.5
+            * H0_Mpc
+            * O_m
+            * (1.0 + z)
+            * self.theory["MG_sigma"](z, k)
+            * (self.theory["f_K_z_func"](z) / (1 / H0_Mpc))
+            * integral_arr
+        )
 
         # Removing the conversion factor between Weyl and matter
         # power spectra from W_val, when employing the Weyl power
         # spectrum in a workaround approach
-        if self.theory['use_Weyl']:
-            W_val = self.theory['f_K_z_func'](z) * integral_arr
+        if self.theory["use_Weyl"]:
+            W_val = self.theory["f_K_z_func"](z) * integral_arr
 
-        if self.theory['magbias_model'] == 2:
+        if self.theory["magbias_model"] == 2:
             # magbias is a list of constants
             W_val *= self.magbias[bin_i - 1]
 
@@ -680,7 +699,7 @@ class Photo:
 
         n_z_normalized = self.nz_WL.evaluates_n_i_z(bin_i, z)
 
-        W_IA = n_z_normalized * self.theory['H_z_func_Mpc'](z)
+        W_IA = n_z_normalized * self.theory["H_z_func_Mpc"](z)
 
         return W_IA
 
@@ -704,12 +723,13 @@ class Photo:
            Values of the angular power spectrum integrand at
            the given redshifts and multipoles :math:`\ell`.
         """
-        kern_mult_power = \
-            PandW_i_j_z_k / (self.H_z_grid * (self.f_K_z_grid ** 2))
+        kern_mult_power = PandW_i_j_z_k / (self.H_z_grid * (self.f_K_z_grid**2))
 
         if np.isnan(PandW_i_j_z_k).any():
-            raise Exception('Requested k, z values are outside of power'
-                            ' spectrum interpolation range.')
+            raise Exception(
+                "Requested k, z values are outside of power"
+                " spectrum interpolation range."
+            )
         return kern_mult_power
 
     def Cl_WL(self, ells, bin_i, bin_j):
@@ -774,35 +794,42 @@ class Photo:
         """
 
         same_ells = np.array_equal(ells, self.ells_WL)
-        precomputed_shearIA = 'shearIA_WL' in self._prefactor_dict.keys()
+        precomputed_shearIA = "shearIA_WL" in self._prefactor_dict.keys()
         if not precomputed_shearIA or not same_ells:
             self.set_prefactor(ells_WL=ells)
 
-        prefactor_wl = self._prefactor_dict['shearIA_WL']
+        prefactor_wl = self._prefactor_dict["shearIA_WL"]
 
-        kern_i = np.interp(self.z_grid_for_cl, self.interpwin[:, 0],
-                           self.interpwin[:, bin_i])
-        kern_j = np.interp(self.z_grid_for_cl, self.interpwin[:, 0],
-                           self.interpwin[:, bin_j])
-        kernia_i = np.interp(self.z_grid_for_cl, self.interpwinia[:, 0],
-                             self.interpwinia[:, bin_i])
-        kernia_j = np.interp(self.z_grid_for_cl, self.interpwinia[:, 0],
-                             self.interpwinia[:, bin_j])
+        kern_i = np.interp(
+            self.z_grid_for_cl, self.interpwin[:, 0], self.interpwin[:, bin_i]
+        )
+        kern_j = np.interp(
+            self.z_grid_for_cl, self.interpwin[:, 0], self.interpwin[:, bin_j]
+        )
+        kernia_i = np.interp(
+            self.z_grid_for_cl, self.interpwinia[:, 0], self.interpwinia[:, bin_i]
+        )
+        kernia_j = np.interp(
+            self.z_grid_for_cl, self.interpwinia[:, 0], self.interpwinia[:, bin_j]
+        )
 
         self._evaluate_power_WL(force_recompute=(not same_ells))
 
         pandw_dd = kern_i * kern_j * self.power_dd_WL
         pandw_ii = kernia_i * kernia_j * self.power_ii_WL
-        pandw_di = \
-            (kern_i * kernia_j + kernia_i * kern_j) * self.power_di_WL
+        pandw_di = (kern_i * kernia_j + kernia_i * kern_j) * self.power_di_WL
         pandwijk = pandw_dd + pandw_ii + pandw_di
 
         c_int_arr = self.Cl_generic_integrand(pandwijk)
 
-        c_final = prefactor_wl * self.theory['c'] * \
-            integrate.trapz(c_int_arr, self.z_grid_for_cl)
-        c_final = c_final * (1 + self.multbias[bin_i - 1]) * \
-            (1 + self.multbias[bin_j - 1])
+        c_final = (
+            prefactor_wl
+            * self.theory["c"]
+            * integrate.trapz(c_int_arr, self.z_grid_for_cl)
+        )
+        c_final = (
+            c_final * (1 + self.multbias[bin_i - 1]) * (1 + self.multbias[bin_j - 1])
+        )
 
         return c_final
 
@@ -822,9 +849,9 @@ class Photo:
             ell_col = np.atleast_2d(self.ells_WL).T
             k_grid = (ell_col + 0.5) / self.f_K_z_grid
 
-            P_dd = self.theory['Pmm_phot']
-            P_ii = self.theory['Pii']
-            P_di = self.theory['Pdeltai']
+            P_dd = self.theory["Pmm_phot"]
+            P_ii = self.theory["Pii"]
+            P_di = self.theory["Pdeltai"]
             self.power_dd_WL = P_dd(self.z_grid_for_cl, k_grid, grid=False)
             self.power_ii_WL = P_ii(self.z_grid_for_cl, k_grid, grid=False)
             self.power_di_WL = P_di(self.z_grid_for_cl, k_grid, grid=False)
@@ -832,10 +859,9 @@ class Photo:
 
             # Updating power_dd_WL and power_di_WL when employing the
             # Weyl power spectrum in a workaround approach
-            if self.theory['use_Weyl']:
-                Weyl_factor_interp = self.theory['Weyl_matter_ratio']
-                Weyl_factor = \
-                    Weyl_factor_interp(self.z_grid_for_cl, k_grid, grid=False)
+            if self.theory["use_Weyl"]:
+                Weyl_factor_interp = self.theory["Weyl_matter_ratio"]
+                Weyl_factor = Weyl_factor_interp(self.z_grid_for_cl, k_grid, grid=False)
                 sqrt_Weyl_factor = np.sqrt(Weyl_factor)
 
                 self.power_dd_WL *= Weyl_factor
@@ -900,41 +926,51 @@ class Photo:
         """
 
         same_ells = np.array_equal(ells, self.ells_GC_phot)
-        precomputed_mag = 'mag_GCphot' in self._prefactor_dict.keys()
+        precomputed_mag = "mag_GCphot" in self._prefactor_dict.keys()
 
         if not precomputed_mag or not same_ells:
             self.set_prefactor(ells_GC_phot=ells)
 
-        prefactor_mag = self._prefactor_dict['mag_GCphot']
+        prefactor_mag = self._prefactor_dict["mag_GCphot"]
         prefactor_mag_col = np.atleast_2d(prefactor_mag).T
 
         if self.add_RSD:
-            kerngalrsd = \
-                np.array([self._unpack_RSD_kernel(ell, bin_i, bin_j)
-                          for ell in ells])
+            kerngalrsd = np.array(
+                [self._unpack_RSD_kernel(ell, bin_i, bin_j) for ell in ells]
+            )
             kerngalrsd_i = kerngalrsd[:, 0, :]
             kerngalrsd_j = kerngalrsd[:, 1, :]
         else:
             kerngalrsd_i = np.zeros(len(ells))
             kerngalrsd_j = np.zeros(len(ells))
 
-        kerngal_i = \
-            np.array(
-                [np.interp(self.z_grid_for_cl, self.interpwingal[:, 0],
-                           self.interpwingal[:, bin_i] + kerngalrsd_ell_i)
-                 for kerngalrsd_ell_i in kerngalrsd_i])
-        kerngal_j = \
-            np.array(
-                [np.interp(self.z_grid_for_cl, self.interpwingal[:, 0],
-                           self.interpwingal[:, bin_j] + kerngalrsd_ell_j)
-                 for kerngalrsd_ell_j in kerngalrsd_j])
+        kerngal_i = np.array(
+            [
+                np.interp(
+                    self.z_grid_for_cl,
+                    self.interpwingal[:, 0],
+                    self.interpwingal[:, bin_i] + kerngalrsd_ell_i,
+                )
+                for kerngalrsd_ell_i in kerngalrsd_i
+            ]
+        )
+        kerngal_j = np.array(
+            [
+                np.interp(
+                    self.z_grid_for_cl,
+                    self.interpwingal[:, 0],
+                    self.interpwingal[:, bin_j] + kerngalrsd_ell_j,
+                )
+                for kerngalrsd_ell_j in kerngalrsd_j
+            ]
+        )
 
-        kernmag_i = prefactor_mag_col * \
-            np.interp(self.z_grid_for_cl, self.interpwinmag[:, 0],
-                      self.interpwinmag[:, bin_i])
-        kernmag_j = prefactor_mag_col * \
-            np.interp(self.z_grid_for_cl, self.interpwinmag[:, 0],
-                      self.interpwinmag[:, bin_j])
+        kernmag_i = prefactor_mag_col * np.interp(
+            self.z_grid_for_cl, self.interpwinmag[:, 0], self.interpwinmag[:, bin_i]
+        )
+        kernmag_j = prefactor_mag_col * np.interp(
+            self.z_grid_for_cl, self.interpwinmag[:, 0], self.interpwinmag[:, bin_j]
+        )
 
         if self.multiply_bias_cl:
             bi = self.photobias[bin_i - 1]
@@ -946,14 +982,14 @@ class Photo:
 
         pandw_galgal = kerngal_i * kerngal_j * self.power_gg_GC
         pandw_magmag = kernmag_i * kernmag_j * self.power_dd_GC
-        pandw_galmag = (kernmag_i * kerngal_j + kernmag_j * kerngal_i) * \
-            self.power_gd_GC
+        pandw_galmag = (
+            kernmag_i * kerngal_j + kernmag_j * kerngal_i
+        ) * self.power_gd_GC
 
         pandwijk = pandw_magmag + pandw_galgal + pandw_galmag
 
         c_int_arr = self.Cl_generic_integrand(pandwijk)
-        c_final = self.theory['c'] * \
-            integrate.trapz(c_int_arr, self.z_grid_for_cl)
+        c_final = self.theory["c"] * integrate.trapz(c_int_arr, self.z_grid_for_cl)
 
         return c_final
 
@@ -973,9 +1009,9 @@ class Photo:
             ell_col = np.atleast_2d(self.ells_GC_phot).T
             k_grid = (ell_col + 0.5) / self.f_K_z_grid
 
-            P_gg = self.theory['Pgg_phot']
-            P_dd = self.theory['Pmm_phot']
-            P_gd = self.theory['Pgdelta_phot']
+            P_gg = self.theory["Pgg_phot"]
+            P_dd = self.theory["Pmm_phot"]
+            P_gd = self.theory["Pgdelta_phot"]
             self.power_gg_GC = P_gg(self.z_grid_for_cl, k_grid, grid=False)
             self.power_dd_GC = P_dd(self.z_grid_for_cl, k_grid, grid=False)
             self.power_gd_GC = P_gd(self.z_grid_for_cl, k_grid, grid=False)
@@ -983,10 +1019,9 @@ class Photo:
 
             # Updating power_dd_GC and power_gd_GC when employing the
             # Weyl power spectrum in a workaround approach
-            if self.theory['use_Weyl']:
-                Weyl_factor_interp = self.theory['Weyl_matter_ratio']
-                Weyl_factor = \
-                    Weyl_factor_interp(self.z_grid_for_cl, k_grid, grid=False)
+            if self.theory["use_Weyl"]:
+                Weyl_factor_interp = self.theory["Weyl_matter_ratio"]
+                Weyl_factor = Weyl_factor_interp(self.z_grid_for_cl, k_grid, grid=False)
                 sqrt_Weyl_factor = np.sqrt(Weyl_factor)
 
                 self.power_dd_GC *= Weyl_factor
@@ -1070,36 +1105,41 @@ class Photo:
         """
 
         same_ells = np.array_equal(ells, self.ells_XC)
-        precomputed_shearIA = 'shearIA_XC' in self._prefactor_dict.keys()
-        precomputed_mag = 'mag_XC' in self._prefactor_dict.keys()
+        precomputed_shearIA = "shearIA_XC" in self._prefactor_dict.keys()
+        precomputed_mag = "mag_XC" in self._prefactor_dict.keys()
         if not precomputed_shearIA or not precomputed_mag or not same_ells:
             self.set_prefactor(ells_XC=ells)
 
-        prefactor_mag = self._prefactor_dict['mag_XC']
-        prefactor_shearia = self._prefactor_dict['shearIA_XC']
+        prefactor_mag = self._prefactor_dict["mag_XC"]
+        prefactor_shearia = self._prefactor_dict["shearIA_XC"]
 
         prefactor_mag_col = np.atleast_2d(prefactor_mag).T
         prefactor_shearia_col = np.atleast_2d(prefactor_shearia).T
 
         if self.add_RSD:
-            kerngalrsd_j = [self._unpack_RSD_kernel(ell, bin_j)[0]
-                            for ell in ells]
+            kerngalrsd_j = [self._unpack_RSD_kernel(ell, bin_j)[0] for ell in ells]
         else:
             kerngalrsd_j = np.zeros(len(ells))
 
         kern_i = prefactor_shearia_col * np.interp(
-            self.z_grid_for_cl, self.interpwin[:, 0], self.interpwin[:, bin_i])
-        kernia_i = prefactor_shearia_col * \
-            np.interp(self.z_grid_for_cl, self.interpwinia[:, 0],
-                      self.interpwinia[:, bin_i])
-        kerngal_j = \
-            np.array(
-                [np.interp(self.z_grid_for_cl, self.interpwingal[:, 0],
-                           self.interpwingal[:, bin_j] + kerngalrsd_ell_j)
-                 for kerngalrsd_ell_j in kerngalrsd_j])
-        kernmag_j = prefactor_mag_col * \
-            np.interp(self.z_grid_for_cl, self.interpwinmag[:, 0],
-                      self.interpwinmag[:, bin_j])
+            self.z_grid_for_cl, self.interpwin[:, 0], self.interpwin[:, bin_i]
+        )
+        kernia_i = prefactor_shearia_col * np.interp(
+            self.z_grid_for_cl, self.interpwinia[:, 0], self.interpwinia[:, bin_i]
+        )
+        kerngal_j = np.array(
+            [
+                np.interp(
+                    self.z_grid_for_cl,
+                    self.interpwingal[:, 0],
+                    self.interpwingal[:, bin_j] + kerngalrsd_ell_j,
+                )
+                for kerngalrsd_ell_j in kerngalrsd_j
+            ]
+        )
+        kernmag_j = prefactor_mag_col * np.interp(
+            self.z_grid_for_cl, self.interpwinmag[:, 0], self.interpwinmag[:, bin_j]
+        )
 
         if self.multiply_bias_cl:
             bj = self.photobias[bin_j - 1]
@@ -1115,8 +1155,7 @@ class Photo:
         pandwijk = pandw_gd + pandw_gi + pandw_dmag + pandw_imag
 
         c_int_arr = self.Cl_generic_integrand(pandwijk)
-        c_final = self.theory['c'] * \
-            integrate.trapz(c_int_arr, self.z_grid_for_cl)
+        c_final = self.theory["c"] * integrate.trapz(c_int_arr, self.z_grid_for_cl)
         c_final = c_final * (1 + self.multbias[bin_i - 1])
 
         return c_final
@@ -1137,10 +1176,10 @@ class Photo:
             ell_col = np.atleast_2d(self.ells_XC).T
             k_grid = (ell_col + 0.5) / self.f_K_z_grid
 
-            P_gd = self.theory['Pgdelta_phot']
-            P_gi = self.theory['Pgi_phot']
-            P_dd = self.theory['Pmm_phot']
-            P_di = self.theory['Pdeltai']
+            P_gd = self.theory["Pgdelta_phot"]
+            P_gi = self.theory["Pgi_phot"]
+            P_dd = self.theory["Pmm_phot"]
+            P_di = self.theory["Pdeltai"]
             self.power_gd_XC = P_gd(self.z_grid_for_cl, k_grid, grid=False)
             self.power_gi_XC = P_gi(self.z_grid_for_cl, k_grid, grid=False)
             self.power_dd_XC = P_dd(self.z_grid_for_cl, k_grid, grid=False)
@@ -1149,10 +1188,9 @@ class Photo:
 
             # Updating power_dd_XC, power_di_XC and power_gd_XC when
             # employing the Weyl power spectrum in a workaround approach
-            if self.theory['use_Weyl']:
-                Weyl_factor_interp = self.theory['Weyl_matter_ratio']
-                Weyl_factor = \
-                    Weyl_factor_interp(self.z_grid_for_cl, k_grid, grid=False)
+            if self.theory["use_Weyl"]:
+                Weyl_factor_interp = self.theory["Weyl_matter_ratio"]
+                Weyl_factor = Weyl_factor_interp(self.z_grid_for_cl, k_grid, grid=False)
                 sqrt_Weyl_factor = np.sqrt(Weyl_factor)
 
                 self.power_dd_XC *= Weyl_factor
@@ -1178,7 +1216,7 @@ class Photo:
         Pre-factor: float or numpy.ndarray of float
            Value(s) of the prefactor at the given :math:`\ell`
         """
-        return ell * (ell + 1) / (ell + 0.5)**2
+        return ell * (ell + 1) / (ell + 0.5) ** 2
 
     @staticmethod
     def _eval_prefactor_shearia(ell):
@@ -1199,8 +1237,9 @@ class Photo:
         Pre-factor: float or numpy.ndarray of float
            Value(s) of the prefactor at the given :math:`\ell`
         """
-        prefactor = np.sqrt((ell + 2.0) * (ell + 1.0) * ell * (ell - 1.0)) / \
-            (ell + 0.5)**2
+        prefactor = (
+            np.sqrt((ell + 2.0) * (ell + 1.0) * ell * (ell - 1.0)) / (ell + 0.5) ** 2
+        )
         return prefactor
 
     @staticmethod
@@ -1224,7 +1263,7 @@ class Photo:
         L_0: float or numpy.ndarray of float
            Value(s) of the :math:`L_{0}` prefactor at the given :math:`\ell`
         """
-        l_0 = (2 * ell ** 2 + 2 * ell - 1) / ((2 * ell - 1) * (2 * ell + 3))
+        l_0 = (2 * ell**2 + 2 * ell - 1) / ((2 * ell - 1) * (2 * ell + 3))
         return l_0
 
     @staticmethod
@@ -1248,8 +1287,9 @@ class Photo:
         L_minus1: float or numpy.ndarray of float
            Value(s) of the :math:`L_{-1}` prefactor at the given :math:`\ell`
         """
-        l_minus1 = -ell * (ell - 1) / \
-            ((2 * ell - 1) * np.sqrt((2 * ell - 3) * (2 * ell + 1)))
+        l_minus1 = (
+            -ell * (ell - 1) / ((2 * ell - 1) * np.sqrt((2 * ell - 3) * (2 * ell + 1)))
+        )
         return l_minus1
 
     @staticmethod
@@ -1273,8 +1313,11 @@ class Photo:
         L_plus1: float or numpy.ndarray of float
            Value(s) of the :math:`L_{+1}` prefactor at the given :math:`\ell`
         """
-        l_plus1 = -(ell + 1) * (ell + 2) / \
-            ((2 * ell + 3) * np.sqrt((2 * ell + 1) * (2 * ell + 5)))
+        l_plus1 = (
+            -(ell + 1)
+            * (ell + 2)
+            / ((2 * ell + 3) * np.sqrt((2 * ell + 1) * (2 * ell + 5)))
+        )
         return l_plus1
 
     def z_minus1(self, ell, r):
@@ -1298,7 +1341,7 @@ class Photo:
         Redshift: float
             The redshift corresponding to the transverse comoving distance
         """
-        z_r_interp = self.theory['z_r_func']
+        z_r_interp = self.theory["z_r_func"]
         ell_factor = (2 * ell - 3) / (2 * ell + 1)
         return z_r_interp(ell_factor * r)
 
@@ -1323,7 +1366,7 @@ class Photo:
         Redshift: float
             The redshift corresponding to the transverse comoving distance
         """
-        z_r_interp = self.theory['z_r_func']
+        z_r_interp = self.theory["z_r_func"]
         ell_factor = (2 * ell + 5) / (2 * ell + 1)
         return z_r_interp(ell_factor * r)
 
@@ -1365,23 +1408,25 @@ class Photo:
            angular separations, and bin combination
         """
         obs = obs.casefold()
-        if obs == 'shear-shear_plus':
+        if obs == "shear-shear_plus":
             cells_func = self.Cl_WL
             bessel_order = 0
-        elif obs == 'shear-shear_minus':
+        elif obs == "shear-shear_minus":
             cells_func = self.Cl_WL
             bessel_order = 4
-        elif obs == 'shear-position':
+        elif obs == "shear-position":
             cells_func = self.Cl_cross
             bessel_order = 2
-        elif obs == 'position-position':
+        elif obs == "position-position":
             cells_func = self.Cl_GC_phot
             bessel_order = 0
         else:
-            raise ValueError('obs parameter must be selected from the '
-                             'following list: ["Shear-Shear_plus", '
-                             '"Shear-Shear_minus", "Shear-Position", '
-                             '"Position-Position"]')
+            raise ValueError(
+                "obs parameter must be selected from the "
+                'following list: ["Shear-Shear_plus", '
+                '"Shear-Shear_minus", "Shear-Position", '
+                '"Position-Position"]'
+            )
 
         if isinstance(theta_arcmin, np.ndarray):
             pass
@@ -1390,27 +1435,28 @@ class Photo:
         elif isinstance(theta_arcmin, (float, int)):
             theta_arcmin = np.array([theta_arcmin])
         else:
-            raise TypeError('theta_arcmin argument must be a int, float, list'
-                            ' or numpy.ndarray')
+            raise TypeError(
+                "theta_arcmin argument must be a int, float, list" " or numpy.ndarray"
+            )
 
         theta_rad = np.deg2rad(theta_arcmin / 60)
         xi_arr = np.empty(theta_arcmin.size)
 
         cells_int = cells_func(self.ells_int, bin_i, bin_j).flatten()
-        cells_interp = interpolate.interp1d(self.ells_int, cells_int,
-                                            kind='cubic')
+        cells_interp = interpolate.interp1d(self.ells_int, cells_int, kind="cubic")
 
         cells_dense = cells_interp(self.ells_dense)
 
         if not self.bessel_dict:
-            bessel = np.array([jv(bessel_order, self.ells_dense * th)
-                               for th in theta_rad])
+            bessel = np.array(
+                [jv(bessel_order, self.ells_dense * th) for th in theta_rad]
+            )
         else:
             bessel = self.bessel_dict[bessel_order]
 
         for i in range(len(xi_arr)):
             xi_arr[i] = np.sum(self.ells_dense * cells_dense * bessel[i])
 
-        xi_arr /= (2.0 * np.pi)
+        xi_arr /= 2.0 * np.pi
 
         return xi_arr

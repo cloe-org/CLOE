@@ -10,8 +10,6 @@ FFTLog algorithm described in `Hamilton (2000)
 
 """
 
-__all__ = ['fftlog',
-           'hankel',
-           'utils']  # list submodules
+__all__ = ["fftlog", "hankel", "utils"]  # list submodules
 
 from . import *

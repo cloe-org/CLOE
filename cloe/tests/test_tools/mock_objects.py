@@ -16,9 +16,7 @@ class mock_CAMB_data:
     def angular_diameter_distance2(self, z1, z2):
         """Angular diameter distance."""
 
-        add2 = (
-            self.rz_interp(z2) / (1.0 + z2) - self.rz_interp(z1) / (1.0 + z2)
-        )
+        add2 = self.rz_interp(z2) / (1.0 + z2) - self.rz_interp(z1) / (1.0 + z2)
 
         return add2
 
@@ -69,18 +67,18 @@ def update_dict_w_mock(cosmo_dict):
 
     """
 
-    cosmo_dict['MG_sigma'] = mock_MG_func
-    cosmo_dict['MG_mu'] = mock_MG_func
+    cosmo_dict["MG_sigma"] = mock_MG_func
+    cosmo_dict["MG_mu"] = mock_MG_func
 
-    if 'Pdd_phot' in cosmo_dict.keys():
-        cosmo_dict['Pk_delta'] = mock_P_obj(cosmo_dict['Pdd_phot'])
+    if "Pdd_phot" in cosmo_dict.keys():
+        cosmo_dict["Pk_delta"] = mock_P_obj(cosmo_dict["Pdd_phot"])
 
     # Todo: this is a place holder,
     # should update that with the Weyl potential P(k)
     # if 'Pk_weyl' in cosmo_dict.keys():
     #     cosmo_dict['Pk_weyl'] = mock_P_obj(cosmo_dict['Pk_weyl'])
 
-    if 'r_z_func' in cosmo_dict.keys():
-        cosmo_dict['CAMBdata'] = mock_CAMB_data(cosmo_dict['r_z_func'])
+    if "r_z_func" in cosmo_dict.keys():
+        cosmo_dict["CAMBdata"] = mock_CAMB_data(cosmo_dict["r_z_func"])
 
     return cosmo_dict

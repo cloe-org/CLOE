@@ -19,7 +19,7 @@ class plotterTestCase(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
 
-        mock_cosmo_dic = load_test_pickle('spectro_test_dic.pickle')
+        mock_cosmo_dic = load_test_pickle("spectro_test_dic.pickle")
 
         fig1 = plt.figure()
         cls.ax1 = fig1.add_subplot(1, 1, 1)
@@ -124,20 +124,20 @@ class plotterTestCase(TestCase):
         npt.assert_raises(
             Exception,
             self.plot_inst.plot_GC_spectro_multipole,
-            '1.2',
+            "1.2",
             5,
             self.ax1,
         )
         npt.assert_raises(
             Exception,
             self.plot_inst.plot_GC_spectro_multipole,
-            '1.2',
+            "1.2",
             2,
         )
         npt.assert_raises(
             Exception,
             self.plot_inst.plot_GC_spectro_multipole,
-            '3.0',
+            "3.0",
             2,
             self.ax1,
         )

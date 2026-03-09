@@ -11,7 +11,6 @@ and stacked with the same arrangement used for the data and masking
 vectors.
 """
 
-__all__ = ['data_handler',
-           'masking']  # list submodules
+__all__ = ["data_handler", "masking"]  # list submodules
 
 from . import *

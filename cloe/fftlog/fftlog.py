@@ -24,8 +24,16 @@ class fftlog(object):
     after this decomposition, each term can be integrated analytically.
     """
 
-    def __init__(self, x, fx, nu=1.1, N_extrap_begin=0, N_extrap_end=0,
-                 c_window_width=0.25, N_pad=0):
+    def __init__(
+        self,
+        x,
+        fx,
+        nu=1.1,
+        N_extrap_begin=0,
+        N_extrap_end=0,
+        c_window_width=0.25,
+        N_pad=0,
+    ):
         """List of parameters.
 
         Parameters
@@ -61,7 +69,7 @@ class fftlog(object):
         self.N = self.x.size  # length of the array after manipulations
 
         # zero-padding
-        if (N_pad):
+        if N_pad:
             pad = np.zeros(N_pad)
             self.x = utils._log_extrap(self.x, N_pad, N_pad)
             self.fx = np.hstack((pad, self.fx, pad))
@@ -69,11 +77,11 @@ class fftlog(object):
             self.N_extrap_end += N_pad
             self.N_extrap_begin += N_pad  # update after padding
 
-        if (self.N % 2 == 1):  # force they array size to be even, as
+        if self.N % 2 == 1:  # force they array size to be even, as
             self.x = self.x[:-1]  # required by the algorithm
             self.fx = self.fx[:-1]
             self.N -= 1
-            if (N_extrap_end):
+            if N_extrap_end:
                 self.N_extrap_end -= 1
 
         self.m, self.c_m = self._get_c_m()
@@ -125,18 +133,19 @@ class fftlog(object):
          over the ``y`` array
         """
         z_ar = self.nu + 1j * self.eta_m
-        y = (ell + 1.) / self.x[::-1]
+        y = (ell + 1.0) / self.x[::-1]
         # TODO: possible improvement. y can be evaluated once and stored
-        h_m = self.c_m * (self.x[0] * y[0])**(-1j * self.eta_m) \
-            * utils._g_l(ell, z_ar)
+        h_m = (
+            self.c_m * (self.x[0] * y[0]) ** (-1j * self.eta_m) * utils._g_l(ell, z_ar)
+        )
         # TODO: possible improvement. _g_l can be evaluated once and stored
 
-        Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi) / 4.
+        Fy = irfft(np.conj(h_m)) * y ** (-self.nu) * np.sqrt(np.pi) / 4.0
         # here the ordering of N_extrap_begin and N_extrap_end is reversed
         # since we have moved to Fourier space
         return (
-            y[self.N_extrap_end:self.N - self.N_extrap_begin],
-            Fy[self.N_extrap_end:self.N - self.N_extrap_begin]
+            y[self.N_extrap_end : self.N - self.N_extrap_begin],
+            Fy[self.N_extrap_end : self.N - self.N_extrap_begin],
         )
 
     def fftlog_first_derivative(self, ell):
@@ -163,18 +172,21 @@ class fftlog(object):
          over the ``y`` array
         """
         z_ar = self.nu + 1j * self.eta_m
-        y = (ell + 1.) / self.x[::-1]
+        y = (ell + 1.0) / self.x[::-1]
         # TODO: possible improvement. y can be evaluated once and stored
-        h_m = self.c_m * (self.x[0] * y[0])**(-1j * self.eta_m) \
+        h_m = (
+            self.c_m
+            * (self.x[0] * y[0]) ** (-1j * self.eta_m)
             * utils._g_l_1(ell, z_ar)
+        )
         # TODO: possible improvement. _g_l can be evaluated once and stored
 
-        Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi) / 4.
+        Fy = irfft(np.conj(h_m)) * y ** (-self.nu) * np.sqrt(np.pi) / 4.0
         # here the ordering of N_extrap_begin and N_extrap_end is reversed
         # since we have moved to Fourier space
         return (
-            y[self.N_extrap_end:self.N - self.N_extrap_begin],
-            Fy[self.N_extrap_end:self.N - self.N_extrap_begin]
+            y[self.N_extrap_end : self.N - self.N_extrap_begin],
+            Fy[self.N_extrap_end : self.N - self.N_extrap_begin],
         )
 
     def fftlog_second_derivative(self, ell):
@@ -201,16 +213,19 @@ class fftlog(object):
          over the ``y`` array
         """
         z_ar = self.nu + 1j * self.eta_m
-        y = (ell + 1.) / self.x[::-1]
+        y = (ell + 1.0) / self.x[::-1]
         # TODO: possible improvement. y can be evaluated once and stored
-        h_m = self.c_m * (self.x[0] * y[0])**(-1j * self.eta_m) \
+        h_m = (
+            self.c_m
+            * (self.x[0] * y[0]) ** (-1j * self.eta_m)
             * utils._g_l_2(ell, z_ar)
+        )
         # TODO: possible improvement. _g_l can be evaluated once and stored
 
-        Fy = irfft(np.conj(h_m)) * y**(-self.nu) * np.sqrt(np.pi) / 4.
+        Fy = irfft(np.conj(h_m)) * y ** (-self.nu) * np.sqrt(np.pi) / 4.0
         # here the ordering of N_extrap_begin and N_extrap_end is reversed
         # since we have moved to Fourier space
         return (
-            y[self.N_extrap_end:self.N - self.N_extrap_begin],
-            Fy[self.N_extrap_end:self.N - self.N_extrap_begin]
+            y[self.N_extrap_end : self.N - self.N_extrap_begin],
+            Fy[self.N_extrap_end : self.N - self.N_extrap_begin],
         )

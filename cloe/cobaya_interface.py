@@ -227,7 +227,9 @@ class EuclidLikelihood(Likelihood):
                 'nonlinear': False,
                 'vars_pairs': ([['delta_tot', 'delta_tot'],
                                 ['delta_nonu', 'delta_nonu'],
-                                ['Weyl', 'Weyl']])
+                                ['Weyl', 'Weyl'],
+                                ["delta_nonu","delta_nu"],
+                                ["delta_nu","delta_nu"]])
             },
             'comoving_radial_distance': {
                 'z': self.z_win_max
@@ -293,6 +295,16 @@ class EuclidLikelihood(Likelihood):
             ('delta_nonu', 'delta_nonu'), nonlinear=False,
             extrap_kmin=self.k_min_extrap,
             extrap_kmax=self.k_max_extrap)
+        self.fiducial_cosmology.cosmo_dic['Pk_nunu_Boltzmann'] = \
+            model_fiducial.provider.get_Pk_interpolator(
+            ('delta_nu', 'delta_nu'), nonlinear=False,
+            extrap_kmin=self.k_min_extrap,
+            extrap_kmax=self.k_max_extrap)
+        self.fiducial_cosmology.cosmo_dic['Pk_nunonu_Boltzmann'] = \
+            model_fiducial.provider.get_Pk_interpolator(
+            ('delta_nu', 'delta_nonu'), nonlinear=False,
+            extrap_kmin=self.k_min_extrap,
+            extrap_kmax=self.k_max_extrap)
         self.fiducial_cosmology.cosmo_dic['Pk_weyl'] = \
             model_fiducial.provider.get_Pk_interpolator(
             ('Weyl', 'Weyl'), nonlinear=False,
@@ -351,7 +363,9 @@ class EuclidLikelihood(Likelihood):
                  'nonlinear': self.use_NL,
                  'vars_pairs': ([['delta_tot', 'delta_tot'],
                                  ['delta_nonu', 'delta_nonu'],
-                                 ['Weyl', 'Weyl']])},
+                                 ['Weyl', 'Weyl'],
+                                 ["delta_nonu","delta_nu"],
+                                 ["delta_nu","delta_nu"]])},
                 'comoving_radial_distance': {'z': self.z_win_max},
                 'angular_diameter_distance': {'z': self.z_win},
                 'Hubble': {'z': self.z_win, 'units': 'km/s/Mpc'},
@@ -459,6 +473,16 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Pk_cb_Boltzmann'] = \
                 self.provider.get_Pk_interpolator(
                 ('delta_nonu', 'delta_nonu'), nonlinear=False,
+                extrap_kmin=self.k_min_extrap,
+                extrap_kmax=self.k_max_extrap)
+            self.cosmo.cosmo_dic['Pk_nunu_Boltzmann'] = \
+                self.provider.get_Pk_interpolator(
+                ('delta_nu', 'delta_nu'), nonlinear=False,
+                extrap_kmin=self.k_min_extrap,
+                extrap_kmax=self.k_max_extrap)
+            self.cosmo.cosmo_dic['Pk_nunonu_Boltzmann'] = \
+                self.provider.get_Pk_interpolator(
+                ('delta_nu', 'delta_nonu'), nonlinear=False,
                 extrap_kmin=self.k_min_extrap,
                 extrap_kmax=self.k_max_extrap)
             self.cosmo.cosmo_dic['Pk_weyl'] = \
@@ -580,6 +604,16 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic['Pk_cb_Boltzmann'] = \
                 model.provider.get_Pk_interpolator(
                 ('delta_nonu', 'delta_nonu'), nonlinear=False,
+                extrap_kmin=self.k_min_extrap,
+                extrap_kmax=self.k_max_extrap)
+            self.cosmo.cosmo_dic['Pk_nunu_Boltzmann'] = \
+                model.provider.get_Pk_interpolator(
+                ('delta_nu', 'delta_nu'), nonlinear=False,
+                extrap_kmin=self.k_min_extrap,
+                extrap_kmax=self.k_max_extrap)
+            self.cosmo.cosmo_dic['Pk_nunonu_Boltzmann'] = \
+                model.provider.get_Pk_interpolator(
+                ('delta_nu', 'delta_nonu'), nonlinear=False,
                 extrap_kmin=self.k_min_extrap,
                 extrap_kmax=self.k_max_extrap)
             self.cosmo.cosmo_dic['Pk_weyl'] = \

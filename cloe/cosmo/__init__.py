@@ -69,9 +69,18 @@ calculation of cosmological quantities not provided by Boltzmann codes.
         ``Pk_cb``: function
             Interpolator function for cdm+b :math:`P(k)` from
             Boltzmann code
+        ``Pk_nunu``: function
+            Interpolator function for neutrino auto :math:`P(k)` from
+            Boltzmann code
+        ``Pk_nunonu``: function
+            Interpolator function for neutrino baryon+CDM cross :math:`P(k)` from
+            Boltzmann code
         ``Pk_halomodel_recipe``: function
             Interpolator function for nonlinear matter :math:`P(k)` from
             Boltzmann code
+        ``Pk_cb_linearnu_recipe``: function
+            Function for nonlinear baryon+CDM :math:`P(k)` from
+            computed using the linearnu approximation
         ``Pk_weyl``: function
             Interpolator function for linear Weyl :math:`P(k)` from
             Boltzmann code
@@ -94,6 +103,14 @@ calculation of cosmological quantities not provided by Boltzmann codes.
             Interpolated function for :math:`f \sigma_8`
         ``f_z``: function
             Interpolated growth rate function
+        ``sigma8_cb_z_func``: function
+            Interpolated function for the variance of the baryon+CDM field
+        ``D_cb_z_k_func``: function
+            Interpolated function for the growth factor of the baryon+CDM field
+        ``f_cb_z_k_func``: function
+            Interpolated function for the growth rate of the baryon+CDM field
+        ``fsigma8_cb_z_k_func``: function
+            Interpolated function for the clustering parameter of the baryon+CDM field
         ``H_z_func``: function
             Interpolated function for Hubble parameter
         ``H_z_func_Mpc``: function

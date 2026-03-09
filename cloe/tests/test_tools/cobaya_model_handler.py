@@ -143,6 +143,16 @@ class CobayaModel:
             self.model.provider.get_Pk_interpolator(
                 ("delta_nonu", "delta_nonu"), nonlinear=False,
                 extrap_kmax=self.k_max_extrap)
+        self.cosmology.cosmo_dic['Pk_nunu_Boltzmann'] = \
+            self.model.provider.get_Pk_interpolator(
+            ('delta_nu', 'delta_nu'), nonlinear=False,
+            extrap_kmin=self.k_min_extrap,
+            extrap_kmax=self.k_max_extrap)
+        self.cosmology.cosmo_dic['Pk_nunonu_Boltzmann'] = \
+            self.model.provider.get_Pk_interpolator(
+            ('delta_nu', 'delta_nonu'), nonlinear=False,
+            extrap_kmin=self.k_min_extrap,
+            extrap_kmax=self.k_max_extrap)
         self.cosmology.cosmo_dic['Pk_weyl'] = \
             self.model.provider.get_Pk_interpolator(
             ("Weyl", "Weyl"), nonlinear=False)

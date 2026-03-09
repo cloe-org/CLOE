@@ -11,6 +11,7 @@ from cloe.auxiliary import redshift_bins as rb
 from cloe.auxiliary.logger import log_debug, log_error
 from scipy.integrate import quad
 from copy import deepcopy
+from types import SimpleNamespace
 
 
 class CosmologyError(Exception):
@@ -277,7 +278,10 @@ class Cosmology:
                           # Interpolators
                           'Pk_delta_Boltzmann': None,
                           'Pk_cb_Boltzmann': None,
+                          'Pk_nunu_Boltzmann': None,
+                          'Pk_nunonu_Boltzmann': None,
                           'Pk_halomodel_recipe_Boltzmann': None,
+                          'Pk_cb_linearnu_recipe': None,
                           'Pk_delta': None,
                           'Pk_cb': None,
                           'Pk_halomodel_recipe': None,
@@ -336,6 +340,8 @@ class Cosmology:
                           'magbias_model': 2,
                           # Use Modified Gravity gamma
                           'use_gamma_MG': 0,
+                          # Handle neutrino induced scale dependent bias
+                          'GCph_do_nisb': False,
                           # use magnification bias for GC spectro
                           'use_magnification_bias_spectro': 0,
                           # Use Weyl power spectrum (workaround approach)
@@ -1147,6 +1153,69 @@ class Cosmology:
             interpolate.InterpolatedUnivariateSpline(
                 x=self.cosmo_dic['z_win'], y=self.cosmo_dic['sigma8'], ext=2)
 
+    def interp_sigma8cb(self):
+        r"""Interpolates :math:`\sigma_{cb}(8 Mpc^{-1}/h)`.
+
+        Adds an interpolator for the baryon+cdm fluctuation
+        parameter :math:`\sigma_{cb}` to the dictionary so that it
+        can be evaluated at redshifts not explicitly supplied to Cobaya.
+
+        Updates 'key' in the cosmo_dic attribute of the class
+        by adding an interpolator object
+        which interpolates :math:`\sigma_{cb}` as a function of redshift.
+        """
+        kh = self.cosmo_dic["k_win"]
+        z = self.cosmo_dic["z_win"]
+        R = 8 / self.cosmo_dic["H0"] * 100
+        Pk_grid = self.cosmo_dic["Pk_cb_Boltzmann"].P(z, kh)
+
+        x = kh*R
+        W = 3 / np.power(x, 3) * (np.sin(x) - x * np.cos(x))
+        W[np.where(x < 0.01)] = 1 - np.power(x[np.where(x < 0.01)], 2) / 10
+
+        Integr = np.power(kh[None,:] * W[None,:], 2) * Pk_grid / (2 * np.pi**2)
+        s8_cb_of_z = np.sqrt(np.trapz(Integr,kh,axis=-1))
+        self.cosmo_dic['sigma8_cb_z_func'] = \
+            interpolate.InterpolatedUnivariateSpline(
+                x=z, y=s8_cb_of_z, ext=2)
+
+    def interp_cbgrowth(self):
+        r"""Interpolates :math:`D_{cb}` and :math:`f_{cb}`.
+
+        Adds interpolators for the baryon+cdm growth
+        factor :math:`D_{cb}` and growth rate :math:`f_{cb}` to the dictionary
+
+        Updates 'key' in the cosmo_dic attribute of the class
+        by adding an interpolator objects
+        which interpolates the growth functions as a function of redshift and wavenumber.
+        """
+        kh = self.cosmo_dic["k_win"]
+        z = self.cosmo_dic["z_win"]
+
+        Pk_grid = self.cosmo_dic["Pk_cb_Boltzmann"].P(z,kh)
+        Pk_at0_grid = self.cosmo_dic["Pk_cb_Boltzmann"].P(0,kh)
+        Dcb_grid = np.sqrt(Pk_grid/Pk_at0_grid[None,:])
+
+        logedk_Dcb_interpoator = interpolate.RectBivariateSpline(z,np.log(kh),Dcb_grid)
+        def D_cb_z_k(redshift, wavenumber):
+            logk = np.log(wavenumber)
+            return np.squeeze(logedk_Dcb_interpoator(redshift,logk))
+        def f_cb_z_k(redshift, wavenumber):
+            redshift = np.atleast_1d(redshift)
+            logk = np.log(np.atleast_1d(wavenumber))
+            f = -1*(1+redshift)[:,None] * logedk_Dcb_interpoator.partial_derivative(1,0)(redshift,logk)
+            return np.squeeze(f)
+        def fsigma8_cb_z_k(redshift, wavenumber):
+            redshift = np.atleast_1d(redshift)
+            wavenumber = np.atleast_1d(wavenumber)
+            f_cb = np.reshape(f_cb_z_k(redshift=redshift,wavenumber=wavenumber),(*redshift.shape,*wavenumber.shape))
+            s8_cb = self.cosmo_dic['sigma8_cb_z_func'](redshift)
+            return np.squeeze(f_cb*s8_cb[:,None])
+
+        self.cosmo_dic["D_cb_z_k_func"] = D_cb_z_k
+        self.cosmo_dic["f_cb_z_k_func"] = f_cb_z_k
+        self.cosmo_dic["fsigma8_cb_z_k_func"] = fsigma8_cb_z_k
+
     def interp_fsigma8(self):
         r"""Interpolates :math:`f\sigma_8`.
 
@@ -1914,6 +1983,24 @@ class Cosmology:
                                                                   wavenumber) *
                 ratio**2)
 
+    def P_cb_linearnu_recepie(self, redshift, wavenumber):
+        r"""Computes the nonlinear baryon+CDM power spectrum using the
+        linear neutrino approximation.
+
+        Retruns the nonlinear :math:`P_{cb}(z, k)` according to the
+        linear neutrino appoximation
+
+        .. math::
+            P_{cb} = P_{mm}^{\rm NL} - 2 f_\nu f_{cb} P_{cb x \nu} - f_\nu^2 P_\nu
+        """
+        f_cb = (self.cosmo_dic["Omb"] + self.cosmo_dic["Omc"])/ self.cosmo_dic["Omm"]
+        f_nu = 1-f_cb
+
+        t1 = self.cosmo_dic["Pk_halomodel_recipe"].P(redshift,wavenumber)
+        t2 = self.cosmo_dic["Pk_nunonu_Boltzmann"].P(redshift,wavenumber)
+        t3 = self.cosmo_dic["Pk_nunu_Boltzmann"].P(redshift,wavenumber)
+        return  (t1 - 2 * f_cb * f_nu * t2 - f_nu**2 * t3) / f_cb**2
+
     def MG_mu_def(self, redshift, k_scale, MG_mu):
         r"""Modified gravitational coupling to matter.
 
@@ -2011,6 +2098,8 @@ class Cosmology:
         self.interp_sigmaR()
         self.interp_sigmaR_cb()
         self.interp_growth_rate()
+        self.interp_sigma8cb()
+        self.interp_cbgrowth()
         self.assign_growth_factor()
         self.interp_angular_dist()
         # For the moment we use our own definition

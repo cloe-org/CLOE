@@ -27,6 +27,10 @@ CLOE moreover allows the user to obtain the linear matter power spectrum and bac
 Further documentation is found in the [CLOE Read the Docs](https://cloe-euclid.readthedocs.io/).
 The full development history is available to EC members [here](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation).
 
+## Contributors
+
+Virginia Ajani, Shahbaz Albi, Stefano Arcari, Emmanuel Artis, Mario Ballardini, Julien Bel, Linda Blot, Marco Bonici, Stefano Camera, Guadalupe Cañas-Herrera, Carmelita Carbone, Vincenzo F. Cardone, Pedro Carrilho, Santiago Casas, Matteo Costanzi, Martín Crocce, Stefano Davini, Bianca De Caro, Anurag Deshpande, Sergio Di Domizio, Christopher Duncan, Giulio Fabbian, Samuel Farrens, Angelo G. Ferrari, Alessandra Fumagalli, Carlo Giocolo, Lisa Goh, Sylvain Gouyou Beauchamps, Stéphane Ilić, Shahab Joudaki, Felicitas Keil, Martin Kilbinger, Thomas Kitching, Raphaël Kou, Fabien Lacasa, Massimiliano Lattanzi, Amandine M. C. Le Brun, Louis Legrand, Margherita Lembo, Giorgio F. Lesci, Matteo Martinelli, Chiara Moretti, David Navarro-Gironés, Ahmad Nouri-Zonoz, Julen Olivares-Miranda, Luca Pagano, Sefa Pamuk, Valeria Pettorino, Andrea Pezzotta, Ariel Sánchez, Ziad Sakr, Laura Salvati, Domenico Sapone, Barbara Sartoris, Davide Sciotti, Elena Sellentin, Konstantinos Tanidis, Peter Taylor, Maria Tsedrik, Isaac Tutusaus
+
 ## Installation
 
 Clone the CLOE repository through the following command:

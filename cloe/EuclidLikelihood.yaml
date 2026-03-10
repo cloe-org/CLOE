@@ -40,8 +40,7 @@ z_samp: 100
 # Add RSD to photometric probes
 add_phot_RSD: False
 # If neutrino induced scale dependent galaxy bias should be considered
-GCph_do_nisb: False
-#GCsp_do_nisb: False
+GC_use_cold_matter_tracer: False
 # Apply a generic matrix transformation to the photo observables (available options: 'BNT', 'BNT-test')
 matrix_transform_phot: False
 # Use MG gamma

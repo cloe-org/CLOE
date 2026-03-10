@@ -6,9 +6,11 @@ required in the nonlinear module (only temporary to mimic the
 linear implementation made by IST:L).
 """
 
-import numpy as np
+from functools import partial
+
 import cloe.auxiliary.redshift_bins as rb
 import fastpt as fpt
+import numpy as np
 from scipy import interpolate
 
 
@@ -281,3 +283,97 @@ class Misc:
                 "Check that redshift is inside the bin edges"
                 "and valid bi_spectro's are provided."
             )
+
+
+class NonlinearNeutrinoApprox:
+    """Class gives access to the non-linear neutrino approximation"""
+
+    def __init__(self, cosmo_dic):
+        """Initialises the :obj:`NonlinearNeutrinoApprox` class.
+
+        Constructor of the class NonlinearNeutrinoApprox.
+
+        Parameters
+        ----------
+        cosmo_dic: dict
+            External dictionary from nonlinear module
+        """
+        self.theory = cosmo_dic
+
+    def update_dic(self, cosmo_dic):
+        """
+        Updates theory with an external cosmo dictionary.
+        """
+        self.theory = cosmo_dic
+        if hasattr(self, "partial_neutrino_func"):
+            del self.partial_neutrino_func
+
+    def _compute_linear_neutrino_approx(self, Pnl, *Boosts, **kwargs):
+        r"""Computes the nonlinear baryon+CDM power spectrum
+
+        Returns the nonlinear :math:`P_{cb}(z, k)` according to the
+        linear neutrino approximation
+        The approximation used in described in [2405.06047]
+
+        In the code whenever terms like b times P show up use this function
+        to compute the nonlinear cb Power spectrum. This has the advantage
+        that the linear bias defined using the cb power has no scale
+        dependence on large scale.
+
+        You can pass here any number of additional boosts that don't affect
+        the neutrino clustering (like baryonic effects and NL halo models)
+        It will then rescale the power spectrum to match the cb one.
+
+        .. math::
+            f_{cb}**2 P_{cb} &= P_{mm}^{\rm NL}
+                             &- 2 f_\nu f_{cb} P_{cb x \nu}
+                             &- f_\nu^2 P_\nu
+        """
+        wavenumber = kwargs.get("wavenumber")
+        redshift = kwargs.get("redshifts")
+
+        f_cb = (self.theory["Omb"] + self.theory["Omc"]) / self.theory["Omm"]
+        f_nu = 1 - f_cb
+
+        t1 = Pnl.P(redshift, wavenumber)
+        for Boost in Boosts:
+            t1 *= Boost(redshift, wavenumber)[0]
+        t2 = self.theory["Pk_nunonu_Boltzmann"].P(redshift, wavenumber)
+        t3 = self.theory["Pk_nunu_Boltzmann"].P(redshift, wavenumber)
+        return (t1 - 2 * f_cb * f_nu * t2 - f_nu**2 * t3) / f_cb**2
+
+    def wrap_linear_neutrino_approx(self, Pnl, *Boosts):
+        """
+        Use this wrapper to obtain a callable Pcb function
+
+        See documentation of `_compute_linear_neutrino_approx` for
+        further explanation of the math as well as details.
+        """
+        self.partial_neutrino_func = partial(
+            self._compute_linear_neutrino_approx,
+            Pnl,
+            *Boosts,
+        )
+
+    def __call__(self, redshift, wavenumber):
+        """
+        Computes the non-linear pcb power spectrum
+
+        This function returns the power spectrum of CDM
+        and baryons with nonlinear corrections. To use it
+        one has to first call `wrap_linear_neutrino_approx` and
+        pass it the power spectrum for which the contribution of
+        linear neutrinos should be subtracted
+        """
+        try:
+            P = self.partial_neutrino_func(
+                redshift=redshift,
+                wavenumber=wavenumber,
+            )
+        except AttributeError:
+            raise AttributeError(
+                "No power spectrum passed to compute the"
+                + " neutrino approximation. Did you call"
+                + " `wrap_linear_neutrino_approx` ?"
+            )
+        return P

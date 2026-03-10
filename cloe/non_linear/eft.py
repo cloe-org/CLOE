@@ -6,16 +6,17 @@ for the Joint analysis of Power Spectrum and Bispectrum,
 adapted from arXiv:2207.14784 / 2306.09275, ported to CLOE by IST:NL.
 """
 
+from collections import OrderedDict
+from functools import partial
+
+import fastpt.FASTPT_simple as fpts
 import numpy as np
 from scipy.fftpack import dst, idst
 from scipy.integrate import simps
-from scipy.interpolate import splrep, splev, RectBivariateSpline
+from scipy.interpolate import RectBivariateSpline, splev, splrep
 from scipy.ndimage import gaussian_filter1d
-from scipy.special import spherical_jn
-from scipy.special import legendre
 from scipy.signal import fftconvolve
-from collections import OrderedDict
-import fastpt.FASTPT_simple as fpts
+from scipy.special import legendre, spherical_jn
 
 
 class EFTofLSS:
@@ -41,14 +42,28 @@ class EFTofLSS:
         self.tau = cosmo_dic["tau"]
 
         self.linear_power_func = cosmo_dic["Pk_cb"]
-        if cosmo_dic["use_gamma_MG"]:
-            self.growth_factor_func = cosmo_dic["D_z_k_func_MG"]
+        if cosmo_dic["GC_use_cold_matter_tracer"]:
+            self.growth_rate_func = partial(
+                self.cosmo_dic["f_cb_z_k_func"].__call__,
+                y=0.05,
+                grid=False,
+            )
+            self.growth_factor_func = partial(
+                self.cosmo_dic["D_cb_z_k_func"].__call__,
+                y=0.05,
+                grid=False,
+            )
         else:
-            self.growth_factor_func = cosmo_dic["D_z_k_func"]
-        self.growth_rate_func = cosmo_dic["f_z"]
+            if cosmo_dic["use_gamma_MG"]:
+                self.growth_factor_func = cosmo_dic["D_z_k_func_MG"]
+            else:
+                self.growth_factor_func = cosmo_dic["D_z_k_func"]
+            self.growth_rate_func = cosmo_dic["f_z"]
 
-        self.fastpt = FASTPTPlus(self.ks, -2, low_extrap=-6, high_extrap=5, n_pad=1000)
-        self.use_gamma_MG = cosmo_dic["use_gamma_MG"]
+            self.fastpt = FASTPTPlus(
+                self.ks, -2, low_extrap=-6, high_extrap=5, n_pad=1000
+            )
+            self.use_gamma_MG = cosmo_dic["use_gamma_MG"]
         self.IR_type_in_grid = None
 
     def CallEH_NW(self, redshift):

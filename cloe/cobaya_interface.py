@@ -432,7 +432,9 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic["GCsp_z_err"] = self.GCsp_z_err
             self.cosmo.cosmo_dic["bias_model"] = self.bias_model
             self.cosmo.cosmo_dic["magbias_model"] = self.magbias_model
-            self.cosmo.cosmo_dic["GCph_do_nisb"] = self.GCph_do_nisb
+            self.cosmo.cosmo_dic["GC_use_cold_matter_tracer"] = (
+                self.GC_use_cold_matter_tracer
+            )
             self.cosmo.cosmo_dic["use_gamma_MG"] = self.use_gamma_MG
             self.cosmo.cosmo_dic["use_Weyl"] = self.use_Weyl
             self.cosmo.cosmo_dic["use_magnification_bias_spectro"] = (
@@ -588,9 +590,9 @@ class EuclidLikelihood(Likelihood):
             self.cosmo.cosmo_dic["use_magnification_bias_spectro"] = (
                 self.use_magnification_bias_spectro
             )
-            self.cosmo.cosmo_dic["GCph_do_nisb"] = info["likelihood"]["Euclid"][
-                "GCph_do_nisb"
-            ]
+            self.cosmo.cosmo_dic["GC_use_cold_matter_tracer"] = info["likelihood"][
+                "Euclid"
+            ]["GC_use_cold_matter_tracer"]
             self.cosmo.cosmo_dic["use_gamma_MG"] = info["likelihood"]["Euclid"][
                 "use_gamma_MG"
             ]

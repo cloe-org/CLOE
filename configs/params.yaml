@@ -309,6 +309,10 @@ magnification_bias_6: -0.7137
 magnification_bias_7: -0.52345
 magnification_bias_8: -0.40845
 magnification_bias_9: -0.41045
+magnification_bias_spectro_bin1: 0.79
+magnification_bias_spectro_bin2: 0.87
+magnification_bias_spectro_bin3: 0.96
+magnification_bias_spectro_bin4: 0.98
 mu_bcemu_0: 1.0
 mu_bcemu_bin1: 1.081169575215787
 mu_bcemu_bin10: -0.006953332782079408

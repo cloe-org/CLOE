@@ -401,9 +401,11 @@ class Photo:
         )
 
         Hzm_arr = self.theory["H_z_func_Mpc"](zm_arr)
-        if self.theory["GCph_do_nisb"]:
-            kappox = (ell + 1 / 2)[None, :] / self.theory["r_z_func"](z)[:, None]
-            fz = self.theory["f_cb_z_k_func"](zm_arr, kappox)[None, :, :]
+        if self.theory["GC_use_cold_matter_tracer"]:
+            # kappox = ((ell + 1 / 2)[None, :, None] /
+            #           self.theory["r_z_func"](zm_arr))
+            kappox = 1e-3
+            fz = self.theory["f_cb_z_k_func"](zm_arr, kappox, grid=False)
         else:
             fz = self.theory["f_z"](zm_arr)
         nzm_arr = self.nz_GC.evaluates_n_i_z(bin_i, zm_arr)

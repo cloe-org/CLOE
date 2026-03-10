@@ -78,9 +78,9 @@ calculation of cosmological quantities not provided by Boltzmann codes.
         ``Pk_halomodel_recipe``: function
             Interpolator function for nonlinear matter :math:`P(k)` from
             Boltzmann code
-        ``Pk_cb_linearnu_recipe``: function
-            Function for nonlinear baryon+CDM :math:`P(k)` from
-            computed using the linearnu approximation
+        ``Pk_cb_halomodel_nuapproximation``: function
+            Function for nonlinear baryon+CDM :math:`P(k)`
+            computed using the approximation of linear neutrinos
         ``Pk_weyl``: function
             Interpolator function for linear Weyl :math:`P(k)` from
             Boltzmann code

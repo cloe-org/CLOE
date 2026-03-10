@@ -7,7 +7,7 @@ photometric and spectroscopic probes.
 import numpy as np
 from scipy import interpolate
 import cloe.auxiliary.redshift_bins as rb
-from cloe.non_linear.miscellanous import Misc
+from cloe.non_linear.miscellanous import Misc, NonlinearNeutrinoApprox
 from cloe.non_linear.pgg_spectro import Pgg_spectro_model
 from cloe.non_linear.pgg_phot import Pgg_phot_model
 from cloe.non_linear.pgL_phot import PgL_phot_model
@@ -73,6 +73,7 @@ class Nonlinear:
         self.theory["Omb"] = self.theory["ombh2"] / (self.theory["H0"] / 100) ** 2
 
         self.misc = Misc(cosmo_dic)
+        self.nonlinear_neutrino_approx = NonlinearNeutrinoApprox(cosmo_dic)
 
         # Nonlinear dictionary, to store intermediate quantities
         # not necessary to the rest of the code
@@ -141,9 +142,18 @@ class Nonlinear:
 
         # Instances of classes to compute power spectra interpolators
         # for the 3x2pt statistics
-        self.Pgg_phot_model = Pgg_phot_model(cosmo_dic, self.nonlinear_dic, self.misc)
-        self.PgL_phot_model = PgL_phot_model(cosmo_dic, self.nonlinear_dic, self.misc)
-        self.PLL_phot_model = PLL_phot_model(cosmo_dic, self.nonlinear_dic, self.misc)
+        self.Pgg_phot_model = Pgg_phot_model(
+            cosmo_dic,
+            self.nonlinear_dic,
+            self.misc,
+            self.nonlinear_neutrino_approx,
+        )
+        self.PgL_phot_model = PgL_phot_model(
+            cosmo_dic, self.nonlinear_dic, self.misc, self.nonlinear_neutrino_approx
+        )
+        self.PLL_phot_model = PLL_phot_model(
+            cosmo_dic, self.nonlinear_dic, self.misc, self.nonlinear_neutrino_approx
+        )
 
         self.eftobj = None
 
@@ -178,7 +188,11 @@ class Nonlinear:
         # Instance of class to compute power spectra interpolators
         # for the GCspectro statistics
         self.Pgg_spectro_model = Pgg_spectro_model(
-            self.theory, self.nonlinear_dic, self.misc, self.zbins
+            self.theory,
+            self.nonlinear_dic,
+            self.misc,
+            self.nonlinear_neutrino_approx,
+            self.zbins,
         )
 
     def update_dic(self, cosmo_dic):
@@ -201,6 +215,7 @@ class Nonlinear:
         self.theory = cosmo_dic
         self.nuis = cosmo_dic["nuisance_parameters"]
         self.misc.update_dic(cosmo_dic)
+        self.nonlinear_neutrino_approx.update_dic(cosmo_dic)
 
         # Add Omb
         self.theory["Omb"] = self.theory["ombh2"] / (self.theory["H0"] / 100) ** 2
@@ -282,10 +297,18 @@ class Nonlinear:
             self.calculate_phot_nl_bias()
 
         # Update of classes for power spectra interpolators
-        self.Pgg_phot_model.update_dic(cosmo_dic, self.nonlinear_dic, self.misc)
-        self.PgL_phot_model.update_dic(cosmo_dic, self.nonlinear_dic, self.misc)
-        self.PLL_phot_model.update_dic(cosmo_dic, self.nonlinear_dic, self.misc)
-        self.Pgg_spectro_model.update_dic(cosmo_dic, self.nonlinear_dic, self.misc)
+        self.Pgg_phot_model.update_dic(
+            cosmo_dic, self.nonlinear_dic, self.misc, self.nonlinear_neutrino_approx
+        )
+        self.PgL_phot_model.update_dic(
+            cosmo_dic, self.nonlinear_dic, self.misc, self.nonlinear_neutrino_approx
+        )
+        self.PLL_phot_model.update_dic(
+            cosmo_dic, self.nonlinear_dic, self.misc, self.nonlinear_neutrino_approx
+        )
+        self.Pgg_spectro_model.update_dic(
+            cosmo_dic, self.nonlinear_dic, self.misc, self.nonlinear_neutrino_approx
+        )
 
         # Compute the one-loop terms for the TATT model
         if self.theory["IA_flag"] == 1:

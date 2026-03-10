@@ -163,7 +163,6 @@ class CobayaModel:
             self.model.provider.get_Pk_interpolator(
                 ("delta_nu", "delta_nu"),
                 nonlinear=False,
-                extrap_kmin=self.k_min_extrap,
                 extrap_kmax=self.k_max_extrap,
             )
         )
@@ -171,7 +170,6 @@ class CobayaModel:
             self.model.provider.get_Pk_interpolator(
                 ("delta_nu", "delta_nonu"),
                 nonlinear=False,
-                extrap_kmin=self.k_min_extrap,
                 extrap_kmax=self.k_max_extrap,
             )
         )

@@ -5,7 +5,10 @@ This module contains the recipes for the photometric
 galaxy x galaxy power spectrum.
 """
 
+from warnings import warn
+
 from cloe.non_linear.power_spectrum import PowerSpectrum
+from numpy import sqrt
 
 
 class Pgg_phot_model(PowerSpectrum):
@@ -37,7 +40,7 @@ class Pgg_phot_model(PowerSpectrum):
             clustering photometric
         """
         bterm = self.theory["b1_inter"](redshift) ** 2.0
-        if self.theory["GCph_do_nisb"]:
+        if self.theory["GC_use_cold_matter_tracer"]:
             pterm = self.theory["Pk_cb"].P(redshift, wavenumber)
         else:
             pterm = self.theory["Pk_delta"].P(redshift, wavenumber)
@@ -71,11 +74,19 @@ class Pgg_phot_model(PowerSpectrum):
             clustering photometric
         """
         bterm = self.theory["b1_inter"](redshift) ** 2.0
-        if self.theory["GCph_do_nisb"]:
-            pnoBFM = self.theory["Pk_cb_linearnu_recipe"].P(redshift, wavenumber)
+        if self.theory["GC_use_cold_matter_tracer"]:
+            self.nonlinear_neutrino_approx.wrap_linear_neutrino_approx(
+                self.theory["Pk_halomodel_recipe"],
+                self.nonlinear_dic["Bar_boost"],
+            )
+            pterm = self.nonlinear_neutrino_approx(redshift, wavenumber)
         else:
-            pnoBFM = self.theory["Pk_halomodel_recipe"].P(redshift, wavenumber)
-        pval = bterm * pnoBFM * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
+            pterm = (
+                self.theory["Pk_halomodel_recipe"].P(redshift, wavenumber)
+                * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
+            )
+
+        pval = bterm * pterm
         return pval
 
     def Pgg_phot_emu(self, redshift, wavenumber):
@@ -106,21 +117,29 @@ class Pgg_phot_model(PowerSpectrum):
             clustering photometric
         """
         bterm = self.theory["b1_inter"](redshift) ** 2.0
-        pnoBFM = (
-            self.theory["Pk_delta"].P(redshift, wavenumber)
-            * self.nonlinear_dic["NL_boost"](redshift, wavenumber)[0]
-        )
-        if self.theory["GCph_do_nisb"]:
-            # do linear neutrino recepie
-            f_cb = (self.theory["Omb"] + self.theory["Omc"]) / self.theory["Omm"]
-            f_nu = 1 - f_cb
-            t2 = self.theory["Pk_nunonu_Boltzmann"].P(redshift, wavenumber)
-            t3 = self.theory["Pk_nunu_Boltzmann"].P(redshift, wavenumber)
-            pnoBFM = (pnoBFM - 2 * f_cb * f_nu * t2 - f_nu**2 * t3) / f_cb**2
-        pval = bterm * pnoBFM * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
+        if self.theory["GC_use_cold_matter_tracer"]:
+            self.nonlinear_neutrino_approx.wrap_linear_neutrino_approx(
+                self.theory["Pk_delta"],
+                self.nonlinear_dic["Bar_boost"],
+                self.nonlinear_dic["NL_boost"],
+            )
+            pterm = self.nonlinear_neutrino_approx(redshift, wavenumber)
+        else:
+            pterm = (
+                self.theory["Pk_delta"].P(redshift, wavenumber)
+                * self.nonlinear_dic["NL_boost"](redshift, wavenumber)[0]
+                * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
+            )
+        pval = bterm * pterm
         return pval
 
-    def _add_NLbias_contributions_gg(self, Pnl, redshift, wavenumber):
+    def _add_NLbias_contributions_gg(
+        self,
+        Pmmnl,
+        redshift,
+        wavenumber,
+        Pcbnl=None,
+    ):
         r"""Add NL bias contributions
 
         Gets the non-linear bias contributions, combines them with
@@ -147,6 +166,12 @@ class Pgg_phot_model(PowerSpectrum):
         """
 
         b1 = self.theory["b1_inter"](redshift)
+        if self.theory["GC_use_cold_matter_tracer"]:
+            warn(
+                "The neutrino implementation only rescales the b1 bias", RuntimeWarning
+            )
+            b1 *= sqrt(Pcbnl / Pmmnl)
+
         b2 = self.theory["b2_inter"](redshift)
         bG2 = self.theory["bG2_inter"](redshift)
         bG3 = self.theory["bG3_inter"](redshift)
@@ -160,7 +185,7 @@ class Pgg_phot_model(PowerSpectrum):
         PZ1bG2 = self.nonlinear_dic["PZ1bG2_kz"](redshift, wavenumber, grid=False)
 
         return (
-            (b1**2.0) * Pnl
+            (b1**2.0) * Pmmnl
             + (b1 * b2) * Pb1b2
             + (b1 * bG2) * (Pb1bG2 + PZ1bG2)
             + (b1 * bG3) * PZ1bG3
@@ -178,6 +203,10 @@ class Pgg_phot_model(PowerSpectrum):
         power spectrum. This include terms in b1 (linear bias),
         b2 (quadratic bias), bG2 (quadratic non-local bias)
         and bG3 (cubic non-local bias).
+
+        In case of massive neutrinos to handle the scale dependance of the bias
+        we rescale the linear b1 bias as described in [1807.04672]
+        and [2405.06047].
 
         .. math::
             P_{\rm gg}^{\rm photo}(z, k) =\
@@ -215,9 +244,26 @@ class Pgg_phot_model(PowerSpectrum):
             * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
         )
 
-        pval = self._add_NLbias_contributions_gg(Pmm, redshift, wavenumber)
+        if self.theory["GC_use_cold_matter_tracer"]:
 
-        return pval
+            self.nonlinear_neutrino_approx.wrap_linear_neutrino_approx(
+                self.theory["Pk_halomodel_recipe"],
+                self.nonlinear_dic["Bar_boost"],
+            )
+            Pcb = self.nonlinear_neutrino_approx(redshift, wavenumber)
+
+            pval = self._add_NLbias_contributions_gg(
+                Pmm,
+                redshift,
+                wavenumber,
+                Pcbnl=Pcb,
+            )
+        else:
+            pval = self._add_NLbias_contributions_gg(
+                Pmm,
+                redshift,
+                wavenumber,
+            )
 
     def Pgg_phot_emu_NLbias(self, redshift, wavenumber):
         r"""Pgg Phot Emu NLbias
@@ -261,12 +307,37 @@ class Pgg_phot_model(PowerSpectrum):
             clustering photometric
         """
 
-        Pmm = (
-            self.theory["Pk_delta"].P(redshift, wavenumber)
-            * self.nonlinear_dic["NL_boost"](redshift, wavenumber)[0]
-            * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
-        )
+        if self.theory["GC_use_cold_matter_tracer"]:
+            Pmm = (
+                self.theory["Pk_delta"].P(redshift, wavenumber)
+                * self.nonlinear_dic["NL_boost"](redshift, wavenumber)[0]
+                * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
+            )
 
-        pval = self._add_NLbias_contributions_gg(Pmm, redshift, wavenumber)
+            self.nonlinear_neutrino_approx.wrap_linear_neutrino_approx(
+                self.theory["Pk_delta"],
+                self.nonlinear_dic["Bar_boost"],
+                self.nonlinear_dic["NL_boost"],
+            )
+            Pcb = self.nonlinear_neutrino_approx(redshift, wavenumber)
+
+            pval = self._add_NLbias_contributions_gg(
+                Pmm,
+                redshift,
+                wavenumber,
+                Pcbnl=Pcb,
+            )
+        else:
+            Pmm = (
+                self.theory["Pk_delta"].P(redshift, wavenumber)
+                * self.nonlinear_dic["NL_boost"](redshift, wavenumber)[0]
+                * self.nonlinear_dic["Bar_boost"](redshift, wavenumber)[0]
+            )
+
+            pval = self._add_NLbias_contributions_gg(
+                Pmm,
+                redshift,
+                wavenumber,
+            )
 
         return pval

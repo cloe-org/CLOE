@@ -3,15 +3,18 @@
 Class to store cosmological parameters and functions.
 """
 
+from copy import deepcopy
+from functools import partial
+from types import SimpleNamespace
+
 import numpy as np
-from scipy import interpolate
 from astropy import constants as const
 from cloe.non_linear.nonlinear import Nonlinear
+from cloe.non_linear.miscellanous import NonlinearNeutrinoApprox
 from cloe.auxiliary import redshift_bins as rb
 from cloe.auxiliary.logger import log_debug, log_error
+from scipy import interpolate
 from scipy.integrate import quad
-from copy import deepcopy
-from types import SimpleNamespace
 
 
 class CosmologyError(Exception):
@@ -281,7 +284,7 @@ class Cosmology:
             "Pk_nunu_Boltzmann": None,
             "Pk_nunonu_Boltzmann": None,
             "Pk_halomodel_recipe_Boltzmann": None,
-            "Pk_cb_linearnu_recipe": None,
+            "Pk_cb_halomodel_nuapproximation": None,
             "Pk_delta": None,
             "Pk_cb": None,
             "Pk_halomodel_recipe": None,
@@ -341,7 +344,7 @@ class Cosmology:
             # Use Modified Gravity gamma
             "use_gamma_MG": 0,
             # Handle neutrino induced scale dependent bias
-            "GCph_do_nisb": False,
+            "GC_use_cold_matter_tracer": False,
             # use magnification bias for GC spectro
             "use_magnification_bias_spectro": 0,
             # Use Weyl power spectrum (workaround approach)
@@ -797,6 +800,7 @@ class Cosmology:
 
         self.cosmo_dic["H0_Mpc"] = self.cosmo_dic["H0"] / const.c.to("km/s").value
         self.nonlinear = Nonlinear(self.cosmo_dic)
+        self.nonlinear_neutrino_approx = NonlinearNeutrinoApprox(self.cosmo_dic)
 
     @property
     def pk_source_phot(self):
@@ -1185,33 +1189,7 @@ class Cosmology:
             x=self.cosmo_dic["z_win"], y=self.cosmo_dic["sigma8"], ext=2
         )
 
-    def interp_sigma8cb(self):
-        r"""Interpolates :math:`\sigma_{cb}(8 Mpc^{-1}/h)`.
-
-        Adds an interpolator for the baryon+cdm fluctuation
-        parameter :math:`\sigma_{cb}` to the dictionary so that it
-        can be evaluated at redshifts not explicitly supplied to Cobaya.
-
-        Updates 'key' in the cosmo_dic attribute of the class
-        by adding an interpolator object
-        which interpolates :math:`\sigma_{cb}` as a function of redshift.
-        """
-        kh = self.cosmo_dic["k_win"]
-        z = self.cosmo_dic["z_win"]
-        R = 8 / self.cosmo_dic["H0"] * 100
-        Pk_grid = self.cosmo_dic["Pk_cb_Boltzmann"].P(z, kh)
-
-        x = kh * R
-        W = 3 / np.power(x, 3) * (np.sin(x) - x * np.cos(x))
-        W[np.where(x < 0.01)] = 1 - np.power(x[np.where(x < 0.01)], 2) / 10
-
-        Integr = np.power(kh[None, :] * W[None, :], 2) * Pk_grid / (2 * np.pi**2)
-        s8_cb_of_z = np.sqrt(np.trapz(Integr, kh, axis=-1))
-        self.cosmo_dic["sigma8_cb_z_func"] = interpolate.InterpolatedUnivariateSpline(
-            x=z, y=s8_cb_of_z, ext=2
-        )
-
-    def interp_cbgrowth(self):
+    def interp_cb_growth(self):
         r"""Interpolates :math:`D_{cb}` and :math:`f_{cb}`.
 
         Adds interpolators for the baryon+cdm growth
@@ -1224,42 +1202,28 @@ class Cosmology:
         kh = self.cosmo_dic["k_win"]
         z = self.cosmo_dic["z_win"]
 
-        Pk_grid = self.cosmo_dic["Pk_cb_Boltzmann"].P(z, kh)
-        Pk_at0_grid = self.cosmo_dic["Pk_cb_Boltzmann"].P(0, kh)
-        Dcb_grid = np.sqrt(Pk_grid / Pk_at0_grid[None, :])
+        Pk_grid = self.cosmo_dic["Pk_cb"].P(z, kh)
+        Pk_at0_grid = self.cosmo_dic["Pk_cb"].P(0, kh)
+        D_cb_grid = np.sqrt(Pk_grid / Pk_at0_grid[None, :])
 
-        loggedk_Dcb_interpolator = interpolate.RectBivariateSpline(
-            z, np.log(kh), Dcb_grid
+        self.cosmo_dic["D_cb_z_k_func"] = interpolate.RectBivariateSpline(
+            z, kh, D_cb_grid
         )
 
-        def D_cb_z_k(redshift, wavenumber):
-            logk = np.log(wavenumber)
-            return np.squeeze(loggedk_Dcb_interpolator(redshift, logk))
-
-        def f_cb_z_k(redshift, wavenumber):
-            logk = np.log(wavenumber)
-            dD_dz = loggedk_Dcb_interpolator.partial_derivative(1, 0)
-            f = (
-                -1
-                * (1 + redshift)
-                * dD_dz(redshift, logk, grid=False)
-                / loggedk_Dcb_interpolator(redshift, logk, grid=False)
-            )
-            return np.squeeze(f)
-
-        s8cb = self.cosmo_dic["sigma8_cb_z_func"](z)
-        fs8cb = f_cb_z_k(z[:, None], kh[None, :]) * s8cb[:, None]
-        loggedk_fs8cb_interpolator = interpolate.RectBivariateSpline(
-            z, np.log(kh), fs8cb
+        f_cb_grid = (
+            -1
+            * (1 + z[:, None])
+            * self.cosmo_dic["D_cb_z_k_func"](z, kh, 1, 0)
+            / D_cb_grid
+        )
+        self.cosmo_dic["f_cb_z_k_func"] = interpolate.RectBivariateSpline(
+            z, kh, f_cb_grid
         )
 
-        def fsigma8_cb_z_k(redshift, wavenumber):
-            logk = np.log(wavenumber)
-            return np.squeeze(loggedk_fs8cb_interpolator(redshift, logk))
-
-        self.cosmo_dic["D_cb_z_k_func"] = D_cb_z_k
-        self.cosmo_dic["f_cb_z_k_func"] = f_cb_z_k
-        self.cosmo_dic["fsigma8_cb_z_k_func"] = fsigma8_cb_z_k
+        fs8_cb_grid = f_cb_grid * self.cosmo_dic["sigma8_cb_z_func"](z)[:, None]
+        self.cosmo_dic["fsigma8_cb_z_k_func"] = interpolate.RectBivariateSpline(
+            z, kh, fs8_cb_grid
+        )
 
     def interp_fsigma8(self):
         r"""Interpolates :math:`f\sigma_8`.
@@ -1331,6 +1295,13 @@ class Cosmology:
             self.cosmo_dic["sigmaR_cb"],
             kx=1,
             ky=1,
+        )
+
+        R = 8 / self.cosmo_dic["H0"] * 100
+        self.cosmo_dic["sigma8_cb_z_func"] = partial(
+            self.cosmo_dic["sigmaR_z_func_cb"].__call__,
+            y=R,
+            grid=False,
         )
 
     def create_phot_galbias(self, model=None, x_values=[0.0, 4.0], y_values=[1.0, 1.0]):
@@ -1641,7 +1612,7 @@ class Cosmology:
         pval = ((bias + growth * mu_rsd**2.0) * (1.0 + growth * mu_rsd**2.0)) * power
         return pval
 
-    def fia(self, redshift, k_scale=0.001):
+    def fia(self, redshift, wavenumber=0.001):
         r"""Intrinsic alignment function.
 
         Computes the intrinsic alignment function. For v1.0
@@ -1657,7 +1628,7 @@ class Cosmology:
         ----------
         redshift: float or numpy.ndarray
             Redshift(s) at which to evaluate the intrinsic alignment
-        k_scale: float or numpy.ndarray
+        wavenumber: float or numpy.ndarray
             Wavenumber(s) at which to evaluate the intrinsic alignment
 
         Returns
@@ -1672,7 +1643,7 @@ class Cosmology:
             # and growth_rate is dropped
             growth = self.cosmo_dic["D_z_k_func_MG"](redshift)
         else:
-            growth = self.cosmo_dic["D_z_k_func"](redshift, k_scale)
+            growth = self.cosmo_dic["D_z_k_func"](redshift, wavenumber)
 
         if isinstance(redshift, (list, np.ndarray)) and isinstance(
             wavenumber, (list, np.ndarray)
@@ -2002,6 +1973,72 @@ class Cosmology:
 
         return self.cosmo_dic["Pk_cb_Boltzmann"].P(redshift, wavenumber) * ratio**2
 
+    def rescaled_linear_power_nunonu_MG(self, redshift, wavenumber):
+        r"""Rescaled linear neutrino x cb power spectrum due to MG growth
+
+        The rescaling is carried out with the ratio of the growth factors
+        squared, as
+
+        .. math::
+            P_{\rm lin}^{\rm MG}(k, z)=P_{\rm lin}(k, z)\left[\frac{D_{\rm MG}\
+            (z ; \gamma)}{D(z)}\right]^2
+
+        Parameters
+        ----------
+        redshift: float or numpy.ndarray
+            Redshift at which to evaluate the power spectrum
+        wavenumber: float or list or numpy.ndarray
+            Wavenumber at which to evaluate the power spectrum
+
+        Returns
+        -------
+        Rescaled power spectrum: float or numpy.ndarray
+            Linear power spectrum rescaled by MG for the cdm+b component
+        """
+        ratio = self.cosmo_dic["D_z_k_func_MG"](redshift) / self.cosmo_dic[
+            "D_z_k_func"
+        ](redshift, 0.05)
+
+        if isinstance(redshift, (list, np.ndarray)) and isinstance(
+            wavenumber, (list, np.ndarray)
+        ):
+            ratio = np.repeat(ratio[:, np.newaxis], len(wavenumber), 1)
+
+        return self.cosmo_dic["Pk_nunonu_Boltzmann"].P(redshift, wavenumber) * ratio**2
+
+    def rescaled_linear_power_nunu_MG(self, redshift, wavenumber):
+        r"""Rescaled linear neutrino auto power spectrum due to MG growth
+
+        The rescaling is carried out with the ratio of the growth factors
+        squared, as
+
+        .. math::
+            P_{\rm lin}^{\rm MG}(k, z)=P_{\rm lin}(k, z)\left[\frac{D_{\rm MG}\
+            (z ; \gamma)}{D(z)}\right]^2
+
+        Parameters
+        ----------
+        redshift: float or numpy.ndarray
+            Redshift at which to evaluate the power spectrum
+        wavenumber: float or list or numpy.ndarray
+            Wavenumber at which to evaluate the power spectrum
+
+        Returns
+        -------
+        Rescaled power spectrum: float or numpy.ndarray
+            Linear power spectrum rescaled by MG for the cdm+b component
+        """
+        ratio = self.cosmo_dic["D_z_k_func_MG"](redshift) / self.cosmo_dic[
+            "D_z_k_func"
+        ](redshift, 0.05)
+
+        if isinstance(redshift, (list, np.ndarray)) and isinstance(
+            wavenumber, (list, np.ndarray)
+        ):
+            ratio = np.repeat(ratio[:, np.newaxis], len(wavenumber), 1)
+
+        return self.cosmo_dic["Pk_nunu_Boltzmann"].P(redshift, wavenumber) * ratio**2
+
     def rescaled_halomodel_power_MG(self, redshift, wavenumber):
         r"""Rescaled halomodel power spectrum due to Modified Gravity
 
@@ -2038,58 +2075,6 @@ class Cosmology:
             self.cosmo_dic["Pk_halomodel_recipe_Boltzmann"].P(redshift, wavenumber)
             * ratio**2
         )
-
-    def P_cb_linearnu_recipe(self, redshift, wavenumber):
-        r"""Computes the nonlinear baryon+CDM power spectrum
-
-        Retruns the nonlinear :math:`P_{cb}(z, k)` according to the
-        linear neutrino appoximation
-
-        .. math::
-            f_{cb}**2 P_{cb} &= P_{mm}^{\rm NL}
-                             &- 2 f_\nu f_{cb} P_{cb x \nu}
-                             &- f_\nu^2 P_\nu
-        """
-        f_cb = (self.cosmo_dic["Omb"] + self.cosmo_dic["Omc"]) / self.cosmo_dic["Omm"]
-        f_nu = 1 - f_cb
-
-        t1 = self.cosmo_dic["Pk_halomodel_recipe"].P(redshift, wavenumber)
-        t2 = self.cosmo_dic["Pk_nunonu_Boltzmann"].P(redshift, wavenumber)
-        t3 = self.cosmo_dic["Pk_nunu_Boltzmann"].P(redshift, wavenumber)
-        return (t1 - 2 * f_cb * f_nu * t2 - f_nu**2 * t3) / f_cb**2
-
-    def rescaled_cb_linearnu_power_MG(self, redshift, wavenumber):
-        r"""Rescaled halomodel cb power spectrum due to Modified Gravity
-
-        The rescaling is carried out with the ratio of the growth factors
-        squared, as
-
-        .. math::
-            P_{\rm lin}^{\rm MG}(k, z)=P_{\rm lin}(k, z)\left[\frac{D_{\rm MG}\
-            (z ; \gamma)}{D(z)}\right]^2
-
-        Parameters
-        ----------
-        redshift: float or numpy.ndarray
-            Redshift at which to evaluate the power spectrum
-        wavenumber: float or list or numpy.ndarray
-            Wavenumber at which to evaluate the power spectrum
-
-        Returns
-        -------
-        Rescaled power spectrum: float or numpy.ndarray
-            cb power spectrum rescaled by MG in linear nu approximation
-        """
-        ratio = self.cosmo_dic["D_z_k_func_MG"](redshift) / self.cosmo_dic[
-            "D_z_k_func"
-        ](redshift, 0.05)
-
-        redshift = np.atleast_1d(redshift)
-        wavenumber = np.atleast_1d(wavenumber)
-        ratio = np.reshape(ratio, (*redshift.shape, *wavenumber.shape))
-
-        P_pseudo = self.cosmo_dic["Pk_cb_linearnu_recipe"].P(redshift, wavenumber)
-        return P_pseudo * ratio**2
 
     def MG_mu_def(self, redshift, k_scale, MG_mu):
         r"""Modified gravitational coupling to matter.
@@ -2210,19 +2195,29 @@ class Cosmology:
             self.cosmo_dic["Pk_halomodel_recipe"] = deepcopy(
                 self.cosmo_dic["Pk_halomodel_recipe_Boltzmann"]
             )
-            self.cosmo_dic["Pk_cb_linearnu_recipe"] = SimpleNamespace(
-                P=self.P_cb_linearnu_recipe
-            )
         if self.cosmo_dic["use_gamma_MG"]:
             self.cosmo_dic["Pk_delta"].P = self.rescaled_linear_power_MG
             self.cosmo_dic["Pk_cb"].P = self.rescaled_linear_power_cb_MG
+            self.cosmo_dic["Pk_nunonu_Boltzmann"].P = (
+                self.rescaled_linear_power_nunonu_MG
+            )
+            self.cosmo_dic["Pk_nunu_Boltzmann"].P = self.rescaled_linear_power_nunu_MG
             if self.cosmo_dic["NL_flag_phot_matter"] > 0:
                 self.cosmo_dic["Pk_halomodel_recipe"].P = (
                     self.rescaled_halomodel_power_MG
                 )
-                self.cosmo_dic["Pk_cb_linearnu_recipe"].P = (
-                    self.rescaled_cb_linearnu_power_MG
-                )
+                # nonlinear cb power spectrum is automatrically rescaled
+
+        self.interp_cb_growth()
+
+        if self.cosmo_dic["NL_flag_phot_matter"] > 0:
+            self.nonlinear_neutrino_approx.wrap_linear_neutrino_approx(
+                self.cosmo_dic["Pk_halomodel_recipe"]
+            )
+            self.cosmo_dic["Pk_cb_halomodel_nuapproximation"] = SimpleNamespace(
+                P=self.nonlinear_neutrino_approx
+            )
+
         # Update nonlinear module, by calling the update_dic method
         # of the nonlinear instance
         self.nonlinear.update_dic(self.cosmo_dic)

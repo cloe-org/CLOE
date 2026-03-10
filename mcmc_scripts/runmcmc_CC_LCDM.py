@@ -33,7 +33,7 @@ info = {
             "statistics_spectro": "legendre_multipole_power_spectrum",
             "use_magnification_bias_spectro": 0,
             "use_Weyl": False,
-            "GCph_do_nisb": False,
+            "GC_use_cold_matter_tracer": False,
             "add_phot_RSD": False,
             "magbias_model": 2,
             "use_gamma_MG": False,

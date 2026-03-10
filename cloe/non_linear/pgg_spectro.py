@@ -14,8 +14,20 @@ class Pgg_spectro_model(PowerSpectrum):
     Class for computation of spectroscopic galaxy-galaxy power spectrum.
     """
 
-    def __init__(self, cosmo_dic, nonlinear_dic, misc, redshift_bins):
-        super(Pgg_spectro_model, self).__init__(cosmo_dic, nonlinear_dic, misc)
+    def __init__(
+        self,
+        cosmo_dic,
+        nonlinear_dic,
+        misc,
+        nu_nonlin,
+        redshift_bins,
+    ):
+        super(Pgg_spectro_model, self).__init__(
+            cosmo_dic,
+            nonlinear_dic,
+            misc,
+            nu_nonlin,
+        )
         self.zbins = redshift_bins
 
     def Pgg_spectro_def(self, redshift, wavenumber, mu_rsd):

@@ -44,12 +44,12 @@ class EFTofLSS:
         self.linear_power_func = cosmo_dic["Pk_cb"]
         if cosmo_dic["GC_use_cold_matter_tracer"]:
             self.growth_rate_func = partial(
-                self.cosmo_dic["f_cb_z_k_func"].__call__,
+                cosmo_dic["f_cb_z_k_func"].__call__,
                 y=0.05,
                 grid=False,
             )
             self.growth_factor_func = partial(
-                self.cosmo_dic["D_cb_z_k_func"].__call__,
+                cosmo_dic["D_cb_z_k_func"].__call__,
                 y=0.05,
                 grid=False,
             )
@@ -60,10 +60,8 @@ class EFTofLSS:
                 self.growth_factor_func = cosmo_dic["D_z_k_func"]
             self.growth_rate_func = cosmo_dic["f_z"]
 
-            self.fastpt = FASTPTPlus(
-                self.ks, -2, low_extrap=-6, high_extrap=5, n_pad=1000
-            )
-            self.use_gamma_MG = cosmo_dic["use_gamma_MG"]
+        self.fastpt = FASTPTPlus(self.ks, -2, low_extrap=-6, high_extrap=5, n_pad=1000)
+        self.use_gamma_MG = cosmo_dic["use_gamma_MG"]
         self.IR_type_in_grid = None
 
     def CallEH_NW(self, redshift):

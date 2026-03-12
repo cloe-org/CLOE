@@ -4,6 +4,8 @@ r"""MASKING MODULE
 Module for masking the data vector and the covariance matrix.
 """
 
+from warnings import warn
+
 import numpy
 
 
@@ -43,6 +45,15 @@ class Masking:
         TypeError
           If the matrix is not a square matrix
         """
+        try:
+            matrix.shape
+        except AttributeError as AE:
+            matrix = matrix["arr_0"]
+            warn(
+                "Covariance file type updated. Original error message:" + str(AE),
+                RuntimeWarning,
+            )
+
         if len(matrix.shape) != 2:
             raise TypeError(
                 f"The size of the input array is"

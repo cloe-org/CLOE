@@ -1414,7 +1414,9 @@ class Cosmology:
             ]
         )
 
-        binedges = np.array([0, *(redshift_means[1:] + redshift_means[:-1]) / 2])
+        binedges = np.zeros(len(redshift_means) + 1)
+        for ia, ai in enumerate(redshift_means):
+            binedges[ia + 1] = 2 * ai - binedges[ia]
 
         def redshift_binned_galbias(redshift: np.ndarray) -> np.ndarray:
             """Galaxie bias following the binned constant prescription.
@@ -1422,8 +1424,8 @@ class Cosmology:
             Computes the corresponding bins of the redshifts and then
             finds the value of the bias in the corresponding bin.
             """
-            indexmenge = np.minimum(
-                np.digitize(redshift, binedges) - 1, len(binedges) - 1
+            indexmenge = np.clip(
+                np.digitize(redshift, binedges) - 1, 0, len(binedges) - 2
             )
             return istf_bias_list[indexmenge]
 

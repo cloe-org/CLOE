@@ -330,7 +330,7 @@ class NonlinearNeutrinoApprox:
                              &- f_\nu^2 P_\nu
         """
         wavenumber = kwargs.get("wavenumber")
-        redshift = kwargs.get("redshifts")
+        redshift = kwargs.get("redshift")
 
         f_cb = (self.theory["Omb"] + self.theory["Omc"]) / self.theory["Omm"]
         f_nu = 1 - f_cb

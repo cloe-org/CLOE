@@ -6,11 +6,12 @@ Class to store cosmological parameters and functions.
 from copy import deepcopy
 from functools import partial
 from types import SimpleNamespace
+from types import Callable
 
 import numpy as np
 from astropy import constants as const
-from cloe.non_linear.nonlinear import Nonlinear
 from cloe.non_linear.miscellanous import NonlinearNeutrinoApprox
+from cloe.non_linear.nonlinear import Nonlinear
 from cloe.auxiliary import redshift_bins as rb
 from cloe.auxiliary.logger import log_debug, log_error
 from scipy import interpolate
@@ -1318,6 +1319,7 @@ class Cosmology:
             #. Linear interpolation
             #. Bias is constant in bin (returns one here)
             #. Polynomial bias function
+            #. Bias is a stepwise function
 
         Parameters
         ----------
@@ -1333,7 +1335,7 @@ class Cosmology:
         ------
         ValueError
             If the bias model parameter in the cosmo dictionary
-            is not 1, 2, or 3
+            is not 1, 2, 3, or 4
         """
 
         if model is None:
@@ -1349,6 +1351,10 @@ class Cosmology:
             self.cosmo_dic["b1_inter"] = rb.linear_interpolator(x_values, y_values)
         elif bias_model == 3:
             self.cosmo_dic["b1_inter"] = self.poly_phot_galbias
+        elif bias_model == 4:
+            self.cosmo_dic["b1_inter"] = self.istf_phot_galbias_binned_constant(
+                self.cosmo_dic["redshift_bins_means_phot"]
+            )
         else:
             raise ValueError("Parameter bias_model not valid:" f"{bias_model}")
 
@@ -1377,6 +1383,51 @@ class Cosmology:
         ]
 
         return rb.linear_interpolator(redshift_means, istf_bias_list)
+
+    def istf_phot_galbias_binned_constant(
+        self, redshift_means: np.ndarray
+    ) -> Callable[[np.ndarray], np.ndarray]:
+        r"""IST:F Photometric galaxy bias interpolator.
+
+        Returns a callable function for the galaxy bias.
+        In this model, the galaxy bias is constant between two bin edges.
+
+        Parameters
+        ----------
+        redshift_means: numpy.ndarray of float
+            Array of tomographic redshift bin means for GCphot.
+
+        Returns
+        -------
+        Callable:
+            Callable function to compute photometric galaxy
+            bias in binned constant prescription.
+        """
+
+        nuisance_par = self.cosmo_dic["nuisance_parameters"]
+        redshift_means = np.atleast_1d(redshift_means)
+
+        istf_bias_list = np.array(
+            [
+                nuisance_par[f"b1_photo_bin{idx}"]
+                for idx, vl in enumerate(redshift_means, start=1)
+            ]
+        )
+
+        binedges = np.array([0, *(redshift_means[1:] + redshift_means[:-1]) / 2])
+
+        def redshift_binned_galbias(redshift: np.ndarray) -> np.ndarray:
+            """Galaxie bias following the binned constant prescription.
+
+            Computes the corresponding bins of the redshifts and then
+            finds the value of the bias in the corresponding bin.
+            """
+            indexmenge = np.minimum(
+                np.digitize(redshift, binedges) - 1, len(binedges) - 1
+            )
+            return istf_bias_list[indexmenge]
+
+        return redshift_binned_galbias
 
     def poly_phot_galbias(self, redshift):
         r"""Polynomial photometric galaxy bias.

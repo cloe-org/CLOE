@@ -88,7 +88,7 @@ primary probes in that they can be run using either Cobaya
 or CosmoSIS, and using either CAMB or CLASS. 
 
 The minor patch ``v2.1.1`` includes a bug fix for the ISW calculation
-in November 2024, and ``v2.1.2`` includes an additional distinct branch
+in November 2024. We also include an additional distinct branch
 of the code used in Euclid Collaboration: Goh et al. (2026).
 
 Further developments

@@ -8,7 +8,7 @@ Please refer to the actively maintained repositories instead:
 - 👉 [cloelib](https://github.com/cloe-org/cloelib)  
 - 👉 [cloelike](https://github.com/cloe-org/cloelike)
 
-These codes are the ones intended for use in the cosmological analysis of the official Euclid data releases.
+This code is no longer maintained by the Euclid Consortium (EC) and should not be used for future official EC publications or to reproduce Data Release 1 results.
 
 -------------------------------------------------------------------------
 

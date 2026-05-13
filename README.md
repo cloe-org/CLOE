@@ -1,6 +1,19 @@
 # CLOE: Cosmology Likelihood for Observables in *Euclid*
 
+
+## ⚠️ CLOE is no longer maintained
+
+Please refer to the actively maintained repositories instead:
+
+- 👉 [cloelib](https://github.com/cloe-org/cloelib)  
+- 👉 [cloelike](https://github.com/cloe-org/cloelike)
+
+This code is no longer maintained by the Euclid Consortium (EC) and should not be used for future official EC publications or to reproduce Data Release 1 results.
+
+-------------------------------------------------------------------------
+
 <img src="./docs/other/cloelogo_notext.png" alt="Logo" width="300" />
+
 
 [![CI](https://github.com/cloe-org/cloe/actions/workflows/ci.yml/badge.svg)](https://github.com/cloe-org/cloe/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/cloe-org/cloe/branch/main/graph/badge.svg?token=26c55a1c-87b4-4666-be68-7c3269a5ce86)](https://codecov.io/gh/cloe-org/cloe)
@@ -26,6 +39,8 @@ CLOE moreover allows the user to obtain the linear matter power spectrum and bac
 
 Further documentation is found in the [CLOE Read the Docs](https://cloe-euclid.readthedocs.io/).
 The full development history is available to EC members [here](https://gitlab.euclid-sgs.uk/pf-ist-likelihood/likelihood-implementation).
+Synthetic data vectors and covariance matrices used for code validation and posterior exploration can be found [here](https://zenodo.org/records/10212464).
+Scripts for posterior exploration can be found [here](https://github.com/gcanasherrera/Forecasting-Euclid/tree/main).
 
 ## Installation
 
